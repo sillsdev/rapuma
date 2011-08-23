@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# version: 20110704
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 
@@ -13,39 +13,36 @@
 # project log in each respective project.
 
 # History:
-# 20110610 - djd - Start initial draft
-# 20110704 - djd - Start refactor for multiple component types
-# 20110721 - djd - Added proper command line processing
-# 20110729 - djd - Removed TIPE system settings from project folder
+# 20110823 - djd - Started with intial file from TIPE project
 
 
 ###############################################################################
-################################ Initialize TIPE ##############################
+################################ Initialize RPM ###############################
 ###############################################################################
 # Firstly, import all the standard Python modules we need for this process and
 # set the base path
 
 import os, sys
 
-# Set the TIPE base program path
-tipeHome = os.environ.get('TIPE_BASE')
-if not tipeHome :
-    tipeHome = os.path.join('usr', 'share', 'xetex-tipe')
-    os.environ['TIPE_BASE'] = tipeHome
+# Set the RPM base program path
+rpmHome = os.environ.get('RPM_BASE')
+if not rpmHome :
+    rpmHome = os.path.join('usr', 'share', 'rpm')
+    os.environ['RPM_BASE'] = rpmHome
 
 # Set the user environment path
-userHome = os.environ.get('TIPE_USER')
+userHome = os.environ.get('RPM_USER')
 if not userHome :
     sysHome = os.environ.get('HOME')
-    userHome = os.path.join(sysHome, '.config', 'tipe')
-    os.environ['TIPE_USER'] = userHome
+    userHome = os.path.join(sysHome, '.config', 'rpm')
+    os.environ['RPM_USER'] = userHome
 
 # Set the (potential) project home
 projHome = os.getcwd()
 
 # Set our paths to application resources
-sys.path.insert(0, os.path.join(tipeHome, 'bin', 'python'))
-sys.path.insert(0, os.path.join(tipeHome, 'bin', 'python', 'lib_system'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python', 'lib_system'))
 
 # Load standard Python modules
 import codecs, shutil, operator
@@ -72,7 +69,7 @@ if len(sys.argv) > 1 :
 ###############################################################################
 
 # Get all our user config info and methods
-uConf = UserConfig(userHome, tipeHome)
+uConf = UserConfig(userHome, rpmHome)
 
 # Load in project settings if they exist in the cwd
 projConfFile = os.path.join(projHome, '.project.conf')
@@ -81,20 +78,20 @@ projType = None
 # Now create a fresh projConfig object
 if os.path.isfile(projConfFile) :
     # Create a fresh merged version of the projConfig
-    projConfig  = mergeProjConfig(ConfigObj(projConfFile), projHome, userHome, tipeHome)
+    projConfig  = mergeProjConfig(ConfigObj(projConfFile), projHome, userHome, rpmHome)
 
     # If we successfuly created a projConfig, the we will load in the type info.
     # For a project conf file to be written out it must be a valid project type
     # so this next part should not fail.
     if projConfig :
         projectType         = projConfig['ProjectInfo']['projectType']
-        tipeProjTypes       = os.path.join(tipeHome, 'resources', 'lib_projTypes')
-        projInit            = getProjInitSettings(userHome, tipeHome, projectType)
+        rpmProjTypes       = os.path.join(rpmHome, 'resources', 'lib_projTypes')
+        projInit            = getProjInitSettings(userHome, rpmHome, projectType)
         from proj_command import *
 
 # FIXME: Need to override sys path with user path if the type exists there
         # Dynamically load the right project type modules
-        thisTypeLib = os.path.join(tipeProjTypes, projectType, 'lib_python')
+        thisTypeLib = os.path.join(rpmProjTypes, projectType, 'lib_python')
         sys.path.insert(0, thisTypeLib)
         projModule = __import__(projectType)
 
@@ -103,7 +100,7 @@ if os.path.isfile(projConfFile) :
         # die here
 
     # Fold in the projConfig into the aProject object
-    aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, projInit, uConf.userConfig, projHome, userHome, tipeHome)
+    aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
     recordProject(uConf.userConfFile, projConfig, projHome)
 
 else :
@@ -111,7 +108,7 @@ else :
     # dummy projConfig object so we'll just make one up.
     projConfig  = ConfigObj()
     projInit    = ConfigObj()
-    aProject    = Project(projConfig, projInit, uConf.userConfig, projHome, userHome, tipeHome)
+    aProject    = Project(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
 
 
 ###############################################################################
@@ -126,14 +123,14 @@ except :
     pass
 
 # Give a welcome message
-terminal('\n\t\tWelcome to TIPE ' + aProject._userConfig['System']['systemVersion'])
+terminal('\n\t\tWelcome to RPM ' + aProject._userConfig['System']['systemVersion'])
 terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
 if os.path.isfile(aProject.projConfFile) :
     terminal('\t\tCurrent Project: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
 
 
 ###############################################################################
-##################### Prepare and Process TIPE Commands #######################
+##################### Prepare and Process RPM Commands #######################
 ###############################################################################
 
 # Run the command and pass along the aProject object
@@ -157,7 +154,7 @@ else :
     
 
 ###############################################################################
-########################### Closeout TIPE Session #############################
+########################### Closeout RPM Session #############################
 ###############################################################################
 
 # Now write out the config files if needed
