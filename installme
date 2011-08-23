@@ -1,0 +1,127 @@
+Manual installation instructions for the developer version of the TIPE package
+	By Dennis Drescher (dennis_drescher@sil.org)
+	Last edited: 04/07/2011
+
+
+These are instruction for manually installing the developer version of the TIPE publishing system package on a typical Ubuntu operating system (currently Lucid, 10.04). Ultimately we want TIPE to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
+
+
+REQUIRED PACKAGES
+-----------------------------------------
+There are a number of packages that need to be installed for TIPE to work. Some are more critical than others but all of them are needed. Some of the packages are located in other repositories that you will need to add to your system repository source list. Fastest way is to open the sources.list file for editing with this command in your terminal:
+
+	sudo gedit /etc/apt/sources.list
+
+Next, in gedit in the file you just opened, go to the bottom of the file and add this line if it does not already exist in the file:
+
+	deb http://packages.sil.org/ubuntu lucid main
+	
+Save the file and close it.
+
+Again, in the terminal, update your package list and update your system with the folling command and answer yes to the "install without verification" question:
+
+	sudo apt-get update
+	sudo apt-get upgrade
+	
+Next, in the terminal, you need to install all the necessary packages to run the TIPE publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
+
+Required:
+
+	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte pdftk 
+
+Suggested:
+
+	sudo apt-get install libgtk2-spell-perl libteckit-perl teckit mercurial meld tortoisehg tortoisehg-nautilus libfont-ttf-scripts-perl
+
+Another suggested program would be a modified version of XeTeX. You may need this if you are processing complex scripts. This version includes the latest features and bug fixes.
+
+	sudo apt-get install texlive-xetex-snapshot
+
+That will remove the other version and replace it with version 3.1415926-2.2-0.999.7 or greater.
+
+Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
+
+With all the above packages installed, we are ready to move on to installing TIPE publishing package.
+
+GETTING TIPE
+-----------------------------------------
+To obtain the TIPE, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the TIPE package will go in this location:
+
+	~/Projects
+
+Create the above path if it does not exist with this command in your terminal:
+
+	mkdir ~/Projects
+
+Now you can to go to the Palaso website and clone the project code with:
+
+	hg clone http://hg.palaso.org/tipe ~/Projects/tipe
+
+That should put TIPE where you need it. From time to time you may want to update it. To do that, from inside the TIPE project folder (~/Projects/tipe), this is the command you need:
+
+	hg pull --update
+
+
+SYSTEM INSTALLATION AND SETUP
+-----------------------------------------
+For easier operation it is necessary to get TIPE properly located in your system. The first thing that needs to be done is to link tipe.conf file (that will be in your user folder) to /etc folder. That is done with:
+
+	sudo ln -sf ~/.config/tipe/tipe.conf /etc/tipe.conf
+	
+Note that if you go look at /etc/tipe.conf you will see that it is a broken link. That is because ~/.config/tipe/tipe.conf does not yet exsist, but it will after you run TIPE for the first time, then every thing will be happy.
+
+Now we will get TIPE in your path by editing the ~/.profile file. To do that use this command:
+
+	sudo gedit ~/.profile
+
+Add this to the end of the file you just opened on its own line:
+
+    # Export the TIPE user and system paths
+    export TIPE_BASE="$HOME/Projects/tipe"
+    export TIPE_USER="$HOME/.config/tipe"
+	
+Save the file and close it. Next time you reboot or login, the new path settings will be there.
+
+If you don't want to reboot right now and you just want to get it working on the current login (terminal) use:
+
+	source ~/.profile
+
+That will enable you to test in the current terminal but if you want it to take effect system-wide then you will need to log off then log back in.
+
+Test to see if the system recognizes the additional path with:
+
+	echo $TIPE_BASE
+	echo $TIPE_USER
+
+After running this command you should see a path that leads to TIPE.
+
+Next we need link TIPE (main program) to /usr/local/bin so it can be started from any location like a real program would. First, varify that you have a bin folder. If you do not, create it in your terminal with this command:
+
+	mkdir ~/bin
+
+Now, you will need to link a couple utilities that are good to run globally out of the ~/bin folder and some links that will enable you to right-click from the Nautilus file browser. To make these links, run each of these commands in order:
+
+	sudo ln -s ~/Projects/tipe/bin/tipe /usr/local/bin/tipe
+	ln -s ~/Projects/tipe/bin/sh/multi-txtconv.sh ~/bin/multi-txtconv.sh
+	ln -s ~/Projects/tipe/bin/python/lib_extras/get-clip ~/bin/get-clip
+	ln -s ~/Projects/tipe/bin/sh/tipe ~/.gnome2/nautilus-scripts/TIPE
+	ln -s ~/Projects/tipe/bin/sh/Open\ Terminal ~/.gnome2/nautilus-scripts/Open\ Terminal
+
+This should complete the manual installation of tipe. Now you should be able to start the program from your terminal at any location with:
+
+	tipe
+
+Go a head, give it a try. What you should see is a TIPE control panel come up but there will obviously be no project displayed. Work needs to be done to the display to gray-out parts of the display that are not relevant when there is no project but it works for now.
+
+One system value that should be set at this point is the user name. This is used for making log entires and such. To do this, at the command prompt type:
+
+	tipe set-user 'your name'
+
+Then, to check the user name type:
+
+	tipe user
+
+
+QUICK START GUIDE
+-----------------------------------------
+Write something here!

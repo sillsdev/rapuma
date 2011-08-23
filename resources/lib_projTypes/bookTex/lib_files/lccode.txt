@@ -1,0 +1,54 @@
+% These are general use non-word-forming characters
+% like punctuation, etc. that would be used in an
+% average Latin script publication. They are set to
+% 0 so TeX will will ignore them.
+\lccode "2018 = 0	% Open single quote marker
+\lccode "2019 = 0	% Close single quote marker
+\lccode "201C = 0	% Open double quote marker
+\lccode "201D = 0	% Close double quote marker
+\lccode "0028 = 0	% Left parenthesis marker
+\lccode "0029 = 0	% Right parenthesis marker
+\lccode "002C = 0	% Comma
+\lccode "002E = 0	% Period (full stop)
+\lccode "0021 = 0	% Exclamation marker
+\lccode "003F = 0	% Question marker
+\lccode "002A = 0	% Asterisk
+\lccode "003A = 0	% Colon
+\lccode "003B = 0	% Semicolon
+
+% These are similar to above as they are non-word-forming
+% characters found in the basic Latin block of Unicode.
+% However, they normally should not be found in normal text.
+% As such, they are commented so TeX will give a warning if
+% it finds one while in the hyphenation process. Uncomment
+% as necessary
+%\lccode "0022 = 0	% Neutral double quote marker
+%\lccode "0023 = 0	% Number sign
+%\lccode "0024 = 0	% Dollar sign
+%\lccode "0025 = 0	% Percent sign
+%\lccode "0026 = 0	% Ampersand
+%\lccode "0027 = 0	% Neutral single quote marker
+%\lccode "002B = 0	% Plus sign
+%\lccode "002F = 0	% Solidus (forward slash)
+%\lccode "003C = 0	% Less-than sign
+%\lccode "003D = 0	% Equals sign
+%\lccode "003E = 0	% Greater-than sign
+%\lccode "0040 = 0	% At sign
+%\lccode "005B = 0	% Left square bracket
+%\lccode "005C = 0	% Reverse solidus
+%\lccode "005D = 0	% Right square bracket
+%\lccode "005E = 0	% Circumflex accent
+%\lccode "005F = 0	% Low line (spacing underscore)
+%\lccode "0060 = 0	% Grave accent
+%\lccode "007B = 0	% Left curly bracket
+%\lccode "007C = 0	% Vertical line
+%\lccode "007D = 0	% Right curly bracket
+%\lccode "007E = 0	% Tilde
+
+
+% These are more rare word forming characters that need
+% to be activated so TeX will see them as part of a word
+\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen
+\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work
+
+

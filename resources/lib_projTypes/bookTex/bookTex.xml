@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: bookTex.xml
+Description:
+This is a project or Document type description for a book publication to be rendered
+with TeX. All file relations and processes are described in this file.
+
+Todo:
+1) Add a process section where all processes are described
+2) Add file type section that describes each kind of type of file found in the component
+3) Need a section to describe project folder attributes <location>
+4) Need a default book project section that the system will use to start a project
+
+-->
+
+<!DOCTYPE root [
+  <!ELEMENT root (section+)>
+  <!ELEMENT section (name, sectionID, description, (setting | file | folder | process)+)>
+  <!ELEMENT file (name, type, location, dependents, createdBy, description)>
+  <!ELEMENT folder (name, key, description, value)>
+  <!ELEMENT process (name, type, description)>
+  <!ELEMENT setting (name, key, description, type*, value)>
+  <!ELEMENT sectionID (#PCDATA)>
+  <!ELEMENT name (#PCDATA)>
+  <!ELEMENT key (#PCDATA)>
+  <!ELEMENT description (#PCDATA)>
+  <!ELEMENT type (#PCDATA)>
+  <!ELEMENT location (#PCDATA)>
+  <!ELEMENT dependents (#PCDATA)>
+  <!ELEMENT createdBy (#PCDATA)>
+  <!ELEMENT value (#PCDATA)>
+]>
+
+<root>
+    <section>
+        <name>Project Information</name>
+        <sectionID>ProjectInfo</sectionID>
+        <description>This section contains general project info for this project.</description>
+        <setting>
+            <name>Project Type</name>
+            <key>projectType</key>
+            <description>This project type name.</description>
+            <type>string</type>
+            <value>bookTex</value>
+        </setting>
+        <setting>
+            <name>Project Name</name>
+            <key>projectName</key>
+            <description>The name of the current project the system is processing.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Project ID Code</name>
+            <key>projectIDCode</key>
+            <description>The current project's ID code.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Project Creation Date</name>
+            <key>projectCreateDate</key>
+            <description>The date this project was created.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Project Settings Last Edit Date</name>
+            <key>projectLastEditDate</key>
+            <description>Time stamp of when the project settings were last edited.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Valid Component Type List</name>
+            <key>validCompTypes</key>
+            <description>A list of valid component types that are acceptable to use with this project type.</description>
+            <type>list</type>
+            <value>usfmTex</value>
+        </setting>
+        <setting>
+            <name>Project Component Binding Order List</name>
+            <key>projectComponentBindingOrder</key>
+            <description>A list of components that are used in this project in the order they are to be found in the publication.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+    </section>
+    <section>
+        <name>Format</name>
+        <sectionID>Format</sectionID>
+        <description>Settings having to do with the formating of this publication.</description>
+        <setting>
+            <name>Page Width</name>
+            <key>pageWidth</key>
+            <description>The trimmed width of the page.</description>
+            <type>integer</type>
+            <value>150</value>
+        </setting>
+        <setting>
+            <name>Page Height</name>
+            <key>pageHeight</key>
+            <description>The trimmed height of the page.</description>
+            <type>integer</type>
+            <value>210</value>
+        </setting>
+    </section>
+</root>
+
