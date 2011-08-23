@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110721
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -12,7 +12,7 @@
 # http://docs.python.org/library/optparse.html
 
 # History:
-# 20110721 - djd - Begin initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
@@ -141,7 +141,7 @@ class Help (Command) :
 
 
 class GUIManager (Command) :
-    '''Start a TIPE GUI manager program'''
+    '''Start a RPM GUI manager program'''
 
     type = "manager"
 
@@ -155,7 +155,7 @@ class GUIManager (Command) :
             terminal("Not a recognized GUI Manager.")
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-c", "--client", action="store", type="string", help="Start up the TIPE client.")
+        self.parser.add_option("-c", "--client", action="store", type="string", help="Start up the RPM client.")
 
 
 class CreateProject (Command) :

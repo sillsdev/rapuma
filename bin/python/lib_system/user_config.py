@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110610
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,7 +10,7 @@
 # This class will handle user configuration operations.
 
 # History:
-# 20110811 - djd - Begin initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
@@ -28,12 +28,12 @@ from tools import *
 
 class UserConfig (object) :
 
-    def __init__(self, userHome, tipeHome) :
+    def __init__(self, userHome, rpmHome) :
         '''Intitate the whole class'''
         
         self.userHome       = userHome
-        self.tipeHome       = tipeHome
-        self.userConfFile   = os.path.join(userHome, 'tipe.conf')
+        self.rpmHome       = rpmHome
+        self.userConfFile   = os.path.join(userHome, 'rpm.conf')
         self.userResources  = os.path.join(userHome, 'resources')
         self.createUserConfig()
 
@@ -45,33 +45,33 @@ class UserConfig (object) :
 
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
-        tipeXML = os.path.join(self.tipeHome, 'bin', 'tipe.xml')
-        if os.path.exists(tipeXML) :
-            sysXmlConfig = xml_to_section(tipeXML)
+        rpmXML = os.path.join(self.rpmHome, 'bin', 'rpm.xml')
+        if os.path.exists(rpmXML) :
+            sysXmlConfig = xml_to_section(rpmXML)
         else :
-            raise IOError, "Can't open " + tipeXML
+            raise IOError, "Can't open " + rpmXML
 
-        # Now get the settings from the users tipe.conf file
+        # Now get the settings from the users rpm.conf file
         if not os.path.exists(self.userConfFile) :
             self.initUserHome()
 
         # Load the conf file into an object
-        tipeConfig = ConfigObj(self.userConfFile)
+        rpmConfig = ConfigObj(self.userConfFile)
 
         # Look for any projects that might be registered and copy the data out
         try :
-            tipeProjs = tipeConfig['Projects']
+            rpmProjs = rpmConfig['Projects']
         except :
-            tipeProjs = None
+            rpmProjs = None
 
         # Create a new conf object based on all the XML default settings
         # Then override them with any exsiting user settings.
-        self.userConfig = ConfigObj(sysXmlConfig.dict()).override(tipeConfig)
+        self.userConfig = ConfigObj(sysXmlConfig.dict()).override(rpmConfig)
 
         # Put back the copied data of any project information that we might have
         # lost from the XML/conf file merging.
-        if tipeProjs :
-            self.userConfig['Projects'] = tipeProjs
+        if rpmProjs :
+            self.userConfig['Projects'] = rpmProjs
             
         return self.userConfig
 
@@ -86,29 +86,29 @@ class UserConfig (object) :
         if not os.path.isdir(self.userResources) :
             os.mkdir(self.userResources)
 
-        # Make the default global tipe.conf for custom environment settings
+        # Make the default global rpm.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
             date_time = tStamp()
-            tipe = ConfigObj()
-            tipe.filename = self.userConfFile
-            tipe['System'] = {}
-            tipe['Folders'] = {}
-            tipe['System']['userName'] = 'Default User'
-            tipe['System']['initDate'] = date_time
-            tipe['System']['writeOutUserConfFile'] = 'True'
+            rpm = ConfigObj()
+            rpm.filename = self.userConfFile
+            rpm['System'] = {}
+            rpm['Folders'] = {}
+            rpm['System']['userName'] = 'Default User'
+            rpm['System']['initDate'] = date_time
+            rpm['System']['writeOutUserConfFile'] = 'True'
             # Folder list
             folders = ['fonts', 'illustrations', 'admin', 'compTypes', 'projTypes']
             # System folders
             for f in folders :
-                tipe['Folders']['tipe' + f] = os.path.join(self.tipeHome, 'resources', 'lib_' + f)
+                rpm['Folders']['rpm' + f] = os.path.join(self.rpmHome, 'resources', 'lib_' + f)
             # User (home) folders
             for f in folders :
                 thisFolder = os.path.join(self.userHome, 'resources', 'lib_' + f)
-                tipe['Folders']['user' + f] = thisFolder
+                rpm['Folders']['user' + f] = thisFolder
                 if not os.path.isdir(thisFolder) :
                     os.mkdir(thisFolder)
 
             # Write out the user config file
-            tipe.write()
+            rpm.write()
 
 

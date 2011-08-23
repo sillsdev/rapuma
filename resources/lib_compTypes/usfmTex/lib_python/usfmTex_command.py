@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110811
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -12,7 +12,7 @@
 # http://docs.python.org/library/optparse.html
 
 # History:
-# 20110811 - djd - Begin initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################

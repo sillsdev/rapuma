@@ -36,7 +36,7 @@ Todo:
     <section>
         <name>Files</name>
         <sectionID>Files</sectionID>
-        <description>This section contains the names of all the bookTex files the TIPE system will use in this projects.</description>
+        <description>This section contains the names of all the bookTex files the RPM system will use in this projects.</description>
         <section>
             <name>Project Log File</name>
             <sectionID>projLogFile</sectionID>
@@ -47,7 +47,7 @@ Todo:
                 <description>The name of this file.</description>
                 <type>string</type>
                 <version>False</version>
-                <value>.tipe.log</value>
+                <value>.rpm.log</value>
             </setting>
             <setting>
                 <name>Location</name>

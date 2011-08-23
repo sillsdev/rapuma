@@ -39,7 +39,7 @@ Todo:
     <section>
         <name>Files</name>
         <sectionID>Files</sectionID>
-        <description>This section contains the names of all the usfmTex files the TIPE system will use in this projects.</description>
+        <description>This section contains the names of all the usfmTex files the RPM system will use in this projects.</description>
         <section>
             <name>James Sample Text</name>
             <sectionID>jasSample</sectionID>

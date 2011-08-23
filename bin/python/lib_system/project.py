@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110610
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,8 +10,7 @@
 # This class will handle project infrastructure tasks.
 
 # History:
-# 20110610 - djd - Initial draft
-# 20110704 - djd - Refactor for mulitple component and project type processing
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
@@ -35,11 +34,11 @@ from component import Component
 
 class Project (object) :
 
-    def __init__(self, projConfig, projInit, userConfig, projHome, userHome, tipeHome) :
+    def __init__(self, projConfig, projInit, userConfig, projHome, userHome, rpmHome) :
 
         self.projHome           = projHome
         self.userHome           = userHome
-        self.tipeHome           = tipeHome
+        self.rpmHome           = rpmHome
 
         # Load project config files
         self._projConfig        = projConfig
@@ -48,14 +47,13 @@ class Project (object) :
 
         # Set all the initial paths and locations
         # System level paths
-        self.tipeHome           = tipeHome
+        self.rpmHome           = rpmHome
         self.userHome           = userHome
         self.projHome           = projHome
-        self.tipeFonts          = os.path.join(tipeHome, 'resources', 'lib_fonts')
-        self.tipeIllustrations  = os.path.join(tipeHome, 'resources', 'lib_illustratons')
-        self.tipeAdmin          = os.path.join(tipeHome, 'resources', 'lib_admin')
-        self.tipeCompTypes      = os.path.join(tipeHome, 'resources', 'lib_compTypes')
-        self.tipeProjTypes      = os.path.join(tipeHome, 'resources', 'lib_projTypes')
+        self.rpmIllustrations  = os.path.join(rpmHome, 'resources', 'lib_illustratons')
+        self.rpmAdmin          = os.path.join(rpmHome, 'resources', 'lib_admin')
+        self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
+        self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         # User/Global level paths
         self.userScripts        = os.path.join(userHome, 'resources', 'lib_scripts')
         self.userFonts          = os.path.join(userHome, 'resources', 'lib_fonts')
@@ -67,7 +65,7 @@ class Project (object) :
         # Set all the system settings
         if self._userConfig :
             self.projConfFile   = os.path.join(self.projHome, '.project.conf')
-            self.userConfFile   = os.path.join(self.userHome, 'tipe.conf')
+            self.userConfFile   = os.path.join(self.userHome, 'rpm.conf')
             for k in ('systemVersion',      'userName',
                       'debugging',          'lastEditDate',
                       'projLogLineLimit',   'lockExt') :
@@ -117,7 +115,7 @@ class Project (object) :
                 thisFolder = os.path.join(pdir, folderName)
 
             # Create a source folder name in case there is one
-            sourceFolder = os.path.join(self.tipeHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_folders', folderName)
+            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_folders', folderName)
 
             if not os.path.isdir(thisFolder) :
                 if os.path.isdir(sourceFolder) :
@@ -151,7 +149,7 @@ class Project (object) :
                 thisFile = os.path.join(pdir, fileName)
                 
             # Create source file name
-            sourceFile = os.path.join(self.tipeHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_files', fileName)
+            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_files', fileName)
             # Make the file if it is not already there
             if not os.path.isfile(thisFile) :
                 if os.path.isfile(sourceFile) :
@@ -199,8 +197,8 @@ class Project (object) :
             os.mkdir(pdir)
 
         # Create a new version of the project config file
-        newProjConfig = getProjSettings(self.userHome, self.tipeHome, ptype)
-        newInitConfig = getProjInitSettings(self.userHome, self.tipeHome, ptype)
+        newProjConfig = getProjSettings(self.userHome, self.rpmHome, ptype)
+        newInitConfig = getProjInitSettings(self.userHome, self.rpmHome, ptype)
         self.writeOutProjConfFile = True
         self._projConfig = newProjConfig
         self._projInit = newInitConfig
@@ -222,7 +220,7 @@ class Project (object) :
 
 
     def removeProject (self, pid='') :
-        '''Remove the project from the TIPE system.  This will not remove the
+        '''Remove the project from the RPM system.  This will not remove the
         project data but will 'disable' the project.'''
 
         # If no pid was given we'll try to get the current on if there is one
@@ -243,7 +241,7 @@ class Project (object) :
                 if os.path.isfile(projConfFile) :
                     os.rename(projConfFile, projConfFile + self.lockExt)
 
-                # Remove references from user tipe.conf
+                # Remove references from user rpm.conf
                 del self._userConfig['Projects'][pid]
                 reportSysConfUpdate(self)
 
@@ -272,7 +270,7 @@ class Project (object) :
             
             # We could put a lot of code here to get this project recorded and
             # check the integrity, or, we could just let that happen the next
-            # time TIPE is run on the project.  For now we'll do that.
+            # time RPM is run on the project.  For now we'll do that.
             terminal('Restored project at: ' + pdir)
             return True
 
@@ -446,7 +444,7 @@ class Project (object) :
             self._projConfig['ComponentTypes'] = {}
             self._projConfig['ComponentTypes'][ctype] = {}
 
-        self._projConfig.merge(getCompSettings(self.userHome, self.tipeHome, ctype))
+        self._projConfig.merge(getCompSettings(self.userHome, self.rpmHome, ctype))
         self.writeOutProjConfFile = True
         self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
 
@@ -472,7 +470,7 @@ class Project (object) :
 
     def changeSystemSetting (self, key, value) :
         '''Change global default setting (key, value) in the System section of
-        the TIPE user settings file.  This will write out changes
+        the RPM user settings file.  This will write out changes
         immediately.'''
 
         if not self._userConfig['System'][key] == value :
@@ -533,7 +531,7 @@ class Project (object) :
             try :
                 if not os.path.isfile(self.projLogFile) or os.path.getsize(self.projLogFile) == 0 :
                     writeObject = codecs.open(self.projLogFile, "w", encoding='utf_8')
-                    writeObject.write('TIPE event log file created: ' + ts + '\n')
+                    writeObject.write('RPM event log file created: ' + ts + '\n')
                     writeObject.close()
 
                 # Now log the event to the top of the log file using preAppend().

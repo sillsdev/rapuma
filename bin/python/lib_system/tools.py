@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110721
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -11,7 +11,7 @@
 # many other scripts in the system.
 
 # History:
-# 20110728 - djd - Begin initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
@@ -46,7 +46,7 @@ def isRecordedProject (userConfigFile, pid) :
 
 
 def recordProject (userConfigFile, projConfig, projHome) :
-    '''Add information about this project to the user's tipe.conf located in
+    '''Add information about this project to the user's rpm.conf located in
     the home config folder.'''
     
     pid     = projConfig['ProjectInfo']['projectIDCode']
@@ -78,13 +78,13 @@ def recordProject (userConfigFile, projConfig, projHome) :
             return False
 
 
-def mergeProjConfig (projConfig, projHome, userHome, tipeHome) :
+def mergeProjConfig (projConfig, projHome, userHome, rpmHome) :
     '''Retrun a merge project config object from a valid project config file'''
 
     # Find out what kind of project this is
     projType = projConfig['ProjectInfo']['projectType']
     # Load in the project type XML default settings
-    projXmlConfig = getProjSettings(userHome, tipeHome, projType)
+    projXmlConfig = getProjSettings(userHome, rpmHome, projType)
     # Create a new conf object based on all the XML default settings
     # Then override them with any exsiting project settings.
     newProjConfig = ConfigObj(projXmlConfig.dict()).override(projConfig)
@@ -95,55 +95,55 @@ def mergeProjConfig (projConfig, projHome, userHome, tipeHome) :
     return newProjConfig
 
 
-def getProjInitSettings (userHome, tipeHome, projType) :
+def getProjInitSettings (userHome, rpmHome, projType) :
     '''Get the project initialisation settings from the project type init xml
     file.'''
 
-    tipeProjInitXML     = os.path.join(tipeHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
+    rpmProjInitXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
     userProjInitXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
     
-    res = getXMLSettings(tipeProjInitXML)
+    res = getXMLSettings(rpmProjInitXML)
     if os.path.isfile(userProjInitXML) :
         return overrideSettings(res, userProjInitXML)
     else :
         return res
 
 
-def getCompInitSettings (userHome, tipeHome, compType) :
+def getCompInitSettings (userHome, rpmHome, compType) :
     '''Get the project initialisation settings from the project type init xml
     file.  Then, if it exsits, override these settings with the version found in
     the user area.'''
 
-    tipeCompInitXML     = os.path.join(tipeHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
+    rpmCompInitXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
     userCompInitXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
     
-    res = getXMLSettings(tipeCompInitXML)
+    res = getXMLSettings(rpmCompInitXML)
     if os.path.isfile(userCompInitXML) :
         return overrideSettings(res, userCompInitXML)
     else :
         return res
 
 
-def getProjSettings (userHome, tipeHome, projType) :
+def getProjSettings (userHome, rpmHome, projType) :
     '''Get the default settings out of a project type xml description file.'''
 
-    tipeProjXML     = os.path.join(tipeHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
+    rpmProjXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
     userProjXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
 
-    res = getXMLSettings(tipeProjXML)
+    res = getXMLSettings(rpmProjXML)
     if os.path.isfile(userProjXML) :
         return overrideSettings(res, userProjXML)
     else :
         return res
 
 
-def getCompSettings (userHome, tipeHome, compType) :
+def getCompSettings (userHome, rpmHome, compType) :
     '''Get the default settings out of a project type xml description file.'''
 
-    tipeCompXML     = os.path.join(tipeHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
+    rpmCompXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
     userCompXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
 
-    res = getXMLSettings(tipeCompXML)
+    res = getXMLSettings(rpmCompXML)
     if os.path.isfile(userCompXML) :
         return overrideSettings(res, userCompXML)
     else :
@@ -187,7 +187,7 @@ def writeProjConfFile (projConfig, projHome) :
 def writeUserConfFile (userConfig, userHome) :
     '''Write out only the user config file.'''
 
-    userConfigFile = os.path.join(userHome, 'tipe.conf')
+    userConfigFile = os.path.join(userHome, 'rpm.conf')
     userConfig['System']['lastEditDate'] = tStamp()
     userConfig.filename = userConfigFile
     userConfig.write()

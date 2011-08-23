@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110811
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,7 +10,7 @@
 # This class will handle project infrastructure tasks.
 
 # History:
-# 20110811 - djd - Initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
@@ -43,7 +43,7 @@ class UsfmTex (Component) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(UsfmTex, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.tipeHome)
+        super(UsfmTex, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
 
         # Set class vars
         self._projConfig = aProject._projConfig
@@ -51,7 +51,7 @@ class UsfmTex (Component) :
         self._userConfig = aProject._userConfig
         self.projHome = aProject.projHome
         self.userHome = aProject.userHome
-        self.tipeHome = aProject.tipeHome
+        self.rpmHome = aProject.rpmHome
 
 
 

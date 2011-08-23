@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110610
+# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,7 +10,7 @@
 # This class will handle mostly housekeeping processes at the component level.
 
 # History:
-# 20110610 - djd - Begin initial draft
+# 20110823 - djd - Started with intial file from RPM project
 
 
 ###############################################################################
