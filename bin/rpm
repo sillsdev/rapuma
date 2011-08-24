@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # version: 20110823
-# By Dennis Drescher (dennis_drescher at sil.org)
+# By Dennis Drescher (dennis_drescher at sil.org
 
 
 ###############################################################################
@@ -101,7 +101,10 @@ if os.path.isfile(projConfFile) :
 
     # Fold in the projConfig into the aProject object
     aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
-    recordProject(uConf.userConfFile, projConfig, projHome)
+    print dir(uConf)
+    if not projectType in uConf.userConfFile['Projects'] :
+        recordProject(uConf.userConfFile, projConfig, projHome)
+        self.writeOutUserConfFile = True
 
 else :
     # If there is no project, we still need a

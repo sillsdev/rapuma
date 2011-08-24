@@ -95,9 +95,8 @@ class UserConfig (object) :
             rpm['Folders'] = {}
             rpm['System']['userName'] = 'Default User'
             rpm['System']['initDate'] = date_time
-            rpm['System']['writeOutUserConfFile'] = 'True'
             # Folder list
-            folders = ['fonts', 'illustrations', 'admin', 'compTypes', 'projTypes']
+            folders = ['compTypes', 'projTypes']
             # System folders
             for f in folders :
                 rpm['Folders']['rpm' + f] = os.path.join(self.rpmHome, 'resources', 'lib_' + f)
