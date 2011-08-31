@@ -202,7 +202,7 @@ class Project (object) :
         self.writeOutProjConfFile = True
         self._projConfig = newProjConfig
         self._projInit = newInitConfig
-        self.initProject(pdir)
+        # We will do the project init when the first component is processed
 
         # Create intitial project settings
         date = tStamp()
@@ -288,7 +288,9 @@ class Project (object) :
         '''Preprocess a project component.'''
         
         # First lets make sure our component is initialized (this will also
-        # initialize the component type as well).
+        # initialize the project and component type as well).
+        self.initProject(os.getcwd())
+        self.initCompType(self._projConfig['Components'][cid]['compType'])
 
         if cid :
             c = self.getComponent(cid)
@@ -438,7 +440,7 @@ class Project (object) :
         '''This will add all the component type information to a project.'''
 
         # It is assumed this is okay to do
-        try :    
+        try :
             self._projConfig['ComponentTypes'][ctype] = {}
         except :
             self._projConfig['ComponentTypes'] = {}

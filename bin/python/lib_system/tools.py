@@ -101,7 +101,7 @@ def getProjInitSettings (userHome, rpmHome, projType) :
 
     rpmProjInitXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
     userProjInitXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
-    
+
     res = getXMLSettings(rpmProjInitXML)
     if os.path.isfile(userProjInitXML) :
         return overrideSettings(res, userProjInitXML)
