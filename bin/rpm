@@ -101,11 +101,14 @@ if os.path.isfile(projConfFile) :
 
     # Fold in the projConfig into the aProject object
     aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
-    print dir(uConf)
-    if not projectType in uConf.userConfFile['Projects'] :
-        recordProject(uConf.userConfFile, projConfig, projHome)
-        self.writeOutUserConfFile = True
 
+    # Record the project if needed
+    try :
+        pt = uConf.userConfig['Projects']
+    except :
+        recordProject(uConf.userConfFile, projConfig, projHome)
+        #aProject.writeOutUserConfFile = True
+    
 else :
     # If there is no project, we still need a
     # dummy projConfig object so we'll just make one up.

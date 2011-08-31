@@ -163,10 +163,18 @@ class CreateProject (Command) :
 
     type = "project_create"
 
+    def help(self) :
+        self.parser.print_help()
+
     def run(self, args, aProject, userConfig) :
         super(CreateProject, self).run(args, aProject, userConfig)
-
-        aProject.makeProject(self.options.ptype, self.options.pname, self.options.pid, self.options.pdir)
+        
+        # Check for "required" options
+        if self.options.ptype and self.options.pname and self.options.pid :
+            aProject.makeProject(self.options.ptype, self.options.pname, self.options.pid, self.options.pdir)
+        else :
+            terminal('Error: A command option is missing!')
+            self.help()
 
     def setupOptions(self, parser) :
         self.parser.add_option("-t", "--ptype", action="store", help="Set the type of project this will be, this is required.")
