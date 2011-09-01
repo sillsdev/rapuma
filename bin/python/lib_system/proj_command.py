@@ -69,7 +69,7 @@ class AddComp (Command) :
     def run (self, args, aProject, userConfig) :
         super(AddComp, self).run(args, aProject, userConfig)
         if self.options.component and self.options.type :
-            aProject.addNewComponent(self.options.component, self.options.type, self.options.source)
+            aProject.addNewComponent(self.options.component, self.options.type)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 

@@ -72,19 +72,22 @@ class Project (object) :
                 setattr(self, k, self._userConfig['System'][k] if self._userConfig else None)
 
             self.orgLastEditDate    = self.lastEditDate
-        
+
         # Load the project vars if this is a valid project
         if len(self._projConfig) :
             for k in (  'projectType',                  'projectName',
                         'projectIDCode',                'validCompTypes',
                         'projectComponentBindingOrder') :
                  setattr(self, k, self._projConfig['ProjectInfo'][k] if self._projConfig else None)
-       
+            # Log file names
+            for k in (  'projLogFile',                  'projErrorLogFile') :
+                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
+
         # Set some flags
         self.writeOutProjConfFile = False
         self.writeOutUserConfFile = False
-        
-        
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
@@ -164,31 +167,33 @@ class Project (object) :
         '''Create a new publishing project.'''
 
         # Run some basic tests to see if this project can be created
-        # Test if this project already exists in the user's config file.
-        if isRecordedProject(self.userConfFile, pid) :
-            terminal('Halt! ID [' + pid + '] already defined for another project')
-            return False
-
         # Grab the cwd if pdir is empty for the default
         if not pdir or pdir == '.' :
             pdir = os.getcwd()
-        else :
-            # So a pdir has been passed now it needs testing
-            pdir = os.path.abspath(pdir)
-            # Test for parent project.
-            if os.path.isfile(os.path.join(pdir, '.project.conf')) :
-                terminal('Halt! Live project already defined in this location')
-                return False
-            elif os.path.isfile(os.path.join(os.path.dirname(pdir), '.project.conf')) :
-                terminal('Halt! Live project already defined in parent folder')
-                return False
-            elif os.path.isfile(os.path.join(os.path.dirname(pdir), '.project.conf' + self.lockExt)) :
-                terminal('Halt! Locked project already defined in parent folder')
-                return False
 
-            elif not os.path.isdir(os.path.dirname(pdir)) :
-                terminal('Halt! Not a valid (parent) path: ' + pdir)
-                return False
+        # So now that we have a pdir it needs testing
+        pdir = os.path.abspath(pdir)
+        # Test for parent project.
+        if os.path.isfile(os.path.join(pdir, '.project.conf')) :
+            self.writeToLog('ERR', 'Halt! Live project already defined in this location')
+            return False
+        elif os.path.isfile(os.path.join(pdir, '.project.conf' + self.lockExt)) :
+            self.writeToLog('ERR', 'Halt! Locked project already defined in target folder')
+            return False
+        elif os.path.isfile(os.path.join(os.path.dirname(pdir), '.project.conf')) :
+            self.writeToLog('ERR', 'Halt! Live project already defined in parent folder')
+            return False
+        elif os.path.isfile(os.path.join(os.path.dirname(pdir), '.project.conf' + self.lockExt)) :
+            self.writeToLog('ERR', 'Halt! Locked project already defined in parent folder')
+            return False
+        elif not os.path.isdir(os.path.dirname(pdir)) :
+            self.writeToLog('ERR', 'Halt! Not a valid (parent) path: ' + pdir)
+            return False
+
+        # Test if this project already exists in the user's config file.
+        if isRecordedProject(self.userConfFile, pid) :
+            self.writeToLog('ERR', 'Halt! ID [' + pid + '] already defined for another project')
+            return False
 
         # If we made it to this point we need to check to see if the project
         # folder exists, if it doesn't make.  We can create only one level deep
@@ -212,6 +217,10 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectCreateDate']      = date
         self._projConfig['ProjectInfo']['projectIDCode']          = pid
         recordProject(self.userConfFile, self._projConfig, pdir)
+        
+        # Set some vars that will be needed
+        self.projLogFile        = self._userConfig['Files']['projLogFile']['name']
+        self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
 
         # Finally write out the project config file
         writeProjConfFile(self._projConfig, pdir)
@@ -246,7 +255,7 @@ class Project (object) :
                 reportSysConfUpdate(self)
 
                 # Report the process is done
-                terminal('Project [' + pid + '] removed from system configuration.')
+                self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
                 return True
 
         except :
@@ -389,7 +398,7 @@ class Project (object) :
 
         self.writeOutProjConfFile = True
         self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewComponents()')
-                
+
 
     def removeComponent (self, comp) :
         '''Remove a component from the current project by removing them from the
@@ -530,7 +539,7 @@ class Project (object) :
         # Test to see if this is a live project by seeing if the project conf is
         # there.  If it is, we can write out log files.  Otherwise, why bother?
         if os.path.isfile(self.projConfFile) :
-        
+
             # When are we doing this?
             ts = tStamp()
             
@@ -558,7 +567,7 @@ class Project (object) :
                     self.writeToErrorLog(eventLine)
 
             except :
-                terminal(msg)
+                terminal("Failed to write: " + msg)
 
         return
 

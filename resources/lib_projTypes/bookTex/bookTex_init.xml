@@ -38,107 +38,6 @@ Todo:
         <sectionID>Files</sectionID>
         <description>This section contains the names of all the bookTex files the RPM system will use in this projects.</description>
         <section>
-            <name>Project Log File</name>
-            <sectionID>projLogFile</sectionID>
-            <description>The project log file.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of this file.</description>
-                <type>string</type>
-                <version>False</version>
-                <value>.rpm.log</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Version Control</name>
-                <key>versionControl</key>
-                <description>Is this file under version control?</description>
-                <type>boolean</type>
-                <value>False</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-        </section>
-        <section>
-            <name>Project Error Log File</name>
-            <sectionID>projErrorLogFile</sectionID>
-            <description>The project error log file.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of this file.</description>
-                <type>string</type>
-                <value>.error.log</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Version Control</name>
-                <key>versionControl</key>
-                <description>Is this file under version control?</description>
-                <type>boolean</type>
-                <value>False</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-        </section>
-        <section>
-            <name>Makefile File</name>
-            <sectionID>makefileFile</sectionID>
-            <description>Makefile file settings that may need to be changed.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of this file.</description>
-                <type>string</type>
-                <value>.makefile</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Version Control</name>
-                <key>versionControl</key>
-                <description>Is this file under version control?</description>
-                <type>boolean</type>
-                <value>False</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-        </section>
-
-        <section>
             <name>GlobalTex TeX File</name>
             <sectionID>globalTex</sectionID>
             <description>The global contol file that feeds into the the component control file.</description>
@@ -171,7 +70,6 @@ Todo:
                 <value>*.ttf, ptx2pdf.tex, hyphenation.tex, .book.conf, global.sty</value>
             </setting>
         </section>
-
         <section>
             <name>BookTex TeX File</name>
             <sectionID>bookTexTex</sectionID>
@@ -205,7 +103,6 @@ Todo:
                 <value></value>
             </setting>
         </section>
-
         <section>
             <name>Hyphenation TeX File</name>
             <sectionID>hyphenationTex</sectionID>
@@ -239,7 +136,6 @@ Todo:
                 <value>wordlist.txt, lccode.tex</value>
             </setting>
         </section>
-
         <section>
             <name>Wordlist File</name>
             <sectionID>wordlistTxt</sectionID>
@@ -273,7 +169,6 @@ Todo:
                 <value></value>
             </setting>
         </section>
-
         <section>
             <name>Lccode TeX File</name>
             <sectionID>lccodeTxt</sectionID>
@@ -308,7 +203,6 @@ Todo:
             </setting>
         </section>
     </section>
-
     <section>
         <name>Folders</name>
         <sectionID>Folders</sectionID>
