@@ -341,7 +341,7 @@ class Project (object) :
         return Component(self)
 
 
-    def addNewComponent (self, cid, ctype, csource) :
+    def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component
         binding list and inserting component info into the project conf file.
         All supplied arguments need to be valid.  This function will fail if the
@@ -368,10 +368,6 @@ class Project (object) :
             self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
             return
 
-        if not os.path.isfile(csource) :
-            self.writeToLog('ERR', 'Path: [' + csource + '] not valid.', 'project.addNewComponents()')
-            return
-
         # Add component code to binding order list
         listOrder = []
         listOrder = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
@@ -388,7 +384,6 @@ class Project (object) :
         compItem = ConfigObj()
         compItem['Components'] = {}
         compItem['Components'][cid] = {}
-        compItem['Components'][cid]['source'] = csource
         compItem['Components'][cid]['compType'] = ctype
         self._projConfig.merge(compItem)
 
@@ -463,6 +458,22 @@ class Project (object) :
             self.writeToLog('MSG', 'Component type: [' + ctype + '] removed from project.', 'project.removeComponentType()')
         else :
             self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
+
+
+    def importComponentSource (self, cid, source) :
+        '''Import the source for a component.  For some components, it is not
+        necessary to get data from outside the system.  For those that need it,
+        this function helps to that end.  This will test for the existence of
+        the source but will not do the actual import.  That will happen when the
+        component is initialized.'''
+        
+        # Check for the resouce and add it to the conf file if it exists.
+        if os.path.isfile(source) :
+            self._projConfig['Components'][cid]['source'] = source        
+            self.writeOutProjConfFile = True
+        else :
+            self.writeToLog('ERR', 'Path: [' + source + '] not valid.', 'project.addNewComponents()')
+            return
 
 
 ###############################################################################

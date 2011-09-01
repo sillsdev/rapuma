@@ -173,13 +173,12 @@ class CreateProject (Command) :
         if self.options.ptype and self.options.pname and self.options.pid :
             aProject.makeProject(self.options.ptype, self.options.pname, self.options.pid, self.options.pdir)
         else :
-            terminal('Error: A command option is missing!')
-            self.help()
+            raise SyntaxError, "Error: Missing required options!"
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-t", "--ptype", action="store", help="Set the type of project this will be, this is required.")
-        self.parser.add_option("-n", "--pname", action="store", help="Set the name of project this will be, this is required.")
-        self.parser.add_option("-i", "--pid", action="store", help="Set the type of project this will be, this is required.")
+        self.parser.add_option("-t", "--ptype", action="store", help="Set the type of project this will be. (Required)")
+        self.parser.add_option("-n", "--pname", action="store", help="Set the name of project this will be. (Required)")
+        self.parser.add_option("-i", "--pid", action="store", help="Set the type of project this will be. (Required)")
         self.parser.add_option("-d", "--pdir", action="store", help="Directory to create this project in, the default is current directory.")
 
 

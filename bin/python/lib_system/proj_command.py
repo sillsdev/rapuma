@@ -66,15 +66,33 @@ class AddComp (Command) :
 
     type = "component_add"
 
-    def run(self, args, aProject, userConfig) :
+    def run (self, args, aProject, userConfig) :
         super(AddComp, self).run(args, aProject, userConfig)
-        if len(args) :
+        if self.options.component and self.options.type :
             aProject.addNewComponent(self.options.component, self.options.type, self.options.source)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
 
-    def setupOptions(self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project.")
-        self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the component type. It needs to be valid but not present in the project.")
-        self.parser.add_option("-s", "--source", type="string", action="store", help="Specify a valid source file for this component.")
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project. (Required)")
+        self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the component type. It needs to be valid but not present in the project. (Required)")
+
+
+class ImportCompSource (Command) :
+    '''Command to import external data for this component'''
+    
+    type = "component_import"
+    
+    def run (self, args, aProject, userConfig) :
+        super(ImportCompSource, self).run(args, aProject, userConfig)
+        if self.options.component and self.options.type :
+            aProject.importComponentSource(self.options.component, self.options.source)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project. (Required)")
+        self.parser.add_option("-s", "--source", type="string", action="store", help="Specify a valid source file for this component if needed.")
 
 
 class RemoveComp (Command) :
@@ -82,12 +100,12 @@ class RemoveComp (Command) :
 
     type = "component_remove"
 
-    def run(self, args, aProject, userConfig) :
+    def run (self, args, aProject, userConfig) :
         super(RemoveComp, self).run(args, aProject, userConfig)
         if len(args) :
             aProject.removeComponent(self.options.component)
 
-    def setupOptions(self, parser) :
+    def setupOptions (self, parser) :
         self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project.")
 
 

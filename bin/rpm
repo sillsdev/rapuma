@@ -129,11 +129,13 @@ except :
     pass
 
 # Give a welcome message
-terminal('\n\t\tWelcome to RPM ' + aProject._userConfig['System']['systemVersion'])
+terminal('\n\t\tWelcome to ' + aProject._userConfig['System']['systemName'] + '  ' + aProject._userConfig['System']['systemVersion'])
 terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
 if os.path.isfile(aProject.projConfFile) :
     terminal('\t\tCurrent Project: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
-
+else :
+    # Just put out an almost blank line
+    terminal(' ')
 
 ###############################################################################
 ##################### Prepare and Process RPM Commands #######################
@@ -144,7 +146,12 @@ if command :
     if command in commands :
         # To process there should be one or more options
         if len(opts) >= 1 :
-            commands[command].run(opts, aProject, uConf.userConfig)
+            try :
+                commands[command].run(opts, aProject, uConf.userConfig)
+            except SyntaxError, err:
+                terminal("\n" + str(err) + "\n")
+                opts.insert(0, command)
+                commands['help'].run(opts, aProject, uConf.userConfig)
         else :
             # If we seem to be short on options then we will just display the help
             # for this command
@@ -155,7 +162,7 @@ if command :
         terminal('\nERROR: This command does not exist: ' + command)
 
 else :
-    terminal('\nAvailable commands:')
+    terminal('\nAvailable commands:\n')
     commands['help'].run(opts, aProject, uConf.userConfig)
 
 
