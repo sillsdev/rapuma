@@ -156,7 +156,6 @@ if command :
             # If we seem to be short on options then we will just display the help
             # for this command
                 terminal('\nHelp for the \"' + command + '\" command:\n')
-                # FIXME: This is not working right
                 commands['help'].run(opts, aProject, uConf.userConfig)
     else :
         terminal('\nERROR: This command does not exist: ' + command)
