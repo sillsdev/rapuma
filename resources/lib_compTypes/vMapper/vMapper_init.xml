@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: adminMSEAG_init.xml
+Description:
+This is a component type description for an adminMSEAG_init component to be with
+all projects.  All file relations and processes are described in this file.
+
+Todo:
+1) ...
+
+
+# This is a save state for this file in case we need to pull info out later.
+
+-->
+
+<!DOCTYPE root [
+  <!ELEMENT root (section+)>
+  <!ELEMENT section (name, sectionID, description, (file | folder | process | setting)+)>
+  <!ELEMENT file (name, type, location, dependents, createdBy, description)>
+  <!ELEMENT folder (name, key, description, value)>
+  <!ELEMENT process (name, type, description)>
+  <!ELEMENT setting (name, key, description, type, value)>
+  <!ELEMENT key (#PCDATA)>
+  <!ELEMENT type (#PCDATA)>
+  <!ELEMENT location (#PCDATA)>
+  <!ELEMENT dependents (#PCDATA)>
+  <!ELEMENT createdBy (#PCDATA)>
+  <!ELEMENT name (#PCDATA)>
+  <!ELEMENT description (#PCDATA)>
+  <!ELEMENT sectionID (#PCDATA)>
+  <!ELEMENT value (#PCDATA)>
+]>
+
+<root>
+    <section>
+        <name>Files</name>
+        <sectionID>Files</sectionID>
+        <description>This section contains the names and information for files of this component type used in the RPM system in this project.</description>
+        <section>
+            <name>Master Map Data</name>
+            <sectionID>m00Data</sectionID>
+            <description>Map point data for all the maps used in vMapper.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>m00-data.csv</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Map</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+    <section>
+        <name>Folders</name>
+        <sectionID>Folders</sectionID>
+        <description>This section contains the settings for all the folders needed for usfmTex component processing.</description>
+        <section>
+            <name>Maps Folder</name>
+            <sectionID>MapsFolder</sectionID>
+            <description>The project map folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of the folder that all project map work will be kept.</description>
+                <type>string</type>
+                <value>Maps</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+</root>
+
