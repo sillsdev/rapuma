@@ -91,7 +91,7 @@ class ImportCompSource (Command) :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project. (Required)")
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Add the source of a component to the project. (Required)")
         self.parser.add_option("-s", "--source", type="string", action="store", help="Specify a valid source file for this component if needed.")
 
 
@@ -106,7 +106,21 @@ class RemoveComp (Command) :
             aProject.removeComponent(self.options.component)
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project.")
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component to the project. (Required)")
+
+
+class RenderComp (Command) :
+    '''Render a single component.'''
+    
+    type = "component_render"
+    
+    def run (self, args, aProject, userConfig) :
+        super(RenderComp, self).run(args, aProject, userConfig)
+        if len(args) :
+            aProject.renderComponent(self.options.component)
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Render a single project component. (Required)")
 
 
 

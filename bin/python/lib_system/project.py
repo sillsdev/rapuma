@@ -84,8 +84,12 @@ class Project (object) :
                  setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
         # Set some flags
-        self.writeOutProjConfFile = False
-        self.writeOutUserConfFile = False
+        self.writeOutProjConfFile   = False
+        self.writeOutUserConfFile   = False
+        self.isProjectInitalized    = False
+        self.isProjectInitalized    = False
+        for ct in self._projConfig['ProjectInfo']['validCompTypes'] :
+            setattr(self, ct + 'Initialized', False)
 
 
 ###############################################################################
@@ -117,6 +121,8 @@ class Project (object) :
             else :
                 thisFolder = os.path.join(pdir, folderName)
 
+# FIXME: The shared resource concept is not implemented here yet.
+
             # Create a source folder name in case there is one
             sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_folders', folderName)
 
@@ -127,6 +133,8 @@ class Project (object) :
                     os.mkdir(thisFolder)
                     if self.debugging == 'True' :
                         terminal('Created folder: ' + folderName)
+
+#######################################################################
 
         # Create some necessary files
         fls = self._projInit['Files'].__iter__()
@@ -150,7 +158,7 @@ class Project (object) :
                 thisFile = os.path.join(pdir, parentFolder, fileName)
             else :
                 thisFile = os.path.join(pdir, fileName)
-                
+
             # Create source file name
             sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_files', fileName)
             # Make the file if it is not already there
@@ -161,6 +169,10 @@ class Project (object) :
                     open(thisFile, 'w').close()
                     if self.debugging == 'True' :
                         terminal('Created file: ' + thisFile)
+
+        # Set to true incase a second round is needed in the same session.
+        # Intialization only needs to happen once per session.
+        self.isProjectInitalized == True
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
@@ -483,6 +495,20 @@ class Project (object) :
         else :
             self.writeToLog('ERR', 'Path: [' + source + '] not valid.', 'project.addNewComponents()')
             return
+
+
+    def renderComponent (self, cid) :
+        '''Render a single project component.  Before starting, make sure
+        everything necessary has been initialized.'''
+
+        # Has the project been initialized? We reinitialize at the start of
+        # every run.
+        if self.isProjectInitalized == False :
+            self.initProject(self.projHome)
+        
+        
+        # Has the component been initialized? We reinitialize at the start of
+        # every run.
 
 
 ###############################################################################
