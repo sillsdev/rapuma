@@ -364,7 +364,7 @@ class Project (object) :
             self._projConfig['ComponentTypes'] = {}
 
         # First we add the type if it is not already in the project
-        if ctype in self.validCompTypes :
+        if not ctype in self.validCompTypes :
             if not ctype in self._projConfig['ComponentTypes'] :
                 self.addNewComponentType(ctype)
 
@@ -442,7 +442,7 @@ class Project (object) :
 
     def addNewComponentType (self, ctype) :
         '''This will add all the component type information to a project.'''
-
+        print "Adding component type zzzzzzzzzzzzzzzzzzzzz"
         # It is assumed this is okay to do
         try :
             self._projConfig['ComponentTypes'][ctype] = {}

@@ -132,7 +132,14 @@ except :
 terminal('\n\t\tWelcome to ' + aProject._userConfig['System']['systemName'] + '  ' + aProject._userConfig['System']['systemVersion'])
 terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
 if os.path.isfile(aProject.projConfFile) :
-    terminal('\t\tCurrent Project: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
+    terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
+    terminal('\t\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
+    if len(aProject._projConfig['ProjectInfo']['validCompTypes']) > 0 :
+        comps = ''
+        for c in aProject._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
+            comps = comps + ' ' + c
+            
+        terminal('\t\t\tComponents:' + comps)
 else :
     # Just put out an almost blank line
     terminal(' ')
@@ -160,9 +167,9 @@ if command :
     else :
         terminal('\nERROR: This command does not exist: ' + command)
 
-else :
-    terminal('\nAvailable commands:\n')
-    commands['help'].run(opts, aProject, uConf.userConfig)
+#else :
+#    terminal('\nAvailable commands:\n')
+#    commands['help'].run(opts, aProject, uConf.userConfig)
 
 
 ###############################################################################
