@@ -100,8 +100,26 @@ class Project (object) :
     def initProject (self, pdir) :
         '''Initialize a new project by creating all necessary global items like
         folders, etc.'''
-
+        
         mod = 'project.initProject()'
+        
+        # We are going to start with the init XML file for this project type so
+        # we have access to all the project init info.
+        initFile = self.projectType + '_init.xml'
+        
+        # Send this off to the generalized init function
+        if self.init(pdir, initFile) :
+            self.isProjectInitalized == True
+                
+        
+    def init (self, pdir, iFile) :
+        '''A generalized function for initializing a project or component which
+        is called by the component or project when a process is run.'''
+
+        # Load up the init file settings
+        
+
+        mod = 'project.init()'
         # Create all necessary folders
         fldrs = self._projInit['Folders'].__iter__()
         for f in fldrs :
@@ -168,11 +186,7 @@ class Project (object) :
                 else :
                     open(thisFile, 'w').close()
                     if self.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
-
-        # Set to true incase a second round is needed in the same session.
-        # Intialization only needs to happen once per session.
-        self.isProjectInitalized == True
+                        terminal('Created file: ' + thisFile)       
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
