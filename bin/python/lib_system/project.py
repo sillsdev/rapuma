@@ -90,7 +90,7 @@ class Project (object) :
         # Set init flag on all comp types to False
         for ct in self._projConfig['ProjectInfo']['validCompTypes'] :
             setattr(self, ct + 'Initialized', False)
-        # Set init flag on all coms to False
+        # Set init flag on all comps to False
         for c in self._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
             setattr(self, c + 'Initialized', False)        
 
