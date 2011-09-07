@@ -54,7 +54,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>hyp,</value>
+                <value>hyp</value>
             </setting>
         </section>
     </section>

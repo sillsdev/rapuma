@@ -77,7 +77,7 @@ Todo:
             <key>validCompTypes</key>
             <description>A list of valid component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>usfmTex,adminMSEAG,vMapper</value>
+            <value>usfmTex,adminMSEAG,vMapper,projectNotes,illustrationsUsfm,hyphenTex,fontSets</value>
         </setting>
         <setting>
             <name>Project Component Binding Order List</name>

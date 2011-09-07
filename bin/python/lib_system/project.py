@@ -87,12 +87,13 @@ class Project (object) :
         self.writeOutProjConfFile   = False
         self.writeOutUserConfFile   = False
         self.isProjectInitalized    = False
-        # Set init flag on all comp types to False
-        for ct in self._projConfig['ProjectInfo']['validCompTypes'] :
-            setattr(self, ct + 'Initialized', False)
-        # Set init flag on all comps to False
-        for c in self._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
-            setattr(self, c + 'Initialized', False)        
+        if len(self._projConfig) :
+            # Set init flag on all comp types to False
+            for ct in self._projConfig['ProjectInfo']['validCompTypes'] :
+                setattr(self, ct + 'Initialized', False)
+            # Set init flag on all comps to False
+            for c in self._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
+                setattr(self, c + 'Initialized', False)        
 
 
 ###############################################################################
@@ -406,7 +407,7 @@ class Project (object) :
             self._projConfig['ComponentTypes'] = {}
 
         # First we add the type if it is not already in the project
-        if not ctype in self.validCompTypes :
+        if ctype in self.validCompTypes :
             if not ctype in self._projConfig['ComponentTypes'] :
                 self.addNewComponentType(ctype)
 
@@ -415,6 +416,7 @@ class Project (object) :
             self.writeToLog('ERR', 'Component: [' + cid + '] exsits. Only one instance allowed.', 'project.addNewComponents()')
             return
 
+        print self._projConfig['ComponentTypes']
         if not cid in self._projConfig['ComponentTypes'][ctype]['validIdCodes'] :
             self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
             return
@@ -484,7 +486,7 @@ class Project (object) :
 
     def addNewComponentType (self, ctype) :
         '''This will add all the component type information to a project.'''
-        print "Adding component type zzzzzzzzzzzzzzzzzzzzz"
+
         # It is assumed this is okay to do
         try :
             self._projConfig['ComponentTypes'][ctype] = {}

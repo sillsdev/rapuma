@@ -50,8 +50,8 @@ Todo:
                 <value></value>
             </setting>
             <setting>
-                <name>Valid Font Set ID Codes</name>
-                <key>validFontSetCodes</key>
+                <name>Valid Component ID Codes</name>
+                <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
                 <value>frontSet,bodySet,backSet</value>

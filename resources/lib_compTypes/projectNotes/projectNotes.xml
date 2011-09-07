@@ -39,7 +39,7 @@ Todo:
         <sectionID>ComponentTypes</sectionID>
         <description>This is the root section for the fontSets component information.</description>
         <section>
-            <name>FontSets Component Information</name>
+            <name>Project Notes Component Information</name>
             <sectionID>ProjectNotes</sectionID>
             <description>This section contains general project notes component information.</description>
             <setting>
@@ -50,11 +50,11 @@ Todo:
                 <value></value>
             </setting>
             <setting>
-                <name>Valid Note Component ID Codes</name>
-                <key>validNoteCompCodes</key>
+                <name>Valid Component ID Codes</name>
+                <key>validIdCodes</key>
                 <description>This list contains all the valid note component ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>simpleNotes,</value>
+                <value>simpleNotes</value>
             </setting>
         </section>
     </section>
