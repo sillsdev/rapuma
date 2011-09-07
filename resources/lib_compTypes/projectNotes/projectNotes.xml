@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: illustrationsUsfm.xml
+File: projectNotes.xml
 Description:
-This is a component type description for an illustrationsUsfm component to be used in
+This is a component type description for a illustrations component to be used in
 any type of project.  All file relations and processes are described in this
 file.
 
@@ -37,11 +37,11 @@ Todo:
     <section>
         <name>Component Root Section</name>
         <sectionID>ComponentTypes</sectionID>
-        <description>This is the root section for the illustrations component information.</description>
+        <description>This is the root section for the fontSets component information.</description>
         <section>
-            <name>Illustrations Component Information</name>
-            <sectionID>Illustrations</sectionID>
-            <description>This section contains general illustrations component information.</description>
+            <name>FontSets Component Information</name>
+            <sectionID>ProjectNotes</sectionID>
+            <description>This section contains general project notes component information.</description>
             <setting>
                 <name>Installed Components</name>
                 <key>installedComponents</key>
@@ -50,11 +50,11 @@ Todo:
                 <value></value>
             </setting>
             <setting>
-                <name>Valid Illustration Library ID Codes</name>
-                <key>validLibCodes</key>
-                <description>This list contains all the valid illustraton library ID codes that can be used for this component type.</description>
+                <name>Valid Note Component ID Codes</name>
+                <key>validNoteCompCodes</key>
+                <description>This list contains all the valid note component ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>system,Knowles-600</value>
+                <value>simpleNotes,</value>
             </setting>
         </section>
     </section>

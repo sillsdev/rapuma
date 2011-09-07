@@ -128,25 +128,6 @@ Todo:
             </setting>
         </section>
         <section>
-            <name>Project Wiki Folder</name>
-            <sectionID>WikiFolder</sectionID>
-            <description>The project wiki notes folder.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The folder where all the project notes are kept.</description>
-                <type>string</type>
-                <value>.wiki</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-        </section>
-        <section>
             <name>Project TeX Macro Folder</name>
             <sectionID>MacroFolder</sectionID>
             <description>The project TeX macro folder.</description>

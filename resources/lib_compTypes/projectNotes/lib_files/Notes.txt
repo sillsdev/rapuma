@@ -1,0 +1,6 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+====== Project Notes ======
+
+Use the Notes button in the ptxplus manager to enter a note on this page.

@@ -1,0 +1,6 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+====== Project Specifications ======
+
+The dream is that this page will contain project specifications that will be gleaned from the project configuration file which should be the central information holding file for any project. This page will be auto-generated from this information. Also, a print ready PDF will be auto-generated as well and stored in the Deliverables folder. That's the dream any way. For now you can enter whatever information you need to keep for the project manually here on this page.
