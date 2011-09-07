@@ -416,7 +416,6 @@ class Project (object) :
             self.writeToLog('ERR', 'Component: [' + cid + '] exsits. Only one instance allowed.', 'project.addNewComponents()')
             return
 
-        print self._projConfig['ComponentTypes']
         if not cid in self._projConfig['ComponentTypes'][ctype]['validIdCodes'] :
             self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
             return

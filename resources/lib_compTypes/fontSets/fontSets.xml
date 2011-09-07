@@ -40,7 +40,7 @@ Todo:
         <description>This is the root section for the fontSets component information.</description>
         <section>
             <name>FontSets Component Information</name>
-            <sectionID>FontSets</sectionID>
+            <sectionID>fontSets</sectionID>
             <description>This section contains general illustrations component information.</description>
             <setting>
                 <name>Installed Components</name>

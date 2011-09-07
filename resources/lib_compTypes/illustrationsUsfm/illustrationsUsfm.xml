@@ -40,8 +40,8 @@ Todo:
         <description>This is the root section for the illustrations component information.</description>
         <section>
             <name>Illustrations Component Information</name>
-            <sectionID>Illustrations</sectionID>
-            <description>This section contains general illustrations component information.</description>
+            <sectionID>illustrationsUsfm</sectionID>
+            <description>This section contains general illustrationsUsfm component information.</description>
             <setting>
                 <name>Installed Components</name>
                 <key>installedComponents</key>
