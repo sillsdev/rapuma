@@ -9,4 +9,5 @@ rpm component_add -c simpleNotes    -t projectNotes
 rpm component_add -c system         -t illustrationsUsfm
 rpm component_add -c hyp            -t hyphenTex
 rpm component_add -c bodySet        -t fontSets
+rpm component_render -c jas
 

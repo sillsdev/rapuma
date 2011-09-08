@@ -38,30 +38,64 @@ Todo:
         <sectionID>Files</sectionID>
         <description>This section contains the names of all the adminMSEAG files the RPM system will use in this projects.</description>
         <section>
-            <name>James Sample Text</name>
-            <sectionID>jasSample</sectionID>
-            <description>The Book of James sample file.</description>
+            <name>Postpub Approval Form</name>
+            <sectionID>postPubApprovalForm</sectionID>
+            <description>The approval form for inspecting a publication when it is completed.</description>
             <setting>
                 <name>Name</name>
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
                 <version>False</version>
-                <value>59_James.usfm</value>
+                <value>pc_postpub_approval.pdf</value>
             </setting>
             <setting>
                 <name>Location</name>
                 <key>location</key>
                 <description>The location of the folder.</description>
                 <type>string</type>
-                <value>Source</value>
+                <value>Admin</value>
             </setting>
             <setting>
                 <name>Version Control</name>
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Postpub Distribution Form</name>
+            <sectionID>postPubDistributionForm</sectionID>
+            <description>The form for PR and archival distribution of a publication when it is completed.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>pc_postpub_dist.pdf</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Admin</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>

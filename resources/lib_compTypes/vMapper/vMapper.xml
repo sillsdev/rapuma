@@ -56,6 +56,20 @@ Todo:
                 <type>list</type>
                 <value>m01,m02,m03,m04,m05,m06,m07,m08,m08a,m08b,m08c,m08d,m10</value>
             </setting>
+            <setting>
+                <name>Component Dependencies</name>
+                <key>dependencies</key>
+                <description>This list contains all the components and their type that this component is dependent on.</description>
+                <type>list</type>
+                <value>mapSet:fontSets</value>
+            </setting>
+            <setting>
+                <name>In Binding List</name>
+                <key>inBindingList</key>
+                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
         </section>
     </section>
 </root>

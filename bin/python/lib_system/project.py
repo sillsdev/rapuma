@@ -87,47 +87,63 @@ class Project (object) :
         self.writeOutProjConfFile   = False
         self.writeOutUserConfFile   = False
         self.isProjectInitalized    = False
-        if len(self._projConfig) :
-            # Set init flag on all comp types to False
-            for ct in self._projConfig['ProjectInfo']['validCompTypes'] :
-                setattr(self, ct + 'Initialized', False)
-            # Set init flag on all comps to False
-            for c in self._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
-                setattr(self, c + 'Initialized', False)        
 
+        # If this project is still new these may not exist yet
+        try :
+            # Set init flag on all comp types to False
+            if self._projConfig['ComponentTypes'] :
+                for key in self._projConfig['ComponentTypes'].keys() :
+                    setattr(self, key + 'Initialized', False)
+
+            # Set init flag on all comps to False
+            if self._projConfig['Components'] :
+                for key in self._projConfig['Components'].keys() :
+                    setattr(self, key + 'Initialized', False)
+
+        except :
+            pass
+        
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-    def initProject (self) :
-        '''Initialize a new project by creating all necessary global items like
-        folders, etc.'''
-        
-        # Pull the information from the project init xml file
-        initInfo = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
-        
-        # Send this off to the generalized init function
-        if self.init(initInfo) :
-            self.isProjectInitalized == True
+#    def initProject (self) :
+#        '''Initialize a new project by creating all necessary global items like
+#        folders, etc.'''
+#        
+#        # No need to init if it is done already
+#        if self.isProjectInitalized == False :
+#            # Pull the information from the project init xml file
+#            initInfo = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
+#            
+#            # Send this off to the generalized init function
+#            if self.init(initInfo) :
+#                self.isProjectInitalized == True
+#            else :
+#                return False
+#                
+#        return True
                 
         
     def initComponent (self, cid, cType) :
         '''Initialize a componet by creating all the necessary items for that
         specific component like files and folders.'''
         
-         # Pull the information from the project init xml file
-        initInfo = getCompInitSettings(self.userHome, self.rpmHome, cType)
-        
-        # Send this off to the generalized init function
-        if self.init(initInfo) :
-            setattr(self, cid + 'Initialized', True)
+        # No need to init if it is done already
+        if getattr(self, cid + 'Initialized') == False :
+             # Pull the information from the project init xml file
+            initInfo = getCompInitSettings(self.userHome, self.rpmHome, cType)
             
-        print 'component initialized? = ', self.jasInitialized
+            # Send this off to the generalized init function
+            if self.init(initInfo) :
+                setattr(self, cid + 'Initialized', True)
+            else :
+                return False
                 
-       
-
+        return True
+                
 
     def init (self, initInfo) :
         '''A generalized function for initializing a project or component which
@@ -193,7 +209,7 @@ class Project (object) :
                 thisFile = os.path.join(self.projHome, fileName)
 
             # Create source file name
-            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_files', fileName)
+            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', !!!!!!!FIXME!!!!!!!!!, 'lib_files', fileName)
             # Make the file if it is not already there
             if not os.path.isfile(thisFile) :
                 if os.path.isfile(sourceFile) :
@@ -384,15 +400,6 @@ class Project (object) :
         pass
 
 
-    def initCompType (self, ctype) :
-        '''Initialize a component type'''
-        ''' create a component object of the right class'''
-        
-# Need to start working here, have to return stuff for the component
-        print "Initializing: " + ctype
-        return Component(self)
-
-
     def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component
         binding list and inserting component info into the project conf file.
@@ -420,12 +427,6 @@ class Project (object) :
             self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
             return
 
-        # Add component code to binding order list
-        listOrder = []
-        listOrder = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
-        listOrder.append(cid)
-        self._projConfig['ProjectInfo']['projectComponentBindingOrder'] = listOrder
-
         # Add to the installed components list for this type
         compList = []
         compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
@@ -439,6 +440,19 @@ class Project (object) :
         compItem['Components'][cid]['compType'] = ctype
         self._projConfig.merge(compItem)
 
+        # Add component code to components list
+        listOrder = []
+        listOrder = self._projConfig['ProjectInfo']['componentList']
+        listOrder.append(cid)
+        self._projConfig['ProjectInfo']['componentList'] = listOrder
+
+        # Add component code to binding order list
+        if self._projConfig['ComponentTypes'][ctype]['inBindingList'] == 'True' :
+            listOrder = []
+            listOrder = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
+            listOrder.append(cid)
+            self._projConfig['ProjectInfo']['projectComponentBindingOrder'] = listOrder
+
         self.writeOutProjConfFile = True
         self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewComponents()')
 
@@ -450,7 +464,17 @@ class Project (object) :
         # Find out what kind of component type this is
         ctype = self._projConfig['Components'][comp]['compType']
 
-        # Remove from Binding order list first
+        # Remove from components list first
+        orderList = []
+        orderList = self._projConfig['ProjectInfo']['componentList']
+        if comp in orderList :
+            orderList.remove(comp)
+            self._projConfig['ProjectInfo']['componentList'] = orderList
+            self.writeOutProjConfFile = True
+        else :
+            self.writeToLog('WRN', 'Component [' + comp + '] not found in component list', 'project.removeComponents()')
+
+        # Remove from Binding order list
         orderList = []
         orderList = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
         if comp in orderList :
@@ -459,7 +483,6 @@ class Project (object) :
             self.writeOutProjConfFile = True
         else :
             self.writeToLog('WRN', 'Component [' + comp + '] not found in binding order list', 'project.removeComponents()')
-
         
         # Remove from the components installed list
         compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
@@ -532,16 +555,30 @@ class Project (object) :
         '''Render a single project component.  Before starting, make sure
         everything necessary has been initialized.'''
 
-        # Has the project been initialized? We reinitialize at the start of
-        # every run.
-        if self.isProjectInitalized == False :
-            self.initProject()
+        # Run/check component inits.
+#        if not self.initProject() :
+#            terminal('Dude! This project does not even exsit. You should not even be able to use this command.')
+#            
+        if not self.initComponent(cid, self._projConfig['Components'][cid]['compType']) :
+            self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
+            return False
         
+        # Check for dependencies for this component
+        depends = self._projConfig['ComponentTypes'][self._projConfig['Components'][cid]['compType']]['dependencies']
+        if len(depends) :
+            # The dependencies should be listed in pairs 0 = component, 1 = component type
+            for c in depends :
+                comp, ctype = c.split(':')
+                try :
+                    if self._projConfig['Components'][comp] :
+                        self.initComponent(comp, ctype)
+                except :
+                    self.writeToLog('ERR', 'Component: [' + comp + '] failed to initialize.', 'project.renderComponent()')
+                    return False
+                
+        self.writeToLog('MSG', 'Rendered: [' + cid + ']', 'project.renderComponent()')
         
-        # Has the component been initialized? We reinitialize at the start of
-        # every run.
-        if getattr(self, cid + 'Initialized') == False :
-            self.initComponent(cid, self._projConfig['Components'][cid]['compType'])
+        return True
 
 
 

@@ -56,6 +56,20 @@ Todo:
                 <type>list</type>
                 <value>system,Knowles-600</value>
             </setting>
+            <setting>
+                <name>Component Dependencies</name>
+                <key>dependencies</key>
+                <description>This list contains all the components and their type that this component is dependent on.</description>
+                <type>list</type>
+                <value>bodySet:fontSets</value>
+            </setting>
+            <setting>
+                <name>In Binding List</name>
+                <key>inBindingList</key>
+                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
+                <type>boolean</type>
+                <value>False</value>
+            </setting>
         </section>
     </section>
 </root>

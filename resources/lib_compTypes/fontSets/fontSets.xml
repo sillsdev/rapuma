@@ -54,7 +54,21 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>frontSet,bodySet,backSet</value>
+                <value>frontSet,bodySet,backSet,mapSet</value>
+            </setting>
+            <setting>
+                <name>Component Dependencies</name>
+                <key>dependencies</key>
+                <description>This list contains all the components and their type that this component is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>In Binding List</name>
+                <key>inBindingList</key>
+                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
+                <type>boolean</type>
+                <value>False</value>
             </setting>
         </section>
     </section>

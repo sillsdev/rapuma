@@ -58,6 +58,20 @@ Todo:
                 <type>list</type>
                 <value>mat,mrk,luk,jhn,act,rom,1co,2co,gal,eph,php,col,1th,2th,1ti,2ti,tit,phm,heb,jas,1pe,2pe,1jn,2jn,3jn,jud,rev</value>
             </setting>
+            <setting>
+                <name>Component Dependencies</name>
+                <key>dependencies</key>
+                <description>This list contains all the components and their type that this component is dependent on.</description>
+                <type>list</type>
+                <value>bodySet:fontSets</value>
+            </setting>
+            <setting>
+                <name>In Binding List</name>
+                <key>inBindingList</key>
+                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
         </section>
     </section>
 </root>

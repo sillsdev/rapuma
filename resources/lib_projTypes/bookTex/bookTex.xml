@@ -80,6 +80,13 @@ Todo:
             <value>usfmTex,adminMSEAG,vMapper,projectNotes,illustrationsUsfm,hyphenTex,fontSets</value>
         </setting>
         <setting>
+            <name>Component List</name>
+            <key>componentList</key>
+            <description>A list of components installed in this project.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Project Component Binding Order List</name>
             <key>projectComponentBindingOrder</key>
             <description>A list of components that are used in this project in the order they are to be found in the publication.</description>
