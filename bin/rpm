@@ -86,7 +86,6 @@ if os.path.isfile(projConfFile) :
     if projConfig :
         projectType         = projConfig['ProjectInfo']['projectType']
         rpmProjTypes       = os.path.join(rpmHome, 'resources', 'lib_projTypes')
-        projInit            = getProjInitSettings(userHome, rpmHome, projectType)
         from proj_command import *
 
 # FIXME: Need to override sys path with user path if the type exists there
@@ -100,7 +99,7 @@ if os.path.isfile(projConfFile) :
         # die here
 
     # Fold in the projConfig into the aProject object
-    aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
+    aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
 
     # Record the project if needed
     try :
@@ -113,8 +112,7 @@ else :
     # If there is no project, we still need a
     # dummy projConfig object so we'll just make one up.
     projConfig  = ConfigObj()
-    projInit    = ConfigObj()
-    aProject    = Project(projConfig, projInit, uConf.userConfig, projHome, userHome, rpmHome)
+    aProject    = Project(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
 
 
 ###############################################################################

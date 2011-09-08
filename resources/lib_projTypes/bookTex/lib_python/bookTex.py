@@ -39,11 +39,13 @@ from component import Component
 
 class BookTex (Project) :
 
-    def __init__(self, projConfig, projInit, userConfig, projHome, userHome, rpmHome) :
+#    def __init__(self, projConfig, projInit, userConfig, projHome, userHome, rpmHome) :
+    def __init__(self, projConfig, userConfig, projHome, userHome, rpmHome) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(BookTex, self).__init__(projConfig, projInit, userConfig, projHome, userHome, rpmHome)
+#        super(BookTex, self).__init__(projConfig, projInit, userConfig, projHome, userHome, rpmHome)
+        super(BookTex, self).__init__(projConfig, userConfig, projHome, userHome, rpmHome)
 
 
 

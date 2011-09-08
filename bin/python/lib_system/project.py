@@ -34,7 +34,7 @@ from component import Component
 
 class Project (object) :
 
-    def __init__(self, projConfig, projInit, userConfig, projHome, userHome, rpmHome) :
+    def __init__(self, projConfig, userConfig, projHome, userHome, rpmHome) :
 
         self.projHome           = projHome
         self.userHome           = userHome
@@ -42,7 +42,6 @@ class Project (object) :
 
         # Load project config files
         self._projConfig        = projConfig
-        self._projInit          = projInit
         self._userConfig        = userConfig
 
         # Set all the initial paths and locations
@@ -102,124 +101,94 @@ class Project (object) :
 
         except :
             pass
-        
+
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-#    def initProject (self) :
-#        '''Initialize a new project by creating all necessary global items like
-#        folders, etc.'''
-#        
-#        # No need to init if it is done already
-#        if self.isProjectInitalized == False :
-#            # Pull the information from the project init xml file
-#            initInfo = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
-#            
-#            # Send this off to the generalized init function
-#            if self.init(initInfo) :
-#                self.isProjectInitalized == True
-#            else :
-#                return False
-#                
-#        return True
-                
-        
-    def initComponent (self, cid, cType) :
-        '''Initialize a componet by creating all the necessary items for that
-        specific component like files and folders.'''
-        
+    def initComponent (self, cid, ctype) :
+        '''A function for initializing a component which is called by the
+        component or project when a process is run.'''
+
+        mod = 'project.initComponent()'
+
         # No need to init if it is done already
         if getattr(self, cid + 'Initialized') == False :
              # Pull the information from the project init xml file
-            initInfo = getCompInitSettings(self.userHome, self.rpmHome, cType)
-            
-            # Send this off to the generalized init function
-            if self.init(initInfo) :
-                setattr(self, cid + 'Initialized', True)
-            else :
-                return False
-                
-        return True
-                
+            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
 
-    def init (self, initInfo) :
-        '''A generalized function for initializing a project or component which
-        is called by the component or project when a process is run.'''
+            # Create all necessary folders
+            fldrs = initInfo['Folders'].__iter__()
+            for f in fldrs :
+                folderName = ''; parentFolder = ''
+                fGroup = initInfo['Folders'][f]
+                for key, value in fGroup.iteritems() :
+                    if key == 'name' :
+                        folderName = value
+                    elif key == 'location' :
+                        if value != 'None' :
+                            parentFolder = value
+                    else :
+                        pass
 
-        mod = 'project.init()'
-
-        # Create all necessary folders
-        fldrs = initInfo['Folders'].__iter__()
-        for f in fldrs :
-            folderName = ''; parentFolder = ''
-            fGroup = initInfo['Folders'][f]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    folderName = value
-                elif key == 'location' :
-                    if value != 'None' :
-                        parentFolder = value
+                if parentFolder :
+                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
                 else :
-                    pass
+                    thisFolder = os.path.join(self.projHome, folderName)
 
-            if parentFolder :
-                thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-            else :
-                thisFolder = os.path.join(self.projHome, folderName)
+    # FIXME: The shared resource concept is not implemented here yet.
 
-# FIXME: The shared resource concept is not implemented here yet.
+                # Create a source folder name in case there is one
+                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_folders', folderName)
 
-            # Create a source folder name in case there is one
-            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_projTypes', self._projConfig['ProjectInfo']['projectType'], 'lib_folders', folderName)
+                if not os.path.isdir(thisFolder) :
+                    if os.path.isdir(sourceFolder) :
+                        shutil.copytree(sourceFolder, thisFolder)
+                    else :
+                        os.mkdir(thisFolder)
+                        if self.debugging == 'True' :
+                            terminal('Created folder: ' + folderName)
 
-            if not os.path.isdir(thisFolder) :
-                if os.path.isdir(sourceFolder) :
-                    shutil.copytree(sourceFolder, thisFolder)
+    #######################################################################
+
+            # Create some necessary files
+            fls = initInfo['Files'].__iter__()
+            for fs in fls :
+                fileName = ''; parentFolder = ''
+                fGroup = initInfo['Files'][fs]
+                for key, value in fGroup.iteritems() :
+                    if key == 'name' :
+                        fileName = value
+                        if fs == 'projLogFile' :
+                            self.projLogFile = os.path.join(self.projHome, value)
+                        elif fs == 'projErrorLogFile' :
+                            self.projErrorLogFile = os.path.join(self.projHome, value)
+                    elif key == 'location' :
+                        if value :
+                            parentFolder = value
+                    else :
+                        pass
+
+                if parentFolder :
+                    thisFile = os.path.join(self.projHome, parentFolder, fileName)
                 else :
-                    os.mkdir(thisFolder)
-                    if self.debugging == 'True' :
-                        terminal('Created folder: ' + folderName)
+                    thisFile = os.path.join(self.projHome, fileName)
 
-#######################################################################
+                # Create source file name
+                sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_files', fileName)
+                # Make the file if it is not already there
+                if not os.path.isfile(thisFile) :
+                    if os.path.isfile(sourceFile) :
+                        shutil.copy(sourceFile, thisFile)
+                    else :
+                        open(thisFile, 'w').close()
+                        if self.debugging == 'True' :
+                            terminal('Created file: ' + thisFile)
 
-        # Create some necessary files
-        fls = self._projInit['Files'].__iter__()
-        for fs in fls :
-            fileName = ''; parentFolder = ''
-            fGroup = self._projInit['Files'][fs]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    fileName = value
-                    if fs == 'projLogFile' :
-                        self.projLogFile = os.path.join(self.projHome, value)
-                    elif fs == 'projErrorLogFile' :
-                        self.projErrorLogFile = os.path.join(self.projHome, value)
-                elif key == 'location' :
-                    if value :
-                        parentFolder = value
-                else :
-                    pass
-
-            if parentFolder :
-                thisFile = os.path.join(self.projHome, parentFolder, fileName)
-            else :
-                thisFile = os.path.join(self.projHome, fileName)
-
-            # Create source file name
-            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', !!!!!!!FIXME!!!!!!!!!, 'lib_files', fileName)
-            # Make the file if it is not already there
-            if not os.path.isfile(thisFile) :
-                if os.path.isfile(sourceFile) :
-                    shutil.copy(sourceFile, thisFile)
-                else :
-                    open(thisFile, 'w').close()
-                    if self.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
-                        
-        return True   
+            setattr(self, cid + 'Initialized', True)
+            return True   
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
@@ -262,10 +231,8 @@ class Project (object) :
 
         # Create a new version of the project config file
         newProjConfig = getProjSettings(self.userHome, self.rpmHome, ptype)
-        newInitConfig = getProjInitSettings(self.userHome, self.rpmHome, ptype)
         self.writeOutProjConfFile = True
         self._projConfig = newProjConfig
-        self._projInit = newInitConfig
         # We will do the project init when the first component is processed
 
         # Create intitial project settings
@@ -556,9 +523,6 @@ class Project (object) :
         everything necessary has been initialized.'''
 
         # Run/check component inits.
-#        if not self.initProject() :
-#            terminal('Dude! This project does not even exsit. You should not even be able to use this command.')
-#            
         if not self.initComponent(cid, self._projConfig['Components'][cid]['compType']) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
             return False
