@@ -54,7 +54,7 @@ Todo:
                 <key>location</key>
                 <description>The location of the folder.</description>
                 <type>string</type>
-                <value>Map</value>
+                <value>Maps</value>
             </setting>
             <setting>
                 <name>Version Control</name>

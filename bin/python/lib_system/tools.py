@@ -95,18 +95,19 @@ def mergeProjConfig (projConfig, projHome, userHome, rpmHome) :
     return newProjConfig
 
 
-def getProjInitSettings (userHome, rpmHome, projType) :
-    '''Get the project initialisation settings from the project type init xml
-    file.'''
+# This should be depricated
+#def getProjInitSettings (userHome, rpmHome, projType) :
+#    '''Get the project initialisation settings from the project type init xml
+#    file.'''
 
-    rpmProjInitXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
-    userProjInitXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
+#    rpmProjInitXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
+#    userProjInitXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '_init.xml')
 
-    res = getXMLSettings(rpmProjInitXML)
-    if os.path.isfile(userProjInitXML) :
-        return overrideSettings(res, userProjInitXML)
-    else :
-        return res
+#    res = getXMLSettings(rpmProjInitXML)
+#    if os.path.isfile(userProjInitXML) :
+#        return overrideSettings(res, userProjInitXML)
+#    else :
+#        return res
 
 
 def getCompInitSettings (userHome, rpmHome, compType) :

@@ -132,10 +132,7 @@ terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
 if os.path.isfile(aProject.projConfFile) :
     terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
     terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
-    if len(aProject._projConfig['ProjectInfo']['validCompTypes']) > 0 :
-        comps = ''
-        for c in aProject._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
-            comps = comps + ' ' + c
+    terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
             
 else :
     # Just put out an almost blank line

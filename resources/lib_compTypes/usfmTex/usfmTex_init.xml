@@ -123,7 +123,7 @@ Todo:
                 <key>location</key>
                 <description>The location of the folder.</description>
                 <type>string</type>
-                <value>Source</value>
+                <value>SourceText</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -165,13 +165,56 @@ Todo:
             </setting>
         </section>
         <section>
-            <name>Project TeX Macro Folder</name>
-            <sectionID>MacroFolder</sectionID>
-            <description>The project TeX macro folder.</description>
+            <name>Project Source Folder</name>
+            <sectionID>SourceFolder</sectionID>
+            <description>The project read-only source folder.</description>
             <setting>
                 <name>Name</name>
                 <key>name</key>
-                <description>The folder where all the TeX macros for this project are kept.</description>
+                <description>The name of the folder that all project administrative documents will be kept.</description>
+                <type>string</type>
+                <value>SourceText</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Project Working Text Folder</name>
+            <sectionID>WorkingTextFolder</sectionID>
+            <description>The project read-only source folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of the folder that all project administrative documents will be kept.</description>
+                <type>string</type>
+                <value>WorkingText</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+    <section>
+        <name>Shared Resources</name>
+        <sectionID>SharedResources</sectionID>
+        <description>This section contains information on shared resources.</description>
+        <section>
+            <name>USFM TeX Macros</name>
+            <sectionID>UsfmMacroFolder</sectionID>
+            <description>The USFM TeX macro folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The project folder where all the USFM TeX macros are kept.</description>
                 <type>string</type>
                 <value>Macros</value>
             </setting>
@@ -182,24 +225,12 @@ Todo:
                 <type>string</type>
                 <value>Process</value>
             </setting>
-        </section>
-        <section>
-            <name>Project Source Folder</name>
-            <sectionID>SourceFolder</sectionID>
-            <description>The project read-only source folder.</description>
             <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of the folder that all project administrative documents will be kept.</description>
+                <name>Share Library</name>
+                <key>shareLibPath</key>
+                <description>The location of the resource in the shared library. Everything in this location will be copied into the project.</description>
                 <type>string</type>
-                <value>Source</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
+                <value>Macros/usfmTex</value>
             </setting>
         </section>
     </section>

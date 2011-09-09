@@ -60,7 +60,7 @@ Todo:
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>
@@ -93,14 +93,14 @@ Todo:
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>
                 <key>dependents</key>
                 <description>The file(s) this file is dependent on.</description>
                 <type>list</type>
-                <value>.project.conf</value>
+                <value></value>
             </setting>
         </section>
         <section>
@@ -126,7 +126,7 @@ Todo:
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>

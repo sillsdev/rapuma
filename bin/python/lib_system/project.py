@@ -119,7 +119,7 @@ class Project (object) :
              # Pull the information from the project init xml file
             initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
 
-            # Create all necessary folders
+            # Create all necessary (empty) folders
             fldrs = initInfo['Folders'].__iter__()
             for f in fldrs :
                 folderName = ''; parentFolder = ''
@@ -138,8 +138,6 @@ class Project (object) :
                 else :
                     thisFolder = os.path.join(self.projHome, folderName)
 
-    # FIXME: The shared resource concept is not implemented here yet.
-
                 # Create a source folder name in case there is one
                 sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_folders', folderName)
 
@@ -151,7 +149,44 @@ class Project (object) :
                         if self.debugging == 'True' :
                             terminal('Created folder: ' + folderName)
 
-    #######################################################################
+
+
+
+            # Some components use shared resources.  If this is one of them do
+            # it here.
+            try :
+                fldrs = initInfo['SharedResources'].__iter__()
+                for f in fldrs :
+                    folderName = ''; parentFolder = ''
+                    fGroup = initInfo['SharedResources'][f]
+                    for key, value in fGroup.iteritems() :
+                        if key == 'name' :
+                            folderName = value
+                        elif key == 'location' :
+                            if value != 'None' :
+                                parentFolder = value
+                        elif key == 'shareLibPath' :
+                            sharePath = value
+                        else :
+                            pass
+
+                    if parentFolder :
+                        thisFolder = os.path.join(self.projHome, parentFolder, folderName)
+                    else :
+                        thisFolder = os.path.join(self.projHome, folderName)
+
+                    # Create a source folder name
+                    sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
+                    # Create and copy the source stuff to the project
+                    if not os.path.isdir(thisFolder) :
+                        if os.path.isdir(sourceFolder) :
+                            shutil.copytree(sourceFolder, thisFolder)
+            except :
+                pass
+
+
+
+            
 
             # Create some necessary files
             fls = initInfo['Files'].__iter__()
@@ -161,10 +196,6 @@ class Project (object) :
                 for key, value in fGroup.iteritems() :
                     if key == 'name' :
                         fileName = value
-                        if fs == 'projLogFile' :
-                            self.projLogFile = os.path.join(self.projHome, value)
-                        elif fs == 'projErrorLogFile' :
-                            self.projErrorLogFile = os.path.join(self.projHome, value)
                     elif key == 'location' :
                         if value :
                             parentFolder = value
@@ -353,18 +384,18 @@ class Project (object) :
         return comp
 
         
-    def getComponents (self) :
-        '''Create all the component objects that are ready for processing.'''
-        # for c in components list :
-            # yield getComponent(c)
-        # or
-        # return [getComponent(c) for c in components_list]
-        # or
-        # res = []
-        # for c in components_list :
-        #   res.append(getComponent(c))
-        # return res
-        pass
+#    def getComponents (self) :
+#        '''Create all the component objects that are ready for processing.'''
+#        # for c in components list :
+#            # yield getComponent(c)
+#        # or
+#        # return [getComponent(c) for c in components_list]
+#        # or
+#        # res = []
+#        # for c in components_list :
+#        #   res.append(getComponent(c))
+#        # return res
+#        pass
 
 
     def addNewComponent (self, cid, ctype) :
@@ -476,17 +507,22 @@ class Project (object) :
     def addNewComponentType (self, ctype) :
         '''This will add all the component type information to a project.'''
 
-        # It is assumed this is okay to do
-        try :
-            self._projConfig['ComponentTypes'][ctype] = {}
+        # Test to see if the section is there, do not add if it is
+        try:
+            test = self._projConfig['ComponentTypes'][ctype]
+            return False
         except :
-            self._projConfig['ComponentTypes'] = {}
-            self._projConfig['ComponentTypes'][ctype] = {}
+            try :
+                self._projConfig['ComponentTypes'][ctype] = {}
+            except :
+                self._projConfig['ComponentTypes'] = {}
+                self._projConfig['ComponentTypes'][ctype] = {}
 
-        self._projConfig.merge(getCompSettings(self.userHome, self.rpmHome, ctype))
-        self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
-
+            self._projConfig.merge(getCompSettings(self.userHome, self.rpmHome, ctype))
+            self.writeOutProjConfFile = True
+            self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
+            return True
+            
 
     def removeComponentType (self, ctype) :
         '''Remove a component type to the current project.  Before doing so, it
@@ -523,6 +559,10 @@ class Project (object) :
         everything necessary has been initialized.'''
 
         # Run/check component inits.
+        if not cid in self._projConfig['ProjectInfo']['componentList'] :
+            self.writeToLog('ERR', 'Component: [' + cid + '] does not seem to be present in the project.', 'project.renderComponent()')
+            return False
+            
         if not self.initComponent(cid, self._projConfig['Components'][cid]['compType']) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
             return False
@@ -534,10 +574,13 @@ class Project (object) :
             for c in depends :
                 comp, ctype = c.split(':')
                 try :
-                    if self._projConfig['Components'][comp] :
-                        self.initComponent(comp, ctype)
+                    if comp == '' :
+                        self.addNewComponentType(ctype)
+                    else :
+                        if self._projConfig['Components'][comp] :
+                            self.initComponent(comp, ctype)
                 except :
-                    self.writeToLog('ERR', 'Component: [' + comp + '] failed to initialize.', 'project.renderComponent()')
+                    self.writeToLog('ERR', 'Subcomponent: [' + comp + '] failed to initialize.', 'project.renderComponent()')
                     return False
                 
         self.writeToLog('MSG', 'Rendered: [' + cid + ']', 'project.renderComponent()')

@@ -38,30 +38,132 @@ Todo:
         <sectionID>Files</sectionID>
         <description>This section contains the names and information for files of this component type used in the RPM system in this project.</description>
         <section>
-            <name>Font Configuration File</name>
-            <sectionID>FontConfig</sectionID>
-            <description>Font configuration data for all the fonts used in this project.</description>
+            <name>Wiki Home Template File</name>
+            <sectionID>wikiHomeFile</sectionID>
+            <description>The Home page template file for notes made in this project.</description>
             <setting>
                 <name>Name</name>
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
                 <version>False</version>
-                <value>fonts.conf</value>
+                <value>Home.txt</value>
             </setting>
             <setting>
                 <name>Location</name>
                 <key>location</key>
                 <description>The location of the folder.</description>
                 <type>string</type>
-                <value>Fonts</value>
+                <value>WikiNotes</value>
             </setting>
             <setting>
                 <name>Version Control</name>
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Wiki Issues Template File</name>
+            <sectionID>wikiIssuesFile</sectionID>
+            <description>The Issues page template file for notes made in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>Issues.txt</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>WikiNotes</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Wiki Home Template File</name>
+            <sectionID>wikiNotesFile</sectionID>
+            <description>The Notes page template file for notes made in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>Notes.txt</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>WikiNotes</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Wiki Home Template File</name>
+            <sectionID>wikiSpecificationsFile</sectionID>
+            <description>The Specifications page template file for notes made in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>Specifications.txt</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>WikiNotes</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>
@@ -72,9 +174,6 @@ Todo:
             </setting>
         </section>
     </section>
-    
-<!-- several files to add -->
-    
     <section>
         <name>Folders</name>
         <sectionID>Folders</sectionID>
