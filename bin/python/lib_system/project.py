@@ -108,120 +108,6 @@ class Project (object) :
 ###############################################################################
 
 
-    def initComponent (self, cid, ctype) :
-        '''A function for initializing a component which is called by the
-        component or project when a process is run.'''
-
-        mod = 'project.initComponent()'
-
-        # No need to init if it is done already
-        if getattr(self, cid + 'Initialized') == False :
-             # Pull the information from the project init xml file
-            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
-
-            # Create all necessary (empty) folders
-            fldrs = initInfo['Folders'].__iter__()
-            for f in fldrs :
-                folderName = ''; parentFolder = ''
-                fGroup = initInfo['Folders'][f]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        folderName = value
-                    elif key == 'location' :
-                        if value != 'None' :
-                            parentFolder = value
-                    else :
-                        pass
-
-                if parentFolder :
-                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-                else :
-                    thisFolder = os.path.join(self.projHome, folderName)
-
-                # Create a source folder name in case there is one
-                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_folders', folderName)
-
-                if not os.path.isdir(thisFolder) :
-                    if os.path.isdir(sourceFolder) :
-                        shutil.copytree(sourceFolder, thisFolder)
-                    else :
-                        os.mkdir(thisFolder)
-                        if self.debugging == 'True' :
-                            terminal('Created folder: ' + folderName)
-
-
-
-
-            # Some components use shared resources.  If this is one of them do
-            # it here.
-            try :
-                fldrs = initInfo['SharedResources'].__iter__()
-                for f in fldrs :
-                    folderName = ''; parentFolder = ''
-                    fGroup = initInfo['SharedResources'][f]
-                    for key, value in fGroup.iteritems() :
-                        if key == 'name' :
-                            folderName = value
-                        elif key == 'location' :
-                            if value != 'None' :
-                                parentFolder = value
-                        elif key == 'shareLibPath' :
-                            sharePath = value
-                        else :
-                            pass
-
-                    if parentFolder :
-                        thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-                    else :
-                        thisFolder = os.path.join(self.projHome, folderName)
-
-                    # Create a source folder name
-                    sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
-                    # Create and copy the source stuff to the project
-                    if not os.path.isdir(thisFolder) :
-                        if os.path.isdir(sourceFolder) :
-                            shutil.copytree(sourceFolder, thisFolder)
-            except :
-                pass
-
-
-
-            
-
-            # Create some necessary files
-            fls = initInfo['Files'].__iter__()
-            for fs in fls :
-                fileName = ''; parentFolder = ''
-                fGroup = initInfo['Files'][fs]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        fileName = value
-                    elif key == 'location' :
-                        if value :
-                            parentFolder = value
-                    else :
-                        pass
-
-                if parentFolder :
-                    thisFile = os.path.join(self.projHome, parentFolder, fileName)
-                else :
-                    thisFile = os.path.join(self.projHome, fileName)
-
-                # Create source file name
-                sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_files', fileName)
-                # Make the file if it is not already there
-                if not os.path.isfile(thisFile) :
-                    if os.path.isfile(sourceFile) :
-                        shutil.copy(sourceFile, thisFile)
-                    else :
-                        open(thisFile, 'w').close()
-                        if self.debugging == 'True' :
-                            terminal('Created file: ' + thisFile)
-
-            setattr(self, cid + 'Initialized', True)
-            return True   
-
-
     def makeProject (self, ptype, pname, pid, pdir='') :
         '''Create a new publishing project.'''
 
@@ -348,6 +234,148 @@ class Project (object) :
 ###############################################################################
 ########################## Component Level Functions ##########################
 ###############################################################################
+
+
+    def getCompFiles (self, ctype, initInfo) :
+        '''Get the files for this project according to the init specs. of the
+        component.'''
+        
+        fls = initInfo['Files'].__iter__()
+        for fs in fls :
+            fileName = ''; parentFolder = ''
+            fGroup = initInfo['Files'][fs]
+            for key, value in fGroup.iteritems() :
+                if key == 'name' :
+                    fileName = value
+                elif key == 'location' :
+                    if value :
+                        parentFolder = value
+                else :
+                    pass
+
+            if parentFolder :
+                thisFile = os.path.join(self.projHome, parentFolder, fileName)
+            else :
+                thisFile = os.path.join(self.projHome, fileName)
+
+            # Create source file name
+            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_files', fileName)
+            # Make the file if it is not already there
+            if not os.path.isfile(thisFile) :
+                if os.path.isfile(sourceFile) :
+                    shutil.copy(sourceFile, thisFile)
+                else :
+                    open(thisFile, 'w').close()
+                    if self.debugging == 'True' :
+                        terminal('Created file: ' + thisFile)
+
+    
+    def getCompFolders (self, ctype, initInfo) :
+        '''Get the folders for this project according to the init specs. of the
+        component.'''
+
+        fldrs = initInfo['Folders'].__iter__()
+        for f in fldrs :
+            folderName = ''; parentFolder = ''
+            fGroup = initInfo['Folders'][f]
+            for key, value in fGroup.iteritems() :
+                if key == 'name' :
+
+                    folderName = value
+                elif key == 'location' :
+                    if value != 'None' :
+                        parentFolder = value
+                else :
+                    pass
+
+            if parentFolder :
+                thisFolder = os.path.join(self.projHome, parentFolder, folderName)
+            else :
+                thisFolder = os.path.join(self.projHome, folderName)
+
+            # Create a source folder name in case there is one
+            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_folders', folderName)
+
+            if not os.path.isdir(thisFolder) :
+                if os.path.isdir(sourceFolder) :
+                    shutil.copytree(sourceFolder, thisFolder)
+                else :
+                    os.mkdir(thisFolder)
+                    if self.debugging == 'True' :
+                        terminal('Created folder: ' + folderName)
+
+
+    def getCompShared (self, initInfo) :
+        '''Get the shared resources for this project according to the init
+        specs. of the component.'''
+        
+        try :
+            fldrs = initInfo['SharedResources'].__iter__()
+            for f in fldrs :
+                folderName = ''; parentFolder = ''
+                fGroup = initInfo['SharedResources'][f]
+                for key, value in fGroup.iteritems() :
+                    if key == 'name' :
+                        folderName = value
+                    elif key == 'location' :
+                        if value != 'None' :
+                            parentFolder = value
+                    elif key == 'shareLibPath' :
+                        sharePath = value
+                    else :
+                        pass
+
+                if parentFolder :
+                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
+                else :
+                    thisFolder = os.path.join(self.projHome, folderName)
+
+                # Create a source folder name
+                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
+                # Create and copy the source stuff to the project
+                if not os.path.isdir(thisFolder) :
+                    if os.path.isdir(sourceFolder) :
+                        shutil.copytree(sourceFolder, thisFolder)
+        except :
+            pass
+    
+    
+    def getFontSettings (self, initInfo) :
+        '''Get the font settings for this project according to the init specs.
+        of the component.'''
+        
+        print initInfo
+        
+        # First thing to do is find out what the current settings are or if they even exist
+        # if they do, then we don't want to overwrite, we leave it alone.
+
+        # If they do not, write out the default settings to the conf file and set the write flag
+        
+        # At last, copy in any files needed
+        
+
+    def initComponent (self, cid, ctype) :
+        '''A function for initializing a component which is called by the
+        component or project when a process is run.'''
+
+        mod = 'project.initComponent()'
+
+        # No need to init if it is done already
+        if getattr(self, cid + 'Initialized') == False :
+             # Pull the information from the project init xml file
+            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
+
+            # Create all necessary (empty) folders
+            self.getCompFolders(ctype, initInfo)
+
+            self.getCompShared(initInfo)
+            
+            self.getCompFiles(ctype, initInfo)
+            
+            self.getFontSettings(initInfo)
+
+            setattr(self, cid + 'Initialized', True)
+            return True   
 
 
     def preProcessComp (self, cid) :
