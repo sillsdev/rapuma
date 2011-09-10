@@ -340,14 +340,22 @@ class Project (object) :
             pass
     
     
-    def getFontSettings (self, initInfo) :
+    def getFontSettings (self, cid, initInfo) :
         '''Get the font settings for this project according to the init specs.
         of the component.'''
         
-        print initInfo
-        
         # First thing to do is find out what the current settings are or if they even exist
         # if they do, then we don't want to overwrite, we leave it alone.
+        try:
+            test = self._projConfig['Components'][cid]
+            return False
+        except :
+            fsets = initInfo['FontSetup'].__iter__()
+            for typeface in fsets :
+                tfsets = initInfo['FontSetup'][typeface]
+                for s in tfsets :
+                    self._projConfig['Components'][cid][typeface][s] = initInfo['FontSetup'][typeface][s]
+
 
         # If they do not, write out the default settings to the conf file and set the write flag
         
@@ -372,7 +380,7 @@ class Project (object) :
             
             self.getCompFiles(ctype, initInfo)
             
-            self.getFontSettings(initInfo)
+            self.getFontSettings(cid, initInfo)
 
             setattr(self, cid + 'Initialized', True)
             return True   
@@ -459,12 +467,20 @@ class Project (object) :
         compList.append(cid)
         self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
 
+        # Read in the main settings file for this comp
+        compSettings = getCompSettings(self.userHome, self.rpmHome, ctype)
+        
         # The cid should be unique to the project so we add a section for it
         compItem = ConfigObj()
         compItem['Components'] = {}
         compItem['Components'][cid] = {}
         compItem['Components'][cid]['compType'] = ctype
+        
+#        compItem['Components'][cid].merge(compSettings[ctype + 'Setup'])
+        
         self._projConfig.merge(compItem)
+       
+# Here we need to see if there are other things that need to go in this comp and get them.
 
         # Add component code to components list
         listOrder = []
@@ -566,20 +582,20 @@ class Project (object) :
             self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
 
 
-    def importComponentSource (self, cid, source) :
-        '''Import the source for a component.  For some components, it is not
-        necessary to get data from outside the system.  For those that need it,
-        this function helps to that end.  This will test for the existence of
-        the source but will not do the actual import.  That will happen when the
-        component is initialized.'''
-        
-        # Check for the resouce and add it to the conf file if it exists.
-        if os.path.isfile(source) :
-            self._projConfig['Components'][cid]['source'] = source        
-            self.writeOutProjConfFile = True
-        else :
-            self.writeToLog('ERR', 'Path: [' + source + '] not valid.', 'project.addNewComponents()')
-            return
+#    def importComponentSource (self, cid, source) :
+#        '''Import the source for a component.  For some components, it is not
+#        necessary to get data from outside the system.  For those that need it,
+#        this function helps to that end.  This will test for the existence of
+#        the source but will not do the actual import.  That will happen when the
+#        component is initialized.'''
+#        
+#        # Check for the resouce and add it to the conf file if it exists.
+#        if os.path.isfile(source) :
+#            self._projConfig['Components'][cid]['source'] = source        
+#            self.writeOutProjConfFile = True
+#        else :
+#            self.writeToLog('ERR', 'Path: [' + source + '] not valid.', 'project.addNewComponents()')
+#            return
 
 
     def renderComponent (self, cid) :
