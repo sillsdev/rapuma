@@ -71,4 +71,17 @@ class FontSets (Component) :
     def preProcess(self) :
         # do pre processing of a usfmtex component here
         print "PreProcessing an FontSets component""
+        
+        
+    def setFont (self, fType, font) :
+        '''Set the font for a font type.'''
+        
+        print "Setting the font for [" + fType + "] to [" + font + "]"
+        
+        # It is expected that all the necessary meta data for this font is in
+        # a file located with the font. The system expects to find it in:
+        # ~/lib_share/Fonts/[FontID]
+        # There will be a minimal number of fonts in the system but we will look
+        # in the user area first. That is where the fonts really should be kept.
+#        if os.path.isfile(os.path.join(
 

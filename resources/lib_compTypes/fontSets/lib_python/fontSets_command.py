@@ -28,8 +28,22 @@ from sys_command import Command
 ###############################################################################
 ########################### Command Classes Go Here ###########################
 ###############################################################################
-# Insert the commands you want visable to the system here in the order you want
-# them to appear when listed.
+
+class SetFont (Command) :
+    '''Specify the font for a font set type.'''
+
+    type = "set_font"
+
+    def run (self, args, aProject, userConfig) :
+        super(SetFont, self).run(args, aProject, userConfig)
+        if self.options.component and self.options.font :
+            aProject.setFont(self.options.component, self.options.font)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Specify the font component. (Required)")
+        self.parser.add_option("-f", "--font", type="string", action="store", help="Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
 
 
 

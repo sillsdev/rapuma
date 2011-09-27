@@ -8,32 +8,10 @@ with TeX. All file relations and processes are described in this file.
 
 Todo:
 1) Add a process section where all processes are described
-2) Add file type section that describes each kind of type of file found in the component
-3) Need a section to describe project folder attributes <location>
-4) Need a default component section that the system will use to create a component
-5) Add a group description section
-
-# This is a save state for this file in case we need to pull info out later.
+2) Need to connect to an external DTD, schema, whatever for validation.
 
 -->
 
-<!DOCTYPE root [
-  <!ELEMENT root (section+)>
-  <!ELEMENT section (name, sectionID, description, (file | folder | process | setting)+)>
-  <!ELEMENT file (name, type, location, dependents, createdBy, description)>
-  <!ELEMENT folder (name, key, description, value)>
-  <!ELEMENT process (name, type, description)>
-  <!ELEMENT setting (name, key, description, type, value)>
-  <!ELEMENT key (#PCDATA)>
-  <!ELEMENT type (#PCDATA)>
-  <!ELEMENT location (#PCDATA)>
-  <!ELEMENT dependents (#PCDATA)>
-  <!ELEMENT createdBy (#PCDATA)>
-  <!ELEMENT name (#PCDATA)>
-  <!ELEMENT description (#PCDATA)>
-  <!ELEMENT sectionID (#PCDATA)>
-  <!ELEMENT value (#PCDATA)>
-]>
 
 <root>
     <section>

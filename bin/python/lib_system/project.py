@@ -47,15 +47,16 @@ class Project (object) :
         # Set all the initial paths and locations
         # System level paths
         self.rpmHome           = rpmHome
-        self.userHome           = userHome
-        self.projHome           = projHome
-        self.rpmIllustrations  = os.path.join(rpmHome, 'resources', 'lib_illustratons')
-        self.rpmAdmin          = os.path.join(rpmHome, 'resources', 'lib_admin')
+        self.userHome          = userHome
+        self.projHome          = projHome
+#        self.rpmIllustrations  = os.path.join(rpmHome, 'resources', 'lib_illustratons')
+#        self.rpmAdmin          = os.path.join(rpmHome, 'resources', 'lib_admin')
         self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
         self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
+        self.rpmShare          = os.path.join(rpmHome, 'resources', 'lib_share')
         # User/Global level paths
         self.userScripts        = os.path.join(userHome, 'resources', 'lib_scripts')
-        self.userFonts          = os.path.join(userHome, 'resources', 'lib_fonts')
+        self.userFonts          = os.path.join(userHome, 'resources', 'lib_share', 'Fonts')
         self.userIllustrations  = os.path.join(userHome, 'resources', 'lib_illustratons')
         self.userAdmin          = os.path.join(userHome, 'resources', 'lib_admin')
         self.userCompTypes      = os.path.join(userHome, 'resources', 'lib_compTypes')
@@ -340,21 +341,21 @@ class Project (object) :
             pass
     
     
-    def getFontSettings (self, cid, initInfo) :
-        '''Get the font settings for this project according to the init specs.
-        of the component.'''
-        
-        # First thing to do is find out what the current settings are or if they even exist
-        # if they do, then we don't want to overwrite, we leave it alone.
-        try:
-            test = self._projConfig['Components'][cid]
-            return False
-        except :
-            fsets = initInfo['FontSetup'].__iter__()
-            for typeface in fsets :
-                tfsets = initInfo['FontSetup'][typeface]
-                for s in tfsets :
-                    self._projConfig['Components'][cid][typeface][s] = initInfo['FontSetup'][typeface][s]
+#    def getFontSettings (self, cid, initInfo) :
+#        '''Get the font settings for this project according to the init specs.
+#        of the component.'''
+#        
+#        # First thing to do is find out what the current settings are or if they even exist
+#        # if they do, then we don't want to overwrite, we leave it alone.
+#        try:
+#            test = self._projConfig['Components'][cid]
+#            return False
+#        except :
+#            fsets = initInfo['FontSetup'].__iter__()
+#            for typeface in fsets :
+#                tfsets = initInfo['FontSetup'][typeface]
+#                for s in tfsets :
+#                    self._projConfig['Components'][cid][typeface][s] = initInfo['FontSetup'][typeface][s]
 
 
         # If they do not, write out the default settings to the conf file and set the write flag
