@@ -49,8 +49,6 @@ class Project (object) :
         self.rpmHome           = rpmHome
         self.userHome          = userHome
         self.projHome          = projHome
-#        self.rpmIllustrations  = os.path.join(rpmHome, 'resources', 'lib_illustratons')
-#        self.rpmAdmin          = os.path.join(rpmHome, 'resources', 'lib_admin')
         self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
         self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         self.rpmShare          = os.path.join(rpmHome, 'resources', 'lib_share')
@@ -103,7 +101,17 @@ class Project (object) :
         except :
             pass
 
-
+        
+        # Walk the ComponentTypes section and try to load commands if there are any
+        for comp in self._projConfig['ComponentTypes'].keys() :
+            sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
+            print os.path.join(self.rpmCompTypes, comp, 'lib_python')
+            self.__import__(comp + '_command')
+        
+            # Clean up the path, we don't need this stuck there
+            del sys.path[0]
+ 
+ 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################

@@ -65,14 +65,14 @@ Todo:
                 <key>file</key>
                 <description>File name for this typeface.</description>
                 <type>string</type>
-                <value>CharisSILR.ttf</value>
+                <value></value>
             </setting>
             <setting>
                 <name>Source</name>
                 <key>source</key>
                 <description>Path and name of the source font file for this typeface.</description>
                 <type>string</type>
-                <value>Resouces/lib_share/Fonts/CharisSIL/CharisSILR.ttf</value>
+                <value></value>
             </setting>
             <setting>
                 <name>Shaping</name>

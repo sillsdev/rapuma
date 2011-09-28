@@ -23,7 +23,7 @@
 
 import os
 from optparse import OptionParser
-from sys_command import Command
+from sys_command import Command, commands
 
 ###############################################################################
 ########################### Command Classes Go Here ###########################
