@@ -106,7 +106,7 @@ class Project (object) :
         for comp in self._projConfig['ComponentTypes'].keys() :
             sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
             print os.path.join(self.rpmCompTypes, comp, 'lib_python')
-            self.__import__(comp + '_command')
+            __import__(comp + '_command')
         
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
@@ -401,7 +401,13 @@ class Project (object) :
         # First lets make sure our component is initialized (this will also
         # initialize the project and component type as well).
         self.initProject(os.getcwd())
+
+################################################################################
+
+# FIXME: There doesn't seem to be an initCompType. Something is really wrong here        
         self.initCompType(self._projConfig['Components'][cid]['compType'])
+        
+################################################################################
 
         if cid :
             c = self.getComponent(cid)

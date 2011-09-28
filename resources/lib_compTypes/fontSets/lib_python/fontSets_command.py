@@ -37,7 +37,8 @@ class SetFont (Command) :
     def run (self, args, aProject, userConfig) :
         super(SetFont, self).run(args, aProject, userConfig)
         if self.options.component and self.options.font :
-            aProject.setFont(self.options.component, self.options.font)
+# FIXME: This is broken
+            aProject.findComponent('fontSets').setFont(self.options.component, self.options.font)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
