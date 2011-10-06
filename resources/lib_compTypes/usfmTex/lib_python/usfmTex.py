@@ -38,20 +38,13 @@ from component import Component
 ###############################################################################
 
 class UsfmTex (Component) :
+    type = "usfmTex"
 
-    def __init__(self, aProject) :
+    def __init__(self, aProject, config, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(UsfmTex, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
-
-        # Set class vars
-        self._projConfig = aProject._projConfig
-        self._projInit = aProject._projInit
-        self._userConfig = aProject._userConfig
-        self.projHome = aProject.projHome
-        self.userHome = aProject.userHome
-        self.rpmHome = aProject.rpmHome
+        super(UsfmTex, self).__init__(aProject, config, typeConfig)
 
 
 
@@ -61,14 +54,14 @@ class UsfmTex (Component) :
 ###############################################################################
 
     @classmethod
-    def initType (cls, aProject) :
+    def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        
+        super(UsfmTex, cls).initType(aProject, typeConfig)
         
         print "(usfmTex.initType) Initializing this component:", cls
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing a usfmtex component""
+        print "PreProcessing a usfmtex component"
 

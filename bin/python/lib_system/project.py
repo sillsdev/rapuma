@@ -25,8 +25,7 @@ import codecs, os, sys, fileinput, shutil, imp
 
 # Load the local classes
 from tools import *
-from component import Component
-
+import component
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -43,6 +42,7 @@ class Project (object) :
         # Load project config files
         self._projConfig        = projConfig
         self._userConfig        = userConfig
+        self._components        = {}
 
         # Set all the initial paths and locations
         # System level paths
@@ -105,7 +105,7 @@ class Project (object) :
         # Walk the ComponentTypes section and try to load commands if there are any
         for comp in self._projConfig['ComponentTypes'].keys() :
             sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
-            print os.path.join(self.rpmCompTypes, comp, 'lib_python')
+            __import__(comp)
             __import__(comp + '_command')
         
             # Clean up the path, we don't need this stuck there
@@ -416,29 +416,33 @@ class Project (object) :
             for c in self.getComponents() :
                 c.preProcess()
 
+    def getComponentIds (self, cType = None) :
+        for c in self._projConfig['Components'].keys() :
+            if cType and self._projCOnfig['Components'][c] != cType : continue
+            yield c
 
-    def getComponent (self, cid) :
+    def getComponent (self, cid = None, cType = None) :
         '''Create a component object that is ready for processes to be run on
         it.'''
 
-        # find component type for cid
-        try :
-            ctype = self._projConfig['Components'][cid]['compType']
-        except :
+        if cid and cid not in self._projConfig['Components'] :
             self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
-            return
+            return None
         
-        # import component type module if not loaded
-        comp = self.initCompType(ctype)
-        
-        # store in dictionary for later reuse?
-        return comp
+        if not cid in self._components :
+            config = self._projConfig['Components'][cid]
+            ctype = config['compType']
+            if not ctype in component.componentTypes :
+                self._components[cid] = component.Component(self, config, None)
+            else :
+                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype])
+        return self._components[cid]
 
         
 #    def getComponents (self) :
 #        '''Create all the component objects that are ready for processing.'''
 #        # for c in components list :
-#            # yield getComponent(c)
+#            # yield getComponent(cc
 #        # or
 #        # return [getComponent(c) for c in components_list]
 #        # or

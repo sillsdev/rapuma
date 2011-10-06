@@ -132,7 +132,10 @@ terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
 if os.path.isfile(aProject.projConfFile) :
     terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
     terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
-    terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
+    if command :
+        terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
+    else :
+        terminal('\n\t\tType \"rpm help\" for a list of current commands')
             
 else :
     # Just put out an almost blank line

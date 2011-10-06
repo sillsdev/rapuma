@@ -70,5 +70,5 @@ class AdminMSEAG (Component) :
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an adminMSEAG component""
+        print "PreProcessing an adminMSEAG component"
 

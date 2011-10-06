@@ -38,21 +38,17 @@ from component import Component
 ###############################################################################
 
 class FontSets (Component) :
-
-    def __init__(self, aProject) :
+    type = "fontSets"
+    
+    def __init__(self, aProject, config, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontSets, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
+        super(FontSets, self).__init__(aProject, config, typeConfig)
 
-        # Set class vars
-        self._projConfig = aProject._projConfig
-        self._projInit = aProject._projInit
-        self._userConfig = aProject._userConfig
-        self.projHome = aProject.projHome
-        self.userHome = aProject.userHome
-        self.rpmHome = aProject.rpmHome
-
+        self.aProject = aProject
+        self.config = config
+        self.typeConfig
 
 
 
@@ -61,22 +57,25 @@ class FontSets (Component) :
 ###############################################################################
 
     @classmethod
-    def initType (cls, aProject) :
+    def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        
+        super(FontSets, cls).initType(aProject, typeConfig)
         
         print "(FontSets.initType) Initializing this component:", cls
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an FontSets component""
+        print "PreProcessing an FontSets component"
         
         
     def setFont (self, fType, font) :
         '''Set the font for a font type.'''
         
         print "Setting the font for [" + fType + "] to [" + font + "]"
+        print self.aProject
+        print self.typeConfig
+        print self.config
         
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:

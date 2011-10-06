@@ -23,22 +23,37 @@
 
 # Load the local classes
 
+componentTypes = {}
+
+class MetaCommand(type) :
+
+    def __init__(cls, namestring, t, d) :
+        global componentTypes
+        super(MetaCommand, cls).__init__(namestring, t, d)
+        if cls.type :
+            componentTypes[cls.type] = cls
+
+
 class Component (object) :
+    __metaclass__ = MetaCommand
+    type = None
+
     initialised = False
-    
+
     # Intitate the whole class
-    def __init__(self, aProject) :
+    def __init__(self, aProject, config, typeConfig) :
         self.project = aProject
-        if not self.initialised : self.initClass()
+        self.config = config
+        if not self.initialised : self.__class__.initType(aProject, typeConfig)
 
     def initClass(self) :
         '''Ensures everything is in place for components of this type to do their thing'''
         self.__class__.initialised = True
         
     @classmethod
-    def initType(cls, aProject) :
+    def initType(cls, aProject, typeConfig) :
         '''Internal housekeeping for the component type when it first wakes up'''
-        pass
+        cls.typeConfig = typeConfig
 
     def preProcess(self) :
         pass

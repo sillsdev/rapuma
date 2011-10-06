@@ -71,5 +71,5 @@ class Illustrations (Component) :
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an Illustrations component""
+        print "PreProcessing an Illustrations component"
 

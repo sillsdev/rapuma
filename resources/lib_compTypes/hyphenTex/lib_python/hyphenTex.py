@@ -65,5 +65,5 @@ class HyphenTex (Component) :
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an hyphenTex component""
+        print "PreProcessing an hyphenTex component"
 

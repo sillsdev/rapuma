@@ -70,5 +70,5 @@ class ProjectNotes (Component) :
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an ProjectNotes component""
+        print "PreProcessing an ProjectNotes component"
 

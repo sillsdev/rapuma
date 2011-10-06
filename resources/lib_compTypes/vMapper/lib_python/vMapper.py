@@ -46,15 +46,6 @@ class VMapper (Component) :
         # Make it available to the Project Class with this
         super(VMapper, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
 
-        # Set class vars
-        self._projConfig = aProject._projConfig
-        self._projInit = aProject._projInit
-        self._userConfig = aProject._userConfig
-        self.projHome = aProject.projHome
-        self.userHome = aProject.userHome
-        self.rpmHome = aProject.rpmHome
-
-
 
 
 ###############################################################################
@@ -71,5 +62,5 @@ class VMapper (Component) :
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here
-        print "PreProcessing an vMapper component""
+        print "PreProcessing an vMapper component"
 
