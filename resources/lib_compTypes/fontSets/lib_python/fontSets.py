@@ -62,7 +62,6 @@ class FontSets (Component) :
         in place for this type of component so it can be rendered.'''
         super(FontSets, cls).initType(aProject, typeConfig)
         
-        print "(FontSets.initType) Initializing this component:", cls
         
     def preProcess(self) :
         # do pre processing of a usfmtex component here

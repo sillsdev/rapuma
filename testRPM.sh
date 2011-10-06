@@ -13,13 +13,13 @@ rpm component_add -c system         -t illustrationsUsfm
 rpm component_add -c hyp            -t hyphenTex
 
 rpm component_render -c bodySet
-rpm component_render -c mapSet
-rpm component_render -c hyp
-rpm component_render -c system
-rpm component_render -c apa
-rpm component_render -c m01
-rpm component_render -c simpleNotes
-rpm component_render -c jas
+#rpm component_render -c mapSet
+#rpm component_render -c hyp
+#rpm component_render -c system
+#rpm component_render -c apa
+#rpm component_render -c m01
+#rpm component_render -c simpleNotes
+#rpm component_render -c jas
 
 
 

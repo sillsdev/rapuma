@@ -54,54 +54,66 @@ Todo:
     </section>
     <section>
         <name>Special Settings Section</name>
-        <sectionID>fontSetsSetup</sectionID>
+        <sectionID>FontSetsSetup</sectionID>
         <description>This section contains all special settings for this component.</description>
         <section>
-            <name>Typeface Regular</name>
-            <sectionID>Regular</sectionID>
-            <description>Settings for the regular typeface font.</description>
+            <name>Font</name>
+            <sectionID>Font</sectionID>
+            <description>A font.</description>
             <setting>
-                <name>File</name>
-                <key>file</key>
-                <description>File name for this typeface.</description>
+                <name>Name</name>
+                <key>name</key>
+                <description>Name for this font.</description>
                 <type>string</type>
                 <value></value>
             </setting>
-            <setting>
-                <name>Source</name>
-                <key>source</key>
-                <description>Path and name of the source font file for this typeface.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Shaping</name>
-                <key>shaping</key>
-                <description>The shaping engine to be used for this typeface.</description>
-                <type>string</type>
-                <value>Graphite</value>
-            </setting>
-            <setting>
-                <name>Features</name>
-                <key>features</key>
-                <description>The features that will be used for this typeface.</description>
-                <type>list</type>
-                <value>liga=1</value>
-            </setting>
-            <setting>
-                <name>Modify</name>
-                <key>modify</key>
-                <description>Request any modifications for this typeface such as bolding.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Mapping</name>
-                <key>mapping</key>
-                <description>Specify a file that might contain any character mapping modifications.</description>
-                <type>string</type>
-                <value>None</value>
-            </setting>
+            <section>
+                <name>Typeface Regular</name>
+                <sectionID>TypefaceRegular</sectionID>
+                <description>Settings for the regular typeface font.</description>
+                <setting>
+                    <name>File</name>
+                    <key>file</key>
+                    <description>File name for this typeface.</description>
+                    <type>string</type>
+                    <value></value>
+                </setting>
+                <setting>
+                    <name>Source</name>
+                    <key>source</key>
+                    <description>Path and name of the source font file for this typeface.</description>
+                    <type>string</type>
+                    <value></value>
+                </setting>
+                <setting>
+                    <name>Shaping</name>
+                    <key>shaping</key>
+                    <description>The shaping engine to be used for this typeface.</description>
+                    <type>string</type>
+                    <value>Graphite</value>
+                </setting>
+                <setting>
+                    <name>Features</name>
+                    <key>features</key>
+                    <description>The features that will be used for this typeface.</description>
+                    <type>list</type>
+                    <value>liga=1</value>
+                </setting>
+                <setting>
+                    <name>Modify</name>
+                    <key>modify</key>
+                    <description>Request any modifications for this typeface such as bolding.</description>
+                    <type>list</type>
+                    <value></value>
+                </setting>
+                <setting>
+                    <name>Mapping</name>
+                    <key>mapping</key>
+                    <description>Specify a file that might contain any character mapping modifications.</description>
+                    <type>string</type>
+                    <value>None</value>
+                </setting>
+            </section>
         </section>
     </section>
 </root>

@@ -98,19 +98,19 @@ class Project (object) :
                 for key in self._projConfig['Components'].keys() :
                     setattr(self, key + 'Initialized', False)
 
+            # Walk the ComponentTypes section and try to load commands if there are any
+            for comp in self._projConfig['ComponentTypes'].keys() :
+                sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
+                __import__(comp)
+                __import__(comp + '_command')
+            
+                # Clean up the path, we don't need this stuck there
+                del sys.path[0]
+ 
         except :
             pass
 
         
-        # Walk the ComponentTypes section and try to load commands if there are any
-        for comp in self._projConfig['ComponentTypes'].keys() :
-            sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
-            __import__(comp)
-            __import__(comp + '_command')
-        
-            # Clean up the path, we don't need this stuck there
-            del sys.path[0]
- 
  
 ###############################################################################
 ############################ Project Level Functions ##########################
@@ -389,7 +389,7 @@ class Project (object) :
             
             self.getCompFiles(ctype, initInfo)
             
-            self.getFontSettings(cid, initInfo)
+#            self.getFontSettings(cid, initInfo)
 
             setattr(self, cid + 'Initialized', True)
             return True   
