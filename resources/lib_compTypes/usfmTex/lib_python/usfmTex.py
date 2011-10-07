@@ -40,11 +40,11 @@ from component import Component
 class UsfmTex (Component) :
     type = "usfmTex"
 
-    def __init__(self, aProject, config, typeConfig) :
+    def __init__(self, aProject, compType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(UsfmTex, self).__init__(aProject, config, typeConfig)
+        super(UsfmTex, self).__init__(aProject, compType, typeConfig)
 
 
 

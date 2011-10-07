@@ -40,15 +40,15 @@ from component import Component
 class FontSets (Component) :
     type = "fontSets"
     
-    def __init__(self, aProject, config, typeConfig) :
+    def __init__(self, aProject, compType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontSets, self).__init__(aProject, config, typeConfig)
+        super(FontSets, self).__init__(aProject, compType, typeConfig)
 
-        self.aProject = aProject
-        self.config = config
-        self.typeConfig
+        self.aProject   = aProject
+        self.compType   = compType
+        self.typeConfig = typeConfig
 
 
 
@@ -69,17 +69,31 @@ class FontSets (Component) :
         
         
     def setFont (self, fType, font) :
-        '''Set the font for a font type.'''
-        
-        print "Setting the font for [" + fType + "] to [" + font + "]"
-        print self.aProject
-        print self.typeConfig
-        print self.config
+        '''Setup a font for a specific typeface.'''
         
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
         # ~/lib_share/Fonts/[FontID]
         # There will be a minimal number of fonts in the system but we will look
         # in the user area first. That is where the fonts really should be kept.
-#        if os.path.isfile(os.path.join(
+        # If it is unable to find the font in either the user area or the system
+        # resources shared area, it will fail.
+        if os.path.isfile(os.path.join(self.aProject.userFonts, font, font + '.xml')) :
+            self.aProject.writeToLog('LOG', 'Found ' + font + '.xml in user resources.')
+            fontDir = os.path.join(self.aProject.userFonts, font)
+            fontInfo = os.path.join(self.aProject.userFonts, font, font + '.xml')
+        elif os.path.isfile(os.path.join(self.aProject.rpmFonts, font, font + '.xml')) :
+            self.aProject.writeToLog('LOG', 'Found ' + font + '.xml in RPM resources.')
+            fontDir = os.path.join(self.aProject.rpmFonts, font)
+            fontInfo = os.path.join(self.aProject.rpmFonts, font, font + '.xml')
+        else :
+            self.aProject.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
+            return False
 
+        # Now inject the font info into the fontset component section in the
+        # project.conf. Enough information should be there for the component init.
+
+        ############ START HERE ############
+
+        self.aProject.writeToLog('MSG', font + ' font setup information added to [' + fType + '] component')     
+        

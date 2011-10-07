@@ -52,6 +52,7 @@ class Project (object) :
         self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
         self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         self.rpmShare          = os.path.join(rpmHome, 'resources', 'lib_share')
+        self.rpmFonts          = os.path.join(rpmHome, 'resources', 'lib_share', 'Fonts')
         # User/Global level paths
         self.userScripts        = os.path.join(userHome, 'resources', 'lib_scripts')
         self.userFonts          = os.path.join(userHome, 'resources', 'lib_share', 'Fonts')

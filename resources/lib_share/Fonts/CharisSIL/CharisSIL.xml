@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: CharisSIL.xml
+Description:
+This is a font settings file. All default settings for this font are specified here.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Font Name</name>
+        <sectionID>CharisSIL</sectionID>
+        <description>The name of this font family.</description>
+        <section>
+            <name>Typeface Regular</name>
+            <sectionID>TypefaceRegular</sectionID>
+            <description>Settings for the regular typeface font.</description>
+            <setting>
+                <name>File</name>
+                <key>file</key>
+                <description>File name for this typeface.</description>
+                <type>string</type>
+                <value>CharisSILR.ttf</value>
+            </setting>
+            <setting>
+                <name>Source</name>
+                <key>source</key>
+                <description>Path and name of the source font file for this typeface.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>Shaping</name>
+                <key>shaping</key>
+                <description>The shaping engine to be used for this typeface.</description>
+                <type>string</type>
+                <value>Graphite</value>
+            </setting>
+            <setting>
+                <name>Features</name>
+                <key>features</key>
+                <description>The features that will be used for this typeface.</description>
+                <type>list</type>
+                <value>liga=1</value>
+            </setting>
+            <setting>
+                <name>Modify</name>
+                <key>modify</key>
+                <description>Request any modifications for this typeface such as bolding.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>Mapping</name>
+                <key>mapping</key>
+                <description>Specify a file that might contain any character mapping modifications.</description>
+                <type>string</type>
+                <value>None</value>
+            </setting>
+        </section>
+    </section>
+</root>
+

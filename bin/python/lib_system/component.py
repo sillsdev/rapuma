@@ -41,9 +41,9 @@ class Component (object) :
     initialised = False
 
     # Intitate the whole class
-    def __init__(self, aProject, config, typeConfig) :
+    def __init__(self, aProject, compType, typeConfig) :
         self.project = aProject
-        self.config = config
+        self.compType = compType
         if not self.initialised : self.__class__.initType(aProject, typeConfig)
 
     def initClass(self) :
