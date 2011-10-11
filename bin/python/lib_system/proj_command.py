@@ -74,8 +74,25 @@ class AddComp (Command) :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component or group of components to the project. (Required)")
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component to the project. (Required)")
         self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the component type. It needs to be valid but not present in the project. (Required)")
+
+
+class AddAuxiliary (Command) :
+    '''Add an auxiliary component to a project.'''
+
+    type = "auxiliary_add"
+
+    def run (self, args, aProject, userConfig) :
+        super(AddAuxiliary, self).run(args, aProject, userConfig)
+        if self.options.component and self.options.type :
+            aProject.addNewAuxiliary(self.options.auxiliary, self.options.type)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Add an auxiliary component to the project. (Required)")
+        self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the type of auxiliary component this is. It needs to be valid but not present in the project. (Required)")
 
 
 class ImportCompSource (Command) :
@@ -106,7 +123,21 @@ class RemoveComp (Command) :
             aProject.removeComponent(self.options.component)
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component to the project. (Required)")
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component from the project. (Required)")
+
+
+class RemoveAux (Command) :
+    '''Remove an auxiliary component from a project.'''
+
+    type = "auxiliary_remove"
+
+    def run (self, args, aProject, userConfig) :
+        super(RemoveAux, self).run(args, aProject, userConfig)
+        if len(args) :
+            aProject.removeAuxiliary(self.options.auxiliary)
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Remove an auxiliary component from the project. (Required)")
 
 
 class RenderComp (Command) :

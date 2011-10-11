@@ -248,6 +248,7 @@ class Project (object) :
 
     def getCompFiles (self, ctype, initInfo) :
         '''Get the files for this project according to the init specs. of the
+
         component.'''
         
         fls = initInfo['Files'].__iter__()
@@ -330,6 +331,7 @@ class Project (object) :
                     elif key == 'location' :
                         if value != 'None' :
                             parentFolder = value
+
                     elif key == 'shareLibPath' :
                         sharePath = value
                     else :
@@ -424,6 +426,7 @@ class Project (object) :
 
     def getComponent (self, cid = None, cType = None) :
         '''Create a component object that is ready for processes to be run on
+
         it.'''
 
         if cid and cid not in self._projConfig['Components'] :
@@ -457,6 +460,7 @@ class Project (object) :
     def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component
         binding list and inserting component info into the project conf file.
+
         All supplied arguments need to be valid.  This function will fail if the
         type, source or ID are not valid or if the component already exsists in
         the binding order list.'''
@@ -484,6 +488,7 @@ class Project (object) :
         # Add to the installed components list for this type
         compList = []
         compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
+
         compList.append(cid)
         self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
 
@@ -521,6 +526,7 @@ class Project (object) :
 
     def removeComponent (self, comp) :
         '''Remove a component from the current project by removing them from the
+
         component binding list and from their type information section.'''
 
         # Find out what kind of component type this is
@@ -629,6 +635,7 @@ class Project (object) :
             
         if not self.initComponent(cid, self._projConfig['Components'][cid]['compType']) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
+
             return False
         
         # Check for dependencies for this component
@@ -651,6 +658,124 @@ class Project (object) :
         
         return True
 
+
+###############################################################################
+########################## Auxiliary Level Functions ##########################
+###############################################################################
+
+
+    def addNewAuxiliary (self, aid, atype) :
+        '''Add auxiliary component to the current project by inserting auxiliary
+        component info into the project conf file.'''
+
+        # Test for comp type section
+        try :
+            at = self._projConfig['AuxiliaryTypes']
+        except :
+            self._projConfig['AuxiliaryTypes'] = {}
+
+        # First we add the aux type if it is not already in the project
+        if atype in self.validAuxTypes :
+            if not atype in self._projConfig['AuxiliaryTypes'] :
+                self.addNewAuxiliaryType(atype)
+
+        if not aid in self._projConfig['AuxiliaryTypes'][atype]['validIdCodes'] :
+            self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
+            return
+
+        # Add to the installed auxiliary components list for this type
+        auxList = []
+        auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
+
+        auxList.append(aid)
+        self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
+
+        # Read in the main settings file for this aux comp
+        auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
+
+        # The aid should be unique to the project so we add a section for it
+        auxItem = ConfigObj()
+        auxItem['Auxiliaries'] = {}
+        auxItem['Auxiliaries'][aid] = {}
+        auxItem['Auxiliaries'][aid]['auxType'] = atype
+
+        self._projConfig.merge(auxItem)
+
+        self.writeOutProjConfFile = True
+        self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewAuxiliary()')
+
+
+    def removeAuxiliary (self, aux) :
+        '''Remove an auxiliary component from the current project by removing
+        its type information section.'''
+
+        # Find out what kind of component type this is
+        atype = self._projConfig['Auxiliaries'][aux]['auxType']
+
+        # Remove from components list first
+        orderList = []
+        orderList = self._projConfig['ProjectInfo']['auxiliaryList']
+        if aux in orderList :
+            orderList.remove(aux)
+            self._projConfig['ProjectInfo']['auxiliaryList'] = orderList
+            self.writeOutProjConfFile = True
+        else :
+            self.writeToLog('WRN', 'Auxiliary [' + aux + '] not found in auxiliary list', 'project.removeAuxiliary()')
+
+        # Remove from the components installed list
+        auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
+        if aux in auxList :
+            auxList.remove(aux)
+            self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
+            self.writeOutProjConfFile = True
+
+        # Remove the component's section from auxiliaries
+        if aux in self._projConfig['Auxiliaries'] :
+            del self._projConfig['Auxiliaries'][aux]
+            self.writeOutProjConfFile = True
+
+        # Remove references in the ComponentTypes section if this is the last
+        # component of its kind to be removed. 
+        if len(self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']) == 0 :
+            self.removeAuxiliaryType(atype)
+
+        # I guess if at least one of the above succeded we removed it
+        if self.writeOutProjConfFile :
+            self.writeToLog('MSG', 'Removed component: [' + aux + '] from project.', 'project.removeAuxiliary()')
+
+
+    def addNewAuxiliaryType (self, atype) :
+        '''This will add all the auxiliary type information to a project.'''
+
+        # Test to see if the section is there, do not add if it is
+        try:
+            test = self._projConfig['AuxiliaryTypes'][atype]
+            return False
+        except :
+            try :
+                self._projConfig['AuxiliaryTypes'][atype] = {}
+            except :
+                self._projConfig['AuxiliaryTypes'] = {}
+                self._projConfig['AuxiliaryTypes'][atype] = {}
+
+            self._projConfig.merge(getAuxSettings(self.userHome, self.rpmHome, atype))
+            self.writeOutProjConfFile = True
+            self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] added to project.', 'project.addNewAuxiliaryType()')
+            return True
+
+
+    def removeAuxiliaryType (self, atype) :
+        '''Remove an auxiliary type from the current project.  Before doing so, it
+        must varify that the requested auxiliary type is valid.'''
+
+        if len(self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']) == 0 :
+            # Remove references in the AuxiliaryTypes section
+            del self._projConfig['AuxiliaryTypes'][atype]
+            self.writeOutProjConfFile = True
+            # FIXME: More should be done at this point to remove files, etc of the aux type.
+            self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] removed from project.', 'project.removeAuxiliaryType()')
+        else :
+            self.writeToLog('WRN', 'Auxiliary type: [' + atype + '] does not exsits.', 'project.removeAuxiliaryType()')
 
 
 ###############################################################################
