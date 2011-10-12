@@ -76,7 +76,7 @@ class Project (object) :
         if len(self._projConfig) :
             for k in (  'projectType',                  'projectName',
                         'projectIDCode',                'validCompTypes',
-                        'projectComponentBindingOrder') :
+                        'validAuxTypes',                'projectComponentBindingOrder') :
                  setattr(self, k, self._projConfig['ProjectInfo'][k] if self._projConfig else None)
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :

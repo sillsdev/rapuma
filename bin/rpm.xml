@@ -9,21 +9,9 @@ various aspects of the type system.  However, it does not describe projects or
 components.
 
 Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
 
 -->
-
-<!DOCTYPE root [
-  <!ELEMENT root (section+)>
-  <!ELEMENT section (name, sectionID, description, setting+)>
-  <!ELEMENT setting (name, key, description, type, version*, value)>
-  <!ELEMENT name (#PCDATA)>
-  <!ELEMENT sectionID (#PCDATA)>
-  <!ELEMENT key (#PCDATA)>
-  <!ELEMENT description (#PCDATA)>
-  <!ELEMENT type (#PCDATA)>
-  <!ELEMENT version (#PCDATA)>
-  <!ELEMENT value (#PCDATA)>
-]>
 
 
 <root>

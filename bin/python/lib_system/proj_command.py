@@ -85,7 +85,7 @@ class AddAuxiliary (Command) :
 
     def run (self, args, aProject, userConfig) :
         super(AddAuxiliary, self).run(args, aProject, userConfig)
-        if self.options.component and self.options.type :
+        if self.options.auxiliary and self.options.type :
             aProject.addNewAuxiliary(self.options.auxiliary, self.options.type)
         else :
             raise SyntaxError, "Error: Missing required arguments!"

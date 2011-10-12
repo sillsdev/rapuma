@@ -139,7 +139,7 @@ def getProjSettings (userHome, rpmHome, projType) :
 
 
 def getCompSettings (userHome, rpmHome, compType) :
-    '''Get the default settings out of a project type xml description file.'''
+    '''Get the default settings out of a component type xml description file.'''
 
     rpmCompXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
     userCompXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
@@ -147,6 +147,19 @@ def getCompSettings (userHome, rpmHome, compType) :
     res = getXMLSettings(rpmCompXML)
     if os.path.isfile(userCompXML) :
         return overrideSettings(res, userCompXML)
+    else :
+        return res
+
+
+def getAuxSettings (userHome, rpmHome, auxType) :
+    '''Get the default settings out of a auxiliary type xml description file.'''
+
+    rpmAuxXML     = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '.xml')
+    useAuxXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '.xml')
+
+    res = getXMLSettings(rpmAuxXML)
+    if os.path.isfile(userAuxXML) :
+        return overrideSettings(res, userAuxXML)
     else :
         return res
 

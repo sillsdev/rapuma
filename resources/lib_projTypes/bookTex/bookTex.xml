@@ -7,30 +7,10 @@ This is a project or Document type description for a book publication to be rend
 with TeX. All file relations and processes are described in this file.
 
 Todo:
-1) Add a process section where all processes are described
-2) Add file type section that describes each kind of type of file found in the component
-3) Need a section to describe project folder attributes <location>
-4) Need a default book project section that the system will use to start a project
+1) Need to connect to an external DTD, schema, whatever for validation.
 
 -->
 
-<!DOCTYPE root [
-  <!ELEMENT root (section+)>
-  <!ELEMENT section (name, sectionID, description, (setting | file | folder | process)+)>
-  <!ELEMENT file (name, type, location, dependents, createdBy, description)>
-  <!ELEMENT folder (name, key, description, value)>
-  <!ELEMENT process (name, type, description)>
-  <!ELEMENT setting (name, key, description, type*, value)>
-  <!ELEMENT sectionID (#PCDATA)>
-  <!ELEMENT name (#PCDATA)>
-  <!ELEMENT key (#PCDATA)>
-  <!ELEMENT description (#PCDATA)>
-  <!ELEMENT type (#PCDATA)>
-  <!ELEMENT location (#PCDATA)>
-  <!ELEMENT dependents (#PCDATA)>
-  <!ELEMENT createdBy (#PCDATA)>
-  <!ELEMENT value (#PCDATA)>
-]>
 
 <root>
     <section>
@@ -77,7 +57,14 @@ Todo:
             <key>validCompTypes</key>
             <description>A list of valid component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>usfmTex,adminMSEAG,vMapper,projectNotes,illustrationsUsfm,hyphenTex,fontSets</value>
+            <value>usfmTex,adminMSEAG,vMapper,projectNotes</value>
+        </setting>
+        <setting>
+            <name>Valid Auxiliary Type List</name>
+            <key>validAuxTypes</key>
+            <description>A list of valid auxiliary component types that are acceptable to use with this project type.</description>
+            <type>list</type>
+            <value>illustrationsUsfm,hyphenTex,fontSets</value>
         </setting>
         <setting>
             <name>Component List</name>
