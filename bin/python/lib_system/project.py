@@ -471,15 +471,18 @@ class Project (object) :
         except :
             self._projConfig['ComponentTypes'] = {}
 
+        # Test for this component and bail if it is there
+        try :
+            at = self._projConfig['Components'][cid]['compType']
+            self.writeToLog('ERR', 'ID: [' + cid + '] cannot be added again.', 'project.addNewComponent()')
+            return
+        except :
+            pass
+
         # First we add the type if it is not already in the project
         if ctype in self.validCompTypes :
             if not ctype in self._projConfig['ComponentTypes'] :
                 self.addNewComponentType(ctype)
-
-        # Test the parameters, return if any fails
-        if cid in self._projConfig['ProjectInfo']['projectComponentBindingOrder'] :
-            self.writeToLog('ERR', 'Component: [' + cid + '] exsits. Only one instance allowed.', 'project.addNewComponents()')
-            return
 
         if not cid in self._projConfig['ComponentTypes'][ctype]['validIdCodes'] :
             self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
@@ -668,12 +671,21 @@ class Project (object) :
         '''Add auxiliary component to the current project by inserting auxiliary
         component info into the project conf file.'''
 
+        # Test for this auxiliary and bail if it is there
+        try :
+            at = self._projConfig['Auxiliaries'][aid]['auxType']
+            self.writeToLog('ERR', 'ID: [' + aid + '] cannot be added again.', 'project.addNewAuxiliary()')
+            return
+        except :
+            pass
+
         # Test for comp type section
         try :
             at = self._projConfig['AuxiliaryTypes']
         except :
             self._projConfig['AuxiliaryTypes'] = {}
 
+# FIXME: Something seems to be going wrong here
         # First we add the aux type if it is not already in the project
         if atype in self.validAuxTypes :
             if not atype in self._projConfig['AuxiliaryTypes'] :
@@ -683,24 +695,13 @@ class Project (object) :
             self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
             return
 
+################################################################
+
         # Add to the installed auxiliary components list for this type
         auxList = []
         auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
-
         auxList.append(aid)
         self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
-
-
-
-        # Add to the installed components list for this type
-        compList = []
-        compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
-
-        compList.append(cid)
-        self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
-
-
-
 
         # Read in the main settings file for this aux comp
         auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
@@ -712,6 +713,13 @@ class Project (object) :
         auxItem['Auxiliaries'][aid]['auxType'] = atype
 
         self._projConfig.merge(auxItem)
+
+        # Add component code to components list
+        listOrder = []
+        listOrder = self._projConfig['ProjectInfo']['auxiliaryList']
+        listOrder.append(aid)
+        self._projConfig['ProjectInfo']['auxiliaryList'] = listOrder
+
 
         self.writeOutProjConfFile = True
         self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')

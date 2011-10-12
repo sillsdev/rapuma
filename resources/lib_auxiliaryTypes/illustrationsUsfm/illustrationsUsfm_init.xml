@@ -7,30 +7,13 @@ This is a component type description for an illustrationsUsfm_init component to 
 all projects.  All file relations and processes are described in this file.
 
 Todo:
-1) ...
+1) Need to connect to an external DTD, schema, whatever for validation.
 
 
 # This is a save state for this file in case we need to pull info out later.
 
 -->
 
-<!DOCTYPE root [
-  <!ELEMENT root (section+)>
-  <!ELEMENT section (name, sectionID, description, (file | folder | process | setting)+)>
-  <!ELEMENT file (name, type, location, dependents, createdBy, description)>
-  <!ELEMENT folder (name, key, description, value)>
-  <!ELEMENT process (name, type, description)>
-  <!ELEMENT setting (name, key, description, type, value)>
-  <!ELEMENT key (#PCDATA)>
-  <!ELEMENT type (#PCDATA)>
-  <!ELEMENT location (#PCDATA)>
-  <!ELEMENT dependents (#PCDATA)>
-  <!ELEMENT createdBy (#PCDATA)>
-  <!ELEMENT name (#PCDATA)>
-  <!ELEMENT description (#PCDATA)>
-  <!ELEMENT sectionID (#PCDATA)>
-  <!ELEMENT value (#PCDATA)>
-]>
 
 <root>
     <section>
