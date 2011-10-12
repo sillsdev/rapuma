@@ -16,39 +16,32 @@ Todo:
 <root>
     <section>
         <name>Component Root Section</name>
-        <sectionID>ComponentTypes</sectionID>
-        <description>This is the root section for the fontSets component information.</description>
+        <sectionID>AuxiliaryTypes</sectionID>
+        <description>This is the root section for the fontSets auxiliary component information.</description>
         <section>
-            <name>FontSets Component Information</name>
+            <name>FontSets Auxiliary Component Information</name>
             <sectionID>fontSets</sectionID>
-            <description>This section contains general fontSets component information.</description>
+            <description>This section contains general fontSets auxiliary component information.</description>
             <setting>
                 <name>Installed Components</name>
-                <key>installedComponents</key>
-                <description>The components from this type which are installed in this project.</description>
+                <key>installedAuxiliaries</key>
+                <description>The auxiliary components from this type which are installed in this project.</description>
                 <type>list</type>
                 <value></value>
             </setting>
             <setting>
-                <name>Valid Component ID Codes</name>
+                <name>Valid Auxiliary Component ID Codes</name>
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
                 <value>frontSet,bodySet,backSet,mapSet</value>
             </setting>
             <setting>
-                <name>Component Dependencies</name>
+                <name>Auxiliary Dependencies</name>
                 <key>dependencies</key>
-                <description>This list contains all the components and their type that this component is dependent on.</description>
+                <description>This list contains all the auxiliary components and their type that this component is dependent on.</description>
                 <type>list</type>
                 <value></value>
-            </setting>
-            <setting>
-                <name>In Binding List</name>
-                <key>inBindingList</key>
-                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
-                <type>boolean</type>
-                <value>False</value>
             </setting>
         </section>
     </section>

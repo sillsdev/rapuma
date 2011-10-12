@@ -74,6 +74,13 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Auxiliary List</name>
+            <key>auxiliaryList</key>
+            <description>A list of auxiliary components installed in this project.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Project Component Binding Order List</name>
             <key>projectComponentBindingOrder</key>
             <description>A list of components that are used in this project in the order they are to be found in the publication.</description>

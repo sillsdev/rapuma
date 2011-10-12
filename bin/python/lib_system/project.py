@@ -690,6 +690,18 @@ class Project (object) :
         auxList.append(aid)
         self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
 
+
+
+        # Add to the installed components list for this type
+        compList = []
+        compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
+
+        compList.append(cid)
+        self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
+
+
+
+
         # Read in the main settings file for this aux comp
         auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
 
@@ -702,7 +714,7 @@ class Project (object) :
         self._projConfig.merge(auxItem)
 
         self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewAuxiliary()')
+        self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')
 
 
     def removeAuxiliary (self, aux) :

@@ -155,7 +155,7 @@ def getAuxSettings (userHome, rpmHome, auxType) :
     '''Get the default settings out of a auxiliary type xml description file.'''
 
     rpmAuxXML     = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '.xml')
-    useAuxXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '.xml')
+    userAuxXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '.xml')
 
     res = getXMLSettings(rpmAuxXML)
     if os.path.isfile(userAuxXML) :
