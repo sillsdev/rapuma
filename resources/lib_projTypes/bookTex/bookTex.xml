@@ -64,7 +64,7 @@ Todo:
             <key>validAuxTypes</key>
             <description>A list of valid auxiliary component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>illustrationsUsfm,hyphenTex,fontSets</value>
+            <value>illustrationsUsfm,hyphenTex,fontSets,pageCompSets,styleSets</value>
         </setting>
         <setting>
             <name>Component List</name>
@@ -86,25 +86,6 @@ Todo:
             <description>A list of components that are used in this project in the order they are to be found in the publication.</description>
             <type>list</type>
             <value></value>
-        </setting>
-    </section>
-    <section>
-        <name>Format</name>
-        <sectionID>Format</sectionID>
-        <description>Settings having to do with the formating of this publication.</description>
-        <setting>
-            <name>Page Width</name>
-            <key>pageWidth</key>
-            <description>The trimmed width of the page.</description>
-            <type>integer</type>
-            <value>150</value>
-        </setting>
-        <setting>
-            <name>Page Height</name>
-            <key>pageHeight</key>
-            <description>The trimmed height of the page.</description>
-            <type>integer</type>
-            <value>210</value>
         </setting>
     </section>
 </root>

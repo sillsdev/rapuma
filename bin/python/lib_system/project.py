@@ -685,17 +685,16 @@ class Project (object) :
         except :
             self._projConfig['AuxiliaryTypes'] = {}
 
-# FIXME: Something seems to be going wrong here
         # First we add the aux type if it is not already in the project
         if atype in self.validAuxTypes :
             if not atype in self._projConfig['AuxiliaryTypes'] :
                 self.addNewAuxiliaryType(atype)
+        else :
+            self.writeToLog('ERR', 'ID: [' + atype + '] not valid auxiliary to use in [' + self.projectType + '] project type', 'project.addNewAuxiliary()')            
 
         if not aid in self._projConfig['AuxiliaryTypes'][atype]['validIdCodes'] :
             self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
             return
-
-################################################################
 
         # Add to the installed auxiliary components list for this type
         auxList = []
@@ -711,7 +710,7 @@ class Project (object) :
         auxItem['Auxiliaries'] = {}
         auxItem['Auxiliaries'][aid] = {}
         auxItem['Auxiliaries'][aid]['auxType'] = atype
-
+        print auxItem
         self._projConfig.merge(auxItem)
 
         # Add component code to components list

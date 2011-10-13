@@ -7,6 +7,8 @@ rpm auxiliary_add -a bodySet        -t fontSets
 rpm auxiliary_add -a mapSet         -t fontSets
 rpm auxiliary_add -a system         -t illustrationsUsfm
 rpm auxiliary_add -a hyp            -t hyphenTex
+rpm auxiliary_add -a contentComp    -t pageCompSets
+rpm auxiliary_add -a contentStyle   -t styleSets
 rpm component_add -c jas            -t usfmTex
 rpm component_add -c apa            -t adminMSEAG
 rpm component_add -c m01            -t vMapper
