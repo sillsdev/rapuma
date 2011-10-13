@@ -710,7 +710,6 @@ class Project (object) :
         auxItem['Auxiliaries'] = {}
         auxItem['Auxiliaries'][aid] = {}
         auxItem['Auxiliaries'][aid]['auxType'] = atype
-        print auxItem
         self._projConfig.merge(auxItem)
 
         # Add component code to components list
