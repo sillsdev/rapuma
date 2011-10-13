@@ -18,40 +18,33 @@ Todo:
 
 <root>
     <section>
-        <name>Component Root Section</name>
-        <sectionID>ComponentTypes</sectionID>
-        <description>This is the root section for hyphenTex component information.</description>
+        <name>Auxiliary Root Section</name>
+        <sectionID>AuxiliaryTypes</sectionID>
+        <description>This is the root section for the hyphenTex auxiliary component information.</description>
         <section>
-            <name>TeX Hyphenation Component Information</name>
+            <name>TeX Hyphenation Auxiliary Component Information</name>
             <sectionID>hyphenTex</sectionID>
-            <description>This section contains general hyphenTex component information.</description>
+            <description>This section contains general hyphenTex auxiliary component information.</description>
             <setting>
-                <name>Installed Components</name>
-                <key>installedComponents</key>
-                <description>The components from this type which are installed in this project.</description>
+                <name>Installed Auxiliary Components</name>
+                <key>installedAuxiliaries</key>
+                <description>The auxiliary components from this type which are installed in this project.</description>
                 <type>list</type>
                 <value></value>
             </setting>
             <setting>
-                <name>Valid Component ID Codes</name>
+                <name>Valid Auxiliary Component ID Codes</name>
                 <key>validIdCodes</key>
                 <description>This list contains all the valid ID codes that can be used for this component type.</description>
                 <type>list</type>
                 <value>hyp</value>
             </setting>
             <setting>
-                <name>Component Dependencies</name>
+                <name>Auxiliary Dependencies</name>
                 <key>dependencies</key>
                 <description>This list contains all the components and their type that this component is dependent on.</description>
                 <type>list</type>
                 <value>:usfmTex</value>
-            </setting>
-            <setting>
-                <name>In Binding List</name>
-                <key>inBindingList</key>
-                <description>Flag if this component is to be added to the binding list. Not all components need to be in that list.</description>
-                <type>boolean</type>
-                <value>False</value>
             </setting>
         </section>
     </section>
