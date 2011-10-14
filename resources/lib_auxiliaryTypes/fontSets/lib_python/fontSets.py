@@ -19,9 +19,10 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, sys
+import os, sys, shutil
 
 # Load the local classes
+from tools import *
 from fontSets_command import Command
 from auxiliary import Auxiliary
 
@@ -46,8 +47,12 @@ class FontSets (Auxiliary) :
         # Make it available to the Project Class with this
         super(FontSets, self).__init__(aProject, auxType, typeConfig)
 
+# take out only the stuff from the proj.comp that this aux needs and pass that
+# on to the stuff below. This needs to happen in all comps and auxs.
+
+
         self.aProject   = aProject
-        self.auxType   = auxType
+        self.auxType    = auxType
         self.typeConfig = typeConfig
 
 
@@ -89,11 +94,24 @@ class FontSets (Auxiliary) :
         else :
             self.aProject.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
-
+            
+        # Copy the contents of the target font folder to the project Fonts folder
+        if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
+            os.mkdir(os.path.join(self.aProject.projHome, 'Fonts'))
+            
+        if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
+            shutil.copytree(fontDir, os.path.join(self.aProject.projHome, 'Fonts', font))
+        else :
+            self.aProject.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
+    
         # Now inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
-
+        fInfo = getXMLSettings(fontInfo)
+        self.aProject._projConfig['Auxiliaries'][ftype].merge(fInfo)
+        print self.aProject._projConfig
+        
+        
         ############ START HERE ############
-
+        self.writeOutProjConfFile = True
         self.aProject.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         

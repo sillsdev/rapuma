@@ -359,28 +359,6 @@ class Project (object) :
                         shutil.copytree(sourceFolder, thisFolder)
         except :
             pass
-    
-    
-#    def getFontSettings (self, cid, initInfo) :
-#        '''Get the font settings for this project according to the init specs.
-#        of the component.'''
-#        
-#        # First thing to do is find out what the current settings are or if they even exist
-#        # if they do, then we don't want to overwrite, we leave it alone.
-#        try:
-#            test = self._projConfig['Components'][cid]
-#            return False
-#        except :
-#            fsets = initInfo['FontSetup'].__iter__()
-#            for typeface in fsets :
-#                tfsets = initInfo['FontSetup'][typeface]
-#                for s in tfsets :
-#                    self._projConfig['Components'][cid][typeface][s] = initInfo['FontSetup'][typeface][s]
-
-
-        # If they do not, write out the default settings to the conf file and set the write flag
-        
-        # At last, copy in any files needed
         
 
     def initComponent (self, cid, ctype) :
