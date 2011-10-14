@@ -23,7 +23,7 @@ import os, sys
 
 # Load the local classes
 from fontSets_command import Command
-from component import Component
+from auxiliary import Auxiliary
 
 
 ###############################################################################
@@ -37,17 +37,17 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class FontSets (Component) :
+class FontSets (Auxiliary) :
     type = "fontSets"
     
-    def __init__(self, aProject, compType, typeConfig) :
+    def __init__(self, aProject, auxType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontSets, self).__init__(aProject, compType, typeConfig)
+        super(FontSets, self).__init__(aProject, auxType, typeConfig)
 
         self.aProject   = aProject
-        self.compType   = compType
+        self.auxType   = auxType
         self.typeConfig = typeConfig
 
 
@@ -68,7 +68,7 @@ class FontSets (Component) :
         print "PreProcessing an FontSets component"
         
         
-    def setFont (self, fType, font) :
+    def setFont (self, ftype, font) :
         '''Setup a font for a specific typeface.'''
         
         # It is expected that all the necessary meta data for this font is in
@@ -95,5 +95,5 @@ class FontSets (Component) :
 
         ############ START HERE ############
 
-        self.aProject.writeToLog('MSG', font + ' font setup information added to [' + fType + '] component')     
+        self.aProject.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         

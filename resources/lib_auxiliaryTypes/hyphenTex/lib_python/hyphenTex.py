@@ -24,7 +24,7 @@ import os, sys
 
 # Load the local classes
 from hyphenTex_command import Command
-from component import Component
+from auxiliary import Auxiliary
 
 
 
@@ -32,21 +32,18 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class HyphenTex (Component) :
+class HyphenTex (Auxiliary) :
 
     def __init__(self, aProject) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(HyphenTex, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
+        super(HyphenTex, self).__init__(aProject, auxType, typeConfig)
 
         # Set class vars
-        self._projConfig = aProject._projConfig
-        self._projInit = aProject._projInit
-        self._userConfig = aProject._userConfig
-        self.projHome = aProject.projHome
-        self.userHome = aProject.userHome
-        self.rpmHome = aProject.rpmHome
+        self.aProject   = aProject
+        self.auxType    = auxType
+        self.typeConfig = typeConfig
 
 
 

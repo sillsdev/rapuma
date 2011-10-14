@@ -3,8 +3,8 @@
 rpm project_remove -i vwxyz
 rpm project_create -t bookTex -n "Simple test project" -i vwxyz -d .
 
-rpm auxiliary_add -a bodySet        -t fontSets
-rpm auxiliary_add -a mapSet         -t fontSets
+rpm auxiliary_add -a contentFont    -t fontSets
+rpm auxiliary_add -a mapFont        -t fontSets
 rpm auxiliary_add -a system         -t illustrationsUsfm
 rpm auxiliary_add -a hyp            -t hyphenTex
 rpm auxiliary_add -a contentComp    -t pageCompSets

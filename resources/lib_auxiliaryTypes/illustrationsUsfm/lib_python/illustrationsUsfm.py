@@ -24,7 +24,7 @@ import os, sys
 
 # Load the local classes
 from illustrationsUsfm_command import Command
-from component import Component
+from auxiliary import Auxiliary
 
 
 ###############################################################################
@@ -38,21 +38,17 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class Illustrations (Component) :
+class Illustrations (Auxiliary) :
 
     def __init__(self, aProject) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(Illustrations, self).__init__(aProject._projConfig, aProject._projInit, aProject._userConfig, aProject.projHome, aProject.userHome, aProject.rpmHome)
+        super(Illustrations, self).__init__(aProject, auxType, typeConfig)
 
-        # Set class vars
-        self._projConfig = aProject._projConfig
-        self._projInit = aProject._projInit
-        self._userConfig = aProject._userConfig
-        self.projHome = aProject.projHome
-        self.userHome = aProject.userHome
-        self.rpmHome = aProject.rpmHome
+        self.aProject   = aProject
+        self.auxType    = auxType
+        self.typeConfig = typeConfig
 
 
 

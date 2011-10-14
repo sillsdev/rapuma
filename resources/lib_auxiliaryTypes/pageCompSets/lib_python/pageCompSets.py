@@ -24,7 +24,7 @@ import os, sys
 
 # Load the local classes
 from pageCompSets_command import Command
-from component import Component
+from auxiliary import Auxiliary
 
 
 ###############################################################################
@@ -38,18 +38,18 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class PageCompSets (Component) :
+class PageCompSets (Auxiliary) :
 
     type = "pageCompSets"
     
-    def __init__(self, aProject, compType, typeConfig) :
+    def __init__(self, aProject, auxType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(PageCompSets, self).__init__(aProject, compType, typeConfig)
+        super(PageCompSets, self).__init__(aProject, auxType, typeConfig)
 
         self.aProject   = aProject
-        self.compType   = compType
+        self.auxType    = auxType
         self.typeConfig = typeConfig
 
 
@@ -65,7 +65,7 @@ class PageCompSets (Component) :
         super(PageCompSets, cls).initType(aProject, typeConfig)
         
 
-    def setPageComp (self, cType, pcType) :
+    def setPageComp (self, ctype, pctype) :
         '''Setup a page composition type for a specific component.'''
         
         print "Setting up page composition auxiliary for this component"

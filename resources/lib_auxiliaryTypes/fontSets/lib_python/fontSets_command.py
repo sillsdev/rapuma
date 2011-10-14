@@ -28,7 +28,7 @@ from sys_command import Command, commands
 ###############################################################################
 ########################### Command Classes Go Here ###########################
 ###############################################################################
-
+ 
 class SetFont (Command) :
     '''Specify the font for a font set type.'''
 
@@ -36,15 +36,15 @@ class SetFont (Command) :
 
     def run (self, args, aProject, userConfig) :
         super(SetFont, self).run(args, aProject, userConfig)
-        if not self.options.component :
-            self.options.component = list(aProject.getComponents('fontSets'))[0]
-        if self.options.component and self.options.font :
-            aProject.getComponent(self.options.component).setFont(self.options.component, self.options.font)
+        if not self.options.auxiliary :
+            self.options.auxiliary = list(aProject.getAuxiliary('fontSets'))[0]
+        if self.options.auxiliary and self.options.font :
+            aProject.getAuxiliary(self.options.auxiliary).setFont(self.options.auxiliary, self.options.font)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Specify the font component. (Required)")
+        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Specify the font auxiliary component ID. (Required)")
         self.parser.add_option("-f", "--font", type="string", action="store", help="Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
 
 

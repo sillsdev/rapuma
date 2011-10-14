@@ -36,15 +36,15 @@ class SetPageComp (Command) :
 
     def run (self, args, aProject, userConfig) :
         super(SetPageComp, self).run(args, aProject, userConfig)
-        if not self.options.component :
-            self.options.component = list(aProject.getComponents('pageCompSets'))[0]
-        if self.options.component and self.options.pagecomp :
-            aProject.getComponent(self.options.component).setPageComp(self.options.component, self.options.pagecomp)
+        if not self.options.auxiliary :
+            self.options.auxiliary = list(aProject.getAuxiliary('pageCompSets'))[0]
+        if self.options.auxiliary and self.options.pagecomp :
+            aProject.getAuxiliary(self.options.auxiliary).setPageComp(self.options.auxiliary, self.options.pagecomp)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Specify the font component. (Required)")
+        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Specify the composition auxiliary component. (Required)")
         self.parser.add_option("-p", "--pagecomp", type="string", action="store", help="Specify the page composition for this component. (Required)")
 
 

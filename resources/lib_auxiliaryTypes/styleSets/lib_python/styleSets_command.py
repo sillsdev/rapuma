@@ -36,16 +36,16 @@ class SetStyle (Command) :
 
     def run (self, args, aProject, userConfig) :
         super(SetStyle, self).run(args, aProject, userConfig)
-        if not self.options.component :
-            self.options.component = list(aProject.getComponents('styleSets'))[0]
-        if self.options.component and self.options.style :
-            aProject.getComponent(self.options.component).setStyle(self.options.component, self.options.style)
+        if not self.options.auxiliary :
+            self.options.auxiliary = list(aProject.getAuxiliary('styleSets'))[0]
+        if self.options.auxiliary and self.options.style :
+            aProject.getAuxiliary(self.options.auxiliary).setStyle(self.options.auxiliary, self.options.style)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Specify the font component. (Required)")
-        self.parser.add_option("-s", "--style", type="string", action="store", help="Specify the style for this actual component. (Required)")
+        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Specify the style auxiliary component. (Required)")
+        self.parser.add_option("-s", "--style", type="string", action="store", help="Specify the style for this actual auxiliary component. (Required)")
 
 
 

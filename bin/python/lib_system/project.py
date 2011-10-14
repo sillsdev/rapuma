@@ -26,6 +26,7 @@ import codecs, os, sys, fileinput, shutil, imp
 # Load the local classes
 from tools import *
 import component
+import auxiliary
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -37,18 +38,20 @@ class Project (object) :
 
         self.projHome           = projHome
         self.userHome           = userHome
-        self.rpmHome           = rpmHome
+        self.rpmHome            = rpmHome
 
         # Load project config files
         self._projConfig        = projConfig
         self._userConfig        = userConfig
         self._components        = {}
+        self._auxilaries        = {}
 
         # Set all the initial paths and locations
         # System level paths
         self.rpmHome           = rpmHome
         self.userHome          = userHome
         self.projHome          = projHome
+        self.rpmAuxTypes       = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes')
         self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
         self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         self.rpmShare          = os.path.join(rpmHome, 'resources', 'lib_share')
@@ -104,6 +107,12 @@ class Project (object) :
                 sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
                 __import__(comp)
                 __import__(comp + '_command')
+            
+            # Walk the AuxiliaryTypes section and try to load commands if there are any
+            for aux in self._projConfig['AuxiliaryTypes'].keys() :
+                sys.path.insert(0, os.path.join(self.rpmAuxTypes, aux, 'lib_python'))
+                __import__(aux)
+                __import__(aux + '_command')
             
                 # Clean up the path, we don't need this stuck there
                 del sys.path[0]
@@ -419,15 +428,15 @@ class Project (object) :
             for c in self.getComponents() :
                 c.preProcess()
 
-    def getComponentIds (self, cType = None) :
+
+    def getComponentIds (self, ctype = None) :
         for c in self._projConfig['Components'].keys() :
-            if cType and self._projCOnfig['Components'][c] != cType : continue
+            if ctype and self._projCOnfig['Components'][c] != ctype : continue
             yield c
 
-    def getComponent (self, cid = None, cType = None) :
-        '''Create a component object that is ready for processes to be run on
 
-        it.'''
+    def getComponent (self, cid = None, ctype = None) :
+        '''Create a component object that is ready for processes to be run on.'''
 
         if cid and cid not in self._projConfig['Components'] :
             self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
@@ -667,6 +676,24 @@ class Project (object) :
 ###############################################################################
 
 
+    def getAuxiliary (self, aid = None, atype = None) :
+        '''Create an auxiliary component object that is ready for processes to
+        be run on it.'''
+
+        if aid and aid not in self._projConfig['Auxiliaries'] :
+            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
+            return None
+        
+        if not aid in self._auxilaries :
+            config = self._projConfig['Auxiliaries'][aid]
+            atype = config['auxType']
+            if not atype in auxiliary.auxiliaryTypes :
+                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
+            else :
+                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
+        return self._auxilaries[aid]
+
+        
     def addNewAuxiliary (self, aid, atype) :
         '''Add auxiliary component to the current project by inserting auxiliary
         component info into the project conf file.'''

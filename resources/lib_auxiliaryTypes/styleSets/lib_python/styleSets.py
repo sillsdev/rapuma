@@ -24,7 +24,7 @@ import os, sys
 
 # Load the local classes
 from styleSets_command import Command
-from component import Component
+from auxiliary import Auxiliary
 
 
 ###############################################################################
@@ -38,18 +38,18 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class StyleSets (Component) :
+class StyleSets (Auxiliary) :
 
     type = "styleSets"
     
-    def __init__(self, aProject, compType, typeConfig) :
+    def __init__(self, aProject, auxType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(StyleSets, self).__init__(aProject, compType, typeConfig)
+        super(StyleSets, self).__init__(aProject, auxType, typeConfig)
 
         self.aProject   = aProject
-        self.compType   = compType
+        self.auxType    = auxType
         self.typeConfig = typeConfig
 
 
@@ -65,7 +65,7 @@ class StyleSets (Component) :
         super(StyleSets, cls).initType(aProject, typeConfig)
         
 
-    def setStyle (self, cType, style) :
+    def setStyle (self, ctype, style) :
         '''Setup a style type for a specific component.'''
         
         print "Setting up style type auxiliary for this component"
