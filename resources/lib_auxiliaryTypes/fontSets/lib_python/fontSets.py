@@ -20,6 +20,7 @@
 # this process
 
 import os, sys, shutil
+from configobj import ConfigObj, Section
 
 # Load the local classes
 from tools import *
@@ -47,9 +48,24 @@ class FontSets (Auxiliary) :
         # Make it available to the Project Class with this
         super(FontSets, self).__init__(aProject, auxType, typeConfig)
 
-# take out only the stuff from the proj.comp that this aux needs and pass that
-# on to the stuff below. This needs to happen in all comps and auxs.
+        # Take out only the stuff from the proj.comp that this aux needs and
+        # pass that on to the stuff below.
+        self.typeSettings = ConfigObj()
+        self.typeSettings['AuxiliaryTypes'] = {} 
+        print self.typeSettings
+        self.typeSettings.merge(aProject._projConfig['AuxiliaryTypes'][auxType['auxType']])
+        print self.typeSettings
 
+        # From the installedAuxiliaries settings we can get a list of this type
+        # of auxiliary that is installed.  Bring in all their settings to so
+        # they can be worked with too.
+        for at in self.typeSettings['installedAuxiliaries'] :
+            print at
+
+        print self.typeSettings
+
+# FIXME: How do I get the local settings to be linked with the global settings
+# so that when the class is done the results will be written out?
 
         self.aProject   = aProject
         self.auxType    = auxType
@@ -66,16 +82,16 @@ class FontSets (Auxiliary) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
         super(FontSets, cls).initType(aProject, typeConfig)
-        
-        
+
+
     def preProcess(self) :
         # do pre processing of a usfmtex component here
         print "PreProcessing an FontSets component"
-        
-        
+
+
     def setFont (self, ftype, font) :
         '''Setup a font for a specific typeface.'''
-        
+
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
         # ~/lib_share/Fonts/[FontID]
@@ -94,23 +110,22 @@ class FontSets (Auxiliary) :
         else :
             self.aProject.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
-            
+
         # Copy the contents of the target font folder to the project Fonts folder
         if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
             os.mkdir(os.path.join(self.aProject.projHome, 'Fonts'))
-            
+
         if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
             shutil.copytree(fontDir, os.path.join(self.aProject.projHome, 'Fonts', font))
         else :
             self.aProject.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
-    
+
         # Now inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
         fInfo = getXMLSettings(fontInfo)
         self.aProject._projConfig['Auxiliaries'][ftype].merge(fInfo)
-        print self.aProject._projConfig
-        
-        
+
+
         ############ START HERE ############
         self.writeOutProjConfFile = True
         self.aProject.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
