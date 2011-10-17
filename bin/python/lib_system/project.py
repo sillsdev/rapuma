@@ -255,13 +255,14 @@ class Project (object) :
 ###############################################################################
 
 
-    def getCompFiles (self, ctype, initInfo) :
+    def initCompFiles (self, ctype, initInfo) :
         '''Get the files for this project according to the init specs. of the
 
         component.'''
         
         fls = initInfo['Files'].__iter__()
         for fs in fls :
+            print fs
             fileName = ''; parentFolder = ''
             fGroup = initInfo['Files'][fs]
             for key, value in fGroup.iteritems() :
@@ -290,7 +291,7 @@ class Project (object) :
                         terminal('Created file: ' + thisFile)
 
     
-    def getCompFolders (self, ctype, initInfo) :
+    def initCompFolders (self, ctype, initInfo) :
         '''Get the folders for this project according to the init specs. of the
         component.'''
 
@@ -325,7 +326,7 @@ class Project (object) :
                         terminal('Created folder: ' + folderName)
 
 
-    def getCompShared (self, initInfo) :
+    def initCompShared (self, initInfo) :
         '''Get the shared resources for this project according to the init
         specs. of the component.'''
         
@@ -373,76 +374,24 @@ class Project (object) :
             initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
 
             # Create all necessary (empty) folders
-            self.getCompFolders(ctype, initInfo)
-
-            self.getCompShared(initInfo)
-            
-            self.getCompFiles(ctype, initInfo)
-            
-#            self.getFontSettings(cid, initInfo)
+            self.initCompFolders(ctype, initInfo)
+            # Bring in any known resources like macros, etc.
+            self.initCompShared(initInfo)
+            # Bring in any know files for this component
+            self.initCompFiles(ctype, initInfo)
 
             setattr(self, cid + 'Initialized', True)
+
             return True   
 
+######################################################################################################
 
-    def preProcessComp (self, cid) :
-        '''Preprocess a project component.'''
-        
-        # First lets make sure our component is initialized (this will also
-        # initialize the project and component type as well).
-        self.initProject(os.getcwd())
+    def initAuxiliaryComps (self, cid, ctype) :
+        '''Initialize any auxiliary components associated with this component.'''
 
-################################################################################
+        print "Write me!"
 
-# FIXME: There doesn't seem to be an initCompType. Something is really wrong here        
-        self.initCompType(self._projConfig['Components'][cid]['compType'])
-        
-################################################################################
-
-        if cid :
-            c = self.getComponent(cid)
-            c.preProcess()
-        else :
-            for c in self.getComponents() :
-                c.preProcess()
-
-
-    def getComponentIds (self, ctype = None) :
-        for c in self._projConfig['Components'].keys() :
-            if ctype and self._projCOnfig['Components'][c] != ctype : continue
-            yield c
-
-
-    def getComponent (self, cid = None, ctype = None) :
-        '''Create a component object that is ready for processes to be run on.'''
-
-        if cid and cid not in self._projConfig['Components'] :
-            self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
-            return None
-        
-        if not cid in self._components :
-            config = self._projConfig['Components'][cid]
-            ctype = config['compType']
-            if not ctype in component.componentTypes :
-                self._components[cid] = component.Component(self, config, None)
-            else :
-                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype])
-        return self._components[cid]
-
-        
-#    def getComponents (self) :
-#        '''Create all the component objects that are ready for processing.'''
-#        # for c in components list :
-#            # yield getComponent(cc
-#        # or
-#        # return [getComponent(c) for c in components_list]
-#        # or
-#        # res = []
-#        # for c in components_list :
-#        #   res.append(getComponent(c))
-#        # return res
-#        pass
-
+######################################################################################################
 
     def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component
@@ -618,32 +567,53 @@ class Project (object) :
         '''Render a single project component.  Before starting, make sure
         everything necessary has been initialized.'''
 
-        # Run/check component inits.
+        ctype = self._projConfig['Components'][cid]['compType']
+
+        # Check to see if this component is valid
         if not cid in self._projConfig['ProjectInfo']['componentList'] :
             self.writeToLog('ERR', 'Component: [' + cid + '] does not seem to be present in the project.', 'project.renderComponent()')
             return False
             
-        if not self.initComponent(cid, self._projConfig['Components'][cid]['compType']) :
+        # Initialize any auxiliary components that this component depends on
+         if not self.initAuxiliaryComps(cid, ctype) :
+            self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
+
+            return False
+           
+        # Initialize this component.
+        if not self.initComponent(cid, ctype) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
 
             return False
         
         # Check for dependencies for this component
-        depends = self._projConfig['ComponentTypes'][self._projConfig['Components'][cid]['compType']]['dependencies']
-        if len(depends) :
+        auxDepends = self._projConfig['ComponentTypes'][ctype]['auxDependencies']
+        compDepends = self._projConfig['ComponentTypes'][ctype]['compDependencies']
+
+        # First we will do a check on auxilary dependencies.  If any are
+        # missing, this will fail and request that the aux be installed.
+        if len(auxDepends) :
+            # The dependencies should be listed in pairs 0 = auxilary, 1 = auxilary type
+            for a in auxDepends :
+                aux, atype = a.split(':')
+                try :
+                    a = self._projConfig['Auxiliaries'][aux]
+                except :
+                    self.writeToLog('ERR', 'Auxiliary component: [' + aux + '] not present, please install.', 'project.renderComponent()')
+                    return False
+
+        # Check for missing dependent components.  Require any missing to be
+        # installed first before continuing.
+        if len(compDepends) :
             # The dependencies should be listed in pairs 0 = component, 1 = component type
-            for c in depends :
+            for c in compDepends :
                 comp, ctype = c.split(':')
                 try :
-                    if comp == '' :
-                        self.addNewComponentType(ctype)
-                    else :
-                        if self._projConfig['Components'][comp] :
-                            self.initComponent(comp, ctype)
+                    c = self._projConfig['Components'][comp]
                 except :
-                    self.writeToLog('ERR', 'Subcomponent: [' + comp + '] failed to initialize.', 'project.renderComponent()')
+                    self.writeToLog('ERR', 'Component: [' + comp + '] not present, please install.', 'project.renderComponent()')
                     return False
-                
+
         self.writeToLog('MSG', 'Rendered: [' + cid + ']', 'project.renderComponent()')
         
         return True

@@ -39,13 +39,14 @@ class SetFont (Command) :
         if not self.options.auxiliary :
             self.options.auxiliary = list(aProject.getAuxiliary('fontSets'))[0]
         if self.options.auxiliary and self.options.font :
-            aProject.getAuxiliary(self.options.auxiliary).setFont(self.options.auxiliary, self.options.font)
+            aProject.getAuxiliary(self.options.auxiliary).setFont(self.options.auxiliary, self.options.font, self.options.rank)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Specify the font auxiliary component ID. (Required)")
-        self.parser.add_option("-f", "--font", type="string", action="store", help="Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
+        self.parser.add_option("-a", "--auxiliary", type = "string", action = "store", help = "Specify the font auxiliary component ID. (Required)")
+        self.parser.add_option("-f", "--font", type = "string", action = "store", help = "Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
+        self.parser.add_option("-r", "--rank", type = "string", action = "store", default = "primary", help = "If more than one font needed, specify its rank. The default is primary.")
 
 
 

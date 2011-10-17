@@ -13,56 +13,304 @@ Todo:
 
 <root>
     <section>
-        <name>Font Name</name>
-        <sectionID>CharisSIL</sectionID>
-        <description>The name of this font family.</description>
-        <section>
-            <name>Typeface Regular</name>
-            <sectionID>TypefaceRegular</sectionID>
-            <description>Settings for the regular typeface font.</description>
-            <setting>
-                <name>File</name>
-                <key>file</key>
-                <description>File name for this typeface.</description>
-                <type>string</type>
-                <value>CharisSILR.ttf</value>
-            </setting>
-            <setting>
-                <name>Source</name>
-                <key>source</key>
-                <description>Path and name of the source font file for this typeface.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Shaping</name>
-                <key>shaping</key>
-                <description>The shaping engine to be used for this typeface.</description>
-                <type>string</type>
-                <value>Graphite</value>
-            </setting>
-            <setting>
-                <name>Features</name>
-                <key>features</key>
-                <description>The features that will be used for this typeface.</description>
-                <type>list</type>
-                <value>liga=1</value>
-            </setting>
-            <setting>
-                <name>Modify</name>
-                <key>modify</key>
-                <description>Request any modifications for this typeface such as bolding.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-            <setting>
-                <name>Mapping</name>
-                <key>mapping</key>
-                <description>Specify a file that might contain any character mapping modifications.</description>
-                <type>string</type>
-                <value>None</value>
-            </setting>
-        </section>
+        <name>Typeface Regular</name>
+        <sectionID>TypefaceRegular</sectionID>
+        <description>Settings for the regular typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSILR.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Charis SIL</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Regular</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>4.106</value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Shaping</name>
+            <key>shaping</key>
+            <description>The shaping engine to be used for this typeface.</description>
+            <type>string</type>
+            <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this typeface.</description>
+            <type>list</type>
+            <value>liga=1</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Bold</name>
+        <sectionID>TypefaceBold</sectionID>
+        <description>Settings for the bold typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSILB.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Charis SIL</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Bold</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>4.106</value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Shaping</name>
+            <key>shaping</key>
+            <description>The shaping engine to be used for this typeface.</description>
+            <type>string</type>
+            <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this typeface.</description>
+            <type>list</type>
+            <value>liga=1</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Italic</name>
+        <sectionID>TypefaceItalic</sectionID>
+        <description>Settings for the italic typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSILI.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Charis SIL</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Italic</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>4.106</value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Shaping</name>
+            <key>shaping</key>
+            <description>The shaping engine to be used for this typeface.</description>
+            <type>string</type>
+            <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this typeface.</description>
+            <type>list</type>
+            <value>liga=1</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Bold Italic</name>
+        <sectionID>TypefaceBoldItalic</sectionID>
+        <description>Settings for the bold italic typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSILBI.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Charis SIL</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Bold Italic</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>4.106</value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Shaping</name>
+            <key>shaping</key>
+            <description>The shaping engine to be used for this typeface.</description>
+            <type>string</type>
+            <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this typeface.</description>
+            <type>list</type>
+            <value>liga=1</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
     </section>
 </root>
 

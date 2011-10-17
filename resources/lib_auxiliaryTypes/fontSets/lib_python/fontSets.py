@@ -42,35 +42,11 @@ from auxiliary import Auxiliary
 class FontSets (Auxiliary) :
     type = "fontSets"
     
-    def __init__(self, aProject, auxType, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontSets, self).__init__(aProject, auxType, typeConfig)
-
-        # Take out only the stuff from the proj.comp that this aux needs and
-        # pass that on to the stuff below.
-        self.typeSettings = ConfigObj()
-        self.typeSettings['AuxiliaryTypes'] = {} 
-        print self.typeSettings
-        self.typeSettings.merge(aProject._projConfig['AuxiliaryTypes'][auxType['auxType']])
-        print self.typeSettings
-
-        # From the installedAuxiliaries settings we can get a list of this type
-        # of auxiliary that is installed.  Bring in all their settings to so
-        # they can be worked with too.
-        for at in self.typeSettings['installedAuxiliaries'] :
-            print at
-
-        print self.typeSettings
-
-# FIXME: How do I get the local settings to be linked with the global settings
-# so that when the class is done the results will be written out?
-
-        self.aProject   = aProject
-        self.auxType    = auxType
-        self.typeConfig = typeConfig
-
+        super(FontSets, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -89,7 +65,7 @@ class FontSets (Auxiliary) :
         print "PreProcessing an FontSets component"
 
 
-    def setFont (self, ftype, font) :
+    def setFont (self, ftype, font, rank) :
         '''Setup a font for a specific typeface.'''
 
         # It is expected that all the necessary meta data for this font is in
@@ -99,34 +75,36 @@ class FontSets (Auxiliary) :
         # in the user area first. That is where the fonts really should be kept.
         # If it is unable to find the font in either the user area or the system
         # resources shared area, it will fail.
-        if os.path.isfile(os.path.join(self.aProject.userFonts, font, font + '.xml')) :
-            self.aProject.writeToLog('LOG', 'Found ' + font + '.xml in user resources.')
-            fontDir = os.path.join(self.aProject.userFonts, font)
-            fontInfo = os.path.join(self.aProject.userFonts, font, font + '.xml')
-        elif os.path.isfile(os.path.join(self.aProject.rpmFonts, font, font + '.xml')) :
-            self.aProject.writeToLog('LOG', 'Found ' + font + '.xml in RPM resources.')
-            fontDir = os.path.join(self.aProject.rpmFonts, font)
-            fontInfo = os.path.join(self.aProject.rpmFonts, font, font + '.xml')
+        if os.path.isfile(os.path.join(self.project.userFonts, font, font + '.xml')) :
+            self.project.writeToLog('LOG', 'Found ' + font + '.xml in user resources.')
+            fontDir = os.path.join(self.project.userFonts, font)
+            fontInfo = os.path.join(self.project.userFonts, font, font + '.xml')
+        elif os.path.isfile(os.path.join(self.project.rpmFonts, font, font + '.xml')) :
+            self.project.writeToLog('LOG', 'Found ' + font + '.xml in RPM resources.')
+            fontDir = os.path.join(self.project.rpmFonts, font)
+            fontInfo = os.path.join(self.project.rpmFonts, font, font + '.xml')
         else :
-            self.aProject.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
+            self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
 
         # Copy the contents of the target font folder to the project Fonts folder
-        if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
-            os.mkdir(os.path.join(self.aProject.projHome, 'Fonts'))
+        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts')) :
+            os.mkdir(os.path.join(self.project.projHome, 'Fonts'))
 
-        if not os.path.isdir(os.path.join(self.aProject.projHome, 'Fonts')) :
-            shutil.copytree(fontDir, os.path.join(self.aProject.projHome, 'Fonts', font))
+        # FIXME-Later: At this point it might be nice if we queried the settings
+        # (xml) file for the exact files that need to be copied into the
+        # project.  For now we'll just do a blind copy of the folder and take
+        # everything and trust it is all good to have in the project.'
+        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts', font)) :
+            shutil.copytree(fontDir, os.path.join(self.project.projHome, 'Fonts', font))
         else :
-            self.aProject.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
+            self.project.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
 
         # Now inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
         fInfo = getXMLSettings(fontInfo)
-        self.aProject._projConfig['Auxiliaries'][ftype].merge(fInfo)
+        self.auxConfig[rank] = fInfo.dict()
 
-
-        ############ START HERE ############
-        self.writeOutProjConfFile = True
-        self.aProject.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
+        self.project.writeOutProjConfFile = True
+        self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         

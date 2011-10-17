@@ -41,9 +41,10 @@ class Auxiliary (object) :
     initialised = False
 
     # Intitate the whole class
-    def __init__(self, aProject, auxType, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig) :
         self.project = aProject
-        self.auxType = auxType
+        self.auxConfig = auxConfig
+        self.typeConfig = typeConfig
         if not self.initialised : self.__class__.initType(aProject, typeConfig)
 
     def initClass(self) :
