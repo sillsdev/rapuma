@@ -69,6 +69,22 @@ class FontsTex (Auxiliary) :
         return True
 
 
+    def makeContentFontFile (self, aux) :
+        '''Create a font file for the content font.'''
+        
+        initSettings = getXMLSettings('fontsTex_init.xml')
+        folderPath = initSettings['Folders']['FontFolder']['name']
+        fileName = initSettings['Files']['FontDefFile']['name']
+        typeFace = aProject._projConfig['Auxiliaries'][aux]['primary']['TypefaceRegular']['file']
+        regFilePath = folderPath + typeFace + aProject._projConfig['Auxiliaries'][aux]['primary']['TypefaceRegular']['file']
+
+        regular = "\\def\\regular{" + regFilePath
+
+#\def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
+#\def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
+#\def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
+
+
     def setFont (self, ftype, font, rank) :
         '''Setup a font for a specific typeface.'''
 

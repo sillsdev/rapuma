@@ -24,6 +24,13 @@ Todo:
             <value>CharisSILR.ttf</value>
         </setting>
         <setting>
+            <name>FontFolder</name>
+            <key>fontFolder</key>
+            <description>Font folder name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
+        </setting>
+        <setting>
             <name>Name</name>
             <key>name</key>
             <description>The name for this typeface.</description>
@@ -97,6 +104,13 @@ Todo:
             <description>File name for this typeface.</description>
             <type>string</type>
             <value>CharisSILB.ttf</value>
+        </setting>
+        <setting>
+            <name>FontFolder</name>
+            <key>fontFolder</key>
+            <description>Font folder name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
         </setting>
         <setting>
             <name>Name</name>
@@ -174,6 +188,13 @@ Todo:
             <value>CharisSILI.ttf</value>
         </setting>
         <setting>
+            <name>FontFolder</name>
+            <key>fontFolder</key>
+            <description>Font folder name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
+        </setting>
+        <setting>
             <name>Name</name>
             <key>name</key>
             <description>The name for this typeface.</description>
@@ -247,6 +268,13 @@ Todo:
             <description>File name for this typeface.</description>
             <type>string</type>
             <value>CharisSILBI.ttf</value>
+        </setting>
+        <setting>
+            <name>FontFolder</name>
+            <key>fontFolder</key>
+            <description>Font folder name for this typeface.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
         </setting>
         <setting>
             <name>Name</name>
