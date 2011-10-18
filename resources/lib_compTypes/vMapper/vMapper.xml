@@ -61,7 +61,7 @@ Todo:
                 <key>dependencies</key>
                 <description>This list contains all the components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>mapSet:fontSets</value>
+                <value>mapFont:fontsTex</value>
             </setting>
             <setting>
                 <name>In Binding List</name>

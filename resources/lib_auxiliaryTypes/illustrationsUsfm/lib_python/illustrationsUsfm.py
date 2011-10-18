@@ -38,19 +38,15 @@ from auxiliary import Auxiliary
 ################################## Begin Class ################################
 ###############################################################################
 
-class Illustrations (Auxiliary) :
+class IllustrationsUsfm (Auxiliary) :
 
-    def __init__(self, aProject) :
+    type = 'illustrationsUsfm'
+
+    def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(Illustrations, self).__init__(aProject, auxType, typeConfig)
-
-        self.aProject   = aProject
-        self.auxType    = auxType
-        self.typeConfig = typeConfig
-
-
+        super(IllustrationsUsfm, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -58,14 +54,18 @@ class Illustrations (Auxiliary) :
 ###############################################################################
 
     @classmethod
-    def initType (cls, aProject) :
+    def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
+        super(IllustrationsUsfm, cls).initType(aProject, typeConfig)
         
         
-        print "(Illustrations.initType) Initializing this component:", cls
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
         
-    def preProcess(self) :
-        # do pre processing of a usfmtex component here
-        print "PreProcessing an Illustrations component"
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the IllustrationsUsfm auxiliary component type.")     
+        return True
+
+
 

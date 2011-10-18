@@ -37,7 +37,7 @@ Todo:
     <section>
         <name>Component Root Section</name>
         <sectionID>ComponentTypes</sectionID>
-        <description>This is the root section for the fontSets component information.</description>
+        <description>This is the root section for the fontsTex component information.</description>
         <section>
             <name>Project Notes Component Information</name>
             <sectionID>projectNotes</sectionID>

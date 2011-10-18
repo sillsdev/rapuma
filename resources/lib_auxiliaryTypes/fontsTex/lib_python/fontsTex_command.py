@@ -37,7 +37,7 @@ class SetFont (Command) :
     def run (self, args, aProject, userConfig) :
         super(SetFont, self).run(args, aProject, userConfig)
         if not self.options.auxiliary :
-            self.options.auxiliary = list(aProject.getAuxiliary('fontSets'))[0]
+            self.options.auxiliary = list(aProject.getAuxiliary('fontsTex'))[0]
         if self.options.auxiliary and self.options.font :
             aProject.getAuxiliary(self.options.auxiliary).setFont(self.options.auxiliary, self.options.font, self.options.rank)
         else :

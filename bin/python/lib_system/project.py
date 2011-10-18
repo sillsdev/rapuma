@@ -40,7 +40,7 @@ class Project (object) :
         self.userHome           = userHome
         self.rpmHome            = rpmHome
 
-        # Load project config files
+        # Load project config files and grouped config information
         self._projConfig        = projConfig
         self._userConfig        = userConfig
         self._components        = {}
@@ -92,6 +92,16 @@ class Project (object) :
 
         # If this project is still new these may not exist yet
         try :
+            # Set init flag on all aux types to False
+            if self._projConfig['AuxiliaryTypes'] :
+                for key in self._projConfig['AuxiliaryTypes'].keys() :
+                    setattr(self, key + 'Initialized', False)
+
+            # Set init flag on all auxs to False
+            if self._projConfig['Auxiliaries'] :
+                for key in self._projConfig['Auxiliaries'].keys() :
+                    setattr(self, key + 'Initialized', False)
+
             # Set init flag on all comp types to False
             if self._projConfig['ComponentTypes'] :
                 for key in self._projConfig['ComponentTypes'].keys() :
@@ -262,7 +272,6 @@ class Project (object) :
         
         fls = initInfo['Files'].__iter__()
         for fs in fls :
-            print fs
             fileName = ''; parentFolder = ''
             fGroup = initInfo['Files'][fs]
             for key, value in fGroup.iteritems() :
@@ -362,6 +371,10 @@ class Project (object) :
             pass
         
 
+######################################################################################################
+
+
+
     def initComponent (self, cid, ctype) :
         '''A function for initializing a component which is called by the
         component or project when a process is run.'''
@@ -384,14 +397,26 @@ class Project (object) :
 
             return True   
 
-######################################################################################################
 
     def initAuxiliaryComps (self, cid, ctype) :
-        '''Initialize any auxiliary components associated with this component.'''
+        '''Initialize any auxiliary components associated with this component.
+        Based on the component ID and its type we will figure out what
+        auxiliaries need to be initialized.'''
 
-        print "Write me!"
+        for aux in self._projConfig['Auxiliaries'].keys() :
+            if getattr(self, aux + 'Initialized') == False :
+                atype = self._projConfig['Auxiliaries'][aux]['auxType']
+                thisAux = self.getAuxiliary(aux, atype)
+                if not thisAux.initThisAuxiliary(aux) :
+                    return False
+
+                setattr(self, aux + 'Initialized', True)
+
+        return True
+            
 
 ######################################################################################################
+
 
     def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component
@@ -547,22 +572,6 @@ class Project (object) :
             self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
 
 
-#    def importComponentSource (self, cid, source) :
-#        '''Import the source for a component.  For some components, it is not
-#        necessary to get data from outside the system.  For those that need it,
-#        this function helps to that end.  This will test for the existence of
-#        the source but will not do the actual import.  That will happen when the
-#        component is initialized.'''
-#        
-#        # Check for the resouce and add it to the conf file if it exists.
-#        if os.path.isfile(source) :
-#            self._projConfig['Components'][cid]['source'] = source        
-#            self.writeOutProjConfFile = True
-#        else :
-#            self.writeToLog('ERR', 'Path: [' + source + '] not valid.', 'project.addNewComponents()')
-#            return
-
-
     def renderComponent (self, cid) :
         '''Render a single project component.  Before starting, make sure
         everything necessary has been initialized.'''
@@ -575,7 +584,7 @@ class Project (object) :
             return False
             
         # Initialize any auxiliary components that this component depends on
-         if not self.initAuxiliaryComps(cid, ctype) :
+        if not self.initAuxiliaryComps(cid, ctype) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
 
             return False
@@ -613,6 +622,9 @@ class Project (object) :
                 except :
                     self.writeToLog('ERR', 'Component: [' + comp + '] not present, please install.', 'project.renderComponent()')
                     return False
+
+        # Each component type has a generic render call call it here.
+        
 
         self.writeToLog('MSG', 'Rendered: [' + cid + ']', 'project.renderComponent()')
         

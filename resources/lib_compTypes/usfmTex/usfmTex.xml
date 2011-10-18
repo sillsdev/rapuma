@@ -47,7 +47,7 @@ Todo:
                 <key>auxDependencies</key>
                 <description>This list contains all the auxiliary components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>contentFont:fontSets</value>
+                <value>contentFont:fontsTex</value>
             </setting>
             <setting>
                 <name>In Binding List</name>

@@ -23,7 +23,7 @@
 import os, sys
 
 # Load the local classes
-from styleSets_command import Command
+from stylesUsfm_command import Command
 from auxiliary import Auxiliary
 
 
@@ -38,20 +38,15 @@ from auxiliary import Auxiliary
 ################################## Begin Class ################################
 ###############################################################################
 
-class StyleSets (Auxiliary) :
+class StylesUsfm (Auxiliary) :
 
-    type = "styleSets"
+    type = "stylesUsfm"
     
-    def __init__(self, aProject, auxType, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(StyleSets, self).__init__(aProject, auxType, typeConfig)
-
-        self.aProject   = aProject
-        self.auxType    = auxType
-        self.typeConfig = typeConfig
-
+        super(StylesUsfm, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -62,8 +57,16 @@ class StyleSets (Auxiliary) :
     def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        super(StyleSets, cls).initType(aProject, typeConfig)
+        super(StylesUsfm, cls).initType(aProject, typeConfig)
         
+
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
+        
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the StylesUsfm auxiliary component type.")     
+        return True
+
 
     def setStyle (self, ctype, style) :
         '''Setup a style type for a specific component.'''

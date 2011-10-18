@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: fontSets_init.xml
+File: stylesUsfm_init.xml
 Description:
-This is a component type description for an fontSets_init component to be with
-all projects.  All file relations and processes are described in this file.
+This is an auxiliary component type description for a stylesUsfm_init component
+to be with all projects.  All file relations and processes are described in this
+file.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -18,60 +19,36 @@ Todo:
         <sectionID>Files</sectionID>
         <description>This section contains the names and information for files of this component type used in the RPM system in this project.</description>
         <section>
-            <name>Font Configuration File</name>
-            <sectionID>FontConfig</sectionID>
-            <description>Font configuration data for all the fonts used in this project.</description>
+            <name>Style Configuration File</name>
+            <sectionID>StyleConfig</sectionID>
+            <description>Style (template) configuration data for all kind of pages used in this project.</description>
             <setting>
                 <name>Name</name>
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
                 <version>False</version>
-                <value>fonts.conf</value>
+                <value>style.conf</value>
             </setting>
             <setting>
                 <name>Location</name>
                 <key>location</key>
                 <description>The location of the folder.</description>
                 <type>string</type>
-                <value>Fonts</value>
+                <value>Process</value>
             </setting>
             <setting>
                 <name>Version Control</name>
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
-                <value>False</value>
+                <value>True</value>
             </setting>
             <setting>
                 <name>Dependent Files</name>
                 <key>dependents</key>
                 <description>The file(s) this file is dependent on.</description>
                 <type>list</type>
-                <value></value>
-            </setting>
-        </section>
-    </section>
-    <section>
-        <name>Folders</name>
-        <sectionID>Folders</sectionID>
-        <description>This section contains the settings for all the folders needed for processing this component.</description>
-        <section>
-            <name>Project Font Folder</name>
-            <sectionID>FontFolder</sectionID>
-            <description>The project font folder.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The folder where all the project fonts are kept.</description>
-                <type>string</type>
-                <value>Fonts</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
                 <value></value>
             </setting>
         </section>

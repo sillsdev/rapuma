@@ -44,7 +44,7 @@ Todo:
                 <key>dependencies</key>
                 <description>This list contains all the components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>bodySet:fontSets</value>
+                <value>contentFont:fontsTex</value>
             </setting>
         </section>
     </section>

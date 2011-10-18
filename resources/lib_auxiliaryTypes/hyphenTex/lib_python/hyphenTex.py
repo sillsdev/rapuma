@@ -34,18 +34,13 @@ from auxiliary import Auxiliary
 
 class HyphenTex (Auxiliary) :
 
-    def __init__(self, aProject) :
+    type = "hyphenTex"
+    
+    def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(HyphenTex, self).__init__(aProject, auxType, typeConfig)
-
-        # Set class vars
-        self.aProject   = aProject
-        self.auxType    = auxType
-        self.typeConfig = typeConfig
-
-
+        super(HyphenTex, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -53,14 +48,18 @@ class HyphenTex (Auxiliary) :
 ###############################################################################
 
     @classmethod
-    def initType (cls, aProject) :
+    def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
+        super(HyphenTex, cls).initType(aProject, typeConfig)
+
         
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
         
-        print "(hyphenTex.initType) Initializing this component:", cls
-        
-    def preProcess(self) :
-        # do pre processing of a usfmtex component here
-        print "PreProcessing an hyphenTex component"
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the HyphenTex auxiliary component type.")     
+        return True
+
+
 

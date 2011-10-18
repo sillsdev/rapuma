@@ -24,7 +24,7 @@ from configobj import ConfigObj, Section
 
 # Load the local classes
 from tools import *
-from fontSets_command import Command
+from fontsTex_command import Command
 from auxiliary import Auxiliary
 
 
@@ -39,14 +39,15 @@ from auxiliary import Auxiliary
 ################################## Begin Class ################################
 ###############################################################################
 
-class FontSets (Auxiliary) :
-    type = "fontSets"
+class FontsTex (Auxiliary) :
+
+    type = "fontsTex"
     
     def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontSets, self).__init__(aProject, auxConfig, typeConfig)
+        super(FontsTex, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -57,12 +58,15 @@ class FontSets (Auxiliary) :
     def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        super(FontSets, cls).initType(aProject, typeConfig)
+        super(FontsTex, cls).initType(aProject, typeConfig)
 
 
-    def preProcess(self) :
-        # do pre processing of a usfmtex component here
-        print "PreProcessing an FontSets component"
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
+        
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the FontsTex auxiliary component type.")     
+        return True
 
 
     def setFont (self, ftype, font, rank) :

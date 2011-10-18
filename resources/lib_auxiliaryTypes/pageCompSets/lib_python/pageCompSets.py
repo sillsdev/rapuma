@@ -48,11 +48,6 @@ class PageCompSets (Auxiliary) :
         # Make it available to the Project Class with this
         super(PageCompSets, self).__init__(aProject, auxType, typeConfig)
 
-        self.aProject   = aProject
-        self.auxType    = auxType
-        self.typeConfig = typeConfig
-
-
 
 ###############################################################################
 ############################# Begin Main Functions ############################
@@ -64,6 +59,14 @@ class PageCompSets (Auxiliary) :
         in place for this type of component so it can be rendered.'''
         super(PageCompSets, cls).initType(aProject, typeConfig)
         
+
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
+        
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompSets auxiliary component type.")     
+        return True
+
 
     def setPageComp (self, ctype, pctype) :
         '''Setup a page composition type for a specific component.'''
