@@ -45,13 +45,6 @@ Todo:
                 <type>boolean</type>
                 <value>True</value>
             </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value>wordlist.txt, lccode.tex</value>
-            </setting>
         </section>
         <section>
             <name>Lccode TeX File</name>

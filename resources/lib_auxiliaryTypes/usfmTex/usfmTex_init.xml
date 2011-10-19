@@ -1,0 +1,514 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: fontsTex_init.xml
+Description:
+This is a component type description for a fontsTex_init component to be with
+all projects.  All file relations and processes are described in this file.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Files</name>
+        <sectionID>Files</sectionID>
+        <description>This section contains the names and information for files of this component type used in the RPM system in this project.</description>
+        <section>
+            <name>paratext2 Macro File</name>
+            <sectionID>paratext2Macro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>paratext2.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-adj-list Macro File</name>
+            <sectionID>ptxadjlistMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-adj-list.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-callers Macro File</name>
+            <sectionID>ptxcallersMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-callers.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-char-style Macro File</name>
+            <sectionID>ptxcharstyleMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-char-style.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-cropmarks Macro File</name>
+            <sectionID>ptxcropmarksMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-cropmarks.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-cutouts Macro File</name>
+            <sectionID>ptxcutoutsMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-cutouts.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-note-style Macro File</name>
+            <sectionID>ptxnotestyleMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-note-style.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-para-style Macro File</name>
+            <sectionID>ptxparastyleMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-para-style.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-pic-list Macro File</name>
+            <sectionID>ptxpiclistMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-pic-list.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptxplus-character-kerning Macro File</name>
+            <sectionID>ptxpluscharacterkerningMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptxplus-character-kerning.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptxplus-maps Macro File</name>
+            <sectionID>ptxplusmapsMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptxplus-maps.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptxplus-marginalverses Macro File</name>
+            <sectionID>ptxplusmarginalversesMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptxplus-marginalverses.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptxplus-toc-tables Macro File</name>
+            <sectionID>ptxplustoctablesMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptxplus-toc-tables.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-references Macro File</name>
+            <sectionID>ptxreferencesMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-references.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-stylesheet Macro File</name>
+            <sectionID>ptxstylesheetMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-stylesheet.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-tables Macro File</name>
+            <sectionID>ptxtablesMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-tables.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-toc Macro File</name>
+            <sectionID>ptxtocMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-toc.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
+            <name>ptx-tracing Macro File</name>
+            <sectionID>ptxtracingMacro</sectionID>
+            <description>A TeX macro to be used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>ptx-tracing.tex</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+    </section>
+    <section>
+        <name>Folders</name>
+        <sectionID>Folders</sectionID>
+        <description>This section contains the settings for all the folders needed for processing this component.</description>
+        <section>
+            <name>Project Macro Folder</name>
+            <sectionID>FontFolder</sectionID>
+            <description>The project macro folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The folder where all the project macros are kept.</description>
+                <type>string</type>
+                <value>Macros</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Process</value>
+            </setting>
+        </section>
+    </section>
+</root>
+

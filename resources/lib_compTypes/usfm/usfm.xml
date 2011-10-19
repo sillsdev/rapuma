@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: usfmTex.xml
+File: usfm.xml
 Description:
 This is a component type description for a USFM Scripture component to be rendered
 with TeX. All file relations and processes are described in this file.
@@ -16,11 +16,11 @@ Todo:
     <section>
         <name>Component Root Section</name>
         <sectionID>ComponentTypes</sectionID>
-        <description>This is the root section for usfmTex component information.</description>
+        <description>This is the root section for usfm component information.</description>
         <section>
-            <name>USFM TeX Component Information</name>
-            <sectionID>usfmTex</sectionID>
-            <description>This section contains general usfmTex component information.</description>
+            <name>USFM Component Information</name>
+            <sectionID>usfm</sectionID>
+            <description>This section contains general usfm component information.</description>
             <setting>
                 <name>Installed Components</name>
                 <key>installedComponents</key>
@@ -47,7 +47,7 @@ Todo:
                 <key>auxDependencies</key>
                 <description>This list contains all the auxiliary components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>contentFont:fontsTex</value>
+                <value>content:pageCompTex</value>
             </setting>
             <setting>
                 <name>In Binding List</name>

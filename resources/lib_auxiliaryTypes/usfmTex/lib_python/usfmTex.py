@@ -1,17 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110907
+# version: 20111019
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle the configuration of page composition elements for
-# publication projects.
+# This class will handle the management of USFM TeX macros for publication
+# projects.
 
 # History:
-# 20111013 - djd - Intial draft
+# 20111019 - djd - Intial draft
 
 
 ###############################################################################
@@ -20,10 +20,12 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, sys
+import os, sys, shutil
+from configobj import ConfigObj, Section
 
 # Load the local classes
-from pageCompSets_command import Command
+from tools import *
+from usfmTex_command import Command
 from auxiliary import Auxiliary
 
 
@@ -38,15 +40,15 @@ from auxiliary import Auxiliary
 ################################## Begin Class ################################
 ###############################################################################
 
-class PageCompSets (Auxiliary) :
+class UsfmTex (Auxiliary) :
 
-    type = "pageCompSets"
+    type = "usfmTex"
     
-    def __init__(self, aProject, auxType, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(PageCompSets, self).__init__(aProject, auxType, typeConfig)
+        super(UsfmTex, self).__init__(aProject, auxConfig, typeConfig)
 
 
 ###############################################################################
@@ -57,21 +59,22 @@ class PageCompSets (Auxiliary) :
     def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        super(PageCompSets, cls).initType(aProject, typeConfig)
-        
+        super(UsfmTex, cls).initType(aProject, typeConfig)
+
 
     def initThisAuxiliary (self, aux) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
         
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompSets auxiliary component type.")     
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the UsfmTex auxiliary component type.")     
         return True
 
 
-    def setPageComp (self, ctype, pctype) :
-        '''Setup a page composition type for a specific component.'''
+    def setTexMacros (self, macros) :
+        '''Indicate to the system what TeX macros are going to be used for
+        processing this USFM text.'''
         
-        print "Setting up page composition auxiliary for this component"
+         self.project.writeToLog('LOG', "Setting up this project to use the [" + macros + "] TeX macros.")     
+        return True
+       
         
-
-

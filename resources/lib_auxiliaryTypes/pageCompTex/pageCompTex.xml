@@ -1,17 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: hyphenTex.xml
+File: pageCompTex.xml
 Description:
-This is a component type description for a vMapper component to be used in
-any type of project.  All file relations and processes are described in this
-file.
+This is a component type description for a page composition auxiliary component
+to be used in any type of project.  All file relations and processes are
+described in this file.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
-
-
-# This is a save state for this file in case we need to pull info out later.
 
 -->
 
@@ -20,11 +17,11 @@ Todo:
     <section>
         <name>Auxiliary Root Section</name>
         <sectionID>AuxiliaryTypes</sectionID>
-        <description>This is the root section for the hyphenTex auxiliary component information.</description>
+        <description>This is the root section for the pageCompSets auxiliary component information.</description>
         <section>
-            <name>TeX Hyphenation Auxiliary Component Information</name>
-            <sectionID>hyphenTex</sectionID>
-            <description>This section contains general hyphenTex auxiliary component information.</description>
+            <name>PageCompTex Auxiliary Component Information</name>
+            <sectionID>pageCompTex</sectionID>
+            <description>This section contains general pageCompTex auxiliary component information.</description>
             <setting>
                 <name>Installed Auxiliary Components</name>
                 <key>installedAuxiliaries</key>
@@ -35,16 +32,16 @@ Todo:
             <setting>
                 <name>Valid Auxiliary Component ID Codes</name>
                 <key>validIdCodes</key>
-                <description>This list contains all the valid ID codes that can be used for this component type.</description>
+                <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>standard</value>
+                <value>frontComp,contentComp,backComp</value>
             </setting>
             <setting>
                 <name>Auxiliary Dependencies</name>
                 <key>dependencies</key>
                 <description>This list contains all the components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>:usfmTex</value>
+                <value>content:fontsTex,content:hyphenTex,content:illustrationsUsfm,content:stylesUsfm,content:usfmTex</value>
             </setting>
         </section>
     </section>

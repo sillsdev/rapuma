@@ -7,8 +7,8 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle system process commands.  This relys a lot on the
-# optparse lib.  Documentation can be found here:
+# This class will handle USFM component process commands.  This relys a lot on
+# the optparse lib.  Documentation can be found here:
 # http://docs.python.org/library/optparse.html
 
 # History:

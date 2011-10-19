@@ -1,18 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110907
+# version: 20111019
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle page composition set process commands.  This relys a
-# lot on the optparse lib.  Documentation can be found here:
+# This class will handle USFM TeX macro process commands.  This relys a lot on
+# the optparse lib.  Documentation can be found here:
 # http://docs.python.org/library/optparse.html
 
 # History:
-# 20111013 - djd - Intial draft
+# 20111019 - djd - Intial draft
 
 
 ###############################################################################
@@ -28,24 +28,23 @@ from sys_command import Command, commands
 ###############################################################################
 ########################### Command Classes Go Here ###########################
 ###############################################################################
+ 
+class SetTexMacros (Command) :
+    '''Specify the font for a font set type.'''
 
-class SetPageComp (Command) :
-    '''Specify the composition set (format) for a type of content.'''
-
-    type = "set_pagecomp"
+    type = "set_texmacros"
 
     def run (self, args, aProject, userConfig) :
-        super(SetPageComp, self).run(args, aProject, userConfig)
+        super(SetTexMacros, self).run(args, aProject, userConfig)
         if not self.options.auxiliary :
-            self.options.auxiliary = list(aProject.getAuxiliary('pageCompSets'))[0]
-        if self.options.auxiliary and self.options.pagecomp :
-            aProject.getAuxiliary(self.options.auxiliary).setPageComp(self.options.auxiliary, self.options.pagecomp)
+            self.options.auxiliary = list(aProject.getAuxiliary('usfmTex'))[0]
+        if self.options.auxiliary and self.options.font :
+            aProject.getAuxiliary(self.options.auxiliary).setTexMacros(self.options.macros)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Specify the composition auxiliary component. (Required)")
-        self.parser.add_option("-p", "--pagecomp", type="string", action="store", help="Specify the page composition for this component. (Required)")
+        self.parser.add_option("-m", "--macros", type = "string", action = "store", default = "normal", help = "Indicate the type of TeX macro set you wish to use on this publication. The default is normal.")
 
 
 

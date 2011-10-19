@@ -1,16 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+# version: 20110907
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle project infrastructure tasks.
+# This class will handle the configuration of page composition elements for
+# publication projects.
 
 # History:
-# 20110823 - djd - Started with intial file from RPM project
+# 20111013 - djd - Intial draft
 
 
 ###############################################################################
@@ -22,8 +23,8 @@
 import os, sys
 
 # Load the local classes
-from usfmTex_command import Command
-from component import Component
+from pageCompTex_command import Command
+from auxiliary import Auxiliary
 
 
 ###############################################################################
@@ -37,16 +38,15 @@ from component import Component
 ################################## Begin Class ################################
 ###############################################################################
 
-class UsfmTex (Component) :
-    type = "usfmTex"
+class PageCompTex (Auxiliary) :
 
-    def __init__(self, aProject, compType, typeConfig) :
+    type = "pageCompTex"
+    
+    def __init__(self, aProject, auxType, typeConfig) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(UsfmTex, self).__init__(aProject, compType, typeConfig)
-
-
+        super(PageCompTex, self).__init__(aProject, auxType, typeConfig)
 
 
 ###############################################################################
@@ -57,11 +57,21 @@ class UsfmTex (Component) :
     def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        super(UsfmTex, cls).initType(aProject, typeConfig)
+        super(PageCompTex, cls).initType(aProject, typeConfig)
         
-        print "(usfmTex.initType) Initializing this component:", cls
+
+    def initThisAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
         
-    def preProcess(self) :
-        # do pre processing of a usfmtex component here
-        print "PreProcessing a usfmtex component"
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
+        return True
+
+
+    def setPageCompTex (self, ctype, pctype) :
+        '''Setup a page composition type for a specific TeX component.'''
+        
+        print "Setting up page composition auxiliary for this TeX component"
+        
+
 

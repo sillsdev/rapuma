@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: usfm_init.xml
+Description:
+This is a component type description for a USFM Scripture component.  All file
+relations and processes are described in this file.
+
+Todo:
+1) Add a process section where all processes are described
+2) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Files</name>
+        <sectionID>Files</sectionID>
+        <description>This section contains the names of all the USFM component files the RPM system will need to use in this projects.</description>
+        <section>
+            <name>James Sample Text</name>
+            <sectionID>jasSample</sectionID>
+            <description>The Book of James sample file.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <version>False</version>
+                <value>59_James.usfm</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>SourceText</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>False</value>
+            </setting>
+            <setting>
+                <name>Dependent Files</name>
+                <key>dependents</key>
+                <description>The file(s) this file is dependent on.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+    <section>
+        <name>Folders</name>
+        <sectionID>Folders</sectionID>
+        <description>This section contains the settings for all the folders needed for usfm component processing.</description>
+        <section>
+            <name>Project Process Folder</name>
+            <sectionID>ProcessFolder</sectionID>
+            <description>The project process folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The folder where all processing happens.</description>
+                <type>string</type>
+                <value>Process</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Project Source Folder</name>
+            <sectionID>SourceFolder</sectionID>
+            <description>The project read-only source folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of the folder that all project administrative documents will be kept.</description>
+                <type>string</type>
+                <value>SourceText</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>Project Working Text Folder</name>
+            <sectionID>WorkingTextFolder</sectionID>
+            <description>The project read-only source folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of the folder that all project administrative documents will be kept.</description>
+                <type>string</type>
+                <value>WorkingText</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+</root>
+

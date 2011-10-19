@@ -27,7 +27,6 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <version>False</version>
                 <value>style.conf</value>
             </setting>
             <setting>
@@ -43,13 +42,6 @@ Todo:
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
                 <value>True</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
             </setting>
         </section>
     </section>
