@@ -375,27 +375,27 @@ class Project (object) :
 
 
 
-    def initComponent (self, cid, ctype) :
-        '''A function for initializing a component which is called by the
-        component or project when a process is run.'''
+#    def initComponent (self, cid, ctype) :
+#        '''A function for initializing a component which is called by the
+#        component or project when a process is run.'''
 
-        mod = 'project.initComponent()'
+#        mod = 'project.initComponent()'
 
-        # No need to init if it is done already
-        if getattr(self, cid + 'Initialized') == False :
-             # Pull the information from the project init xml file
-            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
+#        # No need to init if it is done already
+#        if getattr(self, cid + 'Initialized') == False :
+#             # Pull the information from the project init xml file
+#            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
 
-            # Create all necessary (empty) folders
-            self.initCompFolders(ctype, initInfo)
-            # Bring in any known resources like macros, etc.
-            self.initCompShared(initInfo)
-            # Bring in any know files for this component
-            self.initCompFiles(ctype, initInfo)
+#            # Create all necessary (empty) folders
+#            self.initCompFolders(ctype, initInfo)
+#            # Bring in any known resources like macros, etc.
+#            self.initCompShared(initInfo)
+#            # Bring in any know files for this component
+#            self.initCompFiles(ctype, initInfo)
 
-            setattr(self, cid + 'Initialized', True)
+#            setattr(self, cid + 'Initialized', True)
 
-            return True   
+#            return True   
 
 
 ######################################################################################################
@@ -571,16 +571,19 @@ class Project (object) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
 
             return False
-           
-        # Initialize this component.
-        if not self.initComponent(cid, ctype) :
+
+# FIXME: How do I call a function that is inside component.py?
+
+        # Initialize this component
+        print dir(component.Component)
+        if not Component.initComponent(component, cid, ctype) :
             self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
 
             return False
-        
+
         # Check for dependencies for this component
         auxDepends = self._projConfig['ComponentTypes'][ctype]['auxDependencies']
-        compDepends = self._projConfig['ComponentTypes'][ctype]['compDependencies']
+#        compDepends = self._projConfig['ComponentTypes'][ctype]['compDependencies']
 
         # First we will do a check on auxilary dependencies.  If any are
         # missing, this will fail and request that the aux be installed.
@@ -594,17 +597,17 @@ class Project (object) :
                     self.writeToLog('ERR', 'Auxiliary component: [' + aux + '] not present, please install.', 'project.renderComponent()')
                     return False
 
-        # Check for missing dependent components.  Require any missing to be
-        # installed first before continuing.
-        if len(compDepends) :
-            # The dependencies should be listed in pairs 0 = component, 1 = component type
-            for c in compDepends :
-                comp, ctype = c.split(':')
-                try :
-                    c = self._projConfig['Components'][comp]
-                except :
-                    self.writeToLog('ERR', 'Component: [' + comp + '] not present, please install.', 'project.renderComponent()')
-                    return False
+#        # Check for missing dependent components.  Require any missing to be
+#        # installed first before continuing.
+#        if len(compDepends) :
+#            # The dependencies should be listed in pairs 0 = component, 1 = component type
+#            for c in compDepends :
+#                comp, ctype = c.split(':')
+#                try :
+#                    c = self._projConfig['Components'][comp]
+#                except :
+#                    self.writeToLog('ERR', 'Component: [' + comp + '] not present, please install.', 'project.renderComponent()')
+#                    return False
 
         # Each component type has a generic render call call it here.
         

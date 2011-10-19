@@ -57,14 +57,14 @@ Todo:
             <key>validCompTypes</key>
             <description>A list of valid component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>usfmTex,adminMSEAG,vMapper,projectNotes</value>
+            <value>usfm,adminMSEAG,vMapper,projectNotes</value>
         </setting>
         <setting>
             <name>Valid Auxiliary Type List</name>
             <key>validAuxTypes</key>
             <description>A list of valid auxiliary component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>illustrationsUsfm,hyphenTex,fontsTex,pageCompSets,stylesUsfm</value>
+            <value>illustrationsUsfm,hyphenTex,fontsTex,pageCompTex,stylesUsfm</value>
         </setting>
         <setting>
             <name>Component List</name>

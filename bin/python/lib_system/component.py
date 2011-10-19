@@ -55,6 +55,33 @@ class Component (object) :
         '''Internal housekeeping for the component type when it first wakes up'''
         cls.typeConfig = typeConfig
 
-    def preProcess(self) :
-        pass
+
+###############################################################################
+########################### Component Init Functions ##########################
+###############################################################################
+
+
+    def initComponent (self, cid, ctype) :
+        '''A function for initializing a component which is called by the
+        component or project when a process is run.'''
+
+        mod = 'project.initComponent()'
+
+        # No need to init if it is done already
+        if getattr(self, cid + 'Initialized') == False :
+             # Pull the information from the project init xml file
+            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
+
+            # Create all necessary (empty) folders
+            self.initCompFolders(ctype, initInfo)
+            # Bring in any known resources like macros, etc.
+            self.initCompShared(initInfo)
+            # Bring in any know files for this component
+            self.initCompFiles(ctype, initInfo)
+
+            setattr(self, cid + 'Initialized', True)
+
+            return True   
+
+
 
