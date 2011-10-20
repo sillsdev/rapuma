@@ -34,7 +34,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>front,content,back</value>
+                <value>frontStyle,contentStyle,backStyle</value>
             </setting>
         </section>
     </section>

@@ -37,7 +37,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>front,content,back</value>
+                <value>frontHyphen,contentHyphen,backHyphen</value>
             </setting>
         </section>
     </section>
