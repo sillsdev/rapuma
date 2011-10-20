@@ -40,8 +40,8 @@ class Auxiliary (object) :
 
     initialised = False
 
-    # Intitate the whole class
     def __init__(self, aProject, auxConfig, typeConfig) :
+        '''Initiate the entire class here'''
         self.project = aProject
         self.auxConfig = auxConfig
         self.typeConfig = typeConfig
@@ -51,11 +51,20 @@ class Auxiliary (object) :
         '''Ensures everything is in place for components of this type to do their thing'''
         self.__class__.initialised = True
         
+        
     @classmethod
     def initType(cls, aProject, typeConfig) :
         '''Internal housekeeping for the component type when it first wakes up'''
         cls.typeConfig = typeConfig
 
-    def preProcess(self) :
+
+###############################################################################
+########################### Auxiliary Init Functions ##########################
+###############################################################################
+
+    def initAuxiliary (self) :
+        '''A dummy function to avoid errors.  Any real initilization of any
+        auxiliary component should happen in the auxiliary itself.'''
+        
         pass
 

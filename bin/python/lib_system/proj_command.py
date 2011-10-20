@@ -140,18 +140,4 @@ class RemoveAux (Command) :
         self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Remove an auxiliary component from the project. (Required)")
 
 
-class RenderComp (Command) :
-    '''Render a single component.'''
-    
-    type = "component_render"
-    
-    def run (self, args, aProject, userConfig) :
-        super(RenderComp, self).run(args, aProject, userConfig)
-        if len(args) :
-            aProject.renderComponent(self.options.component)
-
-    def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Render a single project component. (Required)")
-
-
 

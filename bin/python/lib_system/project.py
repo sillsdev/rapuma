@@ -93,24 +93,24 @@ class Project (object) :
         # If this project is still new these may not exist yet
         try :
             # Set init flag on all aux types to False
-            if self._projConfig['AuxiliaryTypes'] :
-                for key in self._projConfig['AuxiliaryTypes'].keys() :
-                    setattr(self, key + 'Initialized', False)
+#            if self._projConfig['AuxiliaryTypes'] :
+#                for key in self._projConfig['AuxiliaryTypes'].keys() :
+#                    setattr(self, key + 'Initialized', False)
 
-            # Set init flag on all auxs to False
-            if self._projConfig['Auxiliaries'] :
-                for key in self._projConfig['Auxiliaries'].keys() :
-                    setattr(self, key + 'Initialized', False)
+#            # Set init flag on all auxs to False
+#            if self._projConfig['Auxiliaries'] :
+#                for key in self._projConfig['Auxiliaries'].keys() :
+#                    setattr(self, key + 'Initialized', False)
 
             # Set init flag on all comp types to False
-            if self._projConfig['ComponentTypes'] :
-                for key in self._projConfig['ComponentTypes'].keys() :
-                    setattr(self, key + 'Initialized', False)
+#            if self._projConfig['ComponentTypes'] :
+#                for key in self._projConfig['ComponentTypes'].keys() :
+#                    setattr(self, key + 'Initialized', False)
 
-            # Set init flag on all comps to False
-            if self._projConfig['Components'] :
-                for key in self._projConfig['Components'].keys() :
-                    setattr(self, key + 'Initialized', False)
+#            # Set init flag on all comps to False
+#            if self._projConfig['Components'] :
+#                for key in self._projConfig['Components'].keys() :
+#                    setattr(self, key + 'Initialized', False)
 
             # Walk the ComponentTypes section and try to load commands if there are any
             for comp in self._projConfig['ComponentTypes'].keys() :
@@ -263,142 +263,6 @@ class Project (object) :
 ###############################################################################
 ########################## Component Level Functions ##########################
 ###############################################################################
-
-
-    def initCompFiles (self, ctype, initInfo) :
-        '''Get the files for this project according to the init specs. of the
-        component.'''
-
-        fls = initInfo['Files'].__iter__()
-        for fs in fls :
-            print fs
-            fileName = ''; parentFolder = ''
-            fGroup = initInfo['Files'][fs]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    fileName = value
-                elif key == 'location' :
-                    if value :
-                        parentFolder = value
-                else :
-                    pass
-
-            if parentFolder :
-                thisFile = os.path.join(self.projHome, parentFolder, fileName)
-            else :
-                thisFile = os.path.join(self.projHome, fileName)
-
-            # Create source file name
-            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_files', fileName)
-            # Make the file if it is not already there
-            if not os.path.isfile(thisFile) :
-                if os.path.isfile(sourceFile) :
-                    shutil.copy(sourceFile, thisFile)
-                else :
-                    open(thisFile, 'w').close()
-                    if self.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
-
-
-    def initCompFolders (self, ctype, initInfo) :
-        '''Get the folders for this project according to the init specs. of the
-        component.'''
-
-        fldrs = initInfo['Folders'].__iter__()
-        for f in fldrs :
-            folderName = ''; parentFolder = ''
-            fGroup = initInfo['Folders'][f]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-
-                    folderName = value
-                elif key == 'location' :
-                    if value != 'None' :
-                        parentFolder = value
-                else :
-                    pass
-
-            if parentFolder :
-                thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-            else :
-                thisFolder = os.path.join(self.projHome, folderName)
-
-            # Create a source folder name in case there is one
-            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', ctype, 'lib_folders', folderName)
-
-            if not os.path.isdir(thisFolder) :
-                if os.path.isdir(sourceFolder) :
-                    shutil.copytree(sourceFolder, thisFolder)
-                else :
-                    os.mkdir(thisFolder)
-                    if self.debugging == 'True' :
-                        terminal('Created folder: ' + folderName)
-
-
-    def initCompShared (self, initInfo) :
-        '''Get the shared resources for this project according to the init
-        specs. of the component.'''
-        
-        try :
-            fldrs = initInfo['SharedResources'].__iter__()
-            for f in fldrs :
-                folderName = ''; parentFolder = ''
-                fGroup = initInfo['SharedResources'][f]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        folderName = value
-                    elif key == 'location' :
-                        if value != 'None' :
-                            parentFolder = value
-
-                    elif key == 'shareLibPath' :
-                        sharePath = value
-                    else :
-                        pass
-
-                if parentFolder :
-                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-                else :
-                    thisFolder = os.path.join(self.projHome, folderName)
-
-                # Create a source folder name
-                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
-                # Create and copy the source stuff to the project
-                if not os.path.isdir(thisFolder) :
-                    if os.path.isdir(sourceFolder) :
-                        shutil.copytree(sourceFolder, thisFolder)
-        except :
-            pass
-        
-
-######################################################################################################
-
-
-
-#    def initComponent (self, cid, ctype) :
-#        '''A function for initializing a component which is called by the
-#        component or project when a process is run.'''
-
-#        mod = 'project.initComponent()'
-
-#        # No need to init if it is done already
-#        if getattr(self, cid + 'Initialized') == False :
-#             # Pull the information from the project init xml file
-#            initInfo = getCompInitSettings(self.userHome, self.rpmHome, ctype)
-
-#            # Create all necessary (empty) folders
-#            self.initCompFolders(ctype, initInfo)
-#            # Bring in any known resources like macros, etc.
-#            self.initCompShared(initInfo)
-#            # Bring in any know files for this component
-#            self.initCompFiles(ctype, initInfo)
-
-#            setattr(self, cid + 'Initialized', True)
-
-#            return True   
-
-
-######################################################################################################
 
 
     def addNewComponent (self, cid, ctype) :
@@ -555,66 +419,30 @@ class Project (object) :
             self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
 
 
-    def renderComponent (self, cid) :
-        '''Render a single project component.  Before starting, make sure
-        everything necessary has been initialized.'''
+    def getUninitializedComponent (self, cid) :
+        '''Create an object for a specified component.'''
 
-        ctype = self._projConfig['Components'][cid]['compType']
-
-        # Check to see if this component is valid
-        if not cid in self._projConfig['ProjectInfo']['componentList'] :
-            self.writeToLog('ERR', 'Component: [' + cid + '] does not seem to be present in the project.', 'project.renderComponent()')
-            return False
-            
-        # Initialize any auxiliary components that this component depends on
-        if not self.initAuxiliaryComps(cid, ctype) :
-            self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
-
-            return False
-
-# FIXME: How do I call a function that is inside component.py?
-
-        # Initialize this component
-        print dir(component.Component)
-        if not Component.initComponent(component, cid, ctype) :
-            self.writeToLog('ERR', 'Component: [' + cid + '] failed to initialize.', 'project.renderComponent()')
-
-            return False
-
-        # Check for dependencies for this component
-        auxDepends = self._projConfig['ComponentTypes'][ctype]['auxDependencies']
-#        compDepends = self._projConfig['ComponentTypes'][ctype]['compDependencies']
-
-        # First we will do a check on auxilary dependencies.  If any are
-        # missing, this will fail and request that the aux be installed.
-        if len(auxDepends) :
-            # The dependencies should be listed in pairs 0 = auxilary, 1 = auxilary type
-            for a in auxDepends :
-                aux, atype = a.split(':')
-                try :
-                    a = self._projConfig['Auxiliaries'][aux]
-                except :
-                    self.writeToLog('ERR', 'Auxiliary component: [' + aux + '] not present, please install.', 'project.renderComponent()')
-                    return False
-
-#        # Check for missing dependent components.  Require any missing to be
-#        # installed first before continuing.
-#        if len(compDepends) :
-#            # The dependencies should be listed in pairs 0 = component, 1 = component type
-#            for c in compDepends :
-#                comp, ctype = c.split(':')
-#                try :
-#                    c = self._projConfig['Components'][comp]
-#                except :
-#                    self.writeToLog('ERR', 'Component: [' + comp + '] not present, please install.', 'project.renderComponent()')
-#                    return False
-
-        # Each component type has a generic render call call it here.
+        if cid and cid not in self._projConfig['Components'] :
+            self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
+            return None
         
+        if not cid in self._components :
+            config = self._projConfig['Components'][cid]
+            ctype = config['compType']
+            if not ctype in component.componentTypes :
+                self._components[cid] = component.component(self, config, None, cid)
+            else :
+                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype], cid)
+        return self._components[cid]
 
-        self.writeToLog('MSG', 'Rendered: [' + cid + ']', 'project.renderComponent()')
-        
-        return True
+
+    def getComponent (self, cid) :
+        '''A function for initializing (making directories, etc.) a component which is called by the
+        component or project when a process is run.'''
+
+        comp = self.getUninitializedComponent(cid)
+        comp.initComponent()
+        return comp
 
 
 ###############################################################################
@@ -751,7 +579,7 @@ class Project (object) :
             pass
 
 
-    def getAuxiliary (self, aid = None, atype = None) :
+    def getAuxiliary (self, aid = None) :
         '''Create an auxiliary component object that is ready for processes to
         be run on it.'''
 

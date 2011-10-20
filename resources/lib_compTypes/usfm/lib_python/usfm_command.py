@@ -31,5 +31,19 @@ from sys_command import Command
 # Insert the commands you want visable to the system here in the order you want
 # them to appear when listed.
 
+class Render (Command) :
+    '''Render a single component.'''
+    
+    type = "component_render"
+    
+    def run (self, args, aProject, userConfig) :
+        super(Render, self).run(args, aProject, userConfig)
+        comp = aProject.getComponent(self.options.component)
+        comp.render()
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Render a single project component. (Required)")
+
+
 
 
