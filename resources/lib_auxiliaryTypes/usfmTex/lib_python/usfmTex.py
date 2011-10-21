@@ -74,6 +74,7 @@ class UsfmTex (Auxiliary) :
         '''Indicate to the system what TeX macros are going to be used for
         processing this USFM text.'''
         
+# FIXME: Following line indented for testing
          self.project.writeToLog('LOG', "Setting up this project to use the [" + macros + "] TeX macros.")     
         return True
        

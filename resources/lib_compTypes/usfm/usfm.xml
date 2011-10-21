@@ -40,7 +40,7 @@ Todo:
                 <key>auxDependencies</key>
                 <description>This list contains all the auxiliary components and their type that this component is dependent on.</description>
                 <type>list</type>
-                <value>content:pageCompTex,content:fontsTex,content:hyphenTex,content:illustrationsUsfm,content:stylesUsfm,content:usfmTex</value>
+                <value>contentComposition:pageCompTex,contentFont:fontsTex,contentHyphen:hyphenTex,contentIllustrations:illustrationsUsfm,contentStyle:stylesUsfm,contentMacros:usfmTex</value>
             </setting>
             <setting>
                 <name>In Binding List</name>

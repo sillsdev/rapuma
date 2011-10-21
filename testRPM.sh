@@ -3,16 +3,19 @@
 rpm project_remove  -i vwxyz
 rpm project_create  -t bookTex -n "Simple test project" -i vwxyz -d .
 
+rpm auxiliary_add   -a contentMacros        -t usfmTex
 rpm auxiliary_add   -a contentFont          -t fontsTex
 rpm auxiliary_add   -a mapFont              -t fontsTex
-rpm auxiliary_add   -a system               -t illustrationsUsfm
+rpm auxiliary_add   -a contentIllustrations -t illustrationsUsfm
 rpm auxiliary_add   -a contentHyphen        -t hyphenTex
 rpm auxiliary_add   -a contentComposition   -t pageCompTex
 rpm auxiliary_add   -a contentStyle         -t stylesUsfm
+
 rpm component_add   -c jas                  -t usfm
 rpm component_add   -c apa                  -t adminMSEAG
 rpm component_add   -c m01                  -t vMapper
 rpm component_add   -c simpleNotes          -t projectNotes
+
 rpm set_font        -a contentFont          -f CharisSIL            -r primary
 
 #rpm component_render -c apa

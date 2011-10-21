@@ -38,18 +38,18 @@ class Auxiliary (object) :
     __metaclass__ = MetaAuxiliary
     type = None
 
-    initialised = False
+    initialized = False
 
     def __init__(self, aProject, auxConfig, typeConfig) :
         '''Initiate the entire class here'''
         self.project = aProject
         self.auxConfig = auxConfig
         self.typeConfig = typeConfig
-        if not self.initialised : self.__class__.initType(aProject, typeConfig)
+        if not self.initialized : self.__class__.initType(aProject, typeConfig)
 
     def initClass(self) :
         '''Ensures everything is in place for components of this type to do their thing'''
-        self.__class__.initialised = True
+        self.__class__.initialized = True
         
         
     @classmethod

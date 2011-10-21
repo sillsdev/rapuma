@@ -37,7 +37,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid illustraton library ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>system,Knowles-600</value>
+                <value>peripheralIllustrations,contentIllustrations</value>
             </setting>
         </section>
     </section>

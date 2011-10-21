@@ -38,7 +38,7 @@ class SetTexMacros (Command) :
         super(SetTexMacros, self).run(args, aProject, userConfig)
         if not self.options.auxiliary :
             self.options.auxiliary = list(aProject.getAuxiliary('usfmTex'))[0]
-        if self.options.auxiliary and self.options.font :
+        if self.options.macros :
             aProject.getAuxiliary(self.options.auxiliary).setTexMacros(self.options.macros)
         else :
             raise SyntaxError, "Error: Missing required arguments!"

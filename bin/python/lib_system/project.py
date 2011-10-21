@@ -28,6 +28,10 @@ from tools import *
 import component
 import auxiliary
 
+
+#sys.path.insert(0, '/home/dennis/Projects/rpm/resources/lib_auxiliaryTypes/usfmTex/lib_python')
+#import usfmTex
+
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
@@ -113,20 +117,35 @@ class Project (object) :
 #                    setattr(self, key + 'Initialized', False)
 
             # Walk the ComponentTypes section and try to load commands if there are any
-            for comp in self._projConfig['ComponentTypes'].keys() :
-                sys.path.insert(0, os.path.join(self.rpmCompTypes, comp, 'lib_python'))
-                __import__(comp)
-                __import__(comp + '_command')
-            
+            for ctype in self._projConfig['ComponentTypes'].keys() :
+                try :
+                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
+                    __import__(ctype)
+                    __import__(ctype + '_command')
+                except :
+                    self.writeToLog('ERR', 'Failed to load [' + ctype + '] component module type!')
+             
             # Walk the AuxiliaryTypes section and try to load commands if there are any
-            for aux in self._projConfig['AuxiliaryTypes'].keys() :
-                sys.path.insert(0, os.path.join(self.rpmAuxTypes, aux, 'lib_python'))
-                __import__(aux)
-                __import__(aux + '_command')
-            
-                # Clean up the path, we don't need this stuck there
-                del sys.path[0]
+            for atype in self._projConfig['AuxiliaryTypes'].keys() :
+
+# FIXME: Is there a way for this to deliver more useful information if one of
+# the imports fail? If not, we will just have to use a try statement.
+                sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
+                __import__(atype)
+                __import__(atype + '_command')      
+
+
+
+#                try :
+#                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
+#                    __import__(atype)
+#                    __import__(atype + '_command')      
+#                except :
+#                    self.writeToLog('ERR', 'Failed to load [' + atype + '] auxilary module type!')
  
+            # Clean up the path, we don't need this stuck there
+            del sys.path[0]
+                    
         except :
             pass
 
@@ -441,6 +460,9 @@ class Project (object) :
         component or project when a process is run.'''
 
         comp = self.getUninitializedComponent(cid)
+        # Init all aux comps before the comp init
+        self.initAuxiliaryComps(comp)
+        # Now init the comp
         comp.initComponent()
         return comp
 
@@ -450,34 +472,59 @@ class Project (object) :
 ###############################################################################
 
 
-    def initAuxiliaryComps (self, cid, ctype) :
-        '''Initialize any auxiliary components associated with this component.
+    def initAuxiliaryComps (self, comp) :
+        '''Initialize all auxiliary components associated with this component.
         Based on the component ID and its type we will figure out what
         auxiliaries need to be initialized.'''
 
-        for aux in self._projConfig['Auxiliaries'].keys() :
-            if getattr(self, aux + 'Initialized') == False :
-                atype = self._projConfig['Auxiliaries'][aux]['auxType']
-                thisAux = self.getAuxiliary(aux, atype)
+        print dir(comp.cid)
+        print comp.cid
+
+        ctype = comp.project._projConfig['Components'][comp.cid]['compType']
+
+        for aid in comp.project._projConfig['ComponentTypes'][ctype]['auxDependencies'] :
+        
+# FIXME: Need to test for the exsitance of this aux.  How do I do this? Also,
+# how do I push the aux into the comp? Do not need a flag if testing for an aux,
+# right?
+        
+            atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
+            thisAux = self.getAuxiliary(aid, atype)
                 
                 
 # init the files and folders and shared
                 
-                if not thisAux.initThisAuxiliary(aux) :
-                    return False
+            if not thisAux.initThisAuxiliary(aid) :
+                return False
 
-                setattr(self, aux + 'Initialized', True)
 
         return True
 
 
+    def getAuxiliary (self, aid, atype) :
+        '''Create an auxiliary component object that is ready for processes to
+        be run on it.'''
+
+        if aid and aid not in self._projConfig['Auxiliaries'] :
+            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
+            return None
+        
+        if not aid in self._auxilaries :
+            config = self._projConfig['Auxiliaries'][aid]
+            atype = config['auxType']
+            if not atype in auxiliary.auxiliaryTypes :
+                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
+            else :
+                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
+        return self._auxilaries[aid]
+
+        
     def initAuxFiles (self, atype, initInfo) :
         '''Get the files for this auxilary according to the init specs. of the
         component.'''
 
         fls = initInfo['Files'].__iter__()
         for fs in fls :
-            print fs
             fileName = ''; parentFolder = ''
             fGroup = initInfo['Files'][fs]
             for key, value in fGroup.iteritems() :
@@ -579,24 +626,6 @@ class Project (object) :
             pass
 
 
-    def getAuxiliary (self, aid = None) :
-        '''Create an auxiliary component object that is ready for processes to
-        be run on it.'''
-
-        if aid and aid not in self._projConfig['Auxiliaries'] :
-            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
-            return None
-        
-        if not aid in self._auxilaries :
-            config = self._projConfig['Auxiliaries'][aid]
-            atype = config['auxType']
-            if not atype in auxiliary.auxiliaryTypes :
-                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
-            else :
-                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
-        return self._auxilaries[aid]
-
-        
     def addNewAuxiliary (self, aid, atype) :
         '''Add auxiliary component to the current project by inserting auxiliary
         component info into the project conf file.'''
