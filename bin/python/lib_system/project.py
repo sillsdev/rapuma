@@ -118,36 +118,22 @@ class Project (object) :
 
             # Walk the ComponentTypes section and try to load commands if there are any
             for ctype in self._projConfig['ComponentTypes'].keys() :
-                try :
-                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
-                    __import__(ctype)
-                    __import__(ctype + '_command')
-                except :
-                    self.writeToLog('ERR', 'Failed to load [' + ctype + '] component module type!')
+                sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
+                __import__(ctype)
+                __import__(ctype + '_command')
              
             # Walk the AuxiliaryTypes section and try to load commands if there are any
             for atype in self._projConfig['AuxiliaryTypes'].keys() :
 
-# FIXME: Is there a way for this to deliver more useful information if one of
-# the imports fail? If not, we will just have to use a try statement.
                 sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
                 __import__(atype)
                 __import__(atype + '_command')      
-
-
-
-#                try :
-#                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
-#                    __import__(atype)
-#                    __import__(atype + '_command')      
-#                except :
-#                    self.writeToLog('ERR', 'Failed to load [' + atype + '] auxilary module type!')
  
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
                     
-        except :
-            pass
+        except StandardError as e:
+            self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
 
         
  
