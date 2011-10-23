@@ -96,7 +96,7 @@ class Project (object) :
 
         # If this project is still new these may not exist yet
         try :
-            # Set init flag on all aux types to False
+#            # Set init flag on all aux types to False
 #            if self._projConfig['AuxiliaryTypes'] :
 #                for key in self._projConfig['AuxiliaryTypes'].keys() :
 #                    setattr(self, key + 'Initialized', False)
@@ -106,7 +106,7 @@ class Project (object) :
 #                for key in self._projConfig['Auxiliaries'].keys() :
 #                    setattr(self, key + 'Initialized', False)
 
-            # Set init flag on all comp types to False
+#            # Set init flag on all comp types to False
 #            if self._projConfig['ComponentTypes'] :
 #                for key in self._projConfig['ComponentTypes'].keys() :
 #                    setattr(self, key + 'Initialized', False)
@@ -124,7 +124,6 @@ class Project (object) :
              
             # Walk the AuxiliaryTypes section and try to load commands if there are any
             for atype in self._projConfig['AuxiliaryTypes'].keys() :
-
                 sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
                 __import__(atype)
                 __import__(atype + '_command')      
@@ -449,7 +448,9 @@ class Project (object) :
         # Init all aux comps before the comp init
         self.initAuxiliaryComps(comp)
         # Now init the comp
+        print dir(comp)
         comp.initComponent()
+        print dir(comp)
         return comp
 
 
@@ -463,33 +464,29 @@ class Project (object) :
         Based on the component ID and its type we will figure out what
         auxiliaries need to be initialized.'''
 
-        print dir(comp.cid)
-        print comp.cid
-
         ctype = comp.project._projConfig['Components'][comp.cid]['compType']
 
         for aid in comp.project._projConfig['ComponentTypes'][ctype]['auxDependencies'] :
-        
-# FIXME: Need to test for the exsitance of this aux.  How do I do this? Also,
-# how do I push the aux into the comp? Do not need a flag if testing for an aux,
-# right?
-        
-            atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
-            thisAux = self.getAuxiliary(aid, atype)
-                
-                
-# init the files and folders and shared
-                
-            if not thisAux.initThisAuxiliary(aid) :
-                return False
 
+            aid = aid.split(':')[0]
+            
+# FIXME: We still need a way of knowing if the aux being called has gone through
+# the init process.  How do we do that?
+            
+            atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
+            thisAux = self.getAuxiliary(aid)
+
+            if not thisAux.initAuxiliary(aid) :
+                return False
 
         return True
 
 
-    def getAuxiliary (self, aid, atype) :
+    def getAuxiliary (self, aid) :
         '''Create an auxiliary component object that is ready for processes to
         be run on it.'''
+
+        atype = self._projConfig['Auxiliaries'][aid]['auxType']
 
         if aid and aid not in self._projConfig['Auxiliaries'] :
             self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
@@ -503,113 +500,6 @@ class Project (object) :
             else :
                 self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
         return self._auxilaries[aid]
-
-        
-    def initAuxFiles (self, atype, initInfo) :
-        '''Get the files for this auxilary according to the init specs. of the
-        component.'''
-
-        fls = initInfo['Files'].__iter__()
-        for fs in fls :
-            fileName = ''; parentFolder = ''
-            fGroup = initInfo['Files'][fs]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    fileName = value
-                elif key == 'location' :
-                    if value :
-                        parentFolder = value
-                else :
-                    pass
-
-            if parentFolder :
-                thisFile = os.path.join(self.projHome, parentFolder, fileName)
-            else :
-                thisFile = os.path.join(self.projHome, fileName)
-
-            # Create source file name
-            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', atype, 'lib_files', fileName)
-            # Make the file if it is not already there
-            if not os.path.isfile(thisFile) :
-                if os.path.isfile(sourceFile) :
-                    shutil.copy(sourceFile, thisFile)
-                else :
-                    open(thisFile, 'w').close()
-                    if self.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
-
-
-    def initAuxFolders (self, atype, initInfo) :
-        '''Get the folders for this auxiliary according to the init specs. of
-        the component.'''
-
-        fldrs = initInfo['Folders'].__iter__()
-        for f in fldrs :
-            folderName = ''; parentFolder = ''
-            fGroup = initInfo['Folders'][f]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-
-                    folderName = value
-                elif key == 'location' :
-                    if value != 'None' :
-                        parentFolder = value
-                else :
-                    pass
-
-            if parentFolder :
-                thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-            else :
-                thisFolder = os.path.join(self.projHome, folderName)
-
-            # Create a source folder name in case there is one
-            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', atype, 'lib_folders', folderName)
-
-            if not os.path.isdir(thisFolder) :
-                if os.path.isdir(sourceFolder) :
-                    shutil.copytree(sourceFolder, thisFolder)
-                else :
-                    os.mkdir(thisFolder)
-                    if self.debugging == 'True' :
-                        terminal('Created folder: ' + folderName)
-
-
-    def initAuxShared (self, initInfo) :
-        '''Get the shared resources for this project according to the init
-
-        specs. of the component.'''
-        
-        try :
-            fldrs = initInfo['SharedResources'].__iter__()
-            for f in fldrs :
-                folderName = ''; parentFolder = ''
-                fGroup = initInfo['SharedResources'][f]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        folderName = value
-                    elif key == 'location' :
-                        if value != 'None' :
-                            parentFolder = value
-
-                    elif key == 'shareLibPath' :
-                        sharePath = value
-
-                    else :
-                        pass
-
-                if parentFolder :
-                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-                else :
-                    thisFolder = os.path.join(self.projHome, folderName)
-
-                # Create a source folder name
-                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
-                # Create and copy the source stuff to the project
-                if not os.path.isdir(thisFolder) :
-                    if os.path.isdir(sourceFolder) :
-                        shutil.copytree(sourceFolder, thisFolder)
-        except :
-            pass
 
 
     def addNewAuxiliary (self, aid, atype) :

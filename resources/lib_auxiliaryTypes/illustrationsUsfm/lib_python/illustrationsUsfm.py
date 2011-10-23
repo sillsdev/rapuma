@@ -60,7 +60,7 @@ class IllustrationsUsfm (Auxiliary) :
         super(IllustrationsUsfm, cls).initType(aProject, typeConfig)
         
         
-    def initThisAuxiliary (self, aux) :
+    def initAuxiliary (self, aux) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
         

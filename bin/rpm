@@ -177,6 +177,7 @@ if command :
 if aProject.writeOutProjConfFile :
     writeProjConfFile(aProject._projConfig, projHome)
     aProject.writeOutProjConfFile = False
+    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 if aProject.writeOutUserConfFile :
     writeUserConfFile(aProject._userConfig, userHome)

@@ -72,21 +72,13 @@ class Component (object) :
         pass
 
 
-    def initComponent(self) :
+    def render(self) :
+        '''A dummy function to avoid errors.  Any real rendering of any
+        component should happen in the component itself.'''
 
-        # Pull the information from the project init xml file
-        initInfo = getCompInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+        self.project.writeToLog('ERR', 'Rendering function not found for: ' + self.type + ' component type', 'component.render()')
 
-        # Create all necessary (empty) folders
-        self.initCompFolders(initInfo)
-        # Bring in any known resources like macros, etc.
-        self.initCompShared(initInfo)
-        # Bring in any know files for this component
-        self.initCompFiles(initInfo)
 
-        return True   
-
-        
     def initCompFiles (self, initInfo) :
         '''Get the files for this project according to the init specs. of the
         component.'''
