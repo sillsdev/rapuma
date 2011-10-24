@@ -110,6 +110,21 @@ def getCompInitSettings (userHome, rpmHome, compType) :
         return res
 
 
+def getAuxInitSettings (userHome, rpmHome, auxType) :
+    '''Get the project initialisation settings from the project type init xml
+    file.  Then, if it exsits, override these settings with the version found in
+    the user area.'''
+
+    rpmAuxInitXML     = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
+    userAuxInitXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
+    
+    res = getXMLSettings(rpmAuxInitXML)
+    if os.path.isfile(userAuxInitXML) :
+        return overrideSettings(res, userAuxInitXML)
+    else :
+        return res
+
+
 def getProjSettings (userHome, rpmHome, projType) :
     '''Get the default settings out of a project type xml description file.'''
 

@@ -42,11 +42,12 @@ class StylesUsfm (Auxiliary) :
 
     type = "stylesUsfm"
     
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(StylesUsfm, self).__init__(aProject, auxConfig, typeConfig)
+        super(StylesUsfm, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -60,12 +61,12 @@ class StylesUsfm (Auxiliary) :
         super(StylesUsfm, cls).initType(aProject, typeConfig)
         
 
-    def initAuxiliary (self, aux) :
-        '''Initialize this component.  This is a generic named function that
-        will be called from the project initialisation process.'''
-        
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the StylesUsfm auxiliary component type.")     
-        return True
+#    def initAuxiliary (self, aux) :
+#        '''Initialize this component.  This is a generic named function that
+#        will be called from the project initialisation process.'''
+#        
+#        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the StylesUsfm auxiliary component type.")     
+#        return True
 
 
     def setStyle (self, ctype, style) :

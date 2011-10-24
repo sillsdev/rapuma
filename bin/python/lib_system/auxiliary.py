@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-# import codecs, os
+import os, shutil
 
 # Load the local classes
 
@@ -40,12 +40,14 @@ class Auxiliary (object) :
 
     initialized = False
 
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initiate the entire class here'''
         self.project = aProject
         self.auxConfig = auxConfig
-        self.typeConfig = typeConfig
+        self.initialized = False
+        self.aid = aid
         if not self.initialized : self.__class__.initType(aProject, typeConfig)
+
 
     def initClass(self) :
         '''Ensures everything is in place for components of this type to do their thing'''
@@ -66,33 +68,42 @@ class Auxiliary (object) :
         '''A dummy function to avoid errors.  Any real initilization of any
         auxiliary component should happen in the auxiliary itself.'''
         
-        pass
+        self.project.writeToLog('WRN', "The default initAuxiliary() was called for the [" + self.aid + "] auxiliary component.")     
+        return True
 
 
     def initAuxFiles (self, atype, initInfo) :
         '''Get the files for this auxilary according to the init specs. of the
         component.'''
 
-        fls = initInfo['Files'].__iter__()
-        for fs in fls :
-            fileName = ''; parentFolder = ''
-            fGroup = initInfo['Files'][fs]
+        files = initInfo['Files'].__iter__()
+        for f in files :
+            fileName = ''; homeFolder = ''
+            fGroup = initInfo['Files'][f]
             for key, value in fGroup.iteritems() :
                 if key == 'name' :
                     fileName = value
                 elif key == 'location' :
                     if value :
-                        parentFolder = value
+                        homeFolder = value
                 else :
                     pass
+                    
+            parentFolder = ''
+            if initInfo['Folders'] :
+                folders = initInfo['Folders'].keys()
+                for f in folders :
+                    if initInfo['Folders'][f]['name'] == homeFolder :
+                        if initInfo['Folders'][f]['location'] != '' :
+                            parentFolder = initInfo['Folders'][f]['location']
 
-            if parentFolder :
-                thisFile = os.path.join(self.projHome, parentFolder, fileName)
+            if parentFolder != '' :
+                thisFile = os.path.join(self.project.projHome, parentFolder, homeFolder, fileName)
             else :
-                thisFile = os.path.join(self.projHome, fileName)
+                thisFile = os.path.join(self.project.projHome, homeFolder, fileName)
 
             # Create source file name
-            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', atype, 'lib_files', fileName)
+            sourceFile = os.path.join(self.project.rpmHome, 'resources', 'lib_auxiliaryTypes', atype, 'lib_files', fileName)
             # Make the file if it is not already there
             if not os.path.isfile(thisFile) :
                 if os.path.isfile(sourceFile) :
@@ -107,13 +118,13 @@ class Auxiliary (object) :
         '''Get the folders for this auxiliary according to the init specs. of
         the component.'''
 
-        fldrs = initInfo['Folders'].__iter__()
+#        fldrs = initInfo['Folders'].__iter__()
+        fldrs = initInfo['Folders'].keys()
         for f in fldrs :
             folderName = ''; parentFolder = ''
             fGroup = initInfo['Folders'][f]
             for key, value in fGroup.iteritems() :
                 if key == 'name' :
-
                     folderName = value
                 elif key == 'location' :
                     if value != 'None' :
@@ -121,57 +132,57 @@ class Auxiliary (object) :
                 else :
                     pass
 
+            # Create paths
             if parentFolder :
-                thisFolder = os.path.join(self.projHome, parentFolder, folderName)
+                parentFolder = os.path.join(self.project.projHome, parentFolder)
+                thisFolder = os.path.join(parentFolder, folderName)
             else :
-                thisFolder = os.path.join(self.projHome, folderName)
+                thisFolder = os.path.join(self.project.projHome, folderName)
 
-            # Create a source folder name in case there is one
-            sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_compTypes', atype, 'lib_folders', folderName)
-
+            # Create the folders
+            if parentFolder :
+                if not os.path.isdir(parentFolder) :
+                    os.mkdir(parentFolder)
+                    self.project.writeToLog('LOG', 'Created: [' + parentFolder, 'auxiliary.initAuxFolders()')
             if not os.path.isdir(thisFolder) :
-                if os.path.isdir(sourceFolder) :
-                    shutil.copytree(sourceFolder, thisFolder)
-                else :
-                    os.mkdir(thisFolder)
-                    if self.debugging == 'True' :
-                        terminal('Created folder: ' + folderName)
+                os.mkdir(thisFolder)
+                self.project.writeToLog('LOG', 'Created: [' + thisFolder, 'auxiliary.initAuxFolders()')
 
 
-    def initAuxShared (self, initInfo) :
-        '''Get the shared resources for this project according to the init
+#    def initAuxShared (self, initInfo) :
+#        '''Get the shared resources for this project according to the init
 
-        specs. of the component.'''
-        
-        try :
-            fldrs = initInfo['SharedResources'].__iter__()
-            for f in fldrs :
-                folderName = ''; parentFolder = ''
-                fGroup = initInfo['SharedResources'][f]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        folderName = value
-                    elif key == 'location' :
-                        if value != 'None' :
-                            parentFolder = value
+#        specs. of the component.'''
+#        
+#        try :
+#            fldrs = initInfo['SharedResources'].__iter__()
+#            for f in fldrs :
+#                folderName = ''; parentFolder = ''
+#                fGroup = initInfo['SharedResources'][f]
+#                for key, value in fGroup.iteritems() :
+#                    if key == 'name' :
+#                        folderName = value
+#                    elif key == 'location' :
+#                        if value != 'None' :
+#                            parentFolder = value
 
-                    elif key == 'shareLibPath' :
-                        sharePath = value
+#                    elif key == 'shareLibPath' :
+#                        sharePath = value
 
-                    else :
-                        pass
+#                    else :
+#                        pass
 
-                if parentFolder :
-                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
-                else :
-                    thisFolder = os.path.join(self.projHome, folderName)
+#                if parentFolder :
+#                    thisFolder = os.path.join(self.projHome, parentFolder, folderName)
+#                else :
+#                    thisFolder = os.path.join(self.projHome, folderName)
 
-                # Create a source folder name
-                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
-                # Create and copy the source stuff to the project
-                if not os.path.isdir(thisFolder) :
-                    if os.path.isdir(sourceFolder) :
-                        shutil.copytree(sourceFolder, thisFolder)
-        except :
-            pass
+#                # Create a source folder name
+#                sourceFolder = os.path.join(self.rpmHome, 'resources', 'lib_share', sharePath)
+#                # Create and copy the source stuff to the project
+#                if not os.path.isdir(thisFolder) :
+#                    if os.path.isdir(sourceFolder) :
+#                        shutil.copytree(sourceFolder, thisFolder)
+#        except :
+#            pass
 

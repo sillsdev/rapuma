@@ -42,11 +42,12 @@ class PageCompTex (Auxiliary) :
 
     type = "pageCompTex"
     
-    def __init__(self, aProject, auxType, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(PageCompTex, self).__init__(aProject, auxType, typeConfig)
+        super(PageCompTex, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -60,12 +61,12 @@ class PageCompTex (Auxiliary) :
         super(PageCompTex, cls).initType(aProject, typeConfig)
         
 
-    def initAuxiliary (self, aux) :
-        '''Initialize this component.  This is a generic named function that
-        will be called from the project initialisation process.'''
-        
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
-        return True
+#    def initAuxiliary (self, aux) :
+#        '''Initialize this component.  This is a generic named function that
+#        will be called from the project initialisation process.'''
+#        
+#        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
+#        return True
 
 
     def setPageCompTex (self, ctype, pctype) :

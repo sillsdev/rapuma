@@ -39,6 +39,7 @@ from component import Component
 ###############################################################################
 
 class Usfm (Component) :
+
     type = "usfm"
 
     def __init__(self, aProject, compType, typeConfig, cid) :
@@ -61,17 +62,18 @@ class Usfm (Component) :
         
 
     def initComponent(self) :
+        '''This is will initiate this component and will override the function
+        of the same name in the component.py module'''
 
         # Pull the information from the project init xml file
         initInfo = getCompInitSettings(self.project.userHome, self.project.rpmHome, self.type)
 
         # Create all necessary (empty) folders
         self.initCompFolders(initInfo)
-        # Bring in any known resources like macros, etc.
-        self.initCompShared(initInfo)
         # Bring in any know files for this component
         self.initCompFiles(initInfo)
 
+        self.project.writeToLog('LOG', "Initialized [" + self.cid + "] for the UsfmTex auxiliary component type.")     
         return True   
 
         

@@ -42,11 +42,12 @@ class IllustrationsUsfm (Auxiliary) :
 
     type = 'illustrationsUsfm'
 
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(IllustrationsUsfm, self).__init__(aProject, auxConfig, typeConfig)
+        super(IllustrationsUsfm, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -60,12 +61,12 @@ class IllustrationsUsfm (Auxiliary) :
         super(IllustrationsUsfm, cls).initType(aProject, typeConfig)
         
         
-    def initAuxiliary (self, aux) :
-        '''Initialize this component.  This is a generic named function that
-        will be called from the project initialisation process.'''
-        
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the IllustrationsUsfm auxiliary component type.")     
-        return True
+#    def initAuxiliary (self, aux) :
+#        '''Initialize this component.  This is a generic named function that
+#        will be called from the project initialisation process.'''
+#        
+#        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the IllustrationsUsfm auxiliary component type.")     
+#        return True
 
 
 

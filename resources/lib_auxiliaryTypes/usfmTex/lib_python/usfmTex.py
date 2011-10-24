@@ -44,11 +44,12 @@ class UsfmTex (Auxiliary) :
 
     type = "usfmTex"
     
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(UsfmTex, self).__init__(aProject, auxConfig, typeConfig)
+        super(UsfmTex, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -62,11 +63,19 @@ class UsfmTex (Auxiliary) :
         super(UsfmTex, cls).initType(aProject, typeConfig)
 
 
-    def initAuxiliary (self, aux) :
-        '''Initialize this component.  This is a generic named function that
-        will be called from the project initialisation process.'''
+    def initAuxiliary (self) :
+        '''This is will initiate this component and will override the function
+        of the same name in the component.py module'''
+
+        # Pull the information from the project init xml file
+        initInfo = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+
+        # Create all necessary (empty) folders
+        self.initAuxFolders(self.type, initInfo)
+        # Bring in any know files for this component
+        self.initAuxFiles(self.type, initInfo)
         
-        self.project.writeToLog('LOG', "Initialized xxxxxx [" + aux + "] for the UsfmTex auxiliary component type.")     
+        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
         return True
 
 

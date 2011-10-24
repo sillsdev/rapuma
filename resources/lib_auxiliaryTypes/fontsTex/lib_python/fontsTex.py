@@ -43,11 +43,12 @@ class FontsTex (Auxiliary) :
 
     type = "fontsTex"
     
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(FontsTex, self).__init__(aProject, auxConfig, typeConfig)
+        super(FontsTex, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -61,11 +62,11 @@ class FontsTex (Auxiliary) :
         super(FontsTex, cls).initType(aProject, typeConfig)
 
 
-    def initAuxiliary (self, aux) :
+    def initAuxiliary (self) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
         
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the FontsTex auxiliary component type.")     
+        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the FontsTex auxiliary component type.")     
         return True
 
 

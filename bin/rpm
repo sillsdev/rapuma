@@ -177,12 +177,13 @@ if command :
 if aProject.writeOutProjConfFile :
     writeProjConfFile(aProject._projConfig, projHome)
     aProject.writeOutProjConfFile = False
-    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 if aProject.writeOutUserConfFile :
     writeUserConfFile(aProject._userConfig, userHome)
     aProject.writeOutUserConfFile = False
 
+# Now trim the log file if it is needed
+aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 ## Politely say good bye
 terminal('\n\t\tThank you, please come again!\n')

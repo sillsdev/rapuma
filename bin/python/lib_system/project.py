@@ -48,7 +48,7 @@ class Project (object) :
         self._projConfig        = projConfig
         self._userConfig        = userConfig
         self._components        = {}
-        self._auxilaries        = {}
+        self._auxiliaries       = {}
 
         # Set all the initial paths and locations
         # System level paths
@@ -446,11 +446,9 @@ class Project (object) :
 
         comp = self.getUninitializedComponent(cid)
         # Init all aux comps before the comp init
-        self.initAuxiliaryComps(comp)
+        self.initCompAuxiliaries(comp)
         # Now init the comp
-        print dir(comp)
         comp.initComponent()
-        print dir(comp)
         return comp
 
 
@@ -459,7 +457,7 @@ class Project (object) :
 ###############################################################################
 
 
-    def initAuxiliaryComps (self, comp) :
+    def initCompAuxiliaries (self, comp) :
         '''Initialize all auxiliary components associated with this component.
         Based on the component ID and its type we will figure out what
         auxiliaries need to be initialized.'''
@@ -475,31 +473,58 @@ class Project (object) :
             
             atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
             thisAux = self.getAuxiliary(aid)
-
-            if not thisAux.initAuxiliary(aid) :
+            
+            if not thisAux.initAuxiliary() :
                 return False
 
         return True
 
 
-    def getAuxiliary (self, aid) :
-        '''Create an auxiliary component object that is ready for processes to
-        be run on it.'''
-
-        atype = self._projConfig['Auxiliaries'][aid]['auxType']
+    def getUninitializedAuxiliary (self, aid) :
+        '''Create an object for a specified component.'''
 
         if aid and aid not in self._projConfig['Auxiliaries'] :
-            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
+            self.writeToLog('ERR', 'Auxiliary component: [' + aid + '] not found.', 'project.getComponent()')            
             return None
         
-        if not aid in self._auxilaries :
+        if not aid in self._auxiliaries :
             config = self._projConfig['Auxiliaries'][aid]
             atype = config['auxType']
             if not atype in auxiliary.auxiliaryTypes :
-                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
+                self._auxiliaries[aid] = auxiliary.auxiliary(self, config, None, aid)
             else :
-                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
-        return self._auxilaries[aid]
+                self._auxiliaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype], aid)
+        return self._auxiliaries[aid]
+
+
+    def getAuxiliary (self, aid) :
+        '''A function for initializing (making directories, etc.) a component which is called by the
+        component or project when a process is run.'''
+
+        aux = self.getUninitializedAuxiliary(aid)
+        # Now init the aux
+        aux.initAuxiliary()
+        return aux
+
+
+#    def getAuxiliary (self, aid) :
+#        '''Create an auxiliary component object that is ready for processes to
+#        be run on it.'''
+
+#        atype = self._projConfig['Auxiliaries'][aid]['auxType']
+
+#        if aid and aid not in self._projConfig['Auxiliaries'] :
+#            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
+#            return None
+#        
+#        if not aid in self._auxilaries :
+#            config = self._projConfig['Auxiliaries'][aid]
+#            atype = config['auxType']
+#            if not atype in auxiliary.auxiliaryTypes :
+#                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
+#            else :
+#                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
+#        return self._auxilaries[aid]
 
 
     def addNewAuxiliary (self, aid, atype) :

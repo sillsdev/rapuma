@@ -36,11 +36,12 @@ class HyphenTex (Auxiliary) :
 
     type = "hyphenTex"
     
-    def __init__(self, aProject, auxConfig, typeConfig) :
+    def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(HyphenTex, self).__init__(aProject, auxConfig, typeConfig)
+        super(HyphenTex, self).__init__(aProject, auxConfig, typeConfig, aid)
+        # no file system work to be done in this method!
 
 
 ###############################################################################
@@ -54,12 +55,12 @@ class HyphenTex (Auxiliary) :
         super(HyphenTex, cls).initType(aProject, typeConfig)
 
         
-    def initAuxiliary (self, aux) :
-        '''Initialize this component.  This is a generic named function that
-        will be called from the project initialisation process.'''
-        
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the HyphenTex auxiliary component type.")     
-        return True
+#    def initAuxiliary (self, aux) :
+#        '''Initialize this component.  This is a generic named function that
+#        will be called from the project initialisation process.'''
+#        
+#        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the HyphenTex auxiliary component type.")     
+#        return True
 
 
 
