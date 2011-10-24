@@ -76,31 +76,15 @@ class Auxiliary (object) :
         '''Get the files for this auxilary according to the init specs. of the
         component.'''
 
-        files = initInfo['Files'].__iter__()
+        self.initAuxFolders(atype, initInfo)
+        
+        files = initInfo['Files'].keys()
         for f in files :
-            fileName = ''; homeFolder = ''
-            fGroup = initInfo['Files'][f]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    fileName = value
-                elif key == 'location' :
-                    if value :
-                        homeFolder = value
-                else :
-                    pass
+            fileName = initInfo['Files'][f]['name']
+            folder = initInfo['Files'][f]['location']
                     
-            parentFolder = ''
-            if initInfo['Folders'] :
-                folders = initInfo['Folders'].keys()
-                for f in folders :
-                    if initInfo['Folders'][f]['name'] == homeFolder :
-                        if initInfo['Folders'][f]['location'] != '' :
-                            parentFolder = initInfo['Folders'][f]['location']
-
-            if parentFolder != '' :
-                thisFile = os.path.join(self.project.projHome, parentFolder, homeFolder, fileName)
-            else :
-                thisFile = os.path.join(self.project.projHome, homeFolder, fileName)
+            thisFolder = self.getAuxFileFolderPath(folder, initInfo)
+            thisFile = os.path.join(thisFolder, fileName)
 
             # Create source file name
             sourceFile = os.path.join(self.project.rpmHome, 'resources', 'lib_auxiliaryTypes', atype, 'lib_files', fileName)
@@ -110,7 +94,7 @@ class Auxiliary (object) :
                     shutil.copy(sourceFile, thisFile)
                 else :
                     open(thisFile, 'w').close()
-                    if self.debugging == 'True' :
+                    if self.project.debugging == 'True' :
                         terminal('Created file: ' + thisFile)
 
 
@@ -118,26 +102,17 @@ class Auxiliary (object) :
         '''Get the folders for this auxiliary according to the init specs. of
         the component.'''
 
-#        fldrs = initInfo['Folders'].__iter__()
-        fldrs = initInfo['Folders'].keys()
-        for f in fldrs :
-            folderName = ''; parentFolder = ''
-            fGroup = initInfo['Folders'][f]
-            for key, value in fGroup.iteritems() :
-                if key == 'name' :
-                    folderName = value
-                elif key == 'location' :
-                    if value != 'None' :
-                        parentFolder = value
-                else :
-                    pass
+        folders = initInfo['Folders'].keys()
+        for f in folders :
+            thisFolder = initInfo['Folders'][f]['name']
+            parentFolder = initInfo['Folders'][f]['location']
 
             # Create paths
             if parentFolder :
                 parentFolder = os.path.join(self.project.projHome, parentFolder)
-                thisFolder = os.path.join(parentFolder, folderName)
+                thisFolder = os.path.join(parentFolder, thisFolder)
             else :
-                thisFolder = os.path.join(self.project.projHome, folderName)
+                thisFolder = os.path.join(self.project.projHome, thisFolder)
 
             # Create the folders
             if parentFolder :
@@ -148,6 +123,23 @@ class Auxiliary (object) :
                 os.mkdir(thisFolder)
                 self.project.writeToLog('LOG', 'Created: [' + thisFolder, 'auxiliary.initAuxFolders()')
 
+
+    def getAuxFileFolderPath (self, folderSection, initInfo) :
+        '''Return the folder path/name for a given folder.  This includes
+        looking for a parent folder.'''
+        
+        folderName = initInfo['Folders'][folderSection]['name']
+        parentFolder = initInfo['Folders'][folderSection]['location']
+
+        # Create paths
+        if parentFolder :
+            parentFolder = os.path.join(self.project.projHome, parentFolder)
+            thisFolder = os.path.join(parentFolder, folderName)
+        else :
+            thisFolder = os.path.join(self.project.projHome, folderName)
+
+        return thisFolder
+        
 
 #    def initAuxShared (self, initInfo) :
 #        '''Get the shared resources for this project according to the init

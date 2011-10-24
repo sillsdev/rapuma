@@ -83,8 +83,8 @@ Todo:
         <description>This section contains the settings for all the folders needed for processing this component.</description>
         <section>
             <name>Project Font Folder</name>
-            <sectionID>FontFolder</sectionID>
-            <description>The project font folder.</description>
+            <sectionID>Fonts</sectionID>
+            <description>The project fonts folder.</description>
             <setting>
                 <name>Name</name>
                 <key>name</key>

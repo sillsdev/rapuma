@@ -66,7 +66,36 @@ class FontsTex (Auxiliary) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
         
-        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the FontsTex auxiliary component type.")     
+        # Pull the information from the project init xml file
+        initInfo = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+
+        # Bring in any know files for this component
+        self.initAuxFiles(self.type, initInfo)
+        
+        # Init the fonts that have been recored with the project
+        for aux in initInfo['Auxiliaries'].keys() :
+            if initInfo['Auxiliaries'][aux][auxType] == self.type :
+                fontInfo = getFontInitSettings(initInfo['Auxiliaries'][aux]['primary']['fontFolder'])
+                
+# Start up here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                
+        
+#        # Copy the contents of the target font folder to the project Fonts folder
+#        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts')) :
+#            os.mkdir(os.path.join(self.project.projHome, 'Fonts'))
+
+#        # FIXME-Later: At this point it might be nice if we queried the settings
+#        # (xml) file for the exact files that need to be copied into the
+#        # project.  For now we'll just do a blind copy of the folder and take
+#        # everything and trust it is all good to have in the project.'
+#        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts', font)) :
+#            shutil.copytree(fontDir, os.path.join(self.project.projHome, 'Fonts', font))
+#        else :
+#            self.project.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
+
+
+        
+        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
         return True
 
 
@@ -108,20 +137,7 @@ class FontsTex (Auxiliary) :
             self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
 
-        # Copy the contents of the target font folder to the project Fonts folder
-        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts')) :
-            os.mkdir(os.path.join(self.project.projHome, 'Fonts'))
-
-        # FIXME-Later: At this point it might be nice if we queried the settings
-        # (xml) file for the exact files that need to be copied into the
-        # project.  For now we'll just do a blind copy of the folder and take
-        # everything and trust it is all good to have in the project.'
-        if not os.path.isdir(os.path.join(self.project.projHome, 'Fonts', font)) :
-            shutil.copytree(fontDir, os.path.join(self.project.projHome, 'Fonts', font))
-        else :
-            self.project.writeToLog('ERR', 'Folder already there. Did not copy ' + font + ' to Fonts folder.')
-
-        # Now inject the font info into the fontset component section in the
+        # Inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
         fInfo = getXMLSettings(fontInfo)
         self.auxConfig[rank] = fInfo.dict()

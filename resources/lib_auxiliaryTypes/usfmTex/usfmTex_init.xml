@@ -492,7 +492,7 @@ Todo:
         <description>This section contains the settings for all the folders needed for processing this component.</description>
         <section>
             <name>Project Macro Folder</name>
-            <sectionID>MacroFolder</sectionID>
+            <sectionID>Macros</sectionID>
             <description>The project macro folder.</description>
             <setting>
                 <name>Name</name>
