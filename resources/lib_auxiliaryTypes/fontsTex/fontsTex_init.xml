@@ -43,39 +43,6 @@ Todo:
                 <value>False</value>
             </setting>
         </section>
-        <section>
-            <name>Font Definition File</name>
-            <sectionID>FontDefFile</sectionID>
-            <description>Font definition data for all the fonts used in this project.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of this file.</description>
-                <type>string</type>
-                <value>fonts.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Fonts</value>
-            </setting>
-            <setting>
-                <name>Version Control</name>
-                <key>versionControl</key>
-                <description>Is this file under version control?</description>
-                <type>boolean</type>
-                <value>True</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
-        </section>
     </section>
     <section>
         <name>Folders</name>

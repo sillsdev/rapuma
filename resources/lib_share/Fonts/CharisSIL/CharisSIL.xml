@@ -45,6 +45,13 @@ Todo:
             <value>Regular</value>
         </setting>
         <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>string</type>
+            <value>regular</value>
+        </setting>
+        <setting>
             <name>Type</name>
             <key>type</key>
             <description>The type of font for this typeface.</description>
@@ -125,6 +132,13 @@ Todo:
             <description>The style of this typeface.</description>
             <type>string</type>
             <value>Bold</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>string</type>
+            <value>bold</value>
         </setting>
         <setting>
             <name>Type</name>
@@ -209,6 +223,13 @@ Todo:
             <value>Italic</value>
         </setting>
         <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>string</type>
+            <value>italic</value>
+        </setting>
+        <setting>
             <name>Type</name>
             <key>type</key>
             <description>The type of font for this typeface.</description>
@@ -289,6 +310,13 @@ Todo:
             <description>The style of this typeface.</description>
             <type>string</type>
             <value>Bold Italic</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>string</type>
+            <value>bolditalic</value>
         </setting>
         <setting>
             <name>Type</name>

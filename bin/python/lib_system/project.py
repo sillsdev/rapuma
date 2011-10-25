@@ -490,6 +490,7 @@ class Project (object) :
         if not aid in self._auxiliaries :
             config = self._projConfig['Auxiliaries'][aid]
             atype = config['auxType']
+            initialized = False
             if not atype in auxiliary.auxiliaryTypes :
                 self._auxiliaries[aid] = auxiliary.auxiliary(self, config, None, aid)
             else :

@@ -102,12 +102,7 @@ def getCompInitSettings (userHome, rpmHome, compType) :
 
     rpmCompInitXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
     userCompInitXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
-    
-    res = getXMLSettings(rpmCompInitXML)
-    if os.path.isfile(userCompInitXML) :
-        return overrideSettings(res, userCompInitXML)
-    else :
-        return res
+    return getXMLOverrideSettings(rpmCompInitXML, userCompInitXML)
 
 
 def getAuxInitSettings (userHome, rpmHome, auxType) :
@@ -117,13 +112,25 @@ def getAuxInitSettings (userHome, rpmHome, auxType) :
 
     rpmAuxInitXML     = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
     userAuxInitXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
+    return getXMLOverrideSettings(rpmAuxInitXML, userAuxInitXML)
     
-    res = getXMLSettings(rpmAuxInitXML)
-    if os.path.isfile(userAuxInitXML) :
-        return overrideSettings(res, userAuxInitXML)
+
+def getFontInitSettings (userHome, rpmHome, fontFolder) :
+    '''Get the font settings from an XML font settings file.'''
+    
+    rpmFontInitXML     = os.path.join(rpmHome, 'resources', 'lib_share', 'Fonts', fontFolder, fontFolder + '.xml')
+    userFontInitXML     = os.path.join(userHome, 'resources', 'lib_share', 'Fonts', fontFolder, fontFolder + '.xml') 
+    return getXMLOverrideSettings(rpmFontInitXML, userFontInitXML)
+    
+def getXMLOverrideSettings (rpm, user) :
+    '''Get the XML settings then override them if needed.'''
+    
+    res = getXMLSettings(rpm)
+    if os.path.isfile(user) :
+        return overrideSettings(res, user)
     else :
         return res
-
+        
 
 def getProjSettings (userHome, rpmHome, projType) :
     '''Get the default settings out of a project type xml description file.'''
