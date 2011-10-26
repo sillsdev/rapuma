@@ -30,6 +30,13 @@ Todo:
                 <value></value>
             </setting>
             <setting>
+                <name>Installed Fonts</name>
+                <key>installedFonts</key>
+                <description>The fonts that are installed for this auxiliary components which will be used in this project.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+            <setting>
                 <name>Valid Auxiliary Component ID Codes</name>
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>

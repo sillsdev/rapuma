@@ -96,26 +96,6 @@ class Project (object) :
 
         # If this project is still new these may not exist yet
         try :
-#            # Set init flag on all aux types to False
-#            if self._projConfig['AuxiliaryTypes'] :
-#                for key in self._projConfig['AuxiliaryTypes'].keys() :
-#                    setattr(self, key + 'Initialized', False)
-
-#            # Set init flag on all auxs to False
-#            if self._projConfig['Auxiliaries'] :
-#                for key in self._projConfig['Auxiliaries'].keys() :
-#                    setattr(self, key + 'Initialized', False)
-
-#            # Set init flag on all comp types to False
-#            if self._projConfig['ComponentTypes'] :
-#                for key in self._projConfig['ComponentTypes'].keys() :
-#                    setattr(self, key + 'Initialized', False)
-
-#            # Set init flag on all comps to False
-#            if self._projConfig['Components'] :
-#                for key in self._projConfig['Components'].keys() :
-#                    setattr(self, key + 'Initialized', False)
-
             # Walk the ComponentTypes section and try to load commands if there are any
             for ctype in self._projConfig['ComponentTypes'].keys() :
                 sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
@@ -127,15 +107,15 @@ class Project (object) :
                 sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
                 __import__(atype)
                 __import__(atype + '_command')      
- 
+
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
-                    
+
         except StandardError as e:
             self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
 
-        
- 
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################

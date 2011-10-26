@@ -88,7 +88,6 @@ if os.path.isfile(projConfFile) :
         rpmProjTypes       = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         from proj_command import *
 
-# FIXME: Need to override sys path with user path if the type exists there
         # Dynamically load the right project type modules
         thisTypeLib = os.path.join(rpmProjTypes, projectType, 'lib_python')
         sys.path.insert(0, thisTypeLib)
@@ -164,10 +163,6 @@ if command :
     else :
         terminal('\nERROR: This command does not exist: ' + command)
 
-#else :
-#    terminal('\nAvailable commands:\n')
-#    commands['help'].run(opts, aProject, uConf.userConfig)
-
 
 ###############################################################################
 ########################### Closeout RPM Session #############################
@@ -183,7 +178,8 @@ if aProject.writeOutUserConfFile :
     aProject.writeOutUserConfFile = False
 
 # Now trim the log file if it is needed
-aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
+if aProject._projConfig :
+    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 ## Politely say good bye
 terminal('\n\t\tThank you, please come again!\n')

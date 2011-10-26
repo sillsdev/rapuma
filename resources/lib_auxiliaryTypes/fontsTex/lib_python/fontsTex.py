@@ -79,40 +79,15 @@ class FontsTex (Auxiliary) :
         # Bring in any know files for this component
         self.initAuxFiles(self.type, initInfo)
         
-        # Init (copy) the fonts that have been recored with the project
-        for aux in self.project._projConfig['Auxiliaries'].keys() :
-            if self.project._projConfig['Auxiliaries'][self.aid]['auxType'] == self.type :
-                # FIXME: Right now we only allow for one primary font for each
-                # font aux, we need to allow for a secondary and tertiary too.
-                for tf in self.project._projConfig['Auxiliaries'][self.aid]['primary'].keys() :
-                    fontInfo = getFontInitSettings(self.project.userHome, self.project.rpmHome, self.project._projConfig['Auxiliaries'][self.aid]['primary'][tf]['fontFolder'])
-                    # Make the font family folder for this typeface
-                    projFontFamilyFolder = os.path.join(projFontFolder, fontInfo[tf]['fontFolder'])
-                    if not os.path.isdir(projFontFamilyFolder) :
-                        os.mkdir(projFontFamilyFolder)
-                    # Find the source font file name and path, always use the user's version
-                    fontFileName = fontInfo[tf]['file']
-                    fontSource = None
-                    # System version
-                    if os.path.isfile(os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
-                        fontSource = os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)
-                    # User version
-                    if os.path.isfile(os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
-                        fontSource = os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)
-                    # Crash and burn if the font file is not found
-                    if not fontSource :
-                        self.project.writeToLog('ERR', 'Halt! ' + fontFileName + 'not found.', 'fontsTex.initAuxiliary()')
-                        return False
-                    # Copy the font file if need be
-                    projFontFilePath = os.path.join(projFontFolder, fontFileName)
-                    if not os.path.isfile(projFontFilePath) :
-                        shutil.copy(fontSource, projFontFilePath)
+        # Init the fonts
+# FIXME: To make this work right we may need to isolate the font settings in a
+# seperate section in the conf file.
+        self.initFonts()
         
         # Now create the right font information file for this aux component.
-        
         if not os.path.isfile(os.path.join(projFontFolder, self.aid + '.tex')) :
             self.makeFontInfoTexFile(projFontFolder, self.aid)
-        
+
         self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
         self.initialized = True
         return True
@@ -154,12 +129,52 @@ class FontsTex (Auxiliary) :
             writeObject.close()
         
 
-
-
 #\def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
 #\def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
 #\def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
 
+
+#########################################################################################
+# A list of fonts to use will be found in the fontsTex section.  We will start
+# with that and then look up the font info in the yet to be made fonts section
+# of the conf file.  That's the dream anyway.
+
+    def initFonts (self) :
+        '''Initialize the fonts for this auxiliary component by finding and
+        copying the fonts into the project from the source.  If this fails the
+        process should die a hard death.'''
+
+        for aux in self.project._projConfig['Auxiliaries'].keys() :
+            if self.project._projConfig['Auxiliaries'][self.aid]['auxType'] == self.type :
+                # FIXME: Right now we only allow for one primary font for each
+                # font aux, we need to allow for a secondary and tertiary too.
+                for tf in self.project._projConfig['Auxiliaries'][self.aid]['primary'].keys() :
+                    fontInfo = getFontInitSettings(self.project.userHome, self.project.rpmHome, self.project._projConfig['Auxiliaries'][self.aid]['primary'][tf]['fontFolder'])
+                    # Make the font family folder for this typeface
+                    projFontFamilyFolder = os.path.join(projFontFolder, fontInfo[tf]['fontFolder'])
+                    if not os.path.isdir(projFontFamilyFolder) :
+                        os.mkdir(projFontFamilyFolder)
+                    # Find the source font file name and path, always use the user's version
+                    fontFileName = fontInfo[tf]['file']
+                    fontSource = None
+                    # System version
+                    if os.path.isfile(os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
+                        fontSource = os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)
+                    # User version
+                    if os.path.isfile(os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
+                        fontSource = os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)
+                    # Crash and burn if the font file is not found
+                    if not fontSource :
+                        self.project.writeToLog('ERR', 'Halt! ' + fontFileName + 'not found.', 'fontsTex.initAuxiliary()')
+                        return False
+                    # Copy the font file if need be
+                    projFontFilePath = os.path.join(projFontFolder, fontFileName)
+                    if not os.path.isfile(projFontFilePath) :
+                        shutil.copy(fontSource, projFontFilePath)
+
+        return True
+
+#######################################################################################
 
     def setFont (self, ftype, font, rank) :
         '''Setup a font for a specific typeface.'''
