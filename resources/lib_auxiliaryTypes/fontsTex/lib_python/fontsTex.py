@@ -144,33 +144,33 @@ class FontsTex (Auxiliary) :
         copying the fonts into the project from the source.  If this fails the
         process should die a hard death.'''
 
-        for aux in self.project._projConfig['Auxiliaries'].keys() :
-            if self.project._projConfig['Auxiliaries'][self.aid]['auxType'] == self.type :
-                # FIXME: Right now we only allow for one primary font for each
-                # font aux, we need to allow for a secondary and tertiary too.
-                for tf in self.project._projConfig['Auxiliaries'][self.aid]['primary'].keys() :
-                    fontInfo = getFontInitSettings(self.project.userHome, self.project.rpmHome, self.project._projConfig['Auxiliaries'][self.aid]['primary'][tf]['fontFolder'])
-                    # Make the font family folder for this typeface
-                    projFontFamilyFolder = os.path.join(projFontFolder, fontInfo[tf]['fontFolder'])
-                    if not os.path.isdir(projFontFamilyFolder) :
-                        os.mkdir(projFontFamilyFolder)
-                    # Find the source font file name and path, always use the user's version
-                    fontFileName = fontInfo[tf]['file']
-                    fontSource = None
-                    # System version
-                    if os.path.isfile(os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
-                        fontSource = os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)
-                    # User version
-                    if os.path.isfile(os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
-                        fontSource = os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)
-                    # Crash and burn if the font file is not found
-                    if not fontSource :
-                        self.project.writeToLog('ERR', 'Halt! ' + fontFileName + 'not found.', 'fontsTex.initAuxiliary()')
-                        return False
-                    # Copy the font file if need be
-                    projFontFilePath = os.path.join(projFontFolder, fontFileName)
-                    if not os.path.isfile(projFontFilePath) :
-                        shutil.copy(fontSource, projFontFilePath)
+#        for aux in self.project._projConfig['Auxiliaries'].keys() :
+#            if self.project._projConfig['Auxiliaries'][self.aid]['auxType'] == self.type :
+#                # FIXME: Right now we only allow for one primary font for each
+#                # font aux, we need to allow for a secondary and tertiary too.
+#                for tf in self.project._projConfig['Auxiliaries'][self.aid]['primary'].keys() :
+#                    fontInfo = getFontInitSettings(self.project.userHome, self.project.rpmHome, self.project._projConfig['Auxiliaries'][self.aid]['primary'][tf]['fontFolder'])
+#                    # Make the font family folder for this typeface
+#                    projFontFamilyFolder = os.path.join(projFontFolder, fontInfo[tf]['fontFolder'])
+#                    if not os.path.isdir(projFontFamilyFolder) :
+#                        os.mkdir(projFontFamilyFolder)
+#                    # Find the source font file name and path, always use the user's version
+#                    fontFileName = fontInfo[tf]['file']
+#                    fontSource = None
+#                    # System version
+#                    if os.path.isfile(os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
+#                        fontSource = os.path.join(self.project.rpmFonts, fontInfo[tf]['fontFolder'], fontFileName)
+#                    # User version
+#                    if os.path.isfile(os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)) :
+#                        fontSource = os.path.join(self.project.userFonts, fontInfo[tf]['fontFolder'], fontFileName)
+#                    # Crash and burn if the font file is not found
+#                    if not fontSource :
+#                        self.project.writeToLog('ERR', 'Halt! ' + fontFileName + 'not found.', 'fontsTex.initAuxiliary()')
+#                        return False
+#                    # Copy the font file if need be
+#                    projFontFilePath = os.path.join(projFontFolder, fontFileName)
+#                    if not os.path.isfile(projFontFilePath) :
+#                        shutil.copy(fontSource, projFontFilePath)
 
         return True
 
@@ -198,11 +198,32 @@ class FontsTex (Auxiliary) :
             self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
 
+        # Make sure we have a fonts section in the conf file
+        try :
+            s = self.project._projConfig['Fonts']
+        except :
+            self.project._projConfig['Fonts'] = {}
+            
+        try :
+            f = self.project._projConfig['Fonts'][font]
+        except :
+            self.project._projConfig['Fonts'][font] = {}
+
+
         # Inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
-        fInfo = getXMLSettings(fontInfo)
-        self.auxConfig[rank] = fInfo.dict()
+        fInfo = getXMLSettings(fontInfo)            
+        self.project._projConfig['Fonts'][font] = fInfo.dict()
+        print dir(self.project._projConfig)
+        if not len(self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']) :
+        
+# FIXME: why is this not appending!
+            self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'].append(font)
+        
+#        self.auxConfig[rank] = fInfo.dict()
 
         self.project.writeOutProjConfFile = True
         self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
-        
+
+
+
