@@ -85,8 +85,8 @@ class FontsTex (Auxiliary) :
         self.initFonts()
         
         # Now create the right font information file for this aux component.
-        if not os.path.isfile(os.path.join(projFontFolder, self.aid + '.tex')) :
-            self.makeFontInfoTexFile(projFontFolder, self.aid)
+#        if not os.path.isfile(os.path.join(projFontFolder, self.aid + '.tex')) :
+#            self.makeFontInfoTexFile(projFontFolder, self.aid)
 
         self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
         self.initialized = True
@@ -212,13 +212,18 @@ class FontsTex (Auxiliary) :
 
         # Inject the font info into the fontset component section in the
         # project.conf. Enough information should be there for the component init.
-        fInfo = getXMLSettings(fontInfo)            
+        fInfo = getXMLSettings(fontInfo)
         self.project._projConfig['Fonts'][font] = fInfo.dict()
-        print dir(self.project._projConfig)
-        if not len(self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']) :
+        # Add to installed fonts list for this auxiliary type, only one instance allowed
+        if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
+            listOrder = []
+            listOrder = self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']
+            listOrder.append(font)
+            self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] = listOrder
+        # Reference the font in the auxiliary
+# FIXME: Start here
+        print dir(self)
         
-# FIXME: why is this not appending!
-            self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'].append(font)
         
 #        self.auxConfig[rank] = fInfo.dict()
 
