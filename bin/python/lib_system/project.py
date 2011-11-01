@@ -106,7 +106,7 @@ class Project (object) :
             for atype in self._projConfig['AuxiliaryTypes'].keys() :
                 sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
                 __import__(atype)
-                __import__(atype + '_command')      
+                __import__(atype + '_command')
 
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
