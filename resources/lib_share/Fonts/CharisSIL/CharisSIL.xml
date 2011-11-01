@@ -13,6 +13,31 @@ Todo:
 
 <root>
     <section>
+        <sectionID>FontInformation</sectionID>
+        <description>General information for this typeface family.</description>
+        <setting>
+            <name>Font Family Name</name>
+            <key>fontFamilyName</key>
+            <description>The name of this typeface family.</description>
+            <type>string</type>
+            <value>Charis SIL</value>
+        </setting>
+        <setting>
+            <name>Font ID</name>
+            <key>fontID</key>
+            <description>The internal ID code of this font family.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
+        </setting>
+        <setting>
+            <name>Font Folder</name>
+            <key>fontFolder</key>
+            <description>The font family folder name.</description>
+            <type>string</type>
+            <value>CharisSIL</value>
+        </setting>
+    </section>
+    <section>
         <name>Typeface Regular</name>
         <sectionID>TypefaceRegular</sectionID>
         <description>Settings for the regular typeface font.</description>
@@ -22,13 +47,6 @@ Todo:
             <description>File name for this typeface.</description>
             <type>string</type>
             <value>CharisSILR.ttf</value>
-        </setting>
-        <setting>
-            <name>FontFolder</name>
-            <key>fontFolder</key>
-            <description>Font folder name for this typeface.</description>
-            <type>string</type>
-            <value>CharisSIL</value>
         </setting>
         <setting>
             <name>Name</name>
@@ -113,13 +131,6 @@ Todo:
             <value>CharisSILB.ttf</value>
         </setting>
         <setting>
-            <name>FontFolder</name>
-            <key>fontFolder</key>
-            <description>Font folder name for this typeface.</description>
-            <type>string</type>
-            <value>CharisSIL</value>
-        </setting>
-        <setting>
             <name>Name</name>
             <key>name</key>
             <description>The name for this typeface.</description>
@@ -202,13 +213,6 @@ Todo:
             <value>CharisSILI.ttf</value>
         </setting>
         <setting>
-            <name>FontFolder</name>
-            <key>fontFolder</key>
-            <description>Font folder name for this typeface.</description>
-            <type>string</type>
-            <value>CharisSIL</value>
-        </setting>
-        <setting>
             <name>Name</name>
             <key>name</key>
             <description>The name for this typeface.</description>
@@ -289,13 +293,6 @@ Todo:
             <description>File name for this typeface.</description>
             <type>string</type>
             <value>CharisSILBI.ttf</value>
-        </setting>
-        <setting>
-            <name>FontFolder</name>
-            <key>fontFolder</key>
-            <description>Font folder name for this typeface.</description>
-            <type>string</type>
-            <value>CharisSIL</value>
         </setting>
         <setting>
             <name>Name</name>
