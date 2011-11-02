@@ -118,10 +118,10 @@ class Auxiliary (object) :
             if parentFolder :
                 if not os.path.isdir(parentFolder) :
                     os.mkdir(parentFolder)
-                    self.project.writeToLog('LOG', 'Created: [' + parentFolder, 'auxiliary.initAuxFolders()')
+                    self.project.writeToLog('LOG', 'Created: ' + parentFolder, 'auxiliary.initAuxFolders()')
             if not os.path.isdir(thisFolder) :
                 os.mkdir(thisFolder)
-                self.project.writeToLog('LOG', 'Created: [' + thisFolder, 'auxiliary.initAuxFolders()')
+                self.project.writeToLog('LOG', 'Created: ' + thisFolder, 'auxiliary.initAuxFolders()')
 
 
     def getAuxFileFolderPath (self, folderSection, initInfo) :
