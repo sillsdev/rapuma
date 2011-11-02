@@ -19,9 +19,21 @@ Todo:
         <sectionID>AuxiliaryTypes</sectionID>
         <description>This is the root section for the usfmTex auxiliary component information.</description>
         <section>
-            <name>TeX Macros Auxiliary Component Information</name>
-            <sectionID>usfmTex</sectionID>
-            <description>This section contains general usfmTex auxiliary component information.</description>
+            <name>USFM TeX Auxiliary Component Information</name>
+            <sectionID>AuxiliaryInformation</sectionID>
+            <description>This section contains general auxiliary component information.</description>
+            <setting>
+                <name>Auxiliary Component Type</name>
+                <key>auxType</key>
+                <description>The type of auxiliary component this is.</description>
+                <type>string</type>
+                <value>usfmTex</value>
+            </setting>
+        </section>
+        <section>
+            <name>TeX Macros Auxiliary Component Type Information</name>
+            <sectionID>AuxiliaryTypeInformation</sectionID>
+            <description>This section contains general type information for all the auxiliary components used in this family.</description>
             <setting>
                 <name>Installed Auxiliary Components</name>
                 <key>installedAuxiliaries</key>

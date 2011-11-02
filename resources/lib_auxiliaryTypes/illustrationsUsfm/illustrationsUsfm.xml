@@ -22,9 +22,21 @@ Todo:
         <sectionID>AuxiliaryTypes</sectionID>
         <description>This is the root section for the illustrationsUsfm auxiliary component information.</description>
         <section>
-            <name>Illustrations Component Information</name>
-            <sectionID>illustrationsUsfm</sectionID>
-            <description>This section contains general illustrationsUsfm auxiliary component information.</description>
+            <name>Illustrations USFM Auxiliary Component Information</name>
+            <sectionID>AuxiliaryInformation</sectionID>
+            <description>This section contains general auxiliary component information.</description>
+            <setting>
+                <name>Auxiliary Component Type</name>
+                <key>auxType</key>
+                <description>The type of auxiliary component this is.</description>
+                <type>string</type>
+                <value>illustrationsUsfm</value>
+            </setting>
+        </section>
+        <section>
+            <name>Illustrations Component Type Information</name>
+            <sectionID>AuxiliaryTypeInformation</sectionID>
+            <description>This section contains general type information for all the auxiliary components used in this family.</description>
             <setting>
                 <name>Installed Auxiliary Components</name>
                 <key>installedAuxiliaries</key>

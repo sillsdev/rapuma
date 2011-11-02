@@ -19,9 +19,21 @@ Todo:
         <sectionID>AuxiliaryTypes</sectionID>
         <description>This is the root section for the stylesUsfm auxiliary component information.</description>
         <section>
-            <name>StyleSets Auxiliary Component Information</name>
-            <sectionID>stylesUsfm</sectionID>
-            <description>This section contains general stylesUsfm auxiliary component information.</description>
+            <name>Styles USFM Auxiliary Component Information</name>
+            <sectionID>AuxiliaryInformation</sectionID>
+            <description>This section contains general auxiliary component information.</description>
+            <setting>
+                <name>Auxiliary Component Type</name>
+                <key>auxType</key>
+                <description>The type of auxiliary component this is.</description>
+                <type>string</type>
+                <value>stylesUsfm</value>
+            </setting>
+        </section>
+        <section>
+            <name>StyleSets Auxiliary Component Type Information</name>
+            <sectionID>AuxiliaryTypeInformation</sectionID>
+            <description>This section contains general type information for all the auxiliary components used in this family.</description>
             <setting>
                 <name>Installed Auxiliary Components</name>
                 <key>installedAuxiliaries</key>
