@@ -94,6 +94,14 @@ class Project (object) :
         self.writeOutUserConfFile   = False
         self.isProjectInitalized    = False
 
+        # Build some default sections into the conf file if needed (Do not like
+        # to have this hard coded but what can you do?)
+        try :
+            s = self._projConfig['AuxiliaryTypes']
+        except :
+            self._projConfig['AuxiliaryTypes'] = {}
+
+
         # If this project is still new these may not exist yet
         try :
             # Walk the ComponentTypes section and try to load commands if there are any
@@ -113,7 +121,6 @@ class Project (object) :
 
         except StandardError as e:
             self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
-
 
 
 ###############################################################################
@@ -529,6 +536,8 @@ class Project (object) :
         auxItem['Auxiliaries'] = {}
         auxItem['Auxiliaries'][aid] = {}
         auxItem['Auxiliaries'][aid]['auxType'] = atype
+#        auxItem['Auxiliaries'][aid] = auxSettings['AuxiliaryInformation']
+
         self._projConfig.merge(auxItem)
 
 ########################################################################################

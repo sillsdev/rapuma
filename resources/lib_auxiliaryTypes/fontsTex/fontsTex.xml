@@ -20,7 +20,7 @@ Todo:
         <description>This is the root section for the fontsTex auxiliary component information.</description>
         <section>
             <name>Fonts TeX Auxiliary Component Information</name>
-            <sectionID>fontsTex</sectionID>
+            <sectionID>AuxiliaryInformation</sectionID>
             <description>This section contains auxiliary component information for use within the fontsTex auxiliary type.</description>
             <setting>
                 <name>Installed Fonts</name>
@@ -39,8 +39,8 @@ Todo:
         </section>
         <section>
             <name>Fonts TeX Auxiliary Component Type Information</name>
-            <sectionID>fontsTex</sectionID>
-            <description>This section contains general fontsTex auxiliary component information.</description>
+            <sectionID>AuxiliaryTypeInformation</sectionID>
+            <description>This section contains general type information for the fontsTex auxiliary component.</description>
             <setting>
                 <name>Installed Auxiliary Components</name>
                 <key>installedAuxiliaries</key>
