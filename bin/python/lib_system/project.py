@@ -447,10 +447,6 @@ class Project (object) :
         for aid in comp.project._projConfig['ComponentTypes'][ctype]['auxDependencies'] :
 
             aid = aid.split(':')[0]
-            
-# FIXME: We still need a way of knowing if the aux being called has gone through
-# the init process.  How do we do that?
-            
             atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
             thisAux = self.getAuxiliary(aid)
             
@@ -486,26 +482,6 @@ class Project (object) :
         # Now init the aux
         aux.initAuxiliary()
         return aux
-
-
-#    def getAuxiliary (self, aid) :
-#        '''Create an auxiliary component object that is ready for processes to
-#        be run on it.'''
-
-#        atype = self._projConfig['Auxiliaries'][aid]['auxType']
-
-#        if aid and aid not in self._projConfig['Auxiliaries'] :
-#            self.writeToLog('ERR', 'Auxiliary: [' + aid + '] not found.', 'project.getAuxiliary()')            
-#            return None
-#        
-#        if not aid in self._auxilaries :
-#            config = self._projConfig['Auxiliaries'][aid]
-#            atype = config['auxType']
-#            if not atype in auxiliary.auxiliaryTypes :
-#                self._auxilaries[aid] = auxiliary.auxiliary(self, config, None)
-#            else :
-#                self._auxilaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype])
-#        return self._auxilaries[aid]
 
 
     def addNewAuxiliary (self, aid, atype) :
@@ -546,6 +522,8 @@ class Project (object) :
         # Read in the main settings file for this aux comp
         auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
 
+
+# FIXME: Here we need to grab the aux-specific settings from the fontsTex.xml defaults
         # The aid should be unique to the project so we add a section for it
         auxItem = ConfigObj()
         auxItem['Auxiliaries'] = {}
@@ -553,12 +531,13 @@ class Project (object) :
         auxItem['Auxiliaries'][aid]['auxType'] = atype
         self._projConfig.merge(auxItem)
 
+########################################################################################
+
         # Add component code to components list
         listOrder = []
         listOrder = self._projConfig['ProjectInfo']['auxiliaryList']
         listOrder.append(aid)
         self._projConfig['ProjectInfo']['auxiliaryList'] = listOrder
-
 
         self.writeOutProjConfFile = True
         self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')
