@@ -33,6 +33,23 @@ from configobj import ConfigObj, Section
 
 ############################## Settings Functions #############################
 
+def isConfSection (confObj, section) :
+    '''A simple test to see if a section in a conf object is valid'''
+
+    try :
+        s = confObj[section]
+        return True
+    except :
+        return False
+
+
+def buildConfSection (confObj, section) :
+    '''Build a conf object section if it doesn't exist.'''
+
+    if not isConfSection (confObj, section) :
+        confObj[section] = {}
+        return True
+
 
 def isRecordedProject (userConfigFile, pid) :
     '''Check to see if this project is recorded in the user's config'''

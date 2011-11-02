@@ -178,7 +178,7 @@ if aProject.writeOutUserConfFile :
     aProject.writeOutUserConfFile = False
 
 # Now trim the log file if it is needed
-if aProject._projConfig :
+if isConfSection(aProject._projConfig, 'Project') :
     aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 ## Politely say good bye

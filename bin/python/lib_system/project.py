@@ -87,34 +87,28 @@ class Project (object) :
                  setattr(self, k, self._projConfig['ProjectInfo'][k] if self._projConfig else None)
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
-                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
+                setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
         # Set some flags
         self.writeOutProjConfFile   = False
         self.writeOutUserConfFile   = False
         self.isProjectInitalized    = False
 
-        # Build some default sections into the conf file if needed (Do not like
-        # to have this hard coded but what can you do?)
-        try :
-            s = self._projConfig['AuxiliaryTypes']
-        except :
-            self._projConfig['AuxiliaryTypes'] = {}
-
-
         # If this project is still new these may not exist yet
         try :
             # Walk the ComponentTypes section and try to load commands if there are any
-            for ctype in self._projConfig['ComponentTypes'].keys() :
-                sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
-                __import__(ctype)
-                __import__(ctype + '_command')
+            if isConfSection(self._projConfig, 'ComponentTypes') :
+                for ctype in self._projConfig['ComponentTypes'].keys() :
+                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
+                    __import__(ctype)
+                    __import__(ctype + '_command')
              
             # Walk the AuxiliaryTypes section and try to load commands if there are any
-            for atype in self._projConfig['AuxiliaryTypes'].keys() :
-                sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
-                __import__(atype)
-                __import__(atype + '_command')
+            if isConfSection(self._projConfig, 'AuxiliaryTypes') :
+                for atype in self._projConfig['AuxiliaryTypes'].keys() :
+                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
+                    __import__(atype)
+                    __import__(atype + '_command')
 
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
@@ -264,66 +258,58 @@ class Project (object) :
         type, source or ID are not valid or if the component already exsists in
         the binding order list.'''
 
-        # Test for comp type section
-        try :
-            ct = self._projConfig['ComponentTypes']
-        except :
-            self._projConfig['ComponentTypes'] = {}
-
         # Test for this component and bail if it is there
         try :
             at = self._projConfig['Components'][cid]['compType']
             self.writeToLog('ERR', 'ID: [' + cid + '] cannot be added again.', 'project.addNewComponent()')
-            return
+            return False
+
         except :
-            pass
+            # Add main Auxiliary sections if necessary
+            buildConfSection(self._projConfig, 'ComponentTypes')
+            buildConfSection(self._projConfig, 'Components')
 
-        # First we add the type if it is not already in the project
-        if ctype in self.validCompTypes :
-            if not ctype in self._projConfig['ComponentTypes'] :
-                self.addNewComponentType(ctype)
+            # First we add the type if it is not already in the project
+            if ctype in self.validCompTypes :
+                if not ctype in self._projConfig['ComponentTypes'] :
+                    self.addNewComponentType(ctype)
+            else :
+                self.writeToLog('ERR', 'ID: [' + ctype + '] not valid component ID to use in [' + self.projectType + '] project type', 'project.addNewAuxiliary()')
 
-        if not cid in self._projConfig['ComponentTypes'][ctype]['validIdCodes'] :
-            self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
-            return
+            if not cid in self._projConfig['ComponentTypes'][ctype]['validIdCodes'] :
+                self.writeToLog('ERR', 'ID: [' + cid + '] not valid ID for [' + ctype + '] component type', 'project.addNewComponents()')
+                return False
 
-        # Add to the installed components list for this type
-        compList = []
-        compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
+            # Add to the installed components list for this type
+            compList = []
+            compList = self._projConfig['ComponentTypes'][ctype]['installedComponents']
+            compList.append(cid)
+            self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
 
-        compList.append(cid)
-        self._projConfig['ComponentTypes'][ctype]['installedComponents'] = compList
+            # Read in the main settings file for this comp
+            compSettings = getCompSettings(self.userHome, self.rpmHome, ctype)
 
-        # Read in the main settings file for this comp
-        compSettings = getCompSettings(self.userHome, self.rpmHome, ctype)
-        
-        # The cid should be unique to the project so we add a section for it
-        compItem = ConfigObj()
-        compItem['Components'] = {}
-        compItem['Components'][cid] = {}
-        compItem['Components'][cid]['compType'] = ctype
-        
-#        compItem['Components'][cid].merge(compSettings[ctype + 'Setup'])
-        
-        self._projConfig.merge(compItem)
-       
-# Here we need to see if there are other things that need to go in this comp and get them.
+            # Build a section for this aux and merge in the default settings
+            buildConfSection(self._projConfig['Components'], cid)
+            self._projConfig['Components'][cid].merge(compSettings['ComponentTypes']['ComponentInformation'])
 
-        # Add component code to components list
-        listOrder = []
-        listOrder = self._projConfig['ProjectInfo']['componentList']
-        listOrder.append(cid)
-        self._projConfig['ProjectInfo']['componentList'] = listOrder
-
-        # Add component code to binding order list
-        if self._projConfig['ComponentTypes'][ctype]['inBindingList'] == 'True' :
+            # Add component code to components list
             listOrder = []
-            listOrder = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
+            listOrder = self._projConfig['ProjectInfo']['componentList']
             listOrder.append(cid)
-            self._projConfig['ProjectInfo']['projectComponentBindingOrder'] = listOrder
+            self._projConfig['ProjectInfo']['componentList'] = listOrder
 
-        self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewComponents()')
+            # Add component code to binding order list
+            if self._projConfig['ComponentTypes'][ctype]['inBindingList'] == 'True' :
+                listOrder = []
+                listOrder = self._projConfig['ProjectInfo']['projectComponentBindingOrder']
+                listOrder.append(cid)
+                self._projConfig['ProjectInfo']['projectComponentBindingOrder'] = listOrder
+
+            self.writeOutProjConfFile = True
+            self.writeToLog('MSG', 'Component added: ' + str(cid), 'project.addNewComponents()')
+
+            return True
 
 
     def removeComponent (self, comp) :
@@ -380,21 +366,13 @@ class Project (object) :
         '''This will add all the component type information to a project.'''
 
         # Test to see if the section is there, do not add if it is
-        try:
-            test = self._projConfig['ComponentTypes'][ctype]
-            return False
-        except :
-            try :
-                self._projConfig['ComponentTypes'][ctype] = {}
-            except :
-                self._projConfig['ComponentTypes'] = {}
-                self._projConfig['ComponentTypes'][ctype] = {}
+        buildConfSection(self._projConfig['ComponentTypes'], ctype)
+        thisCompType = getCompSettings(self.userHome, self.rpmHome, ctype)
+        self._projConfig['ComponentTypes'][ctype].merge(thisCompType['ComponentTypes']['ComponentTypeInformation'])
+        self.writeOutProjConfFile = True
+        self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
+        return True
 
-            self._projConfig.merge(getCompSettings(self.userHome, self.rpmHome, ctype))
-            self.writeOutProjConfFile = True
-            self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
-            return True
-            
 
     def removeComponentType (self, ctype) :
         '''Remove a component type to the current project.  Before doing so, it
@@ -499,57 +477,47 @@ class Project (object) :
         try :
             at = self._projConfig['Auxiliaries'][aid]['auxType']
             self.writeToLog('ERR', 'ID: [' + aid + '] cannot be added again.', 'project.addNewAuxiliary()')
-            return
+            return False
+
         except :
-            pass
+            # Add main Auxiliary sections if necessary
+            buildConfSection(self._projConfig, 'AuxiliaryTypes')
+            buildConfSection(self._projConfig, 'Auxiliaries')
 
-        # Test for comp type section
-        try :
-            at = self._projConfig['AuxiliaryTypes']
-        except :
-            self._projConfig['AuxiliaryTypes'] = {}
+            # First we add the aux type if it is not already in the project
+            if atype in self.validAuxTypes :
+                if not atype in self._projConfig['AuxiliaryTypes'] :
+                    self.addNewAuxiliaryType(atype)
+            else :
+                self.writeToLog('ERR', 'ID: [' + atype + '] not valid auxiliary to use in [' + self.projectType + '] project type', 'project.addNewAuxiliary()')
 
-        # First we add the aux type if it is not already in the project
-        if atype in self.validAuxTypes :
-            if not atype in self._projConfig['AuxiliaryTypes'] :
-                self.addNewAuxiliaryType(atype)
-        else :
-            self.writeToLog('ERR', 'ID: [' + atype + '] not valid auxiliary to use in [' + self.projectType + '] project type', 'project.addNewAuxiliary()')            
+            if not aid in self._projConfig['AuxiliaryTypes'][atype]['validIdCodes'] :
+                self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
+                return False
 
-        if not aid in self._projConfig['AuxiliaryTypes'][atype]['validIdCodes'] :
-            self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
-            return
+            # Add to the installed auxiliary components list for this type
+            auxList = []
+            auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
+            auxList.append(aid)
+            self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
 
-        # Add to the installed auxiliary components list for this type
-        auxList = []
-        auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
-        auxList.append(aid)
-        self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
+            # Read in the main settings file for this aux comp
+            auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
 
-        # Read in the main settings file for this aux comp
-        auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
+            # Build a section for this aux and merge in the default settings
+            buildConfSection(self._projConfig['Auxiliaries'], aid)
+            self._projConfig['Auxiliaries'][aid].merge(auxSettings['AuxiliaryTypes']['AuxiliaryInformation'])
 
+            # Add component code to components list
+            listOrder = []
+            listOrder = self._projConfig['ProjectInfo']['auxiliaryList']
+            listOrder.append(aid)
+            self._projConfig['ProjectInfo']['auxiliaryList'] = listOrder
 
-# FIXME: Here we need to grab the aux-specific settings from the fontsTex.xml defaults
-        # The aid should be unique to the project so we add a section for it
-        auxItem = ConfigObj()
-        auxItem['Auxiliaries'] = {}
-        auxItem['Auxiliaries'][aid] = {}
-        auxItem['Auxiliaries'][aid]['auxType'] = atype
-#        auxItem['Auxiliaries'][aid] = auxSettings['AuxiliaryInformation']
+            self.writeOutProjConfFile = True
+            self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')
 
-        self._projConfig.merge(auxItem)
-
-########################################################################################
-
-        # Add component code to components list
-        listOrder = []
-        listOrder = self._projConfig['ProjectInfo']['auxiliaryList']
-        listOrder.append(aid)
-        self._projConfig['ProjectInfo']['auxiliaryList'] = listOrder
-
-        self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')
+            return True
 
 
     def removeAuxiliary (self, aux) :
@@ -595,20 +563,12 @@ class Project (object) :
         '''This will add all the auxiliary type information to a project.'''
 
         # Test to see if the section is there, do not add if it is
-        try:
-            test = self._projConfig['AuxiliaryTypes'][atype]
-            return False
-        except :
-            try :
-                self._projConfig['AuxiliaryTypes'][atype] = {}
-            except :
-                self._projConfig['AuxiliaryTypes'] = {}
-                self._projConfig['AuxiliaryTypes'][atype] = {}
-
-            self._projConfig.merge(getAuxSettings(self.userHome, self.rpmHome, atype))
-            self.writeOutProjConfFile = True
-            self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] added to project.', 'project.addNewAuxiliaryType()')
-            return True
+        buildConfSection(self._projConfig['AuxiliaryTypes'], atype)
+        thisAuxType = getAuxSettings(self.userHome, self.rpmHome, atype)
+        self._projConfig['AuxiliaryTypes'][atype].merge(thisAuxType['AuxiliaryTypes']['AuxiliaryTypeInformation'])
+        self.writeOutProjConfFile = True
+        self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] added to project.', 'project.addNewAuxiliaryType()')
+        return True
 
 
     def removeAuxiliaryType (self, atype) :
@@ -752,7 +712,6 @@ class Project (object) :
 
             # Process only if we have enough lines
             if len(lines) > projLogLineLimit :
-                
                 writeObject = codecs.open(self.projLogFile, "w", encoding='utf_8')
                 lineCount = 0
                 for line in lines :

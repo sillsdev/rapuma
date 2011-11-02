@@ -19,8 +19,20 @@ Todo:
         <description>This is the root section for usfm component information.</description>
         <section>
             <name>USFM Component Information</name>
-            <sectionID>usfm</sectionID>
+            <sectionID>ComponentInformation</sectionID>
             <description>This section contains general usfm component information.</description>
+            <setting>
+                <name>Component Type</name>
+                <key>compType</key>
+                <description>The type of auxiliary component this is.</description>
+                <type>string</type>
+                <value>usfm</value>
+            </setting>
+        </section>
+        <section>
+            <name>USFM Component Type Information</name>
+            <sectionID>ComponentTypeInformation</sectionID>
+            <description>This section contains general usfm type component information.</description>
             <setting>
                 <name>Installed Components</name>
                 <key>installedComponents</key>
