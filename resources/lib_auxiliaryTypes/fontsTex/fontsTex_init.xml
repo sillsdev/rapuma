@@ -67,6 +67,25 @@ Todo:
                 <value></value>
             </setting>
         </section>
+        <section>
+            <name>Project Process Folder</name>
+            <sectionID>Process</sectionID>
+            <description>The project Process folder where TeX processes happen. Some font information needs to end up here. Caution, if for some reason some of the other components call the process folder something different, lots of things will break.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The folder where font information is kept for use in TeX processes.</description>
+                <type>string</type>
+                <value>Process</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
     </section>
 </root>
 

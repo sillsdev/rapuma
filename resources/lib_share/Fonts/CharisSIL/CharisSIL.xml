@@ -36,6 +36,13 @@ Todo:
             <type>string</type>
             <value>CharisSIL</value>
         </setting>
+        <setting>
+            <name>Shaping</name>
+            <key>shaping</key>
+            <description>Use the shaping engine for this font family.</description>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
     </section>
     <section>
         <name>Typeface Regular</name>
@@ -96,6 +103,13 @@ Todo:
             <description>The shaping engine to be used for this typeface.</description>
             <type>string</type>
             <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Shaping Code</name>
+            <key>shapingCode</key>
+            <description>The shaping engine code to be used when initializing this typeface.</description>
+            <type>string</type>
+            <value>GR</value>
         </setting>
         <setting>
             <name>Features</name>
@@ -180,6 +194,13 @@ Todo:
             <value>Graphite</value>
         </setting>
         <setting>
+            <name>Shaping Code</name>
+            <key>shapingCode</key>
+            <description>The shaping engine code to be used when initializing this typeface.</description>
+            <type>string</type>
+            <value>GR</value>
+        </setting>
+        <setting>
             <name>Features</name>
             <key>features</key>
             <description>The features that will be used for this typeface.</description>
@@ -262,6 +283,13 @@ Todo:
             <value>Graphite</value>
         </setting>
         <setting>
+            <name>Shaping Code</name>
+            <key>shapingCode</key>
+            <description>The shaping engine code to be used when initializing this typeface.</description>
+            <type>string</type>
+            <value>GR</value>
+        </setting>
+        <setting>
             <name>Features</name>
             <key>features</key>
             <description>The features that will be used for this typeface.</description>
@@ -342,6 +370,13 @@ Todo:
             <description>The shaping engine to be used for this typeface.</description>
             <type>string</type>
             <value>Graphite</value>
+        </setting>
+        <setting>
+            <name>Shaping Code</name>
+            <key>shapingCode</key>
+            <description>The shaping engine code to be used when initializing this typeface.</description>
+            <type>string</type>
+            <value>GR</value>
         </setting>
         <setting>
             <name>Features</name>

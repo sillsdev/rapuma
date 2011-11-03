@@ -73,16 +73,18 @@ class FontsTex (Auxiliary) :
         # Pull the information from the project init xml file
         initInfo = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
 
-        # Project Font folder path
+        # Project folder names and paths
         setattr(self, 'projFontFolderName', initInfo['Folders']['Fonts']['name'])
+        setattr(self, 'projProcessFolderName', initInfo['Folders']['Process']['name'])
         setattr(self, 'projFontFolder', os.path.join(self.project.projHome, self.projFontFolderName))
-        
+        setattr(self, 'projProcessFolder', os.path.join(self.project.projHome, self.projProcessFolderName))
+
         # Bring in any know files for this component
         self.initAuxFiles(self.type, initInfo)
-        
+
         # Init the fonts
         self.initFonts()
-        
+
         # Now create the right font information file for this aux component.
         if not os.path.isfile(os.path.join(self.projFontFolder, self.aid + '.tex')) :
             self.makeFontInfoTexFile()
@@ -94,34 +96,37 @@ class FontsTex (Auxiliary) :
 
     def makeFontInfoTexFile (self) :
         '''Create a TeX info font file that TeX will use for rendering.'''
-        
+
         # We will not make this file if it is already there
-# FIXME: This needs to put the file in the Projects folder
-        fontInfoFileName = os.path.join(self.projFontFolder, self.aid + '.tex')
-        
-        
-        
-        if os.path.isfile(fontInfoFileName) :
-            self.project.writeToLog('WRN', 'The file ' + fontInfoFileName + ' already exists.', 'fontsTex.makeFontInfoTexFile()')
-            return False
-        print dir(self)
-        writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
-        writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
-        auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
-        for f in auxFonts :
-            fInfo = self.project._projConfig['Fonts'][f]
-            # Create the primary fonts that will be used with TeX
-            if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
-                for tf in fInfo :
-                    if tf[:8] == 'Typeface' :
-                        writeObject.write("\\def\\" + fInfo[tf]['texMapping'] + "{\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\"}\n")
+        fontInfoFileName = os.path.join(self.projProcessFolder, self.aid + '.tex')
 
-            # Create defs with secondary fonts for special use in TeX
-            else :
-                print 'secondary fonts not implemented yet'
+        # The rule is that we only create this file if it is not there,
+        # otherwise it will silently fail.  If one already exists the file will
+        # need to be removed by some other process before it can be recreated.
+        if not os.path.isfile(fontInfoFileName) :
+            writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
+            writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
+            auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
+            for f in auxFonts :
+                fInfo = self.project._projConfig['Fonts'][f]
+                # Create the primary fonts that will be used with TeX
+                if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
+                    for tf in fInfo :
+                        if tf[:8] == 'Typeface' :
+# FIXME: Start here
+                            # Make all our line components
+                            tdef = '\\def\\'
+                            tmap = fInfo[tf]['texMapping']
+                            fpath = "{\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\"}"
+                            shaping = 'add something here'
+                            writeObject.write(tdef + tmap + fpath + shaping + "\n")
 
-        writeObject.close()
-        return True
+                # Create defs with secondary fonts for special use in TeX
+                else :
+                    print 'secondary fonts not implemented yet'
+
+            writeObject.close()
+            return True
 
 
 #\def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
