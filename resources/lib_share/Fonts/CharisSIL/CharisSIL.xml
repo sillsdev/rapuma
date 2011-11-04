@@ -37,11 +37,11 @@ Todo:
             <value>CharisSIL</value>
         </setting>
         <setting>
-            <name>Shaping</name>
-            <key>shaping</key>
-            <description>Use the shaping engine for this font family.</description>
-            <type>boolean</type>
-            <value>True</value>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this font.</description>
+            <type>list</type>
+            <value>liga=1</value>
         </setting>
     </section>
     <section>
@@ -96,27 +96,6 @@ Todo:
             <description>The copyright information for this typeface.</description>
             <type>string</type>
             <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
-        </setting>
-        <setting>
-            <name>Shaping</name>
-            <key>shaping</key>
-            <description>The shaping engine to be used for this typeface.</description>
-            <type>string</type>
-            <value>Graphite</value>
-        </setting>
-        <setting>
-            <name>Shaping Code</name>
-            <key>shapingCode</key>
-            <description>The shaping engine code to be used when initializing this typeface.</description>
-            <type>string</type>
-            <value>GR</value>
-        </setting>
-        <setting>
-            <name>Features</name>
-            <key>features</key>
-            <description>The features that will be used for this typeface.</description>
-            <type>list</type>
-            <value>liga=1</value>
         </setting>
         <setting>
             <name>Modify</name>
@@ -187,27 +166,6 @@ Todo:
             <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
         </setting>
         <setting>
-            <name>Shaping</name>
-            <key>shaping</key>
-            <description>The shaping engine to be used for this typeface.</description>
-            <type>string</type>
-            <value>Graphite</value>
-        </setting>
-        <setting>
-            <name>Shaping Code</name>
-            <key>shapingCode</key>
-            <description>The shaping engine code to be used when initializing this typeface.</description>
-            <type>string</type>
-            <value>GR</value>
-        </setting>
-        <setting>
-            <name>Features</name>
-            <key>features</key>
-            <description>The features that will be used for this typeface.</description>
-            <type>list</type>
-            <value>liga=1</value>
-        </setting>
-        <setting>
             <name>Modify</name>
             <key>modify</key>
             <description>Request any modifications for this typeface such as bolding.</description>
@@ -276,27 +234,6 @@ Todo:
             <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
         </setting>
         <setting>
-            <name>Shaping</name>
-            <key>shaping</key>
-            <description>The shaping engine to be used for this typeface.</description>
-            <type>string</type>
-            <value>Graphite</value>
-        </setting>
-        <setting>
-            <name>Shaping Code</name>
-            <key>shapingCode</key>
-            <description>The shaping engine code to be used when initializing this typeface.</description>
-            <type>string</type>
-            <value>GR</value>
-        </setting>
-        <setting>
-            <name>Features</name>
-            <key>features</key>
-            <description>The features that will be used for this typeface.</description>
-            <type>list</type>
-            <value>liga=1</value>
-        </setting>
-        <setting>
             <name>Modify</name>
             <key>modify</key>
             <description>Request any modifications for this typeface such as bolding.</description>
@@ -363,27 +300,6 @@ Todo:
             <description>The copyright information for this typeface.</description>
             <type>string</type>
             <value>Copyright (c) SIL International, 1997-2009. All rights reserved.</value>
-        </setting>
-        <setting>
-            <name>Shaping</name>
-            <key>shaping</key>
-            <description>The shaping engine to be used for this typeface.</description>
-            <type>string</type>
-            <value>Graphite</value>
-        </setting>
-        <setting>
-            <name>Shaping Code</name>
-            <key>shapingCode</key>
-            <description>The shaping engine code to be used when initializing this typeface.</description>
-            <type>string</type>
-            <value>GR</value>
-        </setting>
-        <setting>
-            <name>Features</name>
-            <key>features</key>
-            <description>The features that will be used for this typeface.</description>
-            <type>list</type>
-            <value>liga=1</value>
         </setting>
         <setting>
             <name>Modify</name>

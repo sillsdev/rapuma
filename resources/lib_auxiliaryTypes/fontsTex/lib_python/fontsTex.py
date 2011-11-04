@@ -107,19 +107,22 @@ class FontsTex (Auxiliary) :
             writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
+            features = self.project._projConfig['Auxiliaries'][self.aid]['features']
             for f in auxFonts :
                 fInfo = self.project._projConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
                     for tf in fInfo :
                         if tf[:8] == 'Typeface' :
-# FIXME: Start here
-                            # Make all our line components
-                            tdef = '\\def\\'
-                            tmap = fInfo[tf]['texMapping']
-                            fpath = "{\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\"}"
-                            shaping = 'add something here'
-                            writeObject.write(tdef + tmap + fpath + shaping + "\n")
+                            # Make all our line components (More will need to be added)
+                            startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
+                            fpath       = "\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\""
+                            endDef      = "}\n"
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
+
+                            writeObject.write(startDef + fpath + featureString + endDef)
 
                 # Create defs with secondary fonts for special use in TeX
                 else :
@@ -234,10 +237,11 @@ class FontsTex (Auxiliary) :
             self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = listOrder
 
         # Check to see if the primary font has been set
-        try :
-            f = self.project._projConfig['Auxiliaries'][self.aid]['primaryFont']
-        except :
+        if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == 'None' :
             self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._projConfig['Fonts'][font]['FontInformation']['fontID']
+            
+        # Add any features that this aux needs to have with this font.
+        self.project._projConfig['Auxiliaries'][self.aid]['features'] = self.project._projConfig['Fonts'][font]['FontInformation']['features']
         
         # Now recreate the font info TeX file
         self.makeFontInfoTexFile()

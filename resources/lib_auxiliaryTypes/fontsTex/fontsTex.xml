@@ -36,6 +36,20 @@ Todo:
                 <type>string</type>
                 <value>fontsTex</value>
             </setting>
+            <setting>
+                <name>Primary Font</name>
+                <key>primaryFont</key>
+                <description>The primary font for this auxiliary component.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>Font Features</name>
+                <key>features</key>
+                <description>Additional features needed that this font can support.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
         </section>
         <section>
             <name>Fonts TeX Auxiliary Component Type Information</name>
