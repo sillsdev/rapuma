@@ -43,13 +43,6 @@ Todo:
                 <type>string</type>
                 <value></value>
             </setting>
-            <setting>
-                <name>Font Features</name>
-                <key>features</key>
-                <description>Additional features needed that this font can support.</description>
-                <type>list</type>
-                <value></value>
-            </setting>
         </section>
         <section>
             <name>Fonts TeX Auxiliary Component Type Information</name>
@@ -74,7 +67,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>frontFont,contentFont,backFont,mapFont</value>
+                <value>frontFont,contentFont,backFont</value>
             </setting>
         </section>
     </section>

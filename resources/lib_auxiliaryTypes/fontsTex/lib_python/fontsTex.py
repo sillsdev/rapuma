@@ -107,11 +107,11 @@ class FontsTex (Auxiliary) :
             writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
-            features = self.project._projConfig['Auxiliaries'][self.aid]['features']
             for f in auxFonts :
                 fInfo = self.project._projConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
+                    features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
                     for tf in fInfo :
                         if tf[:8] == 'Typeface' :
                             # Make all our line components (More will need to be added)
@@ -124,17 +124,24 @@ class FontsTex (Auxiliary) :
 
                             writeObject.write(startDef + fpath + featureString + endDef)
 
-                # Create defs with secondary fonts for special use in TeX
+                # Create defs with secondary fonts for special use with TeX in publication
                 else :
-                    print 'secondary fonts not implemented yet'
+                    writeObject.write('\n# These are special use fonts for this type of component.\n')
+                    features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
+                    for tf in fInfo :
+                        if tf[:8] == 'Typeface' :
+                            # Make all our line components (More will need to be added)
+                            startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
+                            fpath       = "\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\""
+                            endDef      = "}\n"
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
+
+                            writeObject.write(startDef + fpath + featureString + endDef)
 
             writeObject.close()
             return True
-
-
-#\def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
-#\def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
-#\def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
 
 
     def initFonts (self) :
@@ -152,7 +159,6 @@ class FontsTex (Auxiliary) :
             # Now loop through all the typefaces in this family and copy over the files
             for tf in fontInfo.keys() :
                 if tf[:8] == 'Typeface' :
-                    
                     # Find the source font file name and path, always use the user's version
                     fontFileName = fontInfo[tf]['file']
                     fontSource = None
