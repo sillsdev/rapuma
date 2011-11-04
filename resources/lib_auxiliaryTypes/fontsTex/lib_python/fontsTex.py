@@ -229,7 +229,7 @@ class FontsTex (Auxiliary) :
             fl = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
         except :
             self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = []
-            
+
         if font not in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
             listOrder = []
             listOrder = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
@@ -239,13 +239,14 @@ class FontsTex (Auxiliary) :
         # Check to see if the primary font has been set
         if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == 'None' :
             self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._projConfig['Fonts'][font]['FontInformation']['fontID']
-            
-        # Add any features that this aux needs to have with this font.
-        self.project._projConfig['Auxiliaries'][self.aid]['features'] = self.project._projConfig['Fonts'][font]['FontInformation']['features']
-        
+
+        # Add any features that this aux needs to have with this specific font.
+        buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
+        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self.project._projConfig['Fonts'][font]['FontInformation']['features']
+
         # Now recreate the font info TeX file
         self.makeFontInfoTexFile()
-        
+
         # Set conf write flag and report     
         self.project.writeOutProjConfFile = True
         self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
