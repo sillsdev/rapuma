@@ -16,9 +16,9 @@ rpm auxiliary_add   -a contentComposition   -t pageCompTex
 rpm auxiliary_add   -a contentStyle         -t stylesUsfm
 
 
-rpm set_font        -a frontFont            -f Padauk               -r primary
-rpm set_font        -a contentFont          -f Padauk               -r primary
-rpm set_font        -a contentFont          -f CharisSIL
+rpm font_set        -a frontFont            -f Padauk               -r primary
+rpm font_set        -a contentFont          -f Padauk               -r primary
+rpm font_set        -a contentFont          -f CharisSIL
 
 rpm component_render -c jas
 #rpm component_render -c apa

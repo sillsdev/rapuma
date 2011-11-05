@@ -103,7 +103,7 @@ class FontsTex (Auxiliary) :
         # The rule is that we only create this file if it is not there,
         # otherwise it will silently fail.  If one already exists the file will
         # need to be removed by some other process before it can be recreated.
-        if not os.path.isfile(fontInfoFileName) :
+        if not os.path.isfile(fontInfoFileName) or self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] == 'True' :
             writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
@@ -111,6 +111,7 @@ class FontsTex (Auxiliary) :
                 fInfo = self.project._projConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
+                    writeObject.write('\n# These are normal use fonts for this type of component.\n')
                     features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
                     for tf in fInfo :
                         if tf[:8] == 'Typeface' :
@@ -140,7 +141,10 @@ class FontsTex (Auxiliary) :
 
                             writeObject.write(startDef + fpath + featureString + endDef)
 
+            # Finish the process
             writeObject.close()
+            self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = False
+            self.project.writeOutProjConfFile = True
             return True
 
 
@@ -180,13 +184,13 @@ class FontsTex (Auxiliary) :
         return True
 
 
-    def setFont (self, ftype, font, rank) :
+    def setFont (self, ftype, font, rank='None') :
         '''Setup a font for a specific typeface.'''
 
         # First, delete the font info TeX file.  Everything changes if we add a
         # font to this aux
-        if os.path.isfile(os.path.join(self.projFontFolder, self.aid + '.tex')) :
-            os.remove(os.path.join(self.projFontFolder, self.aid + '.tex'))
+        if os.path.isfile(os.path.join(self.projProcessFolder, self.aid + '.tex')) :
+            os.remove(os.path.join(self.projProcessFolder, self.aid + '.tex'))
 
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
@@ -229,12 +233,6 @@ class FontsTex (Auxiliary) :
             listOrder = self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']
             listOrder.append(font)
             self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] = listOrder
-            
-        # We also keep a list of fonts that are installed in a specific font aux component
-        try :
-            fl = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
-        except :
-            self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = []
 
         if font not in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
             listOrder = []
@@ -243,19 +241,47 @@ class FontsTex (Auxiliary) :
             self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = listOrder
 
         # Check to see if the primary font has been set
-        if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == 'None' :
+        if rank.lower() == 'primary' :
             self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._projConfig['Fonts'][font]['FontInformation']['fontID']
 
         # Add any features that this aux needs to have with this specific font.
         buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
         self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self.project._projConfig['Fonts'][font]['FontInformation']['features']
 
-        # Now recreate the font info TeX file
-        self.makeFontInfoTexFile()
-
-        # Set conf write flag and report     
+        # Set conf write flag and report
+        self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
         self.project.writeOutProjConfFile = True
         self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
+        return True
 
+
+    def removeAuxFont (self, ftype, font) :
+        '''Remove a font from only this aux.'''
+
+        # FIXME: This will work at the aux level but needs expanding to work
+        # more globally
+
+        # Remove from aux font listing
+        if font in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
+            listOrder = []
+            listOrder = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
+            listOrder.pop(listOrder.index(font))
+            self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = listOrder
+
+        # Remove any features that this aux needed to have with this specific font.
+        if font in self.project._projConfig['Auxiliaries'][self.aid] :
+            del self.project._projConfig['Auxiliaries'][self.aid][font]
+
+        # Change the primary font setting if needed
+        if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == font :
+            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'][0]
+        else :
+            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = 'None'
+
+        # Set conf write flag and report
+        self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
+        self.project.writeOutProjConfFile = True
+        self.project.writeToLog('MSG', font + ' font setup information removed from [' + ftype + '] component')
+        return True
 
 

@@ -28,11 +28,12 @@ from sys_command import Command, commands
 ###############################################################################
 ########################### Command Classes Go Here ###########################
 ###############################################################################
- 
-class SetFont (Command) :
-    '''Specify the font for a font set type.'''
 
-    type = "set_font"
+
+class SetFont (Command) :
+    '''Add to the project config the font for a font set type.'''
+
+    type = "font_set"
 
     def run (self, args, aProject, userConfig) :
         super(SetFont, self).run(args, aProject, userConfig)
@@ -47,6 +48,25 @@ class SetFont (Command) :
         self.parser.add_option("-a", "--auxiliary", type = "string", action = "store", help = "Specify the font auxiliary component ID. (Required)")
         self.parser.add_option("-f", "--font", type = "string", action = "store", help = "Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
         self.parser.add_option("-r", "--rank", type = "string", action = "store", default = "primary", help = "If more than one font needed, specify its rank. The default is primary.")
+
+
+class RemoveFont (Command) :
+    '''Remove from the project config the font for a font set type.'''
+
+    type = "font_remove"
+
+    def run (self, args, aProject, userConfig) :
+        super(RemoveFont, self).run(args, aProject, userConfig)
+        if not self.options.auxiliary :
+            self.options.auxiliary = list(aProject.getAuxiliary('fontsTex'))[0]
+        if self.options.auxiliary and self.options.font :
+            aProject.getAuxiliary(self.options.auxiliary).removeAuxFont(self.options.auxiliary, self.options.font)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-a", "--auxiliary", type = "string", action = "store", help = "Specify the font auxiliary component ID. (Required)")
+        self.parser.add_option("-f", "--font", type = "string", action = "store", help = "Specify the font to be removed for this actual font component. This font needs to be specified in the font lib. (Required)")
 
 
 

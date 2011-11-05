@@ -43,6 +43,13 @@ Todo:
                 <type>string</type>
                 <value></value>
             </setting>
+            <setting>
+                <name>RemakeTexFile</name>
+                <key>remakeTexFile</key>
+                <description>An internal flag for triggering the remaking of this auxiliary TeX control file.</description>
+                <type>boolean</type>
+                <value>False</value>
+            </setting>
         </section>
         <section>
             <name>Fonts TeX Auxiliary Component Type Information</name>
