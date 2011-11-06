@@ -218,7 +218,6 @@ def writeProjConfFile (projConfig, projHome) :
         projConfig.writeOutProjConfFile = False
 
     except :
-        # FIXME: Should I be doing something else here?
         pass
 
 
@@ -228,20 +227,14 @@ def writeProjFormatConfFile (formatConfig, projHome) :
     projFormatConfigFile = os.path.join(projHome, '.format.conf')
 
     # There may not always be a valid (populated) formatConfig
-    formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
-    formatConfig.filename = projFormatConfigFile
-    formatConfig.write()
-    formatConfig.writeOutFormatConfFile = False
-#    try :
-#        formatConfig['ProjectFormatInfo']['formatLastEditDate'] = tStamp()
-#        formatConfig.filename = projFormatConfigFile
-#        formatConfig.write()
-#        formatConfig.writeOutFormatConfFile = False
+    try :
+        formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
+        formatConfig.filename = projFormatConfigFile
+        formatConfig.write()
+        formatConfig.writeOutFormatConfFile = False
 
-#    except :
-#        # FIXME: Should I be doing something else here?
-#        print 'Failed to print out: ', projFormatConfigFile
-#        pass
+    except :
+        pass
 
 
 def writeUserConfFile (userConfig, userHome) :

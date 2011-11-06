@@ -108,7 +108,7 @@ class FontsTex (Auxiliary) :
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
             for f in auxFonts :
-                fInfo = self.project._projConfig['Fonts'][f]
+                fInfo = self.project._formatConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
@@ -154,7 +154,7 @@ class FontsTex (Auxiliary) :
         works if there are any fonts set for a given aux.'''
 
         for font in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
-            fontInfo = self.project._projConfig['Fonts'][font]
+            fontInfo = self.project._formatConfig['Fonts'][font]
             # Make the font family folder for this typeface
             projFontFamilyFolder = os.path.join(self.projFontFolder, fontInfo['FontInformation']['fontFolder'])
             if not os.path.isdir(projFontFamilyFolder) :
@@ -212,20 +212,15 @@ class FontsTex (Auxiliary) :
             return False
 
         # Make sure we have a fonts section in the conf file
-        try :
-            s = self.project._projConfig['Fonts']
-        except :
-            self.project._projConfig['Fonts'] = {}
-            
-        try :
-            f = self.project._projConfig['Fonts'][font]
-        except :
-            self.project._projConfig['Fonts'][font] = {}
+        buildConfSection (self.project._formatConfig, 'Fonts')
+        buildConfSection (self.project._formatConfig['Fonts'], font)
 
-        # Inject the font info into the fontset component section in the
-        # project.conf. Enough information should be there for the component init.
+        # Inject the font info into the project format config file.
         fInfo = getXMLSettings(fontInfo)
-        self.project._projConfig['Fonts'][font] = fInfo.dict()
+        self.project._formatConfig['Fonts'][font] = fInfo.dict()
+        self.writeOutFormatConfFile = True
+        print self.project._formatConfig['Fonts']
+# FIXME: Some kind of bug here to fix
 
         # Add to installed fonts list for this auxiliary type, only one instance allowed
         if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
@@ -242,11 +237,11 @@ class FontsTex (Auxiliary) :
 
         # Check to see if the primary font has been set
         if rank.lower() == 'primary' :
-            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._projConfig['Fonts'][font]['FontInformation']['fontID']
+            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._formatConfig['Fonts'][font]['FontInformation']['fontID']
 
         # Add any features that this aux needs to have with this specific font.
         buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
-        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self.project._projConfig['Fonts'][font]['FontInformation']['features']
+        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self.project._formatConfig['Fonts'][font]['FontInformation']['features']
 
         # Set conf write flag and report
         self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
