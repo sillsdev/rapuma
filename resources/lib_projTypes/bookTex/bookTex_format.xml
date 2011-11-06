@@ -17,18 +17,21 @@ Todo:
         <name>General Settings</name>
         <sectionID>GeneralSettings</sectionID>
         <description>This contains general format settings for this publication.</description>
-        <section>
-            <name>Measurement</name>
-            <sectionID>Measurement</sectionID>
-            <description>This section contains information about measurements used in this publication.</description>
-            <setting>
-                <name>Measurement Unit</name>
-                <key>MeasurementUnit</key>
-                <description>The unit of measurement used in this publication.</description>
-                <type>string</type>
-                <value>mm</value>
-            </setting>
-        </section>
+        <setting>
+            <name>Format Last Edit Date</name>
+            <key>formatLastEditDate</key>
+            <description>The last time this format file was edited.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Measurement Unit</name>
+            <key>MeasurementUnit</key>
+            <description>The unit of measurement used in this publication.</description>
+            <type>string</type>
+            <value>mm</value>
+        </setting>
+    </section>
     <section>
         <name>Page Settings</name>
         <sectionID>PageSettings</sectionID>

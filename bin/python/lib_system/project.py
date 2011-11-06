@@ -47,19 +47,20 @@ class Project (object) :
         # Load project config files and grouped config information
         self._projConfig        = projConfig
         self._userConfig        = userConfig
+        self._formatConfig      = {}
         self._components        = {}
         self._auxiliaries       = {}
 
         # Set all the initial paths and locations
         # System level paths
-        self.rpmHome           = rpmHome
-        self.userHome          = userHome
-        self.projHome          = projHome
-        self.rpmAuxTypes       = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes')
-        self.rpmCompTypes      = os.path.join(rpmHome, 'resources', 'lib_compTypes')
-        self.rpmProjTypes      = os.path.join(rpmHome, 'resources', 'lib_projTypes')
-        self.rpmShare          = os.path.join(rpmHome, 'resources', 'lib_share')
-        self.rpmFonts          = os.path.join(rpmHome, 'resources', 'lib_share', 'Fonts')
+        self.rpmHome            = rpmHome
+        self.userHome           = userHome
+        self.projHome           = projHome
+        self.rpmAuxTypes        = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes')
+        self.rpmCompTypes       = os.path.join(rpmHome, 'resources', 'lib_compTypes')
+        self.rpmProjTypes       = os.path.join(rpmHome, 'resources', 'lib_projTypes')
+        self.rpmShare           = os.path.join(rpmHome, 'resources', 'lib_share')
+        self.rpmFonts           = os.path.join(rpmHome, 'resources', 'lib_share', 'Fonts')
         # User/Global level paths
         self.userScripts        = os.path.join(userHome, 'resources', 'lib_scripts')
         self.userFonts          = os.path.join(userHome, 'resources', 'lib_share', 'Fonts')
@@ -70,8 +71,9 @@ class Project (object) :
 
         # Set all the system settings
         if self._userConfig :
-            self.projConfFile   = os.path.join(self.projHome, '.project.conf')
-            self.userConfFile   = os.path.join(self.userHome, 'rpm.conf')
+            self.projConfFile       = os.path.join(self.projHome, '.project.conf')
+            self.formatConfFile     = os.path.join(self.projHome, '.format.conf')
+            self.userConfFile       = os.path.join(self.userHome, 'rpm.conf')
             for k in ('systemVersion',      'userName',
                       'debugging',          'lastEditDate',
                       'projLogLineLimit',   'lockExt') :
@@ -92,6 +94,7 @@ class Project (object) :
         # Set some flags
         self.writeOutProjConfFile   = False
         self.writeOutUserConfFile   = False
+        self.writeOutFormatConfFile = False
         self.isProjectInitalized    = False
 
         # If this project is still new these may not exist yet
@@ -174,7 +177,13 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectCreateDate']      = date
         self._projConfig['ProjectInfo']['projectIDCode']          = pid
         recordProject(self.userConfFile, self._projConfig, pdir)
-        
+
+        # Create a master format file for this project if there is not already
+        # one there. This will contain all the formating for this project.
+        if not os.path.isfile(self.formatConfFile) :
+            self._formatConfig = getXMLSettings(os.path.join(self.rpmProjTypes, ptype, ptype + '_format.xml'))
+            self.writeOutFormatConfFile = True
+
         # Set some vars that will be needed
         self.projLogFile        = self._userConfig['Files']['projLogFile']['name']
         self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
