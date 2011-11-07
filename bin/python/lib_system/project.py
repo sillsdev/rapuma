@@ -72,7 +72,6 @@ class Project (object) :
         # Set all the system settings
         if self._userConfig :
             self.projConfFile       = os.path.join(self.projHome, '.project.conf')
-            self.formatConfFile     = os.path.join(self.projHome, '.format.conf')
             self.userConfFile       = os.path.join(self.userHome, 'rpm.conf')
             for k in ('systemVersion',      'userName',
                       'debugging',          'lastEditDate',
@@ -82,6 +81,7 @@ class Project (object) :
             self.orgLastEditDate    = self.lastEditDate
 
         # Load the project vars if this is a valid project
+        self.formatConfFile     = os.path.join(self.projHome, '.format.conf')
         if len(self._projConfig) :
             for k in (  'projectType',                  'projectName',
                         'projectIDCode',                'validCompTypes',
@@ -90,6 +90,11 @@ class Project (object) :
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
+
+            # Load up the format configuration
+            if os.path.isfile(self.formatConfFile) :
+                self._formatConfig = ConfigObj(self.formatConfFile)
+
 
         # Set some flags
         self.writeOutProjConfFile   = False

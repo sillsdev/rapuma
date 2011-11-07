@@ -219,7 +219,7 @@ class FontsTex (Auxiliary) :
         fInfo = getXMLSettings(fontInfo)
         self.project._formatConfig['Fonts'][font] = fInfo.dict()
         self.writeOutFormatConfFile = True
-        print self.project._formatConfig['Fonts']
+        print self.project._formatConfig
 # FIXME: Some kind of bug here to fix
 
         # Add to installed fonts list for this auxiliary type, only one instance allowed
