@@ -91,7 +91,7 @@ class Project (object) :
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
-            # Load up the format configuration
+            # Load the project's format configuration
             if os.path.isfile(self.formatConfFile) :
                 self._formatConfig = ConfigObj(self.formatConfFile)
 

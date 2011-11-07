@@ -218,9 +218,7 @@ class FontsTex (Auxiliary) :
         # Inject the font info into the project format config file.
         fInfo = getXMLSettings(fontInfo)
         self.project._formatConfig['Fonts'][font] = fInfo.dict()
-        self.writeOutFormatConfFile = True
-        print self.project._formatConfig
-# FIXME: Some kind of bug here to fix
+        self.project.writeOutFormatConfFile = True
 
         # Add to installed fonts list for this auxiliary type, only one instance allowed
         if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :

@@ -226,21 +226,17 @@ def writeProjFormatConfFile (formatConfig, projHome) :
 
     projFormatConfigFile = os.path.join(projHome, '.format.conf')
 
-    formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
-    formatConfig.filename = projFormatConfigFile
-    formatConfig.write()
-    formatConfig.writeOutFormatConfFile = False
     # There may not always be a valid (populated) formatConfig
-#    try :
-#        formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
-#        formatConfig.filename = projFormatConfigFile
-#        formatConfig.write()
-#        formatConfig.writeOutFormatConfFile = False
+    try :
+        formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
+        formatConfig.filename = projFormatConfigFile
+        formatConfig.write()
+        formatConfig.writeOutFormatConfFile = False
+        return True
 
-#    except :
-#        pass
+    except :
+        pass
 
-    print "XXXXXXXXXXXXXX Did This work? XXXXXXXXXXXXXXXXX"
 
 
 def writeUserConfFile (userConfig, userHome) :

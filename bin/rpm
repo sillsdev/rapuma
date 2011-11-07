@@ -178,8 +178,8 @@ if aProject.writeOutUserConfFile :
     aProject.writeOutUserConfFile = False
 
 if aProject.writeOutFormatConfFile :
-    writeProjFormatConfFile(aProject._formatConfig, projHome)
-    aProject.writeOutFormatConfFile = False
+    if writeProjFormatConfFile(aProject._formatConfig, projHome) :
+        aProject.writeOutFormatConfFile = False
 
 # Now trim the log file if it is needed
 if isConfSection(aProject._projConfig, 'Project') :
