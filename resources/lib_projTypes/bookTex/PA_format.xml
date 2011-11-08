@@ -1,0 +1,279 @@
+    </section>
+    <section>
+        <name></name>
+        <sectionID></sectionID>
+        <description></description>
+
+        <setting>
+            <name></name>
+            <key></key>
+            <description></description>
+            <type>string</type>
+            <value></value>
+        </setting>
+
+
+        <section>
+            <name></name>
+            <sectionID></sectionID>
+            <description></description>
+            <setting>
+                <name></name>
+                <key></key>
+                <description></description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+
+
+
+
+    </section>
+    <section>
+        <name>Basics</name>
+        <sectionID>Basics</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value>'page size', 'margins', 'columns', 'font', 'font size', 'leading', 'justification'</value>
+        </setting>
+    ppUseSavedStylesheet = "18 — Stylesheet to use. This parameter would not be used in a publication template."
+	ppFontName = "19 — Name of the font to use to typeset the text."
+	ppFontSize = "19 — Size of the font to use for body text. (default units: pt)"
+	ppSpacingInterline = "19 — Size of the line spacing (leading) to use for body text. (default units: pt)"
+	ppParJustify = "19 — 'Yes' for justified paragraphs. 'No' for ragged right paragraphs. The last line of a paragraph is never justified. It is assumed that some paragraph elements are never justified (headings, poetic lines)."
+	ppPageWidth = "19 — Page width. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
+	ppPageHeight = "19 — Page height. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
+	ppMarginTop = "19 — Page top margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
+	ppMarginBottom = "19 — Page bottom margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
+	ppMarginInside = "19 — Page inside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
+	ppMarginOutside = "19 — Page outside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
+	ppNumberOfColumns = "19 — Number of columns for body text. '1' for single column. '2' for double column."
+	ppColumnGutter = "19 — Column gutter size (space between columns). This is ignored if a 1 column format is chosen. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
+	ppColumnGutterRule = "19 — 'Yes' to draw vertical line in the column gutter. 'No' to disable the gutter rule."
+	ppColumnGutterRuleTopOffset = "20 — Amount to offset the top of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4)."
+	ppColumnGutterRuleBottomOffset = "20 — Amount to offset the bottom of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4)."
+
+    </section>
+    <section>
+        <name>Chapter/Verse</name>
+        <sectionID>ChapterVerse</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+	ppChapterNumber = "21 — 'Drop Cap' to display drop cap chapter numbers. 'Centered' to display centered chapter headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph. This option applies to all books except Psalms."
+	ppPsalmsChapterNumber = "21 — 'Drop Cap' to display drop cap Psalm numbers. 'Centered' to display centered Psalm headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph/poetic line. This option applies to Psalms only"
+	ppChapterString = "21 — Does not apply if ppChapterNumber='Drop Cap'. Provide the string which is to precede the chapter number, e.g. Capitulo. The chapter number will be displayed as a type of heading. This option applies to all books except Psalms."
+	ppPsalmString = "21 — Does not apply if ppPsalmsChapterNumber='Drop Cap'. Provide the string which is to precede the Psalm number, e.g. Capitulo. The Psalm number will be displayed as a type of heading. This option applies to Psalms only."
+	ppFontTitleCenteredChapterStyle = "22 — Font style for Centered chapter numbers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppFontTitleCenteredChapterSize = "22 — Size of the font to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppSpacingTitleCenteredChapterInterline = "22 — Size of the line spacing (leading) to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleCenteredChapterMarginTop = "22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleCenteredChapterMarginBottom = "22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppVerseFormatBold = "22 — Make format for verse numbers bold?"
+	ppVerseFormatRaised = "22 — Make default format for verse numbers raised above base line?"
+	ppVerseFirstInChapterDisplay = "22 — 'Yes' to display the first verse number in a chapter. 'No' to omit the first verse number in a chapter from the published document. In single chapter books, the first verse number is always shown."
+	ppSingleChapterBookHideChapterNum = "22 — 'Hide Chapter Number' to hide the chapter number when a book has only one chapter. 'Show Chapter Number' to show the chapter number."
+
+    </section>
+    <section>
+        <name>Headings</name>
+        <sectionID>Headings</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value>'Major Sections', 'Sections', 'Sub Sections', 'References'</value>
+        </setting>
+	ppTitleMainSize = "23 —Size of the font to use for Main Titles. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppFontTitleSectionStyle = "23 — Font style for Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppAlignTitleSection = "23 — 'Yes' to align Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
+	ppFontTitleSectionSize = "23 — Size of the font to use for Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppSpacingTitleSectionInterline = "23 — Size of the line spacing (leading) to use for Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleSectionMarginTop = "23 — Amount of space to include before Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleSectionMarginBottom = "24 — Amount of space to include after Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppFontTitleSectionReferenceStyle = "24 — Font style to use for Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppFontTitleSectionReferenceSize = "24 — Size of the font to use for Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppFontTitleMajorSectionStyle = "23 — Font style for Major Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppAlignTitleMajorSection = "23 — 'Yes' to align Major Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
+	ppFontTitleMajorSectionSize = "23 — Size of the font to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppSpacingTitleMajorSectionInterline = "23 — Size of the line spacing (leading) to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleMajorSectionMarginTop = "23 — Amount of space to include before Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleMajorSectionMarginBottom = "24 — Amount of space to include after Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppFontTitleMajorSectionReferenceStyle = "24 — Font style to use for Major Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppFontTitleMajorSectionReferenceSize = "24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppFontTitleSubSectionStyle = "23 — Font style for Sub Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppAlignTitleSubSection = "23 — 'Yes' to align Sub Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
+	ppFontTitleSubSectionSize = "23 — Size of the font to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+	ppSpacingTitleSubSectionInterline = "23 — Size of the line spacing (leading) to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleSubSectionMarginTop = "23 — Amount of space to include before Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppSpacingTitleSubSectionMarginBottom = "24 — Amount of space to include after Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
+	ppFontTitleSubSectionReferenceStyle = "24 — Font style to use for Sub Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppFontTitleSubSectionReferenceSize = "24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
+
+    </section>
+    <section>
+        <name>Footnotes</name>
+        <sectionID>Footnotes</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value>'Cross References'</value>
+        </setting>
+	ppTypesetFNotes = "25 — 'Yes' to typeset footnotes. 'No' to prevent footnotes from being typeset."
+	ppTypesetXRefs = "25 — 'Yes' to typeset cross references. 'No' to prevent cross references from being typeset."
+	ppFontSizeNotes = "25 — Size of the font to use for note text (footnotes and cross references). (default units: pt)"
+	ppSpacingInterlineNotes = "25 — Size of the line spacing (leading) to use for note text (footnotes and cross references). (default units: pt)"
+	ppFootnoteCallerFontStyle = "25 — Font style to use for footnote callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppCrossReferenceCallerFontStyle = "25 — Font style to use for cross reference callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppFnoteNumbering = "26 — '0' to use the footnote callers defined in the project text and the default caller sequence method. '1' to cause the footnote caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page."
+	ppXrefNumbering = "26 — '0' to use the cross reference callers defined in the project text and the default caller sequence method. '1' to cause the cross reference caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page."
+	ppFootnoteIncludeReference = "27 — 'Yes' to display the source reference at the beginning of the footnote (after the caller). 'No' to omit the source reference from the footnote text. Specifying 'Yes' will only have an effect if the source text includes a footnote reference element (USFM \fr)."
+	ppFootnoteReferenceFontStyle = "27 — Font style to use for references in footnotes. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppNoteRule = "28 — 'Yes' to draw a horizontal line between the body text and notes. 'No' to disable."
+	ppNoteOnNewline = "28 — 'Yes' to force each footnote to start on a new line. 'No' to allow footnotes to start on the same line as a previous footnote on the same page (with white space between)."
+	ppSpaceBetweenFtAndXt = "28 — 'Yes' to add a blank line between the footnotes and cross references. 'No' to typeset cross references on the next line, immediately following any footnote text."
+	ppNoteFrameStyle = "29 — Desired style for the footnote frame. '1 Column - Page Wide' to produce a 1 column layout for notes. '2 Columns - Page Wide' to produce a 2 column layout for notes."
+	ppNoteGutterRule = "29 — 'Yes' to draw a vertical line in the footnote column gutter. 'No' to disable the gutter rule (n/a with single column note layout)."
+
+    </section>
+    <section>
+        <name>Text Spacing</name>
+        <sectionID>TextSpacing</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value>'vertical justification', 'hyphenation'</value>
+        </setting>
+	ppSpacingWordBasic = "30 — Desired (optimal) size of the space that is used between words, specified as a percentage of a space (eg. 100 = normal spaceband)."
+	ppSpacingWordSquash = "30 — Minimum amount which the space between words can be reduced, specified as a percentage of a space (eg. 75). Must be less than or equal to desired."
+	ppSpacingWordStretch = "30 — Maximum amount which the space between words can be expanded, specified as a percentage of a space. (eg. 125) Must be more than or equal to desired."
+	ppSpacingLetterBasic = "30 — Desired (optimal) size of the space that is used between letters, specified as a percentage of an em space (usually zero)."
+	ppSpacingLetterSquash = "30 — Minimum amount which the space between letters can be reduced, specified as a percentage of an em space (eg. -5). Must be less than or equal to desired."
+	ppSpacingLetterStretch = "30 — Maximum amount which the space between letters can be expanded (stretched), specified as a percentage of an em space (eg. 5). Must be more than or equal to desired."
+	ppKern = "30 — Approach (strategy) to use when adding or subtracting space between specific pairs of characters. Specify 'Optical' to adjust the spacing between adjacent characters based on their shapes. Specify 'Metrics' to use kerning pair tables defined in the font."
+	ppSpacingGlyphScaleBasic = "30 — Desired (optimal) size of glyphs, specified as a percentage (eg. 100 = normal)"
+	ppSpacingGlyphScaleSquash = "30 — Minimum amount which the size of a glyph can be scaled, specified as a percentage (eg. 95)"
+	ppSpacingGlyphScaleStretch = "30 — Maximum amount which the size of a glyph can be scaled, specified as a percentage (eg. 105)"
+	ppVerticalJustify = "31 — 'Yes' to enable automatic vertical justification (column balancing). 'No' to disable automatic vertical justification. If vertical justification is disabled: (1) Default calculations for heading/title and other vertical spacing will attempt to maintain accurate front/back line registration. (2) If you choose to customize heading/title or other vertical spacing parameters, and wish to maintain registration, you must select values carefully (typically working with multiples of the Interline Space)."
+	ppHyphenation 65 — Language to use for hyphenation. Specify one of 'None', 'hyphenatedWords.txt', 'Catalan', 'Czech', 'Danish', 'Dutch', 'English: Canadian', 'English: UK', 'English: USA', 'Finnish', 'French', 'French: Canadian', 'German: Reformed', 'German: Swiss', 'German: Traditional', 'Greek', 'Hungarian', 'Italian', 'Norwegian: Bokomal', 'Norwegian: Nynorsk', 'Polish', 'Portuguese', 'Portuguese: Brazilian', 'Russian', 'Slovak', 'Spanish: Castilian', 'Swedish', 'Turkish'."
+
+    </section>
+    <section>
+        <name>Other</name>
+        <sectionID>Other</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value>'header/footer', 'typeface names'</value>
+        </setting>
+	ppHeaderInsideLP = "32 — Header content for the Inside of Left Page."
+        o '0' to set nothing in the header at this location."
+        o '1' = Page Number"
+        o '2' = Chapter Reference - Entire range on page"
+        o '3' = Chapter Reference - First reference on page"
+        o '4' = Chapter Reference - Last reference on page"
+        o '5' = Chapter/Verse Reference - Entire range on page"
+        o '6' = Chapter/Verse Reference - First reference on page"
+        o '7' = Chapter/Verse Reference - Last reference on page"
+        o '8' = User Defined Style - First reference on page"
+        o '9' = User Defined Style - Last reference on page"
+	ppHeaderCenterLP = "32 — Header content for the Center of Left Page (options as above)."
+	ppHeaderOutsideLP = "32 — Header content for the Outside of Left Page (options as above)."
+	ppHeaderInsideRP = "32 — Header content for the Inside of Right Page (options as above)."
+	ppHeaderCenterRP = "32 — Header content for the Center of Right Page (options as above)."
+	ppHeaderOutsideRP = "32 — Header content for the Outside of Right Page (options as above)."
+	ppHeaderUserDefinedStyle = "32 — If using options '8' or '9' for header content - Name of the style which content should be gathered from on each page."
+	ppFooterInside = "32 — Footer content for the page inside position. '0' to set nothing in the header at this location. '1' = Page Number"
+	ppFooterCenter = "32 — Footer content for the page center position (options as above)."
+	ppFooterOutside = "32 — Footer content for the page outside position (options as above)."
+	ppHeaderReferenceHandling — Should the header contain the reference to a partial verse, or only to the first complete verse which appears on the page. '10' to include the reference for a partial verse. '11' to only include the first full reference."
+	ppFontRunningHeaderSize = "32 — Font size for header text."
+	ppRunningHeaderConsecutiveSeparator = "32 — Separator to be used between consecutive references. Normally a comma ','."
+	ppRunningHeaderNonConsecutiveSeparator = "32 — Separator to be used between non-consecutive references. Enter 'emdash', or 'endash' or the actual character you want to use. Normally an endash."
+	ppRunningHeaderNonConsecutiveSeparatorVerseOnly —"
+	ppShowPageNumberFirstPage = "32 — 'Yes' to show the page number at the bottom of the first page of each book. 'No' to hide the page number."
+	ppRunningHeaderSpaceBelow = "32 — Amount of space to apply between the running header and the first line of body text. Leave blank to apply a default of one full line of space. This value also affects footers. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
+	ppRunningHeaderChapterVerseSeparator = "32 — Separator to be used between chapter/verse. Usually a colon ':' or a period '.'."
+	ppHeaderLabelsFontStyle = "34 — Font style to use for labels in table headers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
+	ppTableSpaceBefore = "34 — Amount of space to include before tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)"
+	ppTableSpaceAfter = "34 — Amount of space to include after tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)"
+	ppItalicFontName = "34 — Font to use for italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when italic is requested. You must also specify ppItalicFaceName."
+	ppItalicFaceName = "34 — Name for the italic face in the font specified by ppItalicFontName."
+	ppBoldFontName = "34 — Font to use for bold text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold is requested. You must also specify ppBoldFaceName."
+	ppBoldFaceName = "34 — Name for the bold face in the font specified by ppBoldFontName."
+	ppBoldItalicFontName = "34 — Font to use for bold italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold italic is requested. You must also specify ppBoldItalicFaceName."
+	ppBoldItalicFaceName = "34 — Name for the bold italic face in the font specified by ppBoldItalicFontName."
+
+    </section>
+    <section>
+        <name>Layout</name>
+        <sectionID>Layout</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+	ppNRComposer = "35 — Specify 'Adobe Paragraph Composer' to use the standard multi-line composer shipped with Adobe InDesign. Specify 'Adobe Single-line Composer' to use the traditional approach to composing text one line at a time. Specify 'Non-Roman Composer' to use the Uniscribe based complex script paragraph composer. The Non-Roman composer handles complex scripts but fewer InDesign features."
+	ppOMA = "35 — 'Yes' to use optical margin alignment. Punctuation marks and letters such as 'W' can make the left or right edges of a column appear to be misaligned. Optical Margin Alignment controls whether punctuation marks (such as periods, commas, quotation marks, and dashes) and edges of letters (such as W and A) hang outside the text margins, so that the type looks aligned. 'No' to turn off Optical Margin Alignment (all text will be justified only up to the margin edge)."
+	ppIDME = "36 — 'Yes' to indicate that the system is using the Middle East version of InDesign. 'No' to indicate that the system is using standard InDesign. The remaining Middle East configuration options will be considered only if ppIDME is set to 'Yes'."
+	ppHindiDigits = "36 — Type of digits to use. Specify 'Default' to use numbers in the same language as that of the previous character in the text. Other options are 'Arabic', 'Hindi', or 'Farsi' numbers. (Arabic in this instance refers to 'European' digits.)"
+	ppKashidas = "36 — 'Yes' to enable justification using kashidas. 'No' to disable kashidas."
+	ppCharacterDirection = "36 — Alternate (non-Arabic) text direction for bi-directional text. Specify 'Default' to let InDesign handle bi-directional text, automatically switching direction as required by the kind of text encountered. Specify 'Left to Right' or 'Right to Left' to explicitly define the alternate text direction."
+	ppDiacriticPositioning = "36 — Specify how vowels/diacritics should be positioned. Specify 'OpenType', 'Loose', 'Normal', 'Tight', or 'None'."
+	ppParagraphJustification = "36 — Method to use for paragraph justification. Specify 'Naskh', 'Arabic', or 'Standard'. The configuration of this parameter is only significant if ppParJustify 19 (justfy pararaphs) is set to 'Yes'."
+	ppChineseJapaneseLayout = "37 — 'None' if the publication is not a Chinese or Japanese text. Specify 'Horizontal' or 'Vertical' for Chinese or Japanese text direction."
+	ppHorizontalScaling = "35 — Percentage of desired horizontal scaling."
+	ppCJKNoteStyle = "37 — 'Inline' to typeset footnotes using a style which presents footnotes inline with the body text using two half-height lines. 'Bottom' to typeset footnotes at the bottom of the page."
+	ppDiglot = "35 — 'Yes' to indicate that this is a diglot publication. 'No' if this is a standard (single language/ script) publication."
+	ppDiglotSecondaryProject = "35 — Paratext short name for the diglot 'secondary' project."
+	ppDiglotSecondaryProjectJob = "38 — Name for the diglot 'secondary' project job which contains the tagged text files prepared for diglot typesetting."
+	ppDiglotFnFrameAtBottom = "35 — 'Yes' to typeset footnotes at the bottom of the page (whitespace added between the notes and the body). 'No' to typeset footnotes directly under the body (whitespace added between the notes and the bottom of the page)."
+	ppDiglotAlignmentOptions = "35 — 'Align Chapters' to indicate that chapter boundaries should be aligned vertically between the two columns. 'Align Chapter and Verse Paragraphs' to indicate that chapters and matching verse paragraphs should be aligned between the two columns. 'Align Top of Columns' to match references at the top of the columns without aligning chapters or verses. ' None' to not perform any alignment."
+	ppDiglotSecondaryProjectColWidth = "35 — Column width for the secondary project. Specify percentages (e.g. 125%) or absolute values (e.g. 12p). An empty string will be interpreted as 100%, making both columns the same width."
+	ppDiglotRunningHeaderSource = "35 — 'Primary Text' or 'Secondary Text' to indicate the the source of the running header information. 'Text In Page Outside Column' to indicate that the source presented in the running header should alternate between the two texts."
+	ppConcordance = "39 — 'Yes' to indicate that output from the Concordance Builder or the Names Index Builder tools is being handled."
+	ppConcContinueKeyword = "39 — 'Yes' to to repeat the current heading text at the top of a new column for an entry which has broken across a column boundary. 'No' to continue a divided section without repeating the current heading text."
+	ppConcContinuationCharLoc = "39 — 'Before' to typeset the continuation character before the continued heading text. 'After' to typeset the continuation character after the heading text."
+	ppConcNumberOfColumns = "39 — Number of columns for a concordance or names index. Specify '1' though '5'."
+	ppConcContinuationChar = "39 — Character to use to indicate heading continuation."
+
+    </section>
+    <section>
+        <name>Custom Layout</name>
+        <sectionID>CustomLayout</sectionID>
+        <description></description>
+        <setting>
+            <name>Includes</name>
+            <key>includes</key>
+            <description>The list of publication settings included in this section.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+	ppStudyBible = "40 — 'Yes' if this is a custom layout job (a page layout description is required). 'No' if this is a basic Bible job (no custom page layout description)."
+	ppCustomLayoutSimple = "40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is a Standard Project. 'False' if this is an Extended Notes Study Bible."
+	ppCustomLayoutComplex = "40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is an Extended Notes Study Bible. 'False' if this is a Standard Project."
+
