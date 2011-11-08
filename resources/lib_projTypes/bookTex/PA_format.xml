@@ -18,9 +18,23 @@
             <sectionID></sectionID>
             <description></description>
             <setting>
-                <name></name>
-                <key></key>
-                <description></description>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -41,23 +55,422 @@
             <type>list</type>
             <value>'page size', 'margins', 'columns', 'font', 'font size', 'leading', 'justification'</value>
         </setting>
-    ppUseSavedStylesheet = "18 — Stylesheet to use. This parameter would not be used in a publication template."
-	ppFontName = "19 — Name of the font to use to typeset the text."
-	ppFontSize = "19 — Size of the font to use for body text. (default units: pt)"
-	ppSpacingInterline = "19 — Size of the line spacing (leading) to use for body text. (default units: pt)"
-	ppParJustify = "19 — 'Yes' for justified paragraphs. 'No' for ragged right paragraphs. The last line of a paragraph is never justified. It is assumed that some paragraph elements are never justified (headings, poetic lines)."
-	ppPageWidth = "19 — Page width. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
-	ppPageHeight = "19 — Page height. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
-	ppMarginTop = "19 — Page top margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
-	ppMarginBottom = "19 — Page bottom margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
-	ppMarginInside = "19 — Page inside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
-	ppMarginOutside = "19 — Page outside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
-	ppNumberOfColumns = "19 — Number of columns for body text. '1' for single column. '2' for double column."
-	ppColumnGutter = "19 — Column gutter size (space between columns). This is ignored if a 1 column format is chosen. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)"
-	ppColumnGutterRule = "19 — 'Yes' to draw vertical line in the column gutter. 'No' to disable the gutter rule."
-	ppColumnGutterRuleTopOffset = "20 — Amount to offset the top of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4)."
-	ppColumnGutterRuleBottomOffset = "20 — Amount to offset the bottom of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4)."
-
+        <section>
+            <name>ppUseSavedStylesheet</name>
+            <sectionID>ppUseSavedStylesheet</sectionID>
+            <description>18 — Stylesheet to use. This parameter would not be used in a publication template.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppUseSavedStylesheet</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontName</name>
+            <sectionID>ppFontName</sectionID>
+            <description>19 — Name of the font to use to typeset the text.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontSize</name>
+            <sectionID>ppFontSize</sectionID>
+            <description>19 — Size of the font to use for body text. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingInterline</name>
+            <sectionID>ppSpacingInterline</sectionID>
+            <description>19 — Size of the line spacing (leading) to use for body text. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingInterline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppParJustify</name>
+            <sectionID>ppParJustify</sectionID>
+            <description>19 — 'Yes' for justified paragraphs. 'No' for ragged right paragraphs. The last line of a paragraph is never justified. It is assumed that some paragraph elements are never justified (headings, poetic lines).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppParJustify</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppPageWidth</name>
+            <sectionID>ppPageWidth</sectionID>
+            <description>19 — Page width. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppPageWidth</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppPageHeight</name>
+            <sectionID>ppPageHeight</sectionID>
+            <description>19 — Page height. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppPageHeight</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppMarginTop</name>
+            <sectionID>ppMarginTop</sectionID>
+            <description>19 — Page top margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppMarginTop</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppMarginBottom</name>
+            <sectionID>ppMarginBottom</sectionID>
+            <description>19 — Page bottom margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppMarginBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppMarginInside</name>
+            <sectionID>ppMarginInside</sectionID>
+            <description>19 — Page inside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppMarginInside</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppMarginOutside</name>
+            <sectionID>ppMarginOutside</sectionID>
+            <description>19 — Page outside margin. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppMarginOutside</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppNumberOfColumns</name>
+            <sectionID>ppNumberOfColumns</sectionID>
+            <description>19 — Number of columns for body text. '1' for single column. '2' for double column.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNumberOfColumns</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppColumnGutter</name>
+            <sectionID>ppColumnGutter</sectionID>
+            <description>19 — Column gutter size (space between columns). This is ignored if a 1 column format is chosen. Specify partial values with decimals, e.g. .75 _not_ 3/4. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppColumnGutter</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppColumnGutterRule</name>
+            <sectionID>ppColumnGutterRule</sectionID>
+            <description>19 — 'Yes' to draw vertical line in the column gutter. 'No' to disable the gutter rule.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppColumnGutterRule</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppColumnGutterRuleTopOffset</name>
+            <sectionID>ppColumnGutterRuleTopOffset</sectionID>
+            <description>20 — Amount to offset the top of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppColumnGutterRuleTopOffset</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppColumnGutterRuleBottomOffset</name>
+            <sectionID>ppColumnGutterRuleBottomOffset</sectionID>
+            <description>20 — Amount to offset the bottom of the column gutter rule. Specify partial values with decimals (e.g. .75 not 3/4).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppColumnGutterRuleBottomOffset</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
     </section>
     <section>
         <name>Chapter/Verse</name>
@@ -70,20 +483,344 @@
             <type>list</type>
             <value></value>
         </setting>
-	ppChapterNumber = "21 — 'Drop Cap' to display drop cap chapter numbers. 'Centered' to display centered chapter headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph. This option applies to all books except Psalms."
-	ppPsalmsChapterNumber = "21 — 'Drop Cap' to display drop cap Psalm numbers. 'Centered' to display centered Psalm headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph/poetic line. This option applies to Psalms only"
-	ppChapterString = "21 — Does not apply if ppChapterNumber='Drop Cap'. Provide the string which is to precede the chapter number, e.g. Capitulo. The chapter number will be displayed as a type of heading. This option applies to all books except Psalms."
-	ppPsalmString = "21 — Does not apply if ppPsalmsChapterNumber='Drop Cap'. Provide the string which is to precede the Psalm number, e.g. Capitulo. The Psalm number will be displayed as a type of heading. This option applies to Psalms only."
-	ppFontTitleCenteredChapterStyle = "22 — Font style for Centered chapter numbers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppFontTitleCenteredChapterSize = "22 — Size of the font to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppSpacingTitleCenteredChapterInterline = "22 — Size of the line spacing (leading) to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleCenteredChapterMarginTop = "22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleCenteredChapterMarginBottom = "22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppVerseFormatBold = "22 — Make format for verse numbers bold?"
-	ppVerseFormatRaised = "22 — Make default format for verse numbers raised above base line?"
-	ppVerseFirstInChapterDisplay = "22 — 'Yes' to display the first verse number in a chapter. 'No' to omit the first verse number in a chapter from the published document. In single chapter books, the first verse number is always shown."
-	ppSingleChapterBookHideChapterNum = "22 — 'Hide Chapter Number' to hide the chapter number when a book has only one chapter. 'Show Chapter Number' to show the chapter number."
-
+        <section>
+            <name>ppChapterNumber</name>
+            <sectionID>ppChapterNumber</sectionID>
+            <description>21 — 'Drop Cap' to display drop cap chapter numbers. 'Centered' to display centered chapter headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph. This option applies to all books except Psalms.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppChapterNumber</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppPsalmsChapterNumber</name>
+            <sectionID>ppPsalmsChapterNumber</sectionID>
+            <description>21 — 'Drop Cap' to display drop cap Psalm numbers. 'Centered' to display centered Psalm headings. 'Inline' to display the chapter number inline with text at the start of the first paragraph/poetic line. This option applies to Psalms only.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppPsalmsChapterNumber</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppChapterString</name>
+            <sectionID>ppChapterString</sectionID>
+            <description>21 — Does not apply if ppChapterNumber='Drop Cap'. Provide the string which is to precede the chapter number, e.g. Capitulo. The chapter number will be displayed as a type of heading. This option applies to all books except Psalms.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppChapterString</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppPsalmString</name>
+            <sectionID>ppPsalmString</sectionID>
+            <description>21 — Does not apply if ppPsalmsChapterNumber='Drop Cap'. Provide the string which is to precede the Psalm number, e.g. Capitulo. The Psalm number will be displayed as a type of heading. This option applies to Psalms only.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppPsalmString</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleCenteredChapterStyle</name>
+            <sectionID>ppFontTitleCenteredChapterStyle</sectionID>
+            <description>22 — Font style for Centered chapter numbers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleCenteredChapterStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleCenteredChapterSize</name>
+            <sectionID>ppFontTitleCenteredChapterSize</sectionID>
+            <description>22 — Size of the font to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleCenteredChapterSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleCenteredChapterInterline</name>
+            <sectionID>ppSpacingTitleCenteredChapterInterline</sectionID>
+            <description>22 — Size of the line spacing (leading) to use for Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleCenteredChapterInterline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleCenteredChapterMarginTop</name>
+            <sectionID>ppSpacingTitleCenteredChapterMarginTop</sectionID>
+            <description>22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleCenteredChapterMarginTop</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleCenteredChapterMarginBottom</name>
+            <sectionID>ppSpacingTitleCenteredChapterMarginBottom</sectionID>
+            <description>22 — Amount of space to include after Centered chapter numbers. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleCenteredChapterMarginBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppVerseFormatBold</name>
+            <sectionID>ppVerseFormatBold</sectionID>
+            <description>22 — Make format for verse numbers bold?</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppVerseFormatBold</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppVerseFormatRaised</name>
+            <sectionID>ppVerseFormatRaised</sectionID>
+            <description>22 — Make default format for verse numbers raised above base line?</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppVerseFormatRaised</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppVerseFirstInChapterDisplay</name>
+            <sectionID>ppVerseFirstInChapterDisplay</sectionID>
+            <description>22 — 'Yes' to display the first verse number in a chapter. 'No' to omit the first verse number in a chapter from the published document. In single chapter books, the first verse number is always shown.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppVerseFirstInChapterDisplay</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSingleChapterBookHideChapterNum</name>
+            <sectionID>ppSingleChapterBookHideChapterNum</sectionID>
+            <description>22 — 'Hide Chapter Number' to hide the chapter number when a book has only one chapter. 'Show Chapter Number' to show the chapter number.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSingleChapterBookHideChapterNum</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
     </section>
     <section>
         <name>Headings</name>
@@ -96,32 +833,656 @@
             <type>list</type>
             <value>'Major Sections', 'Sections', 'Sub Sections', 'References'</value>
         </setting>
-	ppTitleMainSize = "23 —Size of the font to use for Main Titles. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppFontTitleSectionStyle = "23 — Font style for Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppAlignTitleSection = "23 — 'Yes' to align Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
-	ppFontTitleSectionSize = "23 — Size of the font to use for Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppSpacingTitleSectionInterline = "23 — Size of the line spacing (leading) to use for Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleSectionMarginTop = "23 — Amount of space to include before Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleSectionMarginBottom = "24 — Amount of space to include after Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppFontTitleSectionReferenceStyle = "24 — Font style to use for Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppFontTitleSectionReferenceSize = "24 — Size of the font to use for Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppFontTitleMajorSectionStyle = "23 — Font style for Major Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppAlignTitleMajorSection = "23 — 'Yes' to align Major Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
-	ppFontTitleMajorSectionSize = "23 — Size of the font to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppSpacingTitleMajorSectionInterline = "23 — Size of the line spacing (leading) to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleMajorSectionMarginTop = "23 — Amount of space to include before Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleMajorSectionMarginBottom = "24 — Amount of space to include after Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppFontTitleMajorSectionReferenceStyle = "24 — Font style to use for Major Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppFontTitleMajorSectionReferenceSize = "24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppFontTitleSubSectionStyle = "23 — Font style for Sub Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppAlignTitleSubSection = "23 — 'Yes' to align Sub Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL)."
-	ppFontTitleSubSectionSize = "23 — Size of the font to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-	ppSpacingTitleSubSectionInterline = "23 — Size of the line spacing (leading) to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleSubSectionMarginTop = "23 — Amount of space to include before Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppSpacingTitleSubSectionMarginBottom = "24 — Amount of space to include after Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)"
-	ppFontTitleSubSectionReferenceStyle = "24 — Font style to use for Sub Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppFontTitleSubSectionReferenceSize = "24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)"
-
+        <section>
+            <name>ppTitleMainSize</name>
+            <sectionID>ppTitleMainSize</sectionID>
+            <description>23 —Size of the font to use for Main Titles. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppTitleMainSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSectionStyle</name>
+            <sectionID>ppFontTitleSectionStyle</sectionID>
+            <description>23 — Font style for Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSectionStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppAlignTitleSection</name>
+            <sectionID>ppAlignTitleSection</sectionID>
+            <description>23 — 'Yes' to align Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppAlignTitleSection</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSectionSize</name>
+            <sectionID>ppFontTitleSectionSize</sectionID>
+            <description>23 — Size of the font to use for Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSectionSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSectionInterline</name>
+            <sectionID>ppSpacingTitleSectionInterline</sectionID>
+            <description>23 — Size of the line spacing (leading) to use for Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSectionInterline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSectionMarginTop</name>
+            <sectionID>ppSpacingTitleSectionMarginTop</sectionID>
+            <description>23 — Amount of space to include before Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSectionMarginTop</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSectionMarginBottom</name>
+            <sectionID>ppSpacingTitleSectionMarginBottom</sectionID>
+            <description>24 — Amount of space to include after Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSectionMarginBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSectionReferenceStyle</name>
+            <sectionID>ppFontTitleSectionReferenceStyle</sectionID>
+            <description>24 — Font style to use for Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSectionReferenceStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSectionReferenceSize</name>
+            <sectionID>ppFontTitleSectionReferenceSize</sectionID>
+            <description>24 — Size of the font to use for Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSectionReferenceSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleMajorSectionStyle</name>
+            <sectionID>ppFontTitleMajorSectionStyle</sectionID>
+            <description>23 — Font style for Major Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleMajorSectionStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppAlignTitleMajorSection</name>
+            <sectionID>ppAlignTitleMajorSection</sectionID>
+            <description>23 — 'Yes' to align Major Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppAlignTitleMajorSection</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleMajorSectionSize</name>
+            <sectionID>ppFontTitleMajorSectionSize</sectionID>
+            <description>23 — Size of the font to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleMajorSectionSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleMajorSectionInterline</name>
+            <sectionID>ppSpacingTitleMajorSectionInterline</sectionID>
+            <description>23 — Size of the line spacing (leading) to use for Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleMajorSectionInterline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleMajorSectionMarginTop</name>
+            <sectionID>ppSpacingTitleMajorSectionMarginTop</sectionID>
+            <description>23 — Amount of space to include before Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleMajorSectionMarginTop</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleMajorSectionMarginBottom</name>
+            <sectionID>ppSpacingTitleMajorSectionMarginBottom</sectionID>
+            <description>24 — Amount of space to include after Major Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleMajorSectionMarginBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleMajorSectionReferenceStyle</name>
+            <sectionID>ppFontTitleMajorSectionReferenceStyle</sectionID>
+            <description>24 — Font style to use for Major Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleMajorSectionReferenceStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleMajorSectionReferenceSize</name>
+            <sectionID>ppFontTitleMajorSectionReferenceSize</sectionID>
+            <description>24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleMajorSectionReferenceSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSubSectionStyle</name>
+            <sectionID>ppFontTitleSubSectionStyle</sectionID>
+            <description>23 — Font style for Sub Section headings. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSubSectionStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppAlignTitleSubSection</name>
+            <sectionID>ppAlignTitleSubSection</sectionID>
+            <description>23 — 'Yes' to align Sub Section headings in center of column. 'No' to align 'start' (left for LTR scripts; right for RTL).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppAlignTitleSubSection</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSubSectionSize</name>
+            <sectionID>ppFontTitleSubSectionSize</sectionID>
+            <description>23 — Size of the font to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSubSectionSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSubSectionInterline</name>
+            <sectionID>ppSpacingTitleSubSectionInterline</sectionID>
+            <description>23 — Size of the line spacing (leading) to use for Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSubSectionInterline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSubSectionMarginTop</name>
+            <sectionID>ppSpacingTitleSubSectionMarginTop</sectionID>
+            <description>23 — Amount of space to include before Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSubSectionMarginTop</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingTitleSubSectionMarginBottom</name>
+            <sectionID>ppSpacingTitleSubSectionMarginBottom</sectionID>
+            <description>24 — Amount of space to include after Sub Section headings. Specify an empty string to force a default to be calculated based on the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingTitleSubSectionMarginBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSubSectionReferenceStyle</name>
+            <sectionID>ppFontTitleSubSectionReferenceStyle</sectionID>
+            <description>24 — Font style to use for Sub Section heading references. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSubSectionReferenceStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontTitleSubSectionReferenceSize</name>
+            <sectionID>ppFontTitleSubSectionReferenceSize</sectionID>
+            <description>24 — Size of the font to use for Major Section references. Specify an empty string to force a default to be calculated based on the body text font size. (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontTitleSubSectionReferenceSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
     </section>
     <section>
         <name>Footnotes</name>
@@ -134,22 +1495,396 @@
             <type>list</type>
             <value>'Cross References'</value>
         </setting>
-	ppTypesetFNotes = "25 — 'Yes' to typeset footnotes. 'No' to prevent footnotes from being typeset."
-	ppTypesetXRefs = "25 — 'Yes' to typeset cross references. 'No' to prevent cross references from being typeset."
-	ppFontSizeNotes = "25 — Size of the font to use for note text (footnotes and cross references). (default units: pt)"
-	ppSpacingInterlineNotes = "25 — Size of the line spacing (leading) to use for note text (footnotes and cross references). (default units: pt)"
-	ppFootnoteCallerFontStyle = "25 — Font style to use for footnote callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppCrossReferenceCallerFontStyle = "25 — Font style to use for cross reference callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppFnoteNumbering = "26 — '0' to use the footnote callers defined in the project text and the default caller sequence method. '1' to cause the footnote caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page."
-	ppXrefNumbering = "26 — '0' to use the cross reference callers defined in the project text and the default caller sequence method. '1' to cause the cross reference caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page."
-	ppFootnoteIncludeReference = "27 — 'Yes' to display the source reference at the beginning of the footnote (after the caller). 'No' to omit the source reference from the footnote text. Specifying 'Yes' will only have an effect if the source text includes a footnote reference element (USFM \fr)."
-	ppFootnoteReferenceFontStyle = "27 — Font style to use for references in footnotes. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppNoteRule = "28 — 'Yes' to draw a horizontal line between the body text and notes. 'No' to disable."
-	ppNoteOnNewline = "28 — 'Yes' to force each footnote to start on a new line. 'No' to allow footnotes to start on the same line as a previous footnote on the same page (with white space between)."
-	ppSpaceBetweenFtAndXt = "28 — 'Yes' to add a blank line between the footnotes and cross references. 'No' to typeset cross references on the next line, immediately following any footnote text."
-	ppNoteFrameStyle = "29 — Desired style for the footnote frame. '1 Column - Page Wide' to produce a 1 column layout for notes. '2 Columns - Page Wide' to produce a 2 column layout for notes."
-	ppNoteGutterRule = "29 — 'Yes' to draw a vertical line in the footnote column gutter. 'No' to disable the gutter rule (n/a with single column note layout)."
-
+        <section>
+            <name>ppTypesetFNotes</name>
+            <sectionID>ppTypesetFNotes</sectionID>
+            <description>25 — 'Yes' to typeset footnotes. 'No' to prevent footnotes from being typeset.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppTypesetFNotes</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppTypesetXRefs</name>
+            <sectionID>ppTypesetXRefs</sectionID>
+            <description>25 — 'Yes' to typeset cross references. 'No' to prevent cross references from being typeset.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppTypesetXRefs</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontSizeNotes</name>
+            <sectionID>ppFontSizeNotes</sectionID>
+            <description>25 — Size of the font to use for note text (footnotes and cross references). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontSizeNotes</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingInterlineNotes</name>
+            <sectionID>ppSpacingInterlineNotes</sectionID>
+            <description>25 — Size of the line spacing (leading) to use for note text (footnotes and cross references). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingInterlineNotes</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFootnoteCallerFontStyle</name>
+            <sectionID>ppFootnoteCallerFontStyle</sectionID>
+            <description>25 — Font style to use for footnote callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFootnoteCallerFontStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppCrossReferenceCallerFontStyle</name>
+            <sectionID>ppCrossReferenceCallerFontStyle</sectionID>
+            <description>25 — Font style to use for cross reference callers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppCrossReferenceCallerFontStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFnoteNumbering</name>
+            <sectionID>ppFnoteNumbering</sectionID>
+            <description>26 — '0' to use the footnote callers defined in the project text and the default caller sequence method. '1' to cause the footnote caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFnoteNumbering</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppXrefNumbering</name>
+            <sectionID>ppXrefNumbering</sectionID>
+            <description>26 — '0' to use the cross reference callers defined in the project text and the default caller sequence method. '1' to cause the cross reference caller sequence to restart at the beginning of every new book. '2' to restart every chapter. '3' to restart every page.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppXrefNumbering</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFootnoteIncludeReference</name>
+            <sectionID>ppFootnoteIncludeReference</sectionID>
+            <description>27 — 'Yes' to display the source reference at the beginning of the footnote (after the caller). 'No' to omit the source reference from the footnote text. Specifying 'Yes' will only have an effect if the source text includes a footnote reference element (USFM \fr).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFootnoteIncludeReference</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFootnoteReferenceFontStyle</name>
+            <sectionID>ppFootnoteReferenceFontStyle</sectionID>
+            <description>27 — Font style to use for references in footnotes. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFootnoteReferenceFontStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppNoteRule</name>
+            <sectionID>ppNoteRule</sectionID>
+            <description>28 — 'Yes' to draw a horizontal line between the body text and notes. 'No' to disable.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNoteRule</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppNoteOnNewline</name>
+            <sectionID>ppNoteOnNewline</sectionID>
+            <description>28 — 'Yes' to force each footnote to start on a new line. 'No' to allow footnotes to start on the same line as a previous footnote on the same page (with white space between).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNoteOnNewline</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpaceBetweenFtAndXt</name>
+            <sectionID>ppSpaceBetweenFtAndXt</sectionID>
+            <description>28 — 'Yes' to add a blank line between the footnotes and cross references. 'No' to typeset cross references on the next line, immediately following any footnote text.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpaceBetweenFtAndXt</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppNoteFrameStyle</name>
+            <sectionID>ppNoteFrameStyle</sectionID>
+            <description>29 — Desired style for the footnote frame. '1 Column - Page Wide' to produce a 1 column layout for notes. '2 Columns - Page Wide' to produce a 2 column layout for notes.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNoteFrameStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppNoteGutterRule</name>
+            <sectionID>ppNoteGutterRule</sectionID>
+            <description>29 — 'Yes' to draw a vertical line in the footnote column gutter. 'No' to disable the gutter rule (n/a with single column note layout).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNoteGutterRule</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
     </section>
     <section>
         <name>Text Spacing</name>
@@ -162,18 +1897,318 @@
             <type>list</type>
             <value>'vertical justification', 'hyphenation'</value>
         </setting>
-	ppSpacingWordBasic = "30 — Desired (optimal) size of the space that is used between words, specified as a percentage of a space (eg. 100 = normal spaceband)."
-	ppSpacingWordSquash = "30 — Minimum amount which the space between words can be reduced, specified as a percentage of a space (eg. 75). Must be less than or equal to desired."
-	ppSpacingWordStretch = "30 — Maximum amount which the space between words can be expanded, specified as a percentage of a space. (eg. 125) Must be more than or equal to desired."
-	ppSpacingLetterBasic = "30 — Desired (optimal) size of the space that is used between letters, specified as a percentage of an em space (usually zero)."
-	ppSpacingLetterSquash = "30 — Minimum amount which the space between letters can be reduced, specified as a percentage of an em space (eg. -5). Must be less than or equal to desired."
-	ppSpacingLetterStretch = "30 — Maximum amount which the space between letters can be expanded (stretched), specified as a percentage of an em space (eg. 5). Must be more than or equal to desired."
-	ppKern = "30 — Approach (strategy) to use when adding or subtracting space between specific pairs of characters. Specify 'Optical' to adjust the spacing between adjacent characters based on their shapes. Specify 'Metrics' to use kerning pair tables defined in the font."
-	ppSpacingGlyphScaleBasic = "30 — Desired (optimal) size of glyphs, specified as a percentage (eg. 100 = normal)"
-	ppSpacingGlyphScaleSquash = "30 — Minimum amount which the size of a glyph can be scaled, specified as a percentage (eg. 95)"
-	ppSpacingGlyphScaleStretch = "30 — Maximum amount which the size of a glyph can be scaled, specified as a percentage (eg. 105)"
-	ppVerticalJustify = "31 — 'Yes' to enable automatic vertical justification (column balancing). 'No' to disable automatic vertical justification. If vertical justification is disabled: (1) Default calculations for heading/title and other vertical spacing will attempt to maintain accurate front/back line registration. (2) If you choose to customize heading/title or other vertical spacing parameters, and wish to maintain registration, you must select values carefully (typically working with multiples of the Interline Space)."
-	ppHyphenation 65 — Language to use for hyphenation. Specify one of 'None', 'hyphenatedWords.txt', 'Catalan', 'Czech', 'Danish', 'Dutch', 'English: Canadian', 'English: UK', 'English: USA', 'Finnish', 'French', 'French: Canadian', 'German: Reformed', 'German: Swiss', 'German: Traditional', 'Greek', 'Hungarian', 'Italian', 'Norwegian: Bokomal', 'Norwegian: Nynorsk', 'Polish', 'Portuguese', 'Portuguese: Brazilian', 'Russian', 'Slovak', 'Spanish: Castilian', 'Swedish', 'Turkish'."
+        <section>
+            <name>ppSpacingWordBasic</name>
+            <sectionID>ppSpacingWordBasic</sectionID>
+            <description>30 — Desired (optimal) size of the space that is used between words, specified as a percentage of a space (eg. 100 = normal spaceband).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingWordBasic</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingWordSquash</name>
+            <sectionID>ppSpacingWordSquash</sectionID>
+            <description>30 — Minimum amount which the space between words can be reduced, specified as a percentage of a space (eg. 75). Must be less than or equal to desired.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingWordSquash</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingWordStretch</name>
+            <sectionID>ppSpacingWordStretch</sectionID>
+            <description>30 — Maximum amount which the space between words can be expanded, specified as a percentage of a space. (eg. 125) Must be more than or equal to desired.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingWordStretch</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingLetterBasic</name>
+            <sectionID>ppSpacingLetterBasic</sectionID>
+            <description>30 — Desired (optimal) size of the space that is used between letters, specified as a percentage of an em space (usually zero).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingLetterBasic</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingLetterSquash</name>
+            <sectionID>ppSpacingLetterSquash</sectionID>
+            <description>30 — Minimum amount which the space between letters can be reduced, specified as a percentage of an em space (eg. -5). Must be less than or equal to desired.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingLetterSquash</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingLetterStretch</name>
+            <sectionID>ppSpacingLetterStretch</sectionID>
+            <description>30 — Maximum amount which the space between letters can be expanded (stretched), specified as a percentage of an em space (eg. 5). Must be more than or equal to desired.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingLetterStretch</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppKern</name>
+            <sectionID>ppKern</sectionID>
+            <description>30 — Approach (strategy) to use when adding or subtracting space between specific pairs of characters. Specify 'Optical' to adjust the spacing between adjacent characters based on their shapes. Specify 'Metrics' to use kerning pair tables defined in the font.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppKern</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingGlyphScaleBasic</name>
+            <sectionID>ppSpacingGlyphScaleBasic</sectionID>
+            <description>30 — Desired (optimal) size of glyphs, specified as a percentage (eg. 100 = normal)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingGlyphScaleBasic</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingGlyphScaleSquash</name>
+            <sectionID>ppSpacingGlyphScaleSquash</sectionID>
+            <description>30 — Minimum amount which the size of a glyph can be scaled, specified as a percentage (eg. 95)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingGlyphScaleSquash</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppSpacingGlyphScaleStretch</name>
+            <sectionID>ppSpacingGlyphScaleStretch</sectionID>
+            <description>30 — Maximum amount which the size of a glyph can be scaled, specified as a percentage (eg. 105)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppSpacingGlyphScaleStretch</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppVerticalJustify</name>
+            <sectionID>ppVerticalJustify</sectionID>
+            <description>31 — 'Yes' to enable automatic vertical justification (column balancing). 'No' to disable automatic vertical justification. If vertical justification is disabled: (1) Default calculations for heading/title and other vertical spacing will attempt to maintain accurate front/back line registration. (2) If you choose to customize heading/title or other vertical spacing parameters, and wish to maintain registration, you must select values carefully (typically working with multiples of the Interline Space).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppVerticalJustify</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHyphenation</name>
+            <sectionID>ppHyphenation</sectionID>
+            <description>65 — Language to use for hyphenation. Specify one of 'None', 'hyphenatedWords.txt', 'Catalan', 'Czech', 'Danish', 'Dutch', 'English: Canadian', 'English: UK', 'English: USA', 'Finnish', 'French', 'French: Canadian', 'German: Reformed', 'German: Swiss', 'German: Traditional', 'Greek', 'Hungarian', 'Italian', 'Norwegian: Bokomal', 'Norwegian: Nynorsk', 'Polish', 'Portuguese', 'Portuguese: Brazilian', 'Russian', 'Slovak', 'Spanish: Castilian', 'Swedish', 'Turkish'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHyphenation</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
 
     </section>
     <section>
@@ -187,43 +2222,710 @@
             <type>list</type>
             <value>'header/footer', 'typeface names'</value>
         </setting>
-	ppHeaderInsideLP = "32 — Header content for the Inside of Left Page."
-        o '0' to set nothing in the header at this location."
-        o '1' = Page Number"
-        o '2' = Chapter Reference - Entire range on page"
-        o '3' = Chapter Reference - First reference on page"
-        o '4' = Chapter Reference - Last reference on page"
-        o '5' = Chapter/Verse Reference - Entire range on page"
-        o '6' = Chapter/Verse Reference - First reference on page"
-        o '7' = Chapter/Verse Reference - Last reference on page"
-        o '8' = User Defined Style - First reference on page"
-        o '9' = User Defined Style - Last reference on page"
-	ppHeaderCenterLP = "32 — Header content for the Center of Left Page (options as above)."
-	ppHeaderOutsideLP = "32 — Header content for the Outside of Left Page (options as above)."
-	ppHeaderInsideRP = "32 — Header content for the Inside of Right Page (options as above)."
-	ppHeaderCenterRP = "32 — Header content for the Center of Right Page (options as above)."
-	ppHeaderOutsideRP = "32 — Header content for the Outside of Right Page (options as above)."
-	ppHeaderUserDefinedStyle = "32 — If using options '8' or '9' for header content - Name of the style which content should be gathered from on each page."
-	ppFooterInside = "32 — Footer content for the page inside position. '0' to set nothing in the header at this location. '1' = Page Number"
-	ppFooterCenter = "32 — Footer content for the page center position (options as above)."
-	ppFooterOutside = "32 — Footer content for the page outside position (options as above)."
-	ppHeaderReferenceHandling — Should the header contain the reference to a partial verse, or only to the first complete verse which appears on the page. '10' to include the reference for a partial verse. '11' to only include the first full reference."
-	ppFontRunningHeaderSize = "32 — Font size for header text."
-	ppRunningHeaderConsecutiveSeparator = "32 — Separator to be used between consecutive references. Normally a comma ','."
-	ppRunningHeaderNonConsecutiveSeparator = "32 — Separator to be used between non-consecutive references. Enter 'emdash', or 'endash' or the actual character you want to use. Normally an endash."
-	ppRunningHeaderNonConsecutiveSeparatorVerseOnly —"
-	ppShowPageNumberFirstPage = "32 — 'Yes' to show the page number at the bottom of the first page of each book. 'No' to hide the page number."
-	ppRunningHeaderSpaceBelow = "32 — Amount of space to apply between the running header and the first line of body text. Leave blank to apply a default of one full line of space. This value also affects footers. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)"
-	ppRunningHeaderChapterVerseSeparator = "32 — Separator to be used between chapter/verse. Usually a colon ':' or a period '.'."
-	ppHeaderLabelsFontStyle = "34 — Font style to use for labels in table headers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'."
-	ppTableSpaceBefore = "34 — Amount of space to include before tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)"
-	ppTableSpaceAfter = "34 — Amount of space to include after tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)"
-	ppItalicFontName = "34 — Font to use for italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when italic is requested. You must also specify ppItalicFaceName."
-	ppItalicFaceName = "34 — Name for the italic face in the font specified by ppItalicFontName."
-	ppBoldFontName = "34 — Font to use for bold text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold is requested. You must also specify ppBoldFaceName."
-	ppBoldFaceName = "34 — Name for the bold face in the font specified by ppBoldFontName."
-	ppBoldItalicFontName = "34 — Font to use for bold italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold italic is requested. You must also specify ppBoldItalicFaceName."
-	ppBoldItalicFaceName = "34 — Name for the bold italic face in the font specified by ppBoldItalicFontName."
+        <section>
+            <name>ppHeaderInsideLP</name>
+            <sectionID>ppHeaderInsideLP</sectionID>
+            <description>32 — Header content for the Inside of Left Page. '0' to set nothing in the header at this location. '1' = Page Number '2' = Chapter Reference - Entire range on page '3' = Chapter Reference - First reference on page '4' = Chapter Reference - Last reference on page" '5' = Chapter/Verse Reference - Entire range on page" '6' = Chapter/Verse Reference - First reference on page" '7' = Chapter/Verse Reference - Last reference on page" '8' = User Defined Style - First reference on page" '9' = User Defined Style - Last reference on page"</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderInsideLP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderCenterLP</name>
+            <sectionID>ppHeaderCenterLP</sectionID>
+            <description>32 — Header content for the Center of Left Page (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderCenterLP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderOutsideLP</name>
+            <sectionID>ppHeaderOutsideLP</sectionID>
+            <description>32 — Header content for the Outside of Left Page (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderOutsideLP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderInsideRP</name>
+            <sectionID>ppHeaderInsideRP</sectionID>
+            <description>32 — Header content for the Inside of Right Page (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderInsideRP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderCenterRP</name>
+            <sectionID>ppHeaderCenterRP</sectionID>
+            <description>32 — Header content for the Center of Right Page (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderCenterRP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderOutsideRP</name>
+            <sectionID>ppHeaderOutsideRP</sectionID>
+            <description>32 — Header content for the Outside of Right Page (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderOutsideRP</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderUserDefinedStyle</name>
+            <sectionID>ppHeaderUserDefinedStyle</sectionID>
+            <description>32 — If using options '8' or '9' for header content - Name of the style which content should be gathered from on each page.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderUserDefinedStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFooterInside</name>
+            <sectionID>ppFooterInside</sectionID>
+            <description>32 — Footer content for the page inside position. '0' to set nothing in the header at this location. '1' = Page Number</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFooterInside</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFooterCenter</name>
+            <sectionID>ppFooterCenter</sectionID>
+            <description>32 — Footer content for the page center position (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFooterCenter</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFooterOutside</name>
+            <sectionID>ppFooterOutside</sectionID>
+            <description>32 — Footer content for the page outside position (options as above).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFooterOutside</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+
+        <section>
+            <name>ppHeaderReferenceHandling</name>
+            <sectionID>ppHeaderReferenceHandling</sectionID>
+            <description>32 — Should the header contain the reference to a partial verse, or only to the first complete verse which appears on the page. '10' to include the reference for a partial verse. '11' to only include the first full reference.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderReferenceHandling</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppFontRunningHeaderSize</name>
+            <sectionID>ppFontRunningHeaderSize</sectionID>
+            <description>32 — Font size for header text.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppFontRunningHeaderSize</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppRunningHeaderConsecutiveSeparator</name>
+            <sectionID>ppRunningHeaderConsecutiveSeparator</sectionID>
+            <description>32 — Separator to be used between consecutive references. Normally a comma ','.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppRunningHeaderConsecutiveSeparator</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppRunningHeaderNonConsecutiveSeparator</name>
+            <sectionID>ppRunningHeaderNonConsecutiveSeparator</sectionID>
+            <description>32 — Separator to be used between non-consecutive references. Enter 'emdash', or 'endash' or the actual character you want to use. Normally an endash.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppRunningHeaderNonConsecutiveSeparator</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+
+        <section>
+            <name>ppRunningHeaderNonConsecutiveSeparatorVerseOnly</name>
+            <sectionID>ppRunningHeaderNonConsecutiveSeparatorVerseOnly</sectionID>
+            <description>???</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppRunningHeaderNonConsecutiveSeparatorVerseOnly</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppShowPageNumberFirstPage</name>
+            <sectionID>ppShowPageNumberFirstPage</sectionID>
+            <description>32 — 'Yes' to show the page number at the bottom of the first page of each book. 'No' to hide the page number.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppShowPageNumberFirstPage</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppRunningHeaderSpaceBelow</name>
+            <sectionID>ppRunningHeaderSpaceBelow</sectionID>
+            <description>32 — Amount of space to apply between the running header and the first line of body text. Leave blank to apply a default of one full line of space. This value also affects footers. Specify partial values with decimals, e.g. 8.5 _not_ 8 1/2. (default units: mm)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppRunningHeaderSpaceBelow</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppRunningHeaderChapterVerseSeparator</name>
+            <sectionID>ppRunningHeaderChapterVerseSeparator</sectionID>
+            <description>32 — Separator to be used between chapter/verse. Usually a colon ':' or a period '.'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppRunningHeaderChapterVerseSeparator</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHeaderLabelsFontStyle</name>
+            <sectionID>ppHeaderLabelsFontStyle</sectionID>
+            <description>34 — Font style to use for labels in table headers. Specify 'Normal', 'Italic', 'Bold', or 'Bold Italic'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHeaderLabelsFontStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppTableSpaceBefore</name>
+            <sectionID>ppTableSpaceBefore</sectionID>
+            <description>34 — Amount of space to include before tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppTableSpaceBefore</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppTableSpaceAfter</name>
+            <sectionID>ppTableSpaceAfter</sectionID>
+            <description>34 — Amount of space to include after tables. Specify an empty string to force a default of 1/2 of the body text line spacing (leading). (default units: pt)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppTableSpaceAfter</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppItalicFontName</name>
+            <sectionID>ppItalicFontName</sectionID>
+            <description>34 — Font to use for italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when italic is requested. You must also specify ppItalicFaceName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppItalicFontName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppItalicFaceName</name>
+            <sectionID>ppItalicFaceName</sectionID>
+            <description>34 — Name for the italic face in the font specified by ppItalicFontName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppItalicFaceName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppBoldFontName</name>
+            <sectionID>ppBoldFontName</sectionID>
+            <description>34 — Font to use for bold text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold is requested. You must also specify ppBoldFaceName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppBoldFontName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppBoldFaceName</name>
+            <sectionID>ppBoldFaceName</sectionID>
+            <description>34 — Name for the bold face in the font specified by ppBoldFontName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppBoldFaceName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppBoldItalicFontName</name>
+            <sectionID>ppBoldItalicFontName</sectionID>
+            <description>34 — Font to use for bold italic text. This is usually the same as the default body text font specified by ppFontName. Alternatively, specify the name of the font you would like to substitute when bold italic is requested. You must also specify ppBoldItalicFaceName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppBoldItalicFontName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppBoldItalicFaceName</name>
+            <sectionID>ppBoldItalicFaceName</sectionID>
+            <description>34 — Name for the bold italic face in the font specified by ppBoldItalicFontName.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppBoldItalicFaceName</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
 
     </section>
     <section>
@@ -237,29 +2939,604 @@
             <type>list</type>
             <value></value>
         </setting>
-	ppNRComposer = "35 — Specify 'Adobe Paragraph Composer' to use the standard multi-line composer shipped with Adobe InDesign. Specify 'Adobe Single-line Composer' to use the traditional approach to composing text one line at a time. Specify 'Non-Roman Composer' to use the Uniscribe based complex script paragraph composer. The Non-Roman composer handles complex scripts but fewer InDesign features."
-	ppOMA = "35 — 'Yes' to use optical margin alignment. Punctuation marks and letters such as 'W' can make the left or right edges of a column appear to be misaligned. Optical Margin Alignment controls whether punctuation marks (such as periods, commas, quotation marks, and dashes) and edges of letters (such as W and A) hang outside the text margins, so that the type looks aligned. 'No' to turn off Optical Margin Alignment (all text will be justified only up to the margin edge)."
-	ppIDME = "36 — 'Yes' to indicate that the system is using the Middle East version of InDesign. 'No' to indicate that the system is using standard InDesign. The remaining Middle East configuration options will be considered only if ppIDME is set to 'Yes'."
-	ppHindiDigits = "36 — Type of digits to use. Specify 'Default' to use numbers in the same language as that of the previous character in the text. Other options are 'Arabic', 'Hindi', or 'Farsi' numbers. (Arabic in this instance refers to 'European' digits.)"
-	ppKashidas = "36 — 'Yes' to enable justification using kashidas. 'No' to disable kashidas."
-	ppCharacterDirection = "36 — Alternate (non-Arabic) text direction for bi-directional text. Specify 'Default' to let InDesign handle bi-directional text, automatically switching direction as required by the kind of text encountered. Specify 'Left to Right' or 'Right to Left' to explicitly define the alternate text direction."
-	ppDiacriticPositioning = "36 — Specify how vowels/diacritics should be positioned. Specify 'OpenType', 'Loose', 'Normal', 'Tight', or 'None'."
-	ppParagraphJustification = "36 — Method to use for paragraph justification. Specify 'Naskh', 'Arabic', or 'Standard'. The configuration of this parameter is only significant if ppParJustify 19 (justfy pararaphs) is set to 'Yes'."
-	ppChineseJapaneseLayout = "37 — 'None' if the publication is not a Chinese or Japanese text. Specify 'Horizontal' or 'Vertical' for Chinese or Japanese text direction."
-	ppHorizontalScaling = "35 — Percentage of desired horizontal scaling."
-	ppCJKNoteStyle = "37 — 'Inline' to typeset footnotes using a style which presents footnotes inline with the body text using two half-height lines. 'Bottom' to typeset footnotes at the bottom of the page."
-	ppDiglot = "35 — 'Yes' to indicate that this is a diglot publication. 'No' if this is a standard (single language/ script) publication."
-	ppDiglotSecondaryProject = "35 — Paratext short name for the diglot 'secondary' project."
-	ppDiglotSecondaryProjectJob = "38 — Name for the diglot 'secondary' project job which contains the tagged text files prepared for diglot typesetting."
-	ppDiglotFnFrameAtBottom = "35 — 'Yes' to typeset footnotes at the bottom of the page (whitespace added between the notes and the body). 'No' to typeset footnotes directly under the body (whitespace added between the notes and the bottom of the page)."
-	ppDiglotAlignmentOptions = "35 — 'Align Chapters' to indicate that chapter boundaries should be aligned vertically between the two columns. 'Align Chapter and Verse Paragraphs' to indicate that chapters and matching verse paragraphs should be aligned between the two columns. 'Align Top of Columns' to match references at the top of the columns without aligning chapters or verses. ' None' to not perform any alignment."
-	ppDiglotSecondaryProjectColWidth = "35 — Column width for the secondary project. Specify percentages (e.g. 125%) or absolute values (e.g. 12p). An empty string will be interpreted as 100%, making both columns the same width."
-	ppDiglotRunningHeaderSource = "35 — 'Primary Text' or 'Secondary Text' to indicate the the source of the running header information. 'Text In Page Outside Column' to indicate that the source presented in the running header should alternate between the two texts."
-	ppConcordance = "39 — 'Yes' to indicate that output from the Concordance Builder or the Names Index Builder tools is being handled."
-	ppConcContinueKeyword = "39 — 'Yes' to to repeat the current heading text at the top of a new column for an entry which has broken across a column boundary. 'No' to continue a divided section without repeating the current heading text."
-	ppConcContinuationCharLoc = "39 — 'Before' to typeset the continuation character before the continued heading text. 'After' to typeset the continuation character after the heading text."
-	ppConcNumberOfColumns = "39 — Number of columns for a concordance or names index. Specify '1' though '5'."
-	ppConcContinuationChar = "39 — Character to use to indicate heading continuation."
+        <section>
+            <name>ppNRComposer</name>
+            <sectionID>ppNRComposer</sectionID>
+            <description>35 — Specify 'Adobe Paragraph Composer' to use the standard multi-line composer shipped with Adobe InDesign. Specify 'Adobe Single-line Composer' to use the traditional approach to composing text one line at a time. Specify 'Non-Roman Composer' to use the Uniscribe based complex script paragraph composer. The Non-Roman composer handles complex scripts but fewer InDesign features.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppNRComposer</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppOMA</name>
+            <sectionID>ppOMA</sectionID>
+            <description>35 — 'Yes' to use optical margin alignment. Punctuation marks and letters such as 'W' can make the left or right edges of a column appear to be misaligned. Optical Margin Alignment controls whether punctuation marks (such as periods, commas, quotation marks, and dashes) and edges of letters (such as W and A) hang outside the text margins, so that the type looks aligned. 'No' to turn off Optical Margin Alignment (all text will be justified only up to the margin edge).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppOMA</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppIDME</name>
+            <sectionID>ppIDME</sectionID>
+            <description>36 — 'Yes' to indicate that the system is using the Middle East version of InDesign. 'No' to indicate that the system is using standard InDesign. The remaining Middle East configuration options will be considered only if ppIDME is set to 'Yes'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppIDME</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHindiDigits</name>
+            <sectionID>ppHindiDigits</sectionID>
+            <description>36 — Type of digits to use. Specify 'Default' to use numbers in the same language as that of the previous character in the text. Other options are 'Arabic', 'Hindi', or 'Farsi' numbers. (Arabic in this instance refers to 'European' digits.)</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHindiDigits</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppKashidas</name>
+            <sectionID>ppKashidas</sectionID>
+            <description>36 — 'Yes' to enable justification using kashidas. 'No' to disable kashidas.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppKashidas</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppCharacterDirection</name>
+            <sectionID>ppCharacterDirection</sectionID>
+            <description>36 — Alternate (non-Arabic) text direction for bi-directional text. Specify 'Default' to let InDesign handle bi-directional text, automatically switching direction as required by the kind of text encountered. Specify 'Left to Right' or 'Right to Left' to explicitly define the alternate text direction.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppCharacterDirection</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiacriticPositioning</name>
+            <sectionID>ppDiacriticPositioning</sectionID>
+            <description>36 — Specify how vowels/diacritics should be positioned. Specify 'OpenType', 'Loose', 'Normal', 'Tight', or 'None'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiacriticPositioning</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppParagraphJustification</name>
+            <sectionID>ppParagraphJustification</sectionID>
+            <description>36 — Method to use for paragraph justification. Specify 'Naskh', 'Arabic', or 'Standard'. The configuration of this parameter is only significant if ppParJustify 19 (justfy pararaphs) is set to 'Yes'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppParagraphJustification</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppChineseJapaneseLayout</name>
+            <sectionID>ppChineseJapaneseLayout</sectionID>
+            <description>37 — 'None' if the publication is not a Chinese or Japanese text. Specify 'Horizontal' or 'Vertical' for Chinese or Japanese text direction.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppChineseJapaneseLayout</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppHorizontalScaling</name>
+            <sectionID>ppHorizontalScaling</sectionID>
+            <description>35 — Percentage of desired horizontal scaling.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppHorizontalScaling</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppCJKNoteStyle</name>
+            <sectionID>ppCJKNoteStyle</sectionID>
+            <description>37 — 'Inline' to typeset footnotes using a style which presents footnotes inline with the body text using two half-height lines. 'Bottom' to typeset footnotes at the bottom of the page.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppCJKNoteStyle</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglot</name>
+            <sectionID>ppDiglot</sectionID>
+            <description>35 — 'Yes' to indicate that this is a diglot publication. 'No' if this is a standard (single language/ script) publication.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglot</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotSecondaryProject</name>
+            <sectionID>ppDiglotSecondaryProject</sectionID>
+            <description>35 — Paratext short name for the diglot 'secondary' project.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotSecondaryProject</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotSecondaryProjectJob</name>
+            <sectionID>ppDiglotSecondaryProjectJob</sectionID>
+            <description>38 — Name for the diglot 'secondary' project job which contains the tagged text files prepared for diglot typesetting.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotSecondaryProjectJob</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotFnFrameAtBottom</name>
+            <sectionID>ppDiglotFnFrameAtBottom</sectionID>
+            <description>35 — 'Yes' to typeset footnotes at the bottom of the page (whitespace added between the notes and the body). 'No' to typeset footnotes directly under the body (whitespace added between the notes and the bottom of the page).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotFnFrameAtBottom</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotAlignmentOptions</name>
+            <sectionID>ppDiglotAlignmentOptions</sectionID>
+            <description>35 — 'Align Chapters' to indicate that chapter boundaries should be aligned vertically between the two columns. 'Align Chapter and Verse Paragraphs' to indicate that chapters and matching verse paragraphs should be aligned between the two columns. 'Align Top of Columns' to match references at the top of the columns without aligning chapters or verses. ' None' to not perform any alignment.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotAlignmentOptions</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotSecondaryProjectColWidth</name>
+            <sectionID>ppDiglotSecondaryProjectColWidth</sectionID>
+            <description>35 — Column width for the secondary project. Specify percentages (e.g. 125%) or absolute values (e.g. 12p). An empty string will be interpreted as 100%, making both columns the same width.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotSecondaryProjectColWidth</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppDiglotRunningHeaderSource</name>
+            <sectionID>ppDiglotRunningHeaderSource</sectionID>
+            <description>35 — 'Primary Text' or 'Secondary Text' to indicate the the source of the running header information. 'Text In Page Outside Column' to indicate that the source presented in the running header should alternate between the two texts.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppDiglotRunningHeaderSource</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppConcordance</name>
+            <sectionID>ppConcordance</sectionID>
+            <description>39 — 'Yes' to indicate that output from the Concordance Builder or the Names Index Builder tools is being handled.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppConcordance</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppConcContinueKeyword</name>
+            <sectionID>ppConcContinueKeyword</sectionID>
+            <description>39 — 'Yes' to to repeat the current heading text at the top of a new column for an entry which has broken across a column boundary. 'No' to continue a divided section without repeating the current heading text.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppConcContinueKeyword</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppConcContinuationCharLoc</name>
+            <sectionID>ppConcContinuationCharLoc</sectionID>
+            <description>39 — 'Before' to typeset the continuation character before the continued heading text. 'After' to typeset the continuation character after the heading text.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppConcContinuationCharLoc</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppConcNumberOfColumns</name>
+            <sectionID>ppConcNumberOfColumns</sectionID>
+            <description>39 — Number of columns for a concordance or names index. Specify '1' though '5'.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppConcNumberOfColumns</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppConcContinuationChar</name>
+            <sectionID>ppConcContinuationChar</sectionID>
+            <description>39 — Character to use to indicate heading continuation.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppConcContinuationChar</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
 
     </section>
     <section>
@@ -273,7 +3550,82 @@
             <type>list</type>
             <value></value>
         </setting>
-	ppStudyBible = "40 — 'Yes' if this is a custom layout job (a page layout description is required). 'No' if this is a basic Bible job (no custom page layout description)."
-	ppCustomLayoutSimple = "40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is a Standard Project. 'False' if this is an Extended Notes Study Bible."
-	ppCustomLayoutComplex = "40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is an Extended Notes Study Bible. 'False' if this is a Standard Project."
+        <section>
+            <name>ppStudyBible</name>
+            <sectionID>ppStudyBible</sectionID>
+            <description>40 — 'Yes' if this is a custom layout job (a page layout description is required). 'No' if this is a basic Bible job (no custom page layout description).</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppStudyBible</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppCustomLayoutSimple</name>
+            <sectionID>ppCustomLayoutSimple</sectionID>
+            <description>40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is a Standard Project. 'False' if this is an Extended Notes Study Bible.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppCustomLayoutSimple</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+        <section>
+            <name>ppCustomLayoutComplex</name>
+            <sectionID>ppCustomLayoutComplex</sectionID>
+            <description>40 — If this is custom layout 40 job (ppStudyBible = 'True') - 'True' if this is an Extended Notes Study Bible. 'False' if this is a Standard Project.</description>
+            <setting>
+                <name>Setting Value</name>
+                <key>value</key>
+                <description>The actual setting value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>PA Mapping</name>
+                <key>paMapping</key>
+                <description>The equivalent Pubishing Assistant mapping value for this section.</description>
+                <type>string</type>
+                <value>ppCustomLayoutComplex</value>
+            </setting>
+            <setting>
+                <name>TeX Mapping</name>
+                <key>texMapping</key>
+                <description>The equivalent TeX mapping value for this section.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
 
