@@ -216,6 +216,7 @@ def writeProjConfFile (projConfig, projHome) :
         projConfig.filename = projConfigFile
         projConfig.write()
         projConfig.writeOutProjConfFile = False
+        return True
 
     except :
         pass
@@ -246,6 +247,7 @@ def writeUserConfFile (userConfig, userHome) :
     userConfig['System']['lastEditDate'] = tStamp()
     userConfig.filename = userConfigFile
     userConfig.write()
+    return True
 
 
 def xml_to_section (fname) :

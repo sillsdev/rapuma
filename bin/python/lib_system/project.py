@@ -94,10 +94,9 @@ class Project (object) :
             # Make a format file if it isn't there already then
             # load the project's format configuration
             if not os.path.isfile(self.formatConfFile) :
-                self.createProjFormatFile(self.projectType)            
+                self.createProjFormatFile(self.projectType)
             else :
                 self._formatConfig = ConfigObj(self.formatConfFile)
-
 
         # Set some flags
         self.writeOutProjConfFile   = False

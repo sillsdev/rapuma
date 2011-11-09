@@ -170,16 +170,16 @@ if command :
 
 # Now write out the config files if needed
 if aProject.writeOutProjConfFile :
-    writeProjConfFile(aProject._projConfig, projHome)
-    aProject.writeOutProjConfFile = False
+    if not writeProjConfFile(aProject._projConfig, projHome) :
+        terminal('\nERROR: Could not write to: project config file')
 
 if aProject.writeOutUserConfFile :
-    writeUserConfFile(aProject._userConfig, userHome)
-    aProject.writeOutUserConfFile = False
+    if not writeUserConfFile(aProject._userConfig, userHome) :
+        terminal('\nERROR: Could not write to: user` config file')
 
 if aProject.writeOutFormatConfFile :
-    if writeProjFormatConfFile(aProject._formatConfig, projHome) :
-        aProject.writeOutFormatConfFile = False
+    if not writeProjFormatConfFile(aProject._formatConfig, projHome) :
+        terminal('\nERROR: Could not write to: formate config file')
 
 # Now trim the log file if it is needed
 if isConfSection(aProject._projConfig, 'Project') :
