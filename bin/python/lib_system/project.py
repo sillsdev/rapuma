@@ -91,6 +91,8 @@ class Project (object) :
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
+            # Make a format file if it isn't there already
+            self.createProjFormatFile(self.projectType)
             # Load the project's format configuration
             if os.path.isfile(self.formatConfFile) :
                 self._formatConfig = ConfigObj(self.formatConfFile)
@@ -104,6 +106,7 @@ class Project (object) :
 
         # If this project is still new these may not exist yet
         try :
+
             # Walk the ComponentTypes section and try to load commands if there are any
             if isConfSection(self._projConfig, 'ComponentTypes') :
                 for ctype in self._projConfig['ComponentTypes'].keys() :
@@ -120,6 +123,7 @@ class Project (object) :
 
             # Clean up the path, we don't need this stuck there
             del sys.path[0]
+            
 
         except StandardError as e:
             self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
@@ -183,20 +187,31 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectIDCode']          = pid
         recordProject(self.userConfFile, self._projConfig, pdir)
 
+        # Set some vars that will be needed
+        self.projLogFile        = self._userConfig['Files']['projLogFile']['name']
+        self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
+
+        # Now be sure we have a project format file in place
+        self.createProjFormatFile(ptype)
+
+        # Finally write out the project config file
+        writeProjConfFile(self._projConfig, pdir)
+        self.writeOutProjConfFile = False
+        self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
+
+        return True
+
+
+    def createProjFormatFile (self, ptype) :
+        '''Create the project's format conf file.'''
+
         # Create a master format file for this project if there is not already
         # one there. This will contain all the formating for this project.
         if not os.path.isfile(self.formatConfFile) :
             self._formatConfig = getXMLSettings(os.path.join(self.rpmProjTypes, ptype, ptype + '_format.xml'))
             self.writeOutFormatConfFile = True
 
-        # Set some vars that will be needed
-        self.projLogFile        = self._userConfig['Files']['projLogFile']['name']
-        self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
-
-        # Finally write out the project config file
-        writeProjConfFile(self._projConfig, pdir)
-        self.writeOutProjConfFile = False
-        self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
+            return True
 
 
     def removeProject (self, pid='') :
