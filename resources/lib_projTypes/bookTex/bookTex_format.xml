@@ -43,7 +43,7 @@ Todo:
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'page size', 'margins', 'columns', 'font', 'font size', 'leading', 'justification'</value>
+            <value>page size,margins,columns,font,font size,leading,justification</value>
         </setting>
         <section>
             <name>UseSavedStylesheet</name>
@@ -821,7 +821,7 @@ Todo:
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'Major Sections', 'Sections', 'Sub Sections', 'References'</value>
+            <value>"Major Sections", "Sections", "Sub Sections", "References"</value>
         </setting>
         <section>
             <name>TitleMainSize</name>
@@ -1483,7 +1483,7 @@ Todo:
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'Cross References'</value>
+            <value>"Cross References"</value>
         </setting>
         <section>
             <name>TypesetFNotes</name>
@@ -1885,7 +1885,7 @@ Todo:
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'vertical justification', 'hyphenation'</value>
+            <value>"vertical justification", "hyphenation"</value>
         </setting>
         <section>
             <name>SpacingWordBasic</name>
@@ -2210,7 +2210,7 @@ Todo:
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'header/footer', 'typeface names'</value>
+            <value>"header/footer", "typeface names"</value>
         </setting>
         <section>
             <name>HeaderInsideLP</name>
@@ -2577,7 +2577,6 @@ Todo:
                 <value></value>
             </setting>
         </section>
-
         <section>
             <name>RunningHeaderNonConsecutiveSeparatorVerseOnly</name>
             <sectionID>RunningHeaderNonConsecutiveSeparatorVerseOnly</sectionID>

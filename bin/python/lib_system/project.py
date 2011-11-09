@@ -91,10 +91,11 @@ class Project (object) :
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
-            # Make a format file if it isn't there already
-            self.createProjFormatFile(self.projectType)
-            # Load the project's format configuration
-            if os.path.isfile(self.formatConfFile) :
+            # Make a format file if it isn't there already then
+            # load the project's format configuration
+            if not os.path.isfile(self.formatConfFile) :
+                self.createProjFormatFile(self.projectType)            
+            else :
                 self._formatConfig = ConfigObj(self.formatConfFile)
 
 
@@ -209,7 +210,7 @@ class Project (object) :
         # one there. This will contain all the formating for this project.
         if not os.path.isfile(self.formatConfFile) :
             self._formatConfig = getXMLSettings(os.path.join(self.rpmProjTypes, ptype, ptype + '_format.xml'))
-            self.writeOutFormatConfFile = True
+            writeProjFormatConfFile(self._formatConfig, self.projHome)
 
             return True
 
