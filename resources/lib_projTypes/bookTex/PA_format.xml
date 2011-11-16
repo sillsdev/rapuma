@@ -1,4 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: pageCompTex_settings.xml
+Description:
+This contains all the formating for a publication and pageCompTex will use them
+in the current publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This contains general format settings for this publication.</description>
+        <setting>
+            <name>Format Last Edit Date</name>
+            <key>formatLastEditDate</key>
+            <description>The last time this format file was edited.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Measurement Unit</name>
+            <key>MeasurementUnit</key>
+            <description>The unit of measurement used in this publication.</description>
+            <type>string</type>
+            <value>mm</value>
+        </setting>
     </section>
+
+
     <section>
         <name>Basics</name>
         <sectionID>Basics</sectionID>
@@ -8,7 +43,7 @@
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'page size', 'margins', 'columns', 'font', 'font size', 'leading', 'justification'</value>
+            <value>page size,margins,columns,font,font size,leading,justification</value>
         </setting>
         <section>
             <name>UseSavedStylesheet</name>
@@ -33,7 +68,7 @@
                 <key>texMapping</key>
                 <description>The equivalent TeX mapping value for this section.</description>
                 <type>string</type>
-                <value></value>
+                <value>None</value>
             </setting>
         </section>
         <section>
@@ -70,8 +105,8 @@
                 <name>Setting Value</name>
                 <key>value</key>
                 <description>The actual setting value for this section.</description>
-                <type>string</type>
-                <value></value>
+                <type>integer</type>
+                <value>1.0</value>
             </setting>
             <setting>
                 <name>PA Mapping</name>
@@ -85,7 +120,7 @@
                 <key>texMapping</key>
                 <description>The equivalent TeX mapping value for this section.</description>
                 <type>string</type>
-                <value></value>
+                <value>FontSizeUnit</value>
             </setting>
         </section>
         <section>
@@ -96,8 +131,8 @@
                 <name>Setting Value</name>
                 <key>value</key>
                 <description>The actual setting value for this section.</description>
-                <type>string</type>
-                <value></value>
+                <type>integer</type>
+                <value>1.0</value>
             </setting>
             <setting>
                 <name>PA Mapping</name>
@@ -111,7 +146,7 @@
                 <key>texMapping</key>
                 <description>The equivalent TeX mapping value for this section.</description>
                 <type>string</type>
-                <value></value>
+                <value>LineSpacingFactor</value>
             </setting>
         </section>
         <section>
@@ -786,7 +821,7 @@
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'Major Sections', 'Sections', 'Sub Sections', 'References'</value>
+            <value>Major Sections,Sections,Sub Sections,References</value>
         </setting>
         <section>
             <name>TitleMainSize</name>
@@ -1448,7 +1483,7 @@
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'Cross References'</value>
+            <value>Cross References</value>
         </setting>
         <section>
             <name>TypesetFNotes</name>
@@ -1850,7 +1885,7 @@
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'vertical justification', 'hyphenation'</value>
+            <value>vertical justification,hyphenation</value>
         </setting>
         <section>
             <name>SpacingWordBasic</name>
@@ -2175,7 +2210,7 @@
             <key>includes</key>
             <description>The list of publication settings included in this section.</description>
             <type>list</type>
-            <value>'header/footer', 'typeface names'</value>
+            <value>header/footer,typeface names</value>
         </setting>
         <section>
             <name>HeaderInsideLP</name>
@@ -2542,7 +2577,6 @@
                 <value></value>
             </setting>
         </section>
-
         <section>
             <name>RunningHeaderNonConsecutiveSeparatorVerseOnly</name>
             <sectionID>RunningHeaderNonConsecutiveSeparatorVerseOnly</sectionID>
@@ -3583,4 +3617,8 @@
                 <value></value>
             </setting>
         </section>
+
+
+    </section>
+</root>
 

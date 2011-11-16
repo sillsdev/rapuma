@@ -68,7 +68,7 @@ class Component (object) :
     def initComponent(self) :
         '''A dummy function to avoid errors.  Any real initilization of any
         component should happen in the component itself.'''
-        
+
         pass
 
 

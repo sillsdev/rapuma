@@ -65,7 +65,7 @@ def isRecordedProject (userConfigFile, pid) :
 def recordProject (userConfigFile, projConfig, projHome) :
     '''Add information about this project to the user's rpm.conf located in
     the home config folder.'''
-    
+
     pid     = projConfig['ProjectInfo']['projectIDCode']
     pname   = projConfig['ProjectInfo']['projectName']
     ptype   = projConfig['ProjectInfo']['projectType']
@@ -78,7 +78,7 @@ def recordProject (userConfigFile, projConfig, projHome) :
             # FIXME: Before we create a project entry we want to be sure that
             # the projects section already exsists.  There might be a better way
             # of doing this.
-            try :    
+            try :
                 cf['Projects'][pid] = {}
             except :
                 cf['Projects'] = {}
