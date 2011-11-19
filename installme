@@ -1,9 +1,9 @@
 Manual installation instructions for the developer version of the RPM package
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 04/07/2011
+	Last edited: 19/11/2011
 
 
-These are instruction for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently Lucid, 10.04). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
+These are instruction for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently oneiric, 11.10). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 REQUIRED PACKAGES
@@ -14,7 +14,7 @@ There are a number of packages that need to be installed for RPM to work. Some a
 
 Next, in gedit in the file you just opened, go to the bottom of the file and add this line if it does not already exist in the file:
 
-	deb http://packages.sil.org/ubuntu lucid main
+	deb http://packages.sil.org/ubuntu oneiric main
 	
 Save the file and close it.
 
@@ -31,7 +31,13 @@ Required:
 
 Suggested:
 
-	sudo apt-get install libgtk2-spell-perl libteckit-perl teckit mercurial meld tortoisehg tortoisehg-nautilus libfont-ttf-scripts-perl
+    sudo apt-get install libgtk2-spell-perl mercurial meld tortoisehg tortoisehg-nautilus
+
+Suggested SIL Packages:
+
+sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
+
+(Note: On newer versions of Ubuntu, the SIL repo may not be up to date so some of the above may not be available.)
 
 Another suggested program would be a modified version of XeTeX. You may need this if you are processing complex scripts. This version includes the latest features and bug fixes.
 

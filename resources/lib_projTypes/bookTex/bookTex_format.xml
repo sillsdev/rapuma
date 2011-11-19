@@ -38,12 +38,12 @@ Todo:
         <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
         <section>
             <name>Short Book Chapter Omit</name>
-            <description>If a book consists of a single chapter it is often desirable to not have a chapter number marking the beginning of the book.  If set "true" this will insert a command in the control file to prevent ptx2pdf from inserting the chapter number.  Choices: (true | false) - Default = true</description>
-            <sectionID>Shortbookchapteromit</sectionID>
+            <description>If a book consists of a single chapter it is often desirable to not have a chapter number marking the beginning of the book.  If set True, this will insert a command in the control file to prevent inserting the chapter number in a single chapter book.  Default = True</description>
+            <sectionID>ShortBookChapterOmit</sectionID>
             <setting>
                 <name>shortBookChapterOmit</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -52,17 +52,17 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>OmitChapterNumber[value]</value>
             </setting>
         </section>
         <section>
             <name>Omit All Chapter Numbers</name>
-            <description>Omit the chapter numbers of the book. (Often used for one-chapter books.  If set to true, this will override the Short Book Chapter Omit setting above and will take all the chapter numbers out of all books. (I think)  Choices: (true | false) - Default = false</description>
-            <sectionID>Omitallchapternumbers</sectionID>
+            <description>Omit all the chapter numbers in the book. (Actually this is what is done for one-chapter books.)  If set to true, this will override the Short Book Chapter Omit setting that is normally used in one chapter books and will take all the chapter numbers out of all books.  Default = False</description>
+            <sectionID>omitAllChapterNumbers</sectionID>
             <setting>
                 <name>omitAllChapterNumbers</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -71,17 +71,17 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>OmitChapterNumber[value]</value>
             </setting>
         </section>
         <section>
             <name>Marginal Verses</name>
-            <description>To use marginal verses (flying verse numbers) set this to 'true'.  Choices: (true | false) - Default = false</description>
-            <sectionID>Usemarginalverses</sectionID>
+            <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
+            <sectionID>UseMarginalVerses</sectionID>
             <setting>
                 <name>useMarginalVerses</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -90,17 +90,17 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>MarginalVerses[value]</value>
             </setting>
         </section>
         <section>
             <name>Omit Verse Number One</name>
-            <description>Setting this to 'true' will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Choices: (true | false) - Default = true</description>
-            <sectionID>Omitversenumberone</sectionID>
+            <description>Setting this to True will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Default = True</description>
+            <sectionID>OmitVerseNumberOne</sectionID>
             <setting>
                 <name>omitVerseNumberOne</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -109,17 +109,17 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>OmitVerseNumberOne[value]</value>
             </setting>
         </section>
         <section>
             <name>Chapter Verse Separator</name>
             <description>Change the default c/v separator character or adjust the space by adding some extra code.  For example, to kern the space between the separator character you could enter: "\kern.02em:\kern.02em".  This setting primary affects the header reference.   Default = ":"</description>
-            <sectionID>Chapterverseseparator</sectionID>
+            <sectionID>ChapterVerseSeparator</sectionID>
             <setting>
                 <name>chapterVerseSeparator</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>\kern.1em:\kern.1em</value>
             </setting>
@@ -128,7 +128,7 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>ChapterVerseSeparator{[value]}</value>
             </setting>
         </section>
         <section>
@@ -138,7 +138,7 @@ Todo:
             <setting>
                 <name>afterVerseSpaceFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>4</value>
             </setting>
@@ -157,7 +157,7 @@ Todo:
             <setting>
                 <name>afterChapterSpaceFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value></value>
             </setting>
@@ -176,7 +176,7 @@ Todo:
             <setting>
                 <name>adornVerseSetting</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -200,7 +200,7 @@ Todo:
             <setting>
                 <name>titleColumns</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1</value>
             </setting>
@@ -219,7 +219,7 @@ Todo:
             <setting>
                 <name>introColumns</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1</value>
             </setting>
@@ -238,7 +238,7 @@ Todo:
             <setting>
                 <name>bodyColumns</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>2</value>
             </setting>
@@ -257,7 +257,7 @@ Todo:
             <setting>
                 <name>columnGutterFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>10</value>
             </setting>
@@ -276,7 +276,7 @@ Todo:
             <setting>
                 <name>columnGutterRule</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -295,7 +295,7 @@ Todo:
             <setting>
                 <name>columnShift</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>6</value>
             </setting>
@@ -314,7 +314,7 @@ Todo:
             <setting>
                 <name>columnGutterRuleSkip</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>2</value>
             </setting>
@@ -338,7 +338,7 @@ Todo:
             <setting>
                 <name>fontSizeUnit</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0.95</value>
             </setting>
@@ -357,7 +357,7 @@ Todo:
             <setting>
                 <name>lineSpacingFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1.1</value>
             </setting>
@@ -376,7 +376,7 @@ Todo:
             <setting>
                 <name>verticalSpaceFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1</value>
             </setting>
@@ -400,7 +400,7 @@ Todo:
             <setting>
                 <name>autoCallerStartChar</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -419,7 +419,7 @@ Todo:
             <setting>
                 <name>autoCallerNumChars</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -438,7 +438,7 @@ Todo:
             <setting>
                 <name>useAutoCallers</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -457,7 +457,7 @@ Todo:
             <setting>
                 <name>autoCallerCharFn</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>\kern0.2em *\kern0.4em</value>
             </setting>
@@ -476,7 +476,7 @@ Todo:
             <setting>
                 <name>autoCallerCharCr</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -500,7 +500,7 @@ Todo:
             <setting>
                 <name>useNumericCallersCrossRefs</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -519,7 +519,7 @@ Todo:
             <setting>
                 <name>pageResetCallersFootnotes</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -538,7 +538,7 @@ Todo:
             <setting>
                 <name>pageResetCallersCrossRefs</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -557,7 +557,7 @@ Todo:
             <setting>
                 <name>omitCallerInFootnote</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -576,7 +576,7 @@ Todo:
             <setting>
                 <name>omitCallerInCrossRefs</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -595,7 +595,7 @@ Todo:
             <setting>
                 <name>paragraphedFootnotes</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -614,7 +614,7 @@ Todo:
             <setting>
                 <name>paragraphedCrossRefs</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -633,7 +633,7 @@ Todo:
             <setting>
                 <name>defineFootnoteRule</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -657,7 +657,7 @@ Todo:
             <setting>
                 <name>headerPosition</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0.75</value>
             </setting>
@@ -676,7 +676,7 @@ Todo:
             <setting>
                 <name>useRunningHeaderRule</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -695,7 +695,7 @@ Todo:
             <setting>
                 <name>runningHeaderRulePosition</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>4</value>
             </setting>
@@ -714,7 +714,7 @@ Todo:
             <setting>
                 <name>footerPosition</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0.12</value>
             </setting>
@@ -738,7 +738,7 @@ Todo:
             <setting>
                 <name>runningFooterTitleLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -757,7 +757,7 @@ Todo:
             <setting>
                 <name>runningFooterTitleCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -776,7 +776,7 @@ Todo:
             <setting>
                 <name>runningFooterTitleRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -795,7 +795,7 @@ Todo:
             <setting>
                 <name>runningFooterOddLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -814,7 +814,7 @@ Todo:
             <setting>
                 <name>runningFooterOddCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -833,7 +833,7 @@ Todo:
             <setting>
                 <name>runningFooterOddRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -852,7 +852,7 @@ Todo:
             <setting>
                 <name>runningFooterEvenLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -871,7 +871,7 @@ Todo:
             <setting>
                 <name>runningFooterEvenCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -890,7 +890,7 @@ Todo:
             <setting>
                 <name>runningFooterEvenRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -914,7 +914,7 @@ Todo:
             <setting>
                 <name>verseRefs</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -933,7 +933,7 @@ Todo:
             <setting>
                 <name>omitChapterNumber</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -952,7 +952,7 @@ Todo:
             <setting>
                 <name>omitBookRef</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -971,7 +971,7 @@ Todo:
             <setting>
                 <name>runningHeaderTitleLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -990,7 +990,7 @@ Todo:
             <setting>
                 <name>runningHeaderTitleCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -1009,7 +1009,7 @@ Todo:
             <setting>
                 <name>runningHeaderTitleRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -1028,7 +1028,7 @@ Todo:
             <setting>
                 <name>runningHeaderOddLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -1047,7 +1047,7 @@ Todo:
             <setting>
                 <name>runningHeaderOddCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>pagenumber</value>
             </setting>
@@ -1066,7 +1066,7 @@ Todo:
             <setting>
                 <name>runningHeaderOddRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>lastref</value>
             </setting>
@@ -1085,7 +1085,7 @@ Todo:
             <setting>
                 <name>runningHeaderEvenLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>firstref</value>
             </setting>
@@ -1104,7 +1104,7 @@ Todo:
             <setting>
                 <name>runningHeaderEvenCenter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>pagenumber</value>
             </setting>
@@ -1123,7 +1123,7 @@ Todo:
             <setting>
                 <name>runningHeaderEvenRight</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>empty</value>
             </setting>
@@ -1147,7 +1147,7 @@ Todo:
             <setting>
                 <name>useHyphenation</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1166,7 +1166,7 @@ Todo:
             <setting>
                 <name>setHyphenCharacter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>"200B</value>
             </setting>
@@ -1185,7 +1185,7 @@ Todo:
             <setting>
                 <name>setHyphenPenalty</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0</value>
             </setting>
@@ -1204,7 +1204,7 @@ Todo:
             <setting>
                 <name>setExHyphenPenalty</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>50</value>
             </setting>
@@ -1223,7 +1223,7 @@ Todo:
             <setting>
                 <name>Pretolerance</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value></value>
             </setting>
@@ -1242,7 +1242,7 @@ Todo:
             <setting>
                 <name>sourceEncodeTransform</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1261,7 +1261,7 @@ Todo:
             <setting>
                 <name>hyphenBreakRules</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -1285,7 +1285,7 @@ Todo:
             <setting>
                 <name>useIllustrations</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1304,7 +1304,7 @@ Todo:
             <setting>
                 <name>useFigurePlaceholders</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1323,7 +1323,7 @@ Todo:
             <setting>
                 <name>size</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>col</value>
             </setting>
@@ -1342,7 +1342,7 @@ Todo:
             <setting>
                 <name>position</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>tl</value>
             </setting>
@@ -1361,7 +1361,7 @@ Todo:
             <setting>
                 <name>scale</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>1.0</value>
             </setting>
@@ -1380,7 +1380,7 @@ Todo:
             <setting>
                 <name>chpVerSep</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>:</value>
             </setting>
@@ -1399,7 +1399,7 @@ Todo:
             <setting>
                 <name>captionRef</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1418,7 +1418,7 @@ Todo:
             <setting>
                 <name>captionProcessing</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value></value>
             </setting>
@@ -1442,7 +1442,7 @@ Todo:
             <setting>
                 <name>marginUnit</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>10</value>
             </setting>
@@ -1461,7 +1461,7 @@ Todo:
             <setting>
                 <name>topMarginFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1.75</value>
             </setting>
@@ -1480,7 +1480,7 @@ Todo:
             <setting>
                 <name>bottomMarginFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1.12</value>
             </setting>
@@ -1499,7 +1499,7 @@ Todo:
             <setting>
                 <name>sideMarginFactor</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>1.0</value>
             </setting>
@@ -1518,7 +1518,7 @@ Todo:
             <setting>
                 <name>extraRightMargin</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0</value>
             </setting>
@@ -1537,7 +1537,7 @@ Todo:
             <setting>
                 <name>bindingGutter</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0</value>
             </setting>
@@ -1561,7 +1561,7 @@ Todo:
             <setting>
                 <name>useWatermark</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1580,7 +1580,7 @@ Todo:
             <setting>
                 <name>watermarkFile</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>watermark-draft.pdf</value>
             </setting>
@@ -1599,7 +1599,7 @@ Todo:
             <setting>
                 <name>cropmarks</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1618,7 +1618,7 @@ Todo:
             <setting>
                 <name>usePageBorder</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -1637,7 +1637,7 @@ Todo:
             <setting>
                 <name>pageBorderFile</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>page_border.pdf</value>
             </setting>
@@ -1694,7 +1694,7 @@ Todo:
             <setting>
                 <name>pageSizeCode</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>string</type>
                 <value>UBS60</value>
             </setting>
@@ -1713,7 +1713,7 @@ Todo:
             <setting>
                 <name>endBookNoEject</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -1732,7 +1732,7 @@ Todo:
             <setting>
                 <name>pageBorderScale</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value></value>
             </setting>
@@ -1751,7 +1751,7 @@ Todo:
             <setting>
                 <name>pageNumberBegin</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value></value>
             </setting>
@@ -1775,7 +1775,7 @@ Todo:
             <setting>
                 <name>justifyPars</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>True</value>
             </setting>
@@ -1794,7 +1794,7 @@ Todo:
             <setting>
                 <name>rightToLeft</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>boolean</type>
                 <value>False</value>
             </setting>
@@ -1813,7 +1813,7 @@ Todo:
             <setting>
                 <name>quoteKernAmount</name>
                 <key>value</key>
-                <description></description>
+                <description>Value for this setting.</description>
                 <type>integer</type>
                 <value>0.1</value>
             </setting>
