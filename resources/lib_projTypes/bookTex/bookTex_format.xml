@@ -32,6 +32,8 @@ Todo:
             <value>mm</value>
         </setting>
     </section>
+
+
     <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
@@ -114,7 +116,7 @@ Todo:
         </section>
         <section>
             <name>Chapter Verse Separator</name>
-            <description>Change the default c/v separator character or adjust the space by adding some extra code.  For example, to kern the space between the separator character you could enter: "\kern.02em:\kern.02em".  This setting primary affects the header reference.   Default = ":"</description>
+            <description>Change the default c/v separator character or adjust the space by adding some extra code.  For example, to kern the space between the separator character you could enter: "\kern.02em:\kern.02em".  This setting primary affects the header reference. Default = ":"</description>
             <sectionID>ChapterVerseSeparator</sectionID>
             <setting>
                 <name>chapterVerseSeparator</name>
@@ -133,46 +135,46 @@ Todo:
         </section>
         <section>
             <name>After Verse Space Factor</name>
-            <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.   Default = 2</description>
-            <sectionID>Afterversespacefactor</sectionID>
+            <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.  Default = 2</description>
+            <sectionID>AfterVerseSpaceFactor</sectionID>
             <setting>
                 <name>afterVerseSpaceFactor</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>4</value>
+                <value>2</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>AfterVerseSpaceFactor{[value]}</value>
             </setting>
         </section>
         <section>
             <name>After Chapter Space Factor</name>
-            <description>You may need a little extra space following the Chapter numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.   Default = 3</description>
-            <sectionID>Afterchapterspacefactor</sectionID>
+            <description>You may need a little extra space following the Chapter numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.  Default = 3</description>
+            <sectionID>AfterChapterSpaceFactor</sectionID>
             <setting>
                 <name>afterChapterSpaceFactor</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value></value>
+                <value>3</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>AfterChapterSpaceFactor{[value]}</value>
             </setting>
         </section>
         <section>
             <name>Adorn Verse Number Setting</name>
             <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
-            <sectionID>Adornversesetting</sectionID>
+            <sectionID>AdornVerseSetting</sectionID>
             <setting>
                 <name>adornVerseSetting</name>
                 <key>value</key>
@@ -185,10 +187,12 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>AdornVerseNumber#1{[value]}</value>
             </setting>
         </section>
     </section>
+
+
     <section>
         <name>Columns</name>
         <sectionID>Columns</sectionID>
@@ -196,7 +200,7 @@ Todo:
         <section>
             <name>Title Columns</name>
             <description>Number of columns used to typeset the main title.   Default = 1</description>
-            <sectionID>Titlecolumns</sectionID>
+            <sectionID>TitleColumns</sectionID>
             <setting>
                 <name>titleColumns</name>
                 <key>value</key>
@@ -209,13 +213,13 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>TitleColumns=[value]</value>
             </setting>
         </section>
         <section>
             <name>Intro Columns</name>
-            <description>Number of columns used to typeset introduction material.  Introduction material is defined by USFM markers beginning with \i   Default = 1</description>
-            <sectionID>Introcolumns</sectionID>
+            <description>Number of columns used to typeset introduction material.  Introduction material is defined by USFM markers beginning with \i  Default = 1</description>
+            <sectionID>IntroColumns</sectionID>
             <setting>
                 <name>introColumns</name>
                 <key>value</key>
@@ -228,51 +232,51 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>IntroColumns=[value]</value>
             </setting>
         </section>
         <section>
             <name>Body Columns</name>
             <description>Number of columns used to typeset the body text.   Default = 1</description>
-            <sectionID>Bodycolumns</sectionID>
+            <sectionID>BodyColumns</sectionID>
             <setting>
                 <name>bodyColumns</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>2</value>
+                <value>1</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>BodyColumns=[value]</value>
             </setting>
         </section>
         <section>
             <name>Column Gutter Factor</name>
-            <description>Used to set the size of the gutter between columns; this is relative to the font size.   Default = 15</description>
-            <sectionID>Columngutterfactor</sectionID>
+            <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 15</description>
+            <sectionID>ColumnGutterFactor</sectionID>
             <setting>
                 <name>columnGutterFactor</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>10</value>
+                <value>15</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>ColumnGutterFactor{[value]}</value>
             </setting>
         </section>
         <section>
             <name>Column Gutter Rule</name>
             <description>Do you want to place a vertical line between the columns in the column gutter?   Default = false</description>
-            <sectionID>Columngutterrule</sectionID>
+            <sectionID>ColumnGutterRule</sectionID>
             <setting>
                 <name>columnGutterRule</name>
                 <key>value</key>
@@ -285,48 +289,50 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>ColumnGutterRule[value]</value>
             </setting>
         </section>
         <section>
-            <name>Column Shift (Mm)</name>
-            <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  This is a contextual setting depending on how many columns are being used.  It will output both the \singlecolumnshift and \columnshift commands in the TeX settings file.  This is a usfmTex setting and is not part of the standard ptx2pdf macro package.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.   Default = 0</description>
-            <sectionID>Columnshift</sectionID>
+            <name>Column Shift (mm)</name>
+            <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  This is a contextual setting depending on how many columns are being used.  It will output both the \SingleColumnShift and \ColumnShift commands in the TeX settings file.  This is a usfmTex setting and is not part of the standard ptx2pdf macro package.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
+            <sectionID>ColumnShift</sectionID>
             <setting>
-                <name>columnShift</name>
+                <name>ColumnShift</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>6</value>
+                <value>0</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>ColumnShift=[value]</value>
             </setting>
         </section>
         <section>
-            <name>Columngutterruleskip (Mm)</name>
+            <name>Column Gutter Rule Skip (mm)</name>
             <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>
-            <sectionID>Columngutterruleskip</sectionID>
+            <sectionID>ColumnGutterRuleSkip</sectionID>
             <setting>
                 <name>columnGutterRuleSkip</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>2</value>
+                <value>0</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>ColumnGutterRuleSkip=[value]</value>
             </setting>
         </section>
     </section>
+
+
     <section>
         <name>Fonts</name>
         <sectionID>Fonts</sectionID>
@@ -334,26 +340,26 @@ Todo:
         <section>
             <name>Font Size Unit (Pt)</name>
             <description>Unit for font sizes in the stylesheet; changing this will scale all text proportionately.  This is a point (pt) measurement but only enter the number in this field.  The system will add the "pt" in the output.   Default = 1</description>
-            <sectionID>Fontsizeunit</sectionID>
+            <sectionID>FontSizeUnit</sectionID>
             <setting>
                 <name>fontSizeUnit</name>
                 <key>value</key>
                 <description>Value for this setting.</description>
                 <type>integer</type>
-                <value>0.95</value>
+                <value>1</value>
             </setting>
             <setting>
                 <name>USFM Output</name>
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>FontSizeUnit=[value]</value>
             </setting>
         </section>
         <section>
             <name>Line Spacing Factor</name>
-            <description>Scaling factor used to adjust line spacing (leading), relative to font size; default={1.2}   Default = 1.1</description>
-            <sectionID>Linespacingfactor</sectionID>
+            <description>Scaling factor used to adjust line spacing (leading), relative to font size  Default = 1.1</description>
+            <sectionID>LineSpacingFactor</sectionID>
             <setting>
                 <name>lineSpacingFactor</name>
                 <key>value</key>
@@ -366,9 +372,13 @@ Todo:
                 <key>usfmTex</key>
                 <description>This is the necessary output for the usfmTex macro package.</description>
                 <type>string</type>
-                <value></value>
+                <value>LineSpacingFactor{[value]}</value>
             </setting>
         </section>
+
+
+
+
         <section>
             <name>Vertical Space Factor</name>
             <description>Scaling factor used to adjust amount of vertical spaces applied for USFM style sheet SpaceBefore and SpaceAfter values.   Default = 0.2</description>
