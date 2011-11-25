@@ -64,7 +64,7 @@ Todo:
             <key>validAuxTypes</key>
             <description>A list of valid auxiliary component types that are acceptable to use with this project type.</description>
             <type>list</type>
-            <value>illustrationsUsfm,hyphenTex,fontsTex,pageCompTex,stylesUsfm,usfmTex</value>
+            <value>illustrationsUsfm,hyphenTex,fontsTex,pageFormat,stylesUsfm,usfmTex</value>
         </setting>
         <setting>
             <name>Component List</name>
