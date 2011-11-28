@@ -37,7 +37,7 @@ class SetPageComp (Command) :
     def run (self, args, aProject, userConfig) :
         super(SetPageComp, self).run(args, aProject, userConfig)
         if not self.options.auxiliary :
-            self.options.auxiliary = list(aProject.getAuxiliary('pageCompTex'))[0]
+            self.options.auxiliary = list(aProject.getAuxiliary('pageFormat'))[0]
         if self.options.auxiliary and self.options.pagecomp :
             aProject.getAuxiliary(self.options.auxiliary).setPageComp(self.options.auxiliary, self.options.pagecomp)
         else :

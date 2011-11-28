@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: pageCompTex.xml
+File: pageFormat.xml
 Description:
 This is a component type description for a page composition auxiliary component
 to be used in any type of project.  All file relations and processes are
@@ -27,11 +27,11 @@ Todo:
                 <key>auxType</key>
                 <description>The type of auxiliary component this is.</description>
                 <type>string</type>
-                <value>pageCompTex</value>
+                <value>pageFormat</value>
             </setting>
         </section>
         <section>
-            <name>PageCompTex Auxiliary Component Type Information</name>
+            <name>PageFormat Auxiliary Component Type Information</name>
             <sectionID>AuxiliaryTypeInformation</sectionID>
             <description>This section contains general type information for all the auxiliary components used in this family.</description>
             <setting>
@@ -46,7 +46,7 @@ Todo:
                 <key>validIdCodes</key>
                 <description>This list contains all the valid font set ID codes that can be used for this component type.</description>
                 <type>list</type>
-                <value>frontComposition,contentComposition,backComposition</value>
+                <value>frontFormat,contentFormat,backFormat</value>
             </setting>
         </section>
     </section>

@@ -23,7 +23,7 @@
 import os, sys
 
 # Load the local classes
-from pageCompTex_command import Command
+from pageFormat_command import Command
 from auxiliary import Auxiliary
 
 
@@ -74,7 +74,7 @@ class PageFormat (Auxiliary) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
         
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageFormat auxiliary component type.")     
         return True
 
 
