@@ -47,7 +47,6 @@ class Project (object) :
         # Load project config files and grouped config information
         self._projConfig        = projConfig
         self._userConfig        = userConfig
-        self._formatConfig      = {}
         self._components        = {}
         self._auxiliaries       = {}
 
@@ -81,7 +80,6 @@ class Project (object) :
             self.orgLastEditDate    = self.lastEditDate
 
         # Load the project vars if this is a valid project
-        self.formatConfFile     = os.path.join(self.projHome, '.format.conf')
         if len(self._projConfig) :
             for k in (  'projectType',                  'projectName',
                         'projectIDCode',                'validCompTypes',
@@ -90,13 +88,6 @@ class Project (object) :
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
-
-            # Make a format file if it isn't there already then
-            # load the project's format configuration
-            if not os.path.isfile(self.formatConfFile) :
-                self.createProjFormatFile(self.projectType)
-            else :
-                self._formatConfig = ConfigObj(self.formatConfFile)
 
         # Set some flags
         self.writeOutProjConfFile   = False
@@ -191,27 +182,12 @@ class Project (object) :
         self.projLogFile        = self._userConfig['Files']['projLogFile']['name']
         self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
 
-        # Now be sure we have a project format file in place
-        self.createProjFormatFile(ptype)
-
         # Finally write out the project config file
         writeProjConfFile(self._projConfig, pdir)
         self.writeOutProjConfFile = False
         self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
 
         return True
-
-
-    def createProjFormatFile (self, ptype) :
-        '''Create the project's format conf file.'''
-
-        # Create a master format file for this project if there is not already
-        # one there. This will contain all the formating for this project.
-        if not os.path.isfile(self.formatConfFile) :
-            self._formatConfig = getXMLSettings(os.path.join(self.rpmProjTypes, ptype, ptype + '_format.xml'))
-            writeProjFormatConfFile(self._formatConfig, self.projHome)
-
-            return True
 
 
     def removeProject (self, pid='') :

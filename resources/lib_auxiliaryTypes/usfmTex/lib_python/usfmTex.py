@@ -72,10 +72,10 @@ class UsfmTex (Auxiliary) :
 
         # Create all necessary (empty) folders
         self.initAuxFolders(self.type, initInfo)
-        # Bring in any know files for this component
+        # Bring in any known files for this component
         self.initAuxFiles(self.type, initInfo)
-        
-        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
+
+        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")
         return True
 
 

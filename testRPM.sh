@@ -12,7 +12,7 @@ rpm auxiliary_add   -a contentFont          -t fontsTex
 rpm auxiliary_add   -a frontFont            -t fontsTex
 rpm auxiliary_add   -a contentIllustrations -t illustrationsUsfm
 rpm auxiliary_add   -a contentHyphen        -t hyphenTex
-rpm auxiliary_add   -a contentComposition   -t pageCompTex
+rpm auxiliary_add   -a contentFormat        -t pageFormat
 rpm auxiliary_add   -a contentStyle         -t stylesUsfm
 
 

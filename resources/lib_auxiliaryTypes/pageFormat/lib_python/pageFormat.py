@@ -38,16 +38,27 @@ from auxiliary import Auxiliary
 ################################## Begin Class ################################
 ###############################################################################
 
-class PageCompTex (Auxiliary) :
+class PageFormat (Auxiliary) :
 
-    type = "pageCompTex"
+    type = "pageFormat"
     
     def __init__(self, aProject, auxConfig, typeConfig, aid) :
         '''Initialize this class.'''
         
         # Make it available to the Project Class with this
-        super(PageCompTex, self).__init__(aProject, auxConfig, typeConfig, aid)
+        super(PageFormat, self).__init__(aProject, auxConfig, typeConfig, aid)
         # no file system work to be done in this method!
+
+        self._formatConfig      = {}
+
+        # Make a format file if it isn't there already then
+        # load the project's format configuration
+        if not os.path.isfile(aProject.formatConfFile) :
+            self.createProjFormatFile()
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
+
+
 
 
 ###############################################################################
@@ -74,5 +85,19 @@ class PageCompTex (Auxiliary) :
         
         print "Setting up page composition auxiliary for this TeX component"
         
+
+
+    def createProjFormatFile (self) :
+        '''Create the project's format conf file.'''
+
+        # Create a master format file for this project if there is not already
+        # one there. This will contain all the formating for this project.
+        if not os.path.isfile(self.formatConfFile) :
+            aProject._formatConfig = getXMLSettings(os.path.join(aProject.rpmAuxTypes, 'pageFormat', 'pageFormat_values.xml'))
+            writeProjFormatConfFile(self._formatConfig, aProject.projHome)
+
+            return True
+
+
 
 
