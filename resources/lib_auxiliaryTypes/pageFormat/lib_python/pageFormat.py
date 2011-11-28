@@ -59,8 +59,6 @@ class PageFormat (Auxiliary) :
             self._formatConfig = ConfigObj(self.formatConfFile)
 
 
-
-
 ###############################################################################
 ############################# Begin Main Functions ############################
 ###############################################################################
@@ -69,22 +67,15 @@ class PageFormat (Auxiliary) :
     def initType (cls, aProject, typeConfig) :
         '''Initialize a component in this project.  This will put all the files
         in place for this type of component so it can be rendered.'''
-        super(PageCompTex, cls).initType(aProject, typeConfig)
-        
-
-#    def initAuxiliary (self, aux) :
-#        '''Initialize this component.  This is a generic named function that
-#        will be called from the project initialisation process.'''
-#        
-#        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
-#        return True
+        super(PageFormat, cls).initType(aProject, typeConfig)
 
 
-    def setPageCompTex (self, ctype, pctype) :
-        '''Setup a page composition type for a specific TeX component.'''
+    def initAuxiliary (self, aux) :
+        '''Initialize this component.  This is a generic named function that
+        will be called from the project initialisation process.'''
         
-        print "Setting up page composition auxiliary for this TeX component"
-        
+        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageCompTex auxiliary component type.")     
+        return True
 
 
     def createProjFormatFile (self) :

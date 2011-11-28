@@ -62,9 +62,9 @@ Todo:
         <setting>
             <name>Valid Auxiliary Type List</name>
             <key>validAuxTypes</key>
-            <description>A list of valid auxiliary component types that are acceptable to use with this project type.</description>
+            <description>A list of valid auxiliary component types that are acceptable to use with this project type. As some auxiliary types maybe dependent on others it is best to list them in the order that they should load.</description>
             <type>list</type>
-            <value>illustrationsUsfm,hyphenTex,fontsTex,pageFormat,stylesUsfm,usfmTex</value>
+            <value>pageFormat,stylesUsfm,usfmTex,fontsTex,illustrationsUsfm,hyphenTex</value>
         </setting>
         <setting>
             <name>Component List</name>
