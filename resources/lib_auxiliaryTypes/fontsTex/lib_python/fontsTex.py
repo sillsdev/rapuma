@@ -69,29 +69,31 @@ class FontsTex (Auxiliary) :
         # Bail out now if this has already been initialized
         if self.initialized :
             return True
-        
-        # Pull the information from the project init xml file
-        initInfo = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
 
-        # Project folder names and paths
-        setattr(self, 'projFontFolderName', initInfo['Folders']['Fonts']['name'])
-        setattr(self, 'projProcessFolderName', initInfo['Folders']['Process']['name'])
-        setattr(self, 'projFontFolder', os.path.join(self.project.projHome, self.projFontFolderName))
-        setattr(self, 'projProcessFolder', os.path.join(self.project.projHome, self.projProcessFolderName))
-        setattr(self, 'projFontsConfFile', os.path.join(self.projProcessFolder, '.fonts.conf'))
+        # Start with default settings
+        self._fontConfig = {}
+        self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+        # Set values for this method
+        setattr(self, 'fontFolderName', self._initConfig['Folders']['Fonts']['name'])
+        setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
+        setattr(self, 'fontFileName', self._initConfig['Files']['FontConfig']['name'])
+        setattr(self, 'fontFolder', os.path.join(self.project.projHome, self.fontFolderName))
+        setattr(self, 'processFolder', os.path.join(self.project.projHome, self.processFolderName))
+        setattr(self, 'fontConfFile', os.path.join(self.processFolder, self.fontFileName))
 
-        # Make sure we have a fonts.conf file in the Process folder
-        # create it if we don't.
-        if not os.path.isdir(self.projFontsConfFile) :
-            self._fontsConfig = ConfigObj()
-            buildConfSection (self._fontsConfig, 'Fonts')
-            writeProjFormatConfFile(self._fontsConfig, self.projFontsConfFile)
-            print self.projFontsConfFile
+        # Bring in any known files for this component
+        self.initAuxFiles(self.type, self._initConfig)
 
-        # Bring in any know files for this component
-        self.initAuxFiles(self.type, initInfo)
+        # Make a font conf file if it isn't there already or if it is empty.
+        try :
+            self._fontConfig = ConfigObj(self.fontConfFile)
+            x = self._fontConfig['GeneralSettings']['lastEdit']
+        except :
+            buildConfSection (self._fontConfig, 'Fonts')
+            writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
+            self._fontConfig = ConfigObj(self.fontConfFile)
 
-        # Init the fonts and create the fonts.conf file in the process folder
+        # Init the font folder
         self.initFonts()
 
         # Now create a tex font information file for this aux component if needed.
@@ -106,7 +108,7 @@ class FontsTex (Auxiliary) :
         '''Create a TeX info font file that TeX will use for rendering.'''
 
         # We will not make this file if it is already there
-        fontInfoFileName = os.path.join(self.projProcessFolder, self.aid + '.tex')
+        fontInfoFileName = os.path.join(self.processFolder, self.aid + '.tex')
 
         # The rule is that we only create this file if it is not there,
         # otherwise it will silently fail.  If one already exists the file will
@@ -116,7 +118,7 @@ class FontsTex (Auxiliary) :
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
             for f in auxFonts :
-                fInfo = self.project._formatConfig['Fonts'][f]
+                fInfo = self._fontConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
@@ -125,7 +127,7 @@ class FontsTex (Auxiliary) :
                         if tf[:8] == 'Typeface' :
                             # Make all our line components (More will need to be added)
                             startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\""
+                            fpath       = "\"[" + os.path.join('..', self.fontFolderName, fInfo[tf]['file']) + "]\""
                             endDef      = "}\n"
                             featureString = ''
                             for i in features :
@@ -141,7 +143,7 @@ class FontsTex (Auxiliary) :
                         if tf[:8] == 'Typeface' :
                             # Make all our line components (More will need to be added)
                             startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
-                            fpath       = "\"[" + os.path.join('..', self.projFontFolderName, fInfo[tf]['file']) + "]\""
+                            fpath       = "\"[" + os.path.join('..', self.fontFolderName, fInfo[tf]['file']) + "]\""
                             endDef      = "}\n"
                             featureString = ''
                             for i in features :
@@ -162,11 +164,11 @@ class FontsTex (Auxiliary) :
         works if there are any fonts set for a given aux.'''
 
         for font in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
-            fontInfo = self.project._formatConfig['Fonts'][font]
+            fontInfo = self._fontConfig['Fonts'][font]
             # Make the font family folder for this typeface
-            projFontFamilyFolder = os.path.join(self.projFontFolder, fontInfo['FontInformation']['fontFolder'])
-            if not os.path.isdir(projFontFamilyFolder) :
-                os.mkdir(projFontFamilyFolder)
+            fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
+            if not os.path.isdir(fontFamilyFolder) :
+                os.mkdir(fontFamilyFolder)
                 
             # Now loop through all the typefaces in this family and copy over the files
             for tf in fontInfo.keys() :
@@ -185,9 +187,9 @@ class FontsTex (Auxiliary) :
                         self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
                         return False
                     # Copy the font file if need be
-                    projFontFilePath = os.path.join(self.projFontFolder, font, fontFileName)
-                    if not os.path.isfile(projFontFilePath) :
-                        shutil.copy(fontSource, projFontFilePath)
+                    fontFilePath = os.path.join(self.fontFolder, font, fontFileName)
+                    if not os.path.isfile(fontFilePath) :
+                        shutil.copy(fontSource, fontFilePath)
 
         return True
 
@@ -198,8 +200,8 @@ class FontsTex (Auxiliary) :
 
         # First, delete the existing font info TeX file.  Everything changes if
         # we add a font to this aux
-        if os.path.isfile(os.path.join(self.projProcessFolder, self.aid + '.tex')) :
-            os.remove(os.path.join(self.projProcessFolder, self.aid + '.tex'))
+        if os.path.isfile(os.path.join(self.processFolder, self.aid + '.tex')) :
+            os.remove(os.path.join(self.processFolder, self.aid + '.tex'))
 
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
@@ -221,12 +223,9 @@ class FontsTex (Auxiliary) :
             return False
 
         # Inject the font info into the project format config file.
-        buildConfSection (self._fontsConfig['Fonts'], font)
         fInfo = getXMLSettings(fontInfo)
-        self._fontsConfig['Fonts'][font] = fInfo.dict()
-        self._fontsConfig = True
-
-        print fInfo
+        buildConfSection (self._fontConfig['Fonts'], font)
+        self._fontConfig['Fonts'][font] = fInfo.dict()
 
         # Add to installed fonts list for this auxiliary type, only one instance allowed
         if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
@@ -243,15 +242,16 @@ class FontsTex (Auxiliary) :
 
         # Check to see if the primary font has been set
         if rank.lower() == 'primary' :
-            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self._fontsConfig['Fonts'][font]['FontInformation']['fontID']
+            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self._fontConfig['Fonts'][font]['FontInformation']['fontID']
 
         # Add any features that this aux needs to have with this specific font.
         buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
-        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self._fontsConfig['Fonts'][font]['FontInformation']['features']
+        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self._fontConfig['Fonts'][font]['FontInformation']['features']
 
         # Set conf write flag and report
         self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
         self.project.writeOutProjConfFile = True
+        writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
         self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         return True
 

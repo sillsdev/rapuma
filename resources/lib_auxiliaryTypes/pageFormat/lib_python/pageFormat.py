@@ -49,19 +49,6 @@ class PageFormat (Auxiliary) :
         super(PageFormat, self).__init__(aProject, auxConfig, typeConfig, aid)
         # no file system work to be done in this method!
 
-        self._formatConfig      = {}
-        
-        
-        # FIXME: Set this path!
-        self.formatConfFile     = os.path.join(aProject.)
-
-        # Make a format file if it isn't there already then
-        # load the project's format configuration
-        if not os.path.isfile(aProject.formatConfFile) :
-            self.createProjFormatFile()
-        else :
-            self._formatConfig = ConfigObj(self.formatConfFile)
-
 
 ###############################################################################
 ############################# Begin Main Functions ############################
@@ -73,30 +60,35 @@ class PageFormat (Auxiliary) :
         in place for this type of component so it can be rendered.'''
         super(PageFormat, cls).initType(aProject, typeConfig)
 
-
-    def initAuxiliary (self, aux) :
+    def initAuxiliary (self) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
-        
-        self.project.writeToLog('LOG', "Initialized [" + aux + "] for the PageFormat auxiliary component type.")     
+
+        # Bail out now if this has already been initialized
+        if self.initialized :
+            return True
+
+        # Start with default settings
+        self._formatConfig = getXMLSettings(os.path.join(self.project.rpmAuxTypes, 'pageFormat', 'pageFormat_values.xml'))
+        # Set values for this method
+        setattr(self, 'processFolderName', self._formatConfig['Folders']['Process']['name'])
+        setattr(self, 'formatFileName', self._formatConfig['Files']['Format']['name'])
+        setattr(self, 'processFolder', os.path.join(self.project.projHome, self.processFolderName))
+        setattr(self, 'formatConfFile', os.path.join(self.processFolder, self.formatFileName))
+
+        # Make a format file if it isn't there already then
+        # load the project's format configuration. Or, load
+        # the existing file
+        if not os.path.isfile(self.formatConfFile) :
+            writeConfFile(self._formatConfig, self.formatFileName, self.processFolder)
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
+
+        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the PageFormat auxiliary component type.")     
+        self.initialized = True
         return True
 
 
-    def createProjFormatFile (self) :
-        '''Create the project's format conf file.'''
-
-        # Create a master format file for this project if there is not already
-        # one there. This will contain all the formating for this project.
-        if not os.path.isfile(self.formatConfFile) :
-            aProject._formatConfig = getXMLSettings(os.path.join(aProject.rpmAuxTypes, 'pageFormat', 'pageFormat_values.xml'))
-            if not writeConfFile(aProject._formatConfig, '.format.conf', aProject.projHome) :
-                terminal('\nERROR: Could not write to: user config file')
-
-
-
-            writeProjFormatConfFile(self._formatConfig, aProject.projHome)
-
-            return True
 
 
 

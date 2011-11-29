@@ -205,27 +205,15 @@ def overrideSettings (settings, overrideXML) :
     return settings
 
 
-def writeProjFormatConfFile (formatConfig, projHome) :
-    '''Write out only the project format config file.'''
-
-    projFormatConfigFile = os.path.join(projHome, '.format.conf')
-
-    # There may not always be a valid (populated) formatConfig
-    try :
-        formatConfig['GeneralSettings']['lastEditDate'] = tStamp()
-        formatConfig.filename = projFormatConfigFile
-        formatConfig.write()
-        formatConfig.writeOutFormatConfFile = False
-        return True
-
-    except :
-        pass
-
-
 def writeConfFile (configStuff, fileName, folderPath) :
-    '''Generic routin to write out a config file.'''
+    '''Generic routin to write out to, or create a config file.'''
 
+    # Create the file if needed but remember that we are not
+    # creating the folder it goes in.
     configFile = os.path.join(folderPath, fileName)
+    if not os.path.isfile(configFile) or os.path.getsize(configFile) == 0 :
+        writeObject = codecs.open(configFile, "w", encoding='utf_8')
+        writeObject.close()
 
     # To track when a conf file was saved as well as other general
     # housekeeping we will create a GeneralSettings section with
@@ -235,21 +223,11 @@ def writeConfFile (configStuff, fileName, folderPath) :
         configStuff['GeneralSettings']['lastEdit'] = tStamp()
         configStuff.filename = configFile
         configStuff.write()
-        configStuff.writeOutFormatConfFile = False
         return True
 
     except :
-        pass
-
-
-#def writeUserConfFile (userConfig, userHome) :
-#    '''Write out only the user config file.'''
-
-#    userConfigFile = os.path.join(userHome, 'rpm.conf')
-#    userConfig['System']['lastEditDate'] = tStamp()
-#    userConfig.filename = userConfigFile
-#    userConfig.write()
-#    return True
+        terminal('\nERROR: Could not write to: ' + fileName)
+        return False
 
 
 def xml_to_section (fname) :

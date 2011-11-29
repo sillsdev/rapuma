@@ -19,6 +19,32 @@ Todo:
         <sectionID>Files</sectionID>
         <description>This section contains the names and information for files of this component type used in the RPM system in this project.</description>
         <section>
+            <name>Format Config File</name>
+            <sectionID>Format</sectionID>
+            <description>Format configuration data for all kind of pages used in this project.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The name of this file.</description>
+                <type>string</type>
+                <value>.format.conf</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value>Process</value>
+            </setting>
+            <setting>
+                <name>Version Control</name>
+                <key>versionControl</key>
+                <description>Is this file under version control?</description>
+                <type>boolean</type>
+                <value>True</value>
+            </setting>
+        </section>
+        <section>
             <name>Composition Configuration File</name>
             <sectionID>CompConfig</sectionID>
             <description>Composition (template) configuration data for all kind of pages used in this project.</description>
@@ -42,6 +68,30 @@ Todo:
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
                 <value>True</value>
+            </setting>
+        </section>
+    </section>
+    <section>
+        <name>Folders</name>
+        <sectionID>Folders</sectionID>
+        <description>This section contains the settings for all the folders needed for processing this component.</description>
+        <section>
+            <name>Project Process Folder</name>
+            <sectionID>Process</sectionID>
+            <description>The project Process folder where TeX processes happen. Some font information needs to end up here. Caution, if for some reason some of the other components call the process folder something different, lots of things will break.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The folder where format information is kept for use with other processes.</description>
+                <type>string</type>
+                <value>Process</value>
+            </setting>
+            <setting>
+                <name>Location</name>
+                <key>location</key>
+                <description>The location of the folder.</description>
+                <type>string</type>
+                <value></value>
             </setting>
         </section>
     </section>

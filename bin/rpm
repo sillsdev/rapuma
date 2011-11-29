@@ -177,13 +177,6 @@ if aProject.writeOutUserConfFile :
     if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
         terminal('\nERROR: Could not write to: user config file')
 
-
-# FIXME: Move this to the right module. This information needs to be saved right
-# after it is made/changed
-if aProject.writeOutFormatConfFile :
-    if not writeProjFormatConfFile(aProject._formatConfig, projHome) :
-        terminal('\nERROR: Could not write to: formate config file')
-
 # Now trim the log file if it is needed
 if isConfSection(aProject._projConfig, 'Project') :
     aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
