@@ -50,6 +50,10 @@ class PageFormat (Auxiliary) :
         # no file system work to be done in this method!
 
         self._formatConfig      = {}
+        
+        
+        # FIXME: Set this path!
+        self.formatConfFile     = os.path.join(aProject.)
 
         # Make a format file if it isn't there already then
         # load the project's format configuration
@@ -85,6 +89,11 @@ class PageFormat (Auxiliary) :
         # one there. This will contain all the formating for this project.
         if not os.path.isfile(self.formatConfFile) :
             aProject._formatConfig = getXMLSettings(os.path.join(aProject.rpmAuxTypes, 'pageFormat', 'pageFormat_values.xml'))
+            if not writeConfFile(aProject._formatConfig, '.format.conf', aProject.projHome) :
+                terminal('\nERROR: Could not write to: user config file')
+
+
+
             writeProjFormatConfFile(self._formatConfig, aProject.projHome)
 
             return True
