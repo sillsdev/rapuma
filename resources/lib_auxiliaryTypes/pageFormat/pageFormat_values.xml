@@ -17,13 +17,6 @@ Todo:
         <sectionID>GeneralSettings</sectionID>
         <description>This contains general format settings for this publication.</description>
         <setting>
-            <name>Format Last Edit Date</name>
-            <key>formatLastEditDate</key>
-            <description>The last time this format file was edited.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>Measurement Unit</name>
             <key>MeasurementUnit</key>
             <description>The unit of measurement used in this publication.</description>

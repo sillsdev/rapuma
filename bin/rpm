@@ -170,13 +170,16 @@ if command :
 
 # Now write out the config files if needed
 if aProject.writeOutProjConfFile :
-    if not writeProjConfFile(aProject._projConfig, projHome) :
+    if not writeConfFile(aProject._projConfig, '.project.conf', projHome) :
         terminal('\nERROR: Could not write to: project config file')
 
 if aProject.writeOutUserConfFile :
-    if not writeUserConfFile(aProject._userConfig, userHome) :
-        terminal('\nERROR: Could not write to: user` config file')
+    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
+        terminal('\nERROR: Could not write to: user config file')
 
+
+# FIXME: Move this to the right module. This information needs to be saved right
+# after it is made/changed
 if aProject.writeOutFormatConfFile :
     if not writeProjFormatConfFile(aProject._formatConfig, projHome) :
         terminal('\nERROR: Could not write to: formate config file')

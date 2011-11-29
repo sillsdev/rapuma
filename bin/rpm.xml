@@ -76,13 +76,6 @@ Todo:
             <value>make --makefile=</value>
         </setting>
         <setting>
-            <name>User Settings Last Edit Date</name>
-            <key>lastEditDate</key>
-            <description>Time stamp of when the user settings were last edited.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>System Initialization Date</name>
             <key>initDate</key>
             <description>Time stamp of when the system was installed.</description>

@@ -46,13 +46,6 @@ Todo:
             <value></value>
         </setting>
         <setting>
-            <name>Project Settings Last Edit Date</name>
-            <key>projectLastEditDate</key>
-            <description>Time stamp of when the project settings were last edited.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>Valid Component Type List</name>
             <key>validCompTypes</key>
             <description>A list of valid component types that are acceptable to use with this project type.</description>

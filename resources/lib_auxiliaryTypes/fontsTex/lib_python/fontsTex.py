@@ -78,16 +78,24 @@ class FontsTex (Auxiliary) :
         setattr(self, 'projProcessFolderName', initInfo['Folders']['Process']['name'])
         setattr(self, 'projFontFolder', os.path.join(self.project.projHome, self.projFontFolderName))
         setattr(self, 'projProcessFolder', os.path.join(self.project.projHome, self.projProcessFolderName))
+        setattr(self, 'projFontsConfFile', os.path.join(self.projProcessFolder, '.fonts.conf'))
+
+        # Make sure we have a fonts.conf file in the Process folder
+        # create it if we don't.
+        if not os.path.isdir(self.projFontsConfFile) :
+            self._fontsConfig = ConfigObj()
+            buildConfSection (self._fontsConfig, 'Fonts')
+            writeProjFormatConfFile(self._fontsConfig, self.projFontsConfFile)
+            print self.projFontsConfFile
 
         # Bring in any know files for this component
         self.initAuxFiles(self.type, initInfo)
 
-        # Init the fonts
+        # Init the fonts and create the fonts.conf file in the process folder
         self.initFonts()
 
-        # Now create the right font information file for this aux component.
-        if not os.path.isfile(os.path.join(self.projFontFolder, self.aid + '.tex')) :
-            self.makeFontInfoTexFile()
+        # Now create a tex font information file for this aux component if needed.
+        self.makeFontInfoTexFile()
 
         self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
         self.initialized = True
@@ -185,10 +193,11 @@ class FontsTex (Auxiliary) :
 
 
     def setFont (self, ftype, font, rank='None') :
-        '''Setup a font for a specific typeface.'''
+        '''Setup a font for a specific typeface and create a fonts.conf file in
+        the process folder.'''
 
-        # First, delete the font info TeX file.  Everything changes if we add a
-        # font to this aux
+        # First, delete the existing font info TeX file.  Everything changes if
+        # we add a font to this aux
         if os.path.isfile(os.path.join(self.projProcessFolder, self.aid + '.tex')) :
             os.remove(os.path.join(self.projProcessFolder, self.aid + '.tex'))
 
@@ -211,14 +220,13 @@ class FontsTex (Auxiliary) :
             self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
 
-        # Make sure we have a fonts section in the conf file
-        buildConfSection (self.project._formatConfig, 'Fonts')
-        buildConfSection (self.project._formatConfig['Fonts'], font)
-
         # Inject the font info into the project format config file.
+        buildConfSection (self._fontsConfig['Fonts'], font)
         fInfo = getXMLSettings(fontInfo)
-        self.project._formatConfig['Fonts'][font] = fInfo.dict()
-        self.project.writeOutFormatConfFile = True
+        self._fontsConfig['Fonts'][font] = fInfo.dict()
+        self._fontsConfig = True
+
+        print fInfo
 
         # Add to installed fonts list for this auxiliary type, only one instance allowed
         if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
@@ -235,11 +243,11 @@ class FontsTex (Auxiliary) :
 
         # Check to see if the primary font has been set
         if rank.lower() == 'primary' :
-            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self.project._formatConfig['Fonts'][font]['FontInformation']['fontID']
+            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self._fontsConfig['Fonts'][font]['FontInformation']['fontID']
 
         # Add any features that this aux needs to have with this specific font.
         buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
-        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self.project._formatConfig['Fonts'][font]['FontInformation']['features']
+        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self._fontsConfig['Fonts'][font]['FontInformation']['features']
 
         # Set conf write flag and report
         self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True

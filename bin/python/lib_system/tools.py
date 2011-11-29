@@ -205,23 +205,6 @@ def overrideSettings (settings, overrideXML) :
     return settings
 
 
-def writeProjConfFile (projConfig, projHome) :
-    '''Write out only the project config file.'''
-
-    projConfigFile = os.path.join(projHome, '.project.conf')
-
-    # There may not always be a valid (populated) projConfig
-    try :
-        projConfig['ProjectInfo']['projectLastEditDate'] = tStamp()
-        projConfig.filename = projConfigFile
-        projConfig.write()
-        projConfig.writeOutProjConfFile = False
-        return True
-
-    except :
-        pass
-
-
 def writeProjFormatConfFile (formatConfig, projHome) :
     '''Write out only the project format config file.'''
 
@@ -229,7 +212,7 @@ def writeProjFormatConfFile (formatConfig, projHome) :
 
     # There may not always be a valid (populated) formatConfig
     try :
-        formatConfig['GeneralSettings']['formatLastEditDate'] = tStamp()
+        formatConfig['GeneralSettings']['lastEditDate'] = tStamp()
         formatConfig.filename = projFormatConfigFile
         formatConfig.write()
         formatConfig.writeOutFormatConfFile = False
@@ -239,15 +222,34 @@ def writeProjFormatConfFile (formatConfig, projHome) :
         pass
 
 
+def writeConfFile (configStuff, fileName, folderPath) :
+    '''Generic routin to write out a config file.'''
 
-def writeUserConfFile (userConfig, userHome) :
-    '''Write out only the user config file.'''
+    configFile = os.path.join(folderPath, fileName)
 
-    userConfigFile = os.path.join(userHome, 'rpm.conf')
-    userConfig['System']['lastEditDate'] = tStamp()
-    userConfig.filename = userConfigFile
-    userConfig.write()
-    return True
+    # To track when a conf file was saved as well as other general
+    # housekeeping we will create a GeneralSettings section with
+    # a last edit date key/value.
+    buildConfSection(configStuff, 'GeneralSettings')
+    try :
+        configStuff['GeneralSettings']['lastEdit'] = tStamp()
+        configStuff.filename = configFile
+        configStuff.write()
+        configStuff.writeOutFormatConfFile = False
+        return True
+
+    except :
+        pass
+
+
+#def writeUserConfFile (userConfig, userHome) :
+#    '''Write out only the user config file.'''
+
+#    userConfigFile = os.path.join(userHome, 'rpm.conf')
+#    userConfig['System']['lastEditDate'] = tStamp()
+#    userConfig.filename = userConfigFile
+#    userConfig.write()
+#    return True
 
 
 def xml_to_section (fname) :
@@ -308,17 +310,6 @@ def override_section (self, aSection) :
 # This will reasign the standard ConfigObj function that works much like ours
 # but not quite what we need for working with XML as one of the inputs.
 Section.override = override_section
-
-
-def reportSysConfUpdate (aProject) :
-    '''Mark the project/system config object as changed so the next time a write
-    command is called on it it will write out the changes.  This normally
-    happens at the end of a process.'''
-    
-    ts = tStamp()
-    aProject._userConfig['System']['lastEditDate'] = ts
-    aProject.writeOutUserConfFile = True
-    aProject.lastEditDate = ts
 
 
 ############################### Terminal Output ###############################

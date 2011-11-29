@@ -73,11 +73,9 @@ class Project (object) :
             self.projConfFile       = os.path.join(self.projHome, '.project.conf')
             self.userConfFile       = os.path.join(self.userHome, 'rpm.conf')
             for k in ('systemVersion',      'userName',
-                      'debugging',          'lastEditDate',
-                      'projLogLineLimit',   'lockExt') :
+                      'debugging',          'projLogLineLimit',
+                      'lockExt') :
                 setattr(self, k, self._userConfig['System'][k] if self._userConfig else None)
-
-            self.orgLastEditDate    = self.lastEditDate
 
         # Load the project vars if this is a valid project
         if len(self._projConfig) :
@@ -92,7 +90,6 @@ class Project (object) :
         # Set some flags
         self.writeOutProjConfFile   = False
         self.writeOutUserConfFile   = False
-        self.writeOutFormatConfFile = False
         self.isProjectInitalized    = False
 
         # If this project is still new these may not exist yet
@@ -173,7 +170,6 @@ class Project (object) :
         date = tStamp()
         self._projConfig['ProjectInfo']['projectType']            = ptype
         self._projConfig['ProjectInfo']['projectName']            = pname
-        self._projConfig['ProjectInfo']['projectLastEditDate']    = ''
         self._projConfig['ProjectInfo']['projectCreateDate']      = date
         self._projConfig['ProjectInfo']['projectIDCode']          = pid
         recordProject(self.userConfFile, self._projConfig, pdir)
@@ -183,7 +179,9 @@ class Project (object) :
         self.projErrorLogFile   = self._userConfig['Files']['projErrorLogFile']['name']
 
         # Finally write out the project config file
-        writeProjConfFile(self._projConfig, pdir)
+        if not writeConfFile(self._projConfig, '.project.conf', pdir) :
+            terminal('\nERROR: Could not write to: project config file')
+#        writeProjConfFile(self._projConfig, pdir)
         self.writeOutProjConfFile = False
         self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
 
@@ -212,9 +210,10 @@ class Project (object) :
                 if os.path.isfile(projConfFile) :
                     os.rename(projConfFile, projConfFile + self.lockExt)
 
-                # Remove references from user rpm.conf
+                # Remove references from user rpm.conf write out immediately
                 del self._userConfig['Projects'][pid]
-                reportSysConfUpdate(self)
+                if not writeConfFile(self._userConfig, 'rpm.conf', self.userHome) :
+                    terminal('\nERROR: Could not write to: user config file')
 
                 # Report the process is done
                 self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
