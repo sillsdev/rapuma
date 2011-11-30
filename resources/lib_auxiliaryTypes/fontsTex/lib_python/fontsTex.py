@@ -65,7 +65,7 @@ class FontsTex (Auxiliary) :
     def initAuxiliary (self) :
         '''Initialize this component.  This is a generic named function that
         will be called from the project initialisation process.'''
-        
+
         # Bail out now if this has already been initialized
         if self.initialized :
             return True
@@ -81,7 +81,7 @@ class FontsTex (Auxiliary) :
         setattr(self, 'processFolder', os.path.join(self.project.projHome, self.processFolderName))
         setattr(self, 'fontConfFile', os.path.join(self.processFolder, self.fontFileName))
 
-        # Bring in any known files for this component
+        # Bring in any known files for this auxiliary
         self.initAuxFiles(self.type, self._initConfig)
 
         # Make a font conf file if it isn't there already or if it is empty.
@@ -97,6 +97,7 @@ class FontsTex (Auxiliary) :
         self.initFonts()
 
         # Now create a tex font information file for this aux component if needed.
+        # This will only work after the font information has been added
         self.makeFontInfoTexFile()
 
         self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
@@ -107,7 +108,6 @@ class FontsTex (Auxiliary) :
     def makeFontInfoTexFile (self) :
         '''Create a TeX info font file that TeX will use for rendering.'''
 
-        print 'We are in!:::::::::::::::::::::::::::::::::::::'
         # We will not make this file if it is already there
         fontInfoFileName = os.path.join(self.processFolder, self.aid + '.tex')
 
@@ -119,10 +119,10 @@ class FontsTex (Auxiliary) :
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
             for f in auxFonts :
-                print f
                 fInfo = self._fontConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
+                    print 'zzzzzzz', self.project._projConfig['Auxiliaries'][self.aid]['primaryFont']
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
                     features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
                     for tf in fInfo :

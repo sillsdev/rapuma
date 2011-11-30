@@ -23,6 +23,7 @@
 import os, sys
 
 # Load the local classes
+from tools import *
 from pageFormat_command import Command
 from auxiliary import Auxiliary
 
@@ -69,16 +70,24 @@ class PageFormat (Auxiliary) :
             return True
 
         # Start with default settings
-        self._formatConfig = getXMLSettings(os.path.join(self.project.rpmAuxTypes, 'pageFormat', 'pageFormat_values.xml'))
+        self._formatConfig = {}
+        self._defaultConfig = {}
+        self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
         # Set values for this method
-        setattr(self, 'processFolderName', self._formatConfig['Folders']['Process']['name'])
-        setattr(self, 'formatFileName', self._formatConfig['Files']['Format']['name'])
+        setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
+        setattr(self, 'formatFileName', self._initConfig['Files']['Format']['name'])
         setattr(self, 'processFolder', os.path.join(self.project.projHome, self.processFolderName))
         setattr(self, 'formatConfFile', os.path.join(self.processFolder, self.formatFileName))
+        setattr(self, 'defaultFormatValuesFile', os.path.join(self.project.rpmAuxTypes, self.type, self.type + '_values.xml'))
+
+        # Bring in any known files for this auxiliary
+        self.initAuxFiles(self.type, self._initConfig)
 
         # Make a format file if it isn't there already then
         # load the project's format configuration. Or, load
         # the existing file
+        self._defaultConfig = getXMLSettings(self.defaultFormatValuesFile)
+        print self.defaultFormatValuesFile
         if not os.path.isfile(self.formatConfFile) :
             writeConfFile(self._formatConfig, self.formatFileName, self.processFolder)
         else :
