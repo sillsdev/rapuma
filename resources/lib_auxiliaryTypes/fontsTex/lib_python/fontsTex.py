@@ -107,6 +107,7 @@ class FontsTex (Auxiliary) :
     def makeFontInfoTexFile (self) :
         '''Create a TeX info font file that TeX will use for rendering.'''
 
+        print 'We are in!:::::::::::::::::::::::::::::::::::::'
         # We will not make this file if it is already there
         fontInfoFileName = os.path.join(self.processFolder, self.aid + '.tex')
 
@@ -118,6 +119,7 @@ class FontsTex (Auxiliary) :
             writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
             auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
             for f in auxFonts :
+                print f
                 fInfo = self._fontConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
