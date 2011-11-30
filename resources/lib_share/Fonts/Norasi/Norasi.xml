@@ -60,7 +60,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
@@ -135,7 +135,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
@@ -210,7 +210,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
@@ -285,7 +285,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
@@ -360,7 +360,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
@@ -435,7 +435,7 @@ Todo:
             <key>name</key>
             <description>The name for this typeface.</description>
             <type>string</type>
-            <value>Norasi Minor</value>
+            <value>Norasi</value>
         </setting>
         <setting>
             <name>Style</name>
