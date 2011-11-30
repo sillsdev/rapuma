@@ -71,7 +71,6 @@ class PageFormat (Auxiliary) :
 
         # Start with default settings
         self._formatConfig = {}
-        self._defaultConfig = {}
         self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
         # Set values for this method
         setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
@@ -85,10 +84,9 @@ class PageFormat (Auxiliary) :
 
         # Make a format file if it isn't there already then
         # load the project's format configuration. Or, load
-        # the existing file
-        self._defaultConfig = getXMLSettings(self.defaultFormatValuesFile)
-        print self.defaultFormatValuesFile
-        if not os.path.isfile(self.formatConfFile) :
+        # from the existing file
+        if not os.path.isfile(self.formatConfFile) or os.path.getsize(self.formatConfFile) == 0 :
+            self._formatConfig = getXMLSettings(self.defaultFormatValuesFile)
             writeConfFile(self._formatConfig, self.formatFileName, self.processFolder)
         else :
             self._formatConfig = ConfigObj(self.formatConfFile)

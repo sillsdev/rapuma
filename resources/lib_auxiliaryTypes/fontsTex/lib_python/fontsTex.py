@@ -85,6 +85,11 @@ class FontsTex (Auxiliary) :
         self.initAuxFiles(self.type, self._initConfig)
 
         # Make a font conf file if it isn't there already or if it is empty.
+
+
+# FIXME: Why doesn't an if statement work, why do we need try?
+
+# FIXME: This works
         try :
             self._fontConfig = ConfigObj(self.fontConfFile)
             x = self._fontConfig['GeneralSettings']['lastEdit']
@@ -92,6 +97,13 @@ class FontsTex (Auxiliary) :
             buildConfSection (self._fontConfig, 'Fonts')
             writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
             self._fontConfig = ConfigObj(self.fontConfFile)
+
+# FIXME: This does not work
+#        if not os.path.isfile(self.fontConfFile) or os.path.getsize(self.fontConfFile) == 0 :
+#            buildConfSection (self._fontConfig, 'Fonts')
+#            writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
+#            self._fontConfig = ConfigObj(self.fontConfFile)
+
 
         # Init the font folder
         self.initFonts()
@@ -122,7 +134,6 @@ class FontsTex (Auxiliary) :
                 fInfo = self._fontConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
                 if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
-                    print 'zzzzzzz', self.project._projConfig['Auxiliaries'][self.aid]['primaryFont']
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
                     features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
                     for tf in fInfo :
