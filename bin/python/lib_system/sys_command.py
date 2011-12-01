@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+# version: 20111201
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -13,6 +13,7 @@
 
 # History:
 # 20110823 - djd - Started with intial file from RPM project
+# 20111201 - djd - Begin changing to project management model
 
 
 ###############################################################################

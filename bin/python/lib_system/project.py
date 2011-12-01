@@ -88,10 +88,10 @@ class Project (object) :
 
 # FIXME: Start here, make getProjInitSettings() in tools
 
-            # Get project level config information
-            self._initConfig = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
-            # Set values for this method
-            setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
+#            # Get project level config information
+#            self._initConfig = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
+#            # Set values for this method
+#            setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
 
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
@@ -381,227 +381,61 @@ class Project (object) :
             self.writeToLog('MSG', 'Removed component: [' + comp + '] from project.', 'project.removeComponents()')
 
 
-    def addNewComponentType (self, ctype) :
-        '''This will add all the component type information to a project.'''
+#    def addNewComponentType (self, ctype) :
+#        '''This will add all the component type information to a project.'''
 
-        # Test to see if the section is there, do not add if it is
-        buildConfSection(self._projConfig['ComponentTypes'], ctype)
-        thisCompType = getCompSettings(self.userHome, self.rpmHome, ctype)
-        self._projConfig['ComponentTypes'][ctype].merge(thisCompType['ComponentTypes']['ComponentTypeInformation'])
-        self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
-        return True
-
-
-    def removeComponentType (self, ctype) :
-        '''Remove a component type to the current project.  Before doing so, it
-        must varify that the requested component type is valid.'''
-
-        if len(self._projConfig['ComponentTypes'][ctype]['installedComponents']) == 0 :
-            # Remove references in the ComponentType section
-            del self._projConfig['ComponentTypes'][ctype]
-            self.writeOutProjConfFile = True
-            # FIXME: More should be done at this point to remove files, etc of the comp type.
-            self.writeToLog('MSG', 'Component type: [' + ctype + '] removed from project.', 'project.removeComponentType()')
-        else :
-            self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
+#        # Test to see if the section is there, do not add if it is
+#        buildConfSection(self._projConfig['ComponentTypes'], ctype)
+#        thisCompType = getCompSettings(self.userHome, self.rpmHome, ctype)
+#        self._projConfig['ComponentTypes'][ctype].merge(thisCompType['ComponentTypes']['ComponentTypeInformation'])
+#        self.writeOutProjConfFile = True
+#        self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
+#        return True
 
 
-    def getUninitializedComponent (self, cid) :
-        '''Create an object for a specified component.'''
+#    def removeComponentType (self, ctype) :
+#        '''Remove a component type to the current project.  Before doing so, it
+#        must varify that the requested component type is valid.'''
 
-        if cid and cid not in self._projConfig['Components'] :
-            self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
-            return None
-        
-        if not cid in self._components :
-            config = self._projConfig['Components'][cid]
-            ctype = config['compType']
-            if not ctype in component.componentTypes :
-                self._components[cid] = component.component(self, config, None, cid)
-            else :
-                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype], cid)
-        return self._components[cid]
+#        if len(self._projConfig['ComponentTypes'][ctype]['installedComponents']) == 0 :
+#            # Remove references in the ComponentType section
+#            del self._projConfig['ComponentTypes'][ctype]
+#            self.writeOutProjConfFile = True
+#            # FIXME: More should be done at this point to remove files, etc of the comp type.
+#            self.writeToLog('MSG', 'Component type: [' + ctype + '] removed from project.', 'project.removeComponentType()')
+#        else :
+#            self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
 
 
-    def getComponent (self, cid) :
-        '''A function for initializing (making directories, etc.) a component which is called by the
-        component or project when a process is run.'''
+#    def getUninitializedComponent (self, cid) :
+#        '''Create an object for a specified component.'''
 
-        comp = self.getUninitializedComponent(cid)
-        # Init all aux comps before the comp init
-        self.initCompAuxiliaries(comp)
-        # Now init the comp
-        comp.initComponent()
-        return comp
-
-
-###############################################################################
-########################## Auxiliary Level Functions ##########################
-###############################################################################
-
-
-    def initCompAuxiliaries (self, comp) :
-        '''Initialize all auxiliary components associated with this component.
-        Based on the component ID and its type we will figure out what
-        auxiliaries need to be initialized.'''
-
-        ctype = comp.project._projConfig['Components'][comp.cid]['compType']
-
-        for aid in comp.project._projConfig['ComponentTypes'][ctype]['auxDependencies'] :
-
-            aid = aid.split(':')[0]
-            atype = comp.project._projConfig['Auxiliaries'][aid]['auxType']
-            thisAux = self.getAuxiliary(aid)
-            
-            if not thisAux.initAuxiliary() :
-                return False
-
-        return True
+#        if cid and cid not in self._projConfig['Components'] :
+#            self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
+#            return None
+#        
+#        if not cid in self._components :
+#            config = self._projConfig['Components'][cid]
+#            ctype = config['compType']
+#            if not ctype in component.componentTypes :
+#                self._components[cid] = component.component(self, config, None, cid)
+#            else :
+#                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype], cid)
+#        return self._components[cid]
 
 
-    def getUninitializedAuxiliary (self, aid) :
-        '''Create an object for a specified component.'''
+#    def getComponent (self, cid) :
+#        '''A function for initializing (making directories, etc.) a component which is called by the
+#        component or project when a process is run.'''
 
-        if aid and aid not in self._projConfig['Auxiliaries'] :
-            self.writeToLog('ERR', 'Auxiliary component: [' + aid + '] not found.', 'project.getComponent()')            
-            return None
-        
-        if not aid in self._auxiliaries :
-            config = self._projConfig['Auxiliaries'][aid]
-            atype = config['auxType']
-            initialized = False
-            if not atype in auxiliary.auxiliaryTypes :
-                self._auxiliaries[aid] = auxiliary.auxiliary(self, config, None, aid)
-            else :
-                self._auxiliaries[aid] = auxiliary.auxiliaryTypes[atype](self, config, self._projConfig['AuxiliaryTypes'][atype], aid)
-        return self._auxiliaries[aid]
+#        comp = self.getUninitializedComponent(cid)
+#        # Init all aux comps before the comp init
+#        self.initCompAuxiliaries(comp)
+#        # Now init the comp
+#        comp.initComponent()
+#        return comp
 
 
-    def getAuxiliary (self, aid) :
-        '''A function for initializing (making directories, etc.) a component which is called by the
-        component or project when a process is run.'''
-
-        aux = self.getUninitializedAuxiliary(aid)
-        # Now init the aux
-        aux.initAuxiliary()
-        return aux
-
-
-    def addNewAuxiliary (self, aid, atype) :
-        '''Add auxiliary component to the current project by inserting auxiliary
-        component info into the project conf file.'''
-
-        # Test for this auxiliary and bail if it is there
-        try :
-            at = self._projConfig['Auxiliaries'][aid]['auxType']
-            self.writeToLog('ERR', 'ID: [' + aid + '] cannot be added again.', 'project.addNewAuxiliary()')
-            return False
-
-        except :
-            # Add main Auxiliary sections if necessary
-            buildConfSection(self._projConfig, 'AuxiliaryTypes')
-            buildConfSection(self._projConfig, 'Auxiliaries')
-
-            # First we add the aux type if it is not already in the project
-            if atype in self.validAuxTypes :
-                if not atype in self._projConfig['AuxiliaryTypes'] :
-                    self.addNewAuxiliaryType(atype)
-            else :
-                self.writeToLog('ERR', 'ID: [' + atype + '] not valid auxiliary to use in [' + self.projectType + '] project type', 'project.addNewAuxiliary()')
-
-            if not aid in self._projConfig['AuxiliaryTypes'][atype]['validIdCodes'] :
-                self.writeToLog('ERR', 'ID: [' + aid + '] not valid ID for [' + atype + '] auxiliary component type', 'project.addNewAuxiliary()')
-                return False
-
-            # Add to the installed auxiliary components list for this type
-            auxList = []
-            auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
-            auxList.append(aid)
-            self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
-
-            # Read in the main settings file for this aux comp
-            auxSettings = getAuxSettings(self.userHome, self.rpmHome, atype)
-
-            # Build a section for this aux and merge in the default settings
-            buildConfSection(self._projConfig['Auxiliaries'], aid)
-            self._projConfig['Auxiliaries'][aid].merge(auxSettings['AuxiliaryTypes']['AuxiliaryInformation'])
-
-            # Add component code to components list
-            listOrder = []
-            listOrder = self._projConfig['ProjectInfo']['auxiliaryList']
-            listOrder.append(aid)
-            self._projConfig['ProjectInfo']['auxiliaryList'] = listOrder
-
-            self.writeOutProjConfFile = True
-            self.writeToLog('MSG', 'Auxiliary added: ' + str(aid), 'project.addNewAuxiliary()')
-
-            return True
-
-
-    def removeAuxiliary (self, aux) :
-        '''Remove an auxiliary component from the current project by removing
-        its type information section.'''
-
-        # Find out what kind of component type this is
-        atype = self._projConfig['Auxiliaries'][aux]['auxType']
-
-        # Remove from components list first
-        orderList = []
-        orderList = self._projConfig['ProjectInfo']['auxiliaryList']
-        if aux in orderList :
-            orderList.remove(aux)
-            self._projConfig['ProjectInfo']['auxiliaryList'] = orderList
-            self.writeOutProjConfFile = True
-        else :
-            self.writeToLog('WRN', 'Auxiliary [' + aux + '] not found in auxiliary list', 'project.removeAuxiliary()')
-
-        # Remove from the components installed list
-        auxList = self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']
-        if aux in auxList :
-            auxList.remove(aux)
-            self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries'] = auxList
-            self.writeOutProjConfFile = True
-
-        # Remove the component's section from auxiliaries
-        if aux in self._projConfig['Auxiliaries'] :
-            del self._projConfig['Auxiliaries'][aux]
-            self.writeOutProjConfFile = True
-
-        # Remove references in the ComponentTypes section if this is the last
-        # component of its kind to be removed. 
-        if len(self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']) == 0 :
-            self.removeAuxiliaryType(atype)
-
-        # I guess if at least one of the above succeded we removed it
-        if self.writeOutProjConfFile :
-            self.writeToLog('MSG', 'Removed component: [' + aux + '] from project.', 'project.removeAuxiliary()')
-
-
-    def addNewAuxiliaryType (self, atype) :
-        '''This will add all the auxiliary type information to a project.'''
-
-        # Test to see if the section is there, do not add if it is
-        buildConfSection(self._projConfig['AuxiliaryTypes'], atype)
-        thisAuxType = getAuxSettings(self.userHome, self.rpmHome, atype)
-        self._projConfig['AuxiliaryTypes'][atype].merge(thisAuxType['AuxiliaryTypes']['AuxiliaryTypeInformation'])
-        self.writeOutProjConfFile = True
-        self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] added to project.', 'project.addNewAuxiliaryType()')
-        return True
-
-
-    def removeAuxiliaryType (self, atype) :
-        '''Remove an auxiliary type from the current project.  Before doing so, it
-        must varify that the requested auxiliary type is valid.'''
-
-        if len(self._projConfig['AuxiliaryTypes'][atype]['installedAuxiliaries']) == 0 :
-            # Remove references in the AuxiliaryTypes section
-            del self._projConfig['AuxiliaryTypes'][atype]
-            self.writeOutProjConfFile = True
-            # FIXME: More should be done at this point to remove files, etc of the aux type.
-            self.writeToLog('MSG', 'Auxiliary type: [' + atype + '] removed from project.', 'project.removeAuxiliaryType()')
-        else :
-            self.writeToLog('WRN', 'Auxiliary type: [' + atype + '] does not exsits.', 'project.removeAuxiliaryType()')
 
 
 ###############################################################################

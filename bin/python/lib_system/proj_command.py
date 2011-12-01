@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+# version: 20111201
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -14,6 +14,7 @@
 
 # History:
 # 20110823 - djd - Started with intial file from RPM project
+# 20111201 - djd - Begin changing to project management model
 
 
 ###############################################################################
@@ -47,20 +48,6 @@ class ChangeProjSettings (Command) :
         self.parser.add_option("-i", "--pid", action="store", help="Change the ID code of the current project.")
 
 
-class PreProcess (Command) :
-    '''Preprocess a component'''
-    
-    type = "component_preprocess"
-
-    def run(self, args, aProject, userConfig) :
-        super(PreProcess, self).run(args, aProject, userConfig)
-        if len(args) :
-            aProject.preProcessComp(self.options.component)
-
-    def setupOptions(self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Preprocess a component in the project.")
-
-
 class AddComp (Command) :
     '''Add a component to a project.'''
 
@@ -78,40 +65,6 @@ class AddComp (Command) :
         self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the component type. It needs to be valid but not present in the project. (Required)")
 
 
-class AddAuxiliary (Command) :
-    '''Add an auxiliary component to a project.'''
-
-    type = "auxiliary_add"
-
-    def run (self, args, aProject, userConfig) :
-        super(AddAuxiliary, self).run(args, aProject, userConfig)
-        if self.options.auxiliary and self.options.type :
-            aProject.addNewAuxiliary(self.options.auxiliary, self.options.type)
-        else :
-            raise SyntaxError, "Error: Missing required arguments!"
-
-    def setupOptions (self, parser) :
-        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Add an auxiliary component to the project. (Required)")
-        self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the type of auxiliary component this is. It needs to be valid but not present in the project. (Required)")
-
-
-class ImportCompSource (Command) :
-    '''Command to import external data for this component'''
-    
-    type = "component_import"
-    
-    def run (self, args, aProject, userConfig) :
-        super(ImportCompSource, self).run(args, aProject, userConfig)
-        if self.options.component and self.options.type :
-            aProject.importComponentSource(self.options.component, self.options.source)
-        else :
-            raise SyntaxError, "Error: Missing required arguments!"
-
-    def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add the source of a component to the project. (Required)")
-        self.parser.add_option("-s", "--source", type="string", action="store", help="Specify a valid source file for this component if needed.")
-
-
 class RemoveComp (Command) :
     '''Remove a component from a project.'''
 
@@ -124,20 +77,5 @@ class RemoveComp (Command) :
 
     def setupOptions (self, parser) :
         self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component from the project. (Required)")
-
-
-class RemoveAux (Command) :
-    '''Remove an auxiliary component from a project.'''
-
-    type = "auxiliary_remove"
-
-    def run (self, args, aProject, userConfig) :
-        super(RemoveAux, self).run(args, aProject, userConfig)
-        if len(args) :
-            aProject.removeAuxiliary(self.options.auxiliary)
-
-    def setupOptions (self, parser) :
-        self.parser.add_option("-a", "--auxiliary", type="string", action="store", help="Remove an auxiliary component from the project. (Required)")
-
 
 

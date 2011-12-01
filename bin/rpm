@@ -14,6 +14,7 @@
 
 # History:
 # 20110823 - djd - Started with intial file from TIPE project
+# 20111201 - djd - Begin changing to project management model
 
 
 ###############################################################################
@@ -43,6 +44,7 @@ projHome = os.getcwd()
 # Set our paths to application resources
 sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python'))
 sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python', 'lib_system'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python', 'lib_managers'))
 
 # Load standard Python modules
 import codecs, shutil, operator
@@ -85,20 +87,13 @@ if os.path.isfile(projConfFile) :
     # so this next part should not fail.
     if projConfig :
         projectType         = projConfig['ProjectInfo']['projectType']
-        rpmProjTypes       = os.path.join(rpmHome, 'resources', 'lib_projTypes')
         from proj_command import *
-
-        # Dynamically load the right project type modules
-        thisTypeLib = os.path.join(rpmProjTypes, projectType, 'lib_python')
-        sys.path.insert(0, thisTypeLib)
-        projModule = __import__(projectType)
-
     else :
         terminal('ERROR: Failed to load: ' + projConfFile)
         # die here
 
     # Fold in the projConfig into the aProject object
-    aProject = getattr(projModule, projectType[0].upper() + projectType[1:], Project)(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
+    aProject = getattr('FakeName', projectType[0].upper() + projectType[1:], Project)(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
 
     # Record the project if needed
     try :
