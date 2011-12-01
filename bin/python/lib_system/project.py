@@ -77,15 +77,31 @@ class Project (object) :
                       'lockExt') :
                 setattr(self, k, self._userConfig['System'][k] if self._userConfig else None)
 
-        # Load the project vars if this is a valid project
-        if len(self._projConfig) :
-            for k in (  'projectType',                  'projectName',
-                        'projectIDCode',                'validCompTypes',
-                        'validAuxTypes',                'projectComponentBindingOrder') :
+            for k in (  'componentList',            'defaultAuxiliaries',
+                        'projectType',              'optionalAuxiliaries',
+                        'projectName',              'projectIDCode',
+                        'validCompTypes',           'auxiliaryList',
+                        'projectCreateDate',        'projAuxiliaries',
+                        'projectComponentBindingOrder') :
+
                  setattr(self, k, self._projConfig['ProjectInfo'][k] if self._projConfig else None)
+
+# FIXME: Start here, make getProjInitSettings() in tools
+
+            # Get project level config information
+            self._initConfig = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
+            # Set values for this method
+            setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
+
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
+
+            # Now do any necessary initializing for this project
+
+
+            self.isProjectInitalized    = True
+
 
         # Set some flags
         self.writeOutProjConfFile   = False
@@ -93,28 +109,27 @@ class Project (object) :
         self.isProjectInitalized    = False
 
         # If this project is still new these may not exist yet
-        try :
+#        try :
 
-            # Walk the ComponentTypes section and try to load commands if there are any
-            if isConfSection(self._projConfig, 'ComponentTypes') :
-                for ctype in self._projConfig['ComponentTypes'].keys() :
-                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
-                    __import__(ctype)
-                    __import__(ctype + '_command')
-             
-            # Walk the AuxiliaryTypes section and try to load commands if there are any
-            if isConfSection(self._projConfig, 'AuxiliaryTypes') :
-                for atype in self._projConfig['AuxiliaryTypes'].keys() :
-                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
-                    __import__(atype)
-                    __import__(atype + '_command')
+#            # Walk the ComponentTypes section and try to load commands if there are any
+#            if isConfSection(self._projConfig, 'ComponentTypes') :
+#                for ctype in self._projConfig['ComponentTypes'].keys() :
+#                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
+#                    __import__(ctype)
+#                    __import__(ctype + '_command')
+#             
+#            # Walk the AuxiliaryTypes section and try to load commands if there are any
+#            if isConfSection(self._projConfig, 'AuxiliaryTypes') :
+#                for atype in self._projConfig['AuxiliaryTypes'].keys() :
+#                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
+#                    __import__(atype)
+#                    __import__(atype + '_command')
 
-            # Clean up the path, we don't need this stuck there
-            del sys.path[0]
-            
+#            # Clean up the path, we don't need this stuck there
+#            del sys.path[0]
 
-        except StandardError as e:
-            self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
+#        except StandardError as e:
+#            self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
 
 
 ###############################################################################

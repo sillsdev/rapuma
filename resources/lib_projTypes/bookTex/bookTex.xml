@@ -53,11 +53,25 @@ Todo:
             <value>usfm,adminMSEAG,vMapper,projectNotes</value>
         </setting>
         <setting>
-            <name>Valid Auxiliary Type List</name>
-            <key>validAuxTypes</key>
-            <description>A list of valid auxiliary component types that are acceptable to use with this project type. As some auxiliary types maybe dependent on others it is best to list them in the order that they should load.</description>
+            <name>Project Auxiliaries List</name>
+            <key>projAuxiliaries</key>
+            <description>A list of valid auxiliaries that are used at the project level (project-wide).</description>
             <type>list</type>
-            <value>pageFormat,stylesUsfm,usfmTex,fontsTex,illustrationsUsfm,hyphenTex</value>
+            <value>fonts:manager,format:manager,style:manager</value>
+        </setting>
+        <setting>
+            <name>Default Auxiliaries List</name>
+            <key>defaultAuxiliaries</key>
+            <description>A list of valid auxiliary components that are automatically installed for this type of project.</description>
+            <type>list</type>
+            <value>fonts:contentTex,format:contentTex,style:contentUsfm</value>
+        </setting>
+        <setting>
+            <name>Optional Auxiliaries List</name>
+            <key>optionalAuxiliaries</key>
+            <description>A list of valid optional auxiliary components that are acceptable to use with this project type but are not automatically installed.</description>
+            <type>list</type>
+            <value>illustrations:contentUsfm,hyphenation:contentTex</value>
         </setting>
         <setting>
             <name>Component List</name>

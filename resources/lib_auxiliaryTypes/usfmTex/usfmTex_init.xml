@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: fontsTex_init.xml
+File: usfmTex_init.xml
 Description:
 This is a component type description for a fontsTex_init component to be with
 all projects.  All file relations and processes are described in this file.
@@ -26,14 +26,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>.usfmTexSetup.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Process</value>
+                <value>%Process%/.usfmTexSetup.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -52,14 +45,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>paratext2.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/paratext2.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -78,14 +64,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-adj-list.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-adj-list.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -104,14 +83,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-callers.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-callers.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -130,14 +102,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-char-style.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-char-style.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -156,14 +121,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-cropmarks.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-cropmarks.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -182,14 +140,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-cutouts.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-cutouts.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -208,14 +159,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-note-style.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-note-style.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -234,14 +178,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-para-style.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-para-style.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -260,14 +197,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-pic-list.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-pic-list.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -286,14 +216,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptxplus-character-kerning.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptxplus-character-kerning.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -312,14 +235,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptxplus-maps.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptxplus-maps.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -338,14 +254,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptxplus-marginalverses.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptxplus-marginalverses.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -364,14 +273,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptxplus-toc-tables.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptxplus-toc-tables.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -390,14 +292,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-references.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-references.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -416,14 +311,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-stylesheet.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-stylesheet.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -442,14 +330,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-tables.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-tables.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -468,14 +349,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-toc.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-toc.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>
@@ -494,14 +368,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>ptx-tracing.tex</value>
-            </setting>
-            <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value>Macros</value>
+                <value>%Process%/Macros/ptx-tracing.tex</value>
             </setting>
             <setting>
                 <name>Version Control</name>

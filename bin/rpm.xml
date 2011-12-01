@@ -107,25 +107,11 @@ Todo:
                 <value>.rpm.log</value>
             </setting>
             <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
                 <name>Version Control</name>
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
                 <value>False</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
             </setting>
         </section>
         <section>
@@ -140,25 +126,11 @@ Todo:
                 <value>.error.log</value>
             </setting>
             <setting>
-                <name>Location</name>
-                <key>location</key>
-                <description>The location of the folder.</description>
-                <type>string</type>
-                <value></value>
-            </setting>
-            <setting>
                 <name>Version Control</name>
                 <key>versionControl</key>
                 <description>Is this file under version control?</description>
                 <type>boolean</type>
                 <value>False</value>
-            </setting>
-            <setting>
-                <name>Dependent Files</name>
-                <key>dependents</key>
-                <description>The file(s) this file is dependent on.</description>
-                <type>list</type>
-                <value></value>
             </setting>
         </section>
     </section>
