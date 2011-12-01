@@ -71,7 +71,6 @@ class FontsTex (Auxiliary) :
             return True
 
         # Start with default settings
-        self._fontConfig = {}
         self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
         # Set values for this method
         setattr(self, 'fontFolderName', self._initConfig['Folders']['Fonts']['name'])
@@ -85,25 +84,14 @@ class FontsTex (Auxiliary) :
         self.initAuxFiles(self.type, self._initConfig)
 
         # Make a font conf file if it isn't there already or if it is empty.
-
-
-# FIXME: Why doesn't an if statement work, why do we need try?
-
-# FIXME: This works
-        try :
-            self._fontConfig = ConfigObj(self.fontConfFile)
-            x = self._fontConfig['GeneralSettings']['lastEdit']
-        except :
+        # Otherwise, just load up the existing one.
+        if not os.path.isfile(self.fontConfFile) or os.path.getsize(self.fontConfFile) == 0 :
+            self._fontConfig = ConfigObj()
             buildConfSection (self._fontConfig, 'Fonts')
             writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
             self._fontConfig = ConfigObj(self.fontConfFile)
-
-# FIXME: This does not work
-#        if not os.path.isfile(self.fontConfFile) or os.path.getsize(self.fontConfFile) == 0 :
-#            buildConfSection (self._fontConfig, 'Fonts')
-#            writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
-#            self._fontConfig = ConfigObj(self.fontConfFile)
-
+        else :
+            self._fontConfig = ConfigObj(self.fontConfFile)
 
         # Init the font folder
         self.initFonts()
