@@ -38,6 +38,10 @@ if not userHome :
     userHome = os.path.join(sysHome, '.config', 'rpm')
     os.environ['RPM_USER'] = userHome
 
+# Set the location for RPM internal configuration
+if not rpmConfig :
+    rpmConfig = os.path.join(rpmHome, 'bin', 'config')
+
 # Set the (potential) project home
 projHome = os.getcwd()
 
