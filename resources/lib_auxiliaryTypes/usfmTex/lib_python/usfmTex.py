@@ -67,13 +67,33 @@ class UsfmTex (Auxiliary) :
         '''This is will initiate this component and will override the function
         of the same name in the component.py module'''
 
-        # Pull the information from the project init xml file
-        initInfo = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+        # Bail out now if this has already been initialized
+        if self.initialized :
+            return True
 
-        # Create all necessary (empty) folders
-        self.initAuxFolders(self.type, initInfo)
-        # Bring in any known files for this component
-        self.initAuxFiles(self.type, initInfo)
+        # Start with default settings
+        self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
+        # Set values for this method
+        setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
+        setattr(self, 'texMacroSetupFileName', self._initConfig['Files']['TexMacroSetup']['name'])
+        setattr(self, 'processFolder', os.path.join(self.project.projHome, self.processFolderName))
+        setattr(self, 'texMacroSetupFile', os.path.join(self.processFolder, self.texMacroSetupFileName))
+        setattr(self, 'formatConfFile', os.path.join(self.processFolder, self.formatFileName))
+        setattr(self, 'defaultFormatValuesFile', os.path.join(self.project.rpmAuxTypes, self.type, self.type + '_values.xml'))
+
+        # Create all necessary (empty) folders and bring in any known
+        # files for this component. (This will do both.)
+        self.initAuxFiles(self.type, self._initConfig)
+
+        # Get our format settings, use defaults if necessary
+        if not os.path.isfile(self.formatConfFile) or os.path.getsize(self.formatConfFile) == 0 :
+            self._formatConfig = getXMLSettings(self.defaultFormatValuesFile)
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
+
+        # Create the TeX Macro master setup file
+        if not os.path.isfile(self.texMacroSetupFile) or os.path.getsize(self.texMacroSetupFile) == 0 :
+            print 'file not found!'
 
         self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")
         return True
@@ -84,6 +104,7 @@ class UsfmTex (Auxiliary) :
         processing this USFM text.'''
         
         self.project.writeToLog('LOG', "Setting up this project to use the [" + macros + "] TeX macros.")     
+        self.initialized = True
         return True
        
         

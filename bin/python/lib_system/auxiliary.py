@@ -76,6 +76,8 @@ class Auxiliary (object) :
         '''Get the files for this auxilary according to the init specs. of the
         component.'''
 
+        # This is done to ensure the folders are in place before the files try to come.
+        # This way only this function needs to be called.
         self.initAuxFolders(atype, initInfo)
         
         files = initInfo['Files'].keys()
