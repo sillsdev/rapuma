@@ -83,6 +83,9 @@ class Component (object) :
         '''Get the files for this project according to the init specs. of the
         component.'''
 
+        # Before we init the files we need to do the folders
+        self.initCompFolders(initInfo)
+
         fls = initInfo['Files'].__iter__()
         for fs in fls :
             fileName = ''; parentFolder = ''
@@ -148,40 +151,42 @@ class Component (object) :
                         terminal('Created folder: ' + folderName)
 
 
-    def initCompShared (self, initInfo) :
-        '''Get the shared resources for this project according to the init
-        specs. of the component.'''
-        
-        try :
-            fldrs = initInfo['SharedResources'].__iter__()
-            for f in fldrs :
-                folderName = ''; parentFolder = ''
-                fGroup = initInfo['SharedResources'][f]
-                for key, value in fGroup.iteritems() :
-                    if key == 'name' :
-                        folderName = value
-                    elif key == 'location' :
-                        if value != 'None' :
-                            parentFolder = value
 
-                    elif key == 'shareLibPath' :
-                        sharePath = value
-                    else :
-                        pass
+# Depricated
+#    def initCompShared (self, initInfo) :
+#        '''Get the shared resources for this project according to the init
+#        specs. of the component.'''
+#        
+#        try :
+#            fldrs = initInfo['SharedResources'].__iter__()
+#            for f in fldrs :
+#                folderName = ''; parentFolder = ''
+#                fGroup = initInfo['SharedResources'][f]
+#                for key, value in fGroup.iteritems() :
+#                    if key == 'name' :
+#                        folderName = value
+#                    elif key == 'location' :
+#                        if value != 'None' :
+#                            parentFolder = value
 
-                if parentFolder :
-                    thisFolder = os.path.join(self.project.projHome, parentFolder, folderName)
-                else :
-                    thisFolder = os.path.join(self.project.projHome, folderName)
+#                    elif key == 'shareLibPath' :
+#                        sharePath = value
+#                    else :
+#                        pass
 
-                # Create a source folder name
-                sourceFolder = os.path.join(self.project.rpmHome, 'resources', 'lib_share', sharePath)
-                # Create and copy the source stuff to the project
-                if not os.path.isdir(thisFolder) :
-                    if os.path.isdir(sourceFolder) :
-                        shutil.copytree(sourceFolder, thisFolder)
-        except :
-            pass
+#                if parentFolder :
+#                    thisFolder = os.path.join(self.project.projHome, parentFolder, folderName)
+#                else :
+#                    thisFolder = os.path.join(self.project.projHome, folderName)
+
+#                # Create a source folder name
+#                sourceFolder = os.path.join(self.project.rpmHome, 'resources', 'lib_share', sharePath)
+#                # Create and copy the source stuff to the project
+#                if not os.path.isdir(thisFolder) :
+#                    if os.path.isdir(sourceFolder) :
+#                        shutil.copytree(sourceFolder, thisFolder)
+#        except :
+#            pass
 
 
 

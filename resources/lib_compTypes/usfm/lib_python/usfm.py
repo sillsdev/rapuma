@@ -68,24 +68,21 @@ class Usfm (Component) :
         # Pull the information from the project init xml file
         initInfo = getCompInitSettings(self.project.userHome, self.project.rpmHome, self.type)
 
-        # Create all necessary (empty) folders
-        self.initCompFolders(initInfo)
-        # Bring in any know files for this component
+        # Bring in any know files for this component. This will also
+        # create necessary folders for this component.
         self.initCompFiles(initInfo)
 
         self.project.writeToLog('LOG', "Initialized [" + self.cid + "] for the UsfmTex auxiliary component type.")     
         return True   
 
-        
+
     def render (self) :
         '''Render a single project component.  Before starting, make sure
         everything necessary has been initialized.'''
 
         self.project.writeToLog('MSG', 'Rendered: [' + self.cid + ']', 'project.renderComponent()')
-        
+
         return True
 
 
-        
-        
 

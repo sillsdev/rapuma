@@ -71,6 +71,8 @@ class UsfmTex (Auxiliary) :
         if self.initialized :
             return True
 
+        print dir(self)
+
         # Start with default settings
         self._initConfig = getAuxInitSettings(self.project.userHome, self.project.rpmHome, self.type)
         # Set values for this method
