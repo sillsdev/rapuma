@@ -13,7 +13,8 @@
 # project log in each respective project.
 
 # History:
-# 20111202 - djd - Start over with manager-centric model
+# 20110823 - djd - Started with intial file from TIPE project
+# 20111201 - djd - Begin changing to project management model
 
 
 ###############################################################################
@@ -50,10 +51,9 @@ rpmConfig = os.path.join(rpmHome, 'bin', 'config')
 projHome = os.getcwd()
 
 # Set our paths to application resources
-sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'core'))
-sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'manager'))
-sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'project'))
-sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'component'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python', 'lib_system'))
+sys.path.insert(0, os.path.join(rpmHome, 'bin', 'python', 'lib_managers'))
 
 # Load standard Python modules
 import codecs, shutil, operator
@@ -85,9 +85,6 @@ uConf = UserConfig(userHome, rpmHome)
 # Create basic system path/file names
 projConfFile = os.path.join(projHome, '.project.conf')
 projType = None
-
-# Read the project or pass through and quite
-
 
 # Now create a fresh projConfig object
 if os.path.isfile(projConfFile) :

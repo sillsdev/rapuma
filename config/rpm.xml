@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!--
+File: rpm.xml
+Description:
+This is the main RPM system description file.  This contains data to describe
+various aspects of the type system.  However, it does not describe projects or
+components.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>System</name>
+        <sectionID>System</sectionID>
+        <description>These are configurable system settings. Change them only if you know what you are doing!</description>
+        <setting>
+            <name>Debugging</name>
+            <key>debugging</key>
+            <description>If set to true, reporting will be verbose and all events will be recorded to the log file for the purpose of debugging errors.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>User Name</name>
+            <key>userName</key>
+            <description>The name of the person using this system.</description>
+            <type>string</type>
+            <value>Default User</value>
+        </setting>
+        <setting>
+            <name>Interface Language ID Code</name>
+            <key>langID</key>
+            <description>The language ID code that sets the language to be used in the user interface.</description>
+            <type>string</type>
+            <value>ENG</value>
+        </setting>
+        <setting>
+            <name>Log File Length</name>
+            <key>projLogLineLimit</key>
+            <description>This is the maximum number of lines that will be permited to be in the log file. This is necessary because RPM records all events in one log file.</description>
+            <type>integer</type>
+            <value>1000</value>
+        </setting>
+        <setting>
+            <name>System Initialization Date</name>
+            <key>initDate</key>
+            <description>Time stamp of when the system was installed.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
+    <section>
+        <name>Resources</name>
+        <sectionID>Resources</sectionID>
+        <description>This section contains the location of addition resources the user may wish to access. Note resources in these specified locations will override any in the system of the same name.</description>
+        <setting>
+            <name>Fonts Collection Path</name>
+            <key>fonts</key>
+            <description>The full path to where fonts are kept on this system that the user would like to access. Note that there must be a valid XML description file for each font family.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Illustrations Collection Path</name>
+            <key>illustrations</key>
+            <description>The full path to where illustrations are kept on this system that the user would like to access. Note that there must be a valid XML description file for each illustration collection.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
+</root>
+
