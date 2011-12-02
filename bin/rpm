@@ -64,7 +64,6 @@ from configobj import ConfigObj
 from tools import *
 from user_config import UserConfig
 from sys_command import Command, commands
-from project import Project
 
 # Catch any incoming commands here
 command = ""
@@ -84,41 +83,20 @@ uConf = UserConfig(userHome, rpmHome)
 
 # Create basic system path/file names
 projConfFile = os.path.join(projHome, '.project.conf')
+projLogFile = os.path.join(projHome, '.rpm.log')
+projErrorLogFile = os.path.join(projHome, 'error.log')
 projType = None
 
-# Read the project or pass through and quite
-
-
-# Now create a fresh projConfig object
+# Read the project.conf to start the process or pass through and quite
 if os.path.isfile(projConfFile) :
     # Create a fresh merged version of the projConfig
-    projConfig  = mergeProjConfig(ConfigObj(projConfFile), projHome, userHome, rpmHome)
-
-    # If we successfuly created a projConfig, the we will load in the type info.
-    # For a project conf file to be written out it must be a valid project type
-    # so this next part should not fail.
-    if projConfig :
-        projectType         = projConfig['ProjectInfo']['projectType']
-        from proj_command import *
-    else :
-        terminal('ERROR: Failed to load: ' + projConfFile)
-        # die here
-
-    # Fold in the projConfig into the aProject object
-    aProject = getattr('FakeName', projectType[0].upper() + projectType[1:], Project)(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
-
-    # Record the project if needed
-    try :
-        pt = uConf.userConfig['Projects']
-    except :
-        recordProject(uConf.userConfFile, projConfig, projHome)
-        #aProject.writeOutUserConfFile = True
-    
-else :
-    # If there is no project, we still need a
-    # dummy projConfig object so we'll just make one up.
-    projConfig  = ConfigObj()
-    aProject    = Project(projConfig, uConf.userConfig, projHome, userHome, rpmHome)
+    projConfig  = ConfigObj(projConfFile)
+    projectType = projConfig['ProjectInfo']['projectType']
+    buildConfSection(uConf.userConfig, 'Projects')
+    recordProject(uConf.userConfFile, projConfig, projHome)
+# FIXME
+    # Init the project here
+    aProject = xxxx(???)
 
 
 ###############################################################################
@@ -127,17 +105,17 @@ else :
 
 # Do some cleanup like getting rid of the last sessions error log file.
 try :
-    if os.path.isfile(aProject.projErrorLogFile) :
-        os.remove(aProject.projErrorLogFile)
+    if os.path.isfile(projErrorLogFile) :
+        os.remove(projErrorLogFile)
 except :
     pass
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
-terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
-if os.path.isfile(aProject.projConfFile) :
-    terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
-    terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
+terminal('\t\tCurrent User: ' + uConf.userConfig['System']['userName'])
+if os.path.isfile(projConfFile) :
+    terminal('\t\tProject: ' + projConfig['ProjectInfo']['projectName'] + ' (' + projConfig['ProjectInfo']['projectIDCode'] + ')')
+    terminal('\t\tProject Type: ' + projConfig['ProjectInfo']['projectType'])
     if command :
         terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
     else :
@@ -177,7 +155,7 @@ if command :
 
 # Now write out the config files if needed
 if aProject.writeOutProjConfFile :
-    if not writeConfFile(aProject._projConfig, '.project.conf', projHome) :
+    if not writeConfFile(projConf, '.project.conf', projHome) :
         terminal('\nERROR: Could not write to: project config file')
 
 if aProject.writeOutUserConfFile :

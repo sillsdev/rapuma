@@ -11,7 +11,7 @@
 # many other scripts in the system.
 
 # History:
-# 20110823 - djd - Started with intial file from RPM project
+# 20111202 - djd - Start over with manager-centric model
 
 
 ###############################################################################
