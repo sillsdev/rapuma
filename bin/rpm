@@ -64,6 +64,7 @@ from configobj import ConfigObj
 from tools import *
 from user_config import UserConfig
 from sys_command import Command, commands
+from project import *
 
 # Catch any incoming commands here
 command = ""
@@ -82,10 +83,14 @@ if len(sys.argv) > 1 :
 uConf = UserConfig(userHome, rpmHome)
 
 # Create basic system path/file names
-projConfFile = os.path.join(projHome, '.project.conf')
+projConfFile = os.path.join(projHome, '.config' 'project.conf')
 projLogFile = os.path.join(projHome, '.rpm.log')
 projErrorLogFile = os.path.join(projHome, 'error.log')
 projType = None
+
+# Instantiate Project class
+aProject = Project(uConf.userConfig, projHome, userHome, rpmHome)
+
 
 # Read the project.conf to start the process or pass through and quite
 if os.path.isfile(projConfFile) :
@@ -96,7 +101,7 @@ if os.path.isfile(projConfFile) :
     recordProject(uConf.userConfFile, projConfig, projHome)
 # FIXME
     # Init the project here
-    aProject = xxxx(???)
+#    aProject = Project(projConfig, userConfig, projHome, userHome, rpmHome)
 
 
 ###############################################################################
@@ -129,24 +134,26 @@ else :
 ##################### Prepare and Process RPM Commands #######################
 ###############################################################################
 
+aProject.makeProject()
+
 # Run the command and pass along the aProject object
-if command :
-    if command in commands :
-        # To process there should be one or more options
-        if len(opts) >= 1 :
-            try :
-                commands[command].run(opts, aProject, uConf.userConfig)
-            except SyntaxError, err:
-                terminal("\n" + str(err) + "\n")
-                opts.insert(0, command)
-                commands['help'].run(opts, aProject, uConf.userConfig)
-        else :
-            # If we seem to be short on options then we will just display the help
-            # for this command
-                terminal('\nHelp for the \"' + command + '\" command:\n')
-                commands['help'].run(opts, aProject, uConf.userConfig)
-    else :
-        terminal('\nERROR: This command does not exist: ' + command)
+#if command :
+#    if command in commands :
+#        # To process there should be one or more options
+#        if len(opts) >= 1 :
+#            try :
+#                commands[command].run(opts, aProject, uConf.userConfig)
+#            except SyntaxError, err:
+#                terminal("\n" + str(err) + "\n")
+#                opts.insert(0, command)
+#                commands['help'].run(opts, aProject, uConf.userConfig)
+#        else :
+#            # If we seem to be short on options then we will just display the help
+#            # for this command
+#                terminal('\nHelp for the \"' + command + '\" command:\n')
+#                commands['help'].run(opts, aProject, uConf.userConfig)
+#    else :
+#        terminal('\nERROR: This command does not exist: ' + command)
 
 
 ###############################################################################
@@ -154,19 +161,19 @@ if command :
 ###############################################################################
 
 # Now write out the config files if needed
-if aProject.writeOutProjConfFile :
-    if not writeConfFile(projConf, '.project.conf', projHome) :
-        terminal('\nERROR: Could not write to: project config file')
+#if aProject.writeOutProjConfFile :
+#    if not writeConfFile(projConf, '.project.conf', projHome) :
+#        terminal('\nERROR: Could not write to: project config file')
 
-if aProject.writeOutUserConfFile :
-    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
-        terminal('\nERROR: Could not write to: user config file')
+#if aProject.writeOutUserConfFile :
+#    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
+#        terminal('\nERROR: Could not write to: user config file')
 
-# Now trim the log file if it is needed
-if isConfSection(aProject._projConfig, 'Project') :
-    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
+## Now trim the log file if it is needed
+#if isConfSection(aProject._projConfig, 'Project') :
+#    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
-## In case there are any Canadians using this, politely say good bye
-terminal('\n\t\tThank you, please come again!\n')
+### In case there are any Canadians using this, politely say good bye
+#terminal('\n\t\tThank you, please come again!\n')
 
 

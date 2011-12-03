@@ -15,34 +15,21 @@ Todo:
 
 <root>
     <section>
-        <name>Files</name>
-        <sectionID>Files</sectionID>
-        <description>This section contains the names of all the USFM component files the RPM system will need to use in this projects.</description>
-        <section>
-            <name>Project Configuration File</name>
-            <sectionID>projConf</sectionID>
-            <description>The configuration file for this project.</description>
-            <setting>
-                <name>Name</name>
-                <key>name</key>
-                <description>The name of this file.</description>
-                <type>string</type>
-                <version>False</version>
-                <value>.project.conf</value>
-            </setting>
-            <setting>
-                <name>Version Control</name>
-                <key>versionControl</key>
-                <description>Is this file under version control?</description>
-                <type>boolean</type>
-                <value>True</value>
-            </setting>
-        </section>
-    </section>
-    <section>
         <name>Folders</name>
         <sectionID>Folders</sectionID>
         <description>This section contains the settings for all the folders needed for usfm component processing.</description>
+        <section>
+            <name>Project Configuration Folder</name>
+            <sectionID>ConfigFolder</sectionID>
+            <description>The project configuration folder.</description>
+            <setting>
+                <name>Name</name>
+                <key>name</key>
+                <description>The folder where all project configuration files are kept.</description>
+                <type>string</type>
+                <value>.config</value>
+            </setting>
+        </section>
         <section>
             <name>Project Process Folder</name>
             <sectionID>ProcessFolder</sectionID>
