@@ -35,14 +35,41 @@ from tools import *
 class Project (object) :
 
     def __init__(self, userConfig, projHome, userHome, rpmHome) :
+        '''Instantiate this class.'''
 
-        print 'Hi!'
-        pass
-
+        self._userConfig    = userConfig
+        self._projConfig    = {}
+        self.projHome       = projHome
+        self.userHome       = userHome
+        self.rpmHome        = rpmHome
+        self.projectType    = None
+        self.projConfFile   = os.path.join(projHome, 'config', 'project.conf')
+        self.projLogFile = os.path.join(projHome, '.rpm.log')
+        self.projErrorLogFile = os.path.join(projHome, 'error.log')
+        self.writeOutProjConfFile = False
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
+
+
+    def initProject (self, projConfig) :
+        '''Initialize a project.'''
+
+        # Create a fresh merged version of the projConfig
+        self._projConfig  = ConfigObj(self.projConfFile)
+        self.projectType = self._projConfig['ProjectInfo']['projectType']
+        buildConfSection(self._userConfig, 'Projects')
+        recordProject(self._userConfFile, self._projConfig, self.projHome)
+
+        # Do some cleanup like getting rid of the last sessions error log file.
+        try :
+            if os.path.isfile(projErrorLogFile) :
+                os.remove(projErrorLogFile)
+        except :
+            pass
+
+
 
 
     def makeProject (self) :

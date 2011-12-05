@@ -31,10 +31,12 @@ class UserConfig (object) :
     def __init__(self, userHome, rpmHome) :
         '''Intitate the whole class'''
         
-        self.userHome       = userHome
-        self.rpmHome       = rpmHome
-        self.userConfFile   = os.path.join(userHome, 'rpm.conf')
-        self.userResources  = os.path.join(userHome, 'resources')
+        self.userHome               = userHome
+        self.rpmHome                = rpmHome
+        self.userConfFile           = os.path.join(userHome, 'rpm.conf')
+        self._defaultConfig         = {}
+        self._userConfig            = {}
+        self.writeOutUserConfFile   = False
         self.createUserConfig()
 
 
@@ -51,29 +53,31 @@ class UserConfig (object) :
         else :
             raise IOError, "Can't open " + rpmXML
 
-        # Now get the settings from the users rpm.conf file
+        # Now make the users local rpm.conf file if it isn't there
         if not os.path.exists(self.userConfFile) :
             self.initUserHome()
 
-        # Load the conf file into an object
-        rpmConfig = ConfigObj(self.userConfFile)
+        # Load the RPM conf file into an object
+        self._userConfig = ConfigObj(self.userConfFile)
 
         # Look for any projects that might be registered and copy the data out
         try :
-            rpmProjs = rpmConfig['Projects']
+            userProjs = self._userConfig['Projects']
         except :
-            rpmProjs = None
+            userProjs = None
 
         # Create a new conf object based on all the XML default settings
         # Then override them with any exsiting user settings.
-        self.userConfig = ConfigObj(sysXmlConfig.dict()).override(rpmConfig)
+        newConfig = ConfigObj(sysXmlConfig.dict()).override(self._userConfig)
 
         # Put back the copied data of any project information that we might have
         # lost from the XML/conf file merging.
-        if rpmProjs :
-            self.userConfig['Projects'] = rpmProjs
+        if userProjs :
+            newConfig['Projects'] = userProjs
             
-        return self.userConfig
+        self._userConfig = newConfig
+        self._userConfig.filename = self.userConfFile
+        self._userConfig.write()
 
 
     def initUserHome (self) :
@@ -83,29 +87,14 @@ class UserConfig (object) :
         if not os.path.isdir(self.userHome) :
             os.mkdir(self.userHome)
 
-        if not os.path.isdir(self.userResources) :
-            os.mkdir(self.userResources)
-
         # Make the default global rpm.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
             date_time = tStamp()
             rpm = ConfigObj()
             rpm.filename = self.userConfFile
             rpm['System'] = {}
-            rpm['Folders'] = {}
             rpm['System']['userName'] = 'Default User'
             rpm['System']['initDate'] = date_time
-            # Folder list
-            folders = ['auxiliaryTypes', 'compTypes', 'projTypes', 'share']
-            # System folders
-            for f in folders :
-                rpm['Folders']['rpm' + f] = os.path.join(self.rpmHome, 'resources', 'lib_' + f)
-            # User (home) folders
-            for f in folders :
-                thisFolder = os.path.join(self.userHome, 'resources', 'lib_' + f)
-                rpm['Folders']['user' + f] = thisFolder
-                if not os.path.isdir(thisFolder) :
-                    os.mkdir(thisFolder)
 
             # Write out the user config file
             rpm.write()

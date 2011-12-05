@@ -79,48 +79,27 @@ if len(sys.argv) > 1 :
 ######################## Load User and Project Info ###########################
 ###############################################################################
 
-# Get all our user config info and methods
+# Instantiate User and Project classes
 uConf = UserConfig(userHome, rpmHome)
-
-# Create basic system path/file names
-projConfFile = os.path.join(projHome, '.config' 'project.conf')
-projLogFile = os.path.join(projHome, '.rpm.log')
-projErrorLogFile = os.path.join(projHome, 'error.log')
-projType = None
-
-# Instantiate Project class
-aProject = Project(uConf.userConfig, projHome, userHome, rpmHome)
+aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 
 
-# Read the project.conf to start the process or pass through and quite
-if os.path.isfile(projConfFile) :
-    # Create a fresh merged version of the projConfig
-    projConfig  = ConfigObj(projConfFile)
-    projectType = projConfig['ProjectInfo']['projectType']
-    buildConfSection(uConf.userConfig, 'Projects')
-    recordProject(uConf.userConfFile, projConfig, projHome)
-# FIXME
-    # Init the project here
-#    aProject = Project(projConfig, userConfig, projHome, userHome, rpmHome)
+# Look for the project.conf and init the project if it is there.
+# Otherwise we will just pass through and quite
+if os.path.isfile(os.path.join(projHome, 'config', 'project.conf')) :
+    aProject.initProject()
 
 
 ###############################################################################
 ############################### Terminal Startup ##############################
 ###############################################################################
 
-# Do some cleanup like getting rid of the last sessions error log file.
-try :
-    if os.path.isfile(projErrorLogFile) :
-        os.remove(projErrorLogFile)
-except :
-    pass
-
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
-terminal('\t\tCurrent User: ' + uConf.userConfig['System']['userName'])
-if os.path.isfile(projConfFile) :
-    terminal('\t\tProject: ' + projConfig['ProjectInfo']['projectName'] + ' (' + projConfig['ProjectInfo']['projectIDCode'] + ')')
-    terminal('\t\tProject Type: ' + projConfig['ProjectInfo']['projectType'])
+terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
+if os.path.isfile(aProject.projConfFile) :
+    terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
+    terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
     if command :
         terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
     else :
@@ -134,26 +113,24 @@ else :
 ##################### Prepare and Process RPM Commands #######################
 ###############################################################################
 
-aProject.makeProject()
-
 # Run the command and pass along the aProject object
-#if command :
-#    if command in commands :
-#        # To process there should be one or more options
-#        if len(opts) >= 1 :
-#            try :
-#                commands[command].run(opts, aProject, uConf.userConfig)
-#            except SyntaxError, err:
-#                terminal("\n" + str(err) + "\n")
-#                opts.insert(0, command)
-#                commands['help'].run(opts, aProject, uConf.userConfig)
-#        else :
-#            # If we seem to be short on options then we will just display the help
-#            # for this command
-#                terminal('\nHelp for the \"' + command + '\" command:\n')
-#                commands['help'].run(opts, aProject, uConf.userConfig)
-#    else :
-#        terminal('\nERROR: This command does not exist: ' + command)
+if command :
+    if command in commands :
+        # To process there should be one or more options
+        if len(opts) >= 1 :
+            try :
+                commands[command].run(opts, aProject, uConf.userConfig)
+            except SyntaxError, err:
+                terminal("\n" + str(err) + "\n")
+                opts.insert(0, command)
+                commands['help'].run(opts, aProject, uConf.userConfig)
+        else :
+            # If we seem to be short on options then we will just display the help
+            # for this command
+                terminal('\nHelp for the \"' + command + '\" command:\n')
+                commands['help'].run(opts, aProject, uConf.userConfig)
+    else :
+        terminal('\nERROR: This command does not exist: ' + command)
 
 
 ###############################################################################
@@ -161,19 +138,19 @@ aProject.makeProject()
 ###############################################################################
 
 # Now write out the config files if needed
-#if aProject.writeOutProjConfFile :
-#    if not writeConfFile(projConf, '.project.conf', projHome) :
-#        terminal('\nERROR: Could not write to: project config file')
+if aProject.writeOutProjConfFile :
+    if not writeConfFile(projConf, '.project.conf', projHome) :
+        terminal('\nERROR: Could not write to: project config file')
 
-#if aProject.writeOutUserConfFile :
-#    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
-#        terminal('\nERROR: Could not write to: user config file')
+if uConf.writeOutUserConfFile :
+    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
+        terminal('\nERROR: Could not write to: user config file')
 
-## Now trim the log file if it is needed
-#if isConfSection(aProject._projConfig, 'Project') :
-#    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
+# Now trim the log file if it is needed
+if isConfSection(aProject._projConfig, 'Project') :
+    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
-### In case there are any Canadians using this, politely say good bye
-#terminal('\n\t\tThank you, please come again!\n')
+## In case there are any Canadians using this, politely say good bye
+terminal('\n\t\tThank you, please come again!\n')
 
 
