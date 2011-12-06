@@ -76,7 +76,7 @@ class Project (object) :
                 os.remove(projErrorLogFile)
         except :
             pass
-            
+
 
     def makeProject (self, ptype, pname, pid, pdir='') :
         '''Create a new publishing project.'''
@@ -111,10 +111,9 @@ class Project (object) :
             return False
 
         # If we made it to this point we need to check to see if the project
-        # folder exists, if it doesn't make.  We can create only one level deep
-        # though.'
-        if not os.path.isdir(pdir) :
-            os.mkdir(pdir)
+        # folder exists, if it doesn't make it.
+        if not os.path.exists(pdir) :
+            os.mkdirs(pdir)
 
         # Create a new version of the project config file
         self.writeOutProjConfFile = True
@@ -127,10 +126,6 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectCreateDate']      = date
         self._projConfig['ProjectInfo']['projectIDCode']          = pid
         recordProject(self._userConfig, self._projConfig, pdir)
-
-        # Initialize the project now
-        self._initInfo = getXMLSettings(os.path.join(self.rpmConfigFolder, ptype + '_init.xml'))
-        self.initProjFiles(ptype, self._initInfo)
 
         # Finally write out the project config file
         if not writeConfFile(self._projConfig, self.projConfFile) :
@@ -179,47 +174,6 @@ class Project (object) :
         '''Restore a project in the current folder'''
 
         pass
-
-
-    def initProjFiles (self, ptype, initInfo) :
-        '''Get the files for this auxilary according to the init specs. of the
-        component.'''
-
-        # This is done to ensure the folders are in place before the files try to come.
-        # This way only this function needs to be called.
-        self.initProjFolders(initInfo)
-# FIXME: This is all broken below
-#        files = initInfo['Files'].keys()
-#        for f in files :
-#            fileName = initInfo['Files'][f]['name']
-#                    
-#            thisFolder = self.getAuxFileFolderPath(folder, initInfo)
-#            thisFile = os.path.join(thisFolder, fileName)
-
-#            # Create source file name
-#            sourceFile = os.path.join(self.rpmHome, 'resources', 'lib_auxiliaryTypes', ptype, 'lib_files', fileName)
-#            # Make the file if it is not already there
-#            if not os.path.isfile(thisFile) :
-#                if os.path.isfile(sourceFile) :
-#                    shutil.copy(sourceFile, thisFile)
-#                else :
-#                    open(thisFile, 'w').close()
-#                    if self.project.debugging == 'True' :
-#                        terminal('Created file: ' + thisFile)
-
-
-    def initProjFolders (self, initInfo) :
-        '''Get the folders for this auxiliary according to the init specs. of
-        the component.'''
-
-        folders = initInfo['Folders'].keys()
-        for f in folders :
-            thisFolder = initInfo['Folders'][f]['name']
-
-            # Create the folders
-            if not os.path.isdir(thisFolder) :
-                os.mkdir(thisFolder)
-                self.writeToLog('LOG', 'Created: ' + thisFolder, 'auxiliary.initAuxFolders()')
 
 
 ###############################################################################

@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: book.xml
+Description:
+This is a project or Document type description for a book publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Project Information</name>
+        <sectionID>ProjectInfo</sectionID>
+        <description>This section contains general project info for this project.</description>
+        <setting>
+            <name>Project Type</name>
+            <key>projectType</key>
+            <description>This project type name.</description>
+            <type>string</type>
+            <value>book</value>
+        </setting>
+        <setting>
+            <name>Project Name</name>
+            <key>projectName</key>
+            <description>The name of the current project the system is processing.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Project ID Code</name>
+            <key>projectIDCode</key>
+            <description>The current project's ID code.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Project Creation Date</name>
+            <key>projectCreateDate</key>
+            <description>The date this project was created.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Component List</name>
+            <key>componentList</key>
+            <description>A list of components installed in this project.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+    </section>
+</root>
+

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: render.xml
+Description:
+This is a project or Document type description for a book publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Project Information</name>
+        <sectionID>ProjectInfo</sectionID>
+        <description>This section contains general project info for this project.</description>
+        <setting>
+            <name>Project Component Binding Order List</name>
+            <key>projectComponentBindingOrder</key>
+            <description>A list of components that are used in this project in the order they are to be found in the publication.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+    </section>
+</root>
+
