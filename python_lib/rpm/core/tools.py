@@ -51,18 +51,16 @@ def buildConfSection (confObj, section) :
         return True
 
 
-def isRecordedProject (userConfigFile, pid) :
+def isRecordedProject (userConfig, pid) :
     '''Check to see if this project is recorded in the user's config'''
 
-    if os.path.isfile(userConfigFile) :
-        cf = ConfigObj(userConfigFile)
-        try :
-            return pid in cf['Projects']
-        except :
-            pass
+    try :
+        return pid in userConfig['Projects']
+    except :
+        pass
 
 
-def recordProject (userConfigFile, projConfig, projHome) :
+def recordProject (userConfig, projConfig, projHome) :
     '''Add information about this project to the user's rpm.conf located in
     the home config folder.'''
 
@@ -70,29 +68,26 @@ def recordProject (userConfigFile, projConfig, projHome) :
     pname   = projConfig['ProjectInfo']['projectName']
     ptype   = projConfig['ProjectInfo']['projectType']
     date    = projConfig['ProjectInfo']['projectCreateDate']
-    if not isRecordedProject(userConfigFile, pid) :
+    if not isRecordedProject(userConfig, pid) :
 
-        if os.path.isfile(userConfigFile) :
-            cf = ConfigObj(userConfigFile)
+        # FIXME: Before we create a project entry we want to be sure that
+        # the projects section already exsists.  There might be a better way
+        # of doing this.
+        try :
+            userConfig['Projects'][pid] = {}
+        except :
+            userConfig['Projects'] = {}
+            userConfig['Projects'][pid] = {}
 
-            # FIXME: Before we create a project entry we want to be sure that
-            # the projects section already exsists.  There might be a better way
-            # of doing this.
-            try :
-                cf['Projects'][pid] = {}
-            except :
-                cf['Projects'] = {}
-                cf['Projects'][pid] = {}
-
-            # Now add the project data
-            cf['Projects'][pid]['projectName']          = pname
-            cf['Projects'][pid]['projectType']          = ptype
-            cf['Projects'][pid]['projectPath']          = projHome
-            cf['Projects'][pid]['projectCreateDate']    = date
-            cf.write()
-            return True
-        else :
-            return False
+        # Now add the project data
+        userConfig['Projects'][pid]['projectName']          = pname
+        userConfig['Projects'][pid]['projectType']          = ptype
+        userConfig['Projects'][pid]['projectPath']          = projHome
+        userConfig['Projects'][pid]['projectCreateDate']    = date
+        userConfig.write()
+        return True
+    else :
+        return False
 
 
 def mergeProjConfig (projConfig, projHome, userHome, rpmHome) :
@@ -149,17 +144,12 @@ def getXMLOverrideSettings (rpm, user) :
         return res
         
 
-def getProjSettings (userHome, rpmHome, projType) :
-    '''Get the default settings out of a project type xml description file.'''
+#def getProjSettings (userHome, rpmHome, projType) :
+#    '''Get the default settings out of a project type xml description file.'''
 
-    rpmProjXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
-    userProjXML     = os.path.join(userHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
+#    rpmProjXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
 
-    res = getXMLSettings(rpmProjXML)
-    if os.path.isfile(userProjXML) :
-        return overrideSettings(res, userProjXML)
-    else :
-        return res
+#    return getXMLSettings(rpmProjXML)
 
 
 def getCompSettings (userHome, rpmHome, compType) :
@@ -205,14 +195,19 @@ def overrideSettings (settings, overrideXML) :
     return settings
 
 
-def writeConfFile (configStuff, fileName, folderPath) :
+def writeConfFile (configStuff, configFileAndPath) :
     '''Generic routin to write out to, or create a config file.'''
 
-    # Create the file if needed but remember that we are not
-    # creating the folder it goes in.
-    configFile = os.path.join(folderPath, fileName)
-    if not os.path.isfile(configFile) or os.path.getsize(configFile) == 0 :
-        writeObject = codecs.open(configFile, "w", encoding='utf_8')
+    # Parse file and path
+    (folderPath, configFile) = os.path.split(configFileAndPath)
+
+    # Build the folder path if needed
+    if not os.path.exists(folderPath) :
+        os.makedirs(folderPath)
+
+    # Create the file if needed
+    if not os.path.isfile(configFileAndPath) or os.path.getsize(configFileAndPath) == 0 :
+        writeObject = codecs.open(configFileAndPath, "w", encoding='utf_8')
         writeObject.close()
 
     # To track when a conf file was saved as well as other general
@@ -221,13 +216,14 @@ def writeConfFile (configStuff, fileName, folderPath) :
     buildConfSection(configStuff, 'GeneralSettings')
     try :
         configStuff['GeneralSettings']['lastEdit'] = tStamp()
-        configStuff.filename = configFile
+        configStuff.filename = configFileAndPath
         configStuff.write()
         return True
 
     except :
         terminal('\nERROR: Could not write to: ' + fileName)
         return False
+
 
 
 def xml_to_section (fname) :

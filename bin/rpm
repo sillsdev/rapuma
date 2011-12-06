@@ -86,8 +86,8 @@ aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 
 # Look for the project.conf and init the project if it is there.
 # Otherwise we will just pass through and quite
-if os.path.isfile(os.path.join(projHome, 'config', 'project.conf')) :
-    aProject.initProject()
+if os.path.isfile(aProject.projConfFile) :
+    aProject.initProject(aProject._projConfig)
 
 
 ###############################################################################
@@ -119,16 +119,16 @@ if command :
         # To process there should be one or more options
         if len(opts) >= 1 :
             try :
-                commands[command].run(opts, aProject, uConf.userConfig)
+                commands[command].run(opts, aProject, uConf._userConfig)
             except SyntaxError, err:
                 terminal("\n" + str(err) + "\n")
                 opts.insert(0, command)
-                commands['help'].run(opts, aProject, uConf.userConfig)
+                commands['help'].run(opts, aProject, uConf._userConfig)
         else :
             # If we seem to be short on options then we will just display the help
             # for this command
                 terminal('\nHelp for the \"' + command + '\" command:\n')
-                commands['help'].run(opts, aProject, uConf.userConfig)
+                commands['help'].run(opts, aProject, uConf._userConfig)
     else :
         terminal('\nERROR: This command does not exist: ' + command)
 
@@ -139,11 +139,11 @@ if command :
 
 # Now write out the config files if needed
 if aProject.writeOutProjConfFile :
-    if not writeConfFile(projConf, '.project.conf', projHome) :
+    if not writeConfFile(aProject._projConfig, 'project.conf', aProject.projConfFolder) :
         terminal('\nERROR: Could not write to: project config file')
 
 if uConf.writeOutUserConfFile :
-    if not writeConfFile(aProject._userConfig, 'rpm.conf', userHome) :
+    if not writeConfFile(uConf._userConfig, 'rpm.conf', uConf.userHome) :
         terminal('\nERROR: Could not write to: user config file')
 
 # Now trim the log file if it is needed
