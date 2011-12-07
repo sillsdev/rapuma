@@ -90,16 +90,17 @@ def recordProject (userConfig, projConfig, projHome) :
         return False
 
 
-def mergeProjConfig (projConfig, projHome, userHome, rpmHome) :
-    '''Retrun a merge project config object from a valid project config file'''
+def mergeConfig (projConfig, rpmConfigFolder) :
+    '''Generic function to return a merged config object
+    from a valid XML config file'''
 
     # Find out what kind of project this is
     projType = projConfig['ProjectInfo']['projectType']
     # Load in the project type XML default settings
-    projXmlConfig = getProjSettings(userHome, rpmHome, projType)
+    xmlConfig = getXMLSettings(os.path.join(rpmConfigFolder, projType + '.xml'))
     # Create a new conf object based on all the XML default settings
     # Then override them with any exsiting project settings.
-    newProjConfig = ConfigObj(projXmlConfig.dict()).override(projConfig)
+    newProjConfig = ConfigObj(xmlConfig.dict()).override(projConfig)
     for s,v in projConfig.items() :
         if s not in newProjConfig :
             newProjConfig[s] = v
@@ -107,62 +108,37 @@ def mergeProjConfig (projConfig, projHome, userHome, rpmHome) :
     return newProjConfig
 
 
-def getCompInitSettings (userHome, rpmHome, compType) :
-    '''Get the project initialisation settings from the project type init xml
-    file.  Then, if it exsits, override these settings with the version found in
-    the user area.'''
+#def getXMLOverrideSettings (rpm, user) :
+#    '''Get the XML settings then override them if needed.'''
 
-    rpmCompInitXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
-    userCompInitXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
-    return getXMLOverrideSettings(rpmCompInitXML, userCompInitXML)
-
-
-def getAuxInitSettings (userHome, rpmHome, auxType) :
-    '''Get the project initialisation settings from the project type init xml
-    file.  Then, if it exsits, override these settings with the version found in
-    the user area.'''
-
-    rpmAuxInitXML     = os.path.join(rpmHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
-    userAuxInitXML     = os.path.join(userHome, 'resources', 'lib_auxiliaryTypes', auxType, auxType + '_init.xml')
-    return getXMLOverrideSettings(rpmAuxInitXML, userAuxInitXML)
-    
-
-def getFontInitSettings (userHome, rpmHome, fontFolder) :
-    '''Get the font settings from an XML font settings file.'''
-    
-    rpmFontInitXML     = os.path.join(rpmHome, 'resources', 'lib_share', 'Fonts', fontFolder, fontFolder + '.xml')
-    userFontInitXML     = os.path.join(userHome, 'resources', 'lib_share', 'Fonts', fontFolder, fontFolder + '.xml') 
-    return getXMLOverrideSettings(rpmFontInitXML, userFontInitXML)
-    
-def getXMLOverrideSettings (rpm, user) :
-    '''Get the XML settings then override them if needed.'''
-    
-    res = getXMLSettings(rpm)
-    if os.path.isfile(user) :
-        return overrideSettings(res, user)
-    else :
-        return res
-        
-
-#def getProjSettings (userHome, rpmHome, projType) :
-#    '''Get the default settings out of a project type xml description file.'''
-
-#    rpmProjXML     = os.path.join(rpmHome, 'resources', 'lib_projTypes', projType, projType + '.xml')
-
-#    return getXMLSettings(rpmProjXML)
+#    res = getXMLSettings(rpm)
+#    if os.path.isfile(user) :
+#        return overrideSettings(res, user)
+#    else :
+#        return res
 
 
-def getCompSettings (userHome, rpmHome, compType) :
-    '''Get the default settings out of a component type xml description file.'''
+#def getCompInitSettings (userHome, rpmHome, compType) :
+#    '''Get the project initialisation settings from the project type init xml
+#    file.  Then, if it exsits, override these settings with the version found in
+#    the user area.'''
 
-    rpmCompXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
-    userCompXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
+#    rpmCompInitXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
+#    userCompInitXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
+#    return getXMLOverrideSettings(rpmCompInitXML, userCompInitXML)
 
-    res = getXMLSettings(rpmCompXML)
-    if os.path.isfile(userCompXML) :
-        return overrideSettings(res, userCompXML)
-    else :
-        return res
+
+#def getCompSettings (userHome, rpmHome, compType) :
+#    '''Get the default settings out of a component type xml description file.'''
+
+#    rpmCompXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
+#    userCompXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
+
+#    res = getXMLSettings(rpmCompXML)
+#    if os.path.isfile(userCompXML) :
+#        return overrideSettings(res, userCompXML)
+#    else :
+#        return res
 
 
 def getXMLSettings (xmlFile) :
@@ -176,9 +152,9 @@ def getXMLSettings (xmlFile) :
 
 def overrideSettings (settings, overrideXML) :
     '''Override the settings in an object with another like object.'''
-    
+
     settings = xml_to_section(overrideXML)
-    
+
     return settings
 
 

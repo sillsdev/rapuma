@@ -44,13 +44,34 @@ class Book (Project) :
 
         # Some things this project type needs to know about
         # Valid Component Types: usfm, admin, maps, notes
-        # Project Managers: font, format, style, illustration, hyphenation, render
+        # Project Managers: illustration, hyphenation, render
 
         print "Initializing Book project"
         super(Book, self).initProject()
-        
+
         # Do the Book type initializing here
-        pass
+        self.defaultManagers = ['font', 'format', 'style', 'render']
+        self.optionalManagers = ['illustration', 'hyphenation', 'map']
+
+        # Update the config file if it is needed
+        newConf = mergeConfig(self._projConfig, self.rpmConfigFolder)
+        if newConf != self._projConfig :
+            self._projConfig = newConf
+            self.writeOutProjConfFile = True
+
+        # Load up default managers
+        for manager in self.defaultManagers :
+            module = __import__(manager)
+            self.__class__ = getattr(module, manager[0].upper() + manager[1:])
+            self.initManager()
+
+        # Load any optional managers that are needed
+        for manager in self.optionalManagers :
+# FIXME: This doesn't work right yet. How do we get ConfigObj to return a boolean for better testing?
+            if self._projConfig['ProjectInfo']['use' + manager.capitalize()] == True :
+                module = __import__(manager)
+                self.__class__ = getattr(module, manager[0].upper() + manager[1:])
+                self.initManager()
 
 
     def addNewComponent (self, cid, ctype) :

@@ -67,6 +67,12 @@ class Project (object) :
         pass
 
 
+    def initManager(self) :
+        '''This is a place holder method for the real one that gets loaded
+        with the project type class.'''
+        pass
+
+
     def startProjInit (self, projConfig) :
         '''Initialize a project.'''
 

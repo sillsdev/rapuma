@@ -139,11 +139,11 @@ if command :
 
 # Now write out the config files if needed
 if aProject.writeOutProjConfFile :
-    if not writeConfFile(aProject._projConfig, 'project.conf', aProject.projConfFolder) :
+    if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
         terminal('\nERROR: Could not write to: project config file')
 
 if uConf.writeOutUserConfFile :
-    if not writeConfFile(uConf._userConfig, 'rpm.conf', uConf.userHome) :
+    if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
         terminal('\nERROR: Could not write to: user config file')
 
 # Now trim the log file if it is needed
