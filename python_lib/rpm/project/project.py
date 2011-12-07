@@ -50,18 +50,21 @@ class Project (object) :
         self.configFolderName       = 'config'
         self.projConfFolder         = os.path.join(projHome, self.configFolderName)
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
-        self.projLogFile            = os.path.join(projHome, '.rpm.log')
+        self.projLogFile            = os.path.join(projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(projHome, 'error.log')
         self.userConfFileName       = 'rpm.conf'
         self.userConfFile           = os.path.join(userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
 
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+    def initProject(self) :
+        pass
 
-    def initProject (self, projConfig) :
+    def startProjInit (self, projConfig) :
         '''Initialize a project.'''
 
         # Create a fresh merged version of the projConfig
@@ -76,6 +79,11 @@ class Project (object) :
                 os.remove(projErrorLogFile)
         except :
             pass
+
+        # Initialize the project type
+        m = __import__(self.projectType)
+        self.__class__ = getattr(m, self.projectType[0].upper() + self.projectType[1:])
+        self.initProject()
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :

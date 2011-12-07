@@ -87,7 +87,7 @@ aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 # Look for the project.conf and init the project if it is there.
 # Otherwise we will just pass through and quite
 if os.path.isfile(aProject.projConfFile) :
-    aProject.initProject(aProject._projConfig)
+    aProject.startProjInit(aProject._projConfig)
 
 
 ###############################################################################
