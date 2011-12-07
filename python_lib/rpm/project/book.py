@@ -48,6 +48,8 @@ class Book (Project) :
 
         print "Initializing Book project"
         super(Book, self).initProject()
+        
+        # Do the Book type initializing here
         pass
 
 
