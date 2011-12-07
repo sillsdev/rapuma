@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: font.xml
+Description:
+This is a component type description for a illustrations component to be used in
+any type of project.  All file relations and processes are described in this
+file.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>Project Information</name>
+        <sectionID>ProjectInfo</sectionID>
+        <description>This is the project information section of the config file.</description>
+        <section>
+            <name>Font Information</name>
+            <sectionID>FontInformation</sectionID>
+            <description>This section contains general font information for this project.</description>
+            <setting>
+                <name>Installed Fonts</name>
+                <key>installedFonts</key>
+                <description>The fonts that are installed for this auxiliary components which will be used in this project.</description>
+                <type>list</type>
+                <value></value>
+            </setting>
+            <setting>
+                <name>Primary Font</name>
+                <key>primaryFont</key>
+                <description>The primary font for this project.</description>
+                <type>string</type>
+                <value></value>
+            </setting>
+        </section>
+    </section>
+</root>
+
