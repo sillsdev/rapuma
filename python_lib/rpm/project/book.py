@@ -46,7 +46,7 @@ class Book (Project) :
         # Valid Component Types: usfm, admin, maps, notes
         # Project Managers: illustration, hyphenation, render
 
-        print "Initializing Book project"
+        terminal("Initializing Book project")
         super(Book, self).initProject()
 
         # Do the Book type initializing here
@@ -63,12 +63,12 @@ class Book (Project) :
         for manager in self.defaultManagers :
             module = __import__(manager)
             self.__class__ = getattr(module, manager[0].upper() + manager[1:])
+            self.initialized = False
             self.initManager()
 
         # Load any optional managers that are needed
         for manager in self.optionalManagers :
-# FIXME: This doesn't work right yet. How do we get ConfigObj to return a boolean for better testing?
-            if self._projConfig['ProjectInfo']['use' + manager.capitalize()] == True :
+            if str2bool(self._projConfig['ProjectInfo']['use' + manager.capitalize()]) :
                 module = __import__(manager)
                 self.__class__ = getattr(module, manager[0].upper() + manager[1:])
                 self.initManager()

@@ -25,13 +25,23 @@ from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
 
+# Load config specification
+#configspec = ConfigObj(configspecfilename, encoding='UTF8',
+#                       list_values=False, _inspec=True)
+#config = ConfigObj(filename, configspec=configspec)
 
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+def str2bool(str):
+    '''Simple boolean tester'''
 
-############################## Settings Functions #############################
+    if isinstance(str, basestring) and str.lower() in ['0','false','no']:
+        return False
+    else:
+        return bool(str)
+
 
 def isConfSection (confObj, section) :
     '''A simple test to see if a section in a conf object is valid'''
