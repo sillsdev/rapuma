@@ -80,11 +80,11 @@ class Project (object) :
         for f in files :
             fileName = initInfo['Files'][f]['name']
             path = fileName.split('/')[:-1]
-            
-            # Now we are going to check for path defaults in the projConfFile
-            # If they are not there, we will create a path override section and
-            # add the default that we get from the init file. If an override is found
-            # then we will use that value.
+
+            # Check for path defaults in the projConfFile If they are not there,
+            # we will create a path override section and add the default that we
+            # get from the init file.  If an override is found then we will use
+            # that value.
             folderName = ''
             buildConfSection(self._projConfig, 'FolderNameOverride')
             for f in path :
