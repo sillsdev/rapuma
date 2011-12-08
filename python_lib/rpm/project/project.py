@@ -85,8 +85,21 @@ class Project (object) :
             # If they are not there, we will create a path override section and
             # add the default that we get from the init file. If an override is found
             # then we will use that value.
+            folderName = ''
+            buildConfSection(self._projConfig, 'FolderNameOverride')
+            for f in path :
+                if f[0] == '%' :
+                    f = f.strip('%')
+                    try :
+                        fo = self._projConfig['FolderNameOverride'][f]
+                        folderName = fo
+                    except :
+                        self._projConfig['FolderNameOverride'][f] = f
+                        writeConfFile(self._projConfig, self.projConfFile)
             
-            print path
+            
+            
+            print folderName
                     
             # %Fonts%/fonts.xml
             
