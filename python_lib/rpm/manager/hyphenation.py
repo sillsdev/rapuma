@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import hyphenation_command
 
 
@@ -32,7 +32,7 @@ import hyphenation_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Hyphenation (Project) :
+class Hyphenation (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################

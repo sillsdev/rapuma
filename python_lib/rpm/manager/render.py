@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import render_command
 
 
@@ -32,7 +32,7 @@ import render_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Render (Project) :
+class Render (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################

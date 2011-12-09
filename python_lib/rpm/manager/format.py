@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import format_command
 
 
@@ -32,7 +32,7 @@ import format_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Format (Project) :
+class Format (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################

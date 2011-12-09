@@ -32,20 +32,31 @@ from sys_command import Command
 
 
 class AddFont (Command) :
-    '''Add a font to a project.'''
+    '''Add a font set to the project.'''
 
     type = "font_add"
 
+    def __init__(self, man) :
+        super(AddFont, self).__init__()
+        self.manager = man
+
     def run (self, args, aProject, userConfig) :
-        super(AddComp, self).run(args, aProject, userConfig)
-        if self.options.component and self.options.type :
-            aProject.addNewComponent(self.options.component, self.options.type)
+        super(AddFont, self).run(args, aProject, userConfig)
+
+#        if self.options.component and self.options.type :
+#            aProject.addNewComponent(self.options.component, self.options.type)
+#        else :
+#            raise SyntaxError, "Error: Missing required arguments!"
+
+#        if self.options.auxiliary and self.options.font :
+        print dir(aProject)
+        if self.options.font :
+            self.manager.addFont(self.options.font)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Add a component to the project. (Required)")
-        self.parser.add_option("-t", "--type", type="string", action="store", help="Specify the component type. It needs to be valid but not present in the project. (Required)")
+        self.parser.add_option("-f", "--font", type = "string", action = "store", help = "Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
 
 
 

@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import font_command
 
 
@@ -32,41 +32,46 @@ import font_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Font (Project) :
+class Font (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
-
+    def __init__(self, project) :
+        super(Font, self).__init__(project)
+        project.addCommand("font_add", font_command.AddFont(self))
 
     def initManager (self) :
         '''Initialize the Font manager.'''
 
-        print "Initializing Font Manager"
+        terminal("Initializing Font Manager")
         super(Font, self).initManager()
-
-        # Bail out now if this has already been initialized
-        if self.initialized :
-            return True
 
         # Set values for this method
         setattr(self, 'fontFileName', 'fonts.conf')
         setattr(self, 'fontFolderName', 'Fonts')
-        setattr(self, 'fontFolder', os.path.join(self.projHome, self.fontFolderName))
-        setattr(self, 'fontConfFile', os.path.join(self.projConfFolder, self.fontFileName))
-        setattr(self, 'fontInitFile', os.path.join(self.rpmConfigFolder, 'font_init.xml'))
+        setattr(self, 'fontFolder', os.path.join(self.project.projHome, self.fontFolderName))
+        setattr(self, 'fontConfFile', os.path.join(self.project.projConfFolder, self.fontFileName))
+        setattr(self, 'rpmXmlFontConfig', os.path.join(self.project.rpmConfigFolder, 'font.xml'))
+        setattr(self, 'fontInitFile', os.path.join(self.project.rpmConfigFolder, 'font_init.xml'))
 
         # Start with default settings
         if os.path.isfile(self.fontInitFile) :
             self._initConfig = getXMLSettings(self.fontInitFile)
             self.runBasicManagerInit(self._initConfig)
+            
+        # Insert a Fonts section in the projConf if needed
+        newConf = mergeConfig (self.project._projConfig, self.rpmXmlFontConfig)
+        if newConf != self.project._projConfig :
+            self.project._projConfig = newConf
+            self.project.writeOutProjConfFile = True
 
         # Make a font conf file if it isn't there already or if it is empty.
         # Otherwise, just load up the existing one.
         if not os.path.isfile(self.fontConfFile) or os.path.getsize(self.fontConfFile) == 0 :
             self._fontConfig = ConfigObj()
             buildConfSection (self._fontConfig, 'Fonts')
-            writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
+            writeConfFile(self._fontConfig, self.fontConfFile)
             self._fontConfig = ConfigObj(self.fontConfFile)
         else :
             self._fontConfig = ConfigObj(self.fontConfFile)
@@ -76,10 +81,9 @@ class Font (Project) :
 
         # Now create a tex font information file for this aux component if needed.
         # This will only work after the font information has been added
-        self.makeFontInfoTexFile()
+#        self.makeFontInfoTexFile()
 
-        self.project.writeToLog('LOG', "Initialized [" + self.aid + "] for the UsfmTex auxiliary component type.")     
-        self.initialized = True
+        self.project.writeToLog('LOG', "Initialized the font manager.")
         return True
 
 
@@ -142,7 +146,7 @@ class Font (Project) :
         copying the fonts into the project from the source.  Of course this only
         works if there are any fonts set for a given aux.'''
 
-        for font in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
+        for font in self.project._projConfig['FontInformation']['installedFonts'] :
             fontInfo = self._fontConfig['Fonts'][font]
             # Make the font family folder for this typeface
             fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
@@ -173,7 +177,7 @@ class Font (Project) :
         return True
 
 
-    def setFont (self, ftype, font, rank='None') :
+    def addFont (self, ftype, font, rank='None') :
         '''Setup a font for a specific typeface and create a fonts.conf file in
         the process folder.'''
 

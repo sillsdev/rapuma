@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import map_command
 
 
@@ -32,7 +32,7 @@ import map_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Map (Project) :
+class Map (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################

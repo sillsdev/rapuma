@@ -115,22 +115,18 @@ else :
 
 # Run the command and pass along the aProject object
 if command :
-    if command in commands :
-        # To process there should be one or more options
-        if len(opts) >= 1 :
-            try :
-                commands[command].run(opts, aProject, uConf._userConfig)
-            except SyntaxError, err:
-                terminal("\n" + str(err) + "\n")
-                opts.insert(0, command)
-                commands['help'].run(opts, aProject, uConf._userConfig)
-        else :
-            # If we seem to be short on options then we will just display the help
-            # for this command
-                terminal('\nHelp for the \"' + command + '\" command:\n')
-                commands['help'].run(opts, aProject, uConf._userConfig)
+    if len(opts) >= 1 :
+        try :
+            aProject.run(command, opts, uConf._userConfig)
+        except SyntaxError, err:
+            terminal("\n" + str(err) + "\n")
+            opts.insert(0, command)
+            aProject.help(command, opts, uConf._userConfig)
     else :
-        terminal('\nERROR: This command does not exist: ' + command)
+        # If we seem to be short on options then we will just display the help
+        # for this command
+            terminal('\nHelp for the \"' + command + '\" command:\n')
+            aProject.help(command, opts, uConf._userConfig)
 
 
 ###############################################################################

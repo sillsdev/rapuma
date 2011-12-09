@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import illustration_command
 
 
@@ -32,7 +32,7 @@ import illustration_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Illustration (Project) :
+class Illustration (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################

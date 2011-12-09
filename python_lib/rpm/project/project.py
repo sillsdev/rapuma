@@ -26,7 +26,7 @@ import codecs, os, sys, fileinput, shutil, imp
 
 # Load the local classes
 from tools import *
-
+import project_command as projCmd
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -43,6 +43,7 @@ class Project (object) :
         self.userHome               = userHome
         self.rpmHome                = rpmHome
         self.rpmConfigFolder        = os.path.join(rpmHome, 'config')
+        self.rpmXmlConfigFile       = os.path.join(self.rpmConfigFolder, 'rpm.xml')
         self.projectType            = None
         self.projectIDCode          = None
         self.lockExt                = '.lock'
@@ -55,6 +56,8 @@ class Project (object) :
         self.userConfFileName       = 'rpm.conf'
         self.userConfFile           = os.path.join(userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
+        self.commands = {}
+        self.addCommand("project_create", projCmd.CreateProject())
 
 
 ###############################################################################
@@ -65,60 +68,6 @@ class Project (object) :
         '''This is a place holder method for the real one that gets loaded
         with the project type class.'''
         pass
-
-
-    def initManager(self) :
-        '''This is a place holder method for the real one that gets loaded
-        with the project type class.'''
-        pass
-
-# FIXME: Start here
-    def runBasicManagerInit (self, initInfo) :
-        '''Do a basic initialisation according to the settings in an init file.'''
-
-        files = initInfo['Files'].keys()
-        for f in files :
-            fileName = initInfo['Files'][f]['name']
-            path = fileName.split('/')[:-1]
-
-            # Check for path defaults in the projConfFile If they are not there,
-            # we will create a path override section and add the default that we
-            # get from the init file.  If an override is found then we will use
-            # that value.
-            folderName = ''
-            buildConfSection(self._projConfig, 'FolderNameOverride')
-            for f in path :
-                if f[0] == '%' :
-                    f = f.strip('%')
-                    try :
-                        fo = self._projConfig['FolderNameOverride'][f]
-                        folderName = fo
-                    except :
-                        self._projConfig['FolderNameOverride'][f] = f
-                        writeConfFile(self._projConfig, self.projConfFile)
-            
-            
-            
-            print folderName
-                    
-            # %Fonts%/fonts.xml
-            
-            # After all the path names are settled we will create the path so that
-            # when the file needs to be made it has a place to go.
-                    
-            thisFolder = self.getAuxFileFolderPath(folder, initInfo)
-            thisFile = os.path.join(thisFolder, fileName)
-
-            # Create source file name
-            sourceFile = os.path.join(self.project.rpmHome, 'resources', 'lib_auxiliaryTypes', atype, 'lib_files', fileName)
-            # Make the file if it is not already there
-            if not os.path.isfile(thisFile) :
-                if os.path.isfile(sourceFile) :
-                    shutil.copy(sourceFile, thisFile)
-                else :
-                    open(thisFile, 'w').close()
-                    if self.project.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
 
 
     def startProjInit (self, projConfig) :
@@ -245,6 +194,18 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def addCommand(self, name, cls) :
+        self.commands[name] = cls
+    
+    def run(self, command, opts, userConfig) :
+        if command in self.commands :
+            self.commands[command].run(opts, self, userConfig)
+        else :
+            self.help(command, opts, userConfig)
+    
+    def help(self, command, opts, userConfig) :
+        for k in sorted(self.commands.keys()) :
+            print k
 
     def addNewComponent (self, cid, ctype) :
         '''Add component to the current project by adding them to the component

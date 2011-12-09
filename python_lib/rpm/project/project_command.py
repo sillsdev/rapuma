@@ -1,19 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111201
+# version: 20111209
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle system process commands.  This relys a lot on the
+# This class will handle project commands.  This relys a lot on the
 # optparse lib.  Documentation can be found here:
 # http://docs.python.org/library/optparse.html
 
 # History:
 # 20110823 - djd - Started with intial file from RPM project
-# 20111201 - djd - Begin changing to project management model
 
 
 ###############################################################################
@@ -27,17 +26,6 @@ from optparse import OptionParser
 
 # Load the local classes
 from tools import *
-
-commands = {}
-
-#class MetaCommand(type) :
-
-#    def __init__(cmd, namestring, t, d) :
-#        global commands
-#        super(MetaCommand, cmd).__init__(namestring, t, d)
-#        if cmd.type :
-#            commands[cmd.type] = cmd.__call__()
-
 
 class Command (object) :
     '''The main command object class.'''
@@ -68,95 +56,6 @@ class Command (object) :
 ###############################################################################
 # Insert the commands you want visable to the system here in the order you want
 # them to appear when listed.
-
-
-class About (Command) :
-    '''Display the system's About text'''
-
-    type = "system_about"
-
-    def run(self, args) :
-        super(About, self).run(args)
-#        terminal(aProject._userConfig['System']['aboutText'])
-
-
-class ChangeSettings (Command) :
-    '''Change a system setting.'''
-
-    type = "system_settings_change"
-
-    def run(self, args, aProject, userConfig) :
-        (self.options, self.args) = self.parser.parse_args(args = args)
-        new = args[1]
-        old = userConfig['System'][args[0][2:]]
-
-        if new != old :
-            userConfig['System'][args[0][2:]] = new
-            terminal('Changed ' + args[0][2:] + ' from [' + old + '] to ' + new)
-            userConfig['System']['writeOutUserConfFile'] = 'True'
-        else :
-            terminal('New setting is the same, no need to change.')
-
-        return userConfig
-
-    def setupOptions(self, parser) :
-        self.parser.add_option("--userName", action="store", help="Change the system user name.")
-        self.parser.add_option("--language", action="store", help="Change the interface language.")
-        self.parser.add_option("--loglimit", action="store", help="Set the number of lines the log file is allowed to have.")
-
-
-class Debugging (Command) :
-    '''Turn on debugging (verbose output) in the logging.'''
-
-    type = "system_debug"
-
-    def run(self, args, aProject, userConfig) :
-        super(Debugging, self).run(args, aProject, userConfig)
-        if args[0][2:] == 'on' :
-            aProject.changeSystemSetting("debugging", "True")
-
-        if args[0][2:] == 'off' :
-            aProject.changeSystemSetting("debugging", "False")
-
-    def setupOptions(self, parser) :
-        self.parser.add_option("--on", action="store_true", help="Turn on debugging for the log file output.")
-        self.parser.add_option("--off", action="store_false", help="Turn off debugging for the log file output.")
-
-
-class Help (Command) :
-    '''Provide user with information on a specific command.'''
-
-    type = "help"
-
-    def run(self, args, aProject, userConfig) :
-        global commands
-        if len(args) :
-            cmd = commands[args[0]]
-            cmd.help()
-        else :
-            for c in commands.keys() :
-                terminal(c)
-
-            if len(commands) <= 2 :
-                terminal("\nType [help command] for more general command information.")
-
-
-class GUIManager (Command) :
-    '''Start a RPM GUI manager program'''
-
-    type = "manager"
-
-    def run(self, args) :
-        super(GUIManager, self).run(args)
-        if args[1].lower() == 'standard' :
-            terminal("Sorry, this GUI Manager has not been implemented yet.")
-        elif args[1].lower() == 'web' :
-            terminal("Sorry, the web client has not been implemented yet.")
-        else :
-            terminal("Not a recognized GUI Manager.")
-
-    def setupOptions(self, parser) :
-        self.parser.add_option("-c", "--client", action="store", type="string", help="Start up the RPM client.")
 
 
 class CreateProject (Command) :

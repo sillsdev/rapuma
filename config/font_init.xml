@@ -26,7 +26,7 @@ Todo:
                 <key>name</key>
                 <description>The name of this file.</description>
                 <type>string</type>
-                <value>Fred/%Fonts%/fonts.xml</value>
+                <value>%Fonts%/fonts.xml</value>
             </setting>
             <setting>
                 <name>Version Control</name>

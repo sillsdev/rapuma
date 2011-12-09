@@ -52,26 +52,30 @@ class Book (Project) :
         # Do the Book type initializing here
         self.defaultManagers = ['font', 'format', 'style', 'render']
         self.optionalManagers = ['illustration', 'hyphenation', 'map']
+        self.managers = {}
 
         # Update the config file if it is needed
-        newConf = mergeConfig(self._projConfig, self.rpmConfigFolder)
+        newConf = mergeConfig(self._projConfig, os.path.join(self.rpmConfigFolder, 'book.xml'))
         if newConf != self._projConfig :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
         # Load up default managers
         for manager in self.defaultManagers :
-            module = __import__(manager)
-            self.__class__ = getattr(module, manager[0].upper() + manager[1:])
-            self.initialized = False
-            self.initManager()
-
+            print manager
+            self.loadManager(manager)
+            
         # Load any optional managers that are needed
         for manager in self.optionalManagers :
             if str2bool(self._projConfig['ProjectInfo']['use' + manager.capitalize()]) :
-                module = __import__(manager)
-                self.__class__ = getattr(module, manager[0].upper() + manager[1:])
-                self.initManager()
+                self.loadManager(manager)
+
+
+    def loadManager(self, manager) :
+        module = __import__(manager)
+        manobj = getattr(module, manager.capitalize())(self)
+        self.managers[manager] = manobj
+        manobj.initManager()
 
 
     def addNewComponent (self, cid, ctype) :

@@ -24,7 +24,7 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 import style_command
 
 
@@ -32,7 +32,7 @@ import style_command
 ################################## Begin Class ################################
 ###############################################################################
 
-class Style (Project) :
+class Style (Manager) :
 
 ###############################################################################
 ############################ Project Level Functions ##########################
