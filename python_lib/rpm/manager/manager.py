@@ -32,8 +32,8 @@ class Manager(object) :
 
     def initManager(self) :
         pass
-        
-        
+
+
     def runBasicManagerInit (self, initInfo) :
         '''Do a basic initialisation according to the settings in an init file.'''
 

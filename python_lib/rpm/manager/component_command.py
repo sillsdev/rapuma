@@ -43,13 +43,46 @@ class AddFont (Command) :
     def run (self, args, aProject, userConfig) :
         super(AddFont, self).run(args, aProject, userConfig)
 
-        if self.options.font :
-            self.manager.addFont(self.options.font)
+class AddCompGroup (Command) :
+    '''Add a component to a project.'''
+
+    type = "component_add"
+
+    def __init__(self, man) :
+        super(AddCompGroup, self).__init__()
+        self.manager = man
+
+    def run (self, args, aProject, userConfig) :
+        super(AddCompGroup, self).run(args, aProject, userConfig)
+
+        if self.options.components :
+            self.manager.addComponentGroup(self.options.name, self.options.components)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-f", "--font", type = "string", action = "store", help = "Specify the font for this actual font component. This font needs to be specified in the font lib. (Required)")
+        self.parser.add_option("-n", "--name", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
+        self.parser.add_option("-c", "--components", type="string", action="store", help="Add a component group to the project. A group is one or more component. Enter a file name with complete path. (Required)")
 
+
+class RemoveCompGroup (Command) :
+    '''Remove a component from a project.'''
+
+    type = "component_remove"
+
+    def __init__(self, man) :
+        super(RemoveCompGroup, self).__init__()
+        self.manager = man
+
+    def run (self, args, aProject, userConfig) :
+        super(RemoveCompGroup, self).run(args, aProject, userConfig)
+
+        if self.options.component :
+            self.manager.removeComponent(self.options.component)
+        else :
+            raise SyntaxError, "Error: Missing required arguments!"
+
+    def setupOptions (self, parser) :
+        self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component from the project. (Required)")
 
 

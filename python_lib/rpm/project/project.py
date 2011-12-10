@@ -26,6 +26,7 @@ import codecs, os, sys, fileinput, shutil, imp
 
 # Load the local classes
 from tools import *
+import manager as mngr
 import project_command as projCmd
 
 ###############################################################################
@@ -57,7 +58,11 @@ class Project (object) :
         self.userConfFile           = os.path.join(userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
         self.commands = {}
+
+        # Commands that are associated with the project level
         self.addCommand("project_create", projCmd.CreateProject())
+        self.addCommand("project_remove", projCmd.RemoveProject())
+        self.addCommand("project_restore", projCmd.RestoreProject())
 
 
 ###############################################################################
@@ -206,19 +211,6 @@ class Project (object) :
     def help(self, command, opts, userConfig) :
         for k in sorted(self.commands.keys()) :
             print k
-
-    def addNewComponent (self, cid, ctype) :
-        '''Add component to the current project by adding them to the component
-        binding list and inserting component info into the project conf file.'''
-
-        pass
-
-
-    def removeComponent (self, comp) :
-        '''Remove a component from the current project by removing them from the
-        component binding list and from their type information section.'''
-
-        pass
 
 
 ###############################################################################
