@@ -56,13 +56,18 @@ class AddCompGroup (Command) :
         super(AddCompGroup, self).run(args, aProject, userConfig)
 
         if self.options.components :
-            self.manager.addComponentGroup(self.options.name, self.options.components)
+            self.manager.addComponentGroup(self.options.name, self.options.components, self.options.fonts, self.options.type, self.options.rendering, self.options.hyphenation, self.options.illustrations)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
         self.parser.add_option("-n", "--name", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
         self.parser.add_option("-c", "--components", type="string", action="store", help="Add a component group to the project. A group is one or more component. Enter a file name with complete path. (Required)")
+        self.parser.add_option("-f", "--fonts", type="string", action="store", default="CharisSIL", help="Assign font families to this component group. Enter the font family name. More than one is allowed. If it is valid the system will know how to work with it. (Required)")
+        self.parser.add_option("-t", "--type", type="string", action="store", default="usfm", help="Assign the component markup type. Default is USFM.")
+        self.parser.add_option("-r", "--rendering", type="string", action="store", default="tex", help="Assign the component rendering system to be used. Default is TeX.")
+        self.parser.add_option("-p", "--hyphenation", type="string", action="store", default="False", help="Indicate if hyphenation is to be used with this component group. Default is False.")
+        self.parser.add_option("-i", "--illustrations", type="string", action="store", default="False", help="Indicate if illustrations are to be used with this component group. Default is False.")
 
 
 class RemoveCompGroup (Command) :

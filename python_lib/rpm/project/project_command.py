@@ -112,4 +112,20 @@ class RestoreProject (Command) :
         self.parser.add_option("-d", "--dir", type="string", action="store", help="Restore a project in this directory")
 
 
+class RenderProject (Command) :
+    '''Renders the current project. With no group or component specified,
+    the entire project is rendered.'''
+
+    type = 'project_render'
+
+    def run(self, args, aProject, userConfig) :
+        super(RenderProject, self).run(args, aProject, userConfig)
+
+        aProject.renderProject(self.options.group, self.options.comp)
+
+    def setupOptions(self, parser) :
+        self.parser.add_option("-g", "--group", type="string", action="store", default='', help="Render the specified group.")
+        self.parser.add_option("-c", "--comp", type="string", action="store", default='', help="Render the specified component.")
+
+
 

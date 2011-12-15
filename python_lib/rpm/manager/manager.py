@@ -35,7 +35,8 @@ class Manager(object) :
 
 
     def runBasicManagerInit (self, initInfo) :
-        '''Do a basic initialisation according to the settings in an init file.'''
+        '''Do a basic (generic) initialisation according to the settings 
+        in the manager's init file, if it has one.'''
 
         files = initInfo['Files'].keys()
         for f in files :

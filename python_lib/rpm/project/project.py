@@ -63,6 +63,7 @@ class Project (object) :
         self.addCommand("project_create", projCmd.CreateProject())
         self.addCommand("project_remove", projCmd.RemoveProject())
         self.addCommand("project_restore", projCmd.RestoreProject())
+        self.addCommand("project_render", projCmd.RenderProject())
 
 
 ###############################################################################
@@ -140,12 +141,12 @@ class Project (object) :
 
         # Create intitial project settings
         date = tStamp()
-        self._projConfig['ProjectInfo']['projectType']            = ptype
-        self._projConfig['ProjectInfo']['projectName']            = pname
-        self._projConfig['ProjectInfo']['projectCreateDate']      = date
-        self._projConfig['ProjectInfo']['projectIDCode']          = pid
+        self._projConfig['ProjectInfo']['projectType']              = ptype
+        self._projConfig['ProjectInfo']['projectName']              = pname
+        self._projConfig['ProjectInfo']['projectCreateDate']        = date
+        self._projConfig['ProjectInfo']['projectIDCode']            = pid
         recordProject(self._userConfig, self._projConfig, pdir)
-
+        
         # Finally write out the project config file
         if not writeConfFile(self._projConfig, self.projConfFile) :
             terminal('\nERROR: Could not write to: project config file')
@@ -195,6 +196,31 @@ class Project (object) :
         pass
 
 
+    def renderProject (self, group, comp) :
+        '''Render the project or a specified group or component.'''
+
+        if group :
+            # For rendering a group we need to collect all the components and
+            # then create an object that knows how to render itself. The object
+            # will call on the right managers to initialize and link all resources
+            # together for successful rendering. If all the pieces are not present
+            # a resonable error should be thrown.
+            print 'Rendering: ', group
+        elif comp :
+            # Rendering a single component is much like a group only all the 
+            # parts are only acting on one component
+            print 'Rendering: ', comp
+        else :
+            # Because projects are made up of groups that can be very different
+            # in nature, each group will need to be created and initialized.
+            # Each group will be rendered inturn and a PDF will be created. That
+            # PDF file will be bound together according to the bindingOrder with
+            # the other groups which
+            # will result in a final book PDF. Some groups may need to be kept
+            # seperate from the main content. That will be indicated in the group's
+            # configuration information.
+            print 'Rendering: project'
+    
 ###############################################################################
 ########################## Component Level Functions ##########################
 ###############################################################################

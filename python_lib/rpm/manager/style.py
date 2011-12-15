@@ -25,7 +25,7 @@ import os
 # Load the local classes
 from tools import *
 from manager import Manager
-import style_command
+import style_command as styCmd
 
 
 ###############################################################################
@@ -34,15 +34,20 @@ import style_command
 
 class Style (Manager) :
 
+    def __init__(self, project) :
+        '''Do the primary initialization for this manager.'''
+
+        super(Style, self).__init__(project)
+
+        terminal("Initializing Style Manager")
+
+        # Add commands for this manager
+#        project.addCommand("???", styCmd.???(self))
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-
-    def initManager (self) :
-        '''Initialize the style manager.'''
-
-        print "Initializing Style Manager"
-        super(Style, self).initManager()
 
 

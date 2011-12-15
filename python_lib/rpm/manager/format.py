@@ -25,7 +25,7 @@ import os
 # Load the local classes
 from tools import *
 from manager import Manager
-import format_command
+import format_command as frmCmd
 
 
 ###############################################################################
@@ -34,15 +34,32 @@ import format_command
 
 class Format (Manager) :
 
+    def __init__(self, project) :
+        '''Do the primary initialization for this manager.'''
+
+        super(Format, self).__init__(project)
+
+        terminal("Initializing Format Manager")
+
+        # Add commands for this manager
+#        project.addCommand("???", frmCmd.???(self))
+
+        # Set values for this manager
+        self._formatConfig              = {}
+        self.formatConfigFileName       = 'format.conf'
+        self.formatDefaultFileName      = 'format_values.xml'
+        self.formatConfFile             = os.path.join(self.project.projConfFolder, self.formatConfigFileName)
+        self.defaultFormatValuesFile    = os.path.join(self.project.rpmConfigFolder, self.formatDefaultFileName)
+
+        if not os.path.isfile(self.formatConfFile) :
+            self._formatConfig = getXMLSettings(self.defaultFormatValuesFile)
+            writeConfFile(self._formatConfig, self.formatConfFile)
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-
-    def initManager (self) :
-        '''Initialize the Format manager.'''
-
-        print "Initializing Format Manager"
-        super(Format, self).initManager()
 
 

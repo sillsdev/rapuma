@@ -44,34 +44,6 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
-        <setting>
-            <name>Component List</name>
-            <key>componentList</key>
-            <description>A list of components installed in this project.</description>
-            <type>list</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Use Hyphenation</name>
-            <key>useHyphenation</key>
-            <description>Indicate if hyphenation is to be used in this project or not.</description>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Use Illustrations</name>
-            <key>useIllustration</key>
-            <description>Indicate if illustrations are to be used in this project or not.</description>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Use Maps</name>
-            <key>useMap</key>
-            <description>Indicate if maps are to be used in this project or not.</description>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
     </section>
 </root>
 

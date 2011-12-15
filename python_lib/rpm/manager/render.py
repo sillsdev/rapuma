@@ -25,7 +25,7 @@ import os
 # Load the local classes
 from tools import *
 from manager import Manager
-import render_command
+import render_command as rndCmd
 
 
 ###############################################################################
@@ -34,15 +34,23 @@ import render_command
 
 class Render (Manager) :
 
+    def __init__(self, project) :
+        '''Do the primary initialization for this manager.'''
+
+        super(Render, self).__init__(project)
+
+        terminal("Initializing Render Manager")
+
+        # Add commands for this manager
+#        project.addCommand("???", rndCmd.???(self))
+
+        # Set values for this manager
+        self.renderers          = ['tex', 'vmapper']
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-
-    def initManager (self) :
-        '''Initialize a book project.'''
-
-        print "Initializing Render Manager"
-        super(Render, self).initManager()
 
 

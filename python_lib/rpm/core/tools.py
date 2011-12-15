@@ -116,39 +116,6 @@ def mergeConfig (orgConfig, rpmConfigFile) :
     return newConfig
 
 
-#def getXMLOverrideSettings (rpm, user) :
-#    '''Get the XML settings then override them if needed.'''
-
-#    res = getXMLSettings(rpm)
-#    if os.path.isfile(user) :
-#        return overrideSettings(res, user)
-#    else :
-#        return res
-
-
-#def getCompInitSettings (userHome, rpmHome, compType) :
-#    '''Get the project initialisation settings from the project type init xml
-#    file.  Then, if it exsits, override these settings with the version found in
-#    the user area.'''
-
-#    rpmCompInitXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
-#    userCompInitXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '_init.xml')
-#    return getXMLOverrideSettings(rpmCompInitXML, userCompInitXML)
-
-
-#def getCompSettings (userHome, rpmHome, compType) :
-#    '''Get the default settings out of a component type xml description file.'''
-
-#    rpmCompXML     = os.path.join(rpmHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
-#    userCompXML     = os.path.join(userHome, 'resources', 'lib_compTypes', compType, compType + '.xml')
-
-#    res = getXMLSettings(rpmCompXML)
-#    if os.path.isfile(userCompXML) :
-#        return overrideSettings(res, userCompXML)
-#    else :
-#        return res
-
-
 def getXMLSettings (xmlFile) :
     '''Get settings from an XML file.'''
 

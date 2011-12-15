@@ -33,6 +33,17 @@ from project import Project
 
 class Book (Project) :
 
+#    def __init__(self, project) :
+#        super(Book, self).__init__(project)
+#        self.project = project
+#        terminal("Initializing Book project")
+        
+# FIXME: All the initializing should be done up here in a proper __init__
+# How do we do that?
+
+# Also, in the init a book object needs to be created. This object will have
+# all the necessary knowlege and attributes to be able to process itself
+# How do we do that?
 
 ###############################################################################
 ############################## Book Level Functions ###########################
@@ -49,9 +60,7 @@ class Book (Project) :
         terminal("Initializing Book project")
         super(Book, self).initProject()
 
-        # Do the Book type initializing here
-        self.defaultManagers = ['component', 'font', 'format', 'style', 'render']
-        self.optionalManagers = ['illustration', 'hyphenation', 'map']
+        # Initialize the managers dictionary here
         self.managers = {}
 
         # Update the config file if it is needed
@@ -60,16 +69,11 @@ class Book (Project) :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
-        # Load up default managers
-        for manager in self.defaultManagers :
-            self.loadManager(manager)
-
-        # Load any optional managers that are needed
-        for manager in self.optionalManagers :
-            if str2bool(self._projConfig['ProjectInfo']['use' + manager.capitalize()]) :
-                self.loadManager(manager)
+        # Load up the component manager, we only need this one here
+        self.loadManager('component')
 
 
+# FIXME: This needs to be moved to the manager module. How do we make that work?
     def loadManager(self, manager) :
         module = __import__(manager)
         manobj = getattr(module, manager.capitalize())(self)
