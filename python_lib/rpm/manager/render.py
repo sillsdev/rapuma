@@ -34,6 +34,10 @@ import render_command as rndCmd
 
 class Render (Manager) :
 
+    # Shared values
+    xmlConfFile     = ''
+    xmlInitFile     = ''
+
     def __init__(self, project) :
         '''Do the primary initialization for this manager.'''
 

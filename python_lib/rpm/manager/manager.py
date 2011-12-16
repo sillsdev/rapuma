@@ -30,17 +30,20 @@ class Manager(object) :
     def __init__(self, project) :
         self.project = project
 
+        if self.xmlInitFile :
+            self.initInfo = getXMLSettings(os.path.join(project.rpmConfigFolder, self.xmlInitFile))
+
     def initManager(self) :
-        pass
-
-
-    def runBasicManagerInit (self, initInfo) :
         '''Do a basic (generic) initialisation according to the settings 
         in the manager's init file, if it has one.'''
 
-        files = initInfo['Files'].keys()
+        # Skip this is there is not an XML init file for this manager
+        if not self.xmlInitFile :
+            return True
+
+        files = self.initInfo['Files'].keys()
         for f in files :
-            fn = initInfo['Files'][f]['name']
+            fn = self.initInfo['Files'][f]['name']
             path = fn.split('/')[:-1]
             fileName = fn.split('/')[-1:][0]
 

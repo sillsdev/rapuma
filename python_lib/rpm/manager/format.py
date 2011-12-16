@@ -34,6 +34,10 @@ import format_command as frmCmd
 
 class Format (Manager) :
 
+    # Shared values
+    xmlConfFile     = ''
+    xmlInitFile     = ''
+
     def __init__(self, project) :
         '''Do the primary initialization for this manager.'''
 

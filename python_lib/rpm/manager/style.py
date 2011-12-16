@@ -34,6 +34,10 @@ import style_command as styCmd
 
 class Style (Manager) :
 
+    # Shared values
+    xmlConfFile     = ''
+    xmlInitFile     = ''
+
     def __init__(self, project) :
         '''Do the primary initialization for this manager.'''
 

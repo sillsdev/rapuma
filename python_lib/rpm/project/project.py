@@ -73,7 +73,25 @@ class Project (object) :
     def initProject(self) :
         '''This is a place holder method for the real one that gets loaded
         with the project type class.'''
-        pass
+
+        # Initialize the managers dictionary here
+        self.managers = {}
+
+        # Update the config file if it is needed
+        newConf = mergeConfig(self._projConfig, os.path.join(self.rpmConfigFolder, self.configfile))
+        if newConf != self._projConfig :
+            self._projConfig = newConf
+            self.writeOutProjConfFile = True
+
+        # Load up the component manager, we only need this one here
+        for m in self.defaultManagers :
+            self.loadManager(m)
+
+    def loadManager(self, manager) :
+        module = __import__(manager)
+        manobj = getattr(module, manager.capitalize())(self)
+        self.managers[manager] = manobj
+        manobj.initManager()
 
 
     def startProjInit (self, projConfig) :

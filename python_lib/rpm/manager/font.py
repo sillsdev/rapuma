@@ -34,6 +34,10 @@ import font_command as fntCmd
 
 class Font (Manager) :
 
+    # Shared values
+    xmlConfFile     = 'font.xml'
+    xmlInitFile     = 'font_init.xml'
+
     def __init__(self, project) :
         '''Do the primary initialization for this manager.'''
 
@@ -49,13 +53,12 @@ class Font (Manager) :
         self.fontFolderName     = 'Fonts'
         self.fontFolder         = os.path.join(self.project.projHome, self.fontFolderName)
         self.fontConfFile       = os.path.join(self.project.projConfFolder, self.fontFileName)
-        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, 'font.xml')
-        self.fontInitFile       = os.path.join(self.project.rpmConfigFolder, 'font_init.xml')
+        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
+        self.fontInitFile       = os.path.join(self.project.rpmConfigFolder, self.xmlInitFile)
 
         # Start with default settings
         if os.path.isfile(self.fontInitFile) :
             self._initConfig = getXMLSettings(self.fontInitFile)
-            self.runBasicManagerInit(self._initConfig)
 
 
 ###############################################################################
