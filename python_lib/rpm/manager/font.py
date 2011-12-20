@@ -38,10 +38,10 @@ class Font (Manager) :
     xmlConfFile     = 'font.xml'
     xmlInitFile     = 'font_init.xml'
 
-    def __init__(self, project) :
+    def __init__(self, project, cfg) :
         '''Do the primary initialization for this manager.'''
 
-        super(Font, self).__init__(project)
+        super(Font, self).__init__(project, cfg)
 
         terminal("Initializing Font Manager")
 

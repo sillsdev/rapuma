@@ -27,11 +27,18 @@ from tools import *
 
 class Manager(object) :
 
-    def __init__(self, project) :
+    def __init__(self, project, cfg) :
         self.project = project
+        self.cfg = cfg
+
+# FIXME: Start here with building the manager init file name
+# we need to insert into the project config all the known managers that can be used
+# we may need to find a better way to manage this as it may not be too scalable, we'll see
+
 
         if self.xmlInitFile :
             self.initInfo = getXMLSettings(os.path.join(project.rpmConfigFolder, self.xmlInitFile))
+
 
     def initManager(self) :
         '''Do a basic (generic) initialisation according to the settings 

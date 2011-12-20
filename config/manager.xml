@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: render.xml
+File: manager.xml
 Description:
-This is a project or Document type description for a book publication.
+This is a project or Document type description for RPM publication managers.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -14,8 +14,11 @@ Todo:
 <root>
     <section>
         <name>Project Information</name>
-        <sectionID>ProjectInfo</sectionID>
-        <description>This section contains general project info for this project.</description>
+        <sectionID>Managers</sectionID>
+        <description>This section contains information about managers used in the RPM system.</description>
+
+#FIXME: Describe some managers here in sub sections.
+
         <setting>
             <name>Project Component Binding Order List</name>
             <key>projectComponentBindingOrder</key>
@@ -23,6 +26,8 @@ Todo:
             <type>list</type>
             <value></value>
         </setting>
+
+
     </section>
 </root>
 

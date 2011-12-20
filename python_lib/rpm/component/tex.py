@@ -24,30 +24,18 @@ import os, codecs
 
 # Load the local classes
 from tools import *
+from component import Component
 
 
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
 
-class Component (object) :
-
-    def __init__(self, project, cfg, parent = None) :
-        '''Initialize this class.'''
-
-        print "Initializing Component"
-
-        self.project = project
-        self.cfg = cfg
-        self.parent = parent or project
-        self.managers = {}
-        for key, value in cfg['Managers'].iteritems() :
-            self.managers[key] = project.createManager(value)
-        
-        # Commands that are associated with the Component level
-#        self.addCommand("component_add", cmpCmd.AddCompGroup())
+class Tex (Component) :
 
     def render(self) :
-        print "Rendering Component"
+
+        print "Rendering TeX"
+        
 
 

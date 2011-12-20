@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+# version: 20111210
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,7 +10,7 @@
 # This class will handle book project tasks.
 
 # History:
-# 20111207 - djd - Started with intial file
+# 20111210 - djd - Started with intial file
 
 
 ###############################################################################
@@ -19,42 +19,22 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, codecs
 
 
 # Load the local classes
 from tools import *
-from manager import Manager
-import render_command as rndCmd
+from component import Component
 
 
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
 
-class Render (Manager) :
+class Usfm (Component) :
 
-    # Shared values
-    xmlConfFile     = ''
-    xmlInitFile     = ''
+    def render(self) :
 
-    def __init__(self, project) :
-        '''Do the primary initialization for this manager.'''
-
-        super(Render, self).__init__(project)
-
-        terminal("Initializing Render Manager")
-
-        # Add commands for this manager
-#        project.addCommand("???", rndCmd.???(self))
-
-        # Set values for this manager
-        self.renderers          = ['tex', 'vmapper']
-
-
-###############################################################################
-############################ Project Level Functions ##########################
-###############################################################################
-
+        print "Rendering USFM"
 
 

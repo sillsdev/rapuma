@@ -27,6 +27,7 @@ import codecs, os, sys, fileinput, shutil, imp
 # Load the local classes
 from tools import *
 import manager as mngr
+import component as cmpt
 import project_command as projCmd
 
 ###############################################################################
@@ -58,19 +59,24 @@ class Project (object) :
         self.userConfFile           = os.path.join(userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
         self.commands = {}
+        self.components = {}
 
         # Commands that are associated with the project level
         self.addCommand("project_create", projCmd.CreateProject())
         self.addCommand("project_remove", projCmd.RemoveProject())
         self.addCommand("project_restore", projCmd.RestoreProject())
         self.addCommand("project_render", projCmd.RenderProject())
+        self.addCommand("component_add", projCmd.AddComponent())
+        self.addCommand("component_remove", projCmd.RemoveComponent())
+        self.addCommand("component_add-manager", projCmd.AddComponentManager())
+        self.addCommand("component_render", projCmd.RenderComponent())
 
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def initProject(self) :
+    def initProject (self) :
         '''This is a place holder method for the real one that gets loaded
         with the project type class.'''
 
@@ -83,15 +89,33 @@ class Project (object) :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
-        # Load up the component manager, we only need this one here
-        for m in self.defaultManagers :
-            self.loadManager(m)
 
-    def loadManager(self, manager) :
-        module = __import__(manager)
-        manobj = getattr(module, manager.capitalize())(self)
+    def loadManager (self, manager) :
+        '''Do basic initialisation on a manager.'''
+
+        # This gets its information from the config file
+        cfg = self._projConfig['Managers'][manager]
+        ctype = cfg['type']
+        module = __import__(ctype)
+        manobj = getattr(module, ctype.capitalize())(self, cfg)
         self.managers[manager] = manobj
         manobj.initManager()
+
+
+    def createManager (self, manager) :
+        '''Load a manager that was not previously loaded.'''
+
+        if manager not in self.managers :
+            self.loadManager(manager)
+        return self.managers[manager]
+
+
+    def addComponentManager (self, comp, mngr, mType) :
+        '''Add specific details to a component about a manager.'''
+
+        buildConfSection(self._projConfig['Components'][comp], 'Managers')
+        self._projConfig['Components'][comp]['Managers'][mngr] = mType
+        self.writeOutProjConfFile = True
 
 
     def startProjInit (self, projConfig) :
@@ -114,6 +138,8 @@ class Project (object) :
         m = __import__(self.projectType)
         self.__class__ = getattr(m, self.projectType[0].upper() + self.projectType[1:])
         self.initProject()
+
+# FIXME: Do we want to call in the managers at this point?
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
@@ -214,32 +240,52 @@ class Project (object) :
         pass
 
 
-    def renderProject (self, comp) :
-        '''Render the project or a specified group or component.'''
-        self.createComponent(comp).render()
-        
-
 ###############################################################################
 ########################## Component Level Functions ##########################
 ###############################################################################
-    def createComponent(self, cname) :
+
+    def createComponent (self, cname) :
         if cname in self.components : return self.components[cname]
         compconfig = self._projConfig['Components'][cname]
-        ctype = compconfig['compType']
+        ctype = compconfig['type']
         module = __import__(ctype)
         compobj = getattr(module, ctype.capitalize())(self, compconfig)
         self.components[cname] = compobj
         return compobj
 
+
+    def addComponent (self, cName, cType) :
+        '''This will add a component to the object we created above in createComponent().'''
+
+        print "Creating: ", cName
+        
+        buildConfSection(self._projConfig, 'Components')
+        buildConfSection(self._projConfig['Components'], cName)
+        self._projConfig['Components'][cName]['name'] = cName
+        self._projConfig['Components'][cName]['type'] = cType
+        self.writeOutProjConfFile = True
+
+
+    def renderComponent (self, comp) :
+        '''Render a single component.'''
+
+        print 'Rendering: ', comp
+        self.createComponent(comp).render()
+
+
+
     def addCommand(self, name, cls) :
+        '''Add a command to the command list.'''
         self.commands[name] = cls
-    
+
+
     def run(self, command, opts, userConfig) :
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
             self.help(command, opts, userConfig)
-    
+
+
     def help(self, command, opts, userConfig) :
         for k in sorted(self.commands.keys()) :
             print k

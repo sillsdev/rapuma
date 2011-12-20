@@ -38,10 +38,10 @@ class Format (Manager) :
     xmlConfFile     = ''
     xmlInitFile     = ''
 
-    def __init__(self, project) :
+    def __init__(self, project, cfg) :
         '''Do the primary initialization for this manager.'''
 
-        super(Format, self).__init__(project)
+        super(Format, self).__init__(project, cfg)
 
         terminal("Initializing Format Manager")
 
