@@ -87,7 +87,7 @@ aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 # Look for the project.conf and init the project if it is there.
 # Otherwise we will just pass through and quite
 if os.path.isfile(aProject.projConfFile) :
-    aProject.startProjInit(aProject._projConfig)
+    aProject.initProject()
 
 
 ###############################################################################
@@ -137,7 +137,6 @@ if command :
 if aProject.writeOutProjConfFile :
     if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
         terminal('\nERROR: Could not write to: project config file')
-
 if uConf.writeOutUserConfFile :
     if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
         terminal('\nERROR: Could not write to: user config file')

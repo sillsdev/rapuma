@@ -100,12 +100,12 @@ def recordProject (userConfig, projConfig, projHome) :
         return False
 
 
-def mergeConfig (orgConfig, rpmConfigFile) :
+def mergeConfig (orgConfig, newConfigFile) :
     '''Generic function to return a merged config object
     from a valid XML config file. The orgConfig is ConfigObj
     object and rpmConfigFile is a valid RPM XML config file.'''
 
-    xmlConfig = getXMLSettings(rpmConfigFile)
+    xmlConfig = getXMLSettings(newConfigFile)
     # Create a new conf object based on all the XML default settings
     # Then override them with any exsiting project settings.
     newConfig = ConfigObj(xmlConfig.dict()).override(orgConfig)

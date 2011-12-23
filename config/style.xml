@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: stylesUsfm.xml
+Description:
+This is a component type description for style auxiliary components to be used
+in any type of project.  All file relations and processes are described in this
+file.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Manager Type</name>
+        <key>type</key>
+        <description>The manager model (type) this manager is associated with.</description>
+        <type>string</type>
+        <value>style</value>
+    </setting>
+</root>
+

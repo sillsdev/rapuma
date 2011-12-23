@@ -3,9 +3,9 @@
 <!--
 File: font.xml
 Description:
-This is a component type description for a illustrations component to be used in
-any type of project.  All file relations and processes are described in this
-file.
+This is a component type description for the font manager. It contains default
+information for a font type manager and acts as a template for managers created
+in a type of publication.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -14,24 +14,26 @@ Todo:
 
 
 <root>
-    <section>
-        <name>Font Information</name>
-        <sectionID>FontInformation</sectionID>
-        <description>This section contains general font information for this project.</description>
-        <setting>
-            <name>Installed Fonts</name>
-            <key>installedFonts</key>
-            <description>The fonts that are installed for this auxiliary components which will be used in this project.</description>
-            <type>list</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Primary Font</name>
-            <key>primaryFont</key>
-            <description>The primary font for this project.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-    </section>
+    <setting>
+        <name>Manager Type</name>
+        <key>type</key>
+        <description>The manager model (type) this manager is associated with.</description>
+        <type>string</type>
+        <value>font</value>
+    </setting>
+    <setting>
+        <name>Primary Font</name>
+        <key>primaryFont</key>
+        <description>The primary font this manager uses.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Installed Fonts</name>
+        <key>installedFonts</key>
+        <description>All the fonts this font manager uses.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
 </root>
 

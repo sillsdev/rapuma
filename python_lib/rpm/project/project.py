@@ -60,6 +60,7 @@ class Project (object) :
         self.writeOutProjConfFile   = False
         self.commands = {}
         self.components = {}
+        self.componentType = {}
 
         # Commands that are associated with the project level
         self.addCommand("project_create", projCmd.CreateProject())
@@ -83,43 +84,6 @@ class Project (object) :
         # Initialize the managers dictionary here
         self.managers = {}
 
-        # Update the config file if it is needed
-        newConf = mergeConfig(self._projConfig, os.path.join(self.rpmConfigFolder, self.configfile))
-        if newConf != self._projConfig :
-            self._projConfig = newConf
-            self.writeOutProjConfFile = True
-
-
-    def loadManager (self, manager) :
-        '''Do basic initialisation on a manager.'''
-
-        # This gets its information from the config file
-        cfg = self._projConfig['Managers'][manager]
-        ctype = cfg['type']
-        module = __import__(ctype)
-        manobj = getattr(module, ctype.capitalize())(self, cfg)
-        self.managers[manager] = manobj
-        manobj.initManager()
-
-
-    def createManager (self, manager) :
-        '''Load a manager that was not previously loaded.'''
-
-        if manager not in self.managers :
-            self.loadManager(manager)
-        return self.managers[manager]
-
-
-    def addComponentManager (self, comp, mngr, mType) :
-        '''Add specific details to a component about a manager.'''
-
-        buildConfSection(self._projConfig['Components'][comp], 'Managers')
-        self._projConfig['Components'][comp]['Managers'][mngr] = mType
-        self.writeOutProjConfFile = True
-
-
-    def startProjInit (self, projConfig) :
-        '''Initialize a project.'''
 
         # Create a fresh merged version of the projConfig
         self._projConfig  = ConfigObj(self.projConfFile)
@@ -137,9 +101,62 @@ class Project (object) :
         # Initialize the project type
         m = __import__(self.projectType)
         self.__class__ = getattr(m, self.projectType[0].upper() + self.projectType[1:])
-        self.initProject()
 
-# FIXME: Do we want to call in the managers at this point?
+        # Update the config file with the project type XML file if it is needed
+        newConf = mergeConfig(self._projConfig, os.path.join(self.rpmConfigFolder, self.projectType + '.xml'))
+        if newConf != self._projConfig :
+            self._projConfig = newConf
+            self.writeOutProjConfFile = True
+
+        # Bring in all the manager info here if needed
+#        for m, t in getattr(m, self.defaultManagers).items() :
+#            self.addManager(m, t)
+
+
+    def loadManager (self, manager) :
+        '''Do basic load and initialization on a manager.'''
+
+        # This gets its information from the config file
+        cfg = self._projConfig['Managers'][manager]
+        ctype = cfg['type']
+        module = __import__(ctype)
+        manobj = getattr(module, ctype.capitalize())(self, cfg)
+        self.managers[manager] = manobj
+        manobj.initManager()
+
+
+    def createManager (self, manager) :
+        '''Check to see if a manager is loaded and load it if it is not.'''
+
+        if manager not in self.managers :
+            self.loadManager(manager)
+        return self.managers[manager]
+
+
+#    def addComponentManager (self, comp, mngr, mType) :
+#        '''Add a manager reference to a component.'''
+
+#        buildConfSection(self._projConfig['Components'][comp], 'Managers')
+#        buildConfSection(self._projConfig['Components'][comp]['Managers'], mngr)
+#        self._projConfig['Components'][comp]['Managers'][mngr] = mType
+#        self.writeOutProjConfFile = True
+
+
+    def addManager (self, mName, mType) :
+        '''Create a manager reference in the project config that components will point to.'''
+
+        # Insert the Manager section if it is not already there
+        buildConfSection(self._projConfig, 'Managers')
+        buildConfSection(self._projConfig['Managers'], mName)
+        managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, mType + '.xml'))
+        for k, v, in managerDefaults.iteritems() :
+            # Do not overwrite if a value is already there
+            try :
+                self._projConfig['Managers'][mName][k]
+            except :
+                self._projConfig['Managers'][mName][k] = v
+                self.writeOutProjConfFile = True
+            
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
@@ -190,13 +207,12 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectCreateDate']        = date
         self._projConfig['ProjectInfo']['projectIDCode']            = pid
         recordProject(self._userConfig, self._projConfig, pdir)
-        
+
         # Finally write out the project config file
         if not writeConfFile(self._projConfig, self.projConfFile) :
             terminal('\nERROR: Could not write to: project config file')
         self.writeOutProjConfFile = False
         self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
-
         return True
 
 
@@ -244,38 +260,61 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def createComponent (self, cname) :
-        if cname in self.components : return self.components[cname]
-        compconfig = self._projConfig['Components'][cname]
-        ctype = compconfig['type']
-        module = __import__(ctype)
-        compobj = getattr(module, ctype.capitalize())(self, compconfig)
-        self.components[cname] = compobj
+################################# FIXME: Start here ###########################
+
+    def initComponent (self, cid) :
+        '''Initialize a single component.'''
+
+        # Get the type
+        self.componentType = self._projConfig['Components'][cid]['type']
+
+# FIXME: How do we do this?
+        # Initialize the component type
+        m = __import__(self.componentType)
+#        self.__class__ = getattr(m, self.componentType.capitalize())
+        self.__class__ = self.componentType.capitalize()
+        
+        print getattr(self, self.componentType.capitalize())
+
+
+    def createComponent (self, cid) :
+        if cid in self.components : return self.components[cid]
+        compconfig = self._projConfig['Components'][cid]
+        cType = compconfig['type']
+        module = __import__(cType)
+        compobj = getattr(module, cType.capitalize())(self, compconfig)
+        self.components[cid] = compobj
+
+        # Initiate component
+        self.initComponent(cid)
+
         return compobj
 
 
-    def addComponent (self, cName, cType) :
+    def addComponent (self, cid, cType) :
         '''This will add a component to the object we created above in createComponent().'''
 
-        print "Creating: ", cName
+        terminal('Creating: ' + cid)
         
         buildConfSection(self._projConfig, 'Components')
-        buildConfSection(self._projConfig['Components'], cName)
-        self._projConfig['Components'][cName]['name'] = cName
-        self._projConfig['Components'][cName]['type'] = cType
+        buildConfSection(self._projConfig['Components'], cid)
+        self._projConfig['Components'][cid]['name'] = cid
+        self._projConfig['Components'][cid]['type'] = cType
         self.writeOutProjConfFile = True
 
 
-    def renderComponent (self, comp) :
+    def renderComponent (self, cid) :
         '''Render a single component.'''
 
-        print 'Rendering: ', comp
-        self.createComponent(comp).render()
+        terminal('Rendering: ' + cid)
+
+        self.createComponent(cid).render()
 
 
 
     def addCommand(self, name, cls) :
         '''Add a command to the command list.'''
+
         self.commands[name] = cls
 
 
@@ -288,7 +327,7 @@ class Project (object) :
 
     def help(self, command, opts, userConfig) :
         for k in sorted(self.commands.keys()) :
-            print k
+            terminal(k)
 
 
 ###############################################################################

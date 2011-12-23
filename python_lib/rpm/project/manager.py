@@ -36,60 +36,60 @@ class Manager(object) :
 # we may need to find a better way to manage this as it may not be too scalable, we'll see
 
 
-        if self.xmlInitFile :
-            self.initInfo = getXMLSettings(os.path.join(project.rpmConfigFolder, self.xmlInitFile))
+#        if self.xmlInitFile :
+#            self.initInfo = getXMLSettings(os.path.join(project.rpmConfigFolder, self.xmlInitFile))
 
 
-    def initManager(self) :
-        '''Do a basic (generic) initialisation according to the settings 
-        in the manager's init file, if it has one.'''
+#    def initManager(self) :
+#        '''Do a basic (generic) initialisation according to the settings 
+#        in the manager's init file, if it has one.'''
 
-        # Skip this is there is not an XML init file for this manager
-        if not self.xmlInitFile :
-            return True
+#        # Skip this is there is not an XML init file for this manager
+#        if not self.xmlInitFile :
+#            return True
 
-        files = self.initInfo['Files'].keys()
-        for f in files :
-            fn = self.initInfo['Files'][f]['name']
-            path = fn.split('/')[:-1]
-            fileName = fn.split('/')[-1:][0]
+#        files = self.initInfo['Files'].keys()
+#        for f in files :
+#            fn = self.initInfo['Files'][f]['name']
+#            path = fn.split('/')[:-1]
+#            fileName = fn.split('/')[-1:][0]
 
-            # Check for path defaults in the projConfFile If they are not there,
-            # we will create a path override section and add the default that we
-            # get from the init file.  If an override is found then we will use
-            # that value.
-            folderPath = ''
-            buildConfSection(self.project._projConfig, 'FolderNameOverride')
-            for f in path :
-                if f[0] == '%' :
-                    f = f.strip('%')
-                    try :
-                        folderPath = os.path.join(folderPath, self._projConfig['FolderNameOverride'][f])
-                    except :
-                        self.project._projConfig['FolderNameOverride'][f] = f
-                        writeConfFile(self.project._projConfig, self.project.projConfFile)
-                        folderPath = os.path.join(folderPath, f)
-                else :
-                    folderPath = os.path.join(folderPath, f)
-            
-            folderPath = os.path.join(self.project.projHome, folderPath)
-            
-            # Create the path if it is needed
-            if not os.path.exists(folderPath) :
-                os.makedirs(folderPath)
+#            # Check for path defaults in the projConfFile If they are not there,
+#            # we will create a path override section and add the default that we
+#            # get from the init file.  If an override is found then we will use
+#            # that value.
+#            folderPath = ''
+#            buildConfSection(self.project._projConfig, 'FolderNameOverride')
+#            for f in path :
+#                if f[0] == '%' :
+#                    f = f.strip('%')
+#                    try :
+#                        folderPath = os.path.join(folderPath, self._projConfig['FolderNameOverride'][f])
+#                    except :
+#                        self.project._projConfig['FolderNameOverride'][f] = f
+#                        writeConfFile(self.project._projConfig, self.project.projConfFile)
+#                        folderPath = os.path.join(folderPath, f)
+#                else :
+#                    folderPath = os.path.join(folderPath, f)
+#            
+#            folderPath = os.path.join(self.project.projHome, folderPath)
+#            
+#            # Create the path if it is needed
+#            if not os.path.exists(folderPath) :
+#                os.makedirs(folderPath)
 
-            thisFile = os.path.join(folderPath, fileName)
+#            thisFile = os.path.join(folderPath, fileName)
 
-            # Create source file name
-            sourceFile = os.path.join(self.project.rpmHome, 'resources', 'Files', fileName)
-            # Make the file if it is not already there
-            if not os.path.isfile(thisFile) :
-                if os.path.isfile(sourceFile) :
-                    shutil.copy(sourceFile, thisFile)
-                else :
-                    open(thisFile, 'w').close()
-                    if self.debugging == 'True' :
-                        terminal('Created file: ' + thisFile)
+#            # Create source file name
+#            sourceFile = os.path.join(self.project.rpmHome, 'resources', 'Files', fileName)
+#            # Make the file if it is not already there
+#            if not os.path.isfile(thisFile) :
+#                if os.path.isfile(sourceFile) :
+#                    shutil.copy(sourceFile, thisFile)
+#                else :
+#                    open(thisFile, 'w').close()
+#                    if self.debugging == 'True' :
+#                        terminal('Created file: ' + thisFile)
 
 
 

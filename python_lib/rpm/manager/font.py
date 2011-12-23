@@ -214,7 +214,6 @@ class Font (Manager) :
         # Set conf write flag and report
         self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
         self.project.writeOutProjConfFile = True
-        writeConfFile(self._fontConfig, self.fontFileName, self.processFolder)
         self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         return True
 
