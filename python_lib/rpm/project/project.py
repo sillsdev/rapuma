@@ -260,33 +260,25 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-################################# FIXME: Start here ###########################
+    def renderComponent (self, cid) :
+        '''Render a single component. This will ensure there is a component
+        object, then render it.'''
 
-    def initComponent (self, cid) :
-        '''Initialize a single component.'''
-
-        # Get the type
-        self.componentType = self._projConfig['Components'][cid]['type']
-
-# FIXME: How do we do this?
-        # Initialize the component type
-        m = __import__(self.componentType)
-#        self.__class__ = getattr(m, self.componentType.capitalize())
-        self.__class__ = self.componentType.capitalize()
-        
-        print getattr(self, self.componentType.capitalize())
+        self.createComponent(cid).render()
 
 
     def createComponent (self, cid) :
-        if cid in self.components : return self.components[cid]
-        compconfig = self._projConfig['Components'][cid]
-        cType = compconfig['type']
-        module = __import__(cType)
-        compobj = getattr(module, cType.capitalize())(self, compconfig)
-        self.components[cid] = compobj
+        '''Create a component object that can be acted on.'''
 
-        # Initiate component
-        self.initComponent(cid)
+        # If the object already exists just return it
+        if cid in self.components : return self.components[cid]
+        
+        # Otherwise, create a new one and return it
+        cfg = self._projConfig['Components'][cid]
+        cType = cfg['type']
+        module = __import__(cType)
+        compobj = getattr(module, cType.capitalize())(self, cfg)
+        self.components[cid] = compobj
 
         return compobj
 
@@ -295,21 +287,12 @@ class Project (object) :
         '''This will add a component to the object we created above in createComponent().'''
 
         terminal('Creating: ' + cid)
-        
+
         buildConfSection(self._projConfig, 'Components')
         buildConfSection(self._projConfig['Components'], cid)
         self._projConfig['Components'][cid]['name'] = cid
         self._projConfig['Components'][cid]['type'] = cType
         self.writeOutProjConfFile = True
-
-
-    def renderComponent (self, cid) :
-        '''Render a single component.'''
-
-        terminal('Rendering: ' + cid)
-
-        self.createComponent(cid).render()
-
 
 
     def addCommand(self, name, cls) :

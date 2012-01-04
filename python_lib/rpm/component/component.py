@@ -35,19 +35,22 @@ class Component (object) :
     def __init__(self, project, cfg, parent = None) :
         '''Initialize this class.'''
 
-        print "Initializing Component"
-
         self.project = project
         self.cfg = cfg
         self.parent = parent or project
         self.managers = {}
+
+
 #        for key, value in cfg['Managers'].iteritems() :
 #            self.managers[key] = project.createManager(value)
         
         # Commands that are associated with the Component level
 #        self.addCommand("component_add", cmpCmd.AddCompGroup())
 
+
     def render(self) :
-        print "Rendering Component"
+        '''Render a component.'''
+
+        terminal("Warning: Calling dummy rendering in the component class.")
 
 
