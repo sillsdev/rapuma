@@ -108,56 +108,6 @@ class Project (object) :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
-        # Bring in all the manager info here if needed
-#        for m, t in getattr(m, self.defaultManagers).items() :
-#            self.addManager(m, t)
-
-
-    def loadManager (self, manager) :
-        '''Do basic load and initialization on a manager.'''
-
-        # This gets its information from the config file
-        cfg = self._projConfig['Managers'][manager]
-        ctype = cfg['type']
-        module = __import__(ctype)
-        manobj = getattr(module, ctype.capitalize())(self, cfg)
-        self.managers[manager] = manobj
-        manobj.initManager()
-
-
-    def createManager (self, manager) :
-        '''Check to see if a manager is loaded and load it if it is not.'''
-
-        if manager not in self.managers :
-            self.loadManager(manager)
-        return self.managers[manager]
-
-
-#    def addComponentManager (self, comp, mngr, mType) :
-#        '''Add a manager reference to a component.'''
-
-#        buildConfSection(self._projConfig['Components'][comp], 'Managers')
-#        buildConfSection(self._projConfig['Components'][comp]['Managers'], mngr)
-#        self._projConfig['Components'][comp]['Managers'][mngr] = mType
-#        self.writeOutProjConfFile = True
-
-
-    def addManager (self, mName, mType) :
-        '''Create a manager reference in the project config that components will point to.'''
-
-        # Insert the Manager section if it is not already there
-        buildConfSection(self._projConfig, 'Managers')
-        buildConfSection(self._projConfig['Managers'], mName)
-        managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, mType + '.xml'))
-        for k, v, in managerDefaults.iteritems() :
-            # Do not overwrite if a value is already there
-            try :
-                self._projConfig['Managers'][mName][k]
-            except :
-                self._projConfig['Managers'][mName][k] = v
-                self.writeOutProjConfFile = True
-            
-
 
     def makeProject (self, ptype, pname, pid, pdir='') :
         '''Create a new publishing project.'''
@@ -176,6 +126,7 @@ class Project (object) :
         elif os.path.isfile(self.projConfFile + self.lockExt) :
             self.writeToLog('ERR', 'Halt! Locked project already defined in target folder')
             return False
+
         elif os.path.isfile(os.path.join(os.path.dirname(pdir), self.projConfFileName)) :
             self.writeToLog('ERR', 'Halt! Live project already defined in parent folder')
             return False
@@ -254,6 +205,50 @@ class Project (object) :
         '''Restore a project in the current folder'''
 
         pass
+
+
+###############################################################################
+############################ Manager Level Functions ##########################
+###############################################################################
+
+    def createManager (self, manager) :
+        '''Check to see if a manager is loaded and load it if it is not.'''
+
+        if manager not in self.managers :
+            self.loadManager(manager)
+            self.addManager(manager, mType)
+
+        return self.managers[manager]
+
+
+    def loadManager (self, manager) :
+        '''Do basic load and initialization on a manager.'''
+
+# FIXME: How do we load this
+
+        # This gets its information from the config file
+        cfg = self._projConfig['Managers'][manager]
+        ctype = cfg['type']
+        module = __import__(ctype)
+        manobj = getattr(module, ctype.capitalize())(self, cfg)
+        self.managers[manager] = manobj
+        manobj.initManager()
+
+
+    def addManager (self, manager) :
+        '''Create a manager reference in the project config that components will point to.'''
+
+        # Insert the Manager section if it is not already there
+        buildConfSection(self._projConfig, 'Managers')
+        buildConfSection(self._projConfig['Managers'], manager)
+        managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, manager + '.xml'))
+        for k, v, in managerDefaults.iteritems() :
+            # Do not overwrite if a value is already there
+            try :
+                self._projConfig['Managers'][manager][k]
+            except :
+                self._projConfig['Managers'][manager][k] = v
+                self.writeOutProjConfFile = True
 
 
 ###############################################################################

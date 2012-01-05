@@ -78,14 +78,12 @@ class Usfm (Component) :
     def __init__(self, project, config) :
         super(Usfm, self).__init__(project, config)
 
-#    # The default managers are named here in this dictionary with name:type
-#    # format. Where the 'name' is for this text type. The 'type' is the kind of
-#    # manager to use.
-#    # by the Book project type right here.
-#    defaultManagers = {'FontUsfmMain' : 'font', 'FormatUsfmMain' : 'format', 'StyleUsfmMain' : 'style',
-#        'FontUsfmFront' : 'font', 'FormatUsfmFront' : 'format', 'StyleUsfmFront' : 'style'}
+        # Init the managers
+        for man in ['font', 'format', 'style'] :
+            pass # for now
 
         self.compIDs = compIDs
+
 
     def render(self) :
         """Does USFM specific rendering of a USFM component"""
