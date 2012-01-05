@@ -252,7 +252,7 @@ def wordWrap (text, width) :
         text[0] = func(text.pop(0), text[0])
     return text[0]
 
-    
+
 def tStamp () :
     '''Create a simple time stamp for logging and timing purposes.'''
 

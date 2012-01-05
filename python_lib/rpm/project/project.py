@@ -309,8 +309,11 @@ class Project (object) :
 
 
     def help(self, command, opts, userConfig) :
-        for k in sorted(self.commands.keys()) :
-            terminal(k)
+        if len(opts) and opts[0] in self.commands :
+            self.commands[opts[0]].help()
+        else :
+            for k in sorted(self.commands.keys()) :
+                terminal(k)
 
 
 ###############################################################################
