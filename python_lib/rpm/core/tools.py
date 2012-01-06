@@ -34,7 +34,27 @@ from configobj import ConfigObj, Section
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-def str2bool(str):
+# FIXME: Move this into a PT specific collection of util tools.
+def getPtId () :
+    '''Assuming this publishing project is working in a Paratext project, find
+    out what the PT ID is. This will be used in a number of PT utils.'''
+
+    pass
+
+
+def testForSetting (conf, key) :
+    '''Using a try statement, this will test for a setting in a config object.
+    If its not there it returns None.'''
+
+    try :
+        setting = conf[key]
+    except :
+        setting = None
+
+    return setting
+
+
+def str2bool (str):
     '''Simple boolean tester'''
 
     if isinstance(str, basestring) and str.lower() in ['0','false','no']:

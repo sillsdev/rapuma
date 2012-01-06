@@ -15,13 +15,6 @@ Todo:
 
 <root>
     <setting>
-        <name>Manager Type</name>
-        <key>type</key>
-        <description>The manager model (type) this manager is associated with.</description>
-        <type>string</type>
-        <value>font</value>
-    </setting>
-    <setting>
         <name>Primary Font</name>
         <key>primaryFont</key>
         <description>The primary font this manager uses.</description>

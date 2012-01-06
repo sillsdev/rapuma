@@ -3,7 +3,7 @@
 rpm project_remove  -i vwxyz
 rpm project_create  -t book -n "Test Book Project" -i vwxyz -d .
 
-#rpm component_add   -c jas                  -t usfm
+rpm component_add   -c jas                  -t usfm
 #rpm component_add   -c apa                  -t adminMSEAG
 #rpm component_add   -c simpleNotes          -t projectNotes
 

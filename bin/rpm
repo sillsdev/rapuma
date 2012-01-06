@@ -146,7 +146,9 @@ if isConfSection(aProject._projConfig, 'Project') :
     aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
 
 ## In case there are any Canadians using this, politely say good bye
-terminal('Continue work at project.conf - line 224')
+
+terminal('Dev: Continue work in font.py at line 48')
+
 terminal('\n\t\tThank you, please come again!\n')
 
 

@@ -58,9 +58,9 @@ class Project (object) :
         self.userConfFileName       = 'rpm.conf'
         self.userConfFile           = os.path.join(userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
-        self.commands = {}
-        self.components = {}
-        self.componentType = {}
+        self.commands               = {}
+        self.components             = {}
+        self.componentType          = {}
 
         # Commands that are associated with the project level
         self.addCommand("project_create", projCmd.CreateProject())
@@ -69,7 +69,7 @@ class Project (object) :
         self.addCommand("project_render", projCmd.RenderProject())
         self.addCommand("component_add", projCmd.AddComponent())
         self.addCommand("component_remove", projCmd.RemoveComponent())
-        self.addCommand("component_add-manager", projCmd.AddComponentManager())
+#        self.addCommand("component_add-manager", projCmd.AddComponentManager())
         self.addCommand("component_render", projCmd.RenderComponent())
 
 
@@ -212,43 +212,42 @@ class Project (object) :
 ###############################################################################
 
     def createManager (self, manager) :
-        '''Check to see if a manager is loaded and load it if it is not.'''
+        '''Check to see if a manager is listed in the config and load it if
+        it is not already.'''
 
         if manager not in self.managers :
+            self.addManager(manager)
             self.loadManager(manager)
-            self.addManager(manager, mType)
 
         return self.managers[manager]
 
 
     def loadManager (self, manager) :
-        '''Do basic load and initialization on a manager.'''
+        '''Do basic load on a manager.'''
 
-# FIXME: How do we load this
-
-        # This gets its information from the config file
         cfg = self._projConfig['Managers'][manager]
-        ctype = cfg['type']
-        module = __import__(ctype)
-        manobj = getattr(module, ctype.capitalize())(self, cfg)
+        module = __import__(manager)
+        manobj = getattr(module, manager.capitalize())(self, cfg)
         self.managers[manager] = manobj
-        manobj.initManager()
 
 
     def addManager (self, manager) :
         '''Create a manager reference in the project config that components will point to.'''
 
         # Insert the Manager section if it is not already there
-        buildConfSection(self._projConfig, 'Managers')
-        buildConfSection(self._projConfig['Managers'], manager)
-        managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, manager + '.xml'))
-        for k, v, in managerDefaults.iteritems() :
-            # Do not overwrite if a value is already there
-            try :
-                self._projConfig['Managers'][manager][k]
-            except :
-                self._projConfig['Managers'][manager][k] = v
-                self.writeOutProjConfFile = True
+        try :
+            x = self._projConfig['Managers'][manager]
+        except :
+            buildConfSection(self._projConfig, 'Managers')
+            buildConfSection(self._projConfig['Managers'], manager)
+            managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, manager + '.xml'))
+            for k, v, in managerDefaults.iteritems() :
+                # Do not overwrite if a value is already there
+                try :
+                    self._projConfig['Managers'][manager][k]
+                except :
+                    self._projConfig['Managers'][manager][k] = v
+                    self.writeOutProjConfFile = True
 
 
 ###############################################################################
@@ -281,13 +280,15 @@ class Project (object) :
     def addComponent (self, cid, cType) :
         '''This will add a component to the object we created above in createComponent().'''
 
-        terminal('Creating: ' + cid)
-
-        buildConfSection(self._projConfig, 'Components')
-        buildConfSection(self._projConfig['Components'], cid)
-        self._projConfig['Components'][cid]['name'] = cid
-        self._projConfig['Components'][cid]['type'] = cType
-        self.writeOutProjConfFile = True
+        try :
+            x = self._projConfig['Components'][cid]
+        except :
+            buildConfSection(self._projConfig, 'Components')
+            buildConfSection(self._projConfig['Components'], cid)
+            self._projConfig['Components'][cid]['name'] = cid
+            self._projConfig['Components'][cid]['type'] = cType
+            self.writeOutProjConfFile = True
+            self.writeToLog('MSG', 'Created: ' + cid + ' config entry')
 
 
     def addCommand(self, name, cls) :

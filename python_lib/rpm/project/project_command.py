@@ -141,7 +141,7 @@ class AddComponent (Command) :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-n", "--name", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
+        self.parser.add_option("-c", "--name", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
         self.parser.add_option("-t", "--type", type="string", action="store", default="usfm", help="Assign the component markup type. Default is USFM.")
 
 
@@ -162,23 +162,23 @@ class RemoveComponent (Command) :
         self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component from the project. (Required)")
 
 
-class AddComponentManager (Command) :
-    '''Add a manager to a component.'''
+#class AddComponentManager (Command) :
+#    '''Add a manager to a component.'''
 
-    type = "component_add-manager"
+#    type = "component_add-manager"
 
-    def run (self, args, aProject, userConfig) :
-        super(AddComponentManager, self).run(args, aProject, userConfig)
+#    def run (self, args, aProject, userConfig) :
+#        super(AddComponentManager, self).run(args, aProject, userConfig)
 
-        if self.options :
-            aProject.addComponentManager(self.options.comp, self.options.manager, self.options.mtype)
-        else :
-            raise SyntaxError, "Error: Missing required arguments!"
+#        if self.options :
+#            aProject.addComponentManager(self.options.comp, self.options.manager, self.options.mtype)
+#        else :
+#            raise SyntaxError, "Error: Missing required arguments!"
 
-    def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--comp", type="string", action="store", help="List the component ID for this component. (Required)")
-        self.parser.add_option("-m", "--manager", type="string", action="store", help="List the ID for the manager to be bound to this component.")
-        self.parser.add_option("-t", "--mtype", type="string", action="store", help="List the type of this manager.")
+#    def setupOptions (self, parser) :
+#        self.parser.add_option("-c", "--comp", type="string", action="store", help="List the component ID for this component. (Required)")
+#        self.parser.add_option("-m", "--manager", type="string", action="store", help="List the ID for the manager to be bound to this component.")
+#        self.parser.add_option("-t", "--mtype", type="string", action="store", help="List the type of this manager.")
 
 
 class RenderComponent (Command) :

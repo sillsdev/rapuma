@@ -43,10 +43,14 @@ class Font (Manager) :
 
         super(Font, self).__init__(project, cfg)
 
-        terminal("Initializing Font Manager")
-
+# FIXME: If we load the manager via the component, this can't work the way we need it to
+# The command needs to be available up front. Do we need to move all commands to the project_command file?
         # Add commands for this manager
         project.addCommand("font_add", fntCmd.AddFont(self))
+
+# FIXME: How do we really access this model after it has been loaded for a specific component?
+# The manager might have done some intialization but then it needs to do its managing work when
+# the component function calls on it. How is that done?
 
         # Set values for this manager
         self.fontFileName       = 'fonts.conf'

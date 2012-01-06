@@ -41,13 +41,6 @@ class Component (object) :
         self.managers = {}
 
 
-#        for key, value in cfg['Managers'].iteritems() :
-#            self.managers[key] = project.createManager(value)
-        
-        # Commands that are associated with the Component level
-#        self.addCommand("component_add", cmpCmd.AddCompGroup())
-
-
     def render(self) :
         '''Render a component.'''
 
