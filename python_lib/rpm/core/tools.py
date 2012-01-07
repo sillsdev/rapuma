@@ -47,11 +47,9 @@ def testForSetting (conf, key) :
     If its not there it returns None.'''
 
     try :
-        setting = conf[key]
+        return conf[key]
     except :
-        setting = None
-
-    return setting
+        return
 
 
 def str2bool (str):

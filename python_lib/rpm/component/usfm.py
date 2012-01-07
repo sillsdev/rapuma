@@ -84,7 +84,8 @@ class Usfm (Component) :
         self.defaultRenderer = 'xetex'
         self.defaultSourceType = 'paratext'
         self.defaultStyleFile = 'usfm.sty'
-        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
+        self.defaultFontFamily = 'CharisSIL'
+#        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
 #        self.usfmManagers = ['source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
         self.usfmManagers = ['font']
 
@@ -183,8 +184,8 @@ class Usfm (Component) :
 
 
         # Init the managers
-        for manager in self.usfmManagers :
-            self.project.createManager(manager)
+        for mType in self.usfmManagers :
+            self.project.createManager('usfm', mType)
 
 
     def render(self) :
@@ -199,6 +200,12 @@ class Usfm (Component) :
         renderer = testForSetting(self.cfg, 'renderer')
         if not renderer :
             renderer = self.defaultRenderer
+
+        # Check for font
+        fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
+        if not fontFamily :
+            fontFamily = self.defaultFontFamily
+            self.project.managers['usfm_Font'].addFont(fontFamily)
 
         # Check for source
         sourceFile = testForSetting(self.cfg, 'sourceFile')

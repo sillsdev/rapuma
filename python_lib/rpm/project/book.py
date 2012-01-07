@@ -35,6 +35,7 @@ class Book (Project) :
     '''This contains basic information about a type of project.'''
 
     configfile = "book.xml"
+    projectManagers = ['source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
 
 
 

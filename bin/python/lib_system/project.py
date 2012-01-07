@@ -107,29 +107,6 @@ class Project (object) :
         self.writeOutUserConfFile   = False
         self.isProjectInitalized    = False
 
-        # If this project is still new these may not exist yet
-#        try :
-
-#            # Walk the ComponentTypes section and try to load commands if there are any
-#            if isConfSection(self._projConfig, 'ComponentTypes') :
-#                for ctype in self._projConfig['ComponentTypes'].keys() :
-#                    sys.path.insert(0, os.path.join(self.rpmCompTypes, ctype, 'lib_python'))
-#                    __import__(ctype)
-#                    __import__(ctype + '_command')
-#             
-#            # Walk the AuxiliaryTypes section and try to load commands if there are any
-#            if isConfSection(self._projConfig, 'AuxiliaryTypes') :
-#                for atype in self._projConfig['AuxiliaryTypes'].keys() :
-#                    sys.path.insert(0, os.path.join(self.rpmAuxTypes, atype, 'lib_python'))
-#                    __import__(atype)
-#                    __import__(atype + '_command')
-
-#            # Clean up the path, we don't need this stuck there
-#            del sys.path[0]
-
-#        except StandardError as e:
-#            self.writeToLog('ERR', 'Failed to load component! due to error: {0}\n'.format(e))
-
 
 ###############################################################################
 ############################ Project Level Functions ##########################

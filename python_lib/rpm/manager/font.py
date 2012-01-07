@@ -69,6 +69,8 @@ class Font (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+    def testFunction (self) :
+        print 'I work!'
 
 
     def makeFontInfoTexFile (self) :
@@ -161,7 +163,8 @@ class Font (Manager) :
         return True
 
 
-    def addFont (self, ftype, font, rank='None') :
+#    def addFont (self, ftype, font, rank='None') :
+    def addFont (self, font, rank='None') :
         '''Setup a font for a specific typeface and create a fonts.conf file in
         the process folder.'''
 
@@ -218,7 +221,7 @@ class Font (Manager) :
         # Set conf write flag and report
         self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
         self.project.writeOutProjConfFile = True
-        self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
+#        self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
         return True
 
 

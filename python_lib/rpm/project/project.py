@@ -211,42 +211,42 @@ class Project (object) :
 ############################ Manager Level Functions ##########################
 ###############################################################################
 
-    def createManager (self, manager) :
+    def createManager (self, cType, mType) :
         '''Check to see if a manager is listed in the config and load it if
         it is not already.'''
 
-        if manager not in self.managers :
-            self.addManager(manager)
-            self.loadManager(manager)
+        fullName = cType + '_' + mType.capitalize()
+        if fullName not in self.managers :
+            self.addManager(cType, mType)
+            self.loadManager(cType, mType)
 
-        return self.managers[manager]
+        self.writeToLog('LOG', 'Created the [' + fullName + '] manager object.')
+        return self.managers[fullName]
 
 
-    def loadManager (self, manager) :
+    def loadManager (self, cType, mType) :
         '''Do basic load on a manager.'''
 
-        cfg = self._projConfig['Managers'][manager]
-        module = __import__(manager)
-        manobj = getattr(module, manager.capitalize())(self, cfg)
-        self.managers[manager] = manobj
+        fullName = cType + '_' + mType.capitalize()
+        cfg = self._projConfig['Managers'][fullName]
+        module = __import__(mType)
+        manobj = getattr(module, mType.capitalize())(self, cfg)
+        self.managers[fullName] = manobj
 
 
-    def addManager (self, manager) :
+    def addManager (self, cType, mType) :
         '''Create a manager reference in the project config that components will point to.'''
 
+        fullName = cType + '_' + mType.capitalize()
         # Insert the Manager section if it is not already there
-        try :
-            x = self._projConfig['Managers'][manager]
-        except :
-            buildConfSection(self._projConfig, 'Managers')
-            buildConfSection(self._projConfig['Managers'], manager)
-            managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, manager + '.xml'))
+        buildConfSection(self._projConfig, 'Managers')
+        if not testForSetting(self._projConfig['Managers'], fullName) :
+            buildConfSection(self._projConfig['Managers'], fullName)
+            managerDefaults = getXMLSettings(os.path.join(self.rpmConfigFolder, mType + '.xml'))
             for k, v, in managerDefaults.iteritems() :
                 # Do not overwrite if a value is already there
-                try :
-                    self._projConfig['Managers'][manager][k]
-                except :
-                    self._projConfig['Managers'][manager][k] = v
+                if not testForSetting(self._projConfig['Managers'][fullName], k) :
+                    self._projConfig['Managers'][fullName][k] = v
                     self.writeOutProjConfFile = True
 
 
@@ -278,7 +278,8 @@ class Project (object) :
 
 
     def addComponent (self, cid, cType) :
-        '''This will add a component to the object we created above in createComponent().'''
+        '''This will add a component to the object we created 
+        above in createComponent().'''
 
         try :
             x = self._projConfig['Components'][cid]
@@ -289,6 +290,11 @@ class Project (object) :
             self._projConfig['Components'][cid]['type'] = cType
             self.writeOutProjConfFile = True
             self.writeToLog('MSG', 'Created: ' + cid + ' config entry')
+
+
+###############################################################################
+############################ System Level Functions ###########################
+###############################################################################
 
 
     def addCommand(self, name, cls) :
@@ -310,11 +316,6 @@ class Project (object) :
         else :
             for k in sorted(self.commands.keys()) :
                 terminal(k)
-
-
-###############################################################################
-############################ System Level Functions ###########################
-###############################################################################
 
 
     def changeSystemSetting (self, key, value) :
