@@ -43,16 +43,9 @@ class Font (Manager) :
 
         super(Font, self).__init__(project, cfg)
 
-# FIXME: If we load the manager via the component, this can't work the way we need it to
-# The command needs to be available up front. Do we need to move all commands to the project_command file?
-        # Add commands for this manager
-        project.addCommand("font_add", fntCmd.AddFont(self))
-
-# FIXME: How do we really access this model after it has been loaded for a specific component?
-# The manager might have done some intialization but then it needs to do its managing work when
-# the component function calls on it. How is that done?
-
         # Set values for this manager
+        self.project            = project
+        self.cfg                = cfg
         self.fontFileName       = 'fonts.conf'
         self.fontFolderName     = 'Fonts'
         self.fontFolder         = os.path.join(self.project.projHome, self.fontFolderName)
@@ -163,6 +156,35 @@ class Font (Manager) :
         return True
 
 
+    def recordFont (self, font) :
+        '''Check for the exsitance of a font in the project conf file.
+        If there is one, return, if not add it.'''
+
+        # It is expected that all the necessary meta data for this font is in
+        # a file located with the font. The system expects to find it in:
+        # ~/resources/lib_share/Fonts/[FontID]
+        fontDir = os.path.join(self.project.rpmFontsFolder, font)
+        fontInfo = os.path.join(self.project.rpmFontsFolder, font, font + '.xml')
+        if not os.path.isfile(fontInfo) :
+            self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
+            return False
+
+        # Inject the font info into the project format config file.
+        fInfo = getXMLSettings(fontInfo)
+        buildConfSection (self.project._projConfig, 'Fonts')
+        buildConfSection (self.project._projConfig['Fonts'], font)
+        self.project._projConfig['Fonts'][font] = fInfo.dict()
+
+        self.project.writeOutProjConfFile = True
+        self.project.writeToLog('LOG', font + ' font setup information added to project config')
+        return True
+
+
+    def installFont (self, font) :
+        '''Install (copy) a font into a project.'''
+
+        
+
 #    def addFont (self, ftype, font, rank='None') :
     def addFont (self, font, rank='None') :
         '''Setup a font for a specific typeface and create a fonts.conf file in
@@ -175,7 +197,7 @@ class Font (Manager) :
 
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
-        # ~/lib_share/Fonts/[FontID]
+        # ~/resources/lib_share/Fonts/[FontID]
         # There will be a minimal number of fonts in the system but we will look
         # in the user area first. That is where the fonts really should be kept.
         # If it is unable to find the font in either the user area or the system

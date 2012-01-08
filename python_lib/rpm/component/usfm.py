@@ -205,7 +205,9 @@ class Usfm (Component) :
         fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
         if not fontFamily :
             fontFamily = self.defaultFontFamily
-            self.project.managers['usfm_Font'].addFont(fontFamily)
+            self.project.managers['usfm_Font'].recordFont(fontFamily)
+            self.project.managers['usfm_Font'].installFont(fontFamily)
+# FIXME: Still need to record the font with the manager
 
         # Check for source
         sourceFile = testForSetting(self.cfg, 'sourceFile')
