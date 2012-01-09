@@ -149,7 +149,7 @@ class Project (object) :
         # If we made it to this point we need to check to see if the project
         # folder exists, if it doesn't make it.
         if not os.path.exists(pdir) :
-            os.mkdirs(pdir)
+            os.makedirs(pdir)
 
         # Create a new version of the project config file
         self.writeOutProjConfFile = True

@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, shutil
 
 
 # Load the local classes
@@ -61,9 +61,6 @@ class Font (Manager) :
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
-
-    def testFunction (self) :
-        print 'I work!'
 
 
     def makeFontInfoTexFile (self) :
@@ -120,43 +117,43 @@ class Font (Manager) :
             return True
 
 
-    def initFonts (self) :
-        '''Initialize the fonts for this auxiliary component by finding and
-        copying the fonts into the project from the source.  Of course this only
-        works if there are any fonts set for a given aux.'''
+#    def initFonts (self) :
+#        '''Initialize the fonts for this auxiliary component by finding and
+#        copying the fonts into the project from the source.  Of course this only
+#        works if there are any fonts set for a given aux.'''
 
-        for font in self.project._projConfig['FontInformation']['installedFonts'] :
-            fontInfo = self._fontConfig['Fonts'][font]
-            # Make the font family folder for this typeface
-            fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
-            if not os.path.isdir(fontFamilyFolder) :
-                os.mkdir(fontFamilyFolder)
-                
-            # Now loop through all the typefaces in this family and copy over the files
-            for tf in fontInfo.keys() :
-                if tf[:8] == 'Typeface' :
-                    # Find the source font file name and path, always use the user's version
-                    fontFileName = fontInfo[tf]['file']
-                    fontSource = None
-                    # System version
-                    if os.path.isfile(os.path.join(self.project.rpmFonts, font, fontFileName)) :
-                        fontSource = os.path.join(self.project.rpmFonts, font, fontFileName)
-                    # User version
-                    if os.path.isfile(os.path.join(self.project.userFonts, font, fontFileName)) :
-                        fontSource = os.path.join(self.project.userFonts, font, fontFileName)
-                    # Crash and burn if the font file is not found
-                    if not fontSource :
-                        self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
-                        return False
-                    # Copy the font file if need be
-                    fontFilePath = os.path.join(self.fontFolder, font, fontFileName)
-                    if not os.path.isfile(fontFilePath) :
-                        shutil.copy(fontSource, fontFilePath)
+#        for font in self.project._projConfig['FontInformation']['installedFonts'] :
+#            fontInfo = self._fontConfig['Fonts'][font]
+#            # Make the font family folder for this typeface
+#            fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
+#            if not os.path.isdir(fontFamilyFolder) :
+#                os.mkdir(fontFamilyFolder)
+#                
+#            # Now loop through all the typefaces in this family and copy over the files
+#            for tf in fontInfo.keys() :
+#                if tf[:8] == 'Typeface' :
+#                    # Find the source font file name and path, always use the user's version
+#                    fontFileName = fontInfo[tf]['file']
+#                    fontSource = None
+#                    # System version
+#                    if os.path.isfile(os.path.join(self.project.rpmFonts, font, fontFileName)) :
+#                        fontSource = os.path.join(self.project.rpmFonts, font, fontFileName)
+#                    # User version
+#                    if os.path.isfile(os.path.join(self.project.userFonts, font, fontFileName)) :
+#                        fontSource = os.path.join(self.project.userFonts, font, fontFileName)
+#                    # Crash and burn if the font file is not found
+#                    if not fontSource :
+#                        self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
+#                        return False
+#                    # Copy the font file if need be
+#                    fontFilePath = os.path.join(self.fontFolder, font, fontFileName)
+#                    if not os.path.isfile(fontFilePath) :
+#                        shutil.copy(fontSource, fontFilePath)
 
-        return True
+#        return True
 
 
-    def recordFont (self, font) :
+    def recordFont (self, font, manager) :
         '''Check for the exsitance of a font in the project conf file.
         If there is one, return, if not add it.'''
 
@@ -175,76 +172,110 @@ class Font (Manager) :
         buildConfSection (self.project._projConfig['Fonts'], font)
         self.project._projConfig['Fonts'][font] = fInfo.dict()
 
+        # Record the font with the font manager that called it
+        if not self.project._projConfig['Managers'][manager]['primaryFont'] :
+            self.project._projConfig['Managers'][manager]['primaryFont'] = font
+            self.project._projConfig['Managers'][manager]['installedFonts'] = [font]
+        else :
+            fontList = self.project._projConfig['Managers'][manager]['installedFonts']
+            self.project._projConfig['Managers'][manager]['installedFonts'] = addToList(fontList, font)
+
         self.project.writeOutProjConfFile = True
         self.project.writeToLog('LOG', font + ' font setup information added to project config')
         return True
 
 
-    def installFont (self, font) :
+    def installFont (self, font, manager) :
         '''Install (copy) a font into a project.'''
 
-        
+        for font in self.project._projConfig['Managers'][manager]['installedFonts'] :
+            fontInfo = self.project._projConfig['Fonts'][font]
+            # Make the font family folder for this typeface
+            fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
+            if not os.path.isdir(fontFamilyFolder) :
+                os.makedirs(fontFamilyFolder)
+
+            # Now loop through all the typefaces in this family and copy over the files
+            for tf in fontInfo.keys() :
+                if tf[:8] == 'Typeface' :
+                    # Find the source font file name and path, always use the user's version
+                    fontFileName = fontInfo[tf]['file']
+                    fontSource = None
+                    # System version
+                    if os.path.isfile(os.path.join(self.project.rpmFontsFolder, font, fontFileName)) :
+                        fontSource = os.path.join(self.project.rpmFontsFolder, font, fontFileName)
+                    # Crash and burn if the font file is not found
+                    if not fontSource :
+                        self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
+                        return False
+                    # Copy the font file if need be
+                    fontFilePath = os.path.join(self.fontFolder, font, fontFileName)
+                    if not os.path.isfile(fontFilePath) :
+                        shutil.copy(fontSource, fontFilePath)
+
+        return True
+
 
 #    def addFont (self, ftype, font, rank='None') :
-    def addFont (self, font, rank='None') :
-        '''Setup a font for a specific typeface and create a fonts.conf file in
-        the process folder.'''
+#    def addFont (self, font, rank='None') :
+#        '''Setup a font for a specific typeface and create a fonts.conf file in
+#        the process folder.'''
 
-        # First, delete the existing font info TeX file.  Everything changes if
-        # we add a font to this aux
-        if os.path.isfile(os.path.join(self.processFolder, self.aid + '.tex')) :
-            os.remove(os.path.join(self.processFolder, self.aid + '.tex'))
+#        # First, delete the existing font info TeX file.  Everything changes if
+#        # we add a font to this aux
+#        if os.path.isfile(os.path.join(self.processFolder, self.aid + '.tex')) :
+#            os.remove(os.path.join(self.processFolder, self.aid + '.tex'))
 
-        # It is expected that all the necessary meta data for this font is in
-        # a file located with the font. The system expects to find it in:
-        # ~/resources/lib_share/Fonts/[FontID]
-        # There will be a minimal number of fonts in the system but we will look
-        # in the user area first. That is where the fonts really should be kept.
-        # If it is unable to find the font in either the user area or the system
-        # resources shared area, it will fail.
-        if os.path.isfile(os.path.join(self.project.userFonts, font, font + '.xml')) :
-            self.project.writeToLog('LOG', 'Found ' + font + '.xml in user resources.')
-            fontDir = os.path.join(self.project.userFonts, font)
-            fontInfo = os.path.join(self.project.userFonts, font, font + '.xml')
-        elif os.path.isfile(os.path.join(self.project.rpmFonts, font, font + '.xml')) :
-            self.project.writeToLog('LOG', 'Found ' + font + '.xml in RPM resources.')
-            fontDir = os.path.join(self.project.rpmFonts, font)
-            fontInfo = os.path.join(self.project.rpmFonts, font, font + '.xml')
-        else :
-            self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
-            return False
+#        # It is expected that all the necessary meta data for this font is in
+#        # a file located with the font. The system expects to find it in:
+#        # ~/resources/lib_share/Fonts/[FontID]
+#        # There will be a minimal number of fonts in the system but we will look
+#        # in the user area first. That is where the fonts really should be kept.
+#        # If it is unable to find the font in either the user area or the system
+#        # resources shared area, it will fail.
+#        if os.path.isfile(os.path.join(self.project.userFonts, font, font + '.xml')) :
+#            self.project.writeToLog('LOG', 'Found ' + font + '.xml in user resources.')
+#            fontDir = os.path.join(self.project.userFonts, font)
+#            fontInfo = os.path.join(self.project.userFonts, font, font + '.xml')
+#        elif os.path.isfile(os.path.join(self.project.rpmFonts, font, font + '.xml')) :
+#            self.project.writeToLog('LOG', 'Found ' + font + '.xml in RPM resources.')
+#            fontDir = os.path.join(self.project.rpmFonts, font)
+#            fontInfo = os.path.join(self.project.rpmFonts, font, font + '.xml')
+#        else :
+#            self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
+#            return False
 
-        # Inject the font info into the project format config file.
-        fInfo = getXMLSettings(fontInfo)
-        buildConfSection (self._fontConfig['Fonts'], font)
-        self._fontConfig['Fonts'][font] = fInfo.dict()
+#        # Inject the font info into the project format config file.
+#        fInfo = getXMLSettings(fontInfo)
+#        buildConfSection (self._fontConfig['Fonts'], font)
+#        self._fontConfig['Fonts'][font] = fInfo.dict()
 
-        # Add to installed fonts list for this auxiliary type, only one instance allowed
-        if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
-            listOrder = []
-            listOrder = self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']
-            listOrder.append(font)
-            self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] = listOrder
+#        # Add to installed fonts list for this auxiliary type, only one instance allowed
+#        if font not in self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] :
+#            listOrder = []
+#            listOrder = self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts']
+#            listOrder.append(font)
+#            self.project._projConfig['AuxiliaryTypes'][self.type]['installedFonts'] = listOrder
 
-        if font not in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
-            listOrder = []
-            listOrder = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
-            listOrder.append(font)
-            self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = listOrder
+#        if font not in self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] :
+#            listOrder = []
+#            listOrder = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
+#            listOrder.append(font)
+#            self.project._projConfig['Auxiliaries'][self.aid]['installedFonts'] = listOrder
 
-        # Check to see if the primary font has been set
-        if rank.lower() == 'primary' :
-            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self._fontConfig['Fonts'][font]['FontInformation']['fontID']
+#        # Check to see if the primary font has been set
+#        if rank.lower() == 'primary' :
+#            self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] = self._fontConfig['Fonts'][font]['FontInformation']['fontID']
 
-        # Add any features that this aux needs to have with this specific font.
-        buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
-        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self._fontConfig['Fonts'][font]['FontInformation']['features']
+#        # Add any features that this aux needs to have with this specific font.
+#        buildConfSection(self.project._projConfig['Auxiliaries'][self.aid], font)
+#        self.project._projConfig['Auxiliaries'][self.aid][font]['features'] = self._fontConfig['Fonts'][font]['FontInformation']['features']
 
-        # Set conf write flag and report
-        self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
-        self.project.writeOutProjConfFile = True
-#        self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
-        return True
+#        # Set conf write flag and report
+#        self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = True
+#        self.project.writeOutProjConfFile = True
+##        self.project.writeToLog('MSG', font + ' font setup information added to [' + ftype + '] component')     
+#        return True
 
 
     def removeAuxFont (self, ftype, font) :

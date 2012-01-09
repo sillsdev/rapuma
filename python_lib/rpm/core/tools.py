@@ -42,6 +42,22 @@ def getPtId () :
     pass
 
 
+def addToList (thisList, item) :
+    '''Generic function to add an item to any list if it isn't there already.
+    If not, just return the list contents or an empty list.'''
+
+    if len(thisList) != 0 :
+        if item not in thisList :
+            listOrder = []
+            listOrder = thisList
+            listOrder.append(item)
+            return listOrder
+        else :
+            return thisList
+    else :
+        return thisList
+
+
 def testForSetting (conf, key) :
     '''Using a try statement, this will test for a setting in a config object.
     If its not there it returns None.'''

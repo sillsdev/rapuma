@@ -201,13 +201,19 @@ class Usfm (Component) :
         if not renderer :
             renderer = self.defaultRenderer
 
-        # Check for font
+        # Check for font elements and information
         fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
         if not fontFamily :
             fontFamily = self.defaultFontFamily
-            self.project.managers['usfm_Font'].recordFont(fontFamily)
-            self.project.managers['usfm_Font'].installFont(fontFamily)
-# FIXME: Still need to record the font with the manager
+            self.project.managers['usfm_Font'].recordFont(fontFamily, 'usfm_Font')
+            self.project.managers['usfm_Font'].installFont(fontFamily, 'usfm_Font')
+            # Check to see what kind of renderer we are using and create any supporting
+            # font config files needed
+            if renderer == 'xetex' :
+                self.project.managers['usfm_Font'].makeFontInfoTexFile()
+            else :
+                self.project.writeToLog('ERR', 'The [' + renderer + '] is not supported by RPM at this time')
+
 
         # Check for source
         sourceFile = testForSetting(self.cfg, 'sourceFile')
