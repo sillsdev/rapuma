@@ -97,92 +97,6 @@ class Usfm (Component) :
 #    illustration - Manage illustrations for all component types and renderers
 #    hyphenation - Manage hyphenation information for components according to renderer
 
-
-#(02:40:10 PM) uniscript: so onto rpm?
-#(02:41:27 PM) Dennis: Yes, 
-#(02:41:58 PM) Dennis: So, I'm setting up comps and see that I want to run my managers from inside the comp, I think
-#(02:42:13 PM) Dennis: I'm not sure how to do that
-#(02:42:20 PM) Dennis: or if I want to
-#(02:42:37 PM) uniscript: ask the project to get the manager for you
-#(02:43:02 PM) uniscript: I doubt you want to 'run' a manager so much as query it or have it do some calculation for you and return the (string) result
-#(02:43:05 PM) Dennis: But different comps will need the manager to act differently
-#(02:43:26 PM) uniscript: for example?
-#(02:43:57 PM) Dennis: thinking...
-#(02:45:04 PM) Dennis: Ok, if I have a type of project that has types of components, wouldn't I need to load the managers when I get to the component level?
-#(02:45:30 PM) uniscript: just have the component ask the project for the manager
-#(02:45:31 PM) Dennis: Or, should I load every possible manager at the project level?
-#(02:45:36 PM) uniscript: the project loads it if it hasn't done so already
-#(02:46:16 PM) uniscript: the project passes the manager to the component, who does not keep hold of a reference to it in self.something
-#(02:46:20 PM) uniscript: note the NOT there
-#(02:46:24 PM) Dennis: Ok, so I will move all the manager info up to book, which is a type of project
-#(02:46:34 PM) uniscript: and the component can now query or tell the manager to do something
-#(02:46:39 PM) uniscript: yes
-#(02:46:43 PM) uniscript: no
-#(02:46:44 PM) uniscript: err
-#(02:47:11 PM) uniscript: a component will say to the book project: I need the mainfont manager
-#(02:47:22 PM) uniscript: since the component knows that its font manager is called mainfont
-#(02:47:29 PM) uniscript: because we told it that as part of its config
-#(02:47:46 PM) uniscript: the project will go "oh yeh I have one of those around here someplace, here go you"
-#(02:48:00 PM) uniscript: and then the component can bug that poor manager silly
-#(02:49:40 PM) Dennis: I think I've drifted from task specific managers to more generalized ones. For example, the font manager would handle font for all possible renderers in the system
-#(02:49:52 PM) uniscript: no
-#(02:49:53 PM) Dennis: Is that not a good direction
-#(02:50:15 PM) uniscript: well yes ok it could
-#(02:50:36 PM) uniscript: but a single font manager is not going to hold all the font configuration for all of the components in a  project
-#(02:50:48 PM) Dennis: true
-#(02:50:54 PM) uniscript: and it's up to you if you have a tex specific font manager
-#(02:51:02 PM) uniscript: subclassing a generic font manager
-#(02:51:08 PM) uniscript: or you have a generic font manager
-#(02:51:18 PM) uniscript: it depends how clever you want to make your manager
-#(02:51:34 PM) uniscript: the issue is that you don't try to just have one manager store everything
-#(02:51:46 PM) uniscript: if different components can have different configurations for a manager
-#(02:51:52 PM) uniscript: then you need different managers of the same type
-#(02:51:58 PM) Dennis: the font manager would be able to know what the renderer is and then produce the needed output
-#(02:52:29 PM) uniscript: given the project would create a font manager of the correct type, I suppose, yes
-#(02:52:49 PM) uniscript: but remember a map may want the same font manager to output very different info from a usfm book
-#(02:53:01 PM) Dennis: true
-#(02:53:42 PM) uniscript: want a car image?
-#(02:53:45 PM) Dennis: so you are suggesting that I create lots of little managers that are very task specific, right?
-#(02:53:50 PM) uniscript: front wheels are components with breaks
-#(02:53:54 PM) uniscript: as are back wheels
-#(02:54:13 PM) uniscript: front and back wheels are subtly different and they will have different break managers
-#(02:54:28 PM) uniscript: notice that back wheels will be told to stop by both the foot and the hand break
-#(02:54:34 PM) Dennis: that helps :-)
-#(02:54:37 PM) uniscript: only the font wheels are only stopped with the foot break
-#(02:54:54 PM) uniscript: so breaks need to be able to stop with either foot or hand break
-#(02:55:04 PM) uniscript: even though front breaks will never be told to stop with a hand break
-#(02:55:46 PM) uniscript: so we have 2 classes: wheels (components), breaks (manager)
-#(02:55:50 PM) Dennis: so lots of little managers that all get loaded at the project level and are called by the components as needed
-#(02:56:02 PM) uniscript: but 4 instances: front wheel, back wheel, front break, back break
-#(02:56:07 PM) uniscript: right
-#(02:56:31 PM) uniscript: basically, shared config between components should go into a manager
-#(02:57:01 PM) Dennis: so calling a manager would be something like:
-#self.project.thisManager('var')
-#(02:57:06 PM) uniscript: thus stylesheet is a manager
-#(02:57:28 PM) uniscript: self.project.createManager(self.cfg['managers']['font'])
-#(02:58:09 PM) Dennis: Oh, I remember that, not sure if I have my head around that yet
-#(02:58:35 PM) Dennis: I'll need to play around with the config structure to see the data flow
-#(02:58:42 PM) uniscript: ok
-#(02:59:49 PM) Dennis: I'll try to sum this up in notes in my code and think about it more as I pedal home
-#(02:59:59 PM) Dennis: Hopefully something will click
-#(03:00:06 PM) uniscript: ok, we can take another bite on Monday
-#(03:00:34 PM) Dennis: I just want to be sure I don't head the wrong direction and have to do a rewrite, that's my biggest fear
-#(03:00:44 PM) uniscript: yup
-#(03:01:22 PM) Dennis: So should I be doing all the manager loading in the project type (book.py) module when it inits?
-#(03:01:38 PM) uniscript: don't know
-#(03:01:44 PM) uniscript: at the moment it makes no difference
-#(03:01:56 PM) uniscript: since everything will ask for what it wants and you can load it then
-#(03:02:15 PM) uniscript: there's nothing to be gained by preloading
-#(03:02:25 PM) uniscript: so probably not
-#(03:02:31 PM) Dennis: hmm, yes, and you are calling for basically custom, on-the-fly managers
-#(03:02:35 PM) uniscript: why load the map fonts when you are rendering james?
-#(03:02:45 PM) Dennis: yes, I see
-#(03:03:51 PM) Dennis: So, I would be making all these little custom managers when the component type class is loading
-#(03:04:48 PM) Dennis: I'll think about it, probably will need to talk more on Monday
-#(03:04:55 PM) Dennis: thanks for your help
-#(03:04:55 PM) uniscript: nw
-
-
         # Init the managers
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
@@ -200,6 +114,10 @@ class Usfm (Component) :
         renderer = testForSetting(self.cfg, 'renderer')
         if not renderer :
             renderer = self.defaultRenderer
+# FIXME: Start here
+        # Setup renderer (if needed)
+        if not testForSetting(self.project._projConfig['Renderers'], renderer) :
+            print "xxxxxxxxxxxx", renderer, testForSetting(self.project._projConfig['Renderers'], renderer)
 
         # Check for font elements and information
         fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
