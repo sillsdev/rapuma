@@ -15,18 +15,11 @@ Todo:
 
 <root>
     <setting>
-        <name>Primary Font</name>
-        <key>primaryFont</key>
-        <description>The primary font this manager uses.</description>
+        <name>Process Folder</name>
+        <key>processFolder</key>
+        <description>The folder were the font information will be kept.</description>
         <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Installed Fonts</name>
-        <key>installedFonts</key>
-        <description>All the fonts this font manager uses.</description>
-        <type>list</type>
-        <value></value>
+        <value>Process</value>
     </setting>
 </root>
 

@@ -81,22 +81,19 @@ class Usfm (Component) :
 
         self.compIDs = compIDs
         self.project = project
-#        self.defaultRenderer = 'xetex'
-#        self.defaultSourceType = 'paratext'
-#        self.defaultStyleFile = 'usfm.sty'
-#        self.defaultFontFamily = 'CharisSIL'
 
         # Get settings from config file (or defaults if they are not there)
         if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
             compDefaults = getXMLSettings(os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
+            buildConfSection(self.project._projConfig, 'CompTypes')
+            buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
             for k, v, in compDefaults.iteritems() :
                 self.project._projConfig['CompTypes']['Usfm'][k] = v
 
             self.project.writeOutProjConfFile = True
 
-# FIXME: Need to isolate the comp type config here
-
-        for k, v in self.project._projConfig['CompTypes']['Usfm'].iteritems() :
+        self.compConfig = self.project._projConfig['CompTypes']['Usfm']
+        for k, v in self.compConfig.iteritems() :
             setattr(self, k, v)
 
 
@@ -104,20 +101,13 @@ class Usfm (Component) :
 #        self.usfmManagers = ['source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
         self.usfmManagers = ['font']
 
-# Manager Descrption
-#    source - Locate component source file, copy or link to project if needed
-#    font - Manage fonts for all component types and renderers
-#    preprocess - Create the process file, do any preprocesses needed
-#    style - Manage element styles
-#    illustration - Manage illustrations for all component types and renderers
-#    hyphenation - Manage hyphenation information for components according to renderer
-
-        # In case this is the first time, make sure there is a comp type entry in the config
-#        if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
-#            buildConfSection(self.project._projConfig, 'CompTypes')
-#            buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
-#            self.project.writeOutProjConfFile = True
-#            print "zzzzzzzzzzz" 
+        # Manager Descrptions
+        #    source - Locate component source file, copy or link to project if needed
+        #    font - Manage fonts for all component types and renderers
+        #    preprocess - Create the process file, do any preprocesses needed
+        #    style - Manage element styles
+        #    illustration - Manage illustrations for all component types and renderers
+        #    hyphenation - Manage hyphenation information for components according to renderer
 
         # Init the managers
         for mType in self.usfmManagers :
@@ -133,17 +123,14 @@ class Usfm (Component) :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
 
         # Check for font elements and information
-        fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
-        if not fontFamily :
-            fontFamily = self.defaultFontFamily
-            self.project.managers['usfm_Font'].recordFont(fontFamily, 'usfm_Font')
-            self.project.managers['usfm_Font'].installFont(fontFamily, 'usfm_Font')
-            # Check to see what kind of renderer we are using and create any supporting
-            # font config files needed
-            if self.renderer == 'xetex' :
-                self.project.managers['usfm_Font'].makeFontInfoTexFile()
-            else :
-                self.project.writeToLog('ERR', 'The [' + renderer + '] is not supported by RPM at this time')
+#        self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font')
+        self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font')
+        # Check to see what kind of renderer we are using and create any supporting
+        # font config files needed
+        if self.renderer == 'xetex' :
+            self.project.managers['usfm_Font'].makeFontInfoTexFile()
+        else :
+            self.project.writeToLog('ERR', 'The [' + renderer + '] is not supported by RPM at this time')
 
 
         # Check for source
