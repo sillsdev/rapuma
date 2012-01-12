@@ -58,12 +58,15 @@ def addToList (thisList, item) :
         return thisList
 
 
-def testForSetting (conf, key) :
+def testForSetting (conf, key1, key2 = None) :
     '''Using a try statement, this will test for a setting in a config object.
     If its not there it returns None.'''
 
     try :
-        return conf[key]
+        if key2 :
+            return conf[key1][key2]
+        else :
+            return conf[key1]
     except :
         return
 

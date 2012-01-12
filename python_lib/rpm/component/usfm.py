@@ -81,10 +81,25 @@ class Usfm (Component) :
 
         self.compIDs = compIDs
         self.project = project
-        self.defaultRenderer = 'xetex'
-        self.defaultSourceType = 'paratext'
-        self.defaultStyleFile = 'usfm.sty'
-        self.defaultFontFamily = 'CharisSIL'
+#        self.defaultRenderer = 'xetex'
+#        self.defaultSourceType = 'paratext'
+#        self.defaultStyleFile = 'usfm.sty'
+#        self.defaultFontFamily = 'CharisSIL'
+
+        # Get settings from config file (or defaults if they are not there)
+        if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
+            compDefaults = getXMLSettings(os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
+            for k, v, in compDefaults.iteritems() :
+                self.project._projConfig['CompTypes']['Usfm'][k] = v
+
+            self.project.writeOutProjConfFile = True
+
+# FIXME: Need to isolate the comp type config here
+
+        for k, v in self.project._projConfig['CompTypes']['Usfm'].iteritems() :
+            setattr(self, k, v)
+
+
 #        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
 #        self.usfmManagers = ['source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
         self.usfmManagers = ['font']
@@ -96,6 +111,13 @@ class Usfm (Component) :
 #    style - Manage element styles
 #    illustration - Manage illustrations for all component types and renderers
 #    hyphenation - Manage hyphenation information for components according to renderer
+
+        # In case this is the first time, make sure there is a comp type entry in the config
+#        if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
+#            buildConfSection(self.project._projConfig, 'CompTypes')
+#            buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
+#            self.project.writeOutProjConfFile = True
+#            print "zzzzzzzzzzz" 
 
         # Init the managers
         for mType in self.usfmManagers :
@@ -110,15 +132,6 @@ class Usfm (Component) :
         if self.cfg['name'] in self.compIDs :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
 
-        # Determine the renderer
-        renderer = testForSetting(self.cfg, 'renderer')
-        if not renderer :
-            renderer = self.defaultRenderer
-# FIXME: Start here
-        # Setup renderer (if needed)
-        if not testForSetting(self.project._projConfig['Renderers'], renderer) :
-            print "xxxxxxxxxxxx", renderer, testForSetting(self.project._projConfig['Renderers'], renderer)
-
         # Check for font elements and information
         fontFamily = testForSetting(self.project._projConfig['Managers']['usfm_Font'], 'primaryFont')
         if not fontFamily :
@@ -127,7 +140,7 @@ class Usfm (Component) :
             self.project.managers['usfm_Font'].installFont(fontFamily, 'usfm_Font')
             # Check to see what kind of renderer we are using and create any supporting
             # font config files needed
-            if renderer == 'xetex' :
+            if self.renderer == 'xetex' :
                 self.project.managers['usfm_Font'].makeFontInfoTexFile()
             else :
                 self.project.writeToLog('ERR', 'The [' + renderer + '] is not supported by RPM at this time')
