@@ -82,24 +82,26 @@ class Usfm (Component) :
         self.compIDs = compIDs
         self.project = project
 
-        # Get settings from config file (or defaults if they are not there)
+        # Build the comp type config section
         if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
-            compDefaults = getXMLSettings(os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
             buildConfSection(self.project._projConfig, 'CompTypes')
             buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
-            for k, v, in compDefaults.iteritems() :
-                self.project._projConfig['CompTypes']['Usfm'][k] = v
-
+            
+        # Get persistant values from the config if there are any
+        newSectionSettings = self.getPersistantSettings(self.project._projConfig['CompTypes']['Usfm'], os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
+        if newSectionSettings != self.project._projConfig['CompTypes']['Usfm'] :
+            self.project._projConfig['CompTypes']['Usfm'] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compConfig = self.project._projConfig['CompTypes']['Usfm']
-        for k, v in self.compConfig.iteritems() :
+        self.compSettings = self.project._projConfig['CompTypes']['Usfm']
+
+        for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
 
 #        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
 #        self.usfmManagers = [self.renderer, 'source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
-        self.usfmManagers = ['font']
+        self.usfmManagers = [self.renderer, 'font']
 
         # Manager Descrptions
         #    source - Locate component source file, copy or link to project if needed
@@ -112,6 +114,24 @@ class Usfm (Component) :
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
+
+    def getPersistantSettings (self, confSection, defaultSettingsFile) :
+        '''Look up each persistant setting in a given XML config file. Check
+        for the exsitance of the setting in the specified section in the users
+        config file and insert the default if it does not exsit in the uers 
+        config file.'''
+
+        if os.path.isfile(defaultSettingsFile) :
+            compDefaults = getXMLSettings(defaultSettingsFile)
+
+            newConf = {}
+            for k, v, in compDefaults.iteritems() :
+                if not testForSetting(confSection, k) :
+                    newConf[k] = v
+                else :
+                    newConf[k] = confSection[k]
+
+            return newConf
 
 
     def render(self) :
@@ -131,19 +151,11 @@ class Usfm (Component) :
         # Check for font elements and information
 #        self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font')
         self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font')
-        # Check to see what kind of renderer we are using and create any supporting
-        # font config files needed
-        if self.renderer == 'xetex' :
-            self.project.managers['usfm_Font'].makeFontInfoTexFile()
-        else :
-            self.project.writeToLog('ERR', 'The [' + renderer + '] is not supported by RPM at this time')
+
+        # Run the renderer to produce the output
+        self.project.managers['usfm_' + self.renderer.capitalize()].run()
 
 
-        # Check for source
-        sourceFile = testForSetting(self.cfg, 'sourceFile')
-        if not sourceFile :
-            pass #sourceFile = howdowecallthesourcemanager?(sourceType)
-            
 
 
 

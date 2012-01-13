@@ -44,13 +44,20 @@ class Xetex (Manager) :
         # Set values for this manager
         self.project            = project
         self.cfg                = cfg
+        
+        # Init any settings that might be needed
+        self.xetexConfig = getXMLSettings(os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
+
+        for k, v in self.xetexConfig.iteritems() :
+            setattr(self, k, v)
+
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-    def usefulFunction (self) :
+    def run (self) :
         '''This will do something.'''
 
         print "Doing something."

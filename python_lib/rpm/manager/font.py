@@ -54,9 +54,9 @@ class Font (Manager) :
         self.fontInitFile       = os.path.join(self.project.rpmConfigFolder, self.xmlInitFile)
 
         # These are constant values that are in the XML file
-        # FIXME: We need to figure out the best way to load and make persistant
-        self.fontDefaults = getXMLSettings(os.path.join(self.project.rpmConfigFolder, 'font.xml'))
+        self.fontDefaults = getXMLSettings(os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
 
+# FIXME: This next part is not right at all, is it?
         self.fontConfig = self.fontDefaults
         for k, v in self.fontDefaults.iteritems() :
             setattr(self, k, v)
