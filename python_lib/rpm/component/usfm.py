@@ -98,7 +98,7 @@ class Usfm (Component) :
 
 
 #        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
-#        self.usfmManagers = ['source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
+#        self.usfmManagers = [self.renderer, 'source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
         self.usfmManagers = ['font']
 
         # Manager Descrptions
@@ -109,7 +109,7 @@ class Usfm (Component) :
         #    illustration - Manage illustrations for all component types and renderers
         #    hyphenation - Manage hyphenation information for components according to renderer
 
-        # Init the managers
+        # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
@@ -117,6 +117,12 @@ class Usfm (Component) :
     def render(self) :
         '''Does USFM specific rendering of a USFM component'''
         #useful variables: self.project, self.cfg
+
+        # FIXME: This function, when everything has been prepared
+        # by the component managers, will call a specific renderer
+        # that will (some how) have access to the other managers
+        # A call might look like: xetex.???(param1, param2)
+
 
         # Is this a valid component ID for this component type?
         if self.cfg['name'] in self.compIDs :

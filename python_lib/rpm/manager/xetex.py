@@ -7,10 +7,10 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This manager class will handle component rendering with XeTeX.
 
 # History:
-# 20111207 - djd - Started with intial file
+# 20120113 - djd - Started with intial file
 
 
 ###############################################################################
@@ -24,21 +24,35 @@ import os
 
 # Load the local classes
 from tools import *
-from project import Project
+from manager import Manager
 
 
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
 
-class Book (Project) :
-    '''This contains basic information about a type of project.'''
+class Xetex (Manager) :
 
-    configFile = "book.xml"
-    configInitFile = "book_init.xml"
+    # Shared values
+    xmlConfFile     = 'xetex.xml'
 
-# FIXME: Here we want to run through the settings in the init.xml file and
-# create anything that the project is supposed to have. Processes that follow
-# will rely on this being done. Otherwise, things will break.
+    def __init__(self, project, cfg) :
+        '''Do the primary initialization for this manager.'''
 
+        super(Xetex, self).__init__(project, cfg)
+
+        # Set values for this manager
+        self.project            = project
+        self.cfg                = cfg
+
+###############################################################################
+############################ Project Level Functions ##########################
+###############################################################################
+
+
+    def usefulFunction (self) :
+        '''This will do something.'''
+
+        print "Doing something."
+ 
 
