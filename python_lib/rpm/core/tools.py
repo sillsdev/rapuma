@@ -154,7 +154,7 @@ def mergeConfig (orgConfig, newConfigFile) :
 
 
 def getXMLSettings (xmlFile) :
-    '''Get settings from an XML file.'''
+    '''Test for exsistance and then get settings from an XML file.'''
 
     if  os.path.exists(xmlFile) :
         return xml_to_section(xmlFile)

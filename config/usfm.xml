@@ -18,7 +18,7 @@ Todo:
         <key>renderer</key>
         <description>The render for this kind of component.</description>
         <type>string</type>
-        <value>xetex</value>
+        <value config='True'>xetex</value>
     </setting>
     <setting>
         <name>Source Editor</name>
