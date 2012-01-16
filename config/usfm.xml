@@ -46,7 +46,7 @@ Todo:
         <key>installedFonts</key>
         <description>All the installed font families that this component will need to render correctly.</description>
         <type>list</type>
-        <value>CharisSIL</value>
+        <value></value>
     </setting>
 </root>
 

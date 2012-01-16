@@ -234,7 +234,7 @@ class Project (object) :
         fullName = cType + '_' + mType.capitalize()
         cfg = self._projConfig['Managers'][fullName]
         module = __import__(mType)
-        manobj = getattr(module, mType.capitalize())(self, cfg)
+        manobj = getattr(module, mType.capitalize())(self, cfg, cType)
         self.managers[fullName] = manobj
 
 

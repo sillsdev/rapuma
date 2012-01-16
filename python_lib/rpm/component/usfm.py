@@ -88,7 +88,7 @@ class Usfm (Component) :
             buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
             
         # Get persistant values from the config if there are any
-        newSectionSettings = self.getPersistantSettings(self.project._projConfig['CompTypes']['Usfm'], os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
+        newSectionSettings = getPersistantSettings(self.project._projConfig['CompTypes']['Usfm'], os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
         if newSectionSettings != self.project._projConfig['CompTypes']['Usfm'] :
             self.project._projConfig['CompTypes']['Usfm'] = newSectionSettings
             self.project.writeOutProjConfFile = True
@@ -115,44 +115,19 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-    def getPersistantSettings (self, confSection, defaultSettingsFile) :
-        '''Look up each persistant setting in a given XML config file. Check
-        for the exsitance of the setting in the specified section in the users
-        config file and insert the default if it does not exsit in the uers 
-        config file.'''
-
-        if os.path.isfile(defaultSettingsFile) :
-            compDefaults = getXMLSettings(defaultSettingsFile)
-
-            newConf = {}
-            for k, v, in compDefaults.iteritems() :
-                if not testForSetting(confSection, k) :
-                    newConf[k] = v
-                else :
-                    newConf[k] = confSection[k]
-
-            return newConf
-
-
     def render(self) :
         '''Does USFM specific rendering of a USFM component'''
-        #useful variables: self.project, self.cfg
-
-        # FIXME: This function, when everything has been prepared
-        # by the component managers, will call a specific renderer
-        # that will (some how) have access to the other managers
-        # A call might look like: xetex.???(param1, param2)
-
+            # useful variables: self.project, self.cfg
 
         # Is this a valid component ID for this component type?
         if self.cfg['name'] in self.compIDs :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
 
         # Check for font elements and information
-#        self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font')
-        self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font')
+        self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
+        self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
 
-        # Run the renderer to produce the output
+        # Run the renderer as specified in the users config to produce the output
         self.project.managers['usfm_' + self.renderer.capitalize()].run()
 
 

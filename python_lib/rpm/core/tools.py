@@ -42,6 +42,25 @@ def getPtId () :
     pass
 
 
+def getPersistantSettings (confSection, defaultSettingsFile) :
+    '''Look up each persistant setting in a given XML config file. Check
+    for the exsitance of the setting in the specified section in the users
+    config file and insert the default if it does not exsit in the uers 
+    config file.'''
+
+    if os.path.isfile(defaultSettingsFile) :
+        compDefaults = getXMLSettings(defaultSettingsFile)
+
+        newConf = {}
+        for k, v, in compDefaults.iteritems() :
+            if not testForSetting(confSection, k) :
+                newConf[k] = v
+            else :
+                newConf[k] = confSection[k]
+
+        return newConf
+
+
 def addToList (thisList, item) :
     '''Generic function to add an item to any list if it isn't there already.
     If not, just return the list contents or an empty list.'''
