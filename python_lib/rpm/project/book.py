@@ -35,10 +35,5 @@ class Book (Project) :
     '''This contains basic information about a type of project.'''
 
     configFile = "book.xml"
-    configInitFile = "book_init.xml"
-
-# FIXME: Here we want to run through the settings in the init.xml file and
-# create anything that the project is supposed to have. Processes that follow
-# will rely on this being done. Otherwise, things will break.
 
 

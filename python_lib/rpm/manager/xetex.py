@@ -74,31 +74,35 @@ class Xetex (Manager) :
         # it will create all the final forms of files needed to render the
         # current component with the XeTeX renderer.
 
+        # The fonts should all be in place but a TeX specific font control
+        # needs to be created. That is done here by drawing off of the font
+        # manager.
+        self.makeFontInfoTexFile()
+
  
     def makeFontInfoTexFile (self) :
         '''Create a TeX info font file that TeX will use for rendering.'''
 
         # We will not make this file if it is already there
-        fontInfoFileName = os.path.join(self.processFolder, self.aid + '.tex')
-
+        fontInfoFileName = os.path.join(self.project.processFolder,'fonts.tex')
         # The rule is that we only create this file if it is not there,
         # otherwise it will silently fail.  If one already exists the file will
         # need to be removed by some other process before it can be recreated.
-        if not os.path.isfile(fontInfoFileName) or self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] == 'True' :
+        sCType = self.cType.capitalize()
+        if not os.path.isfile(fontInfoFileName) :
             writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
-            writeObject.write('# ' + self.aid + '.tex' + ' created: ' + tStamp() + '\n')
-            auxFonts = self.project._projConfig['Auxiliaries'][self.aid]['installedFonts']
-            for f in auxFonts :
-                fInfo = self._fontConfig['Fonts'][f]
+            writeObject.write('# fonts.tex' + ' created: ' + tStamp() + '\n')
+            for f in self.project._projConfig['CompTypes'][sCType]['installedFonts'] :
+                fInfo = self.project._projConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
-                if self.project._projConfig['Auxiliaries'][self.aid]['primaryFont'] == f :
+                if self.project._projConfig['CompTypes'][sCType]['primaryFont'] == f :
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
-                    features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
+                    features = fInfo['FontInformation']['features']
                     for tf in fInfo :
                         if tf[:8] == 'Typeface' :
                             # Make all our line components (More will need to be added)
                             startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.fontFolderName, fInfo[tf]['file']) + "]\""
+                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
                             endDef      = "}\n"
                             featureString = ''
                             for i in features :
@@ -109,12 +113,12 @@ class Xetex (Manager) :
                 # Create defs with secondary fonts for special use with TeX in publication
                 else :
                     writeObject.write('\n# These are special use fonts for this type of component.\n')
-                    features = self.project._projConfig['Auxiliaries'][self.aid][f]['features']
+                    features = fInfo['FontInformation']['features']
                     for tf in fInfo :
                         if tf[:8] == 'Typeface' :
                             # Make all our line components (More will need to be added)
                             startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
-                            fpath       = "\"[" + os.path.join('..', self.fontFolderName, fInfo[tf]['file']) + "]\""
+                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
                             endDef      = "}\n"
                             featureString = ''
                             for i in features :
@@ -124,8 +128,6 @@ class Xetex (Manager) :
 
             # Finish the process
             writeObject.close()
-            self.project._projConfig['Auxiliaries'][self.aid]['remakeTexFile'] = False
-            self.project.writeOutProjConfFile = True
             return True
 
 

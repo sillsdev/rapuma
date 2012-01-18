@@ -36,7 +36,7 @@ class Font (Manager) :
 
     # Shared values
     xmlConfFile     = 'font.xml'
-    xmlInitFile     = 'font_init.xml'
+#    xmlInitFile     = 'font_init.xml'
 
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
@@ -47,12 +47,7 @@ class Font (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        self.fontFileName       = 'fonts.conf'
-        self.fontFolderName     = 'Fonts'
-        self.fontFolder         = os.path.join(self.project.projHome, self.fontFolderName)
-#        self.fontConfFile       = os.path.join(self.project.projConfFolder, self.fontFileName)
         self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
-        self.fontInitFile       = os.path.join(self.project.rpmConfigFolder, self.xmlInitFile)
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.cType + '_Font'], os.path.join(self.project.rpmConfigFolder, 'font.xml'))
@@ -75,8 +70,6 @@ class Font (Manager) :
         '''Check for the exsitance of a font in the project conf file.
         If there is one, return, if not add it.'''
 
-# FIXME: Need to find way to know if the font is already recorded
-
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
         # ~/resources/lib_share/Fonts/[FontID]
@@ -90,34 +83,34 @@ class Font (Manager) :
         if not testForSetting(self.project._projConfig, 'Fonts') :
             buildConfSection (self.project._projConfig, 'Fonts')
             
-        elif not testForSetting(self.project._projConfig['Fonts'], font) :
+        record = False
+        if not testForSetting(self.project._projConfig['Fonts'], font) :
             buildConfSection (self.project._projConfig['Fonts'], font)
+            record = True
 
+        if record :
             # Inject the font info into the project format config file.
             fInfo = getXMLSettings(fontInfo)
             
             self.project._projConfig['Fonts'][font] = fInfo.dict()
 
-            flag = False
             # Record the font with the component type that called it
             if not self.project._projConfig['CompTypes'][compType]['primaryFont'] :
                 self.project._projConfig['CompTypes'][compType]['primaryFont'] = font
-                flag = True
 
             if len(self.project._projConfig['CompTypes'][compType]['installedFonts']) == 0 :
                 self.project._projConfig['CompTypes'][compType]['installedFonts'] = [font]
-                flag = True
             else :
                 fontList = self.project._projConfig['CompTypes'][compType]['installedFonts']
                 if fontList != [font] :
                     self.project._projConfig['CompTypes'][compType]['installedFonts'] = addToList(fontList, font)
-                    flag = True
-            print flag
-            if flag :
-                self.project.writeOutProjConfFile = True
-                self.project.writeToLog('LOG', font + ' font setup information added to project config')
 
+            self.project.writeOutProjConfFile = True
+            self.project.writeToLog('LOG', font + ' font setup information added to project config')
             return True
+
+        else :
+            return False
 
 
     def installFont (self, font, manager, compType) :
@@ -126,7 +119,7 @@ class Font (Manager) :
         for font in self.project._projConfig['CompTypes'][compType]['installedFonts'] :
             fontInfo = self.project._projConfig['Fonts'][font]
             # Make the font family folder for this typeface
-            fontFamilyFolder = os.path.join(self.fontFolder, fontInfo['FontInformation']['fontFolder'])
+            fontFamilyFolder = os.path.join(self.project.fontsFolder, fontInfo['FontInformation']['fontFolder'])
             if not os.path.isdir(fontFamilyFolder) :
                 os.makedirs(fontFamilyFolder)
 
@@ -153,7 +146,7 @@ class Font (Manager) :
                     self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
                     return False
                 # Copy the font file if need be
-                fontFilePath = os.path.join(self.fontFolder, thisFolder, fontFileName)
+                fontFilePath = os.path.join(self.project.fontsFolder, thisFolder, fontFileName)
                 if not os.path.isfile(fontFilePath) :
                     shutil.copy(fontSource, fontFilePath)
 

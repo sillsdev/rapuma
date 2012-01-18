@@ -44,6 +44,7 @@ class Project (object) :
         self.projHome               = projHome
         self.userHome               = userHome
         self.rpmHome                = rpmHome
+        self.userConfFileName       = 'rpm.conf'
         self.rpmConfigFolder        = os.path.join(self.rpmHome, 'config')
         self.rpmResourceFolder      = os.path.join(self.rpmHome, 'resources')
         self.rpmLibShareFolder      = os.path.join(self.rpmResourceFolder, 'lib_share')
@@ -56,11 +57,13 @@ class Project (object) :
         self.projConfFileName       = 'project.conf'
         self.configFolderName       = 'config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
+        self.processFolder          = os.path.join(self.projHome, 'Process')
+        self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
+        self.textFolder             = os.path.join(self.projHome, 'WorkingText')
+        self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
         self.projLogFile            = os.path.join(self.projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(self.projHome, 'error.log')
-        self.userConfFileName       = 'rpm.conf'
-        self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
         self.writeOutProjConfFile   = False
         self.commands               = {}
         self.components             = {}
@@ -82,8 +85,7 @@ class Project (object) :
 ###############################################################################
 
     def initProject (self) :
-        '''This is a place holder method for the real one that gets loaded
-        with the project type class.'''
+        '''Initialize the project object and load the project type class.'''
 
         # Initialize the managers dictionary here
         self.managers = {}
@@ -111,6 +113,14 @@ class Project (object) :
         if newConf != self._projConfig :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
+
+        # Create some common folders used in every project (if needed)
+        if not os.path.isdir(self.processFolder) :
+            os.mkdir(self.processFolder)
+        if not os.path.isdir(self.textFolder) :
+            os.mkdir(self.textFolder)
+        if not os.path.isdir(self.fontsFolder) :
+            os.mkdir(self.fontsFolder)
 
 
     def makeProject (self, ptype, pname, pid, pdir='') :
