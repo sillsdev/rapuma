@@ -19,14 +19,14 @@ Todo:
         <key>mainStyleFile</key>
         <description>The main style file for this project.</description>
         <type>string</type>
-        <value>%Process%/usfm.sty</value>
+        <value>Process/usfm.sty</value>
     </setting>
     <setting>
         <name>Custom Style File</name>
         <key>customStyleFile</key>
         <description>The custom style file, if needed, for this project.</description>
         <type>string</type>
-        <value>%Process%/custom.sty</value>
+        <value>Process/custom.sty</value>
     </setting>
 </root>
 

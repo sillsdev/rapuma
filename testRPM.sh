@@ -1,9 +1,9 @@
 #!/bin/sh
 
-rpm PUB-MYMR-JAS project_remove
-rpm PUB-MYMR-JAS project_create  -t book -n "SPT Test Book Project" -d PUB-MYMR-JAS
+rpm project_remove -i PUB-MYMR-JAS
+rpm project_create -i PUB-MYMR-JAS -t book -n "SPT Test Book Project" -d PUB-MYMR-JAS
 
-#rpm PUB-MYMR-JAS component_add   -c jas                  -t usfm
+rpm component_add -i PUB-MYMR-JAS -c jas -t usfm
 #rpm component_add   -c apa                  -t adminMSEAG
 #rpm component_add   -c simpleNotes          -t projectNotes
 
@@ -20,7 +20,7 @@ rpm PUB-MYMR-JAS project_create  -t book -n "SPT Test Book Project" -d PUB-MYMR-
 #rpm font_set        -a contentFont          -f Padauk               -r primary
 #rpm font_set        -a contentFont          -f CharisSIL
 
-#rpm component_render -c jas
+#rpm component_render -i PUB-MYMR-JAS -c jas
 #rpm component_render -c apa
 #rpm component_render -c simpleNotes
 

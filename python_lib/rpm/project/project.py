@@ -70,6 +70,7 @@ class Project (object) :
         self.componentType          = {}
 
         # All available commands in context
+        print self.projConfFile
         if os.path.isfile(self.projConfFile) :
             self.addCommand("project_create", projCmd.CreateProject())
             self.addCommand("project_restore", projCmd.RestoreProject())
@@ -81,6 +82,7 @@ class Project (object) :
         else :
             self.addCommand("project_create", projCmd.CreateProject())
             self.addCommand("project_restore", projCmd.RestoreProject())
+            self.addCommand("project_remove", projCmd.RemoveProject())
 
 
 ###############################################################################
@@ -142,7 +144,7 @@ class Project (object) :
         if not pdir or pdir == '.' :
             pdir = os.path.join(os.getcwd(), pid)
         else :
-            pdir = os.path.join(os.path.abspath(pdir), pid)
+            pdir = os.path.abspath(pdir)
 
         # So now that we have a pdir it needs testing
         # Manualy build the new projConfFile path
@@ -337,7 +339,7 @@ class Project (object) :
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
-            self.help(command, opts, userConfig)
+            terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 
     def help(self, command, opts, userConfig) :
