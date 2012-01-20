@@ -35,23 +35,46 @@ import style_command as styCmd
 class Style (Manager) :
 
     # Shared values
-    xmlConfFile     = ''
-    xmlInitFile     = ''
+    xmlConfFile     = 'style.xml'
 
-    def __init__(self, project) :
+    def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
 
-        super(Style, self).__init__(project)
+        super(Style, self).__init__(project, cfg)
 
-        terminal("Initializing Style Manager")
+        # Set values for this manager
+        self.project            = project
+        self.cfg                = cfg
+        self.cType              = cType
+        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
 
-        # Add commands for this manager
-#        project.addCommand("???", styCmd.???(self))
+        # Get persistant values from the config if there are any
+        manager = self.cType + '_Style'
+        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project._projConfig['Managers'][manager] :
+            self.project._projConfig['Managers'][manager] = newSectionSettings
+            self.project.writeOutProjConfFile = True
 
+        self.compSettings = self.project._projConfig['Managers'][manager]
+
+        for k, v in self.compSettings.iteritems() :
+            setattr(self, k, v)
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
+
+
+    def recordStyle (self, cType) :
+
+        pass
+
+    def installStyle (self, cType) :
+    
+        pass
+
+
+
 
 
 

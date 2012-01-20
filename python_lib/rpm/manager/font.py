@@ -36,7 +36,6 @@ class Font (Manager) :
 
     # Shared values
     xmlConfFile     = 'font.xml'
-#    xmlInitFile     = 'font_init.xml'
 
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
@@ -50,12 +49,13 @@ class Font (Manager) :
         self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.cType + '_Font'], os.path.join(self.project.rpmConfigFolder, 'font.xml'))
-        if newSectionSettings != self.project._projConfig['Managers'][self.cType + '_Font'] :
-            self.project._projConfig['Managers'][self.cType + '_Font'] = newSectionSettings
+        manager = self.cType + '_Font'
+        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project._projConfig['Managers'][manager] :
+            self.project._projConfig['Managers'][manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['Managers'][self.cType + '_Font']
+        self.compSettings = self.project._projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)

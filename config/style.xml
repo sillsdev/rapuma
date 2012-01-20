@@ -15,11 +15,18 @@ Todo:
 
 <root>
     <setting>
-        <name>Manager Type</name>
-        <key>type</key>
-        <description>The manager model (type) this manager is associated with.</description>
+        <name>Main Style File</name>
+        <key>mainStyleFile</key>
+        <description>The main style file for this project.</description>
         <type>string</type>
-        <value>style</value>
+        <value>%Process%/usfm.sty</value>
+    </setting>
+    <setting>
+        <name>Custom Style File</name>
+        <key>customStyleFile</key>
+        <description>The custom style file, if needed, for this project.</description>
+        <type>string</type>
+        <value>%Process%/custom.sty</value>
     </setting>
 </root>
 

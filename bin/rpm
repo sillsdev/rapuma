@@ -66,89 +66,165 @@ from user_config import UserConfig
 from sys_command import Command, commands
 from project import *
 
+###############################################################################
+####################### Create the command to be used #########################
+###############################################################################
+
+# A complete command contains three elements, they are:
+#
+#   1) rpm (this program)
+#   2) command (a valid RPM program command)
+#   3) options (a valid option for that RPM command)
+# 
+# All command options must contain a project ID (-i). That is required. If one
+# is not listed then the incoming command is either considered malformed or
+# incomplete. If there is a way to figure out what the user might be needing
+# the help system will be called. Otherwise, RPM will quite.
+
+# FIXME: Command line processing must fixed to reflect the above documentation.
+# FIXME: Is it okay to process the -i here and then ignore it in most of the 
+# actual command processing? For now I am doing that.
+
 # Catch any incoming commands here
-command = ""
+pid = ''
+command = ''
 opts = []
 
-if len(sys.argv) > 1 :
+# Check and collect command line args. If the command is not
+# properly formed, exit now.
+if len(sys.argv) == 1 :
+    command = 'help'
+    opts = ['-h']
+elif len(sys.argv) == 2 :
+    if sys.argv[1].lower() == 'help' :
+        command = 'help'
+        opts = ['-h']
+    else :
+        terminalError('RPM command not properly formed. Missing command options.')
+        sys.exit()
+elif len(sys.argv) >= 3 :
     command = sys.argv[1]
     opts = sys.argv[2:]
+else :
+    terminalError('RPM command not properly formed.')
+    sys.exit()
+
+# We really need to know what the pid here. Let's look now
+# There should be a -i (pid) in every command we process.
+# If not, we quite here.
+c = 0
+if opts :
+    # If there is a help command we just divert to that
+    if not '-h' in opts :
+        # Otherwise we need to be sure there is a pid in the line
+        if '-i' in opts :
+            for cmd in opts :
+                c +=1
+                if cmd == '-i' :
+                    pid = opts[c]
+        else :
+            terminalError('No project ID found in command line.')
+            sys.exit()
+
+
+###############################################################################
+####################### Define functions for startup ##########################
+###############################################################################
+
+def welcomeMessage (aProject) :
+
+    # Give a welcome message
+    terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
+    terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
+    if os.path.isfile(aProject.projConfFile) :
+        terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
+        terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
+        if command :
+            terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
+        else :
+            terminal('\n\t\tType \"rpm help\" for a list of current commands')
+                
+    else :
+        # Just put out an almost blank line
+        terminal(' ')
+
+def processCommand (aProject) :
+    '''Run the command and pass along the aProject object'''
+
+    if command :
+        if len(opts) >= 1 :
+            try :
+                aProject.run(command, opts, uConf._userConfig)
+            except SyntaxError, err:
+                terminal("\n" + str(err) + "\n")
+                opts.insert(0, command)
+                aProject.help(command, opts, uConf._userConfig)
+        else :
+            # If we seem to be short on options then we will just display the help
+            # for this command
+                terminalError('No options were give. There needs to be at least at project ID (-i) given with this command.')
+                terminal('\nHelp for the \"' + command + '\" command:\n')
+                aProject.help(command, opts, uConf._userConfig)
+
+
+def closeSession (aProject) :
+    '''Now write out the config files if needed'''
+
+    if aProject.writeOutProjConfFile :
+        if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
+            terminalError('Could not write to: project config file')
+# FIXME: Why is this writing all the time?
+    if uConf.writeOutUserConfFile :
+        if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
+            terminalError('Could not write to: user config file')
+
+    # Now trim the log file if it is needed
+    if isConfSection(aProject._projConfig, 'Project') :
+        aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
+
+    ## In case there are any Canadians using this, politely say good bye
+    terminal('\n\t\tThank you, please come again!\n')
 
 
 ###############################################################################
 ######################## Load User and Project Info ###########################
 ###############################################################################
 
-# Instantiate User and Project classes
+# Instantiate User classes
 uConf = UserConfig(userHome, rpmHome)
-aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 
+# Every command should be preceeded by a project ID (pid) if that is the case
+# find out what the path is and update the projHome setting. If the pid is not
+# valid, stop here.
+if pid :
+    buildConfSection(uConf._userConfig, 'Projects')
+    if pid in uConf._userConfig['Projects'].keys() :
+        projHome = uConf._userConfig['Projects'][pid]['projectPath']
 
-# Look for the project.conf and init the project if it is there.
-# Otherwise we will just pass through and quite
-if os.path.isfile(aProject.projConfFile) :
-    aProject.initProject()
+        # Instantiate the project class using the adjusted projHome path
+        aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
 
+        # Look for the project.conf and init the project if it is there.
+        # Otherwise we will just pass through and quite
+        if os.path.isfile(aProject.projConfFile) :
+            aProject.initProject()
 
-###############################################################################
-############################### Terminal Startup ##############################
-###############################################################################
+        welcomeMessage(aProject)
+        processCommand(aProject)
+        closeSession(aProject)
 
-# Give a welcome message
-terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
-terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
-if os.path.isfile(aProject.projConfFile) :
-    terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
-    terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
-    if command :
-        terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
     else :
-        terminal('\n\t\tType \"rpm help\" for a list of current commands')
-            
+        if command == 'project_create' :
+            # Instantiate the project class using the default projHome path
+            aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
+            welcomeMessage(aProject)
+            processCommand(aProject)
+            closeSession(aProject)
+        else :
+            terminal('Error: The project ID given [' + pid + '] is not valid. Please try again.')
 else :
-    # Just put out an almost blank line
-    terminal(' ')
-
-###############################################################################
-##################### Prepare and Process RPM Commands #######################
-###############################################################################
-
-# Run the command and pass along the aProject object
-if command :
-    if len(opts) >= 1 :
-        try :
-            aProject.run(command, opts, uConf._userConfig)
-        except SyntaxError, err:
-            terminal("\n" + str(err) + "\n")
-            opts.insert(0, command)
-            aProject.help(command, opts, uConf._userConfig)
-    else :
-        # If we seem to be short on options then we will just display the help
-        # for this command
-            terminal('\nHelp for the \"' + command + '\" command:\n')
-            aProject.help(command, opts, uConf._userConfig)
-
-
-###############################################################################
-########################### Closeout RPM Session #############################
-###############################################################################
-
-# Now write out the config files if needed
-if aProject.writeOutProjConfFile :
-    if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
-        terminal('\nERROR: Could not write to: project config file')
-if uConf.writeOutUserConfFile :
-    if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
-        terminal('\nERROR: Could not write to: user config file')
-
-# Now trim the log file if it is needed
-if isConfSection(aProject._projConfig, 'Project') :
-    aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
-
-## In case there are any Canadians using this, politely say good bye
-
-terminal('Dev: Continue work in usfm.py around line 137')
-
-terminal('\n\t\tThank you, please come again!\n')
-
+    aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
+    terminal('\nAvailable RPM commands:\n')
+    aProject.help(command, opts, uConf._userConfig)
+    terminal('\nFor more help please use the -h option.\n\tFor example: rpm project_create -h\n')
 

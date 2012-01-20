@@ -1,9 +1,9 @@
 #!/bin/sh
 
-rpm project_remove  -i vwxyz
-rpm project_create  -t book -n "Test Book Project" -i vwxyz -d .
+rpm PUB-MYMR-JAS project_remove
+rpm PUB-MYMR-JAS project_create  -t book -n "SPT Test Book Project" -d PUB-MYMR-JAS
 
-rpm component_add   -c jas                  -t usfm
+#rpm PUB-MYMR-JAS component_add   -c jas                  -t usfm
 #rpm component_add   -c apa                  -t adminMSEAG
 #rpm component_add   -c simpleNotes          -t projectNotes
 

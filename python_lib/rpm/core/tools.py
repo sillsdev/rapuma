@@ -215,7 +215,7 @@ def writeConfFile (configStuff, configFileAndPath) :
         return True
 
     except :
-        terminal('\nERROR: Could not write to: ' + fileName)
+        terminal('\nERROR: Could not write to: ' + configFileAndPath)
         return False
 
 
@@ -288,6 +288,14 @@ def terminal (msg) :
 
     # Output the message and wrap it if it is over 60 chars long.
     print wordWrap(msg, 60)
+
+
+def terminalError (msg) :
+    '''Send an error message to the terminal with a little formating to make it
+    look nicer.'''
+
+    # Output the message and wrap it if it is over 60 chars long.
+    print '\n' + wordWrap('\tError: ' + msg, 60) + '\n'
 
 
 def wordWrap (text, width) :

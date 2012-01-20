@@ -101,7 +101,7 @@ class Usfm (Component) :
 
 #        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
 #        self.usfmManagers = [self.renderer, 'source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
-        self.usfmManagers = [self.renderer, 'font']
+        self.usfmManagers = ['font', 'style', self.renderer]
 
         # Manager Descrptions
         #    source - Locate component source file, copy or link to project if needed
@@ -126,6 +126,8 @@ class Usfm (Component) :
         # Check for font elements and information
         self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
         self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
+        self.project.managers['usfm_Style'].recordStyle('Usfm')
+        self.project.managers['usfm_Style'].installStyle('Usfm')
 
         # Run the renderer as specified in the users config to produce the output
         self.project.managers['usfm_' + self.renderer.capitalize()].run()

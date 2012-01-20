@@ -55,7 +55,7 @@ class Project (object) :
         self.projectIDCode          = None
         self.lockExt                = '.lock'
         self.projConfFileName       = 'project.conf'
-        self.configFolderName       = 'config'
+        self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
         self.processFolder          = os.path.join(self.projHome, 'Process')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
@@ -69,15 +69,18 @@ class Project (object) :
         self.components             = {}
         self.componentType          = {}
 
-        # Commands that are associated with the project level
-        self.addCommand("project_create", projCmd.CreateProject())
-        self.addCommand("project_remove", projCmd.RemoveProject())
-        self.addCommand("project_restore", projCmd.RestoreProject())
-        self.addCommand("project_render", projCmd.RenderProject())
-        self.addCommand("component_add", projCmd.AddComponent())
-        self.addCommand("component_remove", projCmd.RemoveComponent())
-#        self.addCommand("component_add-manager", projCmd.AddComponentManager())
-        self.addCommand("component_render", projCmd.RenderComponent())
+        # All available commands in context
+        if os.path.isfile(self.projConfFile) :
+            self.addCommand("project_create", projCmd.CreateProject())
+            self.addCommand("project_restore", projCmd.RestoreProject())
+            self.addCommand("project_remove", projCmd.RemoveProject())
+            self.addCommand("project_render", projCmd.RenderProject())
+            self.addCommand("component_add", projCmd.AddComponent())
+            self.addCommand("component_remove", projCmd.RemoveComponent())
+            self.addCommand("component_render", projCmd.RenderComponent())
+        else :
+            self.addCommand("project_create", projCmd.CreateProject())
+            self.addCommand("project_restore", projCmd.RestoreProject())
 
 
 ###############################################################################
@@ -89,7 +92,6 @@ class Project (object) :
 
         # Initialize the managers dictionary here
         self.managers = {}
-
 
         # Create a fresh merged version of the projConfig
         self._projConfig  = ConfigObj(self.projConfFile)
@@ -123,16 +125,30 @@ class Project (object) :
             os.mkdir(self.fontsFolder)
 
 
-    def makeProject (self, ptype, pname, pid, pdir='') :
+    def makeProject (self, pid, ptype='', pdir='', pname='') :
         '''Create a new publishing project.'''
+
+        # If a type wasn't given we will just make it a book type as that
+        # is our legacy default
+        if not ptype :
+            ptype = 'book'
+
+        # Give the project a name if it doesn't have one
+        if not pname :
+            pname = 'Default Project Name'
 
         # Run some basic tests to see if this project can be created
         # Grab the cwd if pdir is empty for the default
         if not pdir or pdir == '.' :
-            pdir = os.getcwd()
+            pdir = os.path.join(os.getcwd(), pid)
+        else :
+            pdir = os.path.join(os.path.abspath(pdir), pid)
 
         # So now that we have a pdir it needs testing
-        pdir = os.path.abspath(pdir)
+        # Manualy build the new projConfFile path
+        pcf = os.path.join(pdir, self.configFolderName, self.projConfFileName)
+        if pcf != self.projConfFile :
+            self.projConfFile = pcf
         # Test for parent project.
         if os.path.isfile(self.projConfFile) :
             self.writeToLog('ERR', 'Halt! Live project already defined in this location')
@@ -185,13 +201,10 @@ class Project (object) :
         '''Remove the project from the RPM system.  This will not remove the
         project data but will 'disable' the project.'''
 
-        # If no pid was given we'll try to get the current on if there is one
+        # If no pid was given this fails
         if pid == '' :
-            if self.projectIDCode :
-                pid = self.projectIDCode
-            else :
-                terminal('Project ID code not given or found. Remove project failed.')
-                return False
+            terminal('Project ID code not given or found. Remove project failed.')
+            return False
 
         # If we made it this far we should be able to remove it
         try :
@@ -297,13 +310,14 @@ class Project (object) :
 
         try :
             x = self._projConfig['Components'][cid]
+            self.writeToLog('MSG', 'The [' + cid + '] component already exists in this project.')
         except :
             buildConfSection(self._projConfig, 'Components')
             buildConfSection(self._projConfig['Components'], cid)
             self._projConfig['Components'][cid]['name'] = cid
             self._projConfig['Components'][cid]['type'] = cType
             self.writeOutProjConfFile = True
-            self.writeToLog('MSG', 'Created: ' + cid + ' config entry')
+            self.writeToLog('MSG', 'Added the [' + cid + '] component to the project')
 
 
 ###############################################################################
@@ -318,6 +332,8 @@ class Project (object) :
 
 
     def run(self, command, opts, userConfig) :
+        '''Run a command'''
+
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
@@ -325,6 +341,8 @@ class Project (object) :
 
 
     def help(self, command, opts, userConfig) :
+        '''Give the user the documented help'''
+        # FIXME: This is not giving us help for the specific commands
         if len(opts) and opts[0] in self.commands :
             self.commands[opts[0]].help()
         else :

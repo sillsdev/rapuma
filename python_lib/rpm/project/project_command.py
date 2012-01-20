@@ -70,16 +70,16 @@ class CreateProject (Command) :
         super(CreateProject, self).run(args, aProject, userConfig)
         
         # Check for "required" options
-        if self.options.ptype and self.options.pname and self.options.pid :
-            aProject.makeProject(self.options.ptype, self.options.pname, self.options.pid, self.options.pdir)
+        if  self.options.pid and self.options.ptype :
+            aProject.makeProject(self.options.pid, self.options.ptype, self.options.pdir, self.options.pname)
         else :
             raise SyntaxError, "Error: Missing required options!"
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-t", "--ptype", action="store", help="Set the type of project this will be. (Required)")
-        self.parser.add_option("-n", "--pname", action="store", help="Set the name of project this will be. (Required)")
-        self.parser.add_option("-i", "--pid", action="store", help="Set the type of project this will be. (Required)")
-        self.parser.add_option("-d", "--pdir", action="store", help="Directory to create this project in, the default is current directory.")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
+        self.parser.add_option("-t", "--ptype", type="string", action="store", help="Set the type of project this will be. (Required)")
+        self.parser.add_option("-d", "--pdir", type="string", action="store", help="Directory to create this project in, the default is current directory.")
+        self.parser.add_option("-n", "--pname", type="string", action="store", help="Set the name of project this will be.")
 
 
 class RemoveProject (Command) :
@@ -91,11 +91,14 @@ class RemoveProject (Command) :
 
     def run(self, args, aProject, userConfig) :
         super(RemoveProject, self).run(args, aProject, userConfig)
-        if len(args) :
-            aProject.removeProject(args[1])
+
+        if  self.options.pid :
+            aProject.removeProject(self.options.pid)
+        else :
+            raise SyntaxError, "Error: Missing required arguments: -i (Project ID)"
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-i", "--pid", type="string", action="store", help="The ID code of the project to be removed. The default is the current working directory.")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
 
 
 class RestoreProject (Command) :
@@ -106,10 +109,14 @@ class RestoreProject (Command) :
     def run(self, args, aProject, userConfig) :
         super(RestoreProject, self).run(args, aProject, userConfig)
 
-        aProject.restoreProject(args[1])
+        if  self.options.pid and self.options.pdir :
+            aProject.restoreProject(self.options.pid, self.options.pdir)
+        else :
+            raise SyntaxError, "Error: Missing required arguments: -i (Project ID)"
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-d", "--dir", type="string", action="store", help="Restore a project in this directory")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
+        self.parser.add_option("-d", "--pdir", type="string", action="store", help="Directory to restort this project in, the default is current directory.")
 
 
 class RenderProject (Command) :
@@ -121,10 +128,13 @@ class RenderProject (Command) :
     def run(self, args, aProject, userConfig) :
         super(RenderProject, self).run(args, aProject, userConfig)
 
-        aProject.renderProject(self.options.comp)
+        if  self.options.pid :
+            aProject.renderProject(self.options.pid)
+        else :
+            raise SyntaxError, "Error: Missing required arguments: -i (Project ID) & -c (Component)"
 
     def setupOptions(self, parser) :
-        self.parser.add_option("-c", "--comp", type="string", action="store", default='', help="Render the specified component.")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
 
 
 class AddComponent (Command) :
@@ -135,13 +145,14 @@ class AddComponent (Command) :
     def run (self, args, aProject, userConfig) :
         super(AddComponent, self).run(args, aProject, userConfig)
 
-        if self.options :
-            aProject.addComponent(self.options.name, self.options.type)
+        if self.options.pid and self.options.cid and self.options.type :
+            aProject.addComponent(self.options.cid, self.options.type)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--name", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
+        self.parser.add_option("-c", "--cid", type="string", action="store", default="contents", help="Give a name to this component group. (Required)")
         self.parser.add_option("-t", "--type", type="string", action="store", default="usfm", help="Assign the component markup type. Default is USFM.")
 
 
@@ -153,32 +164,14 @@ class RemoveComponent (Command) :
     def run (self, args, aProject, userConfig) :
         super(RemoveComponent, self).run(args, aProject, userConfig)
 
-        if self.options.component :
-            aProject.removeComponent(self.options.component)
+        if self.options.pid and self.options.cid :
+            aProject.removeComponent(self.options.cid)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--component", type="string", action="store", help="Remove a component from the project. (Required)")
-
-
-#class AddComponentManager (Command) :
-#    '''Add a manager to a component.'''
-
-#    type = "component_add-manager"
-
-#    def run (self, args, aProject, userConfig) :
-#        super(AddComponentManager, self).run(args, aProject, userConfig)
-
-#        if self.options :
-#            aProject.addComponentManager(self.options.comp, self.options.manager, self.options.mtype)
-#        else :
-#            raise SyntaxError, "Error: Missing required arguments!"
-
-#    def setupOptions (self, parser) :
-#        self.parser.add_option("-c", "--comp", type="string", action="store", help="List the component ID for this component. (Required)")
-#        self.parser.add_option("-m", "--manager", type="string", action="store", help="List the ID for the manager to be bound to this component.")
-#        self.parser.add_option("-t", "--mtype", type="string", action="store", help="List the type of this manager.")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
+        self.parser.add_option("-c", "--cid", type="string", action="store", help="Remove a component from the project. (Required)")
 
 
 class RenderComponent (Command) :
@@ -188,13 +181,14 @@ class RenderComponent (Command) :
 
     def run (self, args, aProject, userConfig) :
         super(RenderComponent, self).run(args, aProject, userConfig)
-        if self.options :
-            aProject.renderComponent(self.options.comp)
+        if self.options.pid and self.options.cid :
+            aProject.renderComponent(self.options.cid)
         else :
             raise SyntaxError, "Error: Missing required arguments!"
 
     def setupOptions (self, parser) :
-        self.parser.add_option("-c", "--comp", type="string", action="store", help="Render this specific component. (Required)")
+        self.parser.add_option("-i", "--pid", type="string", action="store", help="Give the ID for this project. (Required)")
+        self.parser.add_option("-c", "--cid", type="string", action="store", help="Render this specific component. (Required)")
 
 
 
