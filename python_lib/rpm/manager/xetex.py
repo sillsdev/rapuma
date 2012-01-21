@@ -47,17 +47,16 @@ class Xetex (Manager) :
         self.cType              = cType
         
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.cType + '_Xetex'], os.path.join(self.project.rpmConfigFolder, 'xetex.xml'))
-        if newSectionSettings != self.project._projConfig['Managers'][self.cType + '_Xetex'] :
-            self.project._projConfig['Managers'][self.cType + '_Xetex'] = newSectionSettings
+        manager = self.cType + '_Xetex'
+        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project._projConfig['Managers'][manager] :
+            self.project._projConfig['Managers'][manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['Managers'][self.cType + '_Xetex']
+        self.compSettings = self.project._projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
-
-
 
 
 ###############################################################################

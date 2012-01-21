@@ -70,7 +70,6 @@ class Project (object) :
         self.componentType          = {}
 
         # All available commands in context
-        print self.projConfFile
         if os.path.isfile(self.projConfFile) :
             self.addCommand("project_create", projCmd.CreateProject())
             self.addCommand("project_restore", projCmd.RestoreProject())

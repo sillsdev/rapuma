@@ -7,10 +7,10 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This class will handle book project text tasks.
 
 # History:
-# 20111207 - djd - Started with intial file
+# 20120121 - djd - Started with intial file
 
 
 ###############################################################################
@@ -20,7 +20,7 @@
 # this process
 
 import os, shutil
-
+from configobj import ConfigObj, Section
 
 # Load the local classes
 from tools import *
@@ -31,15 +31,15 @@ from manager import Manager
 ################################## Begin Class ################################
 ###############################################################################
 
-class Style (Manager) :
+class Text (Manager) :
 
     # Shared values
-    xmlConfFile     = 'style.xml'
+    xmlConfFile     = 'text.xml'
 
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
 
-        super(Style, self).__init__(project, cfg)
+        super(Text, self).__init__(project, cfg)
 
         # Set values for this manager
         self.project            = project
@@ -48,7 +48,7 @@ class Style (Manager) :
         self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
-        manager = self.cType + '_Style'
+        manager = self.cType + '_Text'
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project._projConfig['Managers'][manager] :
             self.project._projConfig['Managers'][manager] = newSectionSettings
@@ -59,27 +59,49 @@ class Style (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-    def installPTStyles (self) :
-        '''Go get the style sheet from the local PT project this is in
-        and install it into the project where and how it needs to be.'''
+    def installPTWorkingText (self, cid, cType, compPrefix) :
+        '''Find the source text in the local PT project and install it into
+        the working text folder of the project with the proper name.'''
 
-        # As this is call is for a PT based project, it is certain the style
-        # file should be found in the parent folder.
-        ptStyles = os.path.join(os.path.dirname(self.project.projHome), self.mainStyleFile)
-        ptCustomStyles = os.path.join(os.path.dirname(self.project.projHome), self.customStyleFile)
-        projStyles = os.path.join(self.project.processFolder, self.mainStyleFile)
-        projCustomStyles = os.path.join(self.project.processFolder, self.customStyleFile)
-        # We will start with a very simple copy operation. Once we get going
-        # we will need to make this more sophisticated.
-        if os.path.isfile(ptStyles) :
-            shutil.copy(ptStyles, projStyles)
-        if os.path.isfile(ptCustomStyles) :
-            shutil.copy(ptCustomStyles, projCustomStyles)
+        # Build up the source and working file names based on what we find
+        # in the PT project SSF file
+        ptSSF = os.path.split(os.path.dirname(self.project.projHome))[1] + '.SSF'
+        ssfConf = self.parseSSF(ptSSF)
+        if ssfConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
+            thisFile = compPrefix + cid.upper() + ssfConf['ScriptureText']['FileNamePostPart']
+        else :
+            self.project.writeToLog('ERR', 'The PT Book Name Form: [' + ssfConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
+            return
+
+        ptSource = os.path.join(os.path.dirname(self.project.projHome), thisFile)
+        target = os.path.join(self.project.textFolder, cid + '.' + cType.lower())
+
+        # Copy the source to the working text folder
+        if os.path.isfile(ptSource) :
+            shutil.copy(ptSource, target)
+
+
+# FIXME: Note: these next functions might need to be moved to a special PT tools module
+    def parseSSF (self, fileName) :
+        '''Parse a Paratext SSF file and return a configobj to be used in
+        other processes.'''
+
+        # FIXME: This will take a little doing to generalize this so for
+        # now I'll return a configobj with the stuff I need to have for testing.
+        thisObj = ConfigObj()
+        buildConfSection(thisObj, 'ScriptureText')
+        thisObj['ScriptureText']['Name'] = 'SPT'
+        thisObj['ScriptureText']['FileNamePostPart'] = 'SPT.SFM'
+        thisObj['ScriptureText']['FileNameBookNameForm'] = '41MAT'
+
+        return thisObj
+
 
 
 

@@ -34,14 +34,6 @@ from configobj import ConfigObj, Section
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-# FIXME: Move this into a PT specific collection of util tools.
-def getPtId () :
-    '''Assuming this publishing project is working in a Paratext project, find
-    out what the PT ID is. This will be used in a number of PT utils.'''
-
-    pass
-
-
 def getPersistantSettings (confSection, defaultSettingsFile) :
     '''Look up each persistant setting in a given XML config file. Check
     for the exsitance of the setting in the specified section in the users

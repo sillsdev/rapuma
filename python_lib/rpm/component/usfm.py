@@ -101,7 +101,7 @@ class Usfm (Component) :
 
 #        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
 #        self.usfmManagers = [self.renderer, 'source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
-        self.usfmManagers = ['font', 'style', self.renderer]
+        self.usfmManagers = ['font', 'style', 'text', self.renderer]
 
         # Manager Descrptions
         #    source - Locate component source file, copy or link to project if needed
@@ -123,11 +123,22 @@ class Usfm (Component) :
         if self.cfg['name'] in self.compIDs :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
 
-        # Check for font elements and information
-        self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
-        self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
-        self.project.managers['usfm_Style'].recordStyle('Usfm')
-        self.project.managers['usfm_Style'].installStyle('Usfm')
+        # Set up specific elements for this type of component with our managers
+        # The following rely on specific editing systems
+        if self.sourceEditor.lower() == 'paratext' :
+            self.project.managers['usfm_Text'].installPTWorkingText(self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
+            self.project.managers['usfm_Style'].installPTStyles()
+        else :
+            self.project.writeToLog('ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
+            return
+        
+        # These elements rely on specific rendering systems
+        if self.renderer.lower() == 'xetex' :
+            self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
+            self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
+        else :
+            self.project.writeToLog('ERR', 'Rendering system [' + self.renderer + '] is not supported yet.')
+            return
 
         # Run the renderer as specified in the users config to produce the output
         self.project.managers['usfm_' + self.renderer.capitalize()].run()
