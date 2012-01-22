@@ -28,7 +28,7 @@ import codecs, os, sys, fileinput, shutil, imp
 from tools import *
 import manager as mngr
 import component as cmpt
-import project_command as projCmd
+import command as projCmd
 
 ###############################################################################
 ################################## Begin Class ################################
