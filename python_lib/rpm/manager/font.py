@@ -24,8 +24,8 @@ import os, shutil
 
 # Load the local classes
 from tools import *
+from pt_tools import *
 from manager import Manager
-import font_command as fntCmd
 
 
 ###############################################################################

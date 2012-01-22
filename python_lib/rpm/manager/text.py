@@ -24,6 +24,7 @@ from configobj import ConfigObj, Section
 
 # Load the local classes
 from tools import *
+from pt_tools import *
 from manager import Manager
 
 
@@ -65,18 +66,16 @@ class Text (Manager) :
 ###############################################################################
 
 
-    def installPTWorkingText (self, cid, cType, compPrefix) :
+    def installPTWorkingText (self, ptConf, cid, cType, compPrefix) :
         '''Find the source text in the local PT project and install it into
         the working text folder of the project with the proper name.'''
 
         # Build up the source and working file names based on what we find
         # in the PT project SSF file
-        ptSSF = os.path.split(os.path.dirname(self.project.projHome))[1] + '.SSF'
-        ssfConf = self.parseSSF(ptSSF)
-        if ssfConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
-            thisFile = compPrefix + cid.upper() + ssfConf['ScriptureText']['FileNamePostPart']
+        if ptConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
+            thisFile = compPrefix + cid.upper() + ptConf['ScriptureText']['FileNamePostPart']
         else :
-            self.project.writeToLog('ERR', 'The PT Book Name Form: [' + ssfConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
+            self.project.writeToLog('ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
             return
 
         ptSource = os.path.join(os.path.dirname(self.project.projHome), thisFile)
@@ -86,21 +85,6 @@ class Text (Manager) :
         if os.path.isfile(ptSource) :
             shutil.copy(ptSource, target)
 
-
-# FIXME: Note: these next functions might need to be moved to a special PT tools module
-    def parseSSF (self, fileName) :
-        '''Parse a Paratext SSF file and return a configobj to be used in
-        other processes.'''
-
-        # FIXME: This will take a little doing to generalize this so for
-        # now I'll return a configobj with the stuff I need to have for testing.
-        thisObj = ConfigObj()
-        buildConfSection(thisObj, 'ScriptureText')
-        thisObj['ScriptureText']['Name'] = 'SPT'
-        thisObj['ScriptureText']['FileNamePostPart'] = 'SPT.SFM'
-        thisObj['ScriptureText']['FileNameBookNameForm'] = '41MAT'
-
-        return thisObj
 
 
 

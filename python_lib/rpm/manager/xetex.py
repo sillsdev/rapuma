@@ -77,8 +77,22 @@ class Xetex (Manager) :
         # needs to be created. That is done here by drawing off of the font
         # manager.
         self.makeFontInfoTexFile()
+        self.makeTexControlFile()
+        
+        # Create the system call that will render this component
+        
+        # Run XeTeX to render
+        
+        # Report/record any errors encountered
 
- 
+
+    def makeTexControlFile () :
+        '''Create the control file that will be used for rendering this
+        component.'''
+
+        pass
+
+
     def makeFontInfoTexFile (self) :
         '''Create a TeX info font file that TeX will use for rendering.'''
 

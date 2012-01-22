@@ -63,7 +63,7 @@ from configobj import ConfigObj
 # Load the local classes
 from tools import *
 from user_config import UserConfig
-from sys_command import Command, commands
+#from sys_command import Command, commands
 from project import *
 
 ###############################################################################

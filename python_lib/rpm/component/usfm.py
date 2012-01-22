@@ -25,6 +25,7 @@ from pprint import pprint
 
 # Load the local classes
 from tools import *
+from pt_tools import *
 from component import Component
 
 
@@ -98,9 +99,18 @@ class Usfm (Component) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+        # Add some ParaTExt values if needed
+        if self.sourceEditor.lower() == 'paratext' :
+            self.ptSSFFile = os.path.split(os.path.dirname(self.project.projHome))[1] + '.SSF'
+            self.ptSSFConf = parseSSF(self.ptSSFFile)
 
-#        self.ptProjectInfoFile = os.path.join('gather', getPtId() + '.ssf')
-#        self.usfmManagers = [self.renderer, 'source', 'font', 'preprocess', 'style', 'illustration', 'hyphenation']
+        # Update default font to match PT project info
+        if self.sourceEditor.lower() == 'paratext' :
+            self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
+            self.project._projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
+            self.project.writeOutProjConfFile = True
+
+#        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
         self.usfmManagers = ['font', 'style', 'text', self.renderer]
 
         # Manager Descrptions
@@ -115,6 +125,11 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
+
+###############################################################################
+############################ Functions Begin Here #############################
+###############################################################################
+
     def render(self) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
@@ -126,7 +141,7 @@ class Usfm (Component) :
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
         if self.sourceEditor.lower() == 'paratext' :
-            self.project.managers['usfm_Text'].installPTWorkingText(self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
+            self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
             self.project.managers['usfm_Style'].installPTStyles()
         else :
             self.project.writeToLog('ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
@@ -139,6 +154,12 @@ class Usfm (Component) :
         else :
             self.project.writeToLog('ERR', 'Rendering system [' + self.renderer + '] is not supported yet.')
             return
+
+        # Run any preprocess checks or conversions
+        
+        # Run any illustration processes needed
+        
+        # Run any hyphenation or word break routines
 
         # Run the renderer as specified in the users config to produce the output
         self.project.managers['usfm_' + self.renderer.capitalize()].run()
