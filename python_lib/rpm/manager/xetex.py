@@ -58,13 +58,28 @@ class Xetex (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+# FIXME: This may not be the best place for format settings but we will start here
+
+        # Set values for this manager
+        self._formatConfig              = {}
+        self.formatConfigFileName       = 'format.conf'
+        self.formatDefaultFileName      = 'format_values.xml'
+        self.formatConfFile             = os.path.join(self.project.projConfFolder, self.formatConfigFileName)
+        self.defaultFormatValuesFile    = os.path.join(self.project.rpmConfigFolder, self.formatDefaultFileName)
+
+        if not os.path.isfile(self.formatConfFile) :
+            self._formatConfig = getXMLSettings(self.defaultFormatValuesFile)
+            writeConfFile(self._formatConfig, self.formatConfFile)
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
+
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-    def run (self) :
+    def run (self, cid) :
         '''This will render a component using the XeTeX rendering enging.'''
 
         print "Doing something..."
@@ -77,7 +92,8 @@ class Xetex (Manager) :
         # needs to be created. That is done here by drawing off of the font
         # manager.
         self.makeFontInfoTexFile()
-        self.makeTexControlFile()
+        self.makeCompTypeSettingsFile()
+        self.makeTexControlFile(cid)
         
         # Create the system call that will render this component
         
@@ -86,11 +102,23 @@ class Xetex (Manager) :
         # Report/record any errors encountered
 
 
-    def makeTexControlFile () :
+    def makeTexControlFile (self, cid) :
         '''Create the control file that will be used for rendering this
         component.'''
 
-        pass
+        # Create the control file
+        ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
+        print ctrlTex
+        return
+
+
+    def makeCompTypeSettingsFile (self) :
+        '''Create the TeX settings file for this component type.'''
+
+        compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
+        compTypeSettings = os.path.join(self.project.processFolder, compTypeSettingsFileName)
+        print compTypeSettings
+        return
 
 
     def makeFontInfoTexFile (self) :

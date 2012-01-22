@@ -82,6 +82,7 @@ class Usfm (Component) :
 
         self.compIDs = compIDs
         self.project = project
+        self.cid = ''
 
         # Build the comp type config section
         if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
@@ -137,6 +138,10 @@ class Usfm (Component) :
         # Is this a valid component ID for this component type?
         if self.cfg['name'] in self.compIDs :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
+            self.cid = self.cfg['name']
+        else :
+            self.project.writeToLog('ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
+            return
 
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
@@ -162,7 +167,7 @@ class Usfm (Component) :
         # Run any hyphenation or word break routines
 
         # Run the renderer as specified in the users config to produce the output
-        self.project.managers['usfm_' + self.renderer.capitalize()].run()
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
 
 
 
