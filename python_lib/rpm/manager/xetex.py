@@ -82,8 +82,6 @@ class Xetex (Manager) :
     def run (self, cid) :
         '''This will render a component using the XeTeX rendering enging.'''
 
-        print "Doing something..."
-        
         # Using the information passed to this module created by other managers
         # it will create all the final forms of files needed to render the
         # current component with the XeTeX renderer.
@@ -91,9 +89,14 @@ class Xetex (Manager) :
         # The fonts should all be in place but a TeX specific font control
         # needs to be created. That is done here by drawing off of the font
         # manager.
-        self.makeFontInfoTexFile()
-        self.makeCompTypeSettingsFile()
-        self.makeTexControlFile(cid)
+        if self.makeFontInfoTexFile() :
+            self.project.writeToLog('MSG', 'Created font information file.')
+        # Create the main control file that XeTeX will use for processing components
+        if self.makeCompTypeSettingsFile() :
+            self.project.writeToLog('MSG', 'Created the XeTeX settings file.')
+        # Create the component control file
+        if self.makeTexControlFile(cid) :
+            self.project.writeToLog('MSG', 'Created control file for: ' + cid + ' component.')
         
         # Create the system call that will render this component
         
@@ -108,8 +111,14 @@ class Xetex (Manager) :
 
         # Create the control file
         ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
-        print ctrlTex
-        return
+
+        if not os.path.isfile(ctrlTex) :
+            writeObject = codecs.open(ctrlTex, "w", encoding='utf_8')
+            writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
+
+            # Finish the process
+            writeObject.close()
+            return True
 
 
     def makeCompTypeSettingsFile (self) :
@@ -117,8 +126,14 @@ class Xetex (Manager) :
 
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.processFolder, compTypeSettingsFileName)
-        print compTypeSettings
-        return
+
+        if not os.path.isfile(compTypeSettings) :
+            writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
+            writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
+
+            # Finish the process
+            writeObject.close()
+            return True
 
 
     def makeFontInfoTexFile (self) :

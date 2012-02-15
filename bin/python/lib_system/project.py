@@ -357,63 +357,6 @@ class Project (object) :
             self.writeToLog('MSG', 'Removed component: [' + comp + '] from project.', 'project.removeComponents()')
 
 
-#    def addNewComponentType (self, ctype) :
-#        '''This will add all the component type information to a project.'''
-
-#        # Test to see if the section is there, do not add if it is
-#        buildConfSection(self._projConfig['ComponentTypes'], ctype)
-#        thisCompType = getCompSettings(self.userHome, self.rpmHome, ctype)
-#        self._projConfig['ComponentTypes'][ctype].merge(thisCompType['ComponentTypes']['ComponentTypeInformation'])
-#        self.writeOutProjConfFile = True
-#        self.writeToLog('MSG', 'Component type: [' + ctype + '] added to project.', 'project.addNewComponentType()')
-#        return True
-
-
-#    def removeComponentType (self, ctype) :
-#        '''Remove a component type to the current project.  Before doing so, it
-#        must varify that the requested component type is valid.'''
-
-#        if len(self._projConfig['ComponentTypes'][ctype]['installedComponents']) == 0 :
-#            # Remove references in the ComponentType section
-#            del self._projConfig['ComponentTypes'][ctype]
-#            self.writeOutProjConfFile = True
-#            # FIXME: More should be done at this point to remove files, etc of the comp type.
-#            self.writeToLog('MSG', 'Component type: [' + ctype + '] removed from project.', 'project.removeComponentType()')
-#        else :
-#            self.writeToLog('WRN', 'Component type: [' + ctype + '] does not exsits.', 'project.removeComponentType()')
-
-
-#    def getUninitializedComponent (self, cid) :
-#        '''Create an object for a specified component.'''
-
-#        if cid and cid not in self._projConfig['Components'] :
-#            self.writeToLog('ERR', 'Component: [' + cid + '] not found.', 'project.getComponent()')            
-#            return None
-#        
-#        if not cid in self._components :
-#            config = self._projConfig['Components'][cid]
-#            ctype = config['compType']
-#            if not ctype in component.componentTypes :
-#                self._components[cid] = component.component(self, config, None, cid)
-#            else :
-#                self._components[cid] = component.componentTypes[ctype](self, config, self._projConfig['ComponentTypes'][ctype], cid)
-#        return self._components[cid]
-
-
-#    def getComponent (self, cid) :
-#        '''A function for initializing (making directories, etc.) a component which is called by the
-#        component or project when a process is run.'''
-
-#        comp = self.getUninitializedComponent(cid)
-#        # Init all aux comps before the comp init
-#        self.initCompAuxiliaries(comp)
-#        # Now init the comp
-#        comp.initComponent()
-#        return comp
-
-
-
-
 ###############################################################################
 ############################ System Level Functions ###########################
 ###############################################################################
