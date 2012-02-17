@@ -19,5 +19,12 @@ Todo:
         <type>string</type>
         <value>--somethingimportant</value>
     </setting>
+    <setting>
+        <name>Macro Package</name>
+        <key>macroPackage</key>
+        <description>The macro package the XeTeX rendering engine will use to render components.</description>
+        <type>string</type>
+        <value>usfmTex</value>
+    </setting>
 </root>
 
