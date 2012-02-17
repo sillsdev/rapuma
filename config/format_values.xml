@@ -26,10 +26,10 @@ Todo:
         </setting>
         <setting>
             <name>Source Encoding Transform</name>
-            <description>In the case of multi-script projects or non-Unicode, an encoding transformation may be needed make the source data useful to the system.  The encoding information is stored in the Encoding section and should be the same as other files used in this project.   Default = False</description>
+            <description>In the case of multi-script projects or non-Unicode, an encoding transformation may be needed make the source data useful to the system.  The encoding information is stored in the Encoding section and should be the same as other files used in this project. (Default = False)</description>
             <key>sourceEncodeTransform</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
     </section>
     <section>

@@ -58,21 +58,12 @@ class Xetex (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-# FIXME: This may not be the best place for format settings but we will start here
-
         # Set values for this manager
         self._formatConfig              = {}
         self.formatConfigFileName       = 'format.conf'
-        self.formatDefaultFileName      = 'format_values.xml'
         self.formatConfFile             = os.path.join(self.project.projConfFolder, self.formatConfigFileName)
-        self.defaultFormatValuesFile    = os.path.join(self.project.rpmConfigFolder, self.formatDefaultFileName)
-
-        if not os.path.isfile(self.formatConfFile) :
-            self._formatConfig = getXMLSettings(self.defaultFormatValuesFile)
-            writeConfFile(self._formatConfig, self.formatConfFile)
-        else :
-            self._formatConfig = ConfigObj(self.formatConfFile)
-
+        self.defaultFormatValuesFile    = os.path.join(self.project.rpmConfigFolder, 'format_values.xml')
+        self.macroFormatValuesFile      = os.path.join(self.project.rpmConfigFolder, 'format_values-' + self.project._projConfig['Managers'][manager]['macroPackage'] + '.xml')
 
 ###############################################################################
 ############################ Project Level Functions ##########################
@@ -85,6 +76,17 @@ class Xetex (Manager) :
         # Using the information passed to this module created by other managers
         # it will create all the final forms of files needed to render the
         # current component with the XeTeX renderer.
+
+        # Start by making the main format config file that will control
+        # how Xetex will behave. Depending on the macro package that is
+        # used, this will bring in the default settings that all projects
+        # use, then merge in specific settings for the macro package being
+        # used for this in this instance.
+        if not os.path.isfile(self.formatConfFile) :
+            self._formatConfig = mergeConfig(getXMLSettings(self.defaultFormatValuesFile), self.macroFormatValuesFile)
+            writeConfFile(self._formatConfig, self.formatConfFile)
+        else :
+            self._formatConfig = ConfigObj(self.formatConfFile)
 
         # The fonts should all be in place but a TeX specific font control
         # needs to be created. That is done here by drawing off of the font

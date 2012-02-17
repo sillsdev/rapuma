@@ -25,7 +25,6 @@ import os
 # Load the local classes
 from tools import *
 from manager import Manager
-import format_command as frmCmd
 
 
 ###############################################################################
