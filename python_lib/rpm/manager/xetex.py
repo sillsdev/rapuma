@@ -96,10 +96,10 @@ class Xetex (Manager) :
         component.'''
 
         # List the parts the renderer will be using (in order)
-        pieces = {  1 : ['input', 'macros', self.macroPackage + '.tex'], 2 : ['input', 'process', 'fonts.tex'], 
-                    3 : ['input', 'process', 'xetex_settings_' + self.cType + '.tex'], 4 : ['stylesheet', 'process', self.cType + '.sty'], 
-                    5 : ['input', 'hyphenation', 'hyphenation.tex'], 6 : ['input', 'macros', 'ptxplus-marginalverses.tex'],
-                    7 : ['ptxfile', 'text', cid + '.usfm'] }
+        pieces = {  1 : ['input', 'macrosFolder', self.macroPackage + '.tex'], 2 : ['input', 'processFolder', 'fonts.tex'], 
+                    3 : ['input', 'processFolder', 'xetex_settings_' + self.cType + '.tex'], 4 : ['stylesheet', 'processFolder', self.cType + '.sty'], 
+                    5 : ['input', 'hyphenationFolder', 'hyphenation.tex'], 6 : ['input', 'macrosFolder', 'ptxplus-marginalverses.tex'],
+                    7 : ['ptxfile', 'textFolder', cid + '.usfm'] }
 
         # Create the control file 
         ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
@@ -112,19 +112,21 @@ class Xetex (Manager) :
             while c <= l :
                 if pieces[c][0] == 'input' :
                     lf = '\\' + pieces[c][0] + ' \"'
-                    path =  os.path.join(self.project.processFolder, pieces[c][2])
                     le = '\"\n'
                 elif pieces[c][0] == 'stylesheet' :
                     lf = '\\' + pieces[c][0] + ' {'
-                    path =  os.path.join(self.project.processFolder, pieces[c][2])
                     le = '}\n'
                 elif pieces[c][0] == 'ptxfile' :
                     lf = '\\' + pieces[c][0] + ' {'
-                    path =  os.path.join(self.project.textFolder, pieces[c][2])
                     le = '}\n'
                 else :
                     self.project.writeToLog('ERR', 'Type not supported: ' + pieces[c][0])
 
+                # Build the path
+                path =  os.path.join(setattr(self, 'project', pieces[c][1]), pieces[c][2])
+
+                # Write out after checking to see if it is needed
+                if ... :
                 writeObject.write(lf + path + le)
                 c +=1
 
@@ -132,11 +134,6 @@ class Xetex (Manager) :
             writeObject.write('\\bye\n')
             writeObject.close()
             return True
-
-
-    def makePath (self, dic) :
-    
-        if 
 
 
     def makeCompTypeSettingsFile (self) :
