@@ -1,11 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: pageFormat.xml
+File: layout.xml
 Description:
-This is a component type description for a page composition auxiliary component
-to be used in any type of project.  All file relations and processes are
-described in this file.
+This is a manager type description for a page layout features.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -19,7 +17,7 @@ Todo:
         <key>type</key>
         <description>The manager model (type) this manager is associated with.</description>
         <type>string</type>
-        <value>format</value>
+        <value>layout</value>
     </setting>
 </root>
 

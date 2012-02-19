@@ -45,25 +45,19 @@ class Xetex (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        
+        self.manager            = self.cType + '_Xetex'
+
         # Get persistant values from the config if there are any
-        manager = self.cType + '_Xetex'
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project._projConfig['Managers'][manager] :
-            self.project._projConfig['Managers'][manager] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project._projConfig['Managers'][self.manager] :
+            self.project._projConfig['Managers'][self.manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['Managers'][manager]
+        self.compSettings = self.project._projConfig['Managers'][self.manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-        # Set values for this manager
-        self._formatConfig              = {}
-        self.formatConfigFileName       = 'format.conf'
-        self.formatConfFile             = os.path.join(self.project.projConfFolder, self.formatConfigFileName)
-        self.defaultFormatValuesFile    = os.path.join(self.project.rpmConfigFolder, 'format_values.xml')
-        self.macroFormatValuesFile      = os.path.join(self.project.rpmConfigFolder, 'format_values-' + self.project._projConfig['Managers'][manager]['macroPackage'] + '.xml')
 
 ###############################################################################
 ############################ Project Level Functions ##########################
@@ -77,28 +71,17 @@ class Xetex (Manager) :
         # it will create all the final forms of files needed to render the
         # current component with the XeTeX renderer.
 
-        # Start by making the main format config file that will control
-        # how Xetex will behave. Depending on the macro package that is
-        # used, this will bring in the default settings that all projects
-        # use, then merge in specific settings for the macro package being
-        # used for this in this instance.
-        if not os.path.isfile(self.formatConfFile) :
-            self._formatConfig = mergeConfig(getXMLSettings(self.defaultFormatValuesFile), self.macroFormatValuesFile)
-            writeConfFile(self._formatConfig, self.formatConfFile)
-        else :
-            self._formatConfig = ConfigObj(self.formatConfFile)
-
         # The fonts should all be in place but a TeX specific font control
         # needs to be created. That is done here by drawing off of the font
         # manager.
         if self.makeFontInfoTexFile() :
-            self.project.writeToLog('MSG', 'Created font information file.')
+            self.project.writeToLog('LOG', 'Created font information file.')
         # Create the main control file that XeTeX will use for processing components
         if self.makeCompTypeSettingsFile() :
-            self.project.writeToLog('MSG', 'Created the XeTeX settings file.')
+            self.project.writeToLog('LOG', 'Created the XeTeX settings file.')
         # Create the component control file
         if self.makeTexControlFile(cid) :
-            self.project.writeToLog('MSG', 'Created control file for: ' + cid + ' component.')
+            self.project.writeToLog('LOG', 'Created control file for: ' + cid + ' component.')
         
         # Create the system call that will render this component
         
@@ -111,7 +94,11 @@ class Xetex (Manager) :
         '''Create the control file that will be used for rendering this
         component.'''
 
-        # Create the control file
+        # List the parts the renderer will be using (in order)
+#        pieces = {1 : ['paratext2.tex'], 'fonts.tex', 'xetex_settings_' + cType + '.tex', 
+#                    self.cType + '.sty', cid + '.usfm'}
+
+        # Create the control file 
         ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
 
         if not os.path.isfile(ctrlTex) :

@@ -41,6 +41,7 @@ class Project (object) :
 
         self._userConfig            = userConfig
         self._projConfig            = {}
+        self._layoutConfig          = {}
         self.projHome               = projHome
         self.userHome               = userHome
         self.rpmHome                = rpmHome
@@ -49,6 +50,7 @@ class Project (object) :
         self.rpmResourceFolder      = os.path.join(self.rpmHome, 'resources')
         self.rpmLibShareFolder      = os.path.join(self.rpmResourceFolder, 'lib_share')
         self.rpmFontsFolder         = os.path.join(self.rpmLibShareFolder, 'fonts')
+        self.rpmMacrosFolder        = os.path.join(self.rpmLibShareFolder, 'macros')
         self.rpmIllustrationsFolder = os.path.join(self.rpmLibShareFolder, 'illustrations')
         self.rpmXmlConfigFile       = os.path.join(self.rpmConfigFolder, 'rpm.xml')
         self.projectType            = None
@@ -58,10 +60,12 @@ class Project (object) :
         self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
         self.processFolder          = os.path.join(self.projHome, 'Process')
+        self.macrosFolder           = os.path.join(self.processFolder, 'Macros')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
         self.textFolder             = os.path.join(self.projHome, 'WorkingText')
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
+        self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
         self.projLogFile            = os.path.join(self.projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(self.projHome, 'error.log')
         self.writeOutProjConfFile   = False
@@ -95,6 +99,7 @@ class Project (object) :
         self.managers = {}
 
         # Create a fresh merged version of the projConfig
+        print self.projConfFile
         self._projConfig  = ConfigObj(self.projConfFile)
         self.projectType = self._projConfig['ProjectInfo']['projectType']
         buildConfSection(self._userConfig, 'Projects')
@@ -116,6 +121,10 @@ class Project (object) :
         if newConf != self._projConfig :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
+
+        # Bring in layout config information
+        if os.path.isfile(self.layoutConfFile) :
+            self._layoutConfig  = ConfigObj(self.layoutConfFile)
 
         # Create some common folders used in every project (if needed)
         if not os.path.isdir(self.processFolder) :

@@ -112,15 +112,7 @@ class Usfm (Component) :
             self.project.writeOutProjConfFile = True
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
-        self.usfmManagers = ['font', 'style', 'text', self.renderer]
-
-        # Manager Descrptions
-        #    source - Locate component source file, copy or link to project if needed
-        #    font - Manage fonts for all component types and renderers
-        #    preprocess - Create the process file, do any preprocesses needed
-        #    style - Manage element styles
-        #    illustration - Manage illustrations for all component types and renderers
-        #    hyphenation - Manage hyphenation information for components according to renderer
+        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
 
         # Init the general managers
         for mType in self.usfmManagers :

@@ -85,20 +85,11 @@ class Project (object) :
 
                  setattr(self, k, self._projConfig['ProjectInfo'][k] if self._projConfig else None)
 
-# FIXME: Start here, make getProjInitSettings() in tools
-
-#            # Get project level config information
-#            self._initConfig = getProjInitSettings(self.userHome, self.rpmHome, self.projectType)
-#            # Set values for this method
-#            setattr(self, 'processFolderName', self._initConfig['Folders']['Process']['name'])
-
             # Log file names
             for k in (  'projLogFile',                  'projErrorLogFile') :
                 setattr(self, k, self._userConfig['Files'][k]['name'] if self._projConfig else None)
 
             # Now do any necessary initializing for this project
-
-
             self.isProjectInitalized    = True
 
 
@@ -172,7 +163,7 @@ class Project (object) :
         # Finally write out the project config file
         if not writeConfFile(self._projConfig, '.project.conf', pdir) :
             terminal('\nERROR: Could not write to: project config file')
-#        writeProjConfFile(self._projConfig, pdir)
+
         self.writeOutProjConfFile = False
         self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
 
