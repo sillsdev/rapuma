@@ -63,6 +63,7 @@ class Project (object) :
         self.macrosFolder           = os.path.join(self.processFolder, 'Macros')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
         self.textFolder             = os.path.join(self.projHome, 'WorkingText')
+        self.hyphenationFolder      = os.path.join(self.projHome, 'Hyphenation')
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
         self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')

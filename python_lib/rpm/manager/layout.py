@@ -66,7 +66,7 @@ class Layout (Manager) :
             self._layoutConfig = mergeConfig(getXMLSettings(self.layoutDefaultValuesFile), self.macroLayoutValuesFile)
             writeConfFile(self._layoutConfig, self.layoutConfFile)
 
-        # Copy in to the project the macro package for this component
+        # Copy in to the process folder the macro package for this component
         if not os.path.isdir(self.projMacrosFolder) :
             os.makedirs(self.projMacrosFolder)
 

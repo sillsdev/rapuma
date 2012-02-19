@@ -46,6 +46,7 @@ class Xetex (Manager) :
         self.cfg                = cfg
         self.cType              = cType
         self.manager            = self.cType + '_Xetex'
+        self.macroPackage       = self.project._projConfig['Managers'][self.manager]['macroPackage']
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
@@ -95,8 +96,10 @@ class Xetex (Manager) :
         component.'''
 
         # List the parts the renderer will be using (in order)
-#        pieces = {1 : ['paratext2.tex'], 'fonts.tex', 'xetex_settings_' + cType + '.tex', 
-#                    self.cType + '.sty', cid + '.usfm'}
+        pieces = {  1 : ['input', 'macros', self.macroPackage + '.tex'], 2 : ['input', 'process', 'fonts.tex'], 
+                    3 : ['input', 'process', 'xetex_settings_' + self.cType + '.tex'], 4 : ['stylesheet', 'process', self.cType + '.sty'], 
+                    5 : ['input', 'hyphenation', 'hyphenation.tex'], 6 : ['input', 'macros', 'ptxplus-marginalverses.tex'],
+                    7 : ['ptxfile', 'text', cid + '.usfm'] }
 
         # Create the control file 
         ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
@@ -104,10 +107,36 @@ class Xetex (Manager) :
         if not os.path.isfile(ctrlTex) :
             writeObject = codecs.open(ctrlTex, "w", encoding='utf_8')
             writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
+            l = len(pieces)
+            c = 1
+            while c <= l :
+                if pieces[c][0] == 'input' :
+                    lf = '\\' + pieces[c][0] + ' \"'
+                    path =  os.path.join(self.project.processFolder, pieces[c][2])
+                    le = '\"\n'
+                elif pieces[c][0] == 'stylesheet' :
+                    lf = '\\' + pieces[c][0] + ' {'
+                    path =  os.path.join(self.project.processFolder, pieces[c][2])
+                    le = '}\n'
+                elif pieces[c][0] == 'ptxfile' :
+                    lf = '\\' + pieces[c][0] + ' {'
+                    path =  os.path.join(self.project.textFolder, pieces[c][2])
+                    le = '}\n'
+                else :
+                    self.project.writeToLog('ERR', 'Type not supported: ' + pieces[c][0])
+
+                writeObject.write(lf + path + le)
+                c +=1
 
             # Finish the process
+            writeObject.write('\\bye\n')
             writeObject.close()
             return True
+
+
+    def makePath (self, dic) :
+    
+        if 
 
 
     def makeCompTypeSettingsFile (self) :
