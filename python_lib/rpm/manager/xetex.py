@@ -123,11 +123,13 @@ class Xetex (Manager) :
                     self.project.writeToLog('ERR', 'Type not supported: ' + pieces[c][0])
 
                 # Build the path
-                path =  os.path.join(setattr(self, 'project', pieces[c][1]), pieces[c][2])
+                path =  os.path.join(getattr(self.project, pieces[c][1]), pieces[c][2])
 
                 # Write out after checking to see if it is needed
-                if ... :
-                writeObject.write(lf + path + le)
+# FIXME: This obviously doesn't work, start by fixing the conf merge problem in layout.py
+                if self.project._layoutConfig['Hyphenation']['useHyphenation'] == True :
+                    writeObject.write(lf + path + le)
+
                 c +=1
 
             # Finish the process
