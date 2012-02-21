@@ -100,7 +100,6 @@ class Project (object) :
         self.managers = {}
 
         # Create a fresh merged version of the projConfig
-        print self.projConfFile
         self._projConfig  = ConfigObj(self.projConfFile)
         self.projectType = self._projConfig['ProjectInfo']['projectType']
         buildConfSection(self._userConfig, 'Projects')

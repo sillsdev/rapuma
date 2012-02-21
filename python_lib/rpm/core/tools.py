@@ -156,12 +156,22 @@ def mergeConfig (orgConfig, newConfigFile) :
     xmlConfig = getXMLSettings(newConfigFile)
     # Create a new conf object based on all the XML default settings
     # Then override them with any exsiting project settings.
-    newConfig = ConfigObj(xmlConfig.dict()).override(orgConfig)
-    for s,v in orgConfig.items() :
-        if s not in newConfig :
-            newConfig[s] = v
+    
+    orgConfig.merge(xmlConfig)
+#    z.update(orgConfig)
+    
+#    newConfig = ConfigObj(xmlConfig.dict()).override(orgConfig)
+#    for s,v in orgConfig.items() :
+#        if s not in newConfig :
+#            newConfig[s] = v
 
-    return newConfig
+#        try :
+#            newConfig[s][v]
+#        except :
+#            newConfig[s] = v
+
+#    return newConfig
+    return orgConfig
 
 
 def getXMLSettings (xmlFile) :

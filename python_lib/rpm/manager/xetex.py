@@ -126,8 +126,8 @@ class Xetex (Manager) :
                 path =  os.path.join(getattr(self.project, pieces[c][1]), pieces[c][2])
 
                 # Write out after checking to see if it is needed
-# FIXME: This obviously doesn't work, start by fixing the conf merge problem in layout.py
-                if self.project._layoutConfig['Hyphenation']['useHyphenation'] == True :
+# FIXME: We need to filter out certain lines if they are unnesessary
+                if self.project._layoutConfig['Hyphenation']['useHyphenation'] == 'True' :
                     writeObject.write(lf + path + le)
 
                 c +=1
