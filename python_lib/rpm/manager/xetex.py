@@ -42,18 +42,24 @@ class Xetex (Manager) :
         super(Xetex, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project            = project
-        self.cfg                = cfg
-        self.cType              = cType
-        self.manager            = self.cType + '_Xetex'
-        self.macroPackage       = self.project._projConfig['Managers'][self.manager]['macroPackage']
-        self.xFiles             = {}
+        self.project                = project
+        self.cfg                    = cfg
+        self.cType                  = cType
+        self.manager                = self.cType + '_Xetex'
+        self.macroPackage           = self.project._projConfig['Managers'][self.manager]['macroPackage']
+        self.macroLayoutValuesFile  = os.path.join(self.project.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.xFiles                 = {}
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project._projConfig['Managers'][self.manager] :
             self.project._projConfig['Managers'][self.manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
+
+        # Add into layout config macro package settings
+        print dir(self.project._layoutConfig)
+        self.project._layoutConfig = mergeConfig(self.project._layoutConfig, self.macroLayoutValuesFile)
+        writeConfFile(self.project._layoutConfig, self.project.layoutConfFile)
 
         self.compSettings = self.project._projConfig['Managers'][self.manager]
 
@@ -91,7 +97,7 @@ class Xetex (Manager) :
         # Create the above files in the order they are listed
         l = len(self.xFiles)
         c = 0
-        while c <= l :
+        while c < l :
             c +=1
             path = os.path.join(getattr(self.project, self.xFiles[c][2]), self.xFiles[c][3])
             if not os.path.isfile(path) :

@@ -153,24 +153,12 @@ def mergeConfig (orgConfig, newConfigFile) :
     from a valid XML config file. The orgConfig is ConfigObj
     object and rpmConfigFile is a valid RPM XML config file.'''
 
-    xmlConfig = getXMLSettings(newConfigFile)
     # Create a new conf object based on all the XML default settings
+    newConfig = ConfigObj(getXMLSettings(newConfigFile))
+
     # Then override them with any exsiting project settings.
-    
-    orgConfig.merge(xmlConfig)
-#    z.update(orgConfig)
-    
-#    newConfig = ConfigObj(xmlConfig.dict()).override(orgConfig)
-#    for s,v in orgConfig.items() :
-#        if s not in newConfig :
-#            newConfig[s] = v
-
-#        try :
-#            newConfig[s][v]
-#        except :
-#            newConfig[s] = v
-
-#    return newConfig
+    orgConfig.merge(newConfig)
+#    print dir(orgConfig)
     return orgConfig
 
 

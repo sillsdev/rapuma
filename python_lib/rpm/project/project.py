@@ -40,8 +40,11 @@ class Project (object) :
         '''Instantiate this class.'''
 
         self._userConfig            = userConfig
-        self._projConfig            = {}
-        self._layoutConfig          = {}
+        self._projConfig            = ConfigObj()
+        self._layoutConfig          = ConfigObj()
+        self.commands               = {}
+        self.components             = {}
+        self.componentType          = {}
         self.projHome               = projHome
         self.userHome               = userHome
         self.rpmHome                = rpmHome
@@ -53,12 +56,14 @@ class Project (object) :
         self.rpmMacrosFolder        = os.path.join(self.rpmLibShareFolder, 'macros')
         self.rpmIllustrationsFolder = os.path.join(self.rpmLibShareFolder, 'illustrations')
         self.rpmXmlConfigFile       = os.path.join(self.rpmConfigFolder, 'rpm.xml')
+        self.rpmLayoutDefaultFile   = os.path.join(self.rpmConfigFolder, 'layout_default.xml')
         self.projectType            = None
         self.projectIDCode          = None
         self.lockExt                = '.lock'
         self.projConfFileName       = 'project.conf'
         self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
+        self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
         self.processFolder          = os.path.join(self.projHome, 'Process')
         self.macrosFolder           = os.path.join(self.processFolder, 'Macros')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
@@ -70,9 +75,6 @@ class Project (object) :
         self.projLogFile            = os.path.join(self.projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(self.projHome, 'error.log')
         self.writeOutProjConfFile   = False
-        self.commands               = {}
-        self.components             = {}
-        self.componentType          = {}
 
         # All available commands in context
         if os.path.isfile(self.projConfFile) :
@@ -104,6 +106,7 @@ class Project (object) :
         self.projectType = self._projConfig['ProjectInfo']['projectType']
         buildConfSection(self._userConfig, 'Projects')
         recordProject(self._userConfig, self._projConfig, self.projHome)
+        print dir(self)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -122,9 +125,10 @@ class Project (object) :
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
-        # Bring in layout config information
-        if os.path.isfile(self.layoutConfFile) :
-            self._layoutConfig  = ConfigObj(self.layoutConfFile)
+        # Bring in default layout config information
+        if not os.path.isfile(self.layoutConfFile) :
+            self._layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
+            writeConfFile(self._layoutConfig, self.layoutConfFile)
 
         # Create some common folders used in every project (if needed)
         if not os.path.isdir(self.processFolder) :

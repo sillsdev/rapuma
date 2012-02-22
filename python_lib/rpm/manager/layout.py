@@ -57,14 +57,6 @@ class Layout (Manager) :
         self.macroPackage               = self.project._projConfig['Managers'][self.manager]['macroPackage']
         self.projMacrosFolder           = os.path.join(self.project.macrosFolder, self.macroPackage)
         self.rpmMacrosFolder            = os.path.join(self.project.rpmMacrosFolder, self.macroPackage)
-        self.layoutConfFile             = os.path.join(self.project.projConfFolder, 'layout.conf')
-        self.layoutDefaultValuesFile    = os.path.join(self.project.rpmConfigFolder, 'layout_default.xml')
-        self.macroLayoutValuesFile      = os.path.join(self.project.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
-
-        # Create a layout settings file for this specific component type.if needed
-        if len(self.project._layoutConfig) == 0 :
-            self._layoutConfig = mergeConfig(getXMLSettings(self.layoutDefaultValuesFile), self.macroLayoutValuesFile)
-            writeConfFile(self._layoutConfig, self.layoutConfFile)
 
         # Copy in to the process folder the macro package for this component
         if not os.path.isdir(self.projMacrosFolder) :
@@ -75,7 +67,7 @@ class Layout (Manager) :
                 if not os.path.isfile(os.path.join(self.projMacrosFolder, f)) :
                     shutil.copy(os.path.join(self.rpmMacrosFolder, f), os.path.join(self.projMacrosFolder, f))
 
-
+# FIXME: May need to move this stuff out to xetex.py and deprecate this mod
 
 ###############################################################################
 ############################ Project Level Functions ##########################
