@@ -47,6 +47,7 @@ class Xetex (Manager) :
         self.cType              = cType
         self.manager            = self.cType + '_Xetex'
         self.macroPackage       = self.project._projConfig['Managers'][self.manager]['macroPackage']
+        self.xFiles             = {}
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
@@ -72,17 +73,58 @@ class Xetex (Manager) :
         # it will create all the final forms of files needed to render the
         # current component with the XeTeX renderer.
 
+        # We can consolidate information here for files this manager needs to make
+        #               ID   pType  tType          Location                FileName
+        self.xFiles = { 1 : ['mac', 'input',       'macrosFolder',         self.macroPackage + '.tex',     'Macro link file'], 
+                        2 : ['fnt', 'input',       'processFolder',        'fonts.tex',                    'Font control file'], 
+                        3 : ['set', 'input',       'processFolder',        self.cType + '_xetex.tex',      'XeTeX main settings file'], 
+                        4 : ['set', 'input',       'processFolder',        self.cType + '_xetex-ext.tex',  'XeTeX extention settings file'], 
+                        5 : ['set', 'stylesheet',  'processFolder',        self.cType + '.sty',            'Primary component type styles'], 
+                        6 : ['sty', 'stylesheet',  'processFolder',        'custom.sty',                   'Custom project styles (from ParaTExt)'], 
+                        7 : ['sty', 'stylesheet',  'processFolder',        cid + '.sty',                   'Component style override'], 
+                        8 : ['sty', 'input',       'hyphenationFolder',    'hyphenation.tex',              'XeTeX hyphenation data file'], 
+                        9 : ['mac', 'input',       'macrosFolder',         'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
+                       10 : ['non', 'ptxfile',     'textFolder',           cid + '.usfm',                  'Component text file'],
+                       11 : ['pro', 'input',       'processFolder',        cid + '.tex',                   'XeTeX component processing commands'],
+                        }
+
+        # Create the above files in the order they are listed
+        l = len(self.xFiles)
+        c = 0
+        while c <= l :
+            c +=1
+            path = os.path.join(getattr(self.project, self.xFiles[c][2]), self.xFiles[c][3])
+            if not os.path.isfile(path) :
+                if self.xFiles[c][0] == 'mac' :
+                    continue
+                elif self.xFiles[c][0] == 'fnt' :
+                    continue
+                elif self.xFiles[c][0] == 'set' :
+                    continue
+                elif self.xFiles[c][0] == 'sty' :
+                    continue
+                elif self.xFiles[c][0] == 'pro' :
+                    continue
+                elif self.xFiles[c][0] == 'non' :
+                    continue
+                else :
+                    self.project.writeToLog('ERR', 'Type: [' + self.xFiles[c][0] + '] not supported')
+
+                self.project.writeToLog('MSG', 'Created: ' + self.xFiles[c][4])
+            
+
+
         # The fonts should all be in place but a TeX specific font control
         # needs to be created. That is done here by drawing off of the font
         # manager.
-        if self.makeFontInfoTexFile() :
-            self.project.writeToLog('LOG', 'Created font information file.')
-        # Create the main control file that XeTeX will use for processing components
-        if self.makeCompTypeSettingsFile() :
-            self.project.writeToLog('LOG', 'Created the XeTeX settings file.')
-        # Create the component control file
-        if self.makeTexControlFile(cid) :
-            self.project.writeToLog('LOG', 'Created control file for: ' + cid + ' component.')
+#        if self.makeFontInfoTexFile() :
+#            self.project.writeToLog('LOG', 'Created font information file.')
+#        # Create the main control file that XeTeX will use for processing components
+#        if self.makeCompTypeSettingsFile() :
+#            self.project.writeToLog('LOG', 'Created the XeTeX settings file.')
+#        # Create the component control file
+#        if self.makeTexControlFile(cid) :
+#            self.project.writeToLog('LOG', 'Created control file for: ' + cid + ' component.')
         
         # Create the system call that will render this component
         
@@ -96,39 +138,40 @@ class Xetex (Manager) :
         component.'''
 
         # List the parts the renderer will be using (in order)
-        pieces = {  1 : ['input', 'macrosFolder', self.macroPackage + '.tex'], 2 : ['input', 'processFolder', 'fonts.tex'], 
-                    3 : ['input', 'processFolder', 'xetex_settings_' + self.cType + '.tex'], 4 : ['stylesheet', 'processFolder', self.cType + '.sty'], 
-                    5 : ['input', 'hyphenationFolder', 'hyphenation.tex'], 6 : ['input', 'macrosFolder', 'ptxplus-marginalverses.tex'],
-                    7 : ['ptxfile', 'textFolder', cid + '.usfm'] }
+        pieces = {  1 : self.xFiles[1], 
+                    2 : self.xFiles[2], 
+                    3 : self.xFiles[3], 
+                    4 : self.xFiles[4], 
+                    5 : self.xFiles[5], 
+                    6 : self.xFiles[6], 
+                    7 : self.xFiles[7], 
+                    8 : self.xFiles[8], 
+                    9 : self.xFiles[9],
+                   10 : self.xFiles[10] }
 
         # Create the control file 
-        ctrlTex = os.path.join(self.project.processFolder, cid + '.tex')
+        cidTex = os.path.join(getattr(self.project, self.xFiles[11][2]), self.xFiles[11][3])
 
-        if not os.path.isfile(ctrlTex) :
-            writeObject = codecs.open(ctrlTex, "w", encoding='utf_8')
+        if not os.path.isfile(cidTex) :
+            writeObject = codecs.open(cidTex, "w", encoding='utf_8')
             writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
+            # We allow for a number of different types of lines to
+            # be created for this file. Most lines are in three parts
+            # a top cookie, bottom cookie and a cream filling :-)
             l = len(pieces)
             c = 1
             while c <= l :
+                filling = os.path.join(getattr(self.project, pieces[c][1]), pieces[c][2])
                 if pieces[c][0] == 'input' :
-                    lf = '\\' + pieces[c][0] + ' \"'
-                    le = '\"\n'
-                elif pieces[c][0] == 'stylesheet' :
-                    lf = '\\' + pieces[c][0] + ' {'
-                    le = '}\n'
-                elif pieces[c][0] == 'ptxfile' :
-                    lf = '\\' + pieces[c][0] + ' {'
-                    le = '}\n'
+                    if os.path.isfile(filling) :
+                        writeObject.write('\\' + pieces[c][0] + ' \"' + filling + '\"\n')
+                elif pieces[c][0] in ['stylesheet', 'ptxfile'] :
+                    if os.path.isfile(filling) :
+                        writeObject.write('\\' + pieces[c][0] + ' {' + filling + '}\n')
+                elif pieces[c][0] == 'command' :
+                    writeObject.write('\\' + pieces[c][0] + '\n')
                 else :
                     self.project.writeToLog('ERR', 'Type not supported: ' + pieces[c][0])
-
-                # Build the path
-                path =  os.path.join(getattr(self.project, pieces[c][1]), pieces[c][2])
-
-                # Write out after checking to see if it is needed
-# FIXME: We need to filter out certain lines if they are unnesessary
-                if self.project._layoutConfig['Hyphenation']['useHyphenation'] == 'True' :
-                    writeObject.write(lf + path + le)
 
                 c +=1
 
