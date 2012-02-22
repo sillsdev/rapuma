@@ -25,11 +25,6 @@ from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
 
-# Load config specification
-#configspec = ConfigObj(configspecfilename, encoding='UTF8',
-#                       list_values=False, _inspec=True)
-#config = ConfigObj(filename, configspec=configspec)
-
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
@@ -146,20 +141,6 @@ def recordProject (userConfig, projConfig, projHome) :
         return True
     else :
         return False
-
-
-def mergeConfig (orgConfig, newConfigFile) :
-    '''Generic function to return a merged config object
-    from a valid XML config file. The orgConfig is ConfigObj
-    object and rpmConfigFile is a valid RPM XML config file.'''
-
-    # Create a new conf object based on all the XML default settings
-    newConfig = ConfigObj(getXMLSettings(newConfigFile))
-
-    # Then override them with any exsiting project settings.
-    orgConfig.merge(newConfig)
-#    print dir(orgConfig)
-    return orgConfig
 
 
 def getXMLSettings (xmlFile) :

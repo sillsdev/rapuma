@@ -106,7 +106,6 @@ class Project (object) :
         self.projectType = self._projConfig['ProjectInfo']['projectType']
         buildConfSection(self._userConfig, 'Projects')
         recordProject(self._userConfig, self._projConfig, self.projHome)
-        print dir(self)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -119,9 +118,17 @@ class Project (object) :
         m = __import__(self.projectType)
         self.__class__ = getattr(m, self.projectType[0].upper() + self.projectType[1:])
 
-        # Update the config file with the project type XML file if it is needed
-        newConf = mergeConfig(self._projConfig, os.path.join(self.rpmConfigFolder, self.projectType + '.xml'))
-        if newConf != self._projConfig :
+        # Update the existing config file with the project type XML file
+        # if needed
+        newXmlDefaults = os.path.join(self.rpmConfigFolder, self.projectType + '.xml')
+        xmlConfig = getXMLSettings(newXmlDefaults)
+        newConf = ConfigObj(xmlConfig.dict()).override(self._projConfig)
+        for s,v in self._projConfig.items() :
+            if s not in newConf :
+                newConf[s] = v
+
+        if self._projConfig != newConf :
+            print 'Was different!'
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 

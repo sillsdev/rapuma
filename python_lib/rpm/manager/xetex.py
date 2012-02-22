@@ -56,13 +56,15 @@ class Xetex (Manager) :
             self.project._projConfig['Managers'][self.manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        # Add into layout config macro package settings
-        print dir(self.project._layoutConfig)
-        self.project._layoutConfig = mergeConfig(self.project._layoutConfig, self.macroLayoutValuesFile)
-        writeConfFile(self.project._layoutConfig, self.project.layoutConfFile)
+        # Add (merge) into layout config macro package settings
+        macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
+        layoutCopy = self.project._layoutConfig
+        newLayout = layoutCopy.merge(macVals)
+        if newLayout != layoutCopy :
+            writeConfFile(self.project._layoutConfig, self.project.layoutConfFile)
 
+        # Get settings for this component
         self.compSettings = self.project._projConfig['Managers'][self.manager]
-
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
