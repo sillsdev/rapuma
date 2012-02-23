@@ -29,6 +29,18 @@ from configobj import ConfigObj, Section
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+
+def confObjCompare (objA, objB, path) :
+    '''Do a simple compare on two ConfigObj objects.'''
+
+    # There must be a better way to do this but this will work for now
+    writeConfFile(objA, os.path.join(path, 'confA'))
+    writeConfFile(objB, os.path.join(path, 'confB'))
+    reObjA = ConfigObj(os.path.join(path, 'confA'))
+    reObjB = ConfigObj(os.path.join(path, 'confB'))
+    return reObjA.__eq__(reObjB)
+
+
 def getPersistantSettings (confSection, defaultSettingsFile) :
     '''Look up each persistant setting in a given XML config file. Check
     for the exsitance of the setting in the specified section in the users
@@ -170,6 +182,11 @@ def writeConfFile (configStuff, configFileAndPath) :
     if not os.path.exists(folderPath) :
         os.makedirs(folderPath)
 
+# FIXME: Here we need to add some checking to see if the file on disk
+# is the same as the information we want to write. If it is, we don't
+# need to be writing it. This will prevent us from overwriting the
+# conf files so often.
+
     # Create the file if needed
     if not os.path.isfile(configFileAndPath) or os.path.getsize(configFileAndPath) == 0 :
         writeObject = codecs.open(configFileAndPath, "w", encoding='utf_8')
@@ -188,7 +205,6 @@ def writeConfFile (configStuff, configFileAndPath) :
     except :
         terminal('\nERROR: Could not write to: ' + configFileAndPath)
         return False
-
 
 
 def xml_to_section (fname) :

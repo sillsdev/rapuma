@@ -208,6 +208,7 @@ if pid :
         # Otherwise we will just pass through and quite
         if os.path.isfile(aProject.projConfFile) :
             aProject.initProject()
+            projConfigOrg = aProject._projConfig
 
         welcomeMessage(aProject)
         processCommand(aProject)
@@ -217,6 +218,7 @@ if pid :
         if command == 'project_create' :
             # Instantiate the project class using the default projHome path
             aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
+            projConfigOrg = aProject._projConfig
             welcomeMessage(aProject)
             processCommand(aProject)
             closeSession(aProject)
