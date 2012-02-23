@@ -109,13 +109,6 @@ Todo:
             <type>boolean</type>
             <value>True</value>
         </setting>
-        <setting>
-            <name>Crossreference Auto Caller Character</name>
-            <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
-            <key>crossrefAutoCallerCharacter</key>
-            <type>string</type>
-            <value></value>
-        </setting>
     </section>
     <section>
         <name>Numeric Callers (Footnotes)</name>
@@ -240,14 +233,14 @@ Todo:
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>customPageHeight</key>
             <type>integer</type>
-            <value></value>
+            <value>None</value>
         </setting>
         <setting>
             <name>Custom Page Width</name>
             <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
             <key>customPageWidth</key>
             <type>integer</type>
-            <value></value>
+            <value>None</value>
         </setting>
         <setting>
             <name>Page Size ID Code</name>
@@ -261,7 +254,7 @@ Todo:
             <description>Sometimes the content should not start with the default page number of '1'. If a number is set in this field, the macro will insert a \pageno command in the control file.  Note this is for the main content section only.  Individual components in the front and back matter must have the \pageno command inserted manually into their control files.   Default = Null (which means no command output, page starts on '1')</description>
             <key>pageNumberBegin</key>
             <type>integer</type>
-            <value></value>
+            <value>None</value>
         </setting>
     </section>
     <section>

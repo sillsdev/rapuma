@@ -64,6 +64,11 @@ class Project (object) :
         self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
         self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
+
+        self.layoutConfFileTestA         = os.path.join(self.projConfFolder, 'layout-testA.conf')
+        self.layoutConfFileTestB         = os.path.join(self.projConfFolder, 'layout-testB.conf')
+
+
         self.processFolder          = os.path.join(self.projHome, 'Process')
         self.macrosFolder           = os.path.join(self.processFolder, 'Macros')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
@@ -71,7 +76,6 @@ class Project (object) :
         self.hyphenationFolder      = os.path.join(self.projHome, 'Hyphenation')
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
-        self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
         self.projLogFile            = os.path.join(self.projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(self.projHome, 'error.log')
         self.writeOutProjConfFile   = False
@@ -128,7 +132,6 @@ class Project (object) :
                 newConf[s] = v
 
         if self._projConfig != newConf :
-            print 'Was different!'
             self._projConfig = newConf
             self.writeOutProjConfFile = True
 
@@ -136,6 +139,8 @@ class Project (object) :
         if not os.path.isfile(self.layoutConfFile) :
             self._layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
             writeConfFile(self._layoutConfig, self.layoutConfFile)
+        else :
+            self._layoutConfig = ConfigObj(self.layoutConfFile)
 
         # Create some common folders used in every project (if needed)
         if not os.path.isdir(self.processFolder) :
@@ -201,6 +206,10 @@ class Project (object) :
         # Create a new version of the project config file
         self.writeOutProjConfFile = True
         self._projConfig = getXMLSettings(os.path.join(self.rpmConfigFolder, ptype + '.xml'))
+
+        # Create a new vesion of the layout config file
+#        self._layoutConfig  = getXMLSettings(self.rpmLayoutDefaultFile)
+#        writeConfFile(self._layoutConfig, self.layoutConfFile)
 
         # Create intitial project settings
         date = tStamp()

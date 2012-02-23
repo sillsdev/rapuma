@@ -58,10 +58,27 @@ class Xetex (Manager) :
 
         # Add (merge) into layout config macro package settings
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
-        layoutCopy = self.project._layoutConfig
-        newLayout = layoutCopy.merge(macVals)
-        if newLayout != layoutCopy :
-            writeConfFile(self.project._layoutConfig, self.project.layoutConfFile)
+
+        writeConfFile(self.project._layoutConfig, self.project.layoutConfFileTestA)
+        
+        layoutCopy = ConfigObj(self.project.layoutConfFile)
+        layoutCopy.merge(macVals)
+        
+        writeConfFile(layoutCopy, self.project.layoutConfFileTestB)
+
+# FIXME: We need an acurate way of determining if a confObj is the same as another one.
+# Right now we have a problem with booleans being stored as ['text'] but represented in
+# memory as [text]. Even though the data is actually the same, it is different because
+# of the quotes. The problem seems to be with ['None'] vs. [None].
+
+        print layoutCopy.dict().__eq__(self.project._layoutConfig.dict())
+        
+        print self.project._layoutConfig.dict()
+
+        if layoutCopy != self.project._layoutConfig :
+            self.project._layoutConfig = layoutCopy
+            print 'rewriting the conf file.'
+            writeConfFile(layoutCopy, self.project.layoutConfFile)
 
         # Get settings for this component
         self.compSettings = self.project._projConfig['Managers'][self.manager]
