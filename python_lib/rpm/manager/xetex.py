@@ -54,7 +54,6 @@ class Xetex (Manager) :
         newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project._projConfig['Managers'][self.manager] :
             self.project._projConfig['Managers'][self.manager] = newSectionSettings
-            self.project.writeOutProjConfFile = True
 
         # Add (merge) into layout config macro package settings
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
@@ -62,7 +61,8 @@ class Xetex (Manager) :
         layoutCopy.merge(macVals)
         if not confObjCompare(layoutCopy, self.project._layoutConfig, self.project.projConfFolder) :
             self.project._layoutConfig = layoutCopy
-            writeConfFile(layoutCopy, self.project.layoutConfFile)
+            self.project._layoutConfig.write()
+            #writeConfFile(layoutCopy, self.project.layoutConfFile)
 
         # Get settings for this component
         self.compSettings = self.project._projConfig['Managers'][self.manager]

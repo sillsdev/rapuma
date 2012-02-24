@@ -34,10 +34,12 @@ def confObjCompare (objA, objB, path) :
     '''Do a simple compare on two ConfigObj objects.'''
 
     # There must be a better way to do this but this will work for now
-    writeConfFile(objA, os.path.join(path, 'confA'))
-    writeConfFile(objB, os.path.join(path, 'confB'))
-    reObjA = ConfigObj(os.path.join(path, 'confA'))
-    reObjB = ConfigObj(os.path.join(path, 'confB'))
+    objA.filename = os.path.join(path, '.confA')
+    objA.write()
+    objB.filename = os.path.join(path, '.confB')
+    objB.write()
+    reObjA = ConfigObj(os.path.join(path, '.confA'))
+    reObjB = ConfigObj(os.path.join(path, '.confB'))
     return reObjA.__eq__(reObjB)
 
 
@@ -178,17 +180,22 @@ def writeConfFile (configStuff, configFileAndPath) :
     # Parse file and path
     (folderPath, configFile) = os.path.split(configFileAndPath)
 
-    # Build the folder path if needed
-    if not os.path.exists(folderPath) :
-        os.makedirs(folderPath)
-
-# FIXME: Here we need to add some checking to see if the file on disk
-# is the same as the information we want to write. If it is, we don't
-# need to be writing it. This will prevent us from overwriting the
-# conf files so often.
+    # Check contents of the existing conf file
+    if os.path.isfile(configFileAndPath) :
+        confObjOrg = ConfigObj(configFileAndPath)
+        configStuff.filename = os.path.join(folderPath, '.' + configFile + '.new')
+        configStuff.write()
+        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
+        # If they are the same we don't need to continue
+        if confObjOrg.__eq__(confObjNew) :
+            return False
 
     # Create the file if needed
     if not os.path.isfile(configFileAndPath) or os.path.getsize(configFileAndPath) == 0 :
+        # Build the folder path if needed
+        if not os.path.exists(folderPath) :
+            os.makedirs(folderPath)
+
         writeObject = codecs.open(configFileAndPath, "w", encoding='utf_8')
         writeObject.close()
 

@@ -43,9 +43,6 @@ if not userHome :
     userHome = os.path.join(sysHome, '.config', 'rpm')
     os.environ['RPM_USER'] = userHome
 
-# Set the location for RPM internal configuration
-rpmConfig = os.path.join(rpmHome, 'bin', 'config')
-
 # Set the (potential) project home
 projHome = os.getcwd()
 
@@ -168,15 +165,19 @@ def processCommand (aProject) :
 
 
 def closeSession (aProject) :
-    '''Now write out the config files if needed'''
+    '''Now write out to each of the config files if needed'''
 
-    if aProject.writeOutProjConfFile :
-        if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
-            terminalError('Could not write to: project config file')
-# FIXME: Why is this writing all the time?
-    if uConf.writeOutUserConfFile :
-        if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
-            terminalError('Could not write to: user config file')
+    for conf in aProject.confFileList :
+        confObj = getattr(aProject, '_' + conf)
+        writeConfFile(confObj, confObj.filename)
+
+#    if aProject.writeOutProjConfFile :
+#        if not writeConfFile(aProject._projConfig, aProject.projConfFile) :
+#            terminalError('Could not write to: project config file')
+## FIXME: Why is this writing all the time?
+#    if uConf.writeOutUserConfFile :
+#        if not writeConfFile(uConf._userConfig, uConf.userConfFile) :
+#            terminalError('Could not write to: user config file')
 
     # Now trim the log file if it is needed
     if isConfSection(aProject._projConfig, 'Project') :

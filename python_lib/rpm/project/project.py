@@ -42,6 +42,7 @@ class Project (object) :
         self._userConfig            = userConfig
         self._projConfig            = ConfigObj()
         self._layoutConfig          = ConfigObj()
+        self.confFileList           = ['userConfig', 'projConfig', 'layoutConfig']
         self.commands               = {}
         self.components             = {}
         self.componentType          = {}
@@ -63,22 +64,22 @@ class Project (object) :
         self.projConfFileName       = 'project.conf'
         self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
-        self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
-
-        self.layoutConfFileTestA         = os.path.join(self.projConfFolder, 'layout-testA.conf')
-        self.layoutConfFileTestB         = os.path.join(self.projConfFolder, 'layout-testB.conf')
-
-
         self.processFolder          = os.path.join(self.projHome, 'Process')
         self.macrosFolder           = os.path.join(self.processFolder, 'Macros')
         self.fontsFolder            = os.path.join(self.projHome, 'Fonts')
         self.textFolder             = os.path.join(self.projHome, 'WorkingText')
         self.hyphenationFolder      = os.path.join(self.projHome, 'Hyphenation')
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
+        self.layoutConfFile         = os.path.join(self.projConfFolder, 'layout.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
         self.projLogFile            = os.path.join(self.projHome, 'rpm.log')
         self.projErrorLogFile       = os.path.join(self.projHome, 'error.log')
         self.writeOutProjConfFile   = False
+
+        # Add file names to each of our conf objects
+        self._userConfig.filename   = self.userConfFile
+        self._projConfig.filename   = self.projConfFile
+        self._layoutConfig.filename = self.layoutConfFile
 
         # All available commands in context
         if os.path.isfile(self.projConfFile) :
@@ -133,12 +134,13 @@ class Project (object) :
 
         if self._projConfig != newConf :
             self._projConfig = newConf
-            self.writeOutProjConfFile = True
 
         # Bring in default layout config information
         if not os.path.isfile(self.layoutConfFile) :
             self._layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
-            writeConfFile(self._layoutConfig, self.layoutConfFile)
+            self._layoutConfig.filename = self.layoutConfFile
+            self._layoutConfig.write()
+            #writeConfFile(self._layoutConfig, self.layoutConfFile)
         else :
             self._layoutConfig = ConfigObj(self.layoutConfFile)
 
