@@ -118,45 +118,6 @@ def buildConfSection (confObj, section) :
         return True
 
 
-def isRecordedProject (userConfig, pid) :
-    '''Check to see if this project is recorded in the user's config'''
-
-    try :
-        return pid in userConfig['Projects']
-    except :
-        pass
-
-
-def recordProject (userConfig, projConfig, projHome) :
-    '''Add information about this project to the user's rpm.conf located in
-    the home config folder.'''
-
-    pid     = projConfig['ProjectInfo']['projectIDCode']
-    pname   = projConfig['ProjectInfo']['projectName']
-    ptype   = projConfig['ProjectInfo']['projectType']
-    date    = projConfig['ProjectInfo']['projectCreateDate']
-    if not isRecordedProject(userConfig, pid) :
-
-        # FIXME: Before we create a project entry we want to be sure that
-        # the projects section already exsists.  There might be a better way
-        # of doing this.
-        try :
-            userConfig['Projects'][pid] = {}
-        except :
-            userConfig['Projects'] = {}
-            userConfig['Projects'][pid] = {}
-
-        # Now add the project data
-        userConfig['Projects'][pid]['projectName']          = pname
-        userConfig['Projects'][pid]['projectType']          = ptype
-        userConfig['Projects'][pid]['projectPath']          = projHome
-        userConfig['Projects'][pid]['projectCreateDate']    = date
-        userConfig.write()
-        return True
-    else :
-        return False
-
-
 def getXMLSettings (xmlFile) :
     '''Test for exsistance and then get settings from an XML file.'''
 
@@ -177,41 +138,41 @@ def overrideSettings (settings, overrideXML) :
 def writeConfFile (configStuff, configFileAndPath) :
     '''Generic routin to write out to, or create a config file.'''
 
-    # Parse file and path
-    (folderPath, configFile) = os.path.split(configFileAndPath)
+    if configFileAndPath != 'nothing' :
+        confObjNew = ConfigObj()
+        # Parse file and path
+        print 'configFileAndPath = ', configFileAndPath
+        (folderPath, configFile) = os.path.split(configFileAndPath)
 
-    # Check contents of the existing conf file
-    if os.path.isfile(configFileAndPath) :
-        confObjOrg = ConfigObj(configFileAndPath)
-        configStuff.filename = os.path.join(folderPath, '.' + configFile + '.new')
-        configStuff.write()
-        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
-        # If they are the same we don't need to continue
-        if confObjOrg.__eq__(confObjNew) :
-            return False
+        # Check contents of the existing conf file
+        if os.path.isfile(configFileAndPath) :
+            confObjOrg = ConfigObj(configFileAndPath)
+            configStuff.filename = os.path.join(folderPath, '.' + configFile + '.new')
+            configStuff.write()
+            confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
+            # If they are the same we don't need to continue
+            if confObjOrg.__eq__(confObjNew) :
+                print 'It thinks the two objects are the same.'
+                return False
 
-    # Create the file if needed
-    if not os.path.isfile(configFileAndPath) or os.path.getsize(configFileAndPath) == 0 :
         # Build the folder path if needed
         if not os.path.exists(folderPath) :
             os.makedirs(folderPath)
 
-        writeObject = codecs.open(configFileAndPath, "w", encoding='utf_8')
-        writeObject.close()
+        # To track when a conf file was saved as well as other general
+        # housekeeping we will create a GeneralSettings section with
+        # a last edit date key/value.
+        buildConfSection(confObjNew, 'GeneralSettings')
+        try :
+            confObjNew['GeneralSettings']['lastEdit'] = tStamp()
+            confObjNew.filename = configFileAndPath
+            print 'configStuff.filename = ', configStuff.filename
+            confObjNew.write()
+            return True
 
-    # To track when a conf file was saved as well as other general
-    # housekeeping we will create a GeneralSettings section with
-    # a last edit date key/value.
-    buildConfSection(configStuff, 'GeneralSettings')
-    try :
-        configStuff['GeneralSettings']['lastEdit'] = tStamp()
-        configStuff.filename = configFileAndPath
-        configStuff.write()
-        return True
-
-    except :
-        terminal('\nERROR: Could not write to: ' + configFileAndPath)
-        return False
+        except :
+            terminal('\nERROR: Could not write to: ' + configFileAndPath)
+            return False
 
 
 def xml_to_section (fname) :

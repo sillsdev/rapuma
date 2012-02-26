@@ -36,7 +36,6 @@ class UserConfig (object) :
         self.userConfFile           = os.path.join(userHome, 'rpm.conf')
         self._defaultConfig         = {}
         self._userConfig            = {}
-        self.writeOutUserConfFile   = False
         self.createUserConfig()
 
 
@@ -77,12 +76,11 @@ class UserConfig (object) :
             
         self._userConfig = newConfig
         self._userConfig.filename = self.userConfFile
-        self._userConfig.write()
 
 
     def initUserHome (self) :
         '''Initialize a user config file on a new install or system re-init.'''
-    
+
         # Create home folders
         if not os.path.isdir(self.userHome) :
             os.mkdir(self.userHome)
@@ -90,13 +88,48 @@ class UserConfig (object) :
         # Make the default global rpm.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
             date_time = tStamp()
-            rpm = ConfigObj()
-            rpm.filename = self.userConfFile
-            rpm['System'] = {}
-            rpm['System']['userName'] = 'Default User'
-            rpm['System']['initDate'] = date_time
+            self._userConfig = ConfigObj()
+            self._userConfig.filename = self.userConfFile
+            self._userConfig['System'] = {}
+            self._userConfig['System']['userName'] = 'Default User'
+            self._userConfig['System']['initDate'] = date_time
+            writeConfFile(self._userConfig, self.userConfFile)
 
-            # Write out the user config file
-            rpm.write()
 
+def isRegisteredProject (userConfig, pid) :
+    '''Check to see if this project is recorded in the user's config'''
+
+    try :
+        return pid in userConfig['Projects']
+    except :
+        pass
+
+
+def registerProject (userConfig, projConfig, projHome) :
+    '''If it is already not there, add information about this project to the
+    user's rpm.conf located in the user's config folder.'''
+
+    pid     = projConfig['ProjectInfo']['projectIDCode']
+    pname   = projConfig['ProjectInfo']['projectName']
+    ptype   = projConfig['ProjectInfo']['projectType']
+    date    = projConfig['ProjectInfo']['projectCreateDate']
+    if not isRegisteredProject(userConfig, pid) :
+
+        # FIXME: Before we create a project entry we want to be sure that
+        # the projects section already exsists.  There might be a better way
+        # of doing this.
+        try :
+            userConfig['Projects'][pid] = {}
+        except :
+            userConfig['Projects'] = {}
+            userConfig['Projects'][pid] = {}
+
+        # Now add the project data
+        userConfig['Projects'][pid]['projectName']          = pname
+        userConfig['Projects'][pid]['projectType']          = ptype
+        userConfig['Projects'][pid]['projectPath']          = projHome
+        userConfig['Projects'][pid]['projectCreateDate']    = date
+        return True
+    else :
+        return False
 

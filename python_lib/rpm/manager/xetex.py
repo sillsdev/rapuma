@@ -61,8 +61,6 @@ class Xetex (Manager) :
         layoutCopy.merge(macVals)
         if not confObjCompare(layoutCopy, self.project._layoutConfig, self.project.projConfFolder) :
             self.project._layoutConfig = layoutCopy
-            self.project._layoutConfig.write()
-            #writeConfFile(layoutCopy, self.project.layoutConfFile)
 
         # Get settings for this component
         self.compSettings = self.project._projConfig['Managers'][self.manager]

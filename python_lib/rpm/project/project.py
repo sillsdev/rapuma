@@ -29,6 +29,7 @@ from tools import *
 import manager as mngr
 import component as cmpt
 import command as projCmd
+import user_config as userConfig
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -43,6 +44,7 @@ class Project (object) :
         self._projConfig            = ConfigObj()
         self._layoutConfig          = ConfigObj()
         self.confFileList           = ['userConfig', 'projConfig', 'layoutConfig']
+#        self.confFileList           = ['userConfig', 'projConfig']
         self.commands               = {}
         self.components             = {}
         self.componentType          = {}
@@ -80,7 +82,12 @@ class Project (object) :
         self._userConfig.filename   = self.userConfFile
         self._projConfig.filename   = self.projConfFile
         self._layoutConfig.filename = self.layoutConfFile
-
+        # If there is no projConfFile then we do not want these
+        if os.path.isfile(self.projConfFile) :
+            self._layoutConfig.filename = self.layoutConfFile
+        else :
+            self._layoutConfig.filename = 'nothing'
+#        print 'xxxxxx', self._layoutConfig.filename
         # All available commands in context
         if os.path.isfile(self.projConfFile) :
             self.addCommand("project_create", projCmd.CreateProject())
@@ -110,7 +117,7 @@ class Project (object) :
         self._projConfig  = ConfigObj(self.projConfFile)
         self.projectType = self._projConfig['ProjectInfo']['projectType']
         buildConfSection(self._userConfig, 'Projects')
-        recordProject(self._userConfig, self._projConfig, self.projHome)
+        userConfig.registerProject(self._userConfig, self._projConfig, self.projHome)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -138,9 +145,7 @@ class Project (object) :
         # Bring in default layout config information
         if not os.path.isfile(self.layoutConfFile) :
             self._layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
-            self._layoutConfig.filename = self.layoutConfFile
-            self._layoutConfig.write()
-            #writeConfFile(self._layoutConfig, self.layoutConfFile)
+#            self._layoutConfig.filename = self.layoutConfFile
         else :
             self._layoutConfig = ConfigObj(self.layoutConfFile)
 
@@ -172,11 +177,13 @@ class Project (object) :
         else :
             pdir = os.path.abspath(pdir)
 
+        # Change/update the global settings here
+        self.projHome           = pdir
+        self.projConfFolder     = os.path.join(self.projHome, self.configFolderName)
+        self.projConfFile       = os.path.join(self.projConfFolder, self.projConfFileName)
+
         # So now that we have a pdir it needs testing
         # Manualy build the new projConfFile path
-        pcf = os.path.join(pdir, self.configFolderName, self.projConfFileName)
-        if pcf != self.projConfFile :
-            self.projConfFile = pcf
         # Test for parent project.
         if os.path.isfile(self.projConfFile) :
             self.writeToLog('ERR', 'Halt! Live project already defined in this location')
@@ -184,34 +191,44 @@ class Project (object) :
         elif os.path.isfile(self.projConfFile + self.lockExt) :
             self.writeToLog('ERR', 'Halt! Locked project already defined in target folder')
             return False
-
-        elif os.path.isfile(os.path.join(os.path.dirname(pdir), self.projConfFileName)) :
+        elif os.path.isfile(os.path.join(os.path.dirname(self.projHome), self.projConfFileName)) :
             self.writeToLog('ERR', 'Halt! Live project already defined in parent folder')
             return False
-        elif os.path.isfile(os.path.join(os.path.dirname(pdir), self.projConfFileName + self.lockExt)) :
+        elif os.path.isfile(os.path.join(os.path.dirname(self.projHome), self.projConfFileName + self.lockExt)) :
             self.writeToLog('ERR', 'Halt! Locked project already defined in parent folder')
             return False
-        elif not os.path.isdir(os.path.dirname(pdir)) :
-            self.writeToLog('ERR', 'Halt! Not a valid (parent) path: ' + pdir)
+        elif not os.path.isdir(os.path.dirname(self.projHome)) :
+            self.writeToLog('ERR', 'Halt! Not a valid (parent) path: ' + self.projHome)
             return False
 
         # Test if this project already exists in the user's config file.
-        if isRecordedProject(self._userConfig, pid) :
+        if userConfig.isRegisteredProject(self._userConfig, pid) :
             self.writeToLog('ERR', 'Halt! ID [' + pid + '] already defined for another project')
             return False
 
         # If we made it to this point we need to check to see if the project
         # folder exists, if it doesn't make it.
-        if not os.path.exists(pdir) :
-            os.makedirs(pdir)
+        if not os.path.exists(self.projHome) :
+            os.makedirs(self.projHome)
 
-        # Create a new version of the project config file
-        self.writeOutProjConfFile = True
-        self._projConfig = getXMLSettings(os.path.join(self.rpmConfigFolder, ptype + '.xml'))
+        # Create a new version of the project config file if one is not there.
+        # If one is, then we throw a warning to have it removed first.
+        if not os.path.isfile(self.projConfFile) :
+            if not os.path.isdir (self.projConfFolder) :
+                os.makedirs(self.projConfFolder)
+
+            writeObject = codecs.open(self.projConfFile, "w", encoding='utf_8')
+            writeObject.close()
+            self._projConfig = getXMLSettings(os.path.join(self.rpmConfigFolder, ptype + '.xml'))
+            self._projConfig.filename = self.projConfFile
+            self._projConfig.write()
+        else :
+            self.writeToLog('ERR', 'Halt! A project config file already exsits for this project. Please remove it before continuing.')
+            return False
 
         # Create a new vesion of the layout config file
-#        self._layoutConfig  = getXMLSettings(self.rpmLayoutDefaultFile)
-#        writeConfFile(self._layoutConfig, self.layoutConfFile)
+        self._layoutConfig  = getXMLSettings(self.rpmLayoutDefaultFile)
+#        self._layoutConfig.filename = self.layoutConfFile
 
         # Create intitial project settings
         date = tStamp()
@@ -219,12 +236,9 @@ class Project (object) :
         self._projConfig['ProjectInfo']['projectName']              = pname
         self._projConfig['ProjectInfo']['projectCreateDate']        = date
         self._projConfig['ProjectInfo']['projectIDCode']            = pid
-        recordProject(self._userConfig, self._projConfig, pdir)
+        userConfig.registerProject(self._userConfig, self._projConfig, self.projHome)
 
-        # Finally write out the project config file
-        if not writeConfFile(self._projConfig, self.projConfFile) :
-            terminal('\nERROR: Could not write to: project config file')
-        self.writeOutProjConfFile = False
+        # Report what we did
         self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
         return True
 
@@ -248,8 +262,6 @@ class Project (object) :
 
                 # Remove references from user rpm.conf write out immediately
                 del self._userConfig['Projects'][pid]
-                if not writeConfFile(self._userConfig, self.userConfFile) :
-                    terminal('\nERROR: Could not write to: user config file')
 
                 # Report the process is done
                 self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
