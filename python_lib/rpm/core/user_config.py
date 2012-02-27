@@ -29,19 +29,12 @@ from tools import *
 class UserConfig (object) :
 
     def __init__(self, userHome, rpmHome) :
-        '''Intitate the whole class'''
+        '''Intitate the whole class and create the object.'''
         
         self.userHome               = userHome
         self.rpmHome                = rpmHome
         self.userConfFile           = os.path.join(userHome, 'rpm.conf')
         self.userConfig            = {}
-        self.createUserConfig()
-
-# FIXME: merge with init
-    def createUserConfig (self) :
-        '''Create a user config object based on the system defaults and the
-        overrides in the user config file, if it exsits.  If it does not, make
-        one.'''
 
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
@@ -72,10 +65,12 @@ class UserConfig (object) :
         # lost from the XML/conf file merging.
         if userProjs :
             newConfig['Projects'] = userProjs
-            
-        self.userConfig = newConfig
-        self.userConfig.filename = self.userConfFile
-        writeConfFile(self.userConfig)
+
+        # Do not bother writing if nothing has changed
+        if not self.userConfig.__eq__(newConfig) :
+            self.userConfig = newConfig
+            self.userConfig.filename = self.userConfFile
+            self.userConfig.write()
 
 
     def initUserHome (self) :
@@ -92,7 +87,7 @@ class UserConfig (object) :
             self.userConfig['System'] = {}
             self.userConfig['System']['userName'] = 'Default User'
             self.userConfig['System']['initDate'] = tStamp()
-            writeConfFile(self.userConfig)
+            self.userConfig.write()
 
 
     def isRegisteredProject (self, pid) :
@@ -108,7 +103,7 @@ class UserConfig (object) :
         '''If it is already not there, add information about this project to the
         user's rpm.conf located in the user's config folder.'''
 
-        if not self.isRegisteredProject(self.userConfig, pid) :
+        if not self.isRegisteredProject(pid) :
 
             buildConfSection(self.userConfig, 'Projects')
             buildConfSection(self.userConfig['Projects'], pid)
@@ -118,13 +113,14 @@ class UserConfig (object) :
             self.userConfig['Projects'][pid]['projectType']          = ptype
             self.userConfig['Projects'][pid]['projectPath']          = projHome
             self.userConfig['Projects'][pid]['projectCreateDate']    = tStamp()
-            writeConfFile(self.userConfig)
+            self.userConfig.write()
             return True
+
 
     def unregisterProject (self, pid) :
         '''Remove a project from the user config file.'''
         
         del self.userConfig['Projects'][pid]
-        writeConfFile(self.userConfig)
+        self.userConfig.write()
 
 

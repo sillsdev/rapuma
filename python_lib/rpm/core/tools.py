@@ -149,6 +149,7 @@ def writeConfFile (config) :
         config.filename = os.path.join(folderPath, '.' + configFile + '.new')
         config.write()
         confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
+        confObjNew.filename = configFileAndPath.replace('.new', '')
         # If they are the same we don't need to continue
         if confObjOrg.__eq__(confObjNew) :
             return False
@@ -163,7 +164,7 @@ def writeConfFile (config) :
     buildConfSection(confObjNew, 'GeneralSettings')
     try :
         confObjNew['GeneralSettings']['lastEdit'] = tStamp()
-        confObjNew.filename = configFileAndPath
+        print 'mmmmmmmmm', confObjNew.filename, confObjNew
         confObjNew.write()
         return True
 
