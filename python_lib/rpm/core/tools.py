@@ -135,44 +135,41 @@ def overrideSettings (settings, overrideXML) :
     return settings
 
 
-def writeConfFile (configStuff, configFileAndPath) :
+def writeConfFile (config) :
     '''Generic routin to write out to, or create a config file.'''
 
-    if configFileAndPath != 'nothing' :
-        confObjNew = ConfigObj()
-        # Parse file and path
-        print 'configFileAndPath = ', configFileAndPath
-        (folderPath, configFile) = os.path.split(configFileAndPath)
+    confObjNew = ConfigObj()
+    # Parse file and path
+    configFileAndPath = config.filename
+    (folderPath, configFile) = os.path.split(configFileAndPath)
 
-        # Check contents of the existing conf file
-        if os.path.isfile(configFileAndPath) :
-            confObjOrg = ConfigObj(configFileAndPath)
-            configStuff.filename = os.path.join(folderPath, '.' + configFile + '.new')
-            configStuff.write()
-            confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
-            # If they are the same we don't need to continue
-            if confObjOrg.__eq__(confObjNew) :
-                print 'It thinks the two objects are the same.'
-                return False
-
-        # Build the folder path if needed
-        if not os.path.exists(folderPath) :
-            os.makedirs(folderPath)
-
-        # To track when a conf file was saved as well as other general
-        # housekeeping we will create a GeneralSettings section with
-        # a last edit date key/value.
-        buildConfSection(confObjNew, 'GeneralSettings')
-        try :
-            confObjNew['GeneralSettings']['lastEdit'] = tStamp()
-            confObjNew.filename = configFileAndPath
-            print 'configStuff.filename = ', configStuff.filename
-            confObjNew.write()
-            return True
-
-        except :
-            terminal('\nERROR: Could not write to: ' + configFileAndPath)
+    # Check contents of the existing conf file
+    if os.path.isfile(configFileAndPath) :
+        confObjOrg = ConfigObj(configFileAndPath)
+        config.filename = os.path.join(folderPath, '.' + configFile + '.new')
+        config.write()
+        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
+        # If they are the same we don't need to continue
+        if confObjOrg.__eq__(confObjNew) :
             return False
+
+    # Build the folder path if needed
+    if not os.path.exists(folderPath) :
+        os.makedirs(folderPath)
+
+    # To track when a conf file was saved as well as other general
+    # housekeeping we will create a GeneralSettings section with
+    # a last edit date key/value.
+    buildConfSection(confObjNew, 'GeneralSettings')
+    try :
+        confObjNew['GeneralSettings']['lastEdit'] = tStamp()
+        confObjNew.filename = configFileAndPath
+        confObjNew.write()
+        return True
+
+    except :
+        terminal('\nERROR: Could not write to: ' + configFileAndPath)
+        return False
 
 
 def xml_to_section (fname) :

@@ -62,7 +62,6 @@ class Project (object) :
         self.rpmLayoutDefaultFile   = os.path.join(self.rpmConfigFolder, 'layout_default.xml')
         self.projectType            = None
         self.projectIDCode          = None
-        self.lockExt                = '.lock'
         self.projConfFileName       = 'project.conf'
         self.configFolderName       = 'Config'
         self.projConfFolder         = os.path.join(self.projHome, self.configFolderName)
@@ -89,18 +88,6 @@ class Project (object) :
             self._layoutConfig.filename = 'nothing'
 #        print 'xxxxxx', self._layoutConfig.filename
         # All available commands in context
-        if os.path.isfile(self.projConfFile) :
-            self.addCommand("project_create", projCmd.CreateProject())
-            self.addCommand("project_restore", projCmd.RestoreProject())
-            self.addCommand("project_remove", projCmd.RemoveProject())
-            self.addCommand("project_render", projCmd.RenderProject())
-            self.addCommand("component_add", projCmd.AddComponent())
-            self.addCommand("component_remove", projCmd.RemoveComponent())
-            self.addCommand("component_render", projCmd.RenderComponent())
-        else :
-            self.addCommand("project_create", projCmd.CreateProject())
-            self.addCommand("project_restore", projCmd.RestoreProject())
-            self.addCommand("project_remove", projCmd.RemoveProject())
 
 
 ###############################################################################
@@ -156,126 +143,6 @@ class Project (object) :
             os.mkdir(self.textFolder)
         if not os.path.isdir(self.fontsFolder) :
             os.mkdir(self.fontsFolder)
-
-
-    def makeProject (self, pid, ptype='', pdir='', pname='') :
-        '''Create a new publishing project.'''
-
-        # If a type wasn't given we will just make it a book type as that
-        # is our legacy default
-        if not ptype :
-            ptype = 'book'
-
-        # Give the project a name if it doesn't have one
-        if not pname :
-            pname = 'Default Project Name'
-
-        # Run some basic tests to see if this project can be created
-        # Grab the cwd if pdir is empty for the default
-        if not pdir or pdir == '.' :
-            pdir = os.path.join(os.getcwd(), pid)
-        else :
-            pdir = os.path.abspath(pdir)
-
-        # Change/update the global settings here
-        self.projHome           = pdir
-        self.projConfFolder     = os.path.join(self.projHome, self.configFolderName)
-        self.projConfFile       = os.path.join(self.projConfFolder, self.projConfFileName)
-
-        # So now that we have a pdir it needs testing
-        # Manualy build the new projConfFile path
-        # Test for parent project.
-        if os.path.isfile(self.projConfFile) :
-            self.writeToLog('ERR', 'Halt! Live project already defined in this location')
-            return False
-        elif os.path.isfile(self.projConfFile + self.lockExt) :
-            self.writeToLog('ERR', 'Halt! Locked project already defined in target folder')
-            return False
-        elif os.path.isfile(os.path.join(os.path.dirname(self.projHome), self.projConfFileName)) :
-            self.writeToLog('ERR', 'Halt! Live project already defined in parent folder')
-            return False
-        elif os.path.isfile(os.path.join(os.path.dirname(self.projHome), self.projConfFileName + self.lockExt)) :
-            self.writeToLog('ERR', 'Halt! Locked project already defined in parent folder')
-            return False
-        elif not os.path.isdir(os.path.dirname(self.projHome)) :
-            self.writeToLog('ERR', 'Halt! Not a valid (parent) path: ' + self.projHome)
-            return False
-
-        # Test if this project already exists in the user's config file.
-        if userConfig.isRegisteredProject(self._userConfig, pid) :
-            self.writeToLog('ERR', 'Halt! ID [' + pid + '] already defined for another project')
-            return False
-
-        # If we made it to this point we need to check to see if the project
-        # folder exists, if it doesn't make it.
-        if not os.path.exists(self.projHome) :
-            os.makedirs(self.projHome)
-
-        # Create a new version of the project config file if one is not there.
-        # If one is, then we throw a warning to have it removed first.
-        if not os.path.isfile(self.projConfFile) :
-            if not os.path.isdir (self.projConfFolder) :
-                os.makedirs(self.projConfFolder)
-
-            writeObject = codecs.open(self.projConfFile, "w", encoding='utf_8')
-            writeObject.close()
-            self._projConfig = getXMLSettings(os.path.join(self.rpmConfigFolder, ptype + '.xml'))
-            self._projConfig.filename = self.projConfFile
-            self._projConfig.write()
-        else :
-            self.writeToLog('ERR', 'Halt! A project config file already exsits for this project. Please remove it before continuing.')
-            return False
-
-        # Create a new vesion of the layout config file
-        self._layoutConfig  = getXMLSettings(self.rpmLayoutDefaultFile)
-#        self._layoutConfig.filename = self.layoutConfFile
-
-        # Create intitial project settings
-        date = tStamp()
-        self._projConfig['ProjectInfo']['projectType']              = ptype
-        self._projConfig['ProjectInfo']['projectName']              = pname
-        self._projConfig['ProjectInfo']['projectCreateDate']        = date
-        self._projConfig['ProjectInfo']['projectIDCode']            = pid
-        userConfig.registerProject(self._userConfig, self._projConfig, self.projHome)
-
-        # Report what we did
-        self.writeToLog('MSG', 'Created [' + pid + '] project at: ' + date, 'project.makeProject()')
-        return True
-
-
-    def removeProject (self, pid='') :
-        '''Remove the project from the RPM system.  This will not remove the
-        project data but will 'disable' the project.'''
-
-        # If no pid was given this fails
-        if pid == '' :
-            terminal('Project ID code not given or found. Remove project failed.')
-            return False
-
-        # If we made it this far we should be able to remove it
-        try :
-            # Check to see if the project does exist in the user config
-            if self._userConfig['Projects'][pid] :
-                # Disable the project
-                if os.path.isfile(self.projConfFile) :
-                    os.rename(self.projConfFile, self.projConfFile + self.lockExt)
-
-                # Remove references from user rpm.conf write out immediately
-                del self._userConfig['Projects'][pid]
-
-                # Report the process is done
-                self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
-                return True
-
-        except :
-            terminal('Project ID [' + pid + '] not found in system configuration.')
-            return False
-
-
-    def restoreProject (self, pdir='') :
-        '''Restore a project in the current folder'''
-
-        pass
 
 
 ###############################################################################
@@ -369,10 +236,10 @@ class Project (object) :
 ###############################################################################
 
 
-    def addCommand(self, name, cls) :
-        '''Add a command to the command list.'''
+#    def addCommand(self, name, cls) :
+#        '''Add a command to the command list.'''
 
-        self.commands[name] = cls
+#        self.commands[name] = cls
 
 
     def run(self, command, opts, userConfig) :
@@ -384,14 +251,14 @@ class Project (object) :
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 
-    def help(self, command, opts, userConfig) :
-        '''Give the user the documented help'''
-        # FIXME: This is not giving us help for the specific commands
-        if len(opts) and opts[0] in self.commands :
-            self.commands[opts[0]].help()
-        else :
-            for k in sorted(self.commands.keys()) :
-                terminal(k)
+#    def help(self, command, opts, userConfig) :
+#        '''Give the user the documented help'''
+#        # FIXME: This is not giving us help for the specific commands
+#        if len(opts) and opts[0] in self.commands :
+#            self.commands[opts[0]].help()
+#        else :
+#            for k in sorted(self.commands.keys()) :
+#                terminal(k)
 
 
     def changeSystemSetting (self, key, value) :

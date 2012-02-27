@@ -59,9 +59,9 @@ from configobj import ConfigObj
 
 # Load the local classes
 from tools import *
+import command as projCmd
 from user_config import UserConfig
-#from sys_command import Command, commands
-from project import *
+
 
 ###############################################################################
 ####################### Create the command to be used #########################
@@ -128,22 +128,53 @@ if opts :
 ####################### Define functions for startup ##########################
 ###############################################################################
 
-def welcomeMessage (aProject) :
+def help(commands, opts) :
+    '''Give the user the documented help'''
+
+    if len(opts) and opts[0] in commands :
+        commands[opts[0]].help()
+    else :
+        for k in sorted(commands.keys()) :
+            terminal(k)
+
+
+def getCommands (projHome='') :
+    '''Add commands to the command list so things can be done'''
+
+    commands = {}
+
+    if os.path.isdir(projHome) :
+        commands["project_create"]      = projCmd.CreateProject()
+        commands["project_restore"]     = projCmd.RestoreProject()
+        commands["project_remove"]      = projCmd.RemoveProject()
+        commands["project_render"]      = projCmd.RenderProject()
+        commands["component_add"]       = projCmd.AddComponent()
+        commands["component_remove"]    = projCmd.RemoveComponent()
+        commands["component_render"]    = projCmd.RenderComponent()
+    else :
+        commands["project_create"]      = projCmd.CreateProject()
+        commands["project_restore"]     = projCmd.RestoreProject()
+        commands["project_remove"]      = projCmd.RemoveProject()
+
+    return commands
+
+
+def welcomeMessage (projConfig) :
 
     # Give a welcome message
     terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
-    terminal('\t\tCurrent User: ' + aProject._userConfig['System']['userName'])
-    if os.path.isfile(aProject.projConfFile) :
-        terminal('\t\tProject: ' + aProject._projConfig['ProjectInfo']['projectName'] + ' (' + aProject._projConfig['ProjectInfo']['projectIDCode'] + ')')
-        terminal('\t\tProject Type: ' + aProject._projConfig['ProjectInfo']['projectType'])
-        if command :
-            terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
-        else :
-            terminal('\n\t\tType \"rpm help\" for a list of current commands')
-                
-    else :
-        # Just put out an almost blank line
-        terminal(' ')
+#    terminal('\t\tCurrent User: ' + projConfig['System']['userName'])
+#    if os.path.isfile(aProject.projConfFile) :
+#        terminal('\t\tProject: ' + projConfig['ProjectInfo']['projectName'] + ' (' + projConfig['ProjectInfo']['projectIDCode'] + ')')
+#        terminal('\t\tProject Type: ' + projConfig['ProjectInfo']['projectType'])
+#        if command :
+#            terminal('\t\tCurrent Command: ' + command + ' ' + str(opts))
+#        else :
+#            terminal('\n\t\tType \"rpm help\" for a list of current commands')
+#                
+#    else :
+#        # Just put out an almost blank line
+#        terminal(' ')
 
 def processCommand (aProject) :
     '''Run the command and pass along the aProject object'''
@@ -151,17 +182,17 @@ def processCommand (aProject) :
     if command :
         if len(opts) >= 1 :
             try :
-                aProject.run(command, opts, uConf._userConfig)
+                aProject.run(command, opts, uConf.userConfig)
             except SyntaxError, err:
                 terminal("\n" + str(err) + "\n")
                 opts.insert(0, command)
-                aProject.help(command, opts, uConf._userConfig)
+                aProject.help(command, opts, uConf.userConfig)
         else :
             # If we seem to be short on options then we will just display the help
             # for this command
                 terminalError('No options were give. There needs to be at least at project ID (-i) given with this command.')
                 terminal('\nHelp for the \"' + command + '\" command:\n')
-                aProject.help(command, opts, uConf._userConfig)
+                aProject.help(command, opts, uConf.userConfig)
 
 
 def closeSession (aProject) :
@@ -172,54 +203,171 @@ def closeSession (aProject) :
         writeConfFile(confObj, confObj.filename)
 
     # Now trim the log file if it is needed
-    if isConfSection(aProject._projConfig, 'Project') :
-        aProject.trimLog(aProject._userConfig['System']['projLogLineLimit'])
+    if isConfSection(aProject.projConfig, 'Project') :
+        aProject.trimLog(aProject.userConfig['System']['projLogLineLimit'])
 
     ## In case there are any Canadians using this, politely say good bye
     terminal('\n\t\tThank you, please come again!\n')
+
+
+def newProject (uc, pid, ptype, pname, pdir = None) :
+    '''Create a new publishing project.'''
+
+    # Grab the cwd if pdir is empty for the default
+    if not pdir or pdir == '.' :
+        pdir = os.path.join(os.getcwd(), pid)
+    else :
+        pdir = os.path.abspath(pdir)
+
+    # Local settings here
+    # FIXME: Most of these are duplicated in the Project model
+    # Maybe some of them need to be put in a default XML conf
+    projConfig          = ConfigObj()
+    lockExt             = '.lock'
+    projHome            = pdir
+    projConfFileName    = 'project.conf'
+    projConfFolder      = os.path.join(projHome, 'Config')
+    projConfFile        = os.path.join(projConfFolder, projConfFileName)
+    rpmConfigFolder     = os.path.join(rpmHome, 'config')
+
+    # Run some basic tests to see if this project can be created
+    # So now that we have a pdir it needs testing
+    # Manualy build the new projConfFile path
+    # Test for parent project.
+    if os.path.isfile(projConfFile) :
+        terminal('ERR: Halt! Live project already defined in this location')
+        return
+    elif os.path.isfile(projConfFile + lockExt) :
+        terminal('ERR: Halt! Locked project already defined in target folder')
+        return
+    elif os.path.isfile(os.path.join(os.path.dirname(projHome), projConfFileName)) :
+        terminal('ERR: Halt! Live project already defined in parent folder')
+        return
+    elif os.path.isfile(os.path.join(os.path.dirname(projHome), projConfFileName + lockExt)) :
+        terminal('ERR: Halt! Locked project already defined in parent folder')
+        return
+    elif not os.path.isdir(os.path.dirname(projHome)) :
+        terminal('ERR: Halt! Not a valid (parent) path: ' + projHome)
+        return
+
+    # Test if this project already exists in the user's config file.
+    print dir(UserConfig)
+    if uc.isRegisteredProject(pid) :
+        terminal('ERR: Halt! ID [' + pid + '] already defined for another project')
+        return
+
+    # If we made it to this point we need to check to see if the project
+    # folder exists, if it doesn't make it.
+    if not os.path.exists(projHome) :
+        os.makedirs(projHome)
+
+    # Create a new version of the project config file if one is not there.
+    # If one is, then we throw a warning to have it removed first.
+    if not os.path.isfile(projConfFile) :
+        if not os.path.isdir (projConfFolder) :
+            os.makedirs(projConfFolder)
+
+        writeObject = codecs.open(projConfFile, "w", encoding='utf_8')
+        writeObject.close()
+        projConfig = getXMLSettings(os.path.join(rpmConfigFolder, ptype + '.xml'))
+        projConfig.filename = projConfFile
+        projConfig.write()
+    else :
+        terminal('ERR: Halt! A project config file already exsits for this project. Please remove it before continuing.')
+        return 
+
+    # Create intitial project settings
+    projConfig['ProjectInfo']['projectType']              = ptype
+    projConfig['ProjectInfo']['projectName']              = pname
+    projConfig['ProjectInfo']['projectCreateDate']        = tStamp()
+    projConfig['ProjectInfo']['projectIDCode']            = pid
+    uc.registerProject(pid, pname, ptype, projHome)
+
+    # Report what we did
+    terminal('Created [' + pid + ']')
+    return projConfig
+
+
+def removeProject (pid='') :
+    '''Remove the project from the RPM system.  This will not remove the
+    project data but will 'disable' the project.'''
+
+    # If no pid was given this fails
+    if pid == '' :
+        terminal('Project ID code not given or found. Remove project failed.')
+        return False
+
+    # If we made it this far we should be able to remove it
+    try :
+        # Check to see if the project does exist in the user config
+        if self.userConfig['Projects'][pid] :
+            # Disable the project
+            if os.path.isfile(self.projConfFile) :
+                os.rename(self.projConfFile, self.projConfFile + self.lockExt)
+
+            # Remove references from user rpm.conf write out immediately
+            userConfig.unregisterProject(pid)
+
+            # Report the process is done
+            self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
+            return True
+
+    except :
+        terminal('Project ID [' + pid + '] not found in system configuration.')
+        return False
+
+
+def restoreProject (pdir='') :
+    '''Restore a project in the current folder'''
+
+    pass
 
 
 ###############################################################################
 ######################## Load User and Project Info ###########################
 ###############################################################################
 
+# Here is where we go to work!
+
 # Instantiate User classes
-uConf = UserConfig(userHome, rpmHome)
+uc = UserConfig(userHome, rpmHome)
+
+# Load up just initial command set
+ourCommands = getCommands('')
 
 # Every command should be preceeded by a project ID (pid) if that is the case
 # find out what the path is and update the projHome setting. If the pid is not
 # valid, stop here.
 if pid :
-    buildConfSection(uConf._userConfig, 'Projects')
-    if pid in uConf._userConfig['Projects'].keys() :
-        projHome = uConf._userConfig['Projects'][pid]['projectPath']
+    buildConfSection(uc.userConfig, 'Projects')
+    if pid in uc.userConfig['Projects'].keys() :
+        projHome = uc.userConfig['Projects'][pid]['projectPath']
+
+        # Load up all available project commands
+        ourCommands = getCommands(projHome)
 
         # Instantiate the project class using the adjusted projHome path
-        aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
+        aProject = Project(uc.userConfig, projHome, userHome, rpmHome)
 
         # Look for the project.conf and init the project if it is there.
         # Otherwise we will just pass through and quite
         if os.path.isfile(aProject.projConfFile) :
             aProject.initProject()
-            projConfigOrg = aProject._projConfig
+            projConfigOrg = aProject.projConfig
 
         welcomeMessage(aProject)
         processCommand(aProject)
         closeSession(aProject)
 
     else :
+        # FIXME: Need to add proper OptionParser commands here
         if command == 'project_create' :
             # Instantiate the project class using the default projHome path
-            aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
-            projConfigOrg = aProject._projConfig
-            welcomeMessage(aProject)
-            processCommand(aProject)
-            closeSession(aProject)
-        else :
-            terminal('Error: The project ID given [' + pid + '] is not valid. Please try again.')
+            projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
+            welcomeMessage(projConfig)
+
 else :
-    aProject = Project(uConf._userConfig, projHome, userHome, rpmHome)
     terminal('\nAvailable RPM commands:\n')
-    aProject.help(command, opts, uConf._userConfig)
+    help(ourCommands, opts)
     terminal('\nFor more help please use the -h option.\n\tFor example: rpm project_create -h\n')
 
