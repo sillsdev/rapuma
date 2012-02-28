@@ -28,17 +28,12 @@ from tools import *
 
 class UserConfig (object) :
 
-    def __init__(self, userHome, rpmHome) :
+    def __init__(self, local) :
         '''Intitate the whole class and create the object.'''
         
-        self.userHome               = userHome
-        self.rpmHome                = rpmHome
-        self.userConfFile           = os.path.join(userHome, 'rpm.conf')
-        self.userConfig            = {}
-
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
-        rpmXMLDefaults = os.path.join(self.rpmHome, 'config', 'rpm.xml')
+        rpmXMLDefaults = os.path.join(local.rpmHome, 'config', 'rpm.xml')
         if os.path.exists(rpmXMLDefaults) :
             sysXmlConfig = xml_to_section(rpmXMLDefaults)
         else :

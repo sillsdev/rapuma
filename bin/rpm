@@ -27,24 +27,13 @@ import os, sys
 # Set basic system vars
 systemName = "Rapid Publication Manager (RPM)"
 systemVersion = "0.0.1"
-systemAbout = "RPM is a Scripture publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). RPM stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org."
-
+systemAbout = "RPM is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). RPM stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org."
 
 # Set the RPM base program path
 rpmHome = os.environ.get('RPM_BASE')
 if not rpmHome :
     rpmHome = os.path.join('usr', 'share', 'rpm')
     os.environ['RPM_BASE'] = rpmHome
-
-# Set the user environment path
-userHome = os.environ.get('RPM_USER')
-if not userHome :
-    sysHome = os.environ.get('HOME')
-    userHome = os.path.join(sysHome, '.config', 'rpm')
-    os.environ['RPM_USER'] = userHome
-
-# Set the (potential) project home
-projHome = os.getcwd()
 
 # Set our paths to application resources
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'core'))
@@ -58,9 +47,10 @@ from datetime import *
 from configobj import ConfigObj
 
 # Load the local classes
+from proj_local import ProjLocal
+local = ProjLocal(rpmHome)
 from tools import *
 import command as projCmd
-from proj_local import ProjLocal
 from user_config import UserConfig
 from proj_config import ProjConfig
 
@@ -224,19 +214,19 @@ def newProject (uc, pid, ptype, pname, pdir = None) :
     # Local settings here
     # FIXME: Most of these are duplicated in the Project model
     # Maybe some of them need to be put in a default XML conf
-    projConfig          = ConfigObj()
-    lockExt             = '.lock'
-    projHome            = pdir
-    projConfFileName    = 'project.conf'
-    projConfFolder      = os.path.join(projHome, 'Config')
-    projConfFile        = os.path.join(projConfFolder, projConfFileName)
-    rpmConfigFolder     = os.path.join(rpmHome, 'config')
+#    projConfig          = ConfigObj()
+#    lockExt             = '.lock'
+#    projHome            = pdir
+#    projConfFileName    = 'project.conf'
+#    projConfFolder      = os.path.join(projHome, 'Config')
+#    projConfFile        = os.path.join(projConfFolder, projConfFileName)
+#    rpmConfigFolder     = os.path.join(rpmHome, 'config')
 
     # Run some basic tests to see if this project can be created
     # So now that we have a pdir it needs testing
     # Manualy build the new projConfFile path
     # Test for parent project.
-    if os.path.isfile(projConfFile) :
+    if os.path.isfile(local.projConfFile) :
         terminal('ERR: Halt! Live project already defined in this location')
         return
     elif os.path.isfile(projConfFile + lockExt) :
@@ -331,15 +321,13 @@ def restoreProject (pdir='') :
 # Here is where we go to work!
 
 # Instantiate User classes
-local = ProjLocal(projHome, userHome, rpmHome)
-uc = UserConfig(userHome, rpmHome)
-pc = ProjConfig(userHome, rpmHome)
+#uc = UserConfig(local)
+#pc = ProjConfig(local)
 #projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
 
 
 #print dir(csvIt(uc.userConfig['FolderNames']['macrosFolder']))
 #print os.path.join(projHome, *uc.userConfig['FolderNames']['macrosFolder'])
-print os.path.join(projHome, local.macrosFolder)
 print local.macrosFolder
 #print local.userConfFile
 

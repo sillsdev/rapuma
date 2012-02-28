@@ -14,45 +14,74 @@ Todo:
 
 <root>
     <section>
-        <name>Project File Names</name>
-        <sectionID>FileNames</sectionID>
-        <description>Any file name that is, or could be, shared between system modules needs to be stored here.</description>
+        <name>User Files</name>
+        <sectionID>UserFiles</sectionID>
+        <description>Any file that are for user settings. If the file is deeper than the userHome, the rest of the path needs to be stored here too.</description>
         <setting>
-            <name>User Configuration File Name</name>
-            <key>userConfFileName</key>
+            <name>User Configuration File</name>
+            <key>userConfFile</key>
+            <description>The user configuration file.</description>
+            <type>string</type>
+            <value>rpm.conf</value>
+        </setting>
+    </section>
+    <section>
+        <name>Project Files</name>
+        <sectionID>ProjFiles</sectionID>
+        <description>Any file that is in a normal project along with its path needs to be stored here.</description>
+        <setting>
+            <name>Project Configuration File</name>
+            <key>projConfFile</key>
+            <description>The main project configuration file.</description>
+            <type>list</type>
+            <value>Config,project.conf</value>
+        </setting>
+        <setting>
+            <name>Project Log File</name>
+            <key>projLogFile</key>
+            <description>The general project log file.</description>
+            <type>string</type>
+            <value>projHome,rpm.log</value>
+        </setting>
+        <setting>
+            <name>Project Error Log File</name>
+            <key>projErrorLogFile</key>
+            <description>The general project error log file.</description>
+            <type>list</type>
+            <value>projHome,error.log</value>
+        </setting>
+    </section>
+    <section>
+        <name>RPM Files</name>
+        <sectionID>RpmFiles</sectionID>
+        <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
+        <setting>
+            <name>User Configuration File</name>
+            <key>userConfFile</key>
             <description>The user/system configuration file where all fundamental system information is kept (like this setting).</description>
             <type>string</type>
             <value>rpm.conf</value>
         </setting>
+    </section>
+    <section>
+        <name>User Folders</name>
+        <sectionID>UserFolders</sectionID>
+        <description>User folders that are used in the system are stored here.</description>
         <setting>
-            <name>Project Configuration File Name</name>
-            <key>projConfFileName</key>
-            <description>The main project configuration file.</description>
+            <name>User Home Folder</name>
+            <key>userHome</key>
+            <description>The project configuration folder where all configuration files are kept.</description>
             <type>string</type>
-            <value>project.conf</value>
-        </setting>
-        <setting>
-            <name>Project Log File Name</name>
-            <key>projLogFileName</key>
-            <description>The general project log file.</description>
-            <type>string</type>
-            <value>rpm.log</value>
-        </setting>
-        <setting>
-            <name>Project Error Log File Name</name>
-            <key>projErrorLogFileName</key>
-            <description>The general project error log file.</description>
-            <type>string</type>
-            <value>error.log</value>
+            <value>???</value>
         </setting>
     </section>
     <section>
-        <name>Project Folder Names</name>
-        <sectionID>ProjFolderNames</sectionID>
+        <name>Project Folders</name>
+        <sectionID>ProjFolders</sectionID>
         <description>Any folder name that is, or could be, used in a project needs to be stored here.</description>
         <setting>
             <name>Project Configuration Folder</name>
-            <key>configFolderName</key>
+            <key>configFolder</key>
             <description>The project configuration folder where all configuration files are kept.</description>
             <type>string</type>
             <value>Config</value>
@@ -94,8 +123,8 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>RPM Folder Names</name>
-        <sectionID>RpmFolderNames</sectionID>
+        <name>RPM Folders</name>
+        <sectionID>RpmFolders</sectionID>
         <description>Any folder name that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
             <name>RPM Configuration Folder</name>
