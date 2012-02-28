@@ -56,11 +56,11 @@ Todo:
         <sectionID>RpmFiles</sectionID>
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>User Configuration File</name>
-            <key>userConfFile</key>
-            <description>The user/system configuration file where all fundamental system information is kept (like this setting).</description>
+            <name>Place Holder File</name>
+            <key>placeHolderFolder</key>
+            <description>Place holder file to keep this section active.</description>
             <type>string</type>
-            <value>rpm.conf</value>
+            <value>None</value>
         </setting>
     </section>
     <section>
@@ -68,11 +68,11 @@ Todo:
         <sectionID>UserFolders</sectionID>
         <description>User folders that are used in the system are stored here.</description>
         <setting>
-            <name>User Home Folder</name>
-            <key>userHome</key>
-            <description>The project configuration folder where all configuration files are kept.</description>
+            <name>Place Holder Folder</name>
+            <key>placeHolderFolder</key>
+            <description>Just an entry to keep something in this section for now.</description>
             <type>string</type>
-            <value>???</value>
+            <value>None</value>
         </setting>
     </section>
     <section>

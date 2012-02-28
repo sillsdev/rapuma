@@ -211,17 +211,6 @@ def newProject (uc, pid, ptype, pname, pdir = None) :
     else :
         pdir = os.path.abspath(pdir)
 
-    # Local settings here
-    # FIXME: Most of these are duplicated in the Project model
-    # Maybe some of them need to be put in a default XML conf
-#    projConfig          = ConfigObj()
-#    lockExt             = '.lock'
-#    projHome            = pdir
-#    projConfFileName    = 'project.conf'
-#    projConfFolder      = os.path.join(projHome, 'Config')
-#    projConfFile        = os.path.join(projConfFolder, projConfFileName)
-#    rpmConfigFolder     = os.path.join(rpmHome, 'config')
-
     # Run some basic tests to see if this project can be created
     # So now that we have a pdir it needs testing
     # Manualy build the new projConfFile path
@@ -321,15 +310,11 @@ def restoreProject (pdir='') :
 # Here is where we go to work!
 
 # Instantiate User classes
-#uc = UserConfig(local)
+uc = UserConfig(local)
 #pc = ProjConfig(local)
 #projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
 
 
-#print dir(csvIt(uc.userConfig['FolderNames']['macrosFolder']))
-#print os.path.join(projHome, *uc.userConfig['FolderNames']['macrosFolder'])
-print local.macrosFolder
-#print local.userConfFile
 
 # Load up just initial command set
 ourCommands = getCommands('')

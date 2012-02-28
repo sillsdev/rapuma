@@ -31,20 +31,23 @@ class UserConfig (object) :
     def __init__(self, local) :
         '''Intitate the whole class and create the object.'''
         
+
+        self.local  = local
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
-        rpmXMLDefaults = os.path.join(local.rpmHome, 'config', 'rpm.xml')
+        rpmXMLDefaults = os.path.join(self.local.rpmHome, 'config', 'rpm.xml')
         if os.path.exists(rpmXMLDefaults) :
             sysXmlConfig = xml_to_section(rpmXMLDefaults)
         else :
             raise IOError, "Can't open " + rpmXMLDefaults
 
         # Now make the users local rpm.conf file if it isn't there
-        if not os.path.exists(self.userConfFile) :
+        print self.local.userConfFile
+        if not os.path.exists(self.local.userConfFile) :
             self.initUserHome()
 
         # Load the RPM conf file into an object
-        self.userConfig = ConfigObj(self.userConfFile)
+        self.userConfig = ConfigObj(self.local.userConfFile)
 
         # Look for any projects that might be registered and copy the data out
         try :
@@ -64,7 +67,7 @@ class UserConfig (object) :
         # Do not bother writing if nothing has changed
         if not self.userConfig.__eq__(newConfig) :
             self.userConfig = newConfig
-            self.userConfig.filename = self.userConfFile
+            self.userConfig.filename = self.local.userConfFile
             self.userConfig.write()
 
 
@@ -72,13 +75,13 @@ class UserConfig (object) :
         '''Initialize a user config file on a new install or system re-init.'''
 
         # Create home folders
-        if not os.path.isdir(self.userHome) :
-            os.mkdir(self.userHome)
+        if not os.path.isdir(self.local.userHome) :
+            os.mkdir(self.local.userHome)
 
         # Make the default global rpm.conf for custom environment settings
-        if not os.path.isfile(self.userConfFile) :
+        if not os.path.isfile(self.local.userConfFile) :
             self.userConfig = ConfigObj()
-            self.userConfig.filename = self.userConfFile
+            self.userConfig.filename = self.local.userConfFile
             self.userConfig['System'] = {}
             self.userConfig['System']['userName'] = 'Default User'
             self.userConfig['System']['initDate'] = tStamp()

@@ -64,45 +64,9 @@ class ProjLocal (object) :
                     setattr(self, key, os.path.join(home, *lc[t][key]))
                 else :
                     setattr(self, key, os.path.join(home, lc[t][key]))
-                print getattr(self, key)
-        
-        
-        
-#        for key in lc['ProjFolders'] :
-#            if type(lc['ProjFolders'][key]) == list :
-#                setattr(self, key, os.path.join(self.projHome, *lc['ProjFolders'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.projHome, lc['ProjFolders'][key]))
 
-#        for key in lc['UserFolders'] :
-#            if type(lc['UserFolders'][key]) == list :
-#                setattr(self, key, os.path.join(self.userHome, *lc['ProjFolders'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.userHome, lc['ProjFolders'][key]))
+                # Uncomment for testing
+                print key + ' = ', getattr(self, key)
+        print '\n'
 
-#        for key in lc['RpmFolders'] :
-#            if type(lc['RpmFolders'][key]) == list :
-#                setattr(self, key, os.path.join(self.rpmHome, *lc['RpmFolders'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.rpmHome, lc['RpmFolders'][key]))
-
-#        for key in lc['ProjFiles'] :
-#            if type(lc['ProjFiles']) == list :
-#                setattr(self, key, os.path.join(self.userHome, *lc['ProjFiles'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.userHome, lc['ProjFiles'][key]))
-
-#        for key in lc['UserFiles'] :
-#            if type(lc['UserFiles']) == list :
-#                setattr(self, key, os.path.join(self.userHome, *lc['UserFiles'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.userHome, lc['UserFiles'][key]))
-
-#        for key in lc['RpmFiles'] :
-#            if type(lc['RpmFiles']) == list :
-#                setattr(self, key, os.path.join(self.userHome, *lc['RpmFiles'][key]))
-#            else :
-#                setattr(self, key, os.path.join(self.userHome, lc['RpmFiles'][key]))
-
-        print dir(self)
 
