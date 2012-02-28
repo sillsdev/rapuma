@@ -60,7 +60,9 @@ from configobj import ConfigObj
 # Load the local classes
 from tools import *
 import command as projCmd
+from proj_local import ProjLocal
 from user_config import UserConfig
+from proj_config import ProjConfig
 
 
 ###############################################################################
@@ -329,8 +331,17 @@ def restoreProject (pdir='') :
 # Here is where we go to work!
 
 # Instantiate User classes
+local = ProjLocal(projHome, userHome, rpmHome)
 uc = UserConfig(userHome, rpmHome)
-projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
+pc = ProjConfig(userHome, rpmHome)
+#projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
+
+
+#print dir(csvIt(uc.userConfig['FolderNames']['macrosFolder']))
+#print os.path.join(projHome, *uc.userConfig['FolderNames']['macrosFolder'])
+print os.path.join(projHome, local.macrosFolder)
+print local.macrosFolder
+#print local.userConfFile
 
 # Load up just initial command set
 ourCommands = getCommands('')

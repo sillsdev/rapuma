@@ -74,5 +74,85 @@ Todo:
             <value></value>
         </setting>
     </section>
+    <section>
+        <name>Project File Names</name>
+        <sectionID>FileNames</sectionID>
+        <description>Any file name that is, or could be, shared between system modules needs to be stored here.</description>
+        <setting>
+            <name>User Configuration File Name</name>
+            <key>userConfFileName</key>
+            <description>The user/system configuration file where all fundamental system information is kept (like this setting).</description>
+            <type>string</type>
+            <value>rpm.conf</value>
+        </setting>
+        <setting>
+            <name>Project Configuration File Name</name>
+            <key>projConfFileName</key>
+            <description>The main project configuration file.</description>
+            <type>string</type>
+            <value>project.conf</value>
+        </setting>
+        <setting>
+            <name>Project Log File Name</name>
+            <key>projLogFileName</key>
+            <description>The general project log file.</description>
+            <type>string</type>
+            <value>rpm.log</value>
+        </setting>
+        <setting>
+            <name>Project Error Log File Name</name>
+            <key>projErrorLogFileName</key>
+            <description>The general project error log file.</description>
+            <type>string</type>
+            <value>error.log</value>
+        </setting>
+    </section>
+    <section>
+        <name>Project Folder Names</name>
+        <sectionID>FolderNames</sectionID>
+        <description>Any folder name that is, or could be, shared between system modules needs to be stored here.</description>
+        <setting>
+            <name>Project Configuration Folder Name</name>
+            <key>configFolderName</key>
+            <description>The project configuration folder where all configuration files are kept.</description>
+            <type>string</type>
+            <value>Config</value>
+        </setting>
+        <setting>
+            <name>Project Process Folder Name</name>
+            <key>processFolder</key>
+            <description>The main project processing folder.</description>
+            <type>string</type>
+            <value>Process</value>
+        </setting>
+        <setting>
+            <name>Project Macros Folder Name</name>
+            <key>macrosFolder</key>
+            <description>The folder where all processing scripts and macros are kept.</description>
+            <type>list</type>
+            <value>Process,Macros</value>
+        </setting>
+        <setting>
+            <name>Project Fonts Folder Name</name>
+            <key>fontsFolder</key>
+            <description>The folder where all the fonts for a project are kept.</description>
+            <type>string</type>
+            <value>Fonts</value>
+        </setting>
+        <setting>
+            <name>Project Text Folder Name</name>
+            <key>textFolder</key>
+            <description>The folder where all working text to be processed is kept.</description>
+            <type>string</type>
+            <value>WorkingText</value>
+        </setting>
+        <setting>
+            <name>Project Text Folder Name</name>
+            <key>hyphenationFolder</key>
+            <description>The folder where hyphenation information files are kept.</description>
+            <type>string</type>
+            <value>Hyphenation</value>
+        </setting>
+    </section>
 </root>
 
