@@ -100,12 +100,6 @@ class Project (object) :
         # Initialize the managers dictionary here
         self.managers = {}
 
-        # Create a fresh merged version of the projConfig
-        self._projConfig  = ConfigObj(self.projConfFile)
-        self.projectType = self._projConfig['ProjectInfo']['projectType']
-        buildConfSection(self._userConfig, 'Projects')
-        userConfig.registerProject(self._userConfig, self._projConfig, self.projHome)
-
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
             if os.path.isfile(projErrorLogFile) :

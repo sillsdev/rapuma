@@ -35,6 +35,16 @@ if not rpmHome :
     rpmHome = os.path.join('usr', 'share', 'rpm')
     os.environ['RPM_BASE'] = rpmHome
 
+# Set the user environment path
+userHome = os.environ.get('RPM_USER')
+if not userHome :
+    sysHome = os.environ.get('HOME')
+    userHome = os.path.join(sysHome, '.config', 'rpm')
+    os.environ['RPM_USER'] = userHome
+
+# Set the (potential) project home
+projHome = os.getcwd()
+
 # Set our paths to application resources
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'core'))
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'manager'))
@@ -48,13 +58,13 @@ from configobj import ConfigObj
 
 # Load the local classes
 from proj_local import ProjLocal
-local = ProjLocal(rpmHome)
+local = ProjLocal(rpmHome, userHome, projHome)
 from tools import *
 import command as projCmd
 from user_config import UserConfig
 from proj_config import ProjConfig
 
-
+print dir(local)
 ###############################################################################
 ####################### Create the command to be used #########################
 ###############################################################################
@@ -205,6 +215,9 @@ def closeSession (aProject) :
 def newProject (uc, pid, ptype, pname, pdir = None) :
     '''Create a new publishing project.'''
 
+    # Because we may need to rewrite local, declare it global here
+    global local
+
     # Grab the cwd if pdir is empty for the default
     if not pdir or pdir == '.' :
         pdir = os.path.join(os.getcwd(), pid)
@@ -218,17 +231,17 @@ def newProject (uc, pid, ptype, pname, pdir = None) :
     if os.path.isfile(local.projConfFile) :
         terminal('ERR: Halt! Live project already defined in this location')
         return
-    elif os.path.isfile(projConfFile + lockExt) :
+    elif os.path.isfile(local.projConfFile + local.lockExt) :
         terminal('ERR: Halt! Locked project already defined in target folder')
         return
-    elif os.path.isfile(os.path.join(os.path.dirname(projHome), projConfFileName)) :
+    elif os.path.isfile(os.path.join(os.path.dirname(local.projHome), local.projConfFileName)) :
         terminal('ERR: Halt! Live project already defined in parent folder')
         return
-    elif os.path.isfile(os.path.join(os.path.dirname(projHome), projConfFileName + lockExt)) :
+    elif os.path.isfile(os.path.join(os.path.dirname(local.projHome), local.projConfFileName + local.lockExt)) :
         terminal('ERR: Halt! Locked project already defined in parent folder')
         return
-    elif not os.path.isdir(os.path.dirname(projHome)) :
-        terminal('ERR: Halt! Not a valid (parent) path: ' + projHome)
+    elif not os.path.isdir(os.path.dirname(local.projHome)) :
+        terminal('ERR: Halt! Not a valid (parent) path: ' + local.projHome)
         return
 
     # Test if this project already exists in the user's config file.
@@ -236,21 +249,22 @@ def newProject (uc, pid, ptype, pname, pdir = None) :
         terminal('ERR: Halt! ID [' + pid + '] already defined for another project')
         return
 
-    # If we made it to this point we need to check to see if the project
-    # folder exists, if it doesn't make it.
-    if not os.path.exists(projHome) :
-        os.makedirs(projHome)
+    # If we made it to this point we need adjust the projHome and make a
+    # new project folder if needed
+    local = ProjLocal(rpmHome, userHome, pdir)
+    if not os.path.exists(local.projHome) :
+        os.makedirs(local.projHome)
 
     # Create a new version of the project config file if one is not there.
     # If one is, then we throw a warning to have it removed first.
-    if not os.path.isfile(projConfFile) :
-        if not os.path.isdir (projConfFolder) :
-            os.makedirs(projConfFolder)
+    if not os.path.isfile(local.projConfFile) :
+        if not os.path.isdir (local.projConfFolder) :
+            os.makedirs(local.projConfFolder)
 
-        writeObject = codecs.open(projConfFile, "w", encoding='utf_8')
+        writeObject = codecs.open(local.projConfFile, "w", encoding='utf_8')
         writeObject.close()
-        projConfig = getXMLSettings(os.path.join(rpmConfigFolder, ptype + '.xml'))
-        projConfig.filename = projConfFile
+        projConfig = getXMLSettings(os.path.join(local.rpmConfigFolder, ptype + '.xml'))
+        projConfig.filename = local.projConfFile
         projConfig.write()
     else :
         terminal('ERR: Halt! A project config file already exsits for this project. Please remove it before continuing.')
@@ -261,7 +275,7 @@ def newProject (uc, pid, ptype, pname, pdir = None) :
     projConfig['ProjectInfo']['projectName']              = pname
     projConfig['ProjectInfo']['projectCreateDate']        = tStamp()
     projConfig['ProjectInfo']['projectIDCode']            = pid
-    uc.registerProject(pid, pname, ptype, projHome)
+    uc.registerProject(pid, pname, ptype, local.projHome)
 
     # Report what we did
     terminal('Created [' + pid + ']')
@@ -282,14 +296,14 @@ def removeProject (pid='') :
         # Check to see if the project does exist in the user config
         if self.userConfig['Projects'][pid] :
             # Disable the project
-            if os.path.isfile(self.projConfFile) :
-                os.rename(self.projConfFile, self.projConfFile + self.lockExt)
+            if os.path.isfile(local.projConfFile) :
+                os.rename(local.projConfFile, local.projConfFile + local.lockExt)
 
             # Remove references from user rpm.conf write out immediately
             userConfig.unregisterProject(pid)
 
             # Report the process is done
-            self.writeToLog('MSG', 'Project [' + pid + '] removed from system configuration.')
+            terminal('Project [' + pid + '] removed from system configuration.')
             return True
 
     except :
@@ -311,10 +325,18 @@ def restoreProject (pdir='') :
 
 # Instantiate User classes
 uc = UserConfig(local)
-#pc = ProjConfig(local)
+pc = ProjConfig(local)
+
+# FIXME: START HERE
+# Get the OptionParser hooked up now so we can work with commands and params
+
+
 #projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
 
+writeConfFile(projConfig)
+print pc.projConfig
 
+closeSession(aProject)
 
 # Load up just initial command set
 ourCommands = getCommands('')

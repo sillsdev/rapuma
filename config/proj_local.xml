@@ -41,14 +41,14 @@ Todo:
             <key>projLogFile</key>
             <description>The general project log file.</description>
             <type>string</type>
-            <value>projHome,rpm.log</value>
+            <value>rpm.log</value>
         </setting>
         <setting>
             <name>Project Error Log File</name>
             <key>projErrorLogFile</key>
             <description>The general project error log file.</description>
-            <type>list</type>
-            <value>projHome,error.log</value>
+            <type>string</type>
+            <value>error.log</value>
         </setting>
     </section>
     <section>
@@ -57,7 +57,7 @@ Todo:
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
             <name>Place Holder File</name>
-            <key>placeHolderFolder</key>
+            <key>placeHolderFile</key>
             <description>Place holder file to keep this section active.</description>
             <type>string</type>
             <value>None</value>
@@ -81,42 +81,42 @@ Todo:
         <description>Any folder name that is, or could be, used in a project needs to be stored here.</description>
         <setting>
             <name>Project Configuration Folder</name>
-            <key>configFolder</key>
+            <key>projConfFolder</key>
             <description>The project configuration folder where all configuration files are kept.</description>
             <type>string</type>
             <value>Config</value>
         </setting>
         <setting>
             <name>Project Process Folder</name>
-            <key>processFolder</key>
+            <key>projProcessFolder</key>
             <description>The main project processing folder.</description>
             <type>string</type>
             <value>Process</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
-            <key>macrosFolder</key>
+            <key>projMacrosFolder</key>
             <description>The folder where all processing scripts and macros are kept.</description>
             <type>list</type>
             <value>Process,Macros</value>
         </setting>
         <setting>
             <name>Project Fonts Folder</name>
-            <key>fontsFolder</key>
+            <key>projFontsFolder</key>
             <description>The folder where all the fonts for a project are kept.</description>
             <type>string</type>
             <value>Fonts</value>
         </setting>
         <setting>
             <name>Project Text Folder</name>
-            <key>textFolder</key>
+            <key>projTextFolder</key>
             <description>The folder where all working text to be processed is kept.</description>
             <type>string</type>
             <value>WorkingText</value>
         </setting>
         <setting>
             <name>Project Hyphenation Folder</name>
-            <key>hyphenationFolder</key>
+            <key>projHyphenationFolder</key>
             <description>The folder where hyphenation information files are kept.</description>
             <type>string</type>
             <value>Hyphenation</value>

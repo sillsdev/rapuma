@@ -42,7 +42,6 @@ class UserConfig (object) :
             raise IOError, "Can't open " + rpmXMLDefaults
 
         # Now make the users local rpm.conf file if it isn't there
-        print self.local.userConfFile
         if not os.path.exists(self.local.userConfFile) :
             self.initUserHome()
 

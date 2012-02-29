@@ -28,20 +28,12 @@ from tools import *
 
 class ProjLocal (object) :
 
-    def __init__(self, rpmHome) :
+    def __init__(self, rpmHome, userHome, projHome) :
         '''Intitate the whole class and create the object.'''
 
         self.rpmHome = rpmHome
-
-        # Set the user environment path
-        self.userHome = os.environ.get('RPM_USER')
-        if not self.userHome :
-            sysHome = os.environ.get('HOME')
-            self.userHome = os.path.join(sysHome, '.config', 'rpm')
-            os.environ['RPM_USER'] = self.userHome
-
-        # Set the (potential) project home
-        self.projHome = os.getcwd()
+        self.userHome = userHome
+        self.projHome = projHome
 
         # Bring in all the RPM default project location settings
         rpmXMLDefaults = os.path.join(self.rpmHome, 'config', 'proj_local.xml')
@@ -59,14 +51,29 @@ class ProjLocal (object) :
                 home = getattr(self, 'userHome')
             elif t[:3].lower() == 'rpm' :
                 home = getattr(self, 'rpmHome')
+
             for key in lc[t] :
+                # For extra credit, if we are looking at file, set the name here
+                if t[-5:].lower() == 'files' :
+                    if type(lc[t][key]) == list :
+                        setattr(self, key + 'Name', lc[t][key][len(lc[t][key])-1])
+                    else :
+                        setattr(self, key + 'Name', lc[t][key])
+                    # Uncomment for testing
+#                    print key + 'Name = ', getattr(self, key + 'Name')
+
                 if type(lc[t][key]) == list :
                     setattr(self, key, os.path.join(home, *lc[t][key]))
                 else :
                     setattr(self, key, os.path.join(home, lc[t][key]))
 
                 # Uncomment for testing
-                print key + ' = ', getattr(self, key)
-        print '\n'
+#                print key + ' = ', getattr(self, key)
 
+        # Extract just the file names from these
+        localTypes = ['ProjFiles', 'UserFiles', 'RpmFiles']
+        
+
+        # Add some additional necessary params
+        self.lockExt = '.lock'
 
