@@ -52,9 +52,10 @@ sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'project'))
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'component'))
 
 # Load standard Python modules
-import codecs, shutil, operator
+import codecs, shutil, operator, argparse
 from datetime import *
 from configobj import ConfigObj
+import pprint
 
 # Load the local classes
 from proj_local import ProjLocal
@@ -64,7 +65,6 @@ import command as projCmd
 from user_config import UserConfig
 from proj_config import ProjConfig
 
-print dir(local)
 ###############################################################################
 ####################### Create the command to be used #########################
 ###############################################################################
@@ -80,50 +80,76 @@ print dir(local)
 # incomplete. If there is a way to figure out what the user might be needing
 # the help system will be called. Otherwise, RPM will quite.
 
-# FIXME: Command line processing must fixed to reflect the above documentation.
-# FIXME: Is it okay to process the -i here and then ignore it in most of the 
-# actual command processing? For now I am doing that.
+# The argument handler
+def userArguments (args) :
 
-# Catch any incoming commands here
-pid = ''
-command = ''
-opts = []
+    if args['about'] :
+        terminal('\n' + systemName + ' version ' + systemVersion + '\n')
+        terminal('About: ' + systemAbout + '\n')
+    elif args['version'] :
+        terminal('\nVersion: ' + systemVersion + '\n')
+    elif args['name'] :
+        terminal('\nName: ' + systemName + '\n')
 
-# Check and collect command line args. If the command is not
-# properly formed, exit now.
-if len(sys.argv) == 1 :
-    command = 'help'
-    opts = ['-h']
-elif len(sys.argv) == 2 :
-    if sys.argv[1].lower() == 'help' :
-        command = 'help'
-        opts = ['-h']
-    else :
-        terminalError('RPM command not properly formed. Missing command options.')
-        sys.exit()
-elif len(sys.argv) >= 3 :
-    command = sys.argv[1]
-    opts = sys.argv[2:]
-else :
-    terminalError('RPM command not properly formed.')
-    sys.exit()
+# Setup the arg parser
+parser = argparse.ArgumentParser(description=systemName)
 
-# We really need to know what the pid here. Let's look now
-# There should be a -i (pid) in every command we process.
-# If not, we quite here.
-c = 0
-if opts :
-    # If there is a help command we just divert to that
-    if not '-h' in opts :
-        # Otherwise we need to be sure there is a pid in the line
-        if '-i' in opts :
-            for cmd in opts :
-                c +=1
-                if cmd == '-i' :
-                    pid = opts[c]
-        else :
-            terminalError('No project ID found in command line.')
-            sys.exit()
+# Add main arguments
+parser.add_argument('-a', '--about', action='store_true', help = 'About RPM')
+parser.add_argument('-v', '--version', action='store_true', help = 'About RPM')
+parser.add_argument('-n', '--name', action='store_true', help = 'About RPM')
+# FIXME: Add a new project command here
+
+# Add subprocess arguments
+
+
+# Send the collected arguments to the handler
+userArguments(vars(parser.parse_args()))
+
+
+
+
+
+## Catch any incoming commands here
+#pid = ''
+#command = ''
+#opts = []
+
+## Check and collect command line args. If the command is not
+## properly formed, exit now.
+#if len(sys.argv) == 1 :
+#    command = 'help'
+#    opts = ['-h']
+#elif len(sys.argv) == 2 :
+#    if sys.argv[1].lower() == 'help' :
+#        command = 'help'
+#        opts = ['-h']
+#    else :
+#        terminalError('RPM command not properly formed. Missing command options.')
+#        sys.exit()
+#elif len(sys.rgv) >= 3 :
+#    command = sys.argv[1]
+#    opts = sys.argv[2:]
+#else :
+#    terminalError('RPM command not properly formed.')
+#    sys.exit()
+
+## We really need to know what the pid here. Let's look now
+## There should be a -i (pid) in every command we process.
+## If not, we quite here.
+#c = 0
+#if opts :
+#    # If there is a help command we just divert to that
+#    if not '-h' in opts :
+#        # Otherwise we need to be sure there is a pid in the line
+#        if '-i' in opts :
+#            for cmd in opts :
+#                c +=1
+#                if cmd == '-i' :
+#                    pid = opts[c]
+#        else :
+#            terminalError('No project ID found in command line.')
+#            sys.exit()
 
 
 ###############################################################################
@@ -325,7 +351,7 @@ def restoreProject (pdir='') :
 
 # Instantiate User classes
 uc = UserConfig(local)
-pc = ProjConfig(local)
+#pc = ProjConfig(local)
 
 # FIXME: START HERE
 # Get the OptionParser hooked up now so we can work with commands and params
@@ -333,10 +359,10 @@ pc = ProjConfig(local)
 
 #projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
 
-writeConfFile(projConfig)
-print pc.projConfig
+#writeConfFile(projConfig)
+#print pc.projConfig
 
-closeSession(aProject)
+#closeSession(aProject)
 
 # Load up just initial command set
 ourCommands = getCommands('')
