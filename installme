@@ -15,19 +15,19 @@ There are a number of packages that need to be installed for RPM to work. Some a
 Next, in gedit in the file you just opened, go to the bottom of the file and add this line if it does not already exist in the file:
 
 	deb http://packages.sil.org/ubuntu oneiric main
-	
+
 Save the file and close it.
 
 Again, in the terminal, update your package list and update your system with the folling command and answer yes to the "install without verification" question:
 
 	sudo apt-get update
 	sudo apt-get upgrade
-	
+
 Next, in the terminal, you need to install all the necessary packages to run the RPM publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
 
 Required:
 
-	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte pdftk 
+	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte python-argparse pdftk 
 
 Suggested:
 

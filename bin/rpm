@@ -69,6 +69,8 @@ from proj_config import ProjConfig
 uc = UserConfig(local)
 #pc = ProjConfig(local)
 
+# Create some vars, dicts, etc.
+projConfig = {}
 
 def newProject (uc, pid, ptype = None, pname = None, pdir = None) :
     '''Create a new publishing project.'''
@@ -144,10 +146,39 @@ def newProject (uc, pid, ptype = None, pname = None, pdir = None) :
     uc.registerProject(pid, pname, ptype, local.projHome)
 
     # Report what we did
-    terminal('Created [' + pid + ']')
+    terminal('Created new project [' + pid + ']')
     return projConfig
 
 
+def removeProject (uc, pid = None) :
+    '''Remove the project from the RPM system.  This will not remove the
+    project data but will 'disable' the project.'''
+
+    global local
+
+    # If no pid was given this fails
+    if not pid :
+        terminal('Error: Project ID code not given or found. Remove project failed.')
+        return False
+
+    # If we made it this far we should be able to remove it
+    try :
+        # Check to see if the project does exist in the user config
+        if uc.userConfig['Projects'][pid] :
+            # Disable the project
+            if os.path.isfile(local.projConfFile) :
+                os.rename(local.projConfFile, local.projConfFile + local.lockExt)
+
+            # Remove references from user rpm.conf write out immediately
+            uc.unregisterProject(pid)
+
+            # Report the process is done
+            terminal('Project [' + pid + '] removed from system configuration.')
+            return True
+
+    except :
+        terminal('Project ID [' + pid + '] not found in system configuration.')
+        return False
 
 
 ###############################################################################
@@ -167,12 +198,18 @@ def newProject (uc, pid, ptype = None, pname = None, pdir = None) :
 
 # The argument handler
 def userArguments (args) :
+    '''Process incoming command arguments.'''
 
     if args['about'] :
         terminal('\n' + systemName + ' version ' + systemVersion + '\n')
         terminal('About: ' + systemAbout + '\n')
-    elif args['new_project'] :
-        newProject (uc, args['project_id'])
+    elif args['project_create'] :
+        writeConfFile(newProject(uc, args['project_id']))
+    elif args['project_remove'] :
+        removeProject(uc, args['project_id'])
+    else:
+        terminal('Error: Command not recognized! ')
+        sys.exit()
 
 # Setup the arg parser
 parser = argparse.ArgumentParser(description=systemName)
@@ -182,57 +219,13 @@ subparsers = parser.add_subparsers(help='sub-command help')
 parser.add_argument('-a', '--about', action='store_true', help = 'About RPM')
 
 # Add project subprocess arguments
-projCommand = subparsers.add_parser('project', help='General project command help')
+projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('-i', '--project_id', help='Project ID (required)')
-projCommand.add_argument('-n', '--new_project', action='store_true', help='New project command')
+projCommand.add_argument('-n', '--project_create', action='store_true', help='Create a new project')
+projCommand.add_argument('-r', '--project_remove', action='store_true', help='Remove a project')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))
-
-
-
-
-
-## Catch any incoming commands here
-#pid = ''
-#command = ''
-#opts = []
-
-## Check and collect command line args. If the command is not
-## properly formed, exit now.
-#if len(sys.argv) == 1 :
-#    command = 'help'
-#    opts = ['-h']
-#elif len(sys.argv) == 2 :
-#    if sys.argv[1].lower() == 'help' :
-#        command = 'help'
-#        opts = ['-h']
-#    else :
-#        terminalError('RPM command not properly formed. Missing command options.')
-#        sys.exit()
-#elif len(sys.rgv) >= 3 :
-#    command = sys.argv[1]
-#    opts = sys.argv[2:]
-#else :
-#    terminalError('RPM command not properly formed.')
-#    sys.exit()
-
-## We really need to know what the pid here. Let's look now
-## There should be a -i (pid) in every command we process.
-## If not, we quite here.
-#c = 0
-#if opts :
-#    # If there is a help command we just divert to that
-#    if not '-h' in opts :
-#        # Otherwise we need to be sure there is a pid in the line
-#        if '-i' in opts :
-#            for cmd in opts :
-#                c +=1
-#                if cmd == '-i' :
-#                    pid = opts[c]
-#        else :
-#            terminalError('No project ID found in command line.')
-#            sys.exit()
 
 
 ###############################################################################
@@ -321,35 +314,6 @@ def closeSession (aProject) :
     terminal('\n\t\tThank you, please come again!\n')
 
 
-def removeProject (pid='') :
-    '''Remove the project from the RPM system.  This will not remove the
-    project data but will 'disable' the project.'''
-
-    # If no pid was given this fails
-    if pid == '' :
-        terminal('Project ID code not given or found. Remove project failed.')
-        return False
-
-    # If we made it this far we should be able to remove it
-    try :
-        # Check to see if the project does exist in the user config
-        if self.userConfig['Projects'][pid] :
-            # Disable the project
-            if os.path.isfile(local.projConfFile) :
-                os.rename(local.projConfFile, local.projConfFile + local.lockExt)
-
-            # Remove references from user rpm.conf write out immediately
-            userConfig.unregisterProject(pid)
-
-            # Report the process is done
-            terminal('Project [' + pid + '] removed from system configuration.')
-            return True
-
-    except :
-        terminal('Project ID [' + pid + '] not found in system configuration.')
-        return False
-
-
 def restoreProject (pdir='') :
     '''Restore a project in the current folder'''
 
@@ -361,13 +325,6 @@ def restoreProject (pdir='') :
 ###############################################################################
 
 # Here is where we go to work!
-
-
-# FIXME: START HERE
-# Get the OptionParser hooked up now so we can work with commands and params
-
-
-#projConfig = newProject(uc, opts[1], opts[3], opts[5], opts[7])
 
 #writeConfFile(projConfig)
 #print pc.projConfig

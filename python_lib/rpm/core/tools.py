@@ -164,7 +164,6 @@ def writeConfFile (config) :
     buildConfSection(confObjNew, 'GeneralSettings')
     try :
         confObjNew['GeneralSettings']['lastEdit'] = tStamp()
-        print 'mmmmmmmmm', confObjNew.filename, confObjNew
         confObjNew.write()
         return True
 
