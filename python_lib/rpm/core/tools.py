@@ -231,6 +231,38 @@ def override_section (self, aSection) :
 # but not quite what we need for working with XML as one of the inputs.
 Section.override = override_section
 
+################################ Log File Operations ##########################
+
+def trimLog (logFile, limit = 1000) :
+    '''Trim a log file.  This will take an existing log file and
+    trim it to the amount specified in the system file.'''
+
+    # Of course this isn't needed if there isn't even a log file
+    if os.path.isfile(logFile) :
+
+        # Change this to an int()
+        limit = int(limit)
+        
+        # Read in the existing log file
+        readObject = codecs.open(logFile, "r", encoding='utf_8')
+        lines = readObject.readlines()
+        readObject.close()
+
+        # Process only if we have enough lines
+        if len(lines) > limit :
+            writeObject = codecs.open(logFile, "w", encoding='utf_8')
+            lineCount = 0
+            for line in lines :
+                if limit > lineCount :
+                    writeObject.write(line)
+                    lineCount +=1
+
+            writeObject.close()
+
+        return True
+    else :
+        return False
+
 
 ############################### Terminal Output ###############################
 

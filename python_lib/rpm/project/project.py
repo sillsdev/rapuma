@@ -354,35 +354,6 @@ class Project (object) :
         return
 
 
-    def trimLog (self, projLogLineLimit = 1000) :
-        '''Trim the system log file.  This will take an existing log file and
-        trim it to the amount specified in the system file.'''
-
-        # Of course this isn't needed if there isn't even a log file
-        if os.path.isfile(self.projLogFile) :
-
-            # Change this to an int()
-            projLogLineLimit = int(projLogLineLimit)
-            
-            # Read in the existing log file
-            readObject = codecs.open(self.projLogFile, "r", encoding='utf_8')
-            lines = readObject.readlines()
-            readObject.close()
-
-            # Process only if we have enough lines
-            if len(lines) > projLogLineLimit :
-                writeObject = codecs.open(self.projLogFile, "w", encoding='utf_8')
-                lineCount = 0
-                for line in lines :
-                    if projLogLineLimit > lineCount :
-                        writeObject.write(line)
-                        lineCount +=1
-
-                writeObject.close()
-
-        return
-
-
     def preAppend (self, line, file_name) :
         '''Got the following code out of a Python forum.  This will pre-append a
         line to the begining of a file.'''
