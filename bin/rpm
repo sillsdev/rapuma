@@ -59,18 +59,15 @@ import pprint
 
 # Load the local classes
 from proj_local import ProjLocal
-local = ProjLocal(rpmHome, userHome, projHome)
 from tools import *
 import command as projCmd
 from user_config import UserConfig
 from proj_config import ProjConfig
+from project import Project
 
 # Instantiate User classes
-uc = UserConfig(local)
-#pc = ProjConfig(local)
-
-# Create some vars, dicts, etc.
-projConfig = {}
+local           = ProjLocal(rpmHome, userHome, projHome)
+uc              = UserConfig(local)
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
@@ -135,14 +132,8 @@ def newProject (uc, pid, ptype = None, pname = None, pdir = None) :
         os.makedirs(local.projConfFolder)
 
     # Create a new version of the project config file
-    projConfig = ConfigObj(getXMLSettings(os.path.join(local.rpmConfigFolder, ptype + '.xml')))
-    # Insert intitial project settings
-    projConfig['ProjectInfo']['projectType']              = ptype
-    projConfig['ProjectInfo']['projectName']              = pname
-    projConfig['ProjectInfo']['projectCreateDate']        = tStamp()
-    projConfig['ProjectInfo']['projectIDCode']            = pid
-    projConfig.filename = local.projConfFile
-    projConfig.write()
+    pc.makeNewProjConf(local, pid, ptype, pname)
+
     # Add project to local RPM project registry
     uc.registerProject(pid, pname, ptype, local.projHome)
 
@@ -269,16 +260,28 @@ def userArguments (args) :
     if args['about'] :
         terminal('\n' + systemName + ' version ' + systemVersion + '\n')
         terminal('About: ' + systemAbout + '\n')
-    elif args['project_new'] :
-        newProject(uc, args['project_id'])
-    elif args['project_lock'] :
-        lockProject(uc, args['project_id'])
-    elif args['project_unlock'] :
-        unlockProject(uc, args['project_id'])
-    elif args['project_delete'] :
-        deleteProject(uc, args['project_id'])
-    elif args['component_new'] :
-        newComponent(uc, args['project_id'], args['component_id'], args['component_type'])
+
+    if sys.argv[1].lower() == 'project' :
+        if args['project_new'] :
+            newProject(uc, args['project_id'])
+        elif args['project_lock'] :
+            lockProject(uc, args['project_id'])
+        elif args['project_unlock'] :
+            unlockProject(uc, args['project_id'])
+        elif args['project_delete'] :
+            deleteProject(uc, args['project_id'])
+    elif sys.argv[1].lower() == 'component' :
+        if args['component_new'] :
+# FIXME: If we give the pid to ProjConfig it should help us reset the projHome setting
+            pc              = ProjConfig(local)
+            local           = ProjLocal(rpmHome, userHome, projHome)
+            # Reset the projHome after we have run ProjConfig
+            print 'aaaa', local.projHome
+            local.projHome  = pc.projHome
+            print 'bbbb', local.projHome
+
+            aProject = Project(uc.userConfig, pc.projConfig, local)
+            aProject.addComponent(args['component_id'], args['component_type'])
     else:
         terminal('Error: Command not recognized! ')
         sys.exit()
@@ -297,67 +300,20 @@ projCommand.add_argument('-n', '--project_new', action='store_true', help='Creat
 projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
-
 # Add project subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('-i', '--project_id', help='Project ID (required)')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-c', '--component_id', help='The component ID (required).')
-compCommand.add_argument('-t', '--component_type', action='store_true', help='The component type (required).')
+compCommand.add_argument('-t', '--component_type', help='The component type (required).')
 
 
 # Send the collected arguments to the handler
-print parser.parse_args()
 userArguments(vars(parser.parse_args()))
 
 
-###############################################################################
-####################### Define functions for startup ##########################
-###############################################################################
-
-def processCommand (aProject) :
-    '''Run the command and pass along the aProject object'''
-
-    if command :
-        if len(opts) >= 1 :
-            try :
-                aProject.run(command, opts, uConf.userConfig)
-            except SyntaxError, err:
-                terminal("\n" + str(err) + "\n")
-                opts.insert(0, command)
-                aProject.help(command, opts, uConf.userConfig)
-        else :
-            # If we seem to be short on options then we will just display the help
-            # for this command
-                terminalError('No options were give. There needs to be at least at project ID (-i) given with this command.')
-                terminal('\nHelp for the \"' + command + '\" command:\n')
-                aProject.help(command, opts, uConf.userConfig)
-
-
-def closeSession (aProject) :
-    '''Now write out to each of the config files if needed'''
-    print 'Closing session'
-    for conf in aProject.confFileList :
-        confObj = getattr(aProject, '_' + conf)
-        writeConfFile(confObj, confObj.filename)
-
-    # Now trim the log file if it is needed
-    if isConfSection(aProject.projConfig, 'Project') :
-        aProject.trimLog(aProject.userConfig['System']['projLogLineLimit'])
-
-
-
-###############################################################################
-######################## Load User and Project Info ###########################
-###############################################################################
 
 # Here is where we go to work!
-
-#writeConfFile(projConfig)
-#print pc.projConfig
-
-# Load up just initial command set
-ourCommands = getCommands('')
 
 # Close out the session
 ## In case there are any Canadians using this, politely say good bye

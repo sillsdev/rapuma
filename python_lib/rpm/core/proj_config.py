@@ -32,14 +32,28 @@ class ProjConfig (object) :
         '''Intitate the whole class and create the object.'''
 
         self.local          = local
-        self.projConfig     = {}
+        self.projConfig     = ConfigObj()
+        self.projHome       = ''
 
+        print 'initingggggggggggggggggg', self.local.projConfFile
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :
-            self.projConfig  = ConfigObj(self.local.projConfFile)
+            self.projConfig = ConfigObj(self.local.projConfFile)
             self.projectType = self.projConfig['ProjectInfo']['projectType']
-        else :
-            terminal('Error: Unable to find: ' + self.local.projConfFile)
+            self.projConfig.filename = self.local.projConfFile
+            print 'xxxxxxxxxxxx', self.projConfig.filename
 
+
+    def makeNewProjConf (self, local, pid, ptype, pname) :
+        '''Create a new project configuration file for a new project.'''
+
+        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rpmConfigFolder, ptype + '.xml')))
+        # Insert intitial project settings
+        self.projConfig['ProjectInfo']['projectType']              = ptype
+        self.projConfig['ProjectInfo']['projectName']              = pname
+        self.projConfig['ProjectInfo']['projectCreateDate']        = tStamp()
+        self.projConfig['ProjectInfo']['projectIDCode']            = pid
+        self.projConfig.filename = local.projConfFile
+        self.projConfig.write()
 
 
