@@ -3,7 +3,7 @@
 rpm project -d -i PUB-MYMR-JAS
 rpm project -n -i PUB-MYMR-JAS
 
-#rpm component -a -i PUB-MYMR-JAS -c jas -t usfm
+rpm component -n -i PUB-MYMR-JAS -c jas -t usfm
 #rpm component_add   -c apa                  -t adminMSEAG
 #rpm component_add   -c simpleNotes          -t projectNotes
 

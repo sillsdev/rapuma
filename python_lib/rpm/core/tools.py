@@ -244,7 +244,7 @@ Section.override = override_section
 #   2) Warning event going to log and terminal if debugging is turned on
 #   3) Error event going to the log and terminal
 
-def writeToLog (code, msg, mod = None) :
+def writeToLog (local, uc, code, msg, mod = None) :
     '''Send an event to the log file. and the terminal if specified.
     Everything gets written to the log.  Whether a message gets written to
     the terminal or not depends on what type (code) it is.  There are four
@@ -266,7 +266,7 @@ def writeToLog (code, msg, mod = None) :
 
     # Test to see if this is a live project by seeing if the project conf is
     # there.  If it is, we can write out log files.  Otherwise, why bother?
-    if os.path.isfile(self.projConfFile) :
+    if os.path.isfile(local.projConfFile) :
 
         # When are we doing this?
         ts = tStamp()
@@ -279,20 +279,20 @@ def writeToLog (code, msg, mod = None) :
 
         # Do we need a log file made?
         try :
-            if not os.path.isfile(self.projLogFile) or os.path.getsize(self.projLogFile) == 0 :
-                writeObject = codecs.open(self.projLogFile, "w", encoding='utf_8')
+            if not os.path.isfile(local.projLogFile) or os.path.getsize(local.projLogFile) == 0 :
+                writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
                 writeObject.write('RPM event log file created: ' + ts + '\n')
                 writeObject.close()
 
             # Now log the event to the top of the log file using preAppend().
-            self.preAppend(eventLine, self.projLogFile)
+            preAppend(eventLine, local.projLogFile)
 
             # Write errors and warnings to the error log file
-            if code == 'WRN' and self.debugging == 'True':
-                self.writeToErrorLog(eventLine)
+            if code == 'WRN' and uc.debugging == 'True':
+                writeToErrorLog(local.projErrorLogFile, eventLine)
 
             if code == 'ERR' :
-                self.writeToErrorLog(eventLine)
+                writeToErrorLog(local.projErrorLogFile, eventLine)
 
         except :
             terminal("Failed to write: " + msg)
@@ -300,7 +300,7 @@ def writeToLog (code, msg, mod = None) :
     return
 
 
-def writeToErrorLog (eventLine) :
+def writeToErrorLog (log, eventLine) :
     '''In a perfect world there would be no errors, but alas there are and
     we need to put them in a special file that can be accessed after the
     process is run.  The error file from the previous session is deleted at
@@ -309,10 +309,10 @@ def writeToErrorLog (eventLine) :
     try :
         # Because we want to read errors from top to bottom, we don't pre append
         # them to the error log file.
-        if not os.path.isfile(self.projErrorLogFile) :
-            writeObject = codecs.open(self.projErrorLogFile, "w", encoding='utf_8')
+        if not os.path.isfile(local.projErrorLogFile) :
+            writeObject = codecs.open(log, "w", encoding='utf_8')
         else :
-            writeObject = codecs.open(self.projErrorLogFile, "a", encoding='utf_8')
+            writeObject = codecs.open(log, "a", encoding='utf_8')
 
         # Write and close
         writeObject.write(eventLine + '\n')

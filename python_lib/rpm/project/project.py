@@ -183,7 +183,7 @@ class Project (object) :
             self.projConfig['Components'][cid]['name'] = cid
             self.projConfig['Components'][cid]['type'] = ctype
             writeConfFile(self.projConfig)
-            writeToLog('MSG', 'Added the [' + cid + '] component to the project')
+            writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
 
 
 ###############################################################################

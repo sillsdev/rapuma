@@ -35,13 +35,11 @@ class ProjConfig (object) :
         self.projConfig     = ConfigObj()
         self.projHome       = ''
 
-        print 'initingggggggggggggggggg', self.local.projConfFile
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :
             self.projConfig = ConfigObj(self.local.projConfFile)
             self.projectType = self.projConfig['ProjectInfo']['projectType']
             self.projConfig.filename = self.local.projConfFile
-            print 'xxxxxxxxxxxx', self.projConfig.filename
 
 
     def makeNewProjConf (self, local, pid, ptype, pname) :

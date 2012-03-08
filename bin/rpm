@@ -70,14 +70,14 @@ local           = ProjLocal(rpmHome, userHome, projHome)
 uc              = UserConfig(local)
 
 # Give a welcome message
-terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion)
+terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 
 
 ###########################################################################
 ############################## RPM Functions ##############################
 ###########################################################################
 
-def newProject (uc, pid, ptype = None, pname = None, pdir = None) :
+def newProject (uc, pc, pid, ptype = None, pname = None, pdir = None) :
     '''Create a new publishing project.'''
 
     # Because we may need to rewrite local, declare it global here
@@ -262,8 +262,10 @@ def userArguments (args) :
         terminal('About: ' + systemAbout + '\n')
 
     if sys.argv[1].lower() == 'project' :
+        local           = ProjLocal(rpmHome, userHome, projHome)
+        pc              = ProjConfig(local)
         if args['project_new'] :
-            newProject(uc, args['project_id'])
+            newProject(uc, pc, args['project_id'])
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
         elif args['project_unlock'] :
@@ -271,16 +273,12 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
     elif sys.argv[1].lower() == 'component' :
+        local           = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
+        pc              = ProjConfig(local)
         if args['component_new'] :
-# FIXME: If we give the pid to ProjConfig it should help us reset the projHome setting
-            pc              = ProjConfig(local)
-            local           = ProjLocal(rpmHome, userHome, projHome)
-            # Reset the projHome after we have run ProjConfig
-            print 'aaaa', local.projHome
             local.projHome  = pc.projHome
-            print 'bbbb', local.projHome
-
             aProject = Project(uc.userConfig, pc.projConfig, local)
+# FIXME: Add a check to addComponent that will end graceful if there is no project
             aProject.addComponent(args['component_id'], args['component_type'])
     else:
         terminal('Error: Command not recognized! ')
