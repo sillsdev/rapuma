@@ -47,19 +47,9 @@ class Project (object) :
         self.confFileList           = ['userConfig', 'projConfig', 'layoutConfig']
         self.components             = {}
         self.componentType          = {}
-        self.projectType            = None
-        self.projectIDCode          = None
-
-
-###############################################################################
-############################ Project Level Functions ##########################
-###############################################################################
-
-    def initProject (self) :
-        '''Initialize the project object and load the project type class.'''
-
-        # Initialize the managers dictionary here
-        self.managers = {}
+        self.managers               = {}
+        self.projectType            = self.projConfig['ProjectInfo']['projectType']
+        self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -84,6 +74,11 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
 
+
+
+
+
+# FIXME: Start working here
         # Bring in default layout config information
         if not os.path.isfile(self.local.layoutConfFile) :
             self.layoutConfig  = ConfigObj(getXMLSettings(self.local.rpmLayoutDefaultFile))
@@ -174,17 +169,15 @@ class Project (object) :
         '''This will add a component to the object we created 
         above in createComponent().'''
 
-        try :
-            x = self.projConfig['Components'][cid]
-            writeToLog('MSG', 'The [' + cid + '] component already exists in this project.')
-        except :
+        if not testForSetting(self.projConfig, 'Components', cid) :
             buildConfSection(self.projConfig, 'Components')
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
             self.projConfig['Components'][cid]['type'] = ctype
             writeConfFile(self.projConfig)
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
-
+        else :
+            writeToLog('MSG', 'The [' + cid + '] component already exists in this project.')
 
 ###############################################################################
 ############################ System Level Functions ###########################
@@ -197,6 +190,7 @@ class Project (object) :
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
+
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 

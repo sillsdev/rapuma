@@ -273,13 +273,15 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
     elif sys.argv[1].lower() == 'component' :
-        local           = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
-        pc              = ProjConfig(local)
-        if args['component_new'] :
-            local.projHome  = pc.projHome
-            aProject = Project(uc.userConfig, pc.projConfig, local)
-# FIXME: Add a check to addComponent that will end graceful if there is no project
-            aProject.addComponent(args['component_id'], args['component_type'])
+        local = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
+        pc = ProjConfig(local)
+        if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
+            if args['component_new'] :
+                local.projHome  = pc.projHome
+                aProject = Project(uc.userConfig, pc.projConfig, local)
+                aProject.addComponent(args['component_id'], args['component_type'])
+        else :
+            terminal('Cannot find [' + args['project_id'] + '] project.')
     else:
         terminal('Error: Command not recognized! ')
         sys.exit()
