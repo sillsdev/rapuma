@@ -45,16 +45,16 @@ class Style (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
+        self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project._projConfig['Managers'][manager] :
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project._projConfig['Managers'][manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['Managers'][manager]
+        self.compSettings = self.project.projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -70,8 +70,8 @@ class Style (Manager) :
 
         # As this is call is for a PT based project, it is certain the style
         # file should be found in the parent folder.
-        ptStyles = os.path.join(os.path.dirname(self.project.projHome), self.mainStyleFile)
-        ptCustomStyles = os.path.join(os.path.dirname(self.project.projHome), self.customStyleFile)
+        ptStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.mainStyleFile)
+        ptCustomStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.customStyleFile)
         projStyles = os.path.join(self.project.processFolder, self.mainStyleFile)
         projCustomStyles = os.path.join(self.project.processFolder, self.customStyleFile)
         # We will start with a very simple copy operation. Once we get going

@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys
+import codecs, os, sys, fileinput
 from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
@@ -278,24 +278,24 @@ def writeToLog (local, uc, code, msg, mod = None) :
             eventLine = '\"' + ts + '\", \"' + code + '\", \"' + msg + '\"'
 
         # Do we need a log file made?
-        try :
-            if not os.path.isfile(local.projLogFile) or os.path.getsize(local.projLogFile) == 0 :
-                writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
-                writeObject.write('RPM event log file created: ' + ts + '\n')
-                writeObject.close()
+#        try :
+        if not os.path.isfile(local.projLogFile) or os.path.getsize(local.projLogFile) == 0 :
+            writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
+            writeObject.write('RPM event log file created: ' + ts + '\n')
+            writeObject.close()
 
-            # Now log the event to the top of the log file using preAppend().
-            preAppend(eventLine, local.projLogFile)
+        # Now log the event to the top of the log file using preAppend().
+        preAppend(eventLine, local.projLogFile)
 
-            # Write errors and warnings to the error log file
-            if code == 'WRN' and uc.debugging == 'True':
-                writeToErrorLog(local.projErrorLogFile, eventLine)
+        # Write errors and warnings to the error log file
+        if code == 'WRN' and uc.debugging == 'True':
+            writeToErrorLog(local.projErrorLogFile, eventLine)
 
-            if code == 'ERR' :
-                writeToErrorLog(local.projErrorLogFile, eventLine)
+        if code == 'ERR' :
+            writeToErrorLog(local.projErrorLogFile, eventLine)
 
-        except :
-            terminal("Failed to write: " + msg)
+#        except :
+#            terminal("Failed to write: " + msg)
 
     return
 

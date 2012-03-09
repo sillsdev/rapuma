@@ -44,19 +44,19 @@ class Layout (Manager) :
         self.manager                    = None
 
         # Search for renderer to create a layout conf for
-        for m in self.project._projConfig['Managers'].keys() :
+        for m in self.project.projConfig['Managers'].keys() :
             for r in renderers :
                 if m == cType + '_' + r :
                     self.manager = m
 
         if not self.manager :
-            self.project.writeToLog('ERR', 'Renderering manager not found: ' + self.manager)
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Renderering manager not found: ' + self.manager)
 
         # Set values for this manager
-        self._layoutConfig              = {}
-        self.macroPackage               = self.project._projConfig['Managers'][self.manager]['macroPackage']
-        self.projMacrosFolder           = os.path.join(self.project.macrosFolder, self.macroPackage)
-        self.rpmMacrosFolder            = os.path.join(self.project.rpmMacrosFolder, self.macroPackage)
+        self.layoutConfig               = {}
+        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.projMacrosFolder           = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.rpmMacrosFolder            = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
 
         # Copy in to the process folder the macro package for this component
         if not os.path.isdir(self.projMacrosFolder) :

@@ -46,24 +46,24 @@ class Xetex (Manager) :
         self.cfg                    = cfg
         self.cType                  = cType
         self.manager                = self.cType + '_Xetex'
-        self.macroPackage           = self.project._projConfig['Managers'][self.manager]['macroPackage']
-        self.macroLayoutValuesFile  = os.path.join(self.project.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macroLayoutValuesFile  = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.xFiles                 = {}
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][self.manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project._projConfig['Managers'][self.manager] :
-            self.project._projConfig['Managers'][self.manager] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
+            self.project.projConfig['Managers'][self.manager] = newSectionSettings
 
         # Add (merge) into layout config macro package settings
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
         layoutCopy = ConfigObj(self.project.layoutConfFile)
         layoutCopy.merge(macVals)
-        if not confObjCompare(layoutCopy, self.project._layoutConfig, self.project.projConfFolder) :
-            self.project._layoutConfig = layoutCopy
+        if not confObjCompare(layoutCopy, self.project.layoutConfig, self.project.local.projConfFolder) :
+            self.project.layoutConfig = layoutCopy
 
         # Get settings for this component
-        self.compSettings = self.project._projConfig['Managers'][self.manager]
+        self.compSettings = self.project.projConfig['Managers'][self.manager]
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
@@ -115,29 +115,9 @@ class Xetex (Manager) :
                 elif self.xFiles[c][0] == 'non' :
                     continue
                 else :
-                    self.project.writeToLog('ERR', 'Type: [' + self.xFiles[c][0] + '] not supported')
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[c][0] + '] not supported')
 
-                self.project.writeToLog('MSG', 'Created: ' + self.xFiles[c][4])
-            
-
-
-        # The fonts should all be in place but a TeX specific font control
-        # needs to be created. That is done here by drawing off of the font
-        # manager.
-#        if self.makeFontInfoTexFile() :
-#            self.project.writeToLog('LOG', 'Created font information file.')
-#        # Create the main control file that XeTeX will use for processing components
-#        if self.makeCompTypeSettingsFile() :
-#            self.project.writeToLog('LOG', 'Created the XeTeX settings file.')
-#        # Create the component control file
-#        if self.makeTexControlFile(cid) :
-#            self.project.writeToLog('LOG', 'Created control file for: ' + cid + ' component.')
-        
-        # Create the system call that will render this component
-        
-        # Run XeTeX to render
-        
-        # Report/record any errors encountered
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[c][4])
 
 
     def makeTexControlFile (self, cid) :
@@ -178,7 +158,7 @@ class Xetex (Manager) :
                 elif pieces[c][0] == 'command' :
                     writeObject.write('\\' + pieces[c][0] + '\n')
                 else :
-                    self.project.writeToLog('ERR', 'Type not supported: ' + pieces[c][0])
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[c][0])
 
                 c +=1
 
@@ -215,10 +195,10 @@ class Xetex (Manager) :
         if not os.path.isfile(fontInfoFileName) :
             writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
             writeObject.write('# fonts.tex' + ' created: ' + tStamp() + '\n')
-            for f in self.project._projConfig['CompTypes'][sCType]['installedFonts'] :
-                fInfo = self.project._projConfig['Fonts'][f]
+            for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
+                fInfo = self.project.projConfig['Fonts'][f]
                 # Create the primary fonts that will be used with TeX
-                if self.project._projConfig['CompTypes'][sCType]['primaryFont'] == f :
+                if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
                     writeObject.write('\n# These are normal use fonts for this type of component.\n')
                     features = fInfo['FontInformation']['features']
                     for tf in fInfo :

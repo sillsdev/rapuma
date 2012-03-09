@@ -85,30 +85,30 @@ class Usfm (Component) :
         self.cid = ''
 
         # Build the comp type config section
-        if not testForSetting(self.project._projConfig, 'CompTypes', 'Usfm') :
-            buildConfSection(self.project._projConfig, 'CompTypes')
-            buildConfSection(self.project._projConfig['CompTypes'], 'Usfm')
+        if not testForSetting(self.project.projConfig, 'CompTypes', 'Usfm') :
+            buildConfSection(self.project.projConfig, 'CompTypes')
+            buildConfSection(self.project.projConfig['CompTypes'], 'Usfm')
             
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project._projConfig['CompTypes']['Usfm'], os.path.join(self.project.rpmConfigFolder, 'usfm.xml'))
-        if newSectionSettings != self.project._projConfig['CompTypes']['Usfm'] :
-            self.project._projConfig['CompTypes']['Usfm'] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes']['Usfm'], os.path.join(self.project.local.rpmConfigFolder, 'usfm.xml'))
+        if newSectionSettings != self.project.projConfig['CompTypes']['Usfm'] :
+            self.project.projConfig['CompTypes']['Usfm'] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['CompTypes']['Usfm']
+        self.compSettings = self.project.projConfig['CompTypes']['Usfm']
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
         # Add some ParaTExt values if needed
         if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFFile = os.path.split(os.path.dirname(self.project.projHome))[1] + '.SSF'
+            self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
             self.ptSSFConf = parseSSF(self.ptSSFFile)
 
         # Update default font to match PT project info
         if self.sourceEditor.lower() == 'paratext' :
             self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
-            self.project._projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
+            self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
             self.project.writeOutProjConfFile = True
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']

@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, fileinput, shutil, imp
+import codecs, os, sys, shutil, imp
 #from configobj import ConfigObj, Section
 
 
@@ -44,6 +44,8 @@ class Project (object) :
         self.userConfig             = userConfig
         self.projConfig             = projConfig
         self.layoutConfig           = ConfigObj()
+        self.layoutConfFile         = os.path.join(self.local.projConfFolder, 'layout.conf')
+        self.rpmLayoutDefaultFile   = os.path.join(self.local.rpmConfigFolder, 'layout_default.xml')
         self.confFileList           = ['userConfig', 'projConfig', 'layoutConfig']
         self.components             = {}
         self.componentType          = {}
@@ -74,25 +76,12 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
 
-
-
-
-
-# FIXME: Start working here
         # Bring in default layout config information
-        if not os.path.isfile(self.local.layoutConfFile) :
-            self.layoutConfig  = ConfigObj(getXMLSettings(self.local.rpmLayoutDefaultFile))
-#            self.layoutConfig.filename = self.local.layoutConfFile
+        if not os.path.isfile(self.layoutConfFile) :
+            self.layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
+            self.layoutConfig.filename = self.layoutConfFile
         else :
-            self.layoutConfig = ConfigObj(self.local.layoutConfFile)
-
-        # Create some common folders used in every project (if needed)
-        if not os.path.isdir(self.local.processFolder) :
-            os.mkdir(self.local.processFolder)
-        if not os.path.isdir(self.local.textFolder) :
-            os.mkdir(self.local.textFolder)
-        if not os.path.isdir(self.local.fontsFolder) :
-            os.mkdir(self.local.fontsFolder)
+            self.layoutConfig = ConfigObj(self.layoutConfFile)
 
 
 ###############################################################################
@@ -108,7 +97,7 @@ class Project (object) :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
 
-        writeToLog('LOG', 'Created the [' + fullName + '] manager object.')
+        writeToLog(self.local, self.userConfig, 'LOG', 'Created the [' + fullName + '] manager object.')
         return self.managers[fullName]
 
 
@@ -135,7 +124,6 @@ class Project (object) :
                 # Do not overwrite if a value is already there
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
                     self.projConfig['Managers'][fullName][k] = v
-                    writeOutProjConfFile = True
 
 
 ###############################################################################
@@ -177,7 +165,7 @@ class Project (object) :
             writeConfFile(self.projConfig)
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
-            writeToLog('MSG', 'The [' + cid + '] component already exists in this project.')
+            writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')
 
 ###############################################################################
 ############################ System Level Functions ###########################

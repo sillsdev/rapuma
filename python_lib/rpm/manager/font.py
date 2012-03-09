@@ -46,16 +46,16 @@ class Font (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
+        self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Font'
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project._projConfig['Managers'][manager] :
-            self.project._projConfig['Managers'][manager] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project.projConfig['Managers'][manager] :
+            self.project.projConfig['Managers'][manager] = newSectionSettings
             self.project.writeOutProjConfFile = True
 
-        self.compSettings = self.project._projConfig['Managers'][manager]
+        self.compSettings = self.project.projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -80,33 +80,32 @@ class Font (Manager) :
             return False
 
         # See if this is already in the config
-        if not testForSetting(self.project._projConfig, 'Fonts') :
-            buildConfSection (self.project._projConfig, 'Fonts')
+        if not testForSetting(self.project.projConfig, 'Fonts') :
+            buildConfSection (self.project.projConfig, 'Fonts')
             
         record = False
-        if not testForSetting(self.project._projConfig['Fonts'], font) :
-            buildConfSection (self.project._projConfig['Fonts'], font)
+        if not testForSetting(self.project.projConfig['Fonts'], font) :
+            buildConfSection (self.project.projConfig['Fonts'], font)
             record = True
 
         if record :
             # Inject the font info into the project format config file.
             fInfo = getXMLSettings(fontInfo)
             
-            self.project._projConfig['Fonts'][font] = fInfo.dict()
+            self.project.projConfig['Fonts'][font] = fInfo.dict()
 
             # Record the font with the component type that called it
-            if not self.project._projConfig['CompTypes'][compType]['primaryFont'] :
-                self.project._projConfig['CompTypes'][compType]['primaryFont'] = font
+            if not self.project.projConfig['CompTypes'][compType]['primaryFont'] :
+                self.project.projConfig['CompTypes'][compType]['primaryFont'] = font
 
-            if len(self.project._projConfig['CompTypes'][compType]['installedFonts']) == 0 :
-                self.project._projConfig['CompTypes'][compType]['installedFonts'] = [font]
+            if len(self.project.projConfig['CompTypes'][compType]['installedFonts']) == 0 :
+                self.project.projConfig['CompTypes'][compType]['installedFonts'] = [font]
             else :
-                fontList = self.project._projConfig['CompTypes'][compType]['installedFonts']
+                fontList = self.project.projConfig['CompTypes'][compType]['installedFonts']
                 if fontList != [font] :
-                    self.project._projConfig['CompTypes'][compType]['installedFonts'] = addToList(fontList, font)
+                    self.project.projConfig['CompTypes'][compType]['installedFonts'] = addToList(fontList, font)
 
-            self.project.writeOutProjConfFile = True
-            self.project.writeToLog('LOG', font + ' font setup information added to project config')
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', font + ' font setup information added to project config')
             return True
 
         else :
@@ -116,8 +115,8 @@ class Font (Manager) :
     def installFont (self, font, manager, compType) :
         '''Install (copy) a font into a project.'''
 
-        for font in self.project._projConfig['CompTypes'][compType]['installedFonts'] :
-            fontInfo = self.project._projConfig['Fonts'][font]
+        for font in self.project.projConfig['CompTypes'][compType]['installedFonts'] :
+            fontInfo = self.project.projConfig['Fonts'][font]
             # Make the font family folder for this typeface
             fontFamilyFolder = os.path.join(self.project.fontsFolder, fontInfo['FontInformation']['fontFolder'])
             if not os.path.isdir(fontFamilyFolder) :

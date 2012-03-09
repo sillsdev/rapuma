@@ -46,16 +46,15 @@ class Text (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        self.rpmXmlFontConfig   = os.path.join(self.project.rpmConfigFolder, self.xmlConfFile)
+        self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
-        newSectionSettings = getPersistantSettings(self.project._projConfig['Managers'][manager], os.path.join(self.project.rpmConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project._projConfig['Managers'][manager] :
-            self.project._projConfig['Managers'][manager] = newSectionSettings
-            self.project.writeOutProjConfFile = True
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.project.projConfig['Managers'][manager] :
+            self.project.projConfig['Managers'][manager] = newSectionSettings
 
-        self.compSettings = self.project._projConfig['Managers'][manager]
+        self.compSettings = self.project.projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -75,11 +74,11 @@ class Text (Manager) :
         if ptConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
             thisFile = compPrefix + cid.upper() + ptConf['ScriptureText']['FileNamePostPart']
         else :
-            self.project.writeToLog('ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
             return
 
-        ptSource = os.path.join(os.path.dirname(self.project.projHome), thisFile)
-        target = os.path.join(self.project.textFolder, cid + '.' + cType.lower())
+        ptSource = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        target = os.path.join(self.project.local.projTextFolder, cid + '.' + cType.lower())
 
         # Copy the source to the working text folder
         if os.path.isfile(ptSource) :

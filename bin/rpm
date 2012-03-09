@@ -275,11 +275,13 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'component' :
         local = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
         pc = ProjConfig(local)
+        local.projHome  = pc.projHome
         if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
+            aProject = Project(uc.userConfig, pc.projConfig, local)
             if args['component_new'] :
-                local.projHome  = pc.projHome
-                aProject = Project(uc.userConfig, pc.projConfig, local)
                 aProject.addComponent(args['component_id'], args['component_type'])
+            if args['component_render'] :
+                aProject.renderComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     else:
@@ -304,6 +306,7 @@ projCommand.add_argument('-d', '--project_delete', action='store_true', help='De
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('-i', '--project_id', help='Project ID (required)')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
+compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-c', '--component_id', help='The component ID (required).')
 compCommand.add_argument('-t', '--component_type', help='The component type (required).')
 
