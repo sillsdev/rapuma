@@ -141,7 +141,6 @@ def writeConfFile (config) :
     confObjNew = ConfigObj()
     # Parse file and path
     configFileAndPath = config.filename
-    print configFileAndPath
     (folderPath, configFile) = os.path.split(configFileAndPath)
 
     # Check contents of the existing conf file
@@ -153,6 +152,7 @@ def writeConfFile (config) :
         confObjNew.filename = configFileAndPath.replace('.new', '')
         # If they are the same we don't need to continue
         if confObjOrg.__eq__(confObjNew) :
+            print 'not much to do'
             return False
 
     # Build the folder path if needed

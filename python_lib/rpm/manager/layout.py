@@ -39,7 +39,7 @@ class Layout (Manager) :
         super(Layout, self).__init__(project, cfg)
 
         # List the renderers this manager supports
-        renderers = ['Xetex']
+        renderers                       = ['Xetex']
         self.cType                      = cType
         self.manager                    = None
 

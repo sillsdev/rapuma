@@ -46,11 +46,11 @@ class Text (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
-        self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rpmXmlTextConfig)
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings
 

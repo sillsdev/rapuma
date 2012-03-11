@@ -51,7 +51,7 @@ class Xetex (Manager) :
         self.xFiles                 = {}
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.macroLayoutValuesFile)
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
 

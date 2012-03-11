@@ -56,9 +56,9 @@ Todo:
         <sectionID>RpmFiles</sectionID>
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>Place Holder File</name>
+            <name>Place Holder</name>
             <key>placeHolderFile</key>
-            <description>Place holder file to keep this section active.</description>
+            <description>The name of the file.</description>
             <type>string</type>
             <value>None</value>
         </setting>

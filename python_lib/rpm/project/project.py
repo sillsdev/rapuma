@@ -162,7 +162,6 @@ class Project (object) :
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
             self.projConfig['Components'][cid]['type'] = ctype
-            writeConfFile(self.projConfig)
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
             writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')

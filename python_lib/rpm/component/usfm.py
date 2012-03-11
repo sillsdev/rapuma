@@ -93,7 +93,6 @@ class Usfm (Component) :
         newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes']['Usfm'], os.path.join(self.project.local.rpmConfigFolder, 'usfm.xml'))
         if newSectionSettings != self.project.projConfig['CompTypes']['Usfm'] :
             self.project.projConfig['CompTypes']['Usfm'] = newSectionSettings
-            self.project.writeOutProjConfFile = True
 
         self.compSettings = self.project.projConfig['CompTypes']['Usfm']
 
@@ -109,10 +108,10 @@ class Usfm (Component) :
         if self.sourceEditor.lower() == 'paratext' :
             self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
             self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
-            self.project.writeOutProjConfFile = True
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
-        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
+#        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
+        self.usfmManagers = ['font']
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -135,9 +134,15 @@ class Usfm (Component) :
             self.project.writeToLog('ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
             return
 
+
+# FIXME: There seems to be a problem getting the proj info back into the project object
+
+
+
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
         if self.sourceEditor.lower() == 'paratext' :
+            print self.project.managers
             self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
             self.project.managers['usfm_Style'].installPTStyles()
         else :

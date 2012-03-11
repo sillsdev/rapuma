@@ -282,6 +282,10 @@ def userArguments (args) :
                 aProject.addComponent(args['component_id'], args['component_type'])
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
+
+            # Write out and changes we may have made to the main config file
+            print 'final write'
+            writeConfFile(aProject.projConfig)
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     else:
@@ -315,14 +319,16 @@ compCommand.add_argument('-t', '--component_type', help='The component type (req
 userArguments(vars(parser.parse_args()))
 
 
+###############################################################################
+########################### Close out the session #############################
+###############################################################################
 
-# Here is where we go to work!
-
-# Close out the session
-## In case there are any Canadians using this, politely say good bye
-terminal('\n\t\tThank you, please come again!\n')
 
 # Now trim the log file if it is needed
 if os.path.isfile(local.projLogFile) :
     trimLog(local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+
+## In case there are any Canadians using this, politely say good bye
+terminal('\n\t\tThank you, please come again!\n')
+
 
