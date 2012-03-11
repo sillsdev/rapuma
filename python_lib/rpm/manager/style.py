@@ -51,8 +51,7 @@ class Style (Manager) :
         manager = self.cType + '_Style'
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rpmXmlStyleConfig)
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
-            self.project._projConfig['Managers'][manager] = newSectionSettings
-            self.project.writeOutProjConfFile = True
+            self.project.projConfig['Managers'][manager] = newSectionSettings
 
         self.compSettings = self.project.projConfig['Managers'][manager]
 

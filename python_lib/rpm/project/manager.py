@@ -59,15 +59,15 @@ class Manager(object) :
 #            # get from the init file.  If an override is found then we will use
 #            # that value.
 #            folderPath = ''
-#            buildConfSection(self.project._projConfig, 'FolderNameOverride')
+#            buildConfSection(self.project.projConfig, 'FolderNameOverride')
 #            for f in path :
 #                if f[0] == '%' :
 #                    f = f.strip('%')
 #                    try :
-#                        folderPath = os.path.join(folderPath, self._projConfig['FolderNameOverride'][f])
+#                        folderPath = os.path.join(folderPath, self.projConfig['FolderNameOverride'][f])
 #                    except :
-#                        self.project._projConfig['FolderNameOverride'][f] = f
-#                        writeConfFile(self.project._projConfig, self.project.projConfFile)
+#                        self.project.projConfig['FolderNameOverride'][f] = f
+#                        writeConfFile(self.project.projConfig, self.project.projConfFile)
 #                        folderPath = os.path.join(folderPath, f)
 #                else :
 #                    folderPath = os.path.join(folderPath, f)

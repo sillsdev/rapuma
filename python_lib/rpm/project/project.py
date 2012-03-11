@@ -117,6 +117,7 @@ class Project (object) :
         fullName = cType + '_' + mType.capitalize()
         # Insert the Manager section if it is not already there
         buildConfSection(self.projConfig, 'Managers')
+        print fullName
         if not testForSetting(self.projConfig['Managers'], fullName) :
             buildConfSection(self.projConfig['Managers'], fullName)
             managerDefaults = getXMLSettings(os.path.join(self.local.rpmConfigFolder, mType + '.xml'))
@@ -124,6 +125,7 @@ class Project (object) :
                 # Do not overwrite if a value is already there
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
                     self.projConfig['Managers'][fullName][k] = v
+            writeConfFile(self.projConfig)
 
 
 ###############################################################################

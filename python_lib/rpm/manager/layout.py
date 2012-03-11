@@ -43,6 +43,9 @@ class Layout (Manager) :
         self.cType                      = cType
         self.manager                    = None
 
+# FIXME: Need to have this create the layout specs in a seperate config file
+
+
         # Search for renderer to create a layout conf for
         for m in self.project.projConfig['Managers'].keys() :
             for r in renderers :
@@ -54,6 +57,7 @@ class Layout (Manager) :
 
         # Set values for this manager
         self.layoutConfig               = {}
+        print self.project.projConfig['Managers'][self.manager]
         self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
         self.projMacrosFolder           = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
         self.rpmMacrosFolder            = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)

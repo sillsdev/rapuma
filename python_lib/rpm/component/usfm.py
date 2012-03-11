@@ -110,8 +110,9 @@ class Usfm (Component) :
             self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
-#        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['font']
+#
+        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
+#        self.usfmManagers = ['font']
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -142,7 +143,7 @@ class Usfm (Component) :
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
         if self.sourceEditor.lower() == 'paratext' :
-            print self.project.managers
+            print self.sourceEditor.lower()
             self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
             self.project.managers['usfm_Style'].installPTStyles()
         else :
