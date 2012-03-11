@@ -59,7 +59,7 @@ class Layout (Manager) :
         self.layoutConfig               = {}
         print self.project.projConfig['Managers'][self.manager]
         self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.projMacrosFolder           = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+#        self.projMacrosFolder           = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
         self.rpmMacrosFolder            = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
 
         # Copy in to the process folder the macro package for this component

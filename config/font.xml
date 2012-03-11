@@ -15,11 +15,11 @@ Todo:
 
 <root>
     <setting>
-        <name>Process Folder</name>
-        <key>processFolder</key>
-        <description>The folder were the font information will be kept.</description>
-        <type>string</type>
-        <value>Process</value>
+        <name>Use Font Features</name>
+        <key>useFontFeatures</key>
+        <description>Turn on (or off) all font features.</description>
+        <type>boolean</type>
+        <value>True</value>
     </setting>
 </root>
 

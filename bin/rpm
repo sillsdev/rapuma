@@ -60,7 +60,6 @@ import pprint
 # Load the local classes
 from proj_local import ProjLocal
 from tools import *
-import command as projCmd
 from user_config import UserConfig
 from proj_config import ProjConfig
 from project import Project

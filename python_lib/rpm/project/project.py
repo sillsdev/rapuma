@@ -28,7 +28,6 @@ import codecs, os, sys, shutil, imp
 from tools import *
 import manager as mngr
 import component as cmpt
-import command as projCmd
 import user_config as userConfig
 
 ###############################################################################
@@ -125,6 +124,8 @@ class Project (object) :
                 # Do not overwrite if a value is already there
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
                     self.projConfig['Managers'][fullName][k] = v
+
+# FIXME: If we dont' write out here we loose the info, why?
             writeConfFile(self.projConfig)
 
 
