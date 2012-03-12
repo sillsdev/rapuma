@@ -274,7 +274,6 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'component' :
         local = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
         pc = ProjConfig(local)
-        local.projHome  = pc.projHome
         if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
             aProject = Project(uc.userConfig, pc.projConfig, local)
             if args['component_new'] :

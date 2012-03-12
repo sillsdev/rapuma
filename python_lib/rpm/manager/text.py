@@ -80,6 +80,9 @@ class Text (Manager) :
         ptSource = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
         target = os.path.join(self.project.local.projTextFolder, cid + '.' + cType.lower())
 
+        print 'zzzzzzzzz', self.project.local.projHome
+
+
         # Copy the source to the working text folder
         if os.path.isfile(ptSource) :
             shutil.copy(ptSource, target)

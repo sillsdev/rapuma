@@ -33,7 +33,7 @@ class ProjConfig (object) :
 
         self.local          = local
         self.projConfig     = ConfigObj()
-        self.projHome       = ''
+#        self.projHome       = ''
 
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :

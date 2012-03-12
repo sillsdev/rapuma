@@ -112,7 +112,7 @@ class Usfm (Component) :
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
 #
 #        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['font', 'style']
+        self.usfmManagers = ['text', 'style']
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -135,10 +135,7 @@ class Usfm (Component) :
             self.project.writeToLog('ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
             return
 
-
 # FIXME: There seems to be a problem getting the proj info back into the project object
-
-
 
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
