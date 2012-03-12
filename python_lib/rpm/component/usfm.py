@@ -112,7 +112,7 @@ class Usfm (Component) :
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
 #
 #        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['text', 'style']
+        self.usfmManagers = ['text', 'style', 'font', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -140,7 +140,6 @@ class Usfm (Component) :
         # Set up specific elements for this type of component with our managers
         # The following rely on specific editing systems
         if self.sourceEditor.lower() == 'paratext' :
-            print self.sourceEditor.lower()
             self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
             self.project.managers['usfm_Style'].installPTStyles()
         else :
@@ -149,6 +148,7 @@ class Usfm (Component) :
         
         # These elements rely on specific rendering systems
         if self.renderer.lower() == 'xetex' :
+            print self.project.managers
             self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
             self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
         else :

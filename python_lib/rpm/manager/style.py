@@ -71,8 +71,8 @@ class Style (Manager) :
         # file should be found in the parent folder.
         ptStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.mainStyleFile)
         ptCustomStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.customStyleFile)
-        projStyles = os.path.join(self.project.processFolder, self.mainStyleFile)
-        projCustomStyles = os.path.join(self.project.processFolder, self.customStyleFile)
+        projStyles = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+        projCustomStyles = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
         # We will start with a very simple copy operation. Once we get going
         # we will need to make this more sophisticated.
         if os.path.isfile(ptStyles) :

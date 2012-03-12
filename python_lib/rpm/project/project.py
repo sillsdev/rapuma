@@ -75,6 +75,11 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
 
+        # If this is a valid project we might as well put in the folders
+        for folder in self.local.projFolders :
+            if not os.path.isdir(getattr(self.local, folder)) :
+                os.makedirs(getattr(self.local, folder))
+
         # Bring in default layout config information
         if not os.path.isfile(self.layoutConfFile) :
             self.layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
@@ -116,7 +121,6 @@ class Project (object) :
         fullName = cType + '_' + mType.capitalize()
         # Insert the Manager section if it is not already there
         buildConfSection(self.projConfig, 'Managers')
-        print fullName
         if not testForSetting(self.projConfig['Managers'], fullName) :
             buildConfSection(self.projConfig['Managers'], fullName)
             managerDefaults = getXMLSettings(os.path.join(self.local.rpmConfigFolder, mType + '.xml'))

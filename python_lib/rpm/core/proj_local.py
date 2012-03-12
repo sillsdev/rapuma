@@ -42,6 +42,9 @@ class ProjLocal (object) :
         else :
             raise IOError, "Can't open " + rpmXMLDefaults
             
+        # Create a list of project folders for later processing
+        self.projFolders = lc['ProjFolders'].keys()
+
         # Do a loopy thingy and pull out all the known settings
         localTypes = ['ProjFolders', 'UserFolders', 'RpmFolders', 'ProjFiles', 'UserFiles', 'RpmFiles']
         for t in localTypes :
@@ -72,7 +75,7 @@ class ProjLocal (object) :
 
         # Extract just the file names from these
         localTypes = ['ProjFiles', 'UserFiles', 'RpmFiles']
-        
+
 
         # Add some additional necessary params
         self.lockExt = '.lock'

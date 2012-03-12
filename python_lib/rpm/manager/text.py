@@ -80,7 +80,7 @@ class Text (Manager) :
         ptSource = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
         target = os.path.join(self.project.local.projTextFolder, cid + '.' + cType.lower())
 
-        print 'zzzzzzzzz', self.project.local.projHome
+        print 'zzzzzzzzz', os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
 
         # Copy the source to the working text folder

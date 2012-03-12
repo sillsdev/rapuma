@@ -72,8 +72,8 @@ class Font (Manager) :
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
         # ~/resources/lib_share/Fonts/[FontID]
-        fontDir = os.path.join(self.project.rpmFontsFolder, font)
-        fontInfo = os.path.join(self.project.rpmFontsFolder, font, font + '.xml')
+        fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
+        fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
             self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
             return False
@@ -117,7 +117,7 @@ class Font (Manager) :
         for font in self.project.projConfig['CompTypes'][compType]['installedFonts'] :
             fontInfo = self.project.projConfig['Fonts'][font]
             # Make the font family folder for this typeface
-            fontFamilyFolder = os.path.join(self.project.fontsFolder, fontInfo['FontInformation']['fontFolder'])
+            fontFamilyFolder = os.path.join(self.project.local.projFontsFolder, fontInfo['FontInformation']['fontFolder'])
             if not os.path.isdir(fontFamilyFolder) :
                 os.makedirs(fontFamilyFolder)
 
@@ -137,14 +137,14 @@ class Font (Manager) :
                 fontFileName = fontConfig[tf]['file']
                 fontSource = None
                 # System version
-                if os.path.isfile(os.path.join(self.project.rpmFontsFolder, thisFolder, fontFileName)) :
-                    fontSource = os.path.join(self.project.rpmFontsFolder, thisFolder, fontFileName)
+                if os.path.isfile(os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)) :
+                    fontSource = os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)
                 # Crash and burn if the font file is not found
                 if not fontSource :
                     self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
                     return False
                 # Copy the font file if need be
-                fontFilePath = os.path.join(self.project.fontsFolder, thisFolder, fontFileName)
+                fontFilePath = os.path.join(self.project.local.projFontsFolder, thisFolder, fontFileName)
                 if not os.path.isfile(fontFilePath) :
                     shutil.copy(fontSource, fontFilePath)
 

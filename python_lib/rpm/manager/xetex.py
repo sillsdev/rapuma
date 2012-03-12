@@ -82,17 +82,17 @@ class Xetex (Manager) :
 
         # We can consolidate information here for files this manager needs to make
         #               ID   pType  tType          Location                FileName
-        self.xFiles = { 1 : ['mac', 'input',       'macrosFolder',         self.macroPackage + '.tex',     'Macro link file'], 
-                        2 : ['fnt', 'input',       'processFolder',        'fonts.tex',                    'Font control file'], 
-                        3 : ['set', 'input',       'processFolder',        self.cType + '_xetex.tex',      'XeTeX main settings file'], 
-                        4 : ['set', 'input',       'processFolder',        self.cType + '_xetex-ext.tex',  'XeTeX extention settings file'], 
-                        5 : ['set', 'stylesheet',  'processFolder',        self.cType + '.sty',            'Primary component type styles'], 
-                        6 : ['sty', 'stylesheet',  'processFolder',        'custom.sty',                   'Custom project styles (from ParaTExt)'], 
-                        7 : ['sty', 'stylesheet',  'processFolder',        cid + '.sty',                   'Component style override'], 
-                        8 : ['sty', 'input',       'hyphenationFolder',    'hyphenation.tex',              'XeTeX hyphenation data file'], 
-                        9 : ['mac', 'input',       'macrosFolder',         'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
-                       10 : ['non', 'ptxfile',     'textFolder',           cid + '.usfm',                  'Component text file'],
-                       11 : ['pro', 'input',       'processFolder',        cid + '.tex',                   'XeTeX component processing commands'],
+        self.xFiles = { 1 : ['mac', 'input',       'projMacrosFolder',     self.macroPackage + '.tex',     'Macro link file'], 
+                        2 : ['fnt', 'input',       'projProcessFolder',    'fonts.tex',                    'Font control file'], 
+                        3 : ['set', 'input',       'projProcessFolder',    self.cType + '_xetex.tex',      'XeTeX main settings file'], 
+                        4 : ['set', 'input',       'projProcessFolder',    self.cType + '_xetex-ext.tex',  'XeTeX extention settings file'], 
+                        5 : ['set', 'stylesheet',  'projProcessFolder',    self.cType + '.sty',            'Primary component type styles'], 
+                        6 : ['sty', 'stylesheet',  'projProcessFolder',    'custom.sty',                   'Custom project styles (from ParaTExt)'], 
+                        7 : ['sty', 'stylesheet',  'projProcessFolder',    cid + '.sty',                   'Component style override'], 
+                        8 : ['sty', 'input',       'projHyphenationFolder','hyphenation.tex',              'XeTeX hyphenation data file'], 
+                        9 : ['mac', 'input',       'projMacrosFolder',     'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
+                       10 : ['non', 'ptxfile',     'projTextFolder',       cid + '.usfm',                  'Component text file'],
+                       11 : ['pro', 'input',       'projProcessFolder',    cid + '.tex',                   'XeTeX component processing commands'],
                         }
 
         # Create the above files in the order they are listed
@@ -100,7 +100,7 @@ class Xetex (Manager) :
         c = 0
         while c < l :
             c +=1
-            path = os.path.join(getattr(self.project, self.xFiles[c][2]), self.xFiles[c][3])
+            path = os.path.join(getattr(self.project.local, self.xFiles[c][2]), self.xFiles[c][3])
             if not os.path.isfile(path) :
                 if self.xFiles[c][0] == 'mac' :
                     continue
