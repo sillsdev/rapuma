@@ -47,6 +47,9 @@ class Layout (Manager) :
 
         # Bring in default layout config information
         if not os.path.isfile(self.project.local.layoutConfFile) :
+
+# FIXME: add a GeneralSettings section to the conf file
+
             self.layoutConfig  = ConfigObj(getXMLSettings(self.project.local.rpmLayoutDefaultFile))
             self.layoutConfig.filename = self.project.local.layoutConfFile
             self.layoutConfig.write()

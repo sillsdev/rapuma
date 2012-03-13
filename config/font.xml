@@ -14,12 +14,17 @@ Todo:
 
 
 <root>
-    <setting>
-        <name>Use Font Features</name>
-        <key>useFontFeatures</key>
-        <description>Turn on (or off) all font features.</description>
-        <type>boolean</type>
-        <value>True</value>
-    </setting>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>General font settings.</description>
+        <setting>
+            <name>Use Font Features</name>
+            <key>useFontFeatures</key>
+            <description>Turn on (or off) all font features.</description>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+    </section>
 </root>
 

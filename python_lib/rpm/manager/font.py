@@ -43,10 +43,25 @@ class Font (Manager) :
         super(Font, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project            = project
-        self.cfg                = cfg
-        self.cType              = cType
+        self.project                    = project
+        self.cfg                        = cfg
+        self.cType                      = cType
+        self.fontConfig                 = ConfigObj()
+        self.project                    = project
+
         self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+
+        # Create a default font config file if needed
+        if not os.path.isfile(self.project.local.fontConfFile) :
+            self.fontConfig  = ConfigObj(getXMLSettings(self.rpmXmlFontConfig))
+            buildConfSection(self.fontConfig, 'GeneralSettings')
+            buildConfSection(self.fontConfig, 'Fonts')
+            self.fontConfig['GeneralSettings']
+            self.fontConfig.filename = self.project.local.fontConfFile
+            writeConfFile(self.fontConfig)
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new font config: font.__init__()')
+        else :
+            self.fontConfig = ConfigObj(self.project.local.fontConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Font'
@@ -66,7 +81,7 @@ class Font (Manager) :
 
 
     def recordFont (self, font, manager, compType) :
-        '''Check for the exsitance of a font in the project conf file.
+        '''Check for the exsitance of a font in the font conf file.
         If there is one, return, if not add it.'''
 
         # It is expected that all the necessary meta data for this font is in
