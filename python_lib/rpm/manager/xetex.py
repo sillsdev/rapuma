@@ -57,10 +57,13 @@ class Xetex (Manager) :
 
         # Add (merge) into layout config macro package settings
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
-        layoutCopy = ConfigObj(self.project.layoutConfFile)
-        layoutCopy.merge(macVals)
-        if not confObjCompare(layoutCopy, self.project.layoutConfig, self.project.local.projConfFolder) :
-            self.project.layoutConfig = layoutCopy
+#        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
+#        layoutCopy.merge(macVals)
+        self.project.managers['usfm_Layout'].layoutConfig.merge(macVals)
+        self.project.managers['usfm_Layout'].layoutConfig.write()
+        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
+#        if not confObjCompare(layoutCopy, self.project.managers['usfm_Layout'].layoutConfig, self.project.local.projConfFolder) :
+#            self.project.managers['usfm_Layout'].layoutConfig = layoutCopy
 
         # Get settings for this component
         self.compSettings = self.project.projConfig['Managers'][self.manager]

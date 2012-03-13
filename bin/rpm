@@ -280,10 +280,6 @@ def userArguments (args) :
                 aProject.addComponent(args['component_id'], args['component_type'])
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
-
-            # Write out and changes we may have made to the main config file
-            print 'final write'
-            writeConfFile(aProject.projConfig)
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     else:

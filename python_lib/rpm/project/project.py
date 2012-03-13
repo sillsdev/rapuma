@@ -42,10 +42,6 @@ class Project (object) :
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
-        self.layoutConfig           = ConfigObj()
-        self.layoutConfFile         = os.path.join(self.local.projConfFolder, 'layout.conf')
-        self.rpmLayoutDefaultFile   = os.path.join(self.local.rpmConfigFolder, 'layout_default.xml')
-        self.confFileList           = ['userConfig', 'projConfig', 'layoutConfig']
         self.components             = {}
         self.componentType          = {}
         self.managers               = {}
@@ -79,13 +75,6 @@ class Project (object) :
         for folder in self.local.projFolders :
             if not os.path.isdir(getattr(self.local, folder)) :
                 os.makedirs(getattr(self.local, folder))
-
-        # Bring in default layout config information
-        if not os.path.isfile(self.layoutConfFile) :
-            self.layoutConfig  = ConfigObj(getXMLSettings(self.rpmLayoutDefaultFile))
-            self.layoutConfig.filename = self.layoutConfFile
-        else :
-            self.layoutConfig = ConfigObj(self.layoutConfFile)
 
 
 ###############################################################################
@@ -129,8 +118,8 @@ class Project (object) :
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
                     self.projConfig['Managers'][fullName][k] = v
 
-# FIXME: If we dont' write out here we loose the info, why?
             writeConfFile(self.projConfig)
+            writeToLog(self.local, self.userConfig, 'LOG', 'Write out to config: project.addManager()')
 
 
 ###############################################################################
@@ -169,6 +158,8 @@ class Project (object) :
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
             self.projConfig['Components'][cid]['type'] = ctype
+            writeConfFile(self.projConfig)
+            writeToLog(self.local, self.userConfig, 'LOG', 'Write out to config: project.addManager()')
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
             writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')
@@ -190,6 +181,7 @@ class Project (object) :
 
     def changeSystemSetting (self, key, value) :
         '''Change global default setting (key, value) in the System section of
+
         the RPM user settings file.  This will write out changes
         immediately.'''
 

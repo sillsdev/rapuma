@@ -138,38 +138,37 @@ def overrideSettings (settings, overrideXML) :
 def writeConfFile (config) :
     '''Generic routin to write out to, or create a config file.'''
 
-    confObjNew = ConfigObj()
-    # Parse file and path
-    configFileAndPath = config.filename
-    (folderPath, configFile) = os.path.split(configFileAndPath)
+#    confObjNew = ConfigObj()
+#    # Parse file and path
+#    configFileAndPath = config.filename
+#    (folderPath, configFile) = os.path.split(configFileAndPath)
 
-    # Check contents of the existing conf file
-    if os.path.isfile(configFileAndPath) :
-        confObjOrg = ConfigObj(configFileAndPath)
-        config.filename = os.path.join(folderPath, '.' + configFile + '.new')
-        config.write()
-        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
-        confObjNew.filename = configFileAndPath.replace('.new', '')
-        # If they are the same we don't need to continue
-        if confObjOrg.__eq__(confObjNew) :
-            print 'not much to do'
-            return False
+#    # Check contents of the existing conf file
+#    if os.path.isfile(configFileAndPath) :
+#        confObjOrg = ConfigObj(configFileAndPath)
+#        config.filename = os.path.join(folderPath, '.' + configFile + '.new')
+#        config.write()
+#        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
+#        confObjNew.filename = configFileAndPath.replace('.new', '')
+#        # If they are the same we don't need to continue
+#        if confObjOrg.__eq__(confObjNew) :
+#            return False
 
     # Build the folder path if needed
-    if not os.path.exists(folderPath) :
-        os.makedirs(folderPath)
+    if not os.path.exists(os.path.split(config.filename)[0]) :
+        os.makedirs(os.path.split(config.filename)[0])
 
     # To track when a conf file was saved as well as other general
     # housekeeping we will create a GeneralSettings section with
     # a last edit date key/value.
-    buildConfSection(confObjNew, 'GeneralSettings')
+    buildConfSection(config, 'GeneralSettings')
     try :
-        confObjNew['GeneralSettings']['lastEdit'] = tStamp()
-        confObjNew.write()
+        config['GeneralSettings']['lastEdit'] = tStamp()
+        config.write()
         return True
 
     except :
-        terminal('\nERROR: Could not write to: ' + configFileAndPath)
+        terminal('\nERROR: Could not write to: ' + config.filename)
         return False
 
 

@@ -37,6 +37,20 @@ Todo:
             <value>Config,project.conf</value>
         </setting>
         <setting>
+            <name>Project Layout Configuration File</name>
+            <key>layoutConfFile</key>
+            <description>The project layout configuration file.</description>
+            <type>list</type>
+            <value>Config,layout.conf</value>
+        </setting>
+        <setting>
+            <name>Project Font Configuration File</name>
+            <key>fontConfFile</key>
+            <description>The project font configuration file.</description>
+            <type>list</type>
+            <value>Config,font.conf</value>
+        </setting>
+        <setting>
             <name>Project Log File</name>
             <key>projLogFile</key>
             <description>The general project log file.</description>
@@ -56,11 +70,11 @@ Todo:
         <sectionID>RpmFiles</sectionID>
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>Place Holder</name>
-            <key>placeHolderFile</key>
-            <description>The name of the file.</description>
-            <type>string</type>
-            <value>None</value>
+            <name>RPM Layout Default File</name>
+            <key>rpmLayoutDefaultFile</key>
+            <description>The name of the default layout file.</description>
+            <type>list</type>
+            <value>config,layout_default.xml</value>
         </setting>
     </section>
     <section>

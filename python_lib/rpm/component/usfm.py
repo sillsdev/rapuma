@@ -112,7 +112,7 @@ class Usfm (Component) :
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
 #
 #        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['text', 'style', 'font', self.renderer]
+        self.usfmManagers = ['text', 'style', 'font', 'layout', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -148,7 +148,6 @@ class Usfm (Component) :
         
         # These elements rely on specific rendering systems
         if self.renderer.lower() == 'xetex' :
-            print self.project.managers
             self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
             self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
         else :
