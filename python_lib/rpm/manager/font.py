@@ -51,12 +51,9 @@ class Font (Manager) :
 
         self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
-        # Create a default font config file if needed
+        # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
-            self.fontConfig  = ConfigObj(getXMLSettings(self.rpmXmlFontConfig))
-            buildConfSection(self.fontConfig, 'GeneralSettings')
             buildConfSection(self.fontConfig, 'Fonts')
-            self.fontConfig['GeneralSettings']
             self.fontConfig.filename = self.project.local.fontConfFile
             writeConfFile(self.fontConfig)
             writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new font config: font.__init__()')

@@ -5,7 +5,7 @@ File: font.xml
 Description:
 This is a component type description for the font manager. It contains default
 information for a font type manager and acts as a template for managers created
-in a type of publication.
+in a type of publication. This information goes in the project configuration.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -14,17 +14,12 @@ Todo:
 
 
 <root>
-    <section>
-        <name>General Settings</name>
-        <sectionID>GeneralSettings</sectionID>
-        <description>General font settings.</description>
-        <setting>
-            <name>Use Font Features</name>
-            <key>useFontFeatures</key>
-            <description>Turn on (or off) all font features.</description>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-    </section>
+    <setting>
+        <name>Use Font Features</name>
+        <key>useFontFeatures</key>
+        <description>Turn on (or off) all font features.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
 </root>
 

@@ -59,6 +59,12 @@ class Xetex (Manager) :
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
 #        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
 #        layoutCopy.merge(macVals)
+
+
+# FIXME: This is dependent on a manager that hasn't been loaded yet. How do we make the
+# managers more independent from one another?
+
+
         self.project.managers['usfm_Layout'].layoutConfig.merge(macVals)
         self.project.managers['usfm_Layout'].layoutConfig.write()
         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
