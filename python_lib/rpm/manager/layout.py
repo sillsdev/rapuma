@@ -39,11 +39,12 @@ class Layout (Manager) :
         super(Layout, self).__init__(project, cfg)
 
         # List the renderers this manager supports
-        renderers                       = ['Xetex']
-        self.cType                      = cType
-        self.manager                    = None
-        self.layoutConfig               = ConfigObj()
-        self.project                    = project
+        self.cType                          = cType
+        self.manager                        = self.cType + '_Layout'
+        self.layoutConfig                   = ConfigObj()
+        self.project                        = project
+        # Overrides
+        self.project.local.layoutConfFile   = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
 
         # Create a new default layout config file if needed
         if not os.path.isfile(self.project.local.layoutConfFile) :
@@ -54,33 +55,9 @@ class Layout (Manager) :
         else :
             self.layoutConfig = ConfigObj(self.project.local.layoutConfFile)
 
-        # Search for renderer to create a layout conf for
-        for m in self.project.projConfig['Managers'].keys() :
-            for r in renderers :
-                if m == cType + '_' + r :
-                    self.manager = m
-
-        if not self.manager :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Renderering manager not found: ' + self.manager)
-
-        # Set values for this manager
-        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macrosTarget               = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        self.macrosSource               = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(self.macrosTarget) :
-            os.makedirs(self.macrosTarget)
-
-        for root, dirs, files in os.walk(self.macrosSource) :
-            for f in files :
-                if not os.path.isfile(os.path.join(self.macrosTarget, f)) :
-                    shutil.copy(os.path.join(self.macrosSource, f), os.path.join(self.project.local.projMacrosFolder, f))
-
-# FIXME: May need to move this stuff out to xetex.py and deprecate this mod
 
 ###############################################################################
-############################ Project Level Functions ##########################
+############################ Manager Level Functions ##########################
 ###############################################################################
 
 

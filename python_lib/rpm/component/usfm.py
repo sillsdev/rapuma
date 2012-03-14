@@ -112,7 +112,7 @@ class Usfm (Component) :
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
 #
 #        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['text', 'style', 'font', self.renderer, 'layout']
+        self.usfmManagers = ['text', 'style', 'font', 'layout', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :

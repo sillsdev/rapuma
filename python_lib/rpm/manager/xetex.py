@@ -55,26 +55,51 @@ class Xetex (Manager) :
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
 
+# FIXME: Start here by getting the layout manager to load if it has to
         # Add (merge) into layout config macro package settings
+        # First be sure the right default layout config file is there
+        # and load the manager if it is not
+#        if not ... :
+#            for m in self.project.projConfig['Managers'].keys() :
+            
+            
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
-#        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
-#        layoutCopy.merge(macVals)
-
-
-# FIXME: This is dependent on a manager that hasn't been loaded yet. How do we make the
-# managers more independent from one another?
-
-
-        self.project.managers['usfm_Layout'].layoutConfig.merge(macVals)
-        self.project.managers['usfm_Layout'].layoutConfig.write()
+        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
+        layoutCopy.merge(macVals)
+        self.project.managers[self.cType + '_Layout'].layoutConfig.merge(macVals)
+        self.project.managers[self.cType + '_Layout'].layoutConfig.write()
         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
-#        if not confObjCompare(layoutCopy, self.project.managers['usfm_Layout'].layoutConfig, self.project.local.projConfFolder) :
-#            self.project.managers['usfm_Layout'].layoutConfig = layoutCopy
+
 
         # Get settings for this component
         self.compSettings = self.project.projConfig['Managers'][self.manager]
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
+
+# FIXME: Add macros for this renderer here
+
+#        # Search for renderer to create a layout conf for
+#        for m in self.project.projConfig['Managers'].keys() :
+#            for r in renderers :
+#                if m == cType + '_' + r :
+#                    self.manager = m
+
+#        if not self.manager :
+#            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Renderering manager not found: ' + self.manager)
+
+#        # Set values for this manager
+#        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
+#        self.macrosTarget               = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+#        self.macrosSource               = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+
+#        # Copy in to the process folder the macro package for this component
+#        if not os.path.isdir(self.macrosTarget) :
+#            os.makedirs(self.macrosTarget)
+
+#        for root, dirs, files in os.walk(self.macrosSource) :
+#            for f in files :
+#                if not os.path.isfile(os.path.join(self.macrosTarget, f)) :
+#                    shutil.copy(os.path.join(self.macrosSource, f), os.path.join(self.project.local.projMacrosFolder, f))
 
 
 ###############################################################################
