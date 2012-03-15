@@ -50,26 +50,27 @@ class Xetex (Manager) :
         self.macroLayoutValuesFile  = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.xFiles                 = {}
 
+# FIXME: There maybe an entry in the config but the object still might not be loaded
+# we should look for the object first, if not there then load it and make an entry if necessary.
+
+        # Add (merge) into layout config macro package settings
+        # First be sure the right default layout config file is there
+        # and load the manager if it is not
+        if 'usfm_Layout' not in self.project.projConfig['Managers'].keys() :
+            self.project.createManager(self.cType, 'layout')
+            
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.macroLayoutValuesFile)
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
 
-# FIXME: Start here by getting the layout manager to load if it has to
-        # Add (merge) into layout config macro package settings
-        # First be sure the right default layout config file is there
-        # and load the manager if it is not
-#        if not ... :
-#            for m in self.project.projConfig['Managers'].keys() :
-            
-            
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
         layoutCopy = ConfigObj(self.project.local.layoutConfFile)
         layoutCopy.merge(macVals)
+        print self.project.managers
         self.project.managers[self.cType + '_Layout'].layoutConfig.merge(macVals)
         self.project.managers[self.cType + '_Layout'].layoutConfig.write()
         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
-
 
         # Get settings for this component
         self.compSettings = self.project.projConfig['Managers'][self.manager]
