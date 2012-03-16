@@ -190,13 +190,22 @@ class Xetex (Manager) :
         '''Create the TeX settings file for this component type.'''
 
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
-        compTypeSettings = os.path.join(self.project.processFolder, compTypeSettingsFileName)
+        compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
-        if not os.path.isfile(compTypeSettings) :
+#        if not os.path.isfile(compTypeSettings) :
+        if os.path.isfile(compTypeSettings) :
             writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
             writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
 
-            # Finish the process
+            # Bring in the settings from the layoutConfig
+            cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
+            for section in cfg.keys() :
+                writeObject.write('# ' + section + '\n')
+                for k, v in cfg[section].iteritems() :
+                    if v == None :
+                        v = ''
+                    writeObject.write(k + ' = ' + v + '\n')
+
             writeObject.close()
             return True
 

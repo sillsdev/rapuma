@@ -110,9 +110,7 @@ class Usfm (Component) :
             self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
-#
-#        self.usfmManagers = ['font', 'style', 'text', self.renderer, 'layout']
-        self.usfmManagers = ['text', 'style', 'font', self.renderer, 'layout']
+        self.usfmManagers = ['text', 'style', 'font', 'layout', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -148,6 +146,7 @@ class Usfm (Component) :
         if self.renderer.lower() == 'xetex' :
             self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
             self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
+            self.project.managers['usfm_Xetex'].makeCompTypeSettingsFile()
         else :
             self.project.writeToLog('ERR', 'Rendering system [' + self.renderer + '] is not supported yet.')
             return
