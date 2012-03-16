@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, shutil
 
 
 # Load the local classes
@@ -50,26 +50,20 @@ class Xetex (Manager) :
         self.macroLayoutValuesFile  = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.xFiles                 = {}
 
-# FIXME: There maybe an entry in the config but the object still might not be loaded
-# we should look for the object first, if not there then load it and make an entry if necessary.
-
-        # Add (merge) into layout config macro package settings
-        # First be sure the right default layout config file is there
-        # and load the manager if it is not
-        if 'usfm_Layout' not in self.project.projConfig['Managers'].keys() :
+        # This manager is dependent on usfm_Layout. Load it if needed.
+        if 'usfm_Layout' not in self.project.managers :
             self.project.createManager(self.cType, 'layout')
-            
+
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.macroLayoutValuesFile)
-        if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
-            self.project.projConfig['Managers'][self.manager] = newSectionSettings
+        newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macroLayoutValuesFile)
+        if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
+            project.managers['usfm_Layout'].layoutConfig = newSectionSettings
 
         macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
         layoutCopy = ConfigObj(self.project.local.layoutConfFile)
         layoutCopy.merge(macVals)
-        print self.project.managers
-        self.project.managers[self.cType + '_Layout'].layoutConfig.merge(macVals)
-        self.project.managers[self.cType + '_Layout'].layoutConfig.write()
+        self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
+        writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
 
         # Get settings for this component
@@ -77,30 +71,19 @@ class Xetex (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-# FIXME: Add macros for this renderer here
+        # Set values for this manager
+        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macrosTarget               = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.macrosSource               = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
 
-#        # Search for renderer to create a layout conf for
-#        for m in self.project.projConfig['Managers'].keys() :
-#            for r in renderers :
-#                if m == cType + '_' + r :
-#                    self.manager = m
+        # Copy in to the process folder the macro package for this component
+        if not os.path.isdir(self.macrosTarget) :
+            os.makedirs(self.macrosTarget)
 
-#        if not self.manager :
-#            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Renderering manager not found: ' + self.manager)
-
-#        # Set values for this manager
-#        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
-#        self.macrosTarget               = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-#        self.macrosSource               = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-
-#        # Copy in to the process folder the macro package for this component
-#        if not os.path.isdir(self.macrosTarget) :
-#            os.makedirs(self.macrosTarget)
-
-#        for root, dirs, files in os.walk(self.macrosSource) :
-#            for f in files :
-#                if not os.path.isfile(os.path.join(self.macrosTarget, f)) :
-#                    shutil.copy(os.path.join(self.macrosSource, f), os.path.join(self.project.local.projMacrosFolder, f))
+        for root, dirs, files in os.walk(self.macrosSource) :
+            for f in files :
+                if not os.path.isfile(os.path.join(self.macrosTarget, f)) :
+                    shutil.copy(os.path.join(self.macrosSource, f), os.path.join(self.project.local.projMacrosFolder, f))
 
 
 ###############################################################################
