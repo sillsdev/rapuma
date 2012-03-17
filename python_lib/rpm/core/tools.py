@@ -138,22 +138,6 @@ def overrideSettings (settings, overrideXML) :
 def writeConfFile (config) :
     '''Generic routin to write out to, or create a config file.'''
 
-#    confObjNew = ConfigObj()
-#    # Parse file and path
-#    configFileAndPath = config.filename
-#    (folderPath, configFile) = os.path.split(configFileAndPath)
-
-#    # Check contents of the existing conf file
-#    if os.path.isfile(configFileAndPath) :
-#        confObjOrg = ConfigObj(configFileAndPath)
-#        config.filename = os.path.join(folderPath, '.' + configFile + '.new')
-#        config.write()
-#        confObjNew = ConfigObj(os.path.join(folderPath, '.' + configFile + '.new'))
-#        confObjNew.filename = configFileAndPath.replace('.new', '')
-#        # If they are the same we don't need to continue
-#        if confObjOrg.__eq__(confObjNew) :
-#            return False
-
     # Build the folder path if needed
     if not os.path.exists(os.path.split(config.filename)[0]) :
         os.makedirs(os.path.split(config.filename)[0])
@@ -227,9 +211,73 @@ def override_section (self, aSection) :
     return self
 
 
+def override_section (self, aSection) :
+    '''Overrides settings by using the XML defaults and then merging those with
+    items in the configobj that match.'''
+
+    # Look for the key and value in object of items created from itself
+    for k, v in self.items() :
+        if k in aSection :
+            if isinstance(v, dict) and isinstance(aSection[k], dict) :
+                v.override(aSection[k])
+            elif not isinstance(v, dict) and not isinstance(aSection[k], dict) :
+                self[k] = aSection[k]
+    # Return the overridden object
+    return self
+
+
 # This will reasign the standard ConfigObj function that works much like ours
 # but not quite what we need for working with XML as one of the inputs.
 Section.override = override_section
+
+
+def makeTexSettingsDict (xmlFile) :
+    '''Create a dictionary object from a layout xml file.'''
+
+
+    if  os.path.exists(xmlFile) :
+        # Read in our XML file
+        doc = ElementTree.parse(xmlFile)
+        # Create an empty dictionary
+        data = {}
+        # Extract the section/key/value data
+        return xmlTexAddSection(data, doc)
+    else :
+        raise IOError, "Can't open " + xmlFile
+
+
+def xmlTexAddSection (data, doc) :
+    '''Adds sections in the XML to dict object that is in memory.  It is made to
+    work with certain tex settings for creating a TeX-specific settings file.
+    It acts only on that object and does not return anything.'''
+
+    # Find all the key and value in a setting
+    sets = doc.findall('setting')
+    for s in sets :
+        val = s.find('value').text
+        # Need to treat lists special but type is not required
+        if s.find('type').text == 'list' :
+            if val :
+                data[s.find('key').text] = val.split(',')
+            else :
+                data[s.find('key').text] = []
+        else :
+            data[s.find('key').text] = val
+
+        data['boolDepend'] = s.find('boolDepend').text
+        data['tex'] = s.find('tex').text
+
+    # Find all the sections then call this same function to grab the keys and
+    # values all the settings in the section
+    sects = doc.findall('section')
+    for s in sects :
+        nd = {}
+        data[s.find('sectionID').text] = nd
+        xmlTexAddSection(nd, s)
+
+
+
+
 
 ###############################################################################
 ################################# Logging routines ############################

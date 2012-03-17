@@ -56,6 +56,7 @@ Todo:
             <key>columnGutterFactor</key>
             <type>integer</type>
             <value>15</value>
+            <tex>\def\ColumnGutterFactor{[v]}</tex>
         </setting>
         <setting>
             <name>USFM TeX Column Shift (mm)</name>
@@ -70,6 +71,8 @@ Todo:
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
+            <tex>\ColumnGutterRuleSkip[v]</tex>
+            <boolDepend>columnGutterRule</boolDepend>
         </setting>
     </section>
     <section>
@@ -249,10 +252,11 @@ Todo:
         </setting>
         <setting>
             <name>USFM TeX Omit Chapter Number (Running Header)</name>
-            <description>Omit the chapter numbers in the running header (RH).   Default = False</description>
+            <description>Omit the chapter numbers in the running header (RH). Default = False</description>
             <key>omitChapterNumber</key>
             <type>boolean</type>
             <value>False</value>
+            <tex>\OmitChapterNumbertrue</tex>
         </setting>
         <setting>
             <name>USFM TeX Omit Book Reference (Running Header)</name>
@@ -483,6 +487,7 @@ Todo:
             <key>watermarkFile</key>
             <type>string</type>
             <value>watermark-draft.pdf</value>
+            <tex></tex>
         </setting>
         <setting>
             <name>USFM TeX Cropmarks</name>

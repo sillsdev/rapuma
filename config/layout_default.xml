@@ -96,6 +96,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>True</value>
+            <tex>\ColumnGutterRuletrue</tex>
         </setting>
     </section>
     <section>
@@ -229,18 +230,20 @@ Todo:
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
-            <name>Custom Page Height</name>
+            <name>Page Height</name>
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
-            <key>customPageHeight</key>
+            <key>pageHeight</key>
             <type>integer</type>
-            <value>None</value>
+            <value>210</value>
+            <tex>\PaperHeight</tex>
         </setting>
         <setting>
-            <name>Custom Page Width</name>
+            <name>Page Width</name>
             <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
-            <key>customPageWidth</key>
+            <key>pageWidth</key>
             <type>integer</type>
-            <value>None</value>
+            <value>148</value>
+            <tex>\PaperWidth</tex>
         </setting>
         <setting>
             <name>Page Size ID Code</name>
@@ -255,6 +258,7 @@ Todo:
             <key>pageNumberBegin</key>
             <type>integer</type>
             <value>None</value>
+            <tex></tex>
         </setting>
     </section>
     <section>
