@@ -241,13 +241,22 @@ def makeTexSettingsDict (xmlFile) :
         # Create an empty dictionary
         data = {}
         # Extract the section/key/value data
-        xmlTexAddSection(data, doc)
+        sects = doc.findall('section')
+        for s in sects :
+            # FIXME: Start here, we want to build up a dict object
+            # that is very flat, just have the setting as a section
+            # and any special tex info under it
+        
+        
+        
+        
+#        xmlTexAddSection(data, doc)
         return data
     else :
         raise IOError, "Can't open " + xmlFile
 
 
-def xmlTexAddSection (data, doc) :
+def xmlTexAddSection (data) :
     '''Adds sections in the XML to dict object that is in memory.  It is made to
     work with certain tex settings for creating a TeX-specific settings file.
     It acts only on that object and does not return anything.'''
@@ -279,11 +288,11 @@ def xmlTexAddSection (data, doc) :
 
     # Find all the sections then call this same function to grab the keys and
     # values all the settings in the section
-    sects = doc.findall('section')
-    for s in sects :
-        nd = {}
-        data[s.find('sectionID').text] = nd
-        xmlTexAddSection(nd, s)
+#    sects = doc.findall('section')
+#    for s in sects :
+#        nd = {}
+#        data[s.find('sectionID').text] = nd
+#        xmlTexAddSection(nd, s)
 
 
 
