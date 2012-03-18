@@ -24,6 +24,7 @@ import codecs, os, sys, fileinput
 from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
+import pprint
 
 ###############################################################################
 ############################ Functions Begin Here #############################
@@ -234,14 +235,14 @@ Section.override = override_section
 def makeTexSettingsDict (xmlFile) :
     '''Create a dictionary object from a layout xml file.'''
 
-
     if  os.path.exists(xmlFile) :
         # Read in our XML file
         doc = ElementTree.parse(xmlFile)
         # Create an empty dictionary
         data = {}
         # Extract the section/key/value data
-        return xmlTexAddSection(data, doc)
+        xmlTexAddSection(data, doc)
+        return data
     else :
         raise IOError, "Can't open " + xmlFile
 
@@ -254,18 +255,27 @@ def xmlTexAddSection (data, doc) :
     # Find all the key and value in a setting
     sets = doc.findall('setting')
     for s in sets :
-        val = s.find('value').text
+#        val = s.find('value').text
+#        key = s.find('key').text
         # Need to treat lists special but type is not required
-        if s.find('type').text == 'list' :
-            if val :
-                data[s.find('key').text] = val.split(',')
-            else :
-                data[s.find('key').text] = []
-        else :
-            data[s.find('key').text] = val
+#        if s.find('type').text == 'list' :
+#            if val :
+#                data[s.find('key').text] = val.split(',')
+#            else :
+#                data[s.find('key').text] = []
+#        else :
+#            data[s.find('key').text] = val
 
-        data['boolDepend'] = s.find('boolDepend').text
-        data['tex'] = s.find('tex').text
+#        print s.find('key').text
+        try :
+            data[s.find('key').text] = {'boolDepend' : s.find('boolDepend').text}
+        except :
+            pass
+
+        try :
+            data[s.find('key').text] = {'tex' : s.find('tex').text}
+        except :
+            pass
 
     # Find all the sections then call this same function to grab the keys and
     # values all the settings in the section

@@ -192,6 +192,14 @@ class Xetex (Manager) :
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
+        # Get the default and TeX macro values and merge them into one dictionary
+        x = makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+        y = makeTexSettingsDict(self.macroLayoutValuesFile)
+        macTexVals = dict(y.items() + x.items())
+        print x
+        print y
+        print macTexVals
+
 #        if not os.path.isfile(compTypeSettings) :
         if os.path.isfile(compTypeSettings) :
             writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
@@ -202,9 +210,15 @@ class Xetex (Manager) :
             for section in cfg.keys() :
                 writeObject.write('# ' + section + '\n')
                 for k, v in cfg[section].iteritems() :
-                    if v == None :
-                        v = ''
-                    writeObject.write(k + ' = ' + v + '\n')
+                    try :
+                        line = macTexVals[section][k]['tex']
+                        if line.find('[v]') :
+                            line = line.replace('[v]', v)
+
+                        print line
+                        writeObject.write(line + '\n')
+                    except :
+                        pass
 
             writeObject.close()
             return True

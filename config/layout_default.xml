@@ -235,7 +235,7 @@ Todo:
             <key>pageHeight</key>
             <type>integer</type>
             <value>210</value>
-            <tex>\PaperHeight</tex>
+            <tex>\PaperHeight{[v]}</tex>
         </setting>
         <setting>
             <name>Page Width</name>
@@ -243,7 +243,7 @@ Todo:
             <key>pageWidth</key>
             <type>integer</type>
             <value>148</value>
-            <tex>\PaperWidth</tex>
+            <tex>\PaperWidth{[v]}</tex>
         </setting>
         <setting>
             <name>Page Size ID Code</name>
@@ -258,7 +258,6 @@ Todo:
             <key>pageNumberBegin</key>
             <type>integer</type>
             <value>None</value>
-            <tex></tex>
         </setting>
     </section>
     <section>
