@@ -75,6 +75,7 @@ Todo:
             <key>titleColumns</key>
             <type>integer</type>
             <value>1</value>
+            <tex>\TitleColumns=[v]</tex>
         </setting>
         <setting>
             <name>Intro Columns</name>
@@ -82,6 +83,7 @@ Todo:
             <key>introColumns</key>
             <type>integer</type>
             <value>1</value>
+            <tex>\IntroColumns=[v]</tex>
         </setting>
         <setting>
             <name>Body Columns</name>
@@ -89,6 +91,7 @@ Todo:
             <key>bodyColumns</key>
             <type>integer</type>
             <value>1</value>
+            <tex>\BodyColumns=[v]</tex>
         </setting>
         <setting>
             <name>Column Gutter Rule</name>
