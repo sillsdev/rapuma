@@ -71,7 +71,7 @@ Todo:
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
-            <tex>\ColumnGutterRuleSkip[v]</tex>
+            <tex>\ColumnGutterRuleSkip=[v]</tex>
             <boolDepend>columnGutterRule</boolDepend>
         </setting>
     </section>

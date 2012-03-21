@@ -196,11 +196,7 @@ class Xetex (Manager) :
         x = makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
         y = makeTexSettingsDict(self.macroLayoutValuesFile)
         macTexVals = dict(y.items() + x.items())
-        print x
-        print y
-        print macTexVals
 
-#        if not os.path.isfile(compTypeSettings) :
         if os.path.isfile(compTypeSettings) :
             writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
             writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
@@ -211,11 +207,10 @@ class Xetex (Manager) :
                 writeObject.write('# ' + section + '\n')
                 for k, v in cfg[section].iteritems() :
                     try :
-                        line = macTexVals[section][k]['tex']
+                        line = macTexVals[k]['tex']
                         if line.find('[v]') :
                             line = line.replace('[v]', v)
 
-                        print line
                         writeObject.write(line + '\n')
                     except :
                         pass

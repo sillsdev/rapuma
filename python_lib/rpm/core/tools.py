@@ -23,6 +23,7 @@
 import codecs, os, sys, fileinput
 from datetime import *
 from xml.etree import ElementTree
+
 from configobj import ConfigObj, Section
 import pprint
 
@@ -241,16 +242,22 @@ def makeTexSettingsDict (xmlFile) :
         # Create an empty dictionary
         data = {}
         # Extract the section/key/value data
-        sects = doc.findall('section')
-        for s in sects :
-            # FIXME: Start here, we want to build up a dict object
-            # that is very flat, just have the setting as a section
-            # and any special tex info under it
-        
-        
-        
-        
-#        xmlTexAddSection(data, doc)
+        thisSection = None; thisTex = None; thisBoolDep = None
+
+        for event, elem in ElementTree.iterparse(xmlFile):
+            if elem.tag == 'setting' :
+                if thisTex or thisBoolDep :
+                    data[thisSection] = {'tex' : thisTex, 'thisBoolDep' : thisBoolDep}
+                thisSection = None
+                thisTex = None
+                thisBoolDep = None
+            if elem.tag == 'key' :
+                thisSection = elem.text
+            elif elem.tag == 'tex' :
+                thisTex = elem.text
+            elif elem.tag == 'boolDepend' :
+                thisBoolDep = elem.text
+
         return data
     else :
         raise IOError, "Can't open " + xmlFile
