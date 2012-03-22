@@ -30,6 +30,7 @@ Todo:
             <key>afterVerseSpaceFactor</key>
             <type>integer</type>
             <value>2</value>
+            <usfmTex>\def\AfterVerseSpaceFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX After Chapter Space Factor</name>
@@ -37,6 +38,7 @@ Todo:
             <key>afterChapterSpaceFactor</key>
             <type>integer</type>
             <value>3</value>
+            <usfmTex>\def\AfterChapterSpaceFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Adorn Verse Number Setting</name>
@@ -44,6 +46,7 @@ Todo:
             <key>adornVerseSetting</key>
             <type>string</type>
             <value></value>
+            <usfmTex></usfmTex>
         </setting>
     </section>
     <section>
@@ -56,7 +59,7 @@ Todo:
             <key>columnGutterFactor</key>
             <type>integer</type>
             <value>15</value>
-            <tex>\def\ColumnGutterFactor{[v]}</tex>
+            <usfmTex>\def\ColumnGutterFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Column Shift (mm)</name>
@@ -71,7 +74,7 @@ Todo:
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
-            <tex>\ColumnGutterRuleSkip=[v]</tex>
+            <usfmTex>\ColumnGutterRuleSkip=[v]</usfmTex>
             <boolDepend>columnGutterRule</boolDepend>
         </setting>
     </section>
@@ -155,7 +158,7 @@ Todo:
             <key>headerPosition</key>
             <type>integer</type>
             <value>0.5</value>
-            <tex>\def\HeaderPosition{[v]}</tex>
+            <usfmTex>\def\HeaderPosition{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Rule Position</name>
@@ -170,7 +173,7 @@ Todo:
             <key>footerPosition</key>
             <type>integer</type>
             <value>0.5</value>
-            <tex>\def\FooterPosition{[v]}</tex>
+            <usfmTex>\def\FooterPosition{[v]}</usfmTex>
         </setting>
     </section>
     <section>
@@ -183,6 +186,7 @@ Todo:
             <key>runningFooterTitleLeft</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFtitleleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Title (Center)</name>
@@ -190,6 +194,7 @@ Todo:
             <key>runningFooterTitleCenter</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFtitlecenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Title (Right)</name>
@@ -197,6 +202,7 @@ Todo:
             <key>runningFooterTitleRight</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFtitleright{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Odd (Left)</name>
@@ -204,6 +210,7 @@ Todo:
             <key>runningFooterOddLeft</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFoddleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Odd (Center)</name>
@@ -211,6 +218,7 @@ Todo:
             <key>runningFooterOddCenter</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFoddcenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Odd (Right)</name>
@@ -218,6 +226,7 @@ Todo:
             <key>runningFooterOddRight</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFoddright{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Even (Left)</name>
@@ -225,6 +234,7 @@ Todo:
             <key>runningFooterEvenLeft</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFevenleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Even (Center)</name>
@@ -232,6 +242,7 @@ Todo:
             <key>runningFooterEvenCenter</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFevencenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Footer Even (Right)</name>
@@ -239,6 +250,7 @@ Todo:
             <key>runningFooterEvenRight</key>
             <type>string</type>
             <value>empty</value>
+            <usfmTex>\def\RFevenright{\[v]}</usfmTex>
         </setting>
     </section>
     <section>
@@ -258,7 +270,7 @@ Todo:
             <key>omitChapterNumber</key>
             <type>boolean</type>
             <value>False</value>
-            <tex>\OmitChapterNumbertrue</tex>
+            <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Omit Book Reference (Running Header)</name>
@@ -273,7 +285,7 @@ Todo:
             <key>runningHeaderTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <tex>\def\RHtitleleft{\[v]}</tex>
+            <usfmTex>\def\RHtitleleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Title (Center)</name>
@@ -281,7 +293,7 @@ Todo:
             <key>runningHeaderTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <tex>\def\RHtitlecenter{\[v]}</tex>
+            <usfmTex>\def\RHtitlecenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Title (Right Side)</name>
@@ -289,7 +301,7 @@ Todo:
             <key>runningHeaderTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <tex>\def\RHtitleright{\[v]}</tex>
+            <usfmTex>\def\RHtitleright{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Odd (Left/Inside Of The Page)</name>
@@ -297,7 +309,7 @@ Todo:
             <key>runningHeaderOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <tex>\def\RHoddleft{\[v]}</tex>
+            <usfmTex>\def\RHoddleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Odd (Center)</name>
@@ -305,7 +317,7 @@ Todo:
             <key>runningHeaderOddCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <tex>\def\RHoddcenter{\[v]}</tex>
+            <usfmTex>\def\RHoddcenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Odd (Right/Outside Of The Page)</name>
@@ -313,7 +325,7 @@ Todo:
             <key>runningHeaderOddRight</key>
             <type>string</type>
             <value>lastref</value>
-            <tex>\def\RHoddright{\[v]}</tex>
+            <usfmTex>\def\RHoddright{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Even (Left/Outside Of The Page)</name>
@@ -321,7 +333,7 @@ Todo:
             <key>runningHeaderEvenLeft</key>
             <type>string</type>
             <value>firstref</value>
-            <tex>\def\RHevenleft{\[v]}</tex>
+            <usfmTex>\def\RHevenleft{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Even (Center)</name>
@@ -329,7 +341,7 @@ Todo:
             <key>runningHeaderEvenCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <tex>\def\RHevencenter{\[v]}</tex>
+            <usfmTex>\def\RHevencenter{\[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Running Header Even (Right/Inside Of The Page)</name>
@@ -337,7 +349,7 @@ Todo:
             <key>runningHeaderEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <tex>\def\RHevenright{\[v]}</tex>
+            <usfmTex>\def\RHevenright{\[v]}</usfmTex>
         </setting>
     </section>
     <section>
@@ -444,7 +456,7 @@ Todo:
             <key>marginUnit</key>
             <type>integer</type>
             <value>10</value>
-            <tex>\MarginUnit=[v]</tex>
+            <usfmTex>\MarginUnit=[v]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Top Margin Factor</name>
@@ -452,7 +464,7 @@ Todo:
             <key>topMarginFactor</key>
             <type>integer</type>
             <value>1.75</value>
-            <tex>\def\TopMarginFactor{[v]}</tex>
+            <usfmTex>\def\TopMarginFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Bottom Margin Factor</name>
@@ -460,7 +472,7 @@ Todo:
             <key>bottomMarginFactor</key>
             <type>integer</type>
             <value>1.12</value>
-            <tex>\def\BottomMarginFactor{[v]}</tex>
+            <usfmTex>\def\BottomMarginFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Side Margin Factor</name>
@@ -468,7 +480,7 @@ Todo:
             <key>sideMarginFactor</key>
             <type>integer</type>
             <value>1.0</value>
-            <tex>\def\SideMarginFactor{[v]}</tex>
+            <usfmTex>\def\SideMarginFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Extra Right Margin</name>
@@ -476,7 +488,7 @@ Todo:
             <key>extraRightMargin</key>
             <type>integer</type>
             <value>0</value>
-            <tex>\ExtraRMargin=[v]</tex>
+            <usfmTex>\ExtraRMargin=[v]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Binding Gutter</name>
@@ -503,7 +515,7 @@ Todo:
             <key>watermarkFile</key>
             <type>string</type>
             <value>watermark-draft.pdf</value>
-            <tex></tex>
+            <usfmTex></usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Cropmarks</name>
@@ -551,7 +563,7 @@ Todo:
             <key>quoteKernAmount</key>
             <type>integer</type>
             <value>0.1</value>
-            <tex>\quotekernamount=[v]</tex>
+            <usfmTex>\quotekernamount=[v]</usfmTex>
         </setting>
     </section>
 </root>

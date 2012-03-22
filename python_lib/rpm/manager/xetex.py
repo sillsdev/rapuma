@@ -207,7 +207,7 @@ class Xetex (Manager) :
                 writeObject.write('# ' + section + '\n')
                 for k, v in cfg[section].iteritems() :
                     try :
-                        line = macTexVals[k]['tex']
+                        line = macTexVals[k]['usfmTex']
                         if line.find('[v]') :
                             line = line.replace('[v]', v)
 
@@ -217,6 +217,36 @@ class Xetex (Manager) :
 
             writeObject.close()
             return True
+
+
+def makeTexSettingsDict (xmlFile) :
+    '''Create a dictionary object from a layout xml file.'''
+
+    if  os.path.exists(xmlFile) :
+        # Read in our XML file
+        doc = ElementTree.parse(xmlFile)
+        # Create an empty dictionary
+        data = {}
+        # Extract the section/key/value data
+        thisSection = None; thisTex = None; thisBoolDep = None
+
+        for event, elem in ElementTree.iterparse(xmlFile):
+            if elem.tag == 'setting' :
+                if thisTex or thisBoolDep :
+                    data[thisSection] = {'usfmTex' : thisTex, 'thisBoolDep' : thisBoolDep}
+                thisSection = None
+                thisTex = None
+                thisBoolDep = None
+            if elem.tag == 'key' :
+                thisSection = elem.text
+            elif elem.tag == 'usfmTex' :
+                thisTex = elem.text
+            elif elem.tag == 'boolDepend' :
+                thisBoolDep = elem.text
+
+        return data
+    else :
+        raise IOError, "Can't open " + xmlFile
 
 
     def makeFontInfoTexFile (self) :

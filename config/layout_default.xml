@@ -63,6 +63,7 @@ Todo:
             <key>chapterVerseSeparator</key>
             <type>string</type>
             <value>\kern.1em:\kern.1em</value>
+            <usfmTex>\def\ChapterVerseSeparator{[v]}</usfmTex>
         </setting>
     </section>
     <section>
@@ -75,7 +76,7 @@ Todo:
             <key>titleColumns</key>
             <type>integer</type>
             <value>1</value>
-            <tex>\TitleColumns=[v]</tex>
+            <usfmTex>\TitleColumns=[v]</usfmTex>
         </setting>
         <setting>
             <name>Intro Columns</name>
@@ -83,7 +84,7 @@ Todo:
             <key>introColumns</key>
             <type>integer</type>
             <value>1</value>
-            <tex>\IntroColumns=[v]</tex>
+            <usfmTex>\IntroColumns=[v]</usfmTex>
         </setting>
         <setting>
             <name>Body Columns</name>
@@ -91,7 +92,7 @@ Todo:
             <key>bodyColumns</key>
             <type>integer</type>
             <value>1</value>
-            <tex>\BodyColumns=[v]</tex>
+            <usfmTex>\BodyColumns=[v]</usfmTex>
         </setting>
         <setting>
             <name>Column Gutter Rule</name>
@@ -99,7 +100,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>True</value>
-            <tex>\ColumnGutterRuletrue</tex>
+            <usfmTex>\ColumnGutterRuletrue</usfmTex>
         </setting>
     </section>
     <section>
@@ -238,7 +239,7 @@ Todo:
             <key>pageHeight</key>
             <type>integer</type>
             <value>210</value>
-            <tex>\PaperHeight=[v]</tex>
+            <usfmTex>\PaperHeight=[v]</usfmTex>
         </setting>
         <setting>
             <name>Page Width</name>
@@ -246,7 +247,7 @@ Todo:
             <key>pageWidth</key>
             <type>integer</type>
             <value>148</value>
-            <tex>\PaperWidth=[v]</tex>
+            <usfmTex>\PaperWidth=[v]</usfmTex>
         </setting>
         <setting>
             <name>Page Size ID Code</name>
