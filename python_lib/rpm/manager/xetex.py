@@ -67,9 +67,12 @@ class Xetex (Manager) :
         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
 
         # Get settings for this component
-        self.compSettings = self.project.projConfig['Managers'][self.manager]
-        for k, v in self.compSettings.iteritems() :
-            setattr(self, k, v)
+        self.managerSettings = self.project.projConfig['Managers'][self.manager]
+        for k, v in self.managerSettings.iteritems() :
+            if v == 'True' or v == 'False' :
+                setattr(self, k, str2bool(v))
+            else :
+                setattr(self, k, v)
 
         # Set values for this manager
         self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
@@ -192,12 +195,14 @@ class Xetex (Manager) :
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
-        # Get the default and TeX macro values and merge them into one dictionary
-        x = makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
-        y = makeTexSettingsDict(self.macroLayoutValuesFile)
-        macTexVals = dict(y.items() + x.items())
+        # Do not overwrite unless the flag is set to True
+        if not os.path.isfile(compTypeSettings) or self.xetexSettingsFlag :
 
-        if os.path.isfile(compTypeSettings) :
+            # Get the default and TeX macro values and merge them into one dictionary
+            x = makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+            y = makeTexSettingsDict(self.macroLayoutValuesFile)
+            macTexVals = dict(y.items() + x.items())
+
             writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
             writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
 
@@ -216,6 +221,9 @@ class Xetex (Manager) :
                         pass
 
             writeObject.close()
+            # Set flag to false
+            self.project.projConfig['Managers'][self.manager]['xetexSettingsFlag'] = False
+            writeConfFile(self.project.projConfig)
             return True
 
 

@@ -26,5 +26,12 @@ Todo:
         <type>string</type>
         <value>usfmTex</value>
     </setting>
+    <setting>
+        <name>Make XeTeX Settings Flag</name>
+        <key>xetexSettingsFlag</key>
+        <description>Anytime a change is made to the configuration this should be set to True. When the file is remade it is set to False.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
 </root>
 
