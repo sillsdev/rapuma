@@ -67,6 +67,7 @@ Todo:
             <key>columnShift</key>
             <type>integer</type>
             <value>0</value>
+            <usfmTex>[warning contextual output]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Column Gutter Rule Skip (mm)</name>
@@ -94,6 +95,7 @@ Todo:
             <key>lineSpacingFactor</key>
             <type>integer</type>
             <value>1.1</value>
+            <usfmTex>\def\LineSpacingFactor{[v]}</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Vertical Space Factor</name>
@@ -101,6 +103,7 @@ Todo:
             <key>verticalSpaceFactor</key>
             <type>integer</type>
             <value>1</value>
+            <usfmTex>\def\VerticalSpaceFactor{[v]}</usfmTex>
         </setting>
     </section>
     <section>

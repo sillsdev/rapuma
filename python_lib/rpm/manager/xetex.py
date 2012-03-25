@@ -220,6 +220,19 @@ class Xetex (Manager) :
                     except :
                         pass
 
+# FIXME: add unique stuff on the end of the file
+#            \catcode`@=11
+#            \def\makedigitsother{\m@kedigitsother}
+#            \def\makedigitsletters{\m@kedigitsletters}
+#            \catcode `@=12
+#            \vfuzz=2.3pt
+
+# FIXME: How do we deal with the font settings?
+#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
+#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
+#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
+#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
+
             writeObject.close()
             # Set flag to false
             self.project.projConfig['Managers'][self.manager]['xetexSettingsFlag'] = False

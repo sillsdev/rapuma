@@ -160,6 +160,8 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
+            <boolDepend>paragraphedFootnotes</boolDepend>
+            <usfmTex>\ParagraphedNotes{f}</usfmTex>
         </setting>
         <setting>
             <name>Paragraphed Crossrefs</name>
@@ -167,6 +169,8 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
+            <boolDepend>paragraphedCrossrefs</boolDepend>
+            <usfmTex>\ParagraphedNotes{f}</usfmTex>
         </setting>
     </section>
     <section>
