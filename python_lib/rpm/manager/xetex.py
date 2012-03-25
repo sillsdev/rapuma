@@ -233,6 +233,9 @@ class Xetex (Manager) :
 #            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
 #            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
 
+            if os.path.isfile(self.project.illustration.libPath) :
+                writeObject.write('\PicPath={' + self.project.illustration.libPath + '}\n')
+
             writeObject.close()
             # Set flag to false
             self.project.projConfig['Managers'][self.manager]['xetexSettingsFlag'] = False

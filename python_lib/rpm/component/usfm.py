@@ -110,7 +110,7 @@ class Usfm (Component) :
             self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
-        self.usfmManagers = ['text', 'style', 'font', 'layout', self.renderer]
+        self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :

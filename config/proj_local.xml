@@ -51,6 +51,13 @@ Todo:
             <value>Config,font.conf</value>
         </setting>
         <setting>
+            <name>Project Illustrations Configuration File</name>
+            <key>illustrationConfFile</key>
+            <description>The project illustrations configuration file.</description>
+            <type>list</type>
+            <value>Config,illustration.conf</value>
+        </setting>
+        <setting>
             <name>Project Log File</name>
             <key>projLogFile</key>
             <description>The general project log file.</description>
@@ -82,9 +89,23 @@ Todo:
         <sectionID>UserFolders</sectionID>
         <description>User folders that are used in the system are stored here.</description>
         <setting>
-            <name>Place Holder Folder</name>
-            <key>placeHolderFolder</key>
-            <description>Just an entry to keep something in this section for now.</description>
+            <name>Illustrations Library Path</name>
+            <key>libIllustrations</key>
+            <description>Path to the local user illustrations library.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Fonts Library Path</name>
+            <key>libFonts</key>
+            <description>Path to the local user fonts library.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+        <setting>
+            <name>Scripts Library Path</name>
+            <key>libScripts</key>
+            <description>Path to the local user scripts library.</description>
             <type>string</type>
             <value>None</value>
         </setting>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: font.xml
+Description:
+This is a component type description for the font manager. It contains default
+information for a font type manager and acts as a template for managers created
+in a type of publication. This information goes in the project configuration.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Use Illustrations</name>
+        <key>useIllustrations</key>
+        <description>Turn on (or off) the use of illustrations in this project.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+</root>
+
