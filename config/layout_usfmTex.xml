@@ -448,6 +448,15 @@ Todo:
             <type>string</type>
             <value>None</value>
         </setting>
+        <setting>
+            <name>USFM TeX PicPath</name>
+            <description>The path to the project illustration files.</description>
+            <key>picPath</key>
+            <type>string</type>
+            <value>None</value>
+            <boolDepend>useIllustrations</boolDepend>
+            <usfmTex>\PicPath={[path:projIllustrationsFolder]}</usfmTex>
+        </setting>
     </section>
     <section>
         <name>Margins</name>

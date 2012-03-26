@@ -156,6 +156,13 @@ Todo:
             <type>string</type>
             <value>Hyphenation</value>
         </setting>
+        <setting>
+            <name>Project Illustrations Folder</name>
+            <key>projIllustrationsFolder</key>
+            <description>The folder where project illustration files are kept.</description>
+            <type>string</type>
+            <value>Illustrations</value>
+        </setting>
     </section>
     <section>
         <name>RPM Folders</name>

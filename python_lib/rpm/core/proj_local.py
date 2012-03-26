@@ -56,7 +56,7 @@ class ProjLocal (object) :
                 home = getattr(self, 'rpmHome')
 
             for key in lc[t] :
-                # For extra credit, if we are looking at file, set the name here
+                # For extra credit, if we are looking at files, set the name here
                 if t[-5:].lower() == 'files' :
                     if type(lc[t][key]) == list :
                         setattr(self, key + 'Name', lc[t][key][len(lc[t][key])-1])

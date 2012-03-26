@@ -195,12 +195,14 @@ class Xetex (Manager) :
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
+        self.xetexSettingsFlag = True
+
         # Do not overwrite unless the flag is set to True
         if not os.path.isfile(compTypeSettings) or self.xetexSettingsFlag :
 
             # Get the default and TeX macro values and merge them into one dictionary
-            x = makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
-            y = makeTexSettingsDict(self.macroLayoutValuesFile)
+            x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+            y = self.makeTexSettingsDict(self.macroLayoutValuesFile)
             macTexVals = dict(y.items() + x.items())
 
             writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
@@ -213,28 +215,25 @@ class Xetex (Manager) :
                 for k, v in cfg[section].iteritems() :
                     try :
                         line = macTexVals[k]['usfmTex']
-                        if line.find('[v]') :
+                        if line.find('[path:') > -1 :
+                            line = self.getLocalPath(line)
+                        elif line.find('[font:') > -1 :
+                            line = self.getFontCommand(line)
+                        elif line.find('[v]') > -1 :
                             line = line.replace('[v]', v)
 
                         writeObject.write(line + '\n')
                     except :
                         pass
 
-# FIXME: add unique stuff on the end of the file
+            writeObject.write('# Special commands\n')
+
+# FIXME: Output unique stuff on the end of the file
 #            \catcode`@=11
 #            \def\makedigitsother{\m@kedigitsother}
 #            \def\makedigitsletters{\m@kedigitsletters}
 #            \catcode `@=12
 #            \vfuzz=2.3pt
-
-# FIXME: How do we deal with the font settings?
-#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
-#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
-#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
-#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
-
-            if os.path.isfile(self.project.illustration.libPath) :
-                writeObject.write('\PicPath={' + self.project.illustration.libPath + '}\n')
 
             writeObject.close()
             # Set flag to false
@@ -243,34 +242,64 @@ class Xetex (Manager) :
             return True
 
 
-def makeTexSettingsDict (xmlFile) :
-    '''Create a dictionary object from a layout xml file.'''
+    def getLocalPath (self, line) :
+        '''Parse a settings line to look for a local path. Return the actual
+        path inside the line.'''
 
-    if  os.path.exists(xmlFile) :
-        # Read in our XML file
-        doc = ElementTree.parse(xmlFile)
-        # Create an empty dictionary
-        data = {}
-        # Extract the section/key/value data
-        thisSection = None; thisTex = None; thisBoolDep = None
+        # Determine what the path var is
+        
+        
+        # Look up the real value of the var
+        
+        
+        # Replace and return
+        return line
 
-        for event, elem in ElementTree.iterparse(xmlFile):
-            if elem.tag == 'setting' :
-                if thisTex or thisBoolDep :
-                    data[thisSection] = {'usfmTex' : thisTex, 'thisBoolDep' : thisBoolDep}
-                thisSection = None
-                thisTex = None
-                thisBoolDep = None
-            if elem.tag == 'key' :
-                thisSection = elem.text
-            elif elem.tag == 'usfmTex' :
-                thisTex = elem.text
-            elif elem.tag == 'boolDepend' :
-                thisBoolDep = elem.text
 
-        return data
-    else :
-        raise IOError, "Can't open " + xmlFile
+    def getFontCommand (self, line) :
+        '''parse a settings line to look for a specific font command. Return
+        the line with the font command inserted.'''
+        
+        # Pull out the inserted font command
+        
+        # Return something that looks like this:
+#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
+#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
+#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
+#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
+        # Rework the makeFontInfoTexFile() function to get the info needed to make this happen.
+    
+        return line
+
+
+    def makeTexSettingsDict (self, xmlFile) :
+        '''Create a dictionary object from a layout xml file.'''
+
+        if  os.path.exists(xmlFile) :
+            # Read in our XML file
+            doc = ElementTree.parse(xmlFile)
+            # Create an empty dictionary
+            data = {}
+            # Extract the section/key/value data
+            thisSection = None; thisTex = None; thisBoolDep = None
+
+            for event, elem in ElementTree.iterparse(xmlFile):
+                if elem.tag == 'setting' :
+                    if thisTex or thisBoolDep :
+                        data[thisSection] = {'usfmTex' : thisTex, 'thisBoolDep' : thisBoolDep}
+                    thisSection = None
+                    thisTex = None
+                    thisBoolDep = None
+                if elem.tag == 'key' :
+                    thisSection = elem.text
+                elif elem.tag == 'usfmTex' :
+                    thisTex = elem.text
+                elif elem.tag == 'boolDepend' :
+                    thisBoolDep = elem.text
+
+            return data
+        else :
+            raise IOError, "Can't open " + xmlFile
 
 
     def makeFontInfoTexFile (self) :
