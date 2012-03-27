@@ -63,11 +63,19 @@ Todo:
         </setting>
         <setting>
             <name>USFM TeX Column Shift (mm)</name>
-            <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  This is a contextual setting depending on how many columns are being used.  It will output both the \SingleColumnShift and \ColumnShift commands in the TeX settings file.  This is a usfmTex setting and is not part of the standard ptx2pdf macro package.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
+            <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  Use this if more than one column is being used.  It will output both the \columnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
             <key>columnShift</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>[warning contextual output]</usfmTex>
+            <usfmTex>\columnshift=[v]</usfmTex>
+        </setting>
+        <setting>
+            <name>USFM TeX Column Shift (mm)</name>
+            <description>Single column shift will shift a colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  It will output the \singlecolumnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
+            <key>singleColumnShift</key>
+            <type>integer</type>
+            <value>0</value>
+            <usfmTex>\singlecolumnshift=[v]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Column Gutter Rule Skip (mm)</name>
@@ -76,7 +84,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <usfmTex>\ColumnGutterRuleSkip=[v]</usfmTex>
-            <boolDepend>columnGutterRule</boolDepend>
+            <boolDepend>Columns:columnGutterRule</boolDepend>
         </setting>
     </section>
     <section>
@@ -88,6 +96,7 @@ Todo:
             <key>fontSizeUnit</key>
             <type>integer</type>
             <value>1</value>
+            <usfmTex>\FontSizeUnit=[v]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Line Spacing Factor</name>
@@ -118,6 +127,14 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>USFM TeX Define Footnote Rule</name>
+            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
+            <key>defineFootnoteRule</key>
+            <type>string</type>
+            <value>None</value>
+            <usfmTex>\def\footnoterule{[v]}</usfmTex>
+        </setting>
+        <setting>
             <name>USFM TeX Auto Caller Number Characters</name>
             <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
             <key>autoCallerMaxCharacterNumbers</key>
@@ -143,13 +160,6 @@ Todo:
         <name>Numeric Callers (Footnotes)</name>
         <sectionID>NumericCallers</sectionID>
         <description>Set to true to use numeric callers on footnotes instead of alphabetic callers.   Default = FalseseNumericCallersFootnotes = false</description>
-        <setting>
-            <name>USFM TeX Define Footnote Rule</name>
-            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
-            <key>defineFootnoteRule</key>
-            <type>string</type>
-            <value>None</value>
-        </setting>
     </section>
     <section>
         <name>Header and Footer</name>
@@ -396,8 +406,8 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>Ilustrations</name>
-        <sectionID>Ilustrations</sectionID>
+        <name>Illustrations</name>
+        <sectionID>Illustrations</sectionID>
         <description>Illustration resources</description>
         <setting>
             <name>USFM TeX Figure Placeholders</name>
@@ -454,7 +464,7 @@ Todo:
             <key>picPath</key>
             <type>string</type>
             <value>None</value>
-            <boolDepend>useIllustrations</boolDepend>
+            <boolDepend>Illustrations:useIllustrations</boolDepend>
             <usfmTex>\PicPath={[path:projIllustrationsFolder]}</usfmTex>
         </setting>
     </section>

@@ -100,6 +100,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>True</value>
+            <boolDepend>Columns:columnGutterRule</boolDepend>
             <usfmTex>\ColumnGutterRuletrue</usfmTex>
         </setting>
     </section>
@@ -160,7 +161,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>paragraphedFootnotes</boolDepend>
+            <boolDepend>NumericCallers:paragraphedFootnotes</boolDepend>
             <usfmTex>\ParagraphedNotes{f}</usfmTex>
         </setting>
         <setting>
@@ -169,8 +170,8 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>paragraphedCrossrefs</boolDepend>
-            <usfmTex>\ParagraphedNotes{f}</usfmTex>
+            <boolDepend>NumericCallers:paragraphedCrossrefs</boolDepend>
+            <usfmTex>\ParagraphedNotes{x}</usfmTex>
         </setting>
     </section>
     <section>
@@ -222,8 +223,8 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>Ilustrations</name>
-        <sectionID>Ilustrations</sectionID>
+        <name>Illustrations</name>
+        <sectionID>Illustrations</sectionID>
         <description>Illustration resources</description>
         <setting>
             <name>Use Illustrations</name>

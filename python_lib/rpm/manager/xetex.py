@@ -213,27 +213,30 @@ class Xetex (Manager) :
             for section in cfg.keys() :
                 writeObject.write('# ' + section + '\n')
                 for k, v in cfg[section].iteritems() :
-                    try :
+                    if testForSetting(macTexVals, k, 'usfmTex') :
                         line = macTexVals[k]['usfmTex']
-                        if line.find('[path:') > -1 :
-                            line = self.getLocalPath(line)
-                        elif line.find('[font:') > -1 :
-                            line = self.getFontCommand(line)
-                        elif line.find('[v]') > -1 :
-                            line = line.replace('[v]', v)
+                        # If there is a boolDepend then we don't need to output
+                        if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
+                            continue
+                        else :
+                            if self.hasPlaceHolder(line) :
+                                (ht, hk) = self.getPlaceHolder(line)
+                                if ht == 'v' :
+                                    line = self.insertValue(line, v)
+                                elif ht == 'path' :
+                                    pth = getattr(self.project.local, hk)
+                                    line = self.insertValue(line, pth)
 
                         writeObject.write(line + '\n')
-                    except :
-                        pass
 
+            # Add special custom commands (may want to parameterize these at some point)
             writeObject.write('# Special commands\n')
+            writeObject.write('\catcode`@=11\n')
+            writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
+            writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
+            writeObject.write('\catcode `@=12\n')
+            writeObject.write('\\vfuzz=2.3pt\n')
 
-# FIXME: Output unique stuff on the end of the file
-#            \catcode`@=11
-#            \def\makedigitsother{\m@kedigitsother}
-#            \def\makedigitsletters{\m@kedigitsletters}
-#            \catcode `@=12
-#            \vfuzz=2.3pt
 
             writeObject.close()
             # Set flag to false
@@ -241,19 +244,41 @@ class Xetex (Manager) :
             writeConfFile(self.project.projConfig)
             return True
 
+    def rtnBoolDepend (self, cfg, bd) :
+        '''Return the boolean value of a boolDepend target. This assumes that
+        the format is section:key, if it ever becomes different, this breaks.'''
 
-    def getLocalPath (self, line) :
-        '''Parse a settings line to look for a local path. Return the actual
-        path inside the line.'''
+        bdl = bd.split(':')
+        return cfg[bdl[0]][bdl[1]]
 
-        # Determine what the path var is
-        
-        
-        # Look up the real value of the var
-        
-        
-        # Replace and return
-        return line
+
+    def hasPlaceHolder (self, line) :
+        '''Return True if this line has a data place holder in it.'''
+
+        # If things get more complicated we may need to beef this up a bit
+        if line.find('[') > -1 and line.find(']') > -1 :
+            return True
+
+
+    def getPlaceHolder (self, line) :
+        '''Return place holder type and a key if one exists from a TeX setting line.'''
+
+        begin = line.find('[')
+        end = line.find(']') + 1
+        cnts = line[begin + 1:end - 1]
+        if cnts.find(':') > -1 :
+            return cnts.split(':')
+        else :
+            return cnts, ''
+
+
+    def insertValue (self, line, v) :
+        '''Insert a value where a place holder is.'''
+
+        begin = line.find('[')
+        end = line.find(']') + 1
+        ph = line[begin:end]
+        return line.replace(ph, v)
 
 
     def getFontCommand (self, line) :
@@ -286,7 +311,7 @@ class Xetex (Manager) :
             for event, elem in ElementTree.iterparse(xmlFile):
                 if elem.tag == 'setting' :
                     if thisTex or thisBoolDep :
-                        data[thisSection] = {'usfmTex' : thisTex, 'thisBoolDep' : thisBoolDep}
+                        data[thisSection] = {'usfmTex' : thisTex, 'boolDepend' : thisBoolDep}
                     thisSection = None
                     thisTex = None
                     thisBoolDep = None
