@@ -141,7 +141,7 @@ class Usfm (Component) :
         else :
             self.project.writeToLog('ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
             return
-        
+
         # These elements rely on specific rendering systems
         if self.renderer.lower() == 'xetex' :
             self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')

@@ -91,7 +91,8 @@ class Font (Manager) :
         # See if this is already in the config
         if not testForSetting(self.fontConfig, 'Fonts') :
             buildConfSection (self.fontConfig, 'Fonts')
-            
+
+
         record = False
         if not testForSetting(self.fontConfig['Fonts'], font) :
             buildConfSection (self.fontConfig['Fonts'], font)
@@ -100,7 +101,6 @@ class Font (Manager) :
         if record :
             # Inject the font info into the project format config file.
             fInfo = getXMLSettings(fontInfo)
-            
             self.fontConfig['Fonts'][font] = fInfo.dict()
 
             # Record the font with the component type that called it

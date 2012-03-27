@@ -226,6 +226,9 @@ class Xetex (Manager) :
                                 elif ht == 'path' :
                                     pth = getattr(self.project.local, hk)
                                     line = self.insertValue(line, pth)
+                                elif ht == 'font' :
+                                    fnt = self.getFontCommand(ht)
+                                    line = self.insertValue(line, fnt)
 
                         writeObject.write(line + '\n')
 
@@ -243,6 +246,41 @@ class Xetex (Manager) :
             self.project.projConfig['Managers'][self.manager]['xetexSettingsFlag'] = False
             writeConfFile(self.project.projConfig)
             return True
+
+
+    def getFontCommand (self, fntKey) :
+        '''Return the font settings for a given font key.'''
+
+        sCType = self.cType.capitalize()
+        for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
+            fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
+            if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
+                features = fInfo['FontInformation']['features']
+
+                for tf in fInfo :
+                    if tf[:8] == 'Typeface' :
+                        print tf
+                        # Make all our line components (More will need to be added)
+                        fpath       = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
+                        featureString = ''
+                        for i in features :
+                            featureString += ':' + i
+
+                        print fpath + featureString
+
+
+
+        return fntKey
+        
+        # Pull out the inserted font command
+        
+        # Return something that looks like this:
+#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
+#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
+#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
+#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
+        # Rework the makeFontInfoTexFile() function to get the info needed to make this happen.
+
 
     def rtnBoolDepend (self, cfg, bd) :
         '''Return the boolean value of a boolDepend target. This assumes that
@@ -279,22 +317,6 @@ class Xetex (Manager) :
         end = line.find(']') + 1
         ph = line[begin:end]
         return line.replace(ph, v)
-
-
-    def getFontCommand (self, line) :
-        '''parse a settings line to look for a specific font command. Return
-        the line with the font command inserted.'''
-        
-        # Pull out the inserted font command
-        
-        # Return something that looks like this:
-#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
-#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
-#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
-#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
-        # Rework the makeFontInfoTexFile() function to get the info needed to make this happen.
-    
-        return line
 
 
     def makeTexSettingsDict (self, xmlFile) :
