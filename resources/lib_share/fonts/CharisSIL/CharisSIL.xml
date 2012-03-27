@@ -250,7 +250,7 @@ Todo:
     </section>
     <section>
         <name>Typeface Bold Italic</name>
-        <sectionID>TypefaceBoldItalic</sectionID>
+        <sectionID>TypefaceBolditalic</sectionID>
         <description>Settings for the bold italic typeface font.</description>
         <setting>
             <name>File</name>

@@ -227,7 +227,8 @@ class Xetex (Manager) :
                                     pth = getattr(self.project.local, hk)
                                     line = self.insertValue(line, pth)
                                 elif ht == 'font' :
-                                    fnt = self.getFontCommand(ht)
+                                    fnt = self.getFontCommand(hk)
+                                    print hk, fnt
                                     line = self.insertValue(line, fnt)
 
                         writeObject.write(line + '\n')
@@ -251,6 +252,7 @@ class Xetex (Manager) :
     def getFontCommand (self, fntKey) :
         '''Return the font settings for a given font key.'''
 
+        typeface = 'Typeface' + fntKey.capitalize()
         sCType = self.cType.capitalize()
         for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
             fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
@@ -258,19 +260,15 @@ class Xetex (Manager) :
                 features = fInfo['FontInformation']['features']
 
                 for tf in fInfo :
-                    if tf[:8] == 'Typeface' :
-                        print tf
-                        # Make all our line components (More will need to be added)
-                        fpath       = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
+# Not understanding here
+                    print type(tf['texMapping'])
+                    if tf == typeface or fntKey in tf['texMapping'] :
+                        fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
                         featureString = ''
                         for i in features :
                             featureString += ':' + i
 
-                        print fpath + featureString
-
-
-
-        return fntKey
+                        return fpath + featureString
         
         # Pull out the inserted font command
         
