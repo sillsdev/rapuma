@@ -126,6 +126,13 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def addFontComponent (self, font, cType)
+        '''Add a font to a component.'''
+
+        # FIXME: Start working here
+        pass
+
+
     def renderComponent (self, cid) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
