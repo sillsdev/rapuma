@@ -115,6 +115,7 @@ class Font (Manager) :
                     self.project.projConfig['CompTypes'][compType]['installedFonts'] = addToList(fontList, font)
 
             writeConfFile(self.fontConfig)
+            writeConfFile(self.project.projConfig)
             writeToLog(self.project.local, self.project.userConfig, 'LOG', font + ' font setup information added to project config')
             return True
 

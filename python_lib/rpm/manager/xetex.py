@@ -195,58 +195,57 @@ class Xetex (Manager) :
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
-        self.xetexSettingsFlag = True
+        # Return now if the file is there and it is newer than the conf file
+        if os.path.isfile(compTypeSettings) :
+            tFileTime = 0
+            tFileTime = os.path.getctime(compTypeSettings)
+            cFileTiem = os.path.getctime(self.project.local.projConfFile)
+            if tFileTime > cFileTiem :
+                return
 
-        # Do not overwrite unless the flag is set to True
-        if not os.path.isfile(compTypeSettings) or self.xetexSettingsFlag :
+        # Get the default and TeX macro values and merge them into one dictionary
+        x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+        y = self.makeTexSettingsDict(self.macroLayoutValuesFile)
+        macTexVals = dict(y.items() + x.items())
 
-            # Get the default and TeX macro values and merge them into one dictionary
-            x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
-            y = self.makeTexSettingsDict(self.macroLayoutValuesFile)
-            macTexVals = dict(y.items() + x.items())
+        writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
+        writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
 
-            writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
-            writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
+        # Bring in the settings from the layoutConfig
+        cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
+        for section in cfg.keys() :
+            writeObject.write('# ' + section + '\n')
+            for k, v in cfg[section].iteritems() :
+                if testForSetting(macTexVals, k, 'usfmTex') :
+                    line = macTexVals[k]['usfmTex']
+                    # If there is a boolDepend then we don't need to output
+                    if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
+                        continue
+                    else :
+                        if self.hasPlaceHolder(line) :
+                            (ht, hk) = self.getPlaceHolder(line)
+                            if ht == 'v' :
+                                line = self.insertValue(line, v)
+                            elif ht == 'path' :
+                                pth = getattr(self.project.local, hk)
+                                line = self.insertValue(line, pth)
+                            elif ht == 'font' :
+                                fnt = self.getFontCommand(hk)
+                                line = self.insertValue(line, fnt)
 
-            # Bring in the settings from the layoutConfig
-            cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
-            for section in cfg.keys() :
-                writeObject.write('# ' + section + '\n')
-                for k, v in cfg[section].iteritems() :
-                    if testForSetting(macTexVals, k, 'usfmTex') :
-                        line = macTexVals[k]['usfmTex']
-                        # If there is a boolDepend then we don't need to output
-                        if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
-                            continue
-                        else :
-                            if self.hasPlaceHolder(line) :
-                                (ht, hk) = self.getPlaceHolder(line)
-                                if ht == 'v' :
-                                    line = self.insertValue(line, v)
-                                elif ht == 'path' :
-                                    pth = getattr(self.project.local, hk)
-                                    line = self.insertValue(line, pth)
-                                elif ht == 'font' :
-                                    fnt = self.getFontCommand(hk)
-                                    print hk, fnt
-                                    line = self.insertValue(line, fnt)
+                    writeObject.write(line + '\n')
 
-                        writeObject.write(line + '\n')
+        # Add special custom commands (may want to parameterize these at some point)
+        writeObject.write('# Special commands\n')
+        writeObject.write('\catcode`@=11\n')
+        writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
+        writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
+        writeObject.write('\catcode `@=12\n')
+        writeObject.write('\\vfuzz=2.3pt\n')
 
-            # Add special custom commands (may want to parameterize these at some point)
-            writeObject.write('# Special commands\n')
-            writeObject.write('\catcode`@=11\n')
-            writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
-            writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
-            writeObject.write('\catcode `@=12\n')
-            writeObject.write('\\vfuzz=2.3pt\n')
-
-
-            writeObject.close()
-            # Set flag to false
-            self.project.projConfig['Managers'][self.manager]['xetexSettingsFlag'] = False
-            writeConfFile(self.project.projConfig)
-            return True
+        # End here
+        writeObject.close()
+        return True
 
 
     def getFontCommand (self, fntKey) :
@@ -258,26 +257,34 @@ class Xetex (Manager) :
             fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
             if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
                 features = fInfo['FontInformation']['features']
+                for tf in fInfo.keys() :
+                    try :
+                        if fntKey in fInfo[tf]['texMapping'] :
+                            fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
 
-                for tf in fInfo :
-# Not understanding here
-                    print type(tf['texMapping'])
-                    if tf == typeface or fntKey in tf['texMapping'] :
-                        fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
-                        featureString = ''
-                        for i in features :
-                            featureString += ':' + i
+                            return '[' + fpath + ']/' + featureString
+                    except :
+                        continue
 
-                        return fpath + featureString
-        
-        # Pull out the inserted font command
-        
-        # Return something that looks like this:
-#            \def\regular{"[../Fonts/CharisSIL/CharisSILR.ttf]/GR"}
-#            \def\bold{"[../Fonts/CharisSIL/CharisSILB.ttf]/GR"}
-#            \def\italic{"[../Fonts/CharisSIL/CharisSILI.ttf]/GR"}
-#            \def\bolditalic{"[../Fonts/CharisSIL/CharisSILBI.ttf]/GR"}
-        # Rework the makeFontInfoTexFile() function to get the info needed to make this happen.
+# FIXME: Implement this for projects that need more than one font for a component type
+#            else :
+#                writeObject.write('\n# These are special use fonts for this type of component.\n')
+#                features = fInfo['FontInformation']['features']
+#                for tf in fInfo :
+#                    if tf[:8] == 'Typeface' :
+#                        # Make all our line components (More will need to be added)
+#                        startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
+#                        fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
+#                        endDef      = "}\n"
+#                        featureString = ''
+#                        for i in features :
+#                            featureString += ':' + i
+
+#                        writeObject.write(startDef + fpath + featureString + endDef)
+
 
 
     def rtnBoolDepend (self, cfg, bd) :
