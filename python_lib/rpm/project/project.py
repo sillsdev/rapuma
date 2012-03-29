@@ -126,11 +126,14 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def addFontComponent (self, font, cType)
+    def addFontComponent (self, font, cType) :
         '''Add a font to a component.'''
 
         # FIXME: Start working here
-        pass
+        print cType
+#        self.project.managers['usfm_Text']installFont()
+#        recordFont()
+        
 
 
     def renderComponent (self, cid) :
