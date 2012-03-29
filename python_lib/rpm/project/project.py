@@ -126,14 +126,14 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def addFontComponent (self, font, cType) :
+    def addComponentFont (self, font, cType) :
         '''Add a font to a component.'''
 
-        # FIXME: Start working here
-        print cType
-#        self.project.managers['usfm_Text']installFont()
-#        recordFont()
-        
+        # Call on the font manager to install the font we want for this component
+        self.createManager(cType, 'font')
+        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
+        self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
+
 
 
     def renderComponent (self, cid) :
@@ -151,28 +151,50 @@ class Project (object) :
         
         # Otherwise, create a new one and return it
         cfg = self.projConfig['Components'][cid]
-        ctype = cfg['type']
-        module = __import__(ctype)
-        compobj = getattr(module, ctype.capitalize())(self, cfg)
+        cType = cfg['type']
+        module = __import__(cType)
+        compobj = getattr(module, cType.capitalize())(self, cfg)
         self.components[cid] = compobj
 
         return compobj
 
 
-    def addComponent (self, cid, ctype) :
+    def addComponent (self, cid, cType) :
         '''This will add a component to the object we created 
         above in createComponent().'''
+
+        # First test to see if the compType is already listed
+        self.addComponentType(cType)
 
         if not testForSetting(self.projConfig, 'Components', cid) :
             buildConfSection(self.projConfig, 'Components')
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
-            self.projConfig['Components'][cid]['type'] = ctype
+            self.projConfig['Components'][cid]['type'] = cType
             writeConfFile(self.projConfig)
             writeToLog(self.local, self.userConfig, 'LOG', 'Write out to config: project.addManager()')
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
             writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')
+
+
+    def addComponentType (self, cType) :
+        '''Add (register) a component type to the config if it 
+        is not there already.'''
+        
+        cType = cType.capitalize()
+        # Build the comp type config section
+        if not testForSetting(self.projConfig, 'CompTypes', cType) :
+            buildConfSection(self.projConfig, 'CompTypes')
+            buildConfSection(self.projConfig['CompTypes'], cType)
+
+        # Get persistant values from the config if there are any
+        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][cType], os.path.join(self.local.rpmConfigFolder, 'usfm.xml'))
+        if newSectionSettings != self.projConfig['CompTypes'][cType] :
+            self.projConfig['CompTypes'][cType] = newSectionSettings
+            # Save the setting rightaway
+            writeConfFile(self.projConfig)
+
 
 ###############################################################################
 ############################ System Level Functions ###########################

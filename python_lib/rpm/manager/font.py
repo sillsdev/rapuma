@@ -63,6 +63,8 @@ class Font (Manager) :
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings
+            # Save the setting rightaway
+            writeConfFile(self.project.projConfig)
 
         self.compSettings = self.project.projConfig['Managers'][manager]
 
@@ -75,7 +77,7 @@ class Font (Manager) :
 ###############################################################################
 
 
-    def recordFont (self, font, manager, compType) :
+    def recordFont (self, font, cType) :
         '''Check for the exsitance of a font in the font conf file.
         If there is one, return, if not add it.'''
 
@@ -104,15 +106,15 @@ class Font (Manager) :
             self.fontConfig['Fonts'][font] = fInfo.dict()
 
             # Record the font with the component type that called it
-            if not self.project.projConfig['CompTypes'][compType]['primaryFont'] :
-                self.project.projConfig['CompTypes'][compType]['primaryFont'] = font
+            if not self.project.projConfig['CompTypes'][cType]['primaryFont'] :
+                self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
 
-            if len(self.project.projConfig['CompTypes'][compType]['installedFonts']) == 0 :
-                self.project.projConfig['CompTypes'][compType]['installedFonts'] = [font]
+            if len(self.project.projConfig['CompTypes'][cType]['installedFonts']) == 0 :
+                self.project.projConfig['CompTypes'][cType]['installedFonts'] = [font]
             else :
-                fontList = self.project.projConfig['CompTypes'][compType]['installedFonts']
+                fontList = self.project.projConfig['CompTypes'][cType]['installedFonts']
                 if fontList != [font] :
-                    self.project.projConfig['CompTypes'][compType]['installedFonts'] = addToList(fontList, font)
+                    self.project.projConfig['CompTypes'][cType]['installedFonts'] = addToList(fontList, font)
 
             writeConfFile(self.fontConfig)
             writeConfFile(self.project.projConfig)
@@ -123,10 +125,10 @@ class Font (Manager) :
             return False
 
 
-    def installFont (self, font, manager, compType) :
+    def installFont (self, font, cType) :
         '''Install (copy) a font into a project.'''
 
-        for font in self.project.projConfig['CompTypes'][compType]['installedFonts'] :
+        for font in self.project.projConfig['CompTypes'][cType]['installedFonts'] :
             fontInfo = self.fontConfig['Fonts'][font]
             # Make the font family folder for this typeface
             fontFamilyFolder = os.path.join(self.project.local.projFontsFolder, fontInfo['FontInformation']['fontFolder'])

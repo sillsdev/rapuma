@@ -281,7 +281,7 @@ def userArguments (args) :
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
             if args['component_font'] :
-                aProject.addFontComponent(args['component_font'], args['component_type'])
+                aProject.addComponentFont(args['component_font'], args['component_type'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     else:

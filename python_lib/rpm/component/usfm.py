@@ -93,8 +93,11 @@ class Usfm (Component) :
         newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes']['Usfm'], os.path.join(self.project.local.rpmConfigFolder, 'usfm.xml'))
         if newSectionSettings != self.project.projConfig['CompTypes']['Usfm'] :
             self.project.projConfig['CompTypes']['Usfm'] = newSectionSettings
+            # Save the setting rightaway
+            writeConfFile(self.project.projConfig)
 
         self.compSettings = self.project.projConfig['CompTypes']['Usfm']
+
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -144,8 +147,8 @@ class Usfm (Component) :
 
         # These elements rely on specific rendering systems
         if self.renderer.lower() == 'xetex' :
-            self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'usfm_Font', 'Usfm')
-            self.project.managers['usfm_Font'].installFont(self.primaryFont, 'usfm_Font', 'Usfm')
+            self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'Usfm')
+            self.project.managers['usfm_Font'].installFont(self.primaryFont, 'Usfm')
             self.project.managers['usfm_Xetex'].makeCompTypeSettingsFile()
         else :
             self.project.writeToLog('ERR', 'Rendering system [' + self.renderer + '] is not supported yet.')
