@@ -114,46 +114,6 @@ Todo:
             <value>1</value>
             <usfmTex>\def\VerticalSpaceFactor{[v]}</usfmTex>
         </setting>
-        <setting>
-            <name>USFM TeX Font Command (Regular)</name>
-            <description>TeX Font command for the regular font.</description>
-            <key>fontCommandRegular</key>
-            <type>string</type>
-            <value>None</value>
-            <usfmTex>\def\regular{"[font:regular]"}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Font Command (bold)</name>
-            <description>TeX Font command for the bold font.</description>
-            <key>fontCommandBold</key>
-            <type>string</type>
-            <value>None</value>
-            <usfmTex>\def\bold{"[font:bold]"}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Font Command (italic)</name>
-            <description>TeX Font command for the italic font.</description>
-            <key>fontCommandItalic</key>
-            <type>string</type>
-            <value>None</value>
-            <usfmTex>\def\italic{"[font:italic]"}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Font Command (bolditalic)</name>
-            <description>TeX Font command for the bold-italic font.</description>
-            <key>fontCommandBoldItalic</key>
-            <type>string</type>
-            <value>None</value>
-            <usfmTex>\def\bolditalic{"[font:bolditalic]"}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Axillary Font Command (Regular)</name>
-            <description>TeX Font command for the regular font.</description>
-            <key>fontAuxCommandRegular</key>
-            <type>string</type>
-            <value>None</value>
-            <usfmTex>\def\auxregularone{"[font:regular]"}</usfmTex>
-        </setting>
     </section>
     <section>
         <name>Footnotes</name>

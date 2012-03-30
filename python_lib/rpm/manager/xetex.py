@@ -198,10 +198,11 @@ class Xetex (Manager) :
         # Return now if the file is there and it is newer than the conf file
         if os.path.isfile(compTypeSettings) :
             tFileTime = 0
-            tFileTime = os.path.getctime(compTypeSettings)
-            cFileTiem = os.path.getctime(self.project.local.projConfFile)
-#            if tFileTime > cFileTiem :
-#                return
+            tFileTime = int(os.path.getctime(compTypeSettings))
+            cFileTime = int(os.path.getctime(self.project.local.projConfFile))
+            fFileTime = int(os.path.getctime(self.project.local.fontConfFile))
+            if tFileTime > fFileTime and tFileTime > cFileTime :
+                return
 
         # Get the default and TeX macro values and merge them into one dictionary
         x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
@@ -214,7 +215,7 @@ class Xetex (Manager) :
         # Bring in the settings from the layoutConfig
         cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
         for section in cfg.keys() :
-            writeObject.write('# ' + section + '\n')
+            writeObject.write('\n# ' + section + '\n')
             for k, v in cfg[section].iteritems() :
                 if testForSetting(macTexVals, k, 'usfmTex') :
                     line = macTexVals[k]['usfmTex']
@@ -229,15 +230,62 @@ class Xetex (Manager) :
                             elif ht == 'path' :
                                 pth = getattr(self.project.local, hk)
                                 line = self.insertValue(line, pth)
-                            elif ht == 'font' :
-                                fnt = self.getFontCommand(hk)
-                                print fnt
-                                line = self.insertValue(line, fnt)
 
                     writeObject.write(line + '\n')
 
+        # Add all the font def commands
+        writeObject.write('\n# Font Definitions\n')
+        fpath = ''
+        featureString = ''
+        for f in self.project.projConfig['CompTypes'][self.cType.capitalize()]['installedFonts'] :
+            fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
+            features = fInfo['FontInformation']['features']
+            # Create the primary fonts that will be used with TeX
+            if self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont'] == f :
+                writeObject.write('\n# These are normal use fonts for this type of component.\n')
+                features = fInfo['FontInformation']['features']
+                for tf in fInfo :
+                    if tf[:8] == 'Typeface' :
+                        tmc = 0
+                        for tm in fInfo[tf]['texMapping'] :
+                            startDef    = '\\def\\' + fInfo[tf]['texMapping'][tmc] + '{'
+                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file']) + "]\""
+                            endDef      = "}\n"
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
+
+                            modsString = ''
+                            for m in fInfo[tf]['modify'] :
+                                modsString += ':' + m
+
+                            tmc +=1
+                            writeObject.write(startDef + fpath + featureString + modsString + endDef)
+
+            else :
+                writeObject.write('\n# These are normal use fonts for this type of component.\n')
+                features = fInfo['FontInformation']['features']
+                for tf in fInfo :
+                    if tf[:8] == 'Typeface' :
+                        tmc = 0
+                        for tm in fInfo[tf]['texMapping'] :
+                            name = fInfo[tf]['name'].lower().replace(' ', '')
+                            startDef    = '\\def\\' + name + fInfo[tf]['texMapping'][tmc] + '{'
+                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file']) + "]\""
+                            endDef      = "}\n"
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
+
+                            modsString = ''
+                            for m in fInfo[tf]['modify'] :
+                                modsString += ':' + m
+
+                            tmc +=1
+                            writeObject.write(startDef + fpath + featureString + modsString + endDef)
+
         # Add special custom commands (may want to parameterize these at some point)
-        writeObject.write('# Special commands\n')
+        writeObject.write('\n# Special commands\n')
         writeObject.write('\catcode`@=11\n')
         writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
         writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
@@ -247,47 +295,6 @@ class Xetex (Manager) :
         # End here
         writeObject.close()
         return True
-
-
-# FIXME: Something is wrong with the way this trys to work
-# need a better way to get the primary font to the right tex commands
-# and then shuffle everything else to aux font defs
-
-    def getFontCommand (self, fntKey) :
-        '''Return the font settings for a given font key.'''
-
-        typeface = 'Typeface' + fntKey.capitalize()
-        sCType = self.cType.capitalize()
-        for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
-            fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
-            features = fInfo['FontInformation']['features']
-            if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
-                for tf in fInfo.keys() :
-                    try :
-                        if fntKey in fInfo[tf]['texMapping'] :
-                            fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
-                            featureString = ''
-                            for i in features :
-                                featureString += ':' + i
-
-#                            return '[' + fpath + ']/' + featureString
-                    except :
-                        continue
-
-            else :
-                for tf in fInfo.keys() :
-                    try :
-                        if fntKey in fInfo[tf]['texMapping'] :
-                            fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
-                            featureString = ''
-                            for i in features :
-                                featureString += ':' + i
-
-#                            return '[' + fpath + ']/' + featureString
-                    except :
-                        continue
-
-        return '[' + fpath + ']/' + featureString
 
 
     def rtnBoolDepend (self, cfg, bd) :
