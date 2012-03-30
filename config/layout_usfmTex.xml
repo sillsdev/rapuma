@@ -146,6 +146,14 @@ Todo:
             <value>None</value>
             <usfmTex>\def\bolditalic{"[font:bolditalic]"}</usfmTex>
         </setting>
+        <setting>
+            <name>USFM TeX Axillary Font Command (Regular)</name>
+            <description>TeX Font command for the regular font.</description>
+            <key>fontAuxCommandRegular</key>
+            <type>string</type>
+            <value>None</value>
+            <usfmTex>\def\auxregularone{"[font:regular]"}</usfmTex>
+        </setting>
     </section>
     <section>
         <name>Footnotes</name>

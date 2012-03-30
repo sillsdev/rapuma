@@ -200,8 +200,8 @@ class Xetex (Manager) :
             tFileTime = 0
             tFileTime = os.path.getctime(compTypeSettings)
             cFileTiem = os.path.getctime(self.project.local.projConfFile)
-            if tFileTime > cFileTiem :
-                return
+#            if tFileTime > cFileTiem :
+#                return
 
         # Get the default and TeX macro values and merge them into one dictionary
         x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
@@ -231,6 +231,7 @@ class Xetex (Manager) :
                                 line = self.insertValue(line, pth)
                             elif ht == 'font' :
                                 fnt = self.getFontCommand(hk)
+                                print fnt
                                 line = self.insertValue(line, fnt)
 
                     writeObject.write(line + '\n')
@@ -248,6 +249,10 @@ class Xetex (Manager) :
         return True
 
 
+# FIXME: Something is wrong with the way this trys to work
+# need a better way to get the primary font to the right tex commands
+# and then shuffle everything else to aux font defs
+
     def getFontCommand (self, fntKey) :
         '''Return the font settings for a given font key.'''
 
@@ -255,8 +260,8 @@ class Xetex (Manager) :
         sCType = self.cType.capitalize()
         for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
             fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
+            features = fInfo['FontInformation']['features']
             if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
-                features = fInfo['FontInformation']['features']
                 for tf in fInfo.keys() :
                     try :
                         if fntKey in fInfo[tf]['texMapping'] :
@@ -265,26 +270,24 @@ class Xetex (Manager) :
                             for i in features :
                                 featureString += ':' + i
 
-                            return '[' + fpath + ']/' + featureString
+#                            return '[' + fpath + ']/' + featureString
                     except :
                         continue
 
-# FIXME: Implement this for projects that need more than one font for a component type
-#            else :
-#                writeObject.write('\n# These are special use fonts for this type of component.\n')
-#                features = fInfo['FontInformation']['features']
-#                for tf in fInfo :
-#                    if tf[:8] == 'Typeface' :
-#                        # Make all our line components (More will need to be added)
-#                        startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
-#                        fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
-#                        endDef      = "}\n"
-#                        featureString = ''
-#                        for i in features :
-#                            featureString += ':' + i
+            else :
+                for tf in fInfo.keys() :
+                    try :
+                        if fntKey in fInfo[tf]['texMapping'] :
+                            fpath = os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file'])
+                            featureString = ''
+                            for i in features :
+                                featureString += ':' + i
 
-#                        writeObject.write(startDef + fpath + featureString + endDef)
+#                            return '[' + fpath + ']/' + featureString
+                    except :
+                        continue
 
+        return '[' + fpath + ']/' + featureString
 
 
     def rtnBoolDepend (self, cfg, bd) :
