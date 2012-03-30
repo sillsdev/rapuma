@@ -39,7 +39,7 @@ Todo:
         <key>primaryFont</key>
         <description>The primary font used for rendering component text.</description>
         <type>string</type>
-        <value>CharisSIL</value>
+        <value></value>
     </setting>
     <setting>
         <name>Installed fonts</name>

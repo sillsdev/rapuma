@@ -126,7 +126,9 @@ class Font (Manager) :
 
 
     def installFont (self, font, cType) :
-        '''Install (copy) a font into a project.'''
+        '''Install (copy) a font into a project. This needs to take place
+        after the font has been recorded in the project configuration file.'''
+
 
         for font in self.project.projConfig['CompTypes'][cType]['installedFonts'] :
             fontInfo = self.fontConfig['Fonts'][font]
@@ -135,6 +137,7 @@ class Font (Manager) :
             if not os.path.isdir(fontFamilyFolder) :
                 os.makedirs(fontFamilyFolder)
 
+            # Copy in all the files
             self.copyInFont(fontInfo)
 
         return True

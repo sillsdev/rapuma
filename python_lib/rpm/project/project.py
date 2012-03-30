@@ -131,9 +131,8 @@ class Project (object) :
 
         # Call on the font manager to install the font we want for this component
         self.createManager(cType, 'font')
-        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
         self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
-
+        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
 
 
     def renderComponent (self, cid) :

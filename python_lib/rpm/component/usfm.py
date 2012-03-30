@@ -84,20 +84,11 @@ class Usfm (Component) :
         self.project = project
         self.cid = ''
 
-        # Build the comp type config section
-        if not testForSetting(self.project.projConfig, 'CompTypes', 'Usfm') :
-            buildConfSection(self.project.projConfig, 'CompTypes')
-            buildConfSection(self.project.projConfig['CompTypes'], 'Usfm')
-            
-        # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes']['Usfm'], os.path.join(self.project.local.rpmConfigFolder, 'usfm.xml'))
-        if newSectionSettings != self.project.projConfig['CompTypes']['Usfm'] :
-            self.project.projConfig['CompTypes']['Usfm'] = newSectionSettings
-            # Save the setting rightaway
-            writeConfFile(self.project.projConfig)
+        # Check to see if this component type has been added to the 
+        # proj config already
+        self.project.addComponentType('Usfm')
 
         self.compSettings = self.project.projConfig['CompTypes']['Usfm']
-
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
