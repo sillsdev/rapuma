@@ -131,7 +131,7 @@ class Usfm (Component) :
         # The following rely on specific editing systems
         if self.sourceEditor.lower() == 'paratext' :
             self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
-            self.project.managers['usfm_Style'].installPTStyles()
+#            self.project.managers['usfm_Style'].installPTStyles()
         else :
             self.project.writeToLog('ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
             return

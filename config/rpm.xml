@@ -73,6 +73,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Custom Macros Collection Path</name>
+            <key>macros</key>
+            <description>The full path to where macros are kept on this system that the user would like to access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 
