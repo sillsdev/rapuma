@@ -94,7 +94,6 @@ class Font (Manager) :
         if not testForSetting(self.fontConfig, 'Fonts') :
             buildConfSection (self.fontConfig, 'Fonts')
 
-
         record = False
         if not testForSetting(self.fontConfig['Fonts'], font) :
             buildConfSection (self.fontConfig['Fonts'], font)

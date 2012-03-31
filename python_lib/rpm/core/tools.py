@@ -279,7 +279,7 @@ def writeToLog (local, uc, code, msg, mod = None) :
         try :
             if not os.path.isfile(local.projLogFile) or os.path.getsize(local.projLogFile) == 0 :
                 writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
-                writeObject.write('RPM event log file created: ' + ts + '\n')
+                writeObject.write('RPM event log file created: ' + tStamp() + '\n')
                 writeObject.close()
 
             # Now log the event to the top of the log file using preAppend().

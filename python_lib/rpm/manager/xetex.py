@@ -74,25 +74,9 @@ class Xetex (Manager) :
             else :
                 setattr(self, k, v)
 
-        # Set values for this manager
-        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macrosTarget               = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        self.macrosSource               = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(self.macrosTarget) :
-            os.makedirs(self.macrosTarget)
-
-        for root, dirs, files in os.walk(self.macrosSource) :
-            for f in files :
-                if not os.path.isfile(os.path.join(self.macrosTarget, f)) :
-                    shutil.copy(os.path.join(self.macrosSource, f), os.path.join(self.project.local.projMacrosFolder, f))
-
-
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
-
 
     def run (self, cid) :
         '''This will render a component using the XeTeX rendering enging.'''
@@ -102,43 +86,69 @@ class Xetex (Manager) :
         # current component with the XeTeX renderer.
 
         # We can consolidate information here for files this manager needs to make
-        #               ID   pType  tType          Location                FileName
-        self.xFiles = { 1 : ['mac', 'input',       'projMacrosFolder',     self.macroPackage + '.tex',     'Macro link file'], 
-                        2 : ['fnt', 'input',       'projProcessFolder',    'fonts.tex',                    'Font control file'], 
-                        3 : ['set', 'input',       'projProcessFolder',    self.cType + '_xetex.tex',      'XeTeX main settings file'], 
-                        4 : ['set', 'input',       'projProcessFolder',    self.cType + '_xetex-ext.tex',  'XeTeX extention settings file'], 
-                        5 : ['set', 'stylesheet',  'projProcessFolder',    self.cType + '.sty',            'Primary component type styles'], 
-                        6 : ['sty', 'stylesheet',  'projProcessFolder',    'custom.sty',                   'Custom project styles (from ParaTExt)'], 
-                        7 : ['sty', 'stylesheet',  'projProcessFolder',    cid + '.sty',                   'Component style override'], 
-                        8 : ['sty', 'input',       'projHyphenationFolder','hyphenation.tex',              'XeTeX hyphenation data file'], 
-                        9 : ['mac', 'input',       'projMacrosFolder',     'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
-                       10 : ['non', 'ptxfile',     'projTextFolder',       cid + '.usfm',                  'Component text file'],
-                       11 : ['pro', 'input',       'projProcessFolder',    cid + '.tex',                   'XeTeX component processing commands'],
+        #   ID   pType  tType          Location                 FileName                                                        Description
+        self.xFiles = { 
+            1 : ['mac', 'input',       'projMacrosFolder',      os.path.join(self.macroPackage, self.macroPackage + '.tex'),    'Macro link file'], 
+            2 : ['set', 'input',       'projProcessFolder',     'xetex_settings_' + self.cType + '.tex',                        'XeTeX main settings file'], 
+            3 : ['set', 'input',       'projProcessFolder',     self.cType + '_xetex-ext.tex',                                  'XeTeX extention settings file'], 
+            4 : ['set', 'stylesheet',  'projProcessFolder',     self.cType + '.sty',                                            'Primary component type styles'], 
+            5 : ['sty', 'stylesheet',  'projProcessFolder',     'custom.sty',                                                   'Custom project styles (from ParaTExt)'], 
+            6 : ['sty', 'stylesheet',  'projProcessFolder',     cid + '.sty',                                                   'Component style override'], 
+            7 : ['sty', 'input',       'projHyphenationFolder', 'hyphenation.tex',                                              'XeTeX hyphenation data file'], 
+            8 : ['mac', 'input',       'projMacrosFolder',      'ptxplus-marginalverses.tex',                                   'Marginal verses extention macro'],
+            9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                                                  'Component text file'],
+           10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                                                   'XeTeX component processing commands'],
                         }
 
-        # Create the above files in the order they are listed
-        l = len(self.xFiles)
-        c = 0
-        while c < l :
-            c +=1
-            path = os.path.join(getattr(self.project.local, self.xFiles[c][2]), self.xFiles[c][3])
-            if not os.path.isfile(path) :
-                if self.xFiles[c][0] == 'mac' :
-                    continue
-                elif self.xFiles[c][0] == 'fnt' :
-                    continue
-                elif self.xFiles[c][0] == 'set' :
-                    continue
-                elif self.xFiles[c][0] == 'sty' :
-                    continue
-                elif self.xFiles[c][0] == 'pro' :
-                    continue
-                elif self.xFiles[c][0] == 'non' :
-                    continue
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[c][0] + '] not supported')
+        # Add in some supporting files for the files we will be generating
+        pFont = self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont']
+        self.project.managers[self.cType + '_Font'].recordFont(pFont, self.cType.capitalize())
+        self.project.managers[self.cType + '_Font'].installFont(pFont, self.cType.capitalize())
 
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[c][4])
+        # Create the above files in the order they are listed
+        for r in self.xFiles :
+            path = os.path.join(getattr(self.project.local, self.xFiles[r][2]), self.xFiles[r][3])
+            if not os.path.isfile(path) :
+                if self.xFiles[r][0] == 'mac' :
+                    self.copyInMacros()
+                    continue
+
+                elif self.xFiles[r][0] == 'set' :
+                    self.makeTexSettingsFile()
+                    self.makeTexControlFile(cid)
+                    continue
+
+                elif self.xFiles[r][0] == 'sty' :
+                    continue
+
+                elif self.xFiles[r][0] == 'pro' :
+                    continue
+
+                elif self.xFiles[r][0] == 'non' :
+                    continue
+
+                else :
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[r][0] + '] not supported')
+
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
+
+
+    def copyInMacros (self) :
+        '''Copy in the right macro set for this component and renderer combination.'''
+
+        self.macroPackage   = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macrosTarget   = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.macrosSource   = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+
+        # Copy in to the process folder the macro package for this component
+        if not os.path.isdir(self.macrosTarget) :
+            os.makedirs(self.macrosTarget)
+
+        for root, dirs, files in os.walk(self.macrosSource) :
+            for f in files :
+                fTarget = os.path.join(self.macrosTarget, f)
+                if not os.path.isfile(fTarget) :
+                    shutil.copy(os.path.join(self.macrosSource, f), fTarget)
 
 
     def makeTexControlFile (self, cid) :
@@ -154,34 +164,29 @@ class Xetex (Manager) :
                     6 : self.xFiles[6], 
                     7 : self.xFiles[7], 
                     8 : self.xFiles[8], 
-                    9 : self.xFiles[9],
-                   10 : self.xFiles[10] }
+                    9 : self.xFiles[9] }
 
         # Create the control file 
-        cidTex = os.path.join(getattr(self.project, self.xFiles[11][2]), self.xFiles[11][3])
+        cidTex = os.path.join(getattr(self.project.local, self.xFiles[10][2]), self.xFiles[10][3])
 
-        if not os.path.isfile(cidTex) :
+# FIXME: For testing
+#        if not os.path.isfile(cidTex) :
+        if 1 + 1 == 2 :
             writeObject = codecs.open(cidTex, "w", encoding='utf_8')
             writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
-            # We allow for a number of different types of lines to
-            # be created for this file. Most lines are in three parts
-            # a top cookie, bottom cookie and a cream filling :-)
-            l = len(pieces)
-            c = 1
-            while c <= l :
-                filling = os.path.join(getattr(self.project, pieces[c][1]), pieces[c][2])
-                if pieces[c][0] == 'input' :
-                    if os.path.isfile(filling) :
-                        writeObject.write('\\' + pieces[c][0] + ' \"' + filling + '\"\n')
-                elif pieces[c][0] in ['stylesheet', 'ptxfile'] :
-                    if os.path.isfile(filling) :
-                        writeObject.write('\\' + pieces[c][0] + ' {' + filling + '}\n')
-                elif pieces[c][0] == 'command' :
-                    writeObject.write('\\' + pieces[c][0] + '\n')
+            # We allow for a number of different types of lines
+            for r in pieces :
+                filePath = os.path.join(getattr(self.project.local, pieces[r][2]), pieces[r][3])
+                if pieces[r][1] == 'input' :
+                    if os.path.isfile(filePath) :
+                        writeObject.write('\\' + pieces[r][1] + ' \"' + filePath + '\"\n')
+                elif pieces[r][1] in ['stylesheet', 'ptxfile'] :
+                    if os.path.isfile(filePath) :
+                        writeObject.write('\\' + pieces[r][1] + '{' + filePath + '}\n')
+                elif pieces[r][1] == 'command' :
+                    writeObject.write('\\' + pieces[r][1] + '\n')
                 else :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[c][0])
-
-                c +=1
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[r][0])
 
             # Finish the process
             writeObject.write('\\bye\n')
@@ -189,7 +194,7 @@ class Xetex (Manager) :
             return True
 
 
-    def makeCompTypeSettingsFile (self) :
+    def makeTexSettingsFile (self) :
         '''Create the TeX settings file for this component type.'''
 
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'

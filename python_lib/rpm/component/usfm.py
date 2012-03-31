@@ -136,15 +136,6 @@ class Usfm (Component) :
             self.project.writeToLog('ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
             return
 
-        # These elements rely on specific rendering systems
-        if self.renderer.lower() == 'xetex' :
-            self.project.managers['usfm_Font'].recordFont(self.primaryFont, 'Usfm')
-            self.project.managers['usfm_Font'].installFont(self.primaryFont, 'Usfm')
-            self.project.managers['usfm_Xetex'].makeCompTypeSettingsFile()
-        else :
-            self.project.writeToLog('ERR', 'Rendering system [' + self.renderer + '] is not supported yet.')
-            return
-
         # Run any preprocess checks or conversions
         
         # Run any illustration processes needed
@@ -153,11 +144,6 @@ class Usfm (Component) :
 
         # Run the renderer as specified in the users config to produce the output
         self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
-
-
-
-
-
 
 
 
