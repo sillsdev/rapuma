@@ -108,8 +108,6 @@ class Xetex (Manager) :
         self.project.managers[self.cType + '_Font'].recordFont(pFont, self.cType.capitalize())
         self.project.managers[self.cType + '_Font'].installFont(pFont, self.cType.capitalize())
 
-# FIXME: Start here, something is wrong with the way this works, or doesn't
-
         # Create the above files in the order they are listed
         for r in self.xFiles :
             path = os.path.join(getattr(self.project.local, self.xFiles[r][2]), self.xFiles[r][3])
@@ -121,18 +119,16 @@ class Xetex (Manager) :
                 elif self.xFiles[r][0] == 'set' :
                     self.makeTexSettingsFile()
                     self.makeTexExtentionsFile()
-                    self.makeTexControlFile(cid)
                     # Add the custom (extention) macros
                     continue
 
                 elif self.xFiles[r][0] == 'sty' :
                     self.project.managers[self.cType + '_Style'].installPTStyles()
-                    # FIXME: Currently this is being created in the Usfm compType
-                    # Do we really want it there?
                     # Add the other custom styles here
                     continue
 
                 elif self.xFiles[r][0] == 'pro' :
+                    self.makeTexControlFile(cid)
                     continue
 
                 elif self.xFiles[r][0] == 'non' :
@@ -202,32 +198,26 @@ class Xetex (Manager) :
         # Create the control file 
         cidTex = os.path.join(getattr(self.project.local, self.xFiles[10][2]), self.xFiles[10][3])
 
-# FIXME: For testing
-#        if not os.path.isfile(cidTex) :
-        if 1 + 1 == 2 :
-            print 'hi!'
-            writeObject = codecs.open(cidTex, "w", encoding='utf_8')
-            writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
-            # We allow for a number of different types of lines
-            for r in pieces :
-                filePath = os.path.join(getattr(self.project.local, pieces[r][2]), pieces[r][3])
-                print filePath
-                if pieces[r][1] == 'input' :
-                    if os.path.isfile(filePath) :
-                        writeObject.write('\\' + pieces[r][1] + ' \"' + filePath + '\"\n')
-                elif pieces[r][1] in ['stylesheet', 'ptxfile'] :
-                    if os.path.isfile(filePath) :
-                        print 'zzz', filePath
-                        writeObject.write('\\' + pieces[r][1] + '{' + filePath + '}\n')
-                elif pieces[r][1] == 'command' :
-                    writeObject.write('\\' + pieces[r][1] + '\n')
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[r][0])
+        writeObject = codecs.open(cidTex, "w", encoding='utf_8')
+        writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
+        # We allow for a number of different types of lines
+        for r in pieces :
+            filePath = os.path.join(getattr(self.project.local, pieces[r][2]), pieces[r][3])
+            if pieces[r][1] == 'input' :
+                if os.path.isfile(filePath) :
+                    writeObject.write('\\' + pieces[r][1] + ' \"' + filePath + '\"\n')
+            elif pieces[r][1] in ['stylesheet', 'ptxfile'] :
+                if os.path.isfile(filePath) :
+                    writeObject.write('\\' + pieces[r][1] + '{' + filePath + '}\n')
+            elif pieces[r][1] == 'command' :
+                writeObject.write('\\' + pieces[r][1] + '\n')
+            else :
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[r][0])
 
-            # Finish the process
-            writeObject.write('\\bye\n')
-            writeObject.close()
-            return True
+        # Finish the process
+        writeObject.write('\\bye\n')
+        writeObject.close()
+        return True
 
 
     def makeTexSettingsFile (self) :
