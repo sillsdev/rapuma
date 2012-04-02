@@ -126,15 +126,6 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def addComponentFont (self, font, cType) :
-        '''Add a font to a component.'''
-
-        # Call on the font manager to install the font we want for this component
-        self.createManager(cType, 'font')
-        self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
-        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
-
-
     def renderComponent (self, cid) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
@@ -163,15 +154,21 @@ class Project (object) :
         above in createComponent().'''
 
         # First test to see if the compType is already listed
-        self.addComponentType(cType)
+#        self.addComponentType(cType)
 
         if not testForSetting(self.projConfig, 'Components', cid) :
             buildConfSection(self.projConfig, 'Components')
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
             self.projConfig['Components'][cid]['type'] = cType
+            # This will load the component type manager and put
+            # a lot of different settings into the proj config
+            cfg = self.projConfig['Components'][cid]
+            module = __import__(cType)
+            compobj = getattr(module, cType.capitalize())(self, cfg)
+            self.components[cid] = compobj
+            # Save our config settings
             writeConfFile(self.projConfig)
-            writeToLog(self.local, self.userConfig, 'LOG', 'Write out to config: project.addManager()')
             writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
             writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')
@@ -193,6 +190,37 @@ class Project (object) :
             self.projConfig['CompTypes'][cType] = newSectionSettings
             # Save the setting rightaway
             writeConfFile(self.projConfig)
+
+
+###############################################################################
+################################ Font Functions ###############################
+###############################################################################
+
+    def addComponentFont (self, font, cType) :
+        '''Add a font to a component.'''
+
+        # Call on the font manager to install the font we want for this component
+        self.createManager(cType, 'font')
+        self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
+        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
+
+
+    def setPrimaryFont (self, font, cType) :
+        '''Set the primary font for a component.'''
+
+        module = __import__(cType)
+        # FIXME: In this next call we use a blank dict to load the
+        # comp config section. As long as we call a manager that
+        # doesn't need it, we are okay. Otherwise, this needs fixing.
+        compobj = getattr(module, cType.capitalize())(self, {})
+        self.managers[cType + '_Font'].setPrimaryFont(font, cType.capitalize())
+
+
+    def removeComponentFont (self, font, cType) :
+        '''Remove a font from a component. Remove from the system if
+        it is not used in any other component.'''
+
+        terminal('Forget it dude, this is not implemented yet.')
 
 
 ###############################################################################

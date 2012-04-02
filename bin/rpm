@@ -261,8 +261,8 @@ def userArguments (args) :
         terminal('About: ' + systemAbout + '\n')
 
     if sys.argv[1].lower() == 'project' :
-        local           = ProjLocal(rpmHome, userHome, projHome)
-        pc              = ProjConfig(local)
+        local   = ProjLocal(rpmHome, userHome, projHome)
+        pc      = ProjConfig(local)
         if args['project_new'] :
             newProject(uc, pc, args['project_id'])
         elif args['project_lock'] :
@@ -272,16 +272,27 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
     elif sys.argv[1].lower() == 'component' :
-        local = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
-        pc = ProjConfig(local)
+        local   = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
+        pc      = ProjConfig(local)
         if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
             aProject = Project(uc.userConfig, pc.projConfig, local)
             if args['component_new'] :
                 aProject.addComponent(args['component_id'], args['component_type'])
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
-            if args['component_font'] :
-                aProject.addComponentFont(args['component_font'], args['component_type'])
+        else :
+            terminal('Cannot find [' + args['project_id'] + '] project.')
+    elif sys.argv[1].lower() == 'font' :
+        local   = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
+        pc      = ProjConfig(local)
+        if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
+            aProject = Project(uc.userConfig, pc.projConfig, local)
+            if args['font_new'] :
+                aProject.addComponentFont(args['font_new'], args['component_type'])
+            if args['font_remove'] :
+                aProject.removeComponentFont(args['font_name'], args['component_type'])
+            if args['font_primary'] :
+                aProject.setPrimaryFont(args['font_name'], args['component_type'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     else:
@@ -302,13 +313,21 @@ projCommand.add_argument('-n', '--project_new', action='store_true', help='Creat
 projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
-# Add project subprocess arguments
+# Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-f', '--component_font', help='Manually add a font to a component type in this project. The font family name given has to have an RPM font configuration file associated with it.')
 compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
+compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
+# Add font subprocess arguments
+compCommand = subparsers.add_parser('font', help='General font handling commands help')
+compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+compCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
+compCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
+compCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
+compCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
 compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 
 

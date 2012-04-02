@@ -83,25 +83,13 @@ class Usfm (Component) :
         self.compIDs = compIDs
         self.project = project
         self.cid = ''
-
         # Check to see if this component type has been added to the 
         # proj config already
         self.project.addComponentType('Usfm')
-
         self.compSettings = self.project.projConfig['CompTypes']['Usfm']
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
-
-        # Add some ParaTExt values if needed
-        if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
-            self.ptSSFConf = parseSSF(self.ptSSFFile)
-
-        # Update default font to match PT project info
-        if self.sourceEditor.lower() == 'paratext' :
-            self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
-            self.project.projConfig['CompTypes']['Usfm']['primaryFont'] = self.primaryFont
 
 #        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
         self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
@@ -109,6 +97,19 @@ class Usfm (Component) :
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
+
+        # Add some ParaTExt values if needed
+        if self.sourceEditor.lower() == 'paratext' :
+            self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
+            self.ptSSFConf = parseSSF(self.ptSSFFile)
+
+        # Update default font if needed
+        if not self.primaryFont :
+            # Get the primaryFont from PT if that is the editor
+            if self.sourceEditor.lower() == 'paratext' :
+                self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
+                self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
+
 
 
 ###############################################################################

@@ -77,6 +77,17 @@ class Font (Manager) :
 ###############################################################################
 
 
+    def setPrimaryFont (self, font, cType) :
+        '''Set the primary font for the project.'''
+
+        self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
+        # Load the primary font if it is not there already
+        self.recordFont(font, cType)
+        self.installFont(font, cType)
+        writeConfFile(self.project.projConfig)
+        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Set primary font to: ' + font)
+
+
     def recordFont (self, font, cType) :
         '''Check for the exsitance of a font in the font conf file.
         If there is one, return, if not add it.'''
