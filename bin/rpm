@@ -288,7 +288,7 @@ def userArguments (args) :
         if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
             aProject = Project(uc.userConfig, pc.projConfig, local)
             if args['font_new'] :
-                aProject.addComponentFont(args['font_new'], args['component_type'])
+                aProject.addComponentFont(args['font_name'], args['component_type'])
             if args['font_remove'] :
                 aProject.removeComponentFont(args['font_name'], args['component_type'])
             if args['font_primary'] :
@@ -318,17 +318,16 @@ compCommand = subparsers.add_parser('component', help='General project component
 compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
-compCommand.add_argument('-f', '--component_font', help='Manually add a font to a component type in this project. The font family name given has to have an RPM font configuration file associated with it.')
 compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
 compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 # Add font subprocess arguments
 compCommand = subparsers.add_parser('font', help='General font handling commands help')
 compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 compCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
 compCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
 compCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
 compCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
-compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 
 
 # Send the collected arguments to the handler

@@ -199,6 +199,7 @@ class Project (object) :
     def addComponentFont (self, font, cType) :
         '''Add a font to a component.'''
 
+        self.addComponentType(cType)
         # Call on the font manager to install the font we want for this component
         self.createManager(cType, 'font')
         self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
