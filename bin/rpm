@@ -301,7 +301,7 @@ def userArguments (args) :
         if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
             aProject = Project(uc.userConfig, pc.projConfig, local)
             if args['style_override'] :
-                aProject.createCustomStyleFile(args[args['component_type'])
+                aProject.createCustomStyleFile(args['component_type'])
             if args['style_component'] :
                 aProject.createComponentStyleFile(args['component_id'])
         else :

@@ -24,6 +24,7 @@ import os, shutil
 
 # Load the local classes
 from tools import *
+from run_process import *
 from manager import Manager
 
 
@@ -148,7 +149,9 @@ class Xetex (Manager) :
         # Here we do the rendering process. The result should be a PDF file.
         
         # Look at ptxplus rendering code and adapt it
-        
+MOD_RUN_PROCESS=$(PTXPLUS_BASE)/bin/python/lib_system/run_process.py
+TEX_INPUTS=TEXINPUTS=$(PATH_HOME):$(PATH_HOME)/$(PATH_HYPHENATION):$(PTXPLUS_BASE)/bin/tex/lib_scripture:.
+
         # Create a more generalized command routine for this context, other functions will need it too
         
         # Figure out how to get errors reported back and recorded
