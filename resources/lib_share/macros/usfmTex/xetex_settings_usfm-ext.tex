@@ -89,13 +89,13 @@
 % Some times, when a character does not exist in a font
 % you can substitute from another if no special rendering
 % is needed. This code will do that. Modify as needed.
-\font\cwi="[../Fonts/Padauk/Padauk.ttf]" at 10pt
-\catcode"A92E=\active                            % Make U+A92E an active character
-\def^^^^a92e{\leavevmode{\cwi\char"A92E}}        % Define it to print itself  in \cwi
+%\font\cwi="[../Fonts/Padauk/Padauk.ttf]" at 10pt
+%\catcode"A92E=\active                            % Make U+A92E an active character
+%\def^^^^a92e{\leavevmode{\cwi\char"A92E}}        % Define it to print itself  in \cwi
 
-\font\crossmaltese="[../Fonts/freefont/FreeSerif.ttf]" at 12pt
-\catcode"2720=\active                            % Make U+F058 an active character
-\def^^^^2720{\leavevmode{\crossmaltese\char"2720}}        % Define it to print itself  in \cwi
+%\font\crossmaltese="[../Fonts/freefont/FreeSerif.ttf]" at 12pt
+%\catcode"2720=\active                            % Make U+F058 an active character
+%\def^^^^2720{\leavevmode{\crossmaltese\char"2720}}        % Define it to print itself  in \cwi
 
 %%%%% Non-standard Spaces
 % Some publications may use non-standard (U+0020) between words.

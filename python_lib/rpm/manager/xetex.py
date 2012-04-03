@@ -103,10 +103,11 @@ class Xetex (Manager) :
            10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                   'XeTeX component processing commands'],
                         }
 
+# FIXME: Do we realy need the next set?
         # Add in some supporting files for the files we will be generating
-        pFont = self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont']
-        self.project.managers[self.cType + '_Font'].recordFont(pFont, self.cType.capitalize())
-        self.project.managers[self.cType + '_Font'].installFont(pFont, self.cType.capitalize())
+#        pFont = self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont']
+#        self.project.managers[self.cType + '_Font'].recordFont(pFont, self.cType.capitalize())
+#        self.project.managers[self.cType + '_Font'].installFont(pFont, self.cType.capitalize())
 
         # Create the above files in the order they are listed
         for r in self.xFiles :
@@ -119,12 +120,11 @@ class Xetex (Manager) :
                 elif self.xFiles[r][0] == 'set' :
                     self.makeTexSettingsFile()
                     self.makeTexExtentionsFile()
-                    # Add the custom (extention) macros
                     continue
 
                 elif self.xFiles[r][0] == 'sty' :
-                    self.project.managers[self.cType + '_Style'].installPTStyles()
-                    # Add the other custom styles here
+                    self.project.managers[self.cType + '_Style'].installCompTypeStyles()
+                    self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
                     continue
 
                 elif self.xFiles[r][0] == 'pro' :
@@ -139,6 +139,23 @@ class Xetex (Manager) :
                     writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[r][0] + '] not supported')
 
                 writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
+
+################################################################################################
+# FIXME: Start working here!
+
+
+        # By this point all the files necessary to render this component should be in place
+        # Here we do the rendering process. The result should be a PDF file.
+        
+        # Look at ptxplus rendering code and adapt it
+        
+        # Create a more generalized command routine for this context, other functions will need it too
+        
+        # Figure out how to get errors reported back and recorded
+
+
+
+################################################################################################
 
 
     def makeTexExtentionsFile (self) :
@@ -157,7 +174,7 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
-                writeObject.write('# ' + self.extentionsFile + ' created: ' + tStamp() + '\n')
+                writeObject.write('% ' + self.extentionsFile + ' created: ' + tStamp() + '\n')
                 writeObject.close()
 
 
@@ -199,7 +216,7 @@ class Xetex (Manager) :
         cidTex = os.path.join(getattr(self.project.local, self.xFiles[10][2]), self.xFiles[10][3])
 
         writeObject = codecs.open(cidTex, "w", encoding='utf_8')
-        writeObject.write('# ' + cid + '.tex created: ' + tStamp() + '\n')
+        writeObject.write('% ' + cid + '.tex created: ' + tStamp() + '\n')
         # We allow for a number of different types of lines
         for r in pieces :
             filePath = os.path.join(getattr(self.project.local, pieces[r][2]), pieces[r][3])
@@ -241,12 +258,12 @@ class Xetex (Manager) :
         macTexVals = dict(y.items() + x.items())
 
         writeObject = codecs.open(compTypeSettings, "w", encoding='utf_8')
-        writeObject.write('# ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
+        writeObject.write('% ' + compTypeSettingsFileName + ' created: ' + tStamp() + '\n')
 
         # Bring in the settings from the layoutConfig
         cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
         for section in cfg.keys() :
-            writeObject.write('\n# ' + section + '\n')
+            writeObject.write('\n% ' + section + '\n')
             for k, v in cfg[section].iteritems() :
                 if testForSetting(macTexVals, k, 'usfmTex') :
                     line = macTexVals[k]['usfmTex']
@@ -265,7 +282,7 @@ class Xetex (Manager) :
                     writeObject.write(line + '\n')
 
         # Add all the font def commands
-        writeObject.write('\n# Font Definitions\n')
+        writeObject.write('\n% Font Definitions\n')
         fpath = ''
         featureString = ''
         for f in self.project.projConfig['CompTypes'][self.cType.capitalize()]['installedFonts'] :
@@ -273,7 +290,7 @@ class Xetex (Manager) :
             features = fInfo['FontInformation']['features']
             # Create the primary fonts that will be used with TeX
             if self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont'] == f :
-                writeObject.write('\n# These are normal use fonts for this type of component.\n')
+                writeObject.write('\n% These are normal use fonts for this type of component.\n')
                 features = fInfo['FontInformation']['features']
                 for tf in fInfo :
                     if tf[:8] == 'Typeface' :
@@ -294,7 +311,7 @@ class Xetex (Manager) :
                             writeObject.write(startDef + fpath + featureString + modsString + endDef)
 
             else :
-                writeObject.write('\n# These are normal use fonts for this type of component.\n')
+                writeObject.write('\n% These are normal use fonts for this type of component.\n')
                 features = fInfo['FontInformation']['features']
                 for tf in fInfo :
                     if tf[:8] == 'Typeface' :
@@ -316,7 +333,7 @@ class Xetex (Manager) :
                             writeObject.write(startDef + fpath + featureString + modsString + endDef)
 
         # Add special custom commands (may want to parameterize these at some point)
-        writeObject.write('\n# Special commands\n')
+        writeObject.write('\n% Special commands\n')
         writeObject.write('\catcode`@=11\n')
         writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
         writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
@@ -395,55 +412,55 @@ class Xetex (Manager) :
             raise IOError, "Can't open " + xmlFile
 
 
-    def makeFontInfoTexFile (self) :
-        '''Create a TeX info font file that TeX will use for rendering.'''
+#    def makeFontInfoTexFile (self) :
+#        '''Create a TeX info font file that TeX will use for rendering.'''
 
-        # We will not make this file if it is already there
-        fontInfoFileName = os.path.join(self.project.processFolder,'fonts.tex')
-        # The rule is that we only create this file if it is not there,
-        # otherwise it will silently fail.  If one already exists the file will
-        # need to be removed by some other process before it can be recreated.
-        sCType = self.cType.capitalize()
-        if not os.path.isfile(fontInfoFileName) :
-            writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
-            writeObject.write('# fonts.tex' + ' created: ' + tStamp() + '\n')
-            for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
-                fInfo = self.project.projConfig['Fonts'][f]
-                # Create the primary fonts that will be used with TeX
-                if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
-                    writeObject.write('\n# These are normal use fonts for this type of component.\n')
-                    features = fInfo['FontInformation']['features']
-                    for tf in fInfo :
-                        if tf[:8] == 'Typeface' :
-                            # Make all our line components (More will need to be added)
-                            startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
-                            endDef      = "}\n"
-                            featureString = ''
-                            for i in features :
-                                featureString += ':' + i
+#        # We will not make this file if it is already there
+#        fontInfoFileName = os.path.join(self.project.processFolder,'fonts.tex')
+#        # The rule is that we only create this file if it is not there,
+#        # otherwise it will silently fail.  If one already exists the file will
+#        # need to be removed by some other process before it can be recreated.
+#        sCType = self.cType.capitalize()
+#        if not os.path.isfile(fontInfoFileName) :
+#            writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
+#            writeObject.write('% fonts.tex' + ' created: ' + tStamp() + '\n')
+#            for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
+#                fInfo = self.project.projConfig['Fonts'][f]
+#                # Create the primary fonts that will be used with TeX
+#                if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
+#                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
+#                    features = fInfo['FontInformation']['features']
+#                    for tf in fInfo :
+#                        if tf[:8] == 'Typeface' :
+#                            # Make all our line components (More will need to be added)
+#                            startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
+#                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
+#                            endDef      = "}\n"
+#                            featureString = ''
+#                            for i in features :
+#                                featureString += ':' + i
 
-                            writeObject.write(startDef + fpath + featureString + endDef)
+#                            writeObject.write(startDef + fpath + featureString + endDef)
 
-                # Create defs with secondary fonts for special use with TeX in publication
-                else :
-                    writeObject.write('\n# These are special use fonts for this type of component.\n')
-                    features = fInfo['FontInformation']['features']
-                    for tf in fInfo :
-                        if tf[:8] == 'Typeface' :
-                            # Make all our line components (More will need to be added)
-                            startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
-                            endDef      = "}\n"
-                            featureString = ''
-                            for i in features :
-                                featureString += ':' + i
+#                # Create defs with secondary fonts for special use with TeX in publication
+#                else :
+#                    writeObject.write('\n% These are special use fonts for this type of component.\n')
+#                    features = fInfo['FontInformation']['features']
+#                    for tf in fInfo :
+#                        if tf[:8] == 'Typeface' :
+#                            # Make all our line components (More will need to be added)
+#                            startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
+#                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
+#                            endDef      = "}\n"
+#                            featureString = ''
+#                            for i in features :
+#                                featureString += ':' + i
 
-                            writeObject.write(startDef + fpath + featureString + endDef)
+#                            writeObject.write(startDef + fpath + featureString + endDef)
 
-            # Finish the process
-            writeObject.close()
-            return True
+#            # Finish the process
+#            writeObject.close()
+#            return True
 
 
 

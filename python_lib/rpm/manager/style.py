@@ -21,9 +21,9 @@
 
 import os, shutil
 
-
 # Load the local classes
 from tools import *
+from pt_tools import *
 from manager import Manager
 
 
@@ -45,7 +45,10 @@ class Style (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
+        self.Ctype              = cType.capitalize()
         self.rpmXmlStyleConfig  = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.renderer           = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
+        self.sourceEditor       = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
@@ -62,23 +65,46 @@ class Style (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+    def installCompTypeStyles (self) :
+        '''If the source is from a PT project, check to see if there is a
+        (project-wide) stylesheet to install. If not, we will make one.
+        This file is required as a minimum for components of this type to
+        render. This function must succeed.'''
 
-    def installPTStyles (self) :
-        '''Go get the style sheet from the local PT project this is in
-        and install it into the project where and how it needs to be.'''
+        if self.sourceEditor.lower() == 'paratext' :
+            installPTStyles(self.project.local, self.mainStyleFile)
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
+        else :
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Main style file creation not supported yet.')
 
-        # As this is call is for a PT based project, it is certain the style
-        # file should be found in the parent folder.
-        ptStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.mainStyleFile)
-        ptCustomStyles = os.path.join(os.path.dirname(self.project.local.projHome), self.customStyleFile)
-        projStyles = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-        projCustomStyles = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
-        # We will start with a very simple copy operation. Once we get going
-        # we will need to make this more sophisticated.
-        if os.path.isfile(ptStyles) :
-            shutil.copy(ptStyles, projStyles)
-        if os.path.isfile(ptCustomStyles) :
-            shutil.copy(ptCustomStyles, projCustomStyles)
+
+    def installCompTypeOverrideStyles (self) :
+        '''If the source is from a PT project, check to see if there is a
+        (project-wide) custom stylesheet to install. If not, we are done.
+        This style file is not required.'''
+
+        if self.sourceEditor.lower() == 'paratext' :
+            installPTCustomStyles(self.project.local, self.customStyleFile)
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style file copied in from PT project.')
+        else :
+            self.createCustomUsfmStyles()
+
+
+    def createCustomUsfmStyles (self) :
+        '''Create a custom project-wide USFM style file for this project.
+        This USFM style file will override the main component type styles.'''
+
+        writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Custom style file creation not supported yet.')
+
+
+    def createCompOverrideUsfmStyles (self, cid) :
+        '''Create a component override style file for a single component.
+        This file will override specific styles from preceeding style
+        files loaded before it.'''
+
+        writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Component style override file creation not supported yet.')
+
+
 
 
 

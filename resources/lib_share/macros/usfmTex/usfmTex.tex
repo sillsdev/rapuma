@@ -70,22 +70,25 @@
 \edef\timestamp{\timestamp
   \ifnum\count255<10 0\fi \number\count255}%
 
-\input ptx-tracing.tex
-\input ptx-para-style.tex
-\input ptx-char-style.tex
-\input ptx-note-style.tex
-\input ptx-stylesheet.tex % must come after the ptx-*-style.tex macros
-\input ptx-references.tex
-\input ptx-cropmarks.tex
-\input ptx-toc.tex
-\input ptx-tables.tex
-\input ptx-adj-list.tex % must come after ptx-stylesheet.tex
-\input ptx-pic-list.tex % must come after ptx-stylesheet.tex
-\input ptx-cutouts.tex
-\input ptx-callers.tex % must come after ptx-note-style.tex
+% We needed to do some hard coding to make this work initially with RPM
+% This will need to be fixed when the macros are truly ported to usfmTex
+
+\input Macros/usfmTex/ptx-tracing.tex
+\input Macros/usfmTex/ptx-para-style.tex
+\input Macros/usfmTex/ptx-char-style.tex
+\input Macros/usfmTex/ptx-note-style.tex
+\input Macros/usfmTex/ptx-stylesheet.tex % must come after the ptx-*-style.tex macros
+\input Macros/usfmTex/ptx-references.tex
+\input Macros/usfmTex/ptx-cropmarks.tex
+\input Macros/usfmTex/ptx-toc.tex
+\input Macros/usfmTex/ptx-tables.tex
+\input Macros/usfmTex/ptx-adj-list.tex % must come after ptx-stylesheet.tex
+\input Macros/usfmTex/ptx-pic-list.tex % must come after ptx-stylesheet.tex
+\input Macros/usfmTex/ptx-cutouts.tex
+\input Macros/usfmTex/ptx-callers.tex % must come after ptx-note-style.tex
 % Additional modules that are not part of the normal ptx2pdf module
-\input ptxplus-character-kerning.tex
-\input ptxplus-toc-tables.tex
+\input Macros/usfmTex/ptxplus-character-kerning.tex
+\input Macros/usfmTex/ptxplus-toc-tables.tex
 %\input ptxplus-marginalverses.tex  % This is where we would like
                                     % load this module but has to
                                     % be loaded after the stylesheet
