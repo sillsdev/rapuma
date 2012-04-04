@@ -62,28 +62,28 @@ Todo:
             <usfmTex>\def\ColumnGutterFactor{[v]}</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Column Shift (mm)</name>
+            <name>USFM TeX Column Shift</name>
             <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  Use this if more than one column is being used.  It will output both the \columnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
             <key>columnShift</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\columnshift=[v]</usfmTex>
+            <usfmTex>\columnshift=[vm]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Column Shift (mm)</name>
+            <name>USFM TeX Column Shift</name>
             <description>Single column shift will shift a colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  It will output the \singlecolumnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
             <key>singleColumnShift</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\singlecolumnshift=[v]</usfmTex>
+            <usfmTex>%\singlecolumnshift=[vm]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Column Gutter Rule Skip (mm)</name>
+            <name>USFM TeX Column Gutter Rule Skip</name>
             <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\ColumnGutterRuleSkip=[v]</usfmTex>
+            <usfmTex>\ColumnGutterRuleSkip=[vm]</usfmTex>
             <boolDepend>Columns:columnGutterRule</boolDepend>
         </setting>
     </section>
@@ -93,9 +93,10 @@ Todo:
         <description>Information for fonts used in the publication project.</description>
         <setting>
             <name>USFM TeX Font Size Unit</name>
+            <description>??? Need acurate description for this setting. ???</description>
             <key>fontSizeUnit</key>
             <type>integer</type>
-            <value>1</value>
+            <value>1pt</value>
             <usfmTex>\FontSizeUnit=[v]</usfmTex>
         </setting>
         <setting>
@@ -478,7 +479,7 @@ Todo:
             <key>marginUnit</key>
             <type>integer</type>
             <value>10</value>
-            <usfmTex>\MarginUnit=[v]</usfmTex>
+            <usfmTex>\MarginUnit=[vm]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Top Margin Factor</name>
@@ -510,7 +511,7 @@ Todo:
             <key>extraRightMargin</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\ExtraRMargin=[v]</usfmTex>
+            <usfmTex>\ExtraRMargin=[vm]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Binding Gutter</name>
@@ -584,7 +585,7 @@ Todo:
             <description>Often, when there are quotes within quotes, when they end the two types of quote markers are so close together that, from the reader's perspective, it is hard to tell what is going on.  To fix this kerning space is added between the two characters to make it clear which is which.  The amount is in em space measurement.  For more information on what that is, go to this address:   http://en.wikipedia.org/wiki/Em_(typography) Enter the amount in em but do not follow with "em" as the system assumes the measurement is in em.  Enter 0 if no kerning of quotes is desired.   Defalt = 0.1</description>
             <key>quoteKernAmount</key>
             <type>integer</type>
-            <value>0.1</value>
+            <value>0.1em</value>
             <usfmTex>\quotekernamount=[v]</usfmTex>
         </setting>
     </section>

@@ -42,16 +42,17 @@ class Xetex (Manager) :
         super(Xetex, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project                = project
-        self.cfg                    = cfg
-        self.cType                  = cType
-        self.manager                = self.cType + '_Xetex'
-        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macroLayoutValuesFile  = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
-        self.xFiles                 = {}
-        self.settingsFile           = 'xetex_settings_' + self.cType + '.tex'
-        self.extentionsFile         = 'xetex_settings_' + self.cType + '-ext.tex'
-        self.macroPackageFile       = os.path.join(self.macroPackage, self.macroPackage + '.tex')
+        self.project                    = project
+        self.cfg                        = cfg
+        self.cType                      = cType
+        self.manager                    = self.cType + '_Xetex'
+        self.macroPackage               = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macroLayoutValuesFile      = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.xFiles                     = {}
+        self.settingsFile               = 'xetex_settings_' + self.cType + '.tex'
+        self.extentionsFile             = 'xetex_settings_' + self.cType + '-ext.tex'
+        self.macroPackageFile           = os.path.join(self.macroPackage, self.macroPackage + '.tex')
+        self.projMacrosPackageFolder    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
 
         # This manager is dependent on usfm_Layout. Load it if needed.
         if 'usfm_Layout' not in self.project.managers :
@@ -146,15 +147,18 @@ class Xetex (Manager) :
 
         # By this point all the files necessary to render this component should be in place
         # Here we do the rendering process. The result should be a PDF file.
+
+        # Create the environment that XeTeX will use. This will be temporarily set
+        # just before XeTeX is run.
+        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacrosPackageFolder + ':.'
+        # Create the component file and path that XeTeX is to render
+        cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
+        # Create the command XeTeX will run with
+        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + cidTex
+        # Run XeTeX and collect the return code for analysis
+        x = os.system(command)
         
-        # Look at ptxplus rendering code and adapt it
-# MOD_RUN_PROCESS=$(PTXPLUS_BASE)/bin/python/lib_system/run_process.py
-# TEX_INPUTS=TEXINPUTS=$(PATH_HOME):$(PATH_HOME)/$(PATH_HYPHENATION):$(PTXPLUS_BASE)/bin/tex/lib_scripture:.
-
-        # Create a more generalized command routine for this context, other functions will need it too
-        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + # FIXME: Add the path to the macros here so that it can find them with out having to mangle the internals of the files
-
-        os.system()
+        print x
         
         
         # Figure out how to get errors reported back and recorded
@@ -279,8 +283,13 @@ class Xetex (Manager) :
                     else :
                         if self.hasPlaceHolder(line) :
                             (ht, hk) = self.getPlaceHolder(line)
+                            # Just a plan value
                             if ht == 'v' :
                                 line = self.insertValue(line, v)
+                            # A value that needs a measurement unit attached
+                            elif ht == 'vm' :
+                                line = self.insertValue(line, self.addMeasureUnit(v))
+                            # A value that is a path
                             elif ht == 'path' :
                                 pth = getattr(self.project.local, hk)
                                 line = self.insertValue(line, pth)
@@ -303,11 +312,11 @@ class Xetex (Manager) :
                         tmc = 0
                         for tm in fInfo[tf]['texMapping'] :
                             startDef    = '\\def\\' + fInfo[tf]['texMapping'][tmc] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file']) + "]\""
-                            endDef      = "}\n"
+                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]"
+                            endDef      = "\"}\n"
                             featureString = ''
                             for i in features :
-                                featureString += ':' + i
+                                featureString += '/' + i
 
                             modsString = ''
                             for m in fInfo[tf]['modify'] :
@@ -325,7 +334,7 @@ class Xetex (Manager) :
                         for tm in fInfo[tf]['texMapping'] :
                             name = fInfo[tf]['name'].lower().replace(' ', '')
                             startDef    = '\\def\\' + name + fInfo[tf]['texMapping'][tmc] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['file']) + "]\""
+                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]\""
                             endDef      = "}\n"
                             featureString = ''
                             for i in features :
@@ -349,6 +358,13 @@ class Xetex (Manager) :
         # End here
         writeObject.close()
         return True
+
+
+    def addMeasureUnit (self, val) :
+        '''Return the value with the specified measurement unit attached.'''
+        
+        mu = self.project.managers[self.cType + '_Layout'].layoutConfig['GeneralSettings']['measurementUnit']
+        return val + mu
 
 
     def rtnBoolDepend (self, cfg, bd) :
