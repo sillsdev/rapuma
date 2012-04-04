@@ -154,7 +154,10 @@ class Xetex (Manager) :
         # Create the component file and path that XeTeX is to render
         cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
         # Create the command XeTeX will run with
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + cidTex
+
+# Set up an output folder for PDF output
+
+        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + os.path.join(self.project.local.projProcessFolder, 'Output') + ' ' + cidTex
         print command
         # Run XeTeX and collect the return code for analysis
         x = os.system(command)
