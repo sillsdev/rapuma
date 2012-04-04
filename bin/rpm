@@ -243,6 +243,26 @@ def deleteProject (uc, pid = None) :
     return True
 
 
+def isProject (pid) :
+    '''Look up in the user config to see if a project is registered.'''
+
+    try :
+        if pid in uc.userConfig['Projects'] :
+            return True
+    except :
+        return False
+
+
+def initProject (pid) :
+    '''Initialize an existing project according to the project ID given.'''
+
+    local = ProjLocal(rpmHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
+    pc = ProjConfig(local)
+    if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
+        aProject = Project(uc.userConfig, pc.projConfig, local)
+        return aProject
+
+
 ###############################################################################
 ############################# RPM Command Center ##############################
 ###############################################################################
@@ -272,10 +292,8 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
     elif sys.argv[1].lower() == 'component' :
-        local   = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
-        pc      = ProjConfig(local)
-        if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-            aProject = Project(uc.userConfig, pc.projConfig, local)
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
             if args['component_new'] :
                 aProject.addComponent(args['component_id'], args['component_type'])
             if args['component_render'] :
@@ -283,10 +301,8 @@ def userArguments (args) :
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     elif sys.argv[1].lower() == 'font' :
-        local   = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
-        pc      = ProjConfig(local)
-        if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-            aProject = Project(uc.userConfig, pc.projConfig, local)
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
             if args['font_new'] :
                 aProject.addComponentFont(args['font_name'], args['component_type'])
             if args['font_remove'] :
@@ -296,10 +312,8 @@ def userArguments (args) :
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     elif sys.argv[1].lower() == 'style' :
-        local   = ProjLocal(rpmHome, userHome, os.path.join(projHome, args['project_id'].upper()))
-        pc      = ProjConfig(local)
-        if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-            aProject = Project(uc.userConfig, pc.projConfig, local)
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
             if args['style_override'] :
                 aProject.createCustomStyleFile(args['component_type'])
             if args['style_component'] :

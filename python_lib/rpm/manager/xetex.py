@@ -155,6 +155,7 @@ class Xetex (Manager) :
         cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
         # Create the command XeTeX will run with
         command = 'export ' + texInputsLine + ' && ' + 'xetex ' + cidTex
+        print command
         # Run XeTeX and collect the return code for analysis
         x = os.system(command)
         
