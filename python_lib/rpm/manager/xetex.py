@@ -90,102 +90,132 @@ class Xetex (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+    def isOlder (self, child, parent) :
+        '''Check to see if the child (dependent) is older than the parent.
+        Return true if it is.'''
+
+        childTime = int(os.path.getctime(child))
+        parentTime = int(os.path.getctime(parent))
+        if childTime > parentTime :
+            return True
+
     def run (self, cid) :
         '''This will render a component using the XeTeX rendering enging.'''
 
-        # Using the information passed to this module created by other managers
-        # it will create all the final forms of files needed to render the
-        # current component with the XeTeX renderer.
-
-        # We can consolidate information here for files this manager needs to make
-        #   ID   pType  tType          Location                 FileName                        Description
-        self.xFiles = { 
-            1 : ['mac', 'input',       'projMacrosFolder',      self.macroPackageFile,          'Macro link file'], 
-            2 : ['set', 'input',       'projProcessFolder',     self.settingsFile,              'XeTeX main settings file'], 
-            3 : ['set', 'input',       'projProcessFolder',     self.extentionsFile,            'XeTeX extention settings file'], 
-            4 : ['set', 'stylesheet',  'projProcessFolder',     self.cType + '.sty',            'Primary component type styles'], 
-            5 : ['sty', 'stylesheet',  'projProcessFolder',     'custom.sty',                   'Custom project styles (from ParaTExt)'], 
-            6 : ['sty', 'stylesheet',  'projProcessFolder',     cid + '.sty',                   'Component style override'], 
-            7 : ['sty', 'input',       'projHyphenationFolder', 'hyphenation.tex',              'XeTeX hyphenation data file'], 
-            8 : ['mac', 'input',       'projMacrosFolder',      'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
-            9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                  'Component text file'],
-           10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                   'XeTeX component processing commands'],
-                        }
-
-        # Create the above files in the order they are listed
-        for r in self.xFiles :
-            path = os.path.join(getattr(self.project.local, self.xFiles[r][2]), self.xFiles[r][3])
-            if not os.path.isfile(path) :
-                if self.xFiles[r][0] == 'mac' :
-                    self.copyInMacros()
-                    continue
-
-                elif self.xFiles[r][0] == 'set' :
-                    self.makeTexSettingsFile()
-                    self.makeTexExtentionsFile()
-                    continue
-
-                elif self.xFiles[r][0] == 'sty' :
-                    self.project.managers[self.cType + '_Style'].installCompTypeStyles()
-                    self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
-                    continue
-
-                elif self.xFiles[r][0] == 'pro' :
-                    self.makeTexControlFile(cid)
-                    continue
-
-                elif self.xFiles[r][0] == 'non' :
-                    # This is being added in the Usfm compType too, do we want that?
-                    continue
-
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[r][0] + '] not supported')
-
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
-
-        # By this point all the files necessary to render this component should be in place
-        # Here we do the rendering process. The result should be a PDF file.
-
-        # Create the environment that XeTeX will use. This will be temporarily set
-        # just before XeTeX is run.
-        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacrosPackageFolder + ':.'
-
-        # Create the component file and path that XeTeX is to render
+        # Create file names that XeTeX is to work with
         cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
+        cidPdf = os.path.join(self.xetexOutputFolder, cid + '.pdf')
 
-        # Create the command XeTeX will run with
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + cidTex
+# START here logic is all screwed up!
 
-        # Create the output folder, XeTeX will fail without it
-        if not os.path.isdir(self.xetexOutputFolder) :
-            os.makedirs(self.xetexOutputFolder)
+        # DEPENDENCY CHECK
+        if os.path.isfile(cidPDF) :
+            if self.isOlder(cidPdf, cidTex) :
+                if self.displayPdfOutput(cidPdf) :
+                    writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File already exsits, routing to PDF viewer.')
+                else :
+                    writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File already exsits, PDF viewer turned off.')
+                return
+            else :
+                # Create 
 
-        # Run XeTeX and collect the return code for analysis
-        rCode = os.system(command)
 
-        # Analyse the return code
-        if rCode == int(0) :
-            writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + cid + '.tex' + '] succeful.')
-        elif rCode in self.xetexErrorCodes :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + cid + '.tex' + '] was unsucceful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
-        else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + rCode + '] not understood by RPM.')
 
-        # View the output
-        if str2bool(self.usePdfViewer) :
-            writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing to PDF viewer.')
-            self.displayPDFOutput(os.path.join(self.xetexOutputFolder, cid + '.pdf'))
+
+        def makeCidTex () :
+            # Using the information passed to this module created by other managers
+            # it will create all the final forms of files needed to render the
+            # current component with the XeTeX renderer.
+
+            # We can consolidate information here for files this manager needs to make
+            #   ID   pType  tType          Location                 FileName                        Description
+            self.xFiles = { 
+                1 : ['mac', 'input',       'projMacrosFolder',      self.macroPackageFile,          'Macro link file'], 
+                2 : ['set', 'input',       'projProcessFolder',     self.settingsFile,              'XeTeX main settings file'], 
+                3 : ['set', 'input',       'projProcessFolder',     self.extentionsFile,            'XeTeX extention settings file'], 
+                4 : ['set', 'stylesheet',  'projProcessFolder',     self.cType + '.sty',            'Primary component type styles'], 
+                5 : ['sty', 'stylesheet',  'projProcessFolder',     'custom.sty',                   'Custom project styles (from ParaTExt)'], 
+                6 : ['sty', 'stylesheet',  'projProcessFolder',     cid + '.sty',                   'Component style override'], 
+                7 : ['sty', 'input',       'projHyphenationFolder', 'hyphenation.tex',              'XeTeX hyphenation data file'], 
+                8 : ['mac', 'input',       'projMacrosFolder',      'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
+                9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                  'Component text file'],
+               10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                   'XeTeX component processing commands'],
+                            }
+
+            # Create the above files in the order they are listed
+            for r in self.xFiles :
+                path = os.path.join(getattr(self.project.local, self.xFiles[r][2]), self.xFiles[r][3])
+                if not os.path.isfile(path) :
+                    if self.xFiles[r][0] == 'mac' :
+                        self.copyInMacros()
+                        continue
+
+                    elif self.xFiles[r][0] == 'set' :
+                        self.makeTexSettingsFile()
+                        self.makeTexExtentionsFile()
+                        continue
+
+                    elif self.xFiles[r][0] == 'sty' :
+                        self.project.managers[self.cType + '_Style'].installCompTypeStyles()
+                        self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
+                        continue
+
+                    elif self.xFiles[r][0] == 'pro' :
+                        self.makeTexControlFile(cid)
+                        continue
+
+                    elif self.xFiles[r][0] == 'non' :
+                        # This is being added in the Usfm compType too, do we want that?
+                        continue
+
+                    else :
+                        writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[r][0] + '] not supported')
+
+                    writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
+
+        def makeCidPdf () :
+            # By this point all the files necessary to render this component should be in place
+            # Here we do the rendering process. The result should be a PDF file.
+
+            # Create the environment that XeTeX will use. This will be temporarily set
+            # just before XeTeX is run.
+            texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacrosPackageFolder + ':.'
+
+            # Create the command XeTeX will run with
+            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + cidTex
+
+            # Create the output folder, XeTeX will fail without it
+            if not os.path.isdir(self.xetexOutputFolder) :
+                os.makedirs(self.xetexOutputFolder)
+
+            # Run XeTeX and collect the return code for analysis
+            rCode = os.system(command)
+
+            # Analyse the return code
+            if rCode == int(0) :
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + cid + '.tex' + '] succeful.')
+            elif rCode in self.xetexErrorCodes :
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + cid + '.tex' + '] was unsucceful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
+            else :
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + rCode + '] not understood by RPM.')
+
+            # View the output
+            if self.displayPdfOutput(cidPdf) :
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File created, routing to PDF viewer.')
 
 
 
 ################################################################################################
 
-    def displayPDFOutput (self, pdfFile) :
-        '''Display a PDF XeTeX output file.'''
+    def displayPdfOutput (self, pdfFile) :
+        '''Display a PDF XeTeX output file if that is turned on.'''
 
-        # Build the viewer command
-        command = self.pdfViewer + ' ' + pdfFile + ' &'
-        rCode = os.system(command)
+        if str2bool(self.usePdfViewer) :
+            # Build the viewer command
+            command = self.pdfViewer + ' ' + pdfFile + ' &'
+            rCode = os.system(command)
+            # FIXME: May want to analyse the return code from viewer
+            return True
 
 
     def makeTexExtentionsFile (self) :
@@ -273,6 +303,7 @@ class Xetex (Manager) :
         compTypeSettingsFileName = 'xetex_settings_' + self.cType + '.tex'
         compTypeSettings = os.path.join(self.project.local.projProcessFolder, compTypeSettingsFileName)
 
+        # DEPENDENCY CHECK
         # Return now if the file is there and it is newer than the conf file
         if os.path.isfile(compTypeSettings) :
             tFileTime = 0
