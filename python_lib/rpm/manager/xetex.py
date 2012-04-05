@@ -58,20 +58,20 @@ class Xetex (Manager) :
         self.pdfViewer                  = self.project.projConfig['Managers'][self.manager]['viewerCommand']
 
         # This manager is dependent on usfm_Layout. Load it if needed.
-        if 'usfm_Layout' not in self.project.managers :
-            self.project.createManager(self.cType, 'layout')
+#        if 'usfm_Layout' not in self.project.managers :
+#            self.project.createManager(self.cType, 'layout')
 
-        # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macroLayoutValuesFile)
-        if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
-            project.managers['usfm_Layout'].layoutConfig = newSectionSettings
+#        # Get persistant values from the config if there are any
+#        newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macroLayoutValuesFile)
+#        if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
+#            project.managers['usfm_Layout'].layoutConfig = newSectionSettings
 
-        macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
-        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
-        layoutCopy.merge(macVals)
-        self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
-        writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
-        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
+#        macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
+#        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
+#        layoutCopy.merge(macVals)
+#        self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
+#        writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
+#        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
 
         # Get settings for this component
         self.managerSettings = self.project.projConfig['Managers'][self.manager]
@@ -96,36 +96,67 @@ class Xetex (Manager) :
 
         childTime = int(os.path.getctime(child))
         parentTime = int(os.path.getctime(parent))
-        if childTime > parentTime :
+        if childTime < parentTime :
             return True
+        else :
+            return False
 
     def run (self, cid) :
         '''This will render a component using the XeTeX rendering enging.'''
 
         # Create file names that XeTeX is to work with
-        cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
-        cidPdf = os.path.join(self.xetexOutputFolder, cid + '.pdf')
+        ct              = cid + '.tex'
+        cp              = cid + '.pdf'
+        cidTex          = os.path.join(self.project.local.projProcessFolder, ct)
+        cidPdf          = os.path.join(self.xetexOutputFolder, cp)
+        layoutConfFile  = self.project.local.layoutConfFile
+        fontConfFile    = self.project.local.fontConfFile
 
-# START here logic is all screwed up!
-
-        # DEPENDENCY CHECK
-        if os.path.isfile(cidPDF) :
-            if self.isOlder(cidPdf, cidTex) :
-                if self.displayPdfOutput(cidPdf) :
-                    writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File already exsits, routing to PDF viewer.')
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File already exsits, PDF viewer turned off.')
-                return
+        def texDependCheck () :
+           # Dependency check for the main TeX control file
+            if os.path.isfile(cidTex) :
+                if self.isOlder(cidTex, layoutConfFile) :
+                    # Something changed in the layout conf file
+                    makeCidTex()
+                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Layout settings changed, ' + ct + ' recreated.')
+                elif self.isOlder(cidTex, fontConfFile) :
+                    # Something changed in the font conf file
+                    makeCidTex()
+                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Font settings changed, ' + ct + ' recreated.')
             else :
-                # Create 
+                makeCidTex()
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', ct + ' missing, created a new one.')
 
 
+        def pdfDependCheck () :
+            # Dependency check for the PDF filePath
+            if os.path.isfile(cidPdf) :
+                if not self.isOlder(cidPdf, cidTex) :
+                    if self.displayPdfOutput(cidPdf) :
+                        writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' already exsits, routing to PDF viewer.')
+                    else :
+                        writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' already exsits, PDF viewer turned off.')
+                else :
+                    # Just create the PDF because the cidTex is older
+                    makeCidPdf()
+                    if self.displayPdfOutput(cidPdf) :
+                        writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' recreated, routing to PDF viewer.')
+                    else :
+                        writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' recreated, PDF viewer turned off.')
+            else :
+                # Create the PDF
+                makeCidPdf()
+                if self.displayPdfOutput(cidPdf) :
+                    writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' created, routing to PDF viewer.')
+                else :
+                    writeToLog(self.project.local, self.project.userConfig, 'MSG', cp + ' created, PDF viewer turned off.')
 
 
         def makeCidTex () :
             # Using the information passed to this module created by other managers
             # it will create all the final forms of files needed to render the
-            # current component with the XeTeX renderer.
+            # current component with the XeTeX renderer. The final file made is
+            # the cidTex file which is needed to control rendering of the source.
 
             # We can consolidate information here for files this manager needs to make
             #   ID   pType  tType          Location                 FileName                        Description
@@ -138,11 +169,11 @@ class Xetex (Manager) :
                 6 : ['sty', 'stylesheet',  'projProcessFolder',     cid + '.sty',                   'Component style override'], 
                 7 : ['sty', 'input',       'projHyphenationFolder', 'hyphenation.tex',              'XeTeX hyphenation data file'], 
                 8 : ['mac', 'input',       'projMacrosFolder',      'ptxplus-marginalverses.tex',   'Marginal verses extention macro'],
-                9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                  'Component text file'],
-               10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                   'XeTeX component processing commands'],
+                9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                  'Component text file']
                             }
 
-            # Create the above files in the order they are listed
+            # Create (if needed) the above files in the order they are listed.
+            # These files are dependents of the cidTex file
             for r in self.xFiles :
                 path = os.path.join(getattr(self.project.local, self.xFiles[r][2]), self.xFiles[r][3])
                 if not os.path.isfile(path) :
@@ -160,10 +191,6 @@ class Xetex (Manager) :
                         self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
                         continue
 
-                    elif self.xFiles[r][0] == 'pro' :
-                        self.makeTexControlFile(cid)
-                        continue
-
                     elif self.xFiles[r][0] == 'non' :
                         # This is being added in the Usfm compType too, do we want that?
                         continue
@@ -172,6 +199,10 @@ class Xetex (Manager) :
                         writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.xFiles[r][0] + '] not supported')
 
                     writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
+
+            # Make the cidTex file
+            self.makeTexControlFile(cidTex)
+
 
         def makeCidPdf () :
             # By this point all the files necessary to render this component should be in place
@@ -183,27 +214,28 @@ class Xetex (Manager) :
 
             # Create the command XeTeX will run with
             command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + cidTex
+#            command = 'touch ' + cidPdf + ' &'
 
             # Create the output folder, XeTeX will fail without it
             if not os.path.isdir(self.xetexOutputFolder) :
                 os.makedirs(self.xetexOutputFolder)
 
             # Run XeTeX and collect the return code for analysis
+            rCode = -1
             rCode = os.system(command)
 
             # Analyse the return code
             if rCode == int(0) :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + cid + '.tex' + '] succeful.')
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + cid + '.tex' + '] successful.')
             elif rCode in self.xetexErrorCodes :
-                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + cid + '.tex' + '] was unsucceful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + cid + '.tex' + '] was unsuccessful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + rCode + '] not understood by RPM.')
-
-            # View the output
-            if self.displayPdfOutput(cidPdf) :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'File created, routing to PDF viewer.')
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
 
 
+        # With all the sub functions defined start running here
+        texDependCheck()
+        pdfDependCheck()
 
 ################################################################################################
 
@@ -257,7 +289,7 @@ class Xetex (Manager) :
                         shutil.copy(os.path.join(macrosSource, f), fTarget)
 
 
-    def makeTexControlFile (self, cid) :
+    def makeTexControlFile (self, cidTex) :
         '''Create the control file that will be used for rendering this
         component.'''
 
@@ -273,10 +305,10 @@ class Xetex (Manager) :
                     9 : self.xFiles[9] }
 
         # Create the control file 
-        cidTex = os.path.join(getattr(self.project.local, self.xFiles[10][2]), self.xFiles[10][3])
+        head, tail = os.path.split(cidTex)
 
         writeObject = codecs.open(cidTex, "w", encoding='utf_8')
-        writeObject.write('% ' + cid + '.tex created: ' + tStamp() + '\n')
+        writeObject.write('% ' + tail + ' created: ' + tStamp() + '\n')
         # We allow for a number of different types of lines
         for r in pieces :
             filePath = os.path.join(getattr(self.project.local, pieces[r][2]), pieces[r][3])
