@@ -26,5 +26,19 @@ Todo:
         <type>string</type>
         <value>usfmTex</value>
     </setting>
+    <setting>
+        <name>Use PDF Viewer</name>
+        <key>usePdfViewer</key>
+        <description>Route the output to the PDF viewer.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
+        <name>PDF Viewer Command</name>
+        <key>viewerCommand</key>
+        <description>The command needed to view the PDF output created by this module.</description>
+        <type>string</type>
+        <value>evince -w</value>
+    </setting>
 </root>
 

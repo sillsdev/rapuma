@@ -53,6 +53,9 @@ class Xetex (Manager) :
         self.extentionsFile             = 'xetex_settings_' + self.cType + '-ext.tex'
         self.macroPackageFile           = os.path.join(self.macroPackage, self.macroPackage + '.tex')
         self.projMacrosPackageFolder    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.xetexOutputFolder          = os.path.join(self.project.local.projProcessFolder, 'Output')
+        self.usePdfViewer               = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
+        self.pdfViewer                  = self.project.projConfig['Managers'][self.manager]['viewerCommand']
 
         # This manager is dependent on usfm_Layout. Load it if needed.
         if 'usfm_Layout' not in self.project.managers :
@@ -77,6 +80,11 @@ class Xetex (Manager) :
                 setattr(self, k, str2bool(v))
             else :
                 setattr(self, k, v)
+
+        self.xetexErrorCodes =  {
+                                    0   : 'Rendering succeful.',
+                                    256 : 'Something really awful happened.'
+                                }
 
 ###############################################################################
 ############################ Project Level Functions ##########################
@@ -103,12 +111,6 @@ class Xetex (Manager) :
             9 : ['non', 'ptxfile',     'projTextFolder',        cid + '.usfm',                  'Component text file'],
            10 : ['pro', 'input',       'projProcessFolder',     cid + '.tex',                   'XeTeX component processing commands'],
                         }
-
-# FIXME: Do we realy need the next set?
-        # Add in some supporting files for the files we will be generating
-#        pFont = self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont']
-#        self.project.managers[self.cType + '_Font'].recordFont(pFont, self.cType.capitalize())
-#        self.project.managers[self.cType + '_Font'].installFont(pFont, self.cType.capitalize())
 
         # Create the above files in the order they are listed
         for r in self.xFiles :
@@ -141,35 +143,49 @@ class Xetex (Manager) :
 
                 writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + self.xFiles[r][4])
 
-################################################################################################
-# FIXME: Start working here!
-
-
         # By this point all the files necessary to render this component should be in place
         # Here we do the rendering process. The result should be a PDF file.
 
         # Create the environment that XeTeX will use. This will be temporarily set
         # just before XeTeX is run.
         texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacrosPackageFolder + ':.'
+
         # Create the component file and path that XeTeX is to render
         cidTex = os.path.join(self.project.local.projProcessFolder, cid + '.tex')
+
         # Create the command XeTeX will run with
+        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + cidTex
 
-# Set up an output folder for PDF output
+        # Create the output folder, XeTeX will fail without it
+        if not os.path.isdir(self.xetexOutputFolder) :
+            os.makedirs(self.xetexOutputFolder)
 
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + os.path.join(self.project.local.projProcessFolder, 'Output') + ' ' + cidTex
-        print command
         # Run XeTeX and collect the return code for analysis
-        x = os.system(command)
-        
-        print x
-        
-        
-        # Figure out how to get errors reported back and recorded
+        rCode = os.system(command)
+
+        # Analyse the return code
+        if rCode == int(0) :
+            writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + cid + '.tex' + '] succeful.')
+        elif rCode in self.xetexErrorCodes :
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + cid + '.tex' + '] was unsucceful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
+        else :
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + rCode + '] not understood by RPM.')
+
+        # View the output
+        if str2bool(self.usePdfViewer) :
+            writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing to PDF viewer.')
+            self.displayPDFOutput(os.path.join(self.xetexOutputFolder, cid + '.pdf'))
 
 
 
 ################################################################################################
+
+    def displayPDFOutput (self, pdfFile) :
+        '''Display a PDF XeTeX output file.'''
+
+        # Build the viewer command
+        command = self.pdfViewer + ' ' + pdfFile + ' &'
+        rCode = os.system(command)
 
 
     def makeTexExtentionsFile (self) :
