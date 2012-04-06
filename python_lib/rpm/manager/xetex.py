@@ -58,20 +58,31 @@ class Xetex (Manager) :
         self.pdfViewer                  = self.project.projConfig['Managers'][self.manager]['viewerCommand']
 
         # This manager is dependent on usfm_Layout. Load it if needed.
-#        if 'usfm_Layout' not in self.project.managers :
-#            self.project.createManager(self.cType, 'layout')
+        if 'usfm_Layout' not in self.project.managers :
+            self.project.createManager(self.cType, 'layout')
 
-#        # Get persistant values from the config if there are any
-#        newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macroLayoutValuesFile)
-#        if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
-#            project.managers['usfm_Layout'].layoutConfig = newSectionSettings
+        # Get persistant values from the config if there are any
+        # We assume at this point that if the merge has already taken place,
+        # we do not need to do it again. We will check for a version number 
+        # under the General Settings section to tell if it has been merged
+        # already. FIXME: This may not be the best way to do this but we cannot
+        # be writing this file out every time as it causes the PDF to get
+        # rendered every time, which is not helpful.
+        try :
+            version = self.project.managers[self.cType + '_Layout'].layoutConfig['GeneralSettings']['usfmTexVersion']
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Version number present, not running persistant values: layout.__init__()')
+        except :
+            # No version number means we need to merge the default and usfmTex layout settings
+            newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macroLayoutValuesFile)
+            if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
+                project.managers['usfm_Layout'].layoutConfig = newSectionSettings
 
-#        macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
-#        layoutCopy = ConfigObj(self.project.local.layoutConfFile)
-#        layoutCopy.merge(macVals)
-#        self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
-#        writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
-#        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
+            macVals = ConfigObj(getXMLSettings(self.macroLayoutValuesFile))
+            layoutCopy = ConfigObj(self.project.local.layoutConfFile)
+            layoutCopy.merge(macVals)
+            self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
+            writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
 
         # Get settings for this component
         self.managerSettings = self.project.projConfig['Managers'][self.manager]

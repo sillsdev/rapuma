@@ -14,6 +14,18 @@ Todo:
 
 <root>
     <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This contains general format settings for UsfmTex macro package.</description>
+        <setting>
+            <name>USFM TeX Macro Version</name>
+            <key>usfmTexVersion</key>
+            <description>The version number of this USFM TeX macro package.</description>
+            <type>string</type>
+            <value>0.0.1</value>
+        </setting>
+    </section>
+    <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
         <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
