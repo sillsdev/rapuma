@@ -101,32 +101,48 @@ class Xetex (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def isOlder (self, child, parent) :
-        '''Check to see if the child (dependent) is older than the parent.
-        Return true if it is.'''
-
-        childTime = int(os.path.getctime(child))
-        parentTime = int(os.path.getctime(parent))
-        if childTime < parentTime :
-            return True
-        else :
-            return False
-
     def run (self, cid) :
-        '''This will render a component using the XeTeX rendering enging.'''
+        '''This will check all the dependencies for a component and then
+        use XeTeX to render it.'''
 
         # Create file names that XeTeX is to work with
-        ct              = cid + '.tex'
+        cu              = cid + '.usfm'
+        cidUsfm         = os.path.join(self.project.local.projTextFolder, cu)
         cp              = cid + '.pdf'
-        cidTex          = os.path.join(self.project.local.projProcessFolder, ct)
         cidPdf          = os.path.join(self.xetexOutputFolder, cp)
+        ct              = cid + '.tex'
+        cidTex          = os.path.join(self.project.local.projProcessFolder, ct)
+        cs              = cid + '.sty'
+        cidSty          = os.path.join(self.project.local.projProcessFolder, cs)
+        ca              = cid + '.adj'
+        cidAdj          = os.path.join(self.project.local.projTextFolder, ca)
+        cg              = cid + '.piclist'
+        cidPics         = os.path.join(self.project.local.projTextFolder, cg)
+        custSty         = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
+        globSty         = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
+        hyphenTex       = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
         layoutConfFile  = self.project.local.layoutConfFile
         fontConfFile    = self.project.local.fontConfFile
         setFile         = os.path.join(self.project.local.projProcessFolder, self.settingsFile)
         extFile         = os.path.join(self.project.local.projProcessFolder, self.extentionsFile)
 
+        def setDependCheck () :
+            # Dependency check for the main TeX settings file
+            # The setFile is dependent on:
+            # fontConfFile
+            # layoutConfFile
+            pass
+
+
         def texDependCheck () :
-           # Dependency check for the main TeX control file
+            # Dependency check for the main TeX control file
+            # The cidTex is dependent on:
+            # cidSty
+            # custSty
+            # globSty
+            # setFile
+            # extFile
+            # hyphenTex
             if os.path.isfile(cidTex) :
                 if self.isOlder(cidTex, layoutConfFile) :
                     # Something changed in the layout conf file
@@ -136,23 +152,17 @@ class Xetex (Manager) :
                     # Something changed in the font conf file
                     makeDependents()
                     writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Font settings changed, ' + ct + ' recreated.')
-
-# FIXME: Dependent problems here
-
-#                elif self.isOlder(cidTex, setFile) :
-#                    # Something changed in the main settings file
-#                    makeDependents()
-#                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main TeX settings changed, ' + ct + ' recreated.')
-#                elif self.isOlder(cidTex, extFile) :
-#                    # Something changed in the extentions settings file
-#                    makeDependents()
-#                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'TeX extentions settings changed, ' + ct + ' recreated.')
             else :
                 self.makeTexControlFile(cidTex)
                 writeToLog(self.project.local, self.project.userConfig, 'LOG', ct + ' missing, created a new one.')
 
         def pdfDependCheck () :
             # Dependency check for the PDF filePath
+            # The cidPdf is the final product it is dependent on:
+            # cidTex
+            # cidAdj
+            # cidPics
+            # cidUsfm
             if os.path.isfile(cidPdf) :
                 if not self.isOlder(cidPdf, cidTex) :
                     if self.displayPdfOutput(cidPdf) :
@@ -256,6 +266,7 @@ class Xetex (Manager) :
 
 
         # With all the sub functions defined start running here
+        setDependCheck()
         texDependCheck()
         pdfDependCheck()
 
@@ -563,6 +574,18 @@ class Xetex (Manager) :
             return data
         else :
             raise IOError, "Can't open " + xmlFile
+
+
+    def isOlder (self, child, parent) :
+        '''Check to see if the child (dependent) is older than the parent.
+        Return true if it is.'''
+
+        childTime = int(os.path.getctime(child))
+        parentTime = int(os.path.getctime(parent))
+        if childTime < parentTime :
+            return True
+        else :
+            return False
 
 
 #    def makeFontInfoTexFile (self) :
