@@ -71,11 +71,12 @@ class Style (Manager) :
         This file is required as a minimum for components of this type to
         render. This function must succeed.'''
 
-        if self.sourceEditor.lower() == 'paratext' :
-            installPTStyles(self.project.local, self.mainStyleFile)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
-        else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Main style file creation not supported yet.')
+        if not os.path.isfile(self.mainStyleFile) :
+            if self.sourceEditor.lower() == 'paratext' :
+                installPTStyles(self.project.local, self.mainStyleFile)
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
+            else :
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Main style file creation not supported yet.')
 
 
     def installCompTypeOverrideStyles (self) :
@@ -83,11 +84,13 @@ class Style (Manager) :
         (project-wide) custom stylesheet to install. If not, we are done.
         This style file is not required.'''
 
-        if self.sourceEditor.lower() == 'paratext' :
-            installPTCustomStyles(self.project.local, self.customStyleFile)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style file copied in from PT project.')
-        else :
-            self.createCustomUsfmStyles()
+        if not os.path.isfile(self.customStyleFile) :
+            if self.sourceEditor.lower() == 'paratext' :
+                if not installPTCustomStyles(self.project.local, self.customStyleFile) :
+                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style file in PT project not found.')
+                    self.createCustomUsfmStyles()
+            else :
+                self.createCustomUsfmStyles()
 
 
     def createCustomUsfmStyles (self) :

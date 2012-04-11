@@ -44,6 +44,7 @@ def installPTStyles (local, mainStyleFile) :
     # we will need to make this more sophisticated.
     if os.path.isfile(ptStyles) :
         shutil.copy(ptStyles, projStyles)
+        return True
 
 
 def installPTCustomStyles (local, customStyleFile) :

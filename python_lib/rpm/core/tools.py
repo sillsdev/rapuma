@@ -32,6 +32,25 @@ import pprint
 ###############################################################################
 
 
+def isOlder (child, parent) :
+    '''Check to see if the child (dependent) is older (has accumulated more
+    time) than the parent.  Return true if it is.'''
+
+    childTime = int(os.path.getctime(child))
+    parentTime = int(os.path.getctime(parent))
+    if childTime < parentTime :
+        return True
+    else :
+        return False
+
+
+def fName (fullPath) :
+    '''Lazy way to extract the file name from a full path 
+    using os.path.split().'''
+
+    return os.path.split(fullPath)[1]
+
+
 def confObjCompare (objA, objB, path) :
     '''Do a simple compare on two ConfigObj objects.'''
 
