@@ -46,7 +46,8 @@ class Xetex (Manager) :
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
-        self.xFiles                 = {}
+        self.tcfDependents          = {}
+        self.tcfDependOrder         = {}
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
@@ -120,44 +121,41 @@ class Xetex (Manager) :
             writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.setFile) + ' missing, created a new one.')
 
 
-
     def controlDependCheck (self) :
-        # Dependency check for the main TeX control file
-        # The cidTex is dependent on:
-        # cidSty
-        # custSty
-        # globSty
-        # setFile
-        # extFile
-        # hyphenTex
-        pass
+        '''Dependency check for the main TeX control file. The cidTex is dependent on 
+        files that are listed in self.tcfDependOrder. If any have changed since the
+        last time the cidTex was created, it will be recreated. If it is missing, it
+        will be created.'''
+
         if os.path.isfile(self.cidTex) :
-            if os.path.isfile(self.cidSty) and isOlder(self.cidTex, self.cidSty) :
-                # Something changed in the cidSty file
-                self.makeTexControlFile()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Component style override changed, ' + fName(self.cidTex) + ' recreated.')
-            elif os.path.isfile(self.custSty) and isOlder(self.cidTex, self.custSty) :
-                # Something changed in the custSty file
-                self.makeTexControlFile()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style override changed, ' + fName(self.cidTex) + ' recreated.')
+            for r in self.tcfDependOrder :
+                if os.path.isfile(self.tcfDependOrder[r][2]) :
+                    if isOlder(self.cidTex, self.tcfDependOrder[r][2]) :
+                        # Something changed in this dependent file
+                        self.makeTexControlFile()
+                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
         else :
             self.makeTexControlFile()
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidTex) + ' missing, created a new one.')
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
 
 
     def pdfDependCheck (self) :
-        # Dependency check for the PDF filePath
+        '''This will check to see if all the dependents of the cidPdf
+        file are younger than itself. If not, the cidPdf will be rendered.'''
+
         # The cidPdf is the final product it is dependent on:
         # cidTex
+        # FIXME: These need to be added yet
         # cidAdj
         # cidPics
         # cidUsfm
+        
+        # Create the PDF (if needed)
         if os.path.isfile(self.cidPdf) :
-            if not isOlder(self.cidPdf, self.cidTex) :
-                if self.displayPdfOutput(self.cidPdf) :
-                    writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' already exsits, routing to PDF viewer.')
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' already exsits, PDF viewer turned off.')
+            if isOlder(self.cidTex, self.cidPdf) :
+                self.renderCidPdf()
+        else :
+            self.renderCidPdf()
 
 
     def makeTexControlDependents (self) :
@@ -195,7 +193,7 @@ class Xetex (Manager) :
                     continue
 
                 elif self.tcfDependents[r][0] == 'glo' :
-                    self.project.managers[self.cType + '_Style'].installCompTypeStyles()
+                    self.project.managers[self.cType + '_Style'].installCompTypeGlobalStyles()
                     continue
 
                 elif self.tcfDependents[r][0] == 'hyp' :
@@ -204,19 +202,13 @@ class Xetex (Manager) :
 
                 elif self.tcfDependents[r][0] == 'non' :
                     # This is being added in the Usfm compType too, do we want that?
+                    # I think we probably should but the function will need to be reworked.
                     continue
 
                 else :
                     writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
 
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + fName(self.tcfDependents[r][2]))
-
-# FIXME: the creation of the control file needs to be regulated better. 
-# If it doesn't need to be remade for the dependencies, then it should be left 
-# alone. We need some kind of signal from the above to mark any changes.'
-
-        # Make the cidTex file
-        self.makeTexControlFile()
+#                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + fName(self.tcfDependents[r][2]))
 
 
     def renderCidPdf (self) :
@@ -290,6 +282,7 @@ class Xetex (Manager) :
 
         if not os.path.isfile(self.ptxMargVerseFile) :
             shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            return True
             writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
 
 
@@ -311,41 +304,31 @@ class Xetex (Manager) :
                 if f not in copyExempt :
                     if not os.path.isfile(fTarget) :
                         shutil.copy(os.path.join(macrosSource, f), fTarget)
+                        mCopy = True
                         writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
+
+        return mCopy
 
 
     def makeTexControlFile (self) :
         '''Create the control file that will be used for rendering this
         component.'''
 
-        # List the parts the renderer will be using (in order)
-        pieces = {  
-                    1 : self.tcfDependents[1], 
-                    2 : self.tcfDependents[2], 
-                    3 : self.tcfDependents[3], 
-                    4 : self.tcfDependents[4], 
-                    5 : self.tcfDependents[5], 
-                    6 : self.tcfDependents[6], 
-                    7 : self.tcfDependents[7], 
-                    8 : self.tcfDependents[8], 
-                    9 : self.tcfDependents[9]
-                 }
-
         # Create the control file 
         writeObject = codecs.open(self.cidTex, "w", encoding='utf_8')
         writeObject.write('% ' + fName(self.cidTex) + ' created: ' + tStamp() + '\n')
         # We allow for a number of different types of lines
-        for r in pieces :
-            if pieces[r][1] == 'input' :
-                if os.path.isfile(pieces[r][2]) :
-                    writeObject.write('\\' + pieces[r][1] + ' \"' + pieces[r][2] + '\"\n')
-            elif pieces[r][1] in ['stylesheet', 'ptxfile'] :
-                if os.path.isfile(pieces[r][2]) :
-                    writeObject.write('\\' + pieces[r][1] + '{' + pieces[r][2] + '}\n')
-            elif pieces[r][1] == 'command' :
-                writeObject.write('\\' + pieces[r][1] + '\n')
+        for r in self.tcfDependOrder :
+            if self.tcfDependOrder[r][1] == 'input' :
+                if os.path.isfile(self.tcfDependOrder[r][2]) :
+                    writeObject.write('\\' + self.tcfDependOrder[r][1] + ' \"' + self.tcfDependOrder[r][2] + '\"\n')
+            elif self.tcfDependOrder[r][1] in ['stylesheet', 'ptxfile'] :
+                if os.path.isfile(self.tcfDependOrder[r][2]) :
+                    writeObject.write('\\' + self.tcfDependOrder[r][1] + '{' + self.tcfDependOrder[r][2] + '}\n')
+            elif self.tcfDependOrder[r][1] == 'command' :
+                writeObject.write('\\' + self.tcfDependOrder[r][1] + '\n')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + pieces[r][0])
+                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + self.tcfDependOrder[r][0])
 
         # Finish the process
         writeObject.write('\\bye\n')
@@ -562,13 +545,25 @@ class Xetex (Manager) :
             9 : ['non', 'ptxfile',      self.cidUsfm,               'Component text file']
                                 }
 
+        # This is a list of files needed by the TeX control file in the order they need to be listed
+        self.tcfDependOrder =   {
+            1 : self.tcfDependents[1], 
+            2 : self.tcfDependents[2], 
+            3 : self.tcfDependents[3], 
+            4 : self.tcfDependents[4], 
+            5 : self.tcfDependents[5], 
+            6 : self.tcfDependents[6], 
+            7 : self.tcfDependents[7], 
+            8 : self.tcfDependents[8], 
+            9 : self.tcfDependents[9]
+                                }
+
         # With all the new values defined start running here
         self.makeTexControlDependents()
         self.setDependCheck()
         self.controlDependCheck()
         self.pdfDependCheck()
-        # Create the PDF (if needed)
-        if self.renderCidPdf() :
+        if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
                 writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' recreated, routing to PDF viewer.')
             else :

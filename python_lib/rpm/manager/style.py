@@ -65,13 +65,15 @@ class Style (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def installCompTypeStyles (self) :
+    def installCompTypeGlobalStyles (self) :
         '''If the source is from a PT project, check to see if there is a
         (project-wide) stylesheet to install. If not, we will make one.
         This file is required as a minimum for components of this type to
         render. This function must succeed.'''
 
-        if not os.path.isfile(self.mainStyleFile) :
+        globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+        if not os.path.isfile(globalStyFile) :
+            print 'not found: ', globalStyFile
             if self.sourceEditor.lower() == 'paratext' :
                 installPTStyles(self.project.local, self.mainStyleFile)
                 writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
