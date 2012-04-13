@@ -48,6 +48,7 @@ class Xetex (Manager) :
         self.cType                  = cType
         self.tcfDependents          = {}
         self.tcfDependOrder         = {}
+        self.pdfDependents          = {}
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
@@ -120,6 +121,16 @@ class Xetex (Manager) :
             self.makeSetTex()
             writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.setFile) + ' missing, created a new one.')
 
+# FIXME: These should be the final dependent fullfilments
+
+    def usfmDependCheck (self) :
+        pass
+
+
+    def makeUsfmDependents (self) :
+        pass
+
+#############################################################
 
     def controlDependCheck (self) :
         '''Dependency check for the main TeX control file. The cidTex is dependent on 
@@ -143,18 +154,15 @@ class Xetex (Manager) :
         '''This will check to see if all the dependents of the cidPdf
         file are younger than itself. If not, the cidPdf will be rendered.'''
 
-        # The cidPdf is the final product it is dependent on:
-        # cidTex
-        # FIXME: These need to be added yet
-        # cidAdj
-        # cidPics
-        # cidUsfm
-        
         # Create the PDF (if needed)
         if os.path.isfile(self.cidPdf) :
-            if isOlder(self.cidTex, self.cidPdf) :
-                self.renderCidPdf()
+            for r in self.pdfDependents :
+                if os.path.isfile(self.pdfDependents[r][1]) :
+                    if isOlder(self.cidPdf, self.pdfDependents[r][1]) :
+                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
+                        self.renderCidPdf()
         else :
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
             self.renderCidPdf()
 
 
@@ -207,8 +215,6 @@ class Xetex (Manager) :
 
                 else :
                     writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
-
-#                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Created: ' + fName(self.tcfDependents[r][2]))
 
 
     def renderCidPdf (self) :
@@ -333,7 +339,6 @@ class Xetex (Manager) :
         # Finish the process
         writeObject.write('\\bye\n')
         writeObject.close()
-        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.cidTex))
 
 
     def makeSetTex (self) :
@@ -545,6 +550,18 @@ class Xetex (Manager) :
             9 : ['non', 'ptxfile',      self.cidUsfm,               'Component text file']
                                 }
 
+        # PDF dependency files
+        self.pdfDependents =    {
+            1 : ['cidTex',  self.cidTex,    'Main TeX control file'],
+            2 : ['cidUsfm', self.cidUsfm,   'Text working file']
+                                }
+
+        # USFM dependency files
+        self.usfmDependents =   {
+            1 : ['cidAdj',  self.cidAdj,    'Component adjustment file'],
+            2 : ['cidPics', self.cidPics,   'Illustration placement file']
+                                }
+
         # This is a list of files needed by the TeX control file in the order they need to be listed
         self.tcfDependOrder =   {
             1 : self.tcfDependents[1], 
@@ -560,14 +577,16 @@ class Xetex (Manager) :
 
         # With all the new values defined start running here
         self.makeTexControlDependents()
+        self.makeUsfmDependents()
         self.setDependCheck()
         self.controlDependCheck()
+        self.usfmDependCheck()
         self.pdfDependCheck()
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' recreated, routing to PDF viewer.')
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' recreated, PDF viewer turned off.')
+                writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
 
 
 

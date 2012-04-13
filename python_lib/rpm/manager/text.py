@@ -81,9 +81,13 @@ class Text (Manager) :
         target = os.path.join(self.project.local.projTextFolder, cid + '.' + cType.lower())
 
         # Copy the source to the working text folder
-        if os.path.isfile(ptSource) :
-            shutil.copy(ptSource, target)
-
+        # FIXME: At some point dependency checking might need to be done
+        if not os.path.isfile(target) :
+            if os.path.isfile(ptSource) :
+                shutil.copy(ptSource, target)
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied [' + fName(ptSource) + '] to [' + fName(target) + '] in project.')
+            else :
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', ptSource + ' not found.')
 
 
 
