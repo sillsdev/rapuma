@@ -46,17 +46,9 @@ class Xetex (Manager) :
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
-        self.tcfDependents          = {}
-        self.tcfDependOrder         = {}
-        self.pdfDependents          = {}
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
-        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
-        self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
-        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.xetexOutputFolder      = os.path.join(self.project.local.projProcessFolder, 'Output')
 
         # This manager is dependent on usfm_Layout. Load it if needed.
@@ -104,10 +96,11 @@ class Xetex (Manager) :
 ###############################################################################
 
     def setDependCheck (self) :
-        # Dependency check for the main TeX settings file
-        # The setFile is dependent on:
-        # fontConfFile
-        # layoutConfFile
+        '''Dependency check for the main TeX settings file.
+            The setFile is dependent on:
+                fontConfFile
+                layoutConfFile'''
+
         if os.path.isfile(self.setFile) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
@@ -124,6 +117,11 @@ class Xetex (Manager) :
 # FIXME: These should be the final dependent fullfilments
 
     def usfmDependCheck (self) :
+    '''Dependency check for the USFM working text file.
+        The cidUsfm file is (or can be) dependent on:
+            cidAdj
+            cidPics
+            cidSty'''
         pass
 
 
@@ -167,10 +165,10 @@ class Xetex (Manager) :
 
 
     def makeTexControlDependents (self) :
-        # Using the information passed to this module created by other managers
-        # it will create all the final forms of files needed to render the
-        # current component with the XeTeX renderer. The final file made is
-        # the cidTex file which is needed to control rendering of the source.
+        '''Using the information passed to this module created by other managers
+        it will create all the final forms of files needed to render the
+        current component with the XeTeX renderer. The final file made is
+        the cidTex file which is needed to control rendering of the source.'''
 
         # Create (if needed) the above files in the order they are listed.
         # These files are dependents of the cidTex file
@@ -520,10 +518,13 @@ class Xetex (Manager) :
         use XeTeX to render it.'''
 
         # Now that we know the cid, set the rest of the file/path values we need
+        self.files                  = {}
+        self.primOut                = {}
         self.cid                    = cid
         self.cidUsfm                = os.path.join(self.project.local.projTextFolder, self.cid + '.usfm')
         self.cidPdf                 = os.path.join(self.xetexOutputFolder, self.cid + '.pdf')
         self.cidTex                 = os.path.join(self.project.local.projProcessFolder, self.cid + '.tex')
+        self.cidExt                 = os.path.join(self.project.local.projProcessFolder, self.cid + '-ext.tex')
         self.cidSty                 = os.path.join(self.project.local.projProcessFolder, self.cid + '.sty')
         self.cidAdj                 = os.path.join(self.project.local.projTextFolder, self.cid + '.adj')
         self.cidPics                = os.path.join(self.project.local.projTextFolder, self.cid + '.piclist')
@@ -536,44 +537,76 @@ class Xetex (Manager) :
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         self.setFile                = os.path.join(self.project.local.projProcessFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projProcessFolder, self.extFileName)
+        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
+        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
 
-        #   ID   pType  tType           Path & File Name            Description
-        self.tcfDependents =    { 
-            1 : ['mac', 'input',        self.macPackFile,           'Macro link file'], 
-            2 : ['set', 'input',        self.setFile,               'XeTeX main settings file'], 
-            3 : ['ext', 'input',        self.extFile,               'XeTeX extention settings file'], 
-            4 : ['glo', 'stylesheet',   self.globSty,               'Primary component type styles'], 
-            5 : ['cus', 'stylesheet',   self.custSty,               'Custom project styles (from ParaTExt)'], 
-            6 : ['sty', 'stylesheet',   self.cidSty,                'Component style override'], 
-            7 : ['hyp', 'input',        self.hyphenTexFile,         'XeTeX hyphenation data file'], 
-            8 : ['mar', 'input',        self.ptxMargVerseFile,      'Marginal verses extention macro'], 
-            9 : ['non', 'ptxfile',      self.cidUsfm,               'Component text file']
-                                }
+        # Process file information
+        #   ID                      tType           Required    Description
+        self.files      =   {
+            'cidPdf'            : ['None',          True,       'PDF output file'],
+            'cidTex'            : ['None',          True,       'Main TeX control file'],
+            'cidUsfm'           : ['input',         True,       'USFM text working file'],
+            'cidPics'           : ['None',          False,      'Scripture illustrations placement file'],
+            'cidAdj'            : ['None',          False,      'Scripture text adjustments file'],
+            'cidExt'            : ['input',         False,      'Component macro/extention and override file'],
+            'cidSty'            : ['stylesheet',    False,      'Component style override file'],
+            'custSty'           : ['stylesheet',    False,      'Custom project styles (from ParaTExt)'],
+            'globSty'           : ['stylesheet',    True,       'Primary global component type styles'],
+            'extFile'           : ['input',         False,      'XeTeX extention settings file'],
+            'setFile'           : ['input',         True,       'XeTeX main settings file'],
+            'macPackFile'       : ['input',         True,       'Macro package link file'],
+            'hyphenTexFile'     : ['input',         False,      'XeTeX hyphenation data file'],
+            'fontConfFile'      : ['None',          True,       'Project fonts configuration file'],
+            'layoutConfFile'    : ['None',          True,       'Project layout configuration file'],
+            'ptxMargVerseFile'  : ['None',          False,      'Marginal verses extention macro']
+                            }
 
-        # PDF dependency files
-        self.pdfDependents =    {
-            1 : ['cidTex',  self.cidTex,    'Main TeX control file'],
-            2 : ['cidUsfm', self.cidUsfm,   'Text working file']
-                                }
+        # Primary output files and their Dependencies
+            # OrderID      FileID     Dependencies List
+        self.primOut    =   {
+            1           : ['cidTex', ['cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']]
+            2           : ['cidPdf', ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']]
+                            }
+  
+#        #   ID   pType  tType           Path & File Name            Description
+#        self.tcfDependents =    { 
+#            1 : ['mac', 'input',        self.macPackFile,           'Macro link file'], 
+#            2 : ['set', 'input',        self.setFile,               'XeTeX main settings file'], 
+#            3 : ['ext', 'input',        self.extFile,               'XeTeX extention settings file'], 
+#            4 : ['glo', 'stylesheet',   self.globSty,               'Primary component type styles'], 
+#            5 : ['cus', 'stylesheet',   self.custSty,               'Custom project styles (from ParaTExt)'], 
+#            6 : ['hyp', 'input',        self.hyphenTexFile,         'XeTeX hyphenation data file'], 
+#            7 : ['mar', 'input',        self.ptxMargVerseFile,      'Marginal verses extention macro']
+#                                }
 
-        # USFM dependency files
-        self.usfmDependents =   {
-            1 : ['cidAdj',  self.cidAdj,    'Component adjustment file'],
-            2 : ['cidPics', self.cidPics,   'Illustration placement file']
-                                }
+#        # PDF dependency files
+#        self.pdfDependents =    {
+#            1 : ['cidTex',  self.cidTex,    'Main TeX control file'],
+#            2 : ['cidUsfm', self.cidUsfm,   'Text working file']
+#                                }
 
-        # This is a list of files needed by the TeX control file in the order they need to be listed
-        self.tcfDependOrder =   {
-            1 : self.tcfDependents[1], 
-            2 : self.tcfDependents[2], 
-            3 : self.tcfDependents[3], 
-            4 : self.tcfDependents[4], 
-            5 : self.tcfDependents[5], 
-            6 : self.tcfDependents[6], 
-            7 : self.tcfDependents[7], 
-            8 : self.tcfDependents[8], 
-            9 : self.tcfDependents[9]
-                                }
+#        # USFM dependency files
+#        self.usfmDependents =   {
+#            1 : ['cidAdj',  self.cidAdj,    'Component adjustment file'],
+#            2 : ['cidPics', self.cidPics,   'Illustration placement file'],
+#            3 : ['cidSty', 'stylesheet',   self.cidSty,                'Component style override']
+#                                }
+
+#        # This is a list of files needed by the TeX control file in the order they need to be listed
+#        self.tcfDependOrder =   {
+#            1 : self.tcfDependents[1], 
+#            2 : self.tcfDependents[2], 
+#            3 : self.tcfDependents[3], 
+#            4 : self.tcfDependents[4], 
+#            5 : self.tcfDependents[5], 
+#            6 : self.tcfDependents[6], 
+#            7 : self.tcfDependents[7], 
+#            8 : self.tcfDependents[8], 
+#            9 : self.tcfDependents[9]
+#                                }
 
         # With all the new values defined start running here
         self.makeTexControlDependents()
