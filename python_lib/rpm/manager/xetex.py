@@ -91,128 +91,22 @@ class Xetex (Manager) :
             256 : 'Something really awful happened.'
                                 }
 
+        # FIXME: I think this might need to be somewhere else eventually
+        # Add some ParaTExt values if needed/possible
+        try:
+            self.sourceEditor           = self.project.projConfig['CompTypes']['Usfm']
+            if self.sourceEditor.lower() == 'paratext' :
+                self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
+                self.ptSSFConf = parseSSF(self.ptSSFFile)
+        except :
+            pass
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def setDependCheck (self) :
-        '''Dependency check for the main TeX settings file.
-            The setFile is dependent on:
-                fontConfFile
-                layoutConfFile'''
 
-        if os.path.isfile(self.setFile) :
-            if isOlder(self.setFile, self.layoutConfFile) :
-                # Something changed in the layout conf file
-                self.makeSetTex()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Layout settings changed, ' + fName(self.setFile) + ' recreated.')
-            elif isOlder(self.setFile, self.fontConfFile) :
-                # Something changed in the font conf file
-                self.makeSetTex()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Font settings changed, ' + fName(self.setFile) + ' recreated.')
-        else :
-            self.makeSetTex()
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.setFile) + ' missing, created a new one.')
-
-# FIXME: These should be the final dependent fullfilments
-
-    def usfmDependCheck (self) :
-    '''Dependency check for the USFM working text file.
-        The cidUsfm file is (or can be) dependent on:
-            cidAdj
-            cidPics
-            cidSty'''
-        pass
-
-
-    def makeUsfmDependents (self) :
-        pass
-
-#############################################################
-
-    def controlDependCheck (self) :
-        '''Dependency check for the main TeX control file. The cidTex is dependent on 
-        files that are listed in self.tcfDependOrder. If any have changed since the
-        last time the cidTex was created, it will be recreated. If it is missing, it
-        will be created.'''
-
-        if os.path.isfile(self.cidTex) :
-            for r in self.tcfDependOrder :
-                if os.path.isfile(self.tcfDependOrder[r][2]) :
-                    if isOlder(self.cidTex, self.tcfDependOrder[r][2]) :
-                        # Something changed in this dependent file
-                        self.makeTexControlFile()
-                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
-        else :
-            self.makeTexControlFile()
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
-
-
-    def pdfDependCheck (self) :
-        '''This will check to see if all the dependents of the cidPdf
-        file are younger than itself. If not, the cidPdf will be rendered.'''
-
-        # Create the PDF (if needed)
-        if os.path.isfile(self.cidPdf) :
-            for r in self.pdfDependents :
-                if os.path.isfile(self.pdfDependents[r][1]) :
-                    if isOlder(self.cidPdf, self.pdfDependents[r][1]) :
-                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
-                        self.renderCidPdf()
-        else :
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
-            self.renderCidPdf()
-
-
-    def makeTexControlDependents (self) :
-        '''Using the information passed to this module created by other managers
-        it will create all the final forms of files needed to render the
-        current component with the XeTeX renderer. The final file made is
-        the cidTex file which is needed to control rendering of the source.'''
-
-        # Create (if needed) the above files in the order they are listed.
-        # These files are dependents of the cidTex file
-        for r in self.tcfDependents :
-            if not os.path.isfile(self.tcfDependents[r][2]) :
-                if self.tcfDependents[r][0] == 'mac' :
-                    self.copyInMacros()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'mar' :
-                    self.copyInMargVerse()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'set' :
-                    self.makeSetTex()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'ext' :
-                    self.makeTexExtentionsFile()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'sty' :
-                    self.project.managers[self.cType + '_Style'].createCompOverrideUsfmStyles(self.cid)
-                    continue
-
-                elif self.tcfDependents[r][0] == 'cus' :
-                    self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'glo' :
-                    self.project.managers[self.cType + '_Style'].installCompTypeGlobalStyles()
-                    continue
-
-                elif self.tcfDependents[r][0] == 'hyp' :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Hyphenation file creation not supported yet.')
-                    continue
-
-                elif self.tcfDependents[r][0] == 'non' :
-                    # This is being added in the Usfm compType too, do we want that?
-                    # I think we probably should but the function will need to be reworked.
-                    continue
-
-                else :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
 
 
     def renderCidPdf (self) :
@@ -254,7 +148,7 @@ class Xetex (Manager) :
             return True
 
 
-    def makeTexExtentionsFile (self) :
+    def makeExtFile (self) :
         '''Create/copy a TeX extentions file that has custom code for this project.'''
 
         rpmExtFile = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage, self.extFileName)
@@ -314,130 +208,188 @@ class Xetex (Manager) :
         return mCopy
 
 
-    def makeTexControlFile (self) :
+    def makeMacPackFile (self) :
+        return True
+    
+    def makeGlobSty (self) :
+        return True
+    
+    def makeCidUsfm (self) :
+    
+        if self.sourceEditor.lower() == 'paratext' :
+            self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
+            return True
+        else :
+            self.project.writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
+
+#    def makeCidExt (self) :
+#        return True
+
+    def makeCidTex (self) :
         '''Create the control file that will be used for rendering this
-        component.'''
+        component. This is run every time rendering is called on.'''
+
+        def setLine (fileName) :
+            '''Internal function to return the file name in a formated 
+            line according to the type it is.'''
+
+            if self.files[fileName][0] == 'input' :
+                if os.path.isfile(getattr(self, fileName)) :
+                    return '\\input \"' + getattr(self, fileName) + '\"\n'
+
+            elif self.files[fileName][0] in ['stylesheet', 'ptxfile'] :
+                if os.path.isfile(getattr(self, fileName)) :
+                    return '\\' + self.files[fileName][0] + '{' + getattr(self, fileName) + '}\n'
+
+        # Create or refresh any required files
+        for f in self.primOut['cidTex'] :
+            if str2bool(self.files[f][1]) :
+                if not getattr(self, 'make' + f[0].upper() + f[1:])() :
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Failed to create: ' + fName(getattr(self, f)) + ' This file is required.')
+                    return
+            else :
+                # FIXME: How do we make this work for files that need to be created by outside processes?
+                getattr(self, 'make' + f[0].upper() + f[1:])()
+                    
 
         # Create the control file 
         writeObject = codecs.open(self.cidTex, "w", encoding='utf_8')
         writeObject.write('% ' + fName(self.cidTex) + ' created: ' + tStamp() + '\n')
+        writeObject.write('% This file is auto-generated. Do not bother editing it.\n')
         # We allow for a number of different types of lines
-        for r in self.tcfDependOrder :
-            if self.tcfDependOrder[r][1] == 'input' :
-                if os.path.isfile(self.tcfDependOrder[r][2]) :
-                    writeObject.write('\\' + self.tcfDependOrder[r][1] + ' \"' + self.tcfDependOrder[r][2] + '\"\n')
-            elif self.tcfDependOrder[r][1] in ['stylesheet', 'ptxfile'] :
-                if os.path.isfile(self.tcfDependOrder[r][2]) :
-                    writeObject.write('\\' + self.tcfDependOrder[r][1] + '{' + self.tcfDependOrder[r][2] + '}\n')
-            elif self.tcfDependOrder[r][1] == 'command' :
-                writeObject.write('\\' + self.tcfDependOrder[r][1] + '\n')
-            else :
-                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type not supported: ' + self.tcfDependOrder[r][0])
+        for f in self.primOut['cidTex'] :
+            if setLine(f) :
+                writeObject.write(setLine(f))
 
         # Finish the process
         writeObject.write('\\bye\n')
         writeObject.close()
+        return True
 
 
-    def makeSetTex (self) :
-        '''Create the main settings file that XeTeX will use to render cidTex.'''
+    def makeSetFile (self) :
+        '''Create the main settings file that XeTeX will use in cidTex to render 
+        cidPdf. This is a required file so it will run every time. However, it
+        may not need to be remade. We will look for its exsistance and then compare 
+        it to its primary dependents to see if we actually need to do anything.'''
 
-        # Get the default and TeX macro values and merge them into one dictionary
-        x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
-        y = self.makeTexSettingsDict(self.macLayoutValFile)
-        macTexVals = dict(y.items() + x.items())
+        def makeIt () :
+            '''Internal function to build the setFile.'''
+        
+            # Get the default and TeX macro values and merge them into one dictionary
+            x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+            y = self.makeTexSettingsDict(self.macLayoutValFile)
+            macTexVals = dict(y.items() + x.items())
 
-        writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
-        writeObject.write('% ' + fName(self.setFile) + ' created: ' + tStamp() + '\n')
+            writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
+            writeObject.write('% ' + fName(self.setFile) + ' created: ' + tStamp() + '\n')
 
-        # Bring in the settings from the layoutConfig
-        cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
-        for section in cfg.keys() :
-            writeObject.write('\n% ' + section + '\n')
-            for k, v in cfg[section].iteritems() :
-                if testForSetting(macTexVals, k, 'usfmTex') :
-                    line = macTexVals[k]['usfmTex']
-                    # If there is a boolDepend then we don't need to output
-                    if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
-                        continue
-                    else :
-                        if self.hasPlaceHolder(line) :
-                            (ht, hk) = self.getPlaceHolder(line)
-                            # Just a plan value
-                            if ht == 'v' :
-                                line = self.insertValue(line, v)
-                            # A value that needs a measurement unit attached
-                            elif ht == 'vm' :
-                                line = self.insertValue(line, self.addMeasureUnit(v))
-                            # A value that is a path
-                            elif ht == 'path' :
-                                pth = getattr(self.project.local, hk)
-                                line = self.insertValue(line, pth)
+            # Bring in the settings from the layoutConfig
+            cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
+            for section in cfg.keys() :
+                writeObject.write('\n% ' + section + '\n')
+                for k, v in cfg[section].iteritems() :
+                    if testForSetting(macTexVals, k, 'usfmTex') :
+                        line = macTexVals[k]['usfmTex']
+                        # If there is a boolDepend then we don't need to output
+                        if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
+                            continue
+                        else :
+                            if self.hasPlaceHolder(line) :
+                                (ht, hk) = self.getPlaceHolder(line)
+                                # Just a plan value
+                                if ht == 'v' :
+                                    line = self.insertValue(line, v)
+                                # A value that needs a measurement unit attached
+                                elif ht == 'vm' :
+                                    line = self.insertValue(line, self.addMeasureUnit(v))
+                                # A value that is a path
+                                elif ht == 'path' :
+                                    pth = getattr(self.project.local, hk)
+                                    line = self.insertValue(line, pth)
 
-                    writeObject.write(line + '\n')
+                        writeObject.write(line + '\n')
 
-        # Add all the font def commands
-        writeObject.write('\n% Font Definitions\n')
-        fpath = ''
-        featureString = ''
-        for f in self.project.projConfig['CompTypes'][self.cType.capitalize()]['installedFonts'] :
-            fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
-            features = fInfo['FontInformation']['features']
-            # Create the primary fonts that will be used with TeX
-            if self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont'] == f :
-                writeObject.write('\n% These are normal use fonts for this type of component.\n')
+            # Add all the font def commands
+            writeObject.write('\n% Font Definitions\n')
+            fpath = ''
+            featureString = ''
+            for f in self.project.projConfig['CompTypes'][self.cType.capitalize()]['installedFonts'] :
+                fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
                 features = fInfo['FontInformation']['features']
-                for tf in fInfo :
-                    if tf[:8] == 'Typeface' :
-                        tmc = 0
-                        for tm in fInfo[tf]['texMapping'] :
-                            startDef    = '\\def\\' + fInfo[tf]['texMapping'][tmc] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]"
-                            endDef      = "\"}\n"
-                            featureString = ''
-                            for i in features :
-                                featureString += '/' + i
+                # Create the primary fonts that will be used with TeX
+                if self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont'] == f :
+                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
+                    features = fInfo['FontInformation']['features']
+                    for tf in fInfo :
+                        if tf[:8] == 'Typeface' :
+                            tmc = 0
+                            for tm in fInfo[tf]['texMapping'] :
+                                startDef    = '\\def\\' + fInfo[tf]['texMapping'][tmc] + '{'
+                                fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]"
+                                endDef      = "\"}\n"
+                                featureString = ''
+                                for i in features :
+                                    featureString += '/' + i
 
-                            modsString = ''
-                            for m in fInfo[tf]['modify'] :
-                                modsString += ':' + m
+                                modsString = ''
+                                for m in fInfo[tf]['modify'] :
+                                    modsString += ':' + m
 
-                            tmc +=1
-                            writeObject.write(startDef + fpath + featureString + modsString + endDef)
+                                tmc +=1
+                                writeObject.write(startDef + fpath + featureString + modsString + endDef)
 
-            else :
-                writeObject.write('\n% These are normal use fonts for this type of component.\n')
-                features = fInfo['FontInformation']['features']
-                for tf in fInfo :
-                    if tf[:8] == 'Typeface' :
-                        tmc = 0
-                        for tm in fInfo[tf]['texMapping'] :
-                            name = fInfo[tf]['name'].lower().replace(' ', '')
-                            startDef    = '\\def\\' + name + fInfo[tf]['texMapping'][tmc] + '{'
-                            fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]\""
-                            endDef      = "}\n"
-                            featureString = ''
-                            for i in features :
-                                featureString += ':' + i
+                else :
+                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
+                    features = fInfo['FontInformation']['features']
+                    for tf in fInfo :
+                        if tf[:8] == 'Typeface' :
+                            tmc = 0
+                            for tm in fInfo[tf]['texMapping'] :
+                                name = fInfo[tf]['name'].lower().replace(' ', '')
+                                startDef    = '\\def\\' + name + fInfo[tf]['texMapping'][tmc] + '{'
+                                fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]\""
+                                endDef      = "}\n"
+                                featureString = ''
+                                for i in features :
+                                    featureString += ':' + i
 
-                            modsString = ''
-                            for m in fInfo[tf]['modify'] :
-                                modsString += ':' + m
+                                modsString = ''
+                                for m in fInfo[tf]['modify'] :
+                                    modsString += ':' + m
 
-                            tmc +=1
-                            writeObject.write(startDef + fpath + featureString + modsString + endDef)
+                                tmc +=1
+                                writeObject.write(startDef + fpath + featureString + modsString + endDef)
 
-        # Add special custom commands (may want to parameterize these at some point)
-        writeObject.write('\n% Special commands\n')
-        writeObject.write('\catcode`@=11\n')
-        writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
-        writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
-        writeObject.write('\catcode `@=12\n')
-        writeObject.write('\\vfuzz=2.3pt\n')
+            # Add special custom commands (may want to parameterize these at some point)
+            writeObject.write('\n% Special commands\n')
+            writeObject.write('\catcode`@=11\n')
+            writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
+            writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
+            writeObject.write('\catcode `@=12\n')
+            writeObject.write('\\vfuzz=2.3pt\n')
 
-        # End here
-        writeObject.close()
-        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.setFile))
+            # End here
+            writeObject.close()
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.setFile))
+
+        # Start the main part of the function here
+
+        # Check for existance and age
+        if os.path.isfile(self.setFile) :
+            if isOlder(self.setFile, self.layoutConfFile) :
+                # Something changed in the layout conf file
+                makeIt()
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Layout settings changed, ' + fName(self.setFile) + ' recreated.')
+            elif isOlder(self.setFile, self.fontConfFile) :
+                # Something changed in the font conf file
+                makeIt()
+                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Font settings changed, ' + fName(self.setFile) + ' recreated.')
+        else :
+            makeIt()
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.setFile) + ' missing, created a new one.')
+
+        return True
 
 
     def addMeasureUnit (self, val) :
@@ -564,57 +516,23 @@ class Xetex (Manager) :
             'ptxMargVerseFile'  : ['None',          False,      'Marginal verses extention macro']
                             }
 
-        # Primary output files and their Dependencies
+        # Primary output files and their Dependencies (in necessary order)
             # OrderID      FileID     Dependencies List
         self.primOut    =   {
-            1           : ['cidTex', ['cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']]
-            2           : ['cidPdf', ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']]
+            'cidTex' : ['macPackFile', 'setFile', 'extFile', 'cidExt', 'globSty', 'custSty', 'cidSty', 'hyphenTexFile', 'cidUsfm'],
+            'cidPdf' : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']
                             }
-  
-#        #   ID   pType  tType           Path & File Name            Description
-#        self.tcfDependents =    { 
-#            1 : ['mac', 'input',        self.macPackFile,           'Macro link file'], 
-#            2 : ['set', 'input',        self.setFile,               'XeTeX main settings file'], 
-#            3 : ['ext', 'input',        self.extFile,               'XeTeX extention settings file'], 
-#            4 : ['glo', 'stylesheet',   self.globSty,               'Primary component type styles'], 
-#            5 : ['cus', 'stylesheet',   self.custSty,               'Custom project styles (from ParaTExt)'], 
-#            6 : ['hyp', 'input',        self.hyphenTexFile,         'XeTeX hyphenation data file'], 
-#            7 : ['mar', 'input',        self.ptxMargVerseFile,      'Marginal verses extention macro']
-#                                }
-
-#        # PDF dependency files
-#        self.pdfDependents =    {
-#            1 : ['cidTex',  self.cidTex,    'Main TeX control file'],
-#            2 : ['cidUsfm', self.cidUsfm,   'Text working file']
-#                                }
-
-#        # USFM dependency files
-#        self.usfmDependents =   {
-#            1 : ['cidAdj',  self.cidAdj,    'Component adjustment file'],
-#            2 : ['cidPics', self.cidPics,   'Illustration placement file'],
-#            3 : ['cidSty', 'stylesheet',   self.cidSty,                'Component style override']
-#                                }
-
-#        # This is a list of files needed by the TeX control file in the order they need to be listed
-#        self.tcfDependOrder =   {
-#            1 : self.tcfDependents[1], 
-#            2 : self.tcfDependents[2], 
-#            3 : self.tcfDependents[3], 
-#            4 : self.tcfDependents[4], 
-#            5 : self.tcfDependents[5], 
-#            6 : self.tcfDependents[6], 
-#            7 : self.tcfDependents[7], 
-#            8 : self.tcfDependents[8], 
-#            9 : self.tcfDependents[9]
-#                                }
 
         # With all the new values defined start running here
-        self.makeTexControlDependents()
-        self.makeUsfmDependents()
-        self.setDependCheck()
-        self.controlDependCheck()
-        self.usfmDependCheck()
-        self.pdfDependCheck()
+        self.makeCidTex()
+
+
+#        self.makeTexControlDependents()
+#        self.makeUsfmDependents()
+#        self.setDependCheck()
+#        self.controlDependCheck()
+#        self.usfmDependCheck()
+#        self.pdfDependCheck()
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
                 writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
@@ -624,55 +542,89 @@ class Xetex (Manager) :
 
 
 
-#    def makeFontInfoTexFile (self) :
-#        '''Create a TeX info font file that TeX will use for rendering.'''
+#    def controlDependCheck (self) :
+#        '''Dependency check for the main TeX control file. The cidTex is dependent on 
+#        files that are listed in self.tcfDependOrder. If any have changed since the
+#        last time the cidTex was created, it will be recreated. If it is missing, it
+#        will be created.'''
 
-#        # We will not make this file if it is already there
-#        fontInfoFileName = os.path.join(self.project.processFolder,'fonts.tex')
-#        # The rule is that we only create this file if it is not there,
-#        # otherwise it will silently fail.  If one already exists the file will
-#        # need to be removed by some other process before it can be recreated.
-#        sCType = self.cType.capitalize()
-#        if not os.path.isfile(fontInfoFileName) :
-#            writeObject = codecs.open(fontInfoFileName, "w", encoding='utf_8')
-#            writeObject.write('% fonts.tex' + ' created: ' + tStamp() + '\n')
-#            for f in self.project.projConfig['CompTypes'][sCType]['installedFonts'] :
-#                fInfo = self.project.projConfig['Fonts'][f]
-#                # Create the primary fonts that will be used with TeX
-#                if self.project.projConfig['CompTypes'][sCType]['primaryFont'] == f :
-#                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
-#                    features = fInfo['FontInformation']['features']
-#                    for tf in fInfo :
-#                        if tf[:8] == 'Typeface' :
-#                            # Make all our line components (More will need to be added)
-#                            startDef    = '\\def\\' + fInfo[tf]['texMapping'] + '{'
-#                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
-#                            endDef      = "}\n"
-#                            featureString = ''
-#                            for i in features :
-#                                featureString += ':' + i
+#        if os.path.isfile(self.cidTex) :
+#            for r in self.tcfDependOrder :
+#                if os.path.isfile(self.tcfDependOrder[r][2]) :
+#                    if isOlder(self.cidTex, self.tcfDependOrder[r][2]) :
+#                        # Something changed in this dependent file
+#                        self.makeTexControlFile()
+#                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
+#        else :
+#            self.makeTexControlFile()
+#            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
 
-#                            writeObject.write(startDef + fpath + featureString + endDef)
 
-#                # Create defs with secondary fonts for special use with TeX in publication
+#    def pdfDependCheck (self) :
+#        '''This will check to see if all the dependents of the cidPdf
+#        file are younger than itself. If not, the cidPdf will be rendered.'''
+
+#        # Create the PDF (if needed)
+#        if os.path.isfile(self.cidPdf) :
+#            for r in self.pdfDependents :
+#                if os.path.isfile(self.pdfDependents[r][1]) :
+#                    if isOlder(self.cidPdf, self.pdfDependents[r][1]) :
+#                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
+#                        self.renderCidPdf()
+#        else :
+#            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
+#            self.renderCidPdf()
+
+
+#    def makeTexControlDependents (self) :
+#        '''Using the information passed to this module created by other managers
+#        it will create all the final forms of files needed to render the
+#        current component with the XeTeX renderer. The final file made is
+
+#        the cidTex file which is needed to control rendering of the source.'''
+
+#        # Create (if needed) the above files in the order they are listed.
+#        # These files are dependents of the cidTex file
+#        for r in self.tcfDependents :
+#            if not os.path.isfile(self.tcfDependents[r][2]) :
+#                if self.tcfDependents[r][0] == 'mac' :
+#                    self.copyInMacros()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'mar' :
+#                    self.copyInMargVerse()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'set' :
+#                    self.makeSetTex()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'ext' :
+#                    self.makeTexExtentionsFile()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'sty' :
+#                    self.project.managers[self.cType + '_Style'].createCompOverrideUsfmStyles(self.cid)
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'cus' :
+#                    self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'glo' :
+#                    self.project.managers[self.cType + '_Style'].installCompTypeGlobalStyles()
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'hyp' :
+#                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Hyphenation file creation not supported yet.')
+#                    continue
+
+#                elif self.tcfDependents[r][0] == 'non' :
+#                    # This is being added in the Usfm compType too, do we want that?
+#                    # I think we probably should but the function will need to be reworked.
+#                    continue
+
 #                else :
-#                    writeObject.write('\n% These are special use fonts for this type of component.\n')
-#                    features = fInfo['FontInformation']['features']
-#                    for tf in fInfo :
-#                        if tf[:8] == 'Typeface' :
-#                            # Make all our line components (More will need to be added)
-#                            startDef    = '\\def\\' + f.lower() + tf[8:].lower() + '{'
-#                            fpath       = "\"[" + os.path.join('..', self.project.fontsFolder, fInfo[tf]['file']) + "]\""
-#                            endDef      = "}\n"
-#                            featureString = ''
-#                            for i in features :
-#                                featureString += ':' + i
-
-#                            writeObject.write(startDef + fpath + featureString + endDef)
-
-#            # Finish the process
-#            writeObject.close()
-#            return True
-
+#                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
 
 
