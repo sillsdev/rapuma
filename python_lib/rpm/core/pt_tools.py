@@ -58,6 +58,7 @@ def installPTCustomStyles (local, customStyleFile) :
     # we will need to make this more sophisticated.
     if os.path.isfile(ptCustomStyles) :
         shutil.copy(ptCustomStyles, projCustomStyles)
+        return True
 
 
 def parseSSF (fileName) :

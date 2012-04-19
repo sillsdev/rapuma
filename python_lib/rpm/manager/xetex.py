@@ -24,6 +24,7 @@ import os, shutil
 
 # Load the local classes
 from tools import *
+from pt_tools import *
 from manager import Manager
 
 
@@ -50,10 +51,13 @@ class Xetex (Manager) :
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
         self.xetexOutputFolder      = os.path.join(self.project.local.projProcessFolder, 'Output')
+        self.layoutConfig           = {}
 
         # This manager is dependent on usfm_Layout. Load it if needed.
         if 'usfm_Layout' not in self.project.managers :
             self.project.createManager(self.cType, 'layout')
+
+        self.layoutConfig           = self.project.managers[self.cType + '_Layout'].layoutConfig
 
         # Get persistant values from the config if there are any
         # We assume at this point that if the merge has already taken place,
@@ -63,18 +67,19 @@ class Xetex (Manager) :
         # be writing this file out every time as it causes the PDF to get
         # rendered every time, which is not helpful.
         try :
-            version = self.project.managers[self.cType + '_Layout'].layoutConfig['GeneralSettings']['usfmTexVersion']
+            version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
             writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Version number present, not running persistant values: layout.__init__()')
         except :
             # No version number means we need to merge the default and usfmTex layout settings
-            newSectionSettings = getPersistantSettings(project.managers['usfm_Layout'].layoutConfig, self.macLayoutValFile)
-            if newSectionSettings != self.project.managers['usfm_Layout'].layoutConfig :
-                project.managers['usfm_Layout'].layoutConfig = newSectionSettings
+            newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
+            if newSectionSettings != self.layoutConfig :
+                self.project.managers[self.cType + '_Layout'].layoutConfig = newSectionSettings
 
             macVals = ConfigObj(getXMLSettings(self.macLayoutValFile))
             layoutCopy = ConfigObj(self.project.local.layoutConfFile)
             layoutCopy.merge(macVals)
             self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
+            self.layoutConfig = layoutCopy
             writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
             writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
 
@@ -91,27 +96,15 @@ class Xetex (Manager) :
             256 : 'Something really awful happened.'
                                 }
 
-        # FIXME: I think this might need to be somewhere else eventually
-        # Add some ParaTExt values if needed/possible
-        try:
-            self.sourceEditor           = self.project.projConfig['CompTypes']['Usfm']
-            if self.sourceEditor.lower() == 'paratext' :
-                self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
-                self.ptSSFConf = parseSSF(self.ptSSFFile)
-        except :
-            pass
-
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-
-
-
-    def renderCidPdf (self) :
-        # By this point all the files necessary to render this component should be in place
-        # Here we do the rendering process. The result should be a PDF file.
+    def makeCidPdf (self) :
+        # When this is called all the files necessary to render this component 
+        # should be in place. Here we do the rendering process. The result 
+        # should be a PDF file.
 
         # Create the environment that XeTeX will use. This will be temporarily set
         # just before XeTeX is run.
@@ -137,17 +130,6 @@ class Xetex (Manager) :
             writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
 
 
-    def displayPdfOutput (self, pdfFile) :
-        '''Display a PDF XeTeX output file if that is turned on.'''
-
-        if str2bool(self.usePdfViewer) :
-            # Build the viewer command
-            command = self.pdfViewer + ' ' + pdfFile + ' &'
-            rCode = os.system(command)
-            # FIXME: May want to analyse the return code from viewer
-            return True
-
-
     def makeExtFile (self) :
         '''Create/copy a TeX extentions file that has custom code for this project.'''
 
@@ -167,63 +149,51 @@ class Xetex (Manager) :
                 writeObject.close()
                 writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.extFile))
 
-
-    def copyInMargVerse (self) :
-        '''Copy in the marginalverse macro package.'''
-
-        macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(macrosTarget) :
-            os.makedirs(macrosTarget)
-
-        if not os.path.isfile(self.ptxMargVerseFile) :
-            shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
-            return True
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
-
-
-    def copyInMacros (self) :
-        '''Copy in the right macro set for this component and renderer combination.'''
-
-        macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-        copyExempt      = [self.extFile]
-
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(macrosTarget) :
-            os.makedirs(macrosTarget)
-
-        mCopy = False
-        for root, dirs, files in os.walk(macrosSource) :
-            for f in files :
-                fTarget = os.path.join(macrosTarget, f)
-                if f not in copyExempt :
-                    if not os.path.isfile(fTarget) :
-                        shutil.copy(os.path.join(macrosSource, f), fTarget)
-                        mCopy = True
-                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
-
-        return mCopy
-
+#####################################################################################################
 
     def makeMacPackFile (self) :
+        '''Install the macro package we need to render this component.'''
+
+        # Copy in the standard package
+        self.copyInMacros()
+
+        # If we are using marginal verses then we will need this
+        if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
+            self.copyInMargVerse()
+        else :
+            self.removeMargVerse()
+
+        # Make the usfmTex.tex file that will link the project with
+        # the macro package. Customize it as needed.
+        
+        # FIXME: We will need some way to know what the possible files are
+        # then look for them and add them as we find them.
+
         return True
-    
+
+#######################################################################################################
+
     def makeGlobSty (self) :
-        return True
-    
-    def makeCidUsfm (self) :
-    
-        if self.sourceEditor.lower() == 'paratext' :
-            self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
+        '''The Global style file is required for rendering but it is created/aquired
+        by the component type manager. This will check to see if it is there, and
+        try to quite gracefully if it is not.'''
+
+        if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            self.project.writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Source editor [' + self.sourceEditor + '] is not supported yet.')
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
 
-#    def makeCidExt (self) :
-#        return True
+
+    def makeCidUsfm (self) :
+        '''The USFM source text needs to be handled by the text manager and component type.
+        This file is required so if it has not been created and the system got this far
+        this function will report the missing file and try to quite gracefully.'''
+
+        if os.path.isfile(self.cidUsfm) :
+            return True
+        else :
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+
 
     def makeCidTex (self) :
         '''Create the control file that will be used for rendering this
@@ -243,13 +213,20 @@ class Xetex (Manager) :
 
         # Create or refresh any required files
         for f in self.primOut['cidTex'] :
+            # This is for required files, if something fails here we should die
             if str2bool(self.files[f][1]) :
                 if not getattr(self, 'make' + f[0].upper() + f[1:])() :
                     writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Failed to create: ' + fName(getattr(self, f)) + ' This file is required.')
                     return
+            # Non required files are handled different we will look for
+            # each one and try to make it if it is not there but will 
+            # not complain if we cannot do it
             else :
-                # FIXME: How do we make this work for files that need to be created by outside processes?
-                getattr(self, 'make' + f[0].upper() + f[1:])()
+                if not os.path.isfile(getattr(self, f)) :
+                    try :
+                        getattr(self, 'make' + f[0].upper() + f[1:])()
+                    except :
+                        pass
                     
 
         # Create the control file 
@@ -392,6 +369,69 @@ class Xetex (Manager) :
         return True
 
 
+###############################################################################
+############################ Local Support Functions ##########################
+###############################################################################
+
+    def displayPdfOutput (self, pdfFile) :
+        '''Display a PDF XeTeX output file if that is turned on.'''
+
+        if str2bool(self.usePdfViewer) :
+            # Build the viewer command
+            command = self.pdfViewer + ' ' + pdfFile + ' &'
+            rCode = os.system(command)
+            # FIXME: May want to analyse the return code from viewer
+            return True
+
+
+    def copyInMargVerse (self) :
+        '''Copy in the marginalverse macro package.'''
+
+        macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+
+        # Copy in to the process folder the macro package for this component
+        if not os.path.isdir(macrosTarget) :
+            os.makedirs(macrosTarget)
+
+        if not os.path.isfile(self.ptxMargVerseFile) :
+            shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            return True
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
+
+
+    def removeMargVerse (self) :
+        '''Remove the marginal verse macro package from the project.'''
+
+        if os.path.isfile(self.ptxMargVerseFile) :
+            os.remove(self.ptxMargVerseFile)
+            return True
+
+
+    def copyInMacros (self) :
+        '''Copy in the right macro set for this component and renderer combination.'''
+
+        macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+        copyExempt      = [fName(self.extFile), fName(self.ptxMargVerseFile)]
+
+        # Copy in to the process folder the macro package for this component
+        if not os.path.isdir(macrosTarget) :
+            os.makedirs(macrosTarget)
+
+        mCopy = False
+        for root, dirs, files in os.walk(macrosSource) :
+            for f in files :
+                fTarget = os.path.join(macrosTarget, f)
+                if fName(f) not in copyExempt :
+                    if not os.path.isfile(fTarget) :
+                        shutil.copy(os.path.join(macrosSource, f), fTarget)
+                        mCopy = True
+                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
+
+        return mCopy
+
+
     def addMeasureUnit (self, val) :
         '''Return the value with the specified measurement unit attached.'''
         
@@ -465,6 +505,10 @@ class Xetex (Manager) :
             raise IOError, "Can't open " + xmlFile
 
 
+###############################################################################
+################################# Main Function ###############################
+###############################################################################
+
     def run (self, cid) :
         '''This will check all the dependencies for a component and then
         use XeTeX to render it.'''
@@ -498,7 +542,7 @@ class Xetex (Manager) :
         # Process file information
         #   ID                      tType           Required    Description
         self.files      =   {
-            'cidPdf'            : ['None',          True,       'PDF output file'],
+            'cidPdf'            : ['None',          False,       'PDF output file'],
             'cidTex'            : ['None',          True,       'Main TeX control file'],
             'cidUsfm'           : ['input',         True,       'USFM text working file'],
             'cidPics'           : ['None',          False,      'Scripture illustrations placement file'],
@@ -527,12 +571,12 @@ class Xetex (Manager) :
         self.makeCidTex()
 
 
-#        self.makeTexControlDependents()
-#        self.makeUsfmDependents()
-#        self.setDependCheck()
-#        self.controlDependCheck()
-#        self.usfmDependCheck()
-#        self.pdfDependCheck()
+# FIXME: This is where we need to do the dependency checking on all the possible
+# files that could effect the rendering of the PDF file
+
+        self.makeCidPdf()
+        
+        # Review the results if desired
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
                 writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')

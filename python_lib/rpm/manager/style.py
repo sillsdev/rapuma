@@ -73,7 +73,6 @@ class Style (Manager) :
 
         globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
         if not os.path.isfile(globalStyFile) :
-            print 'not found: ', globalStyFile
             if self.sourceEditor.lower() == 'paratext' :
                 installPTStyles(self.project.local, self.mainStyleFile)
                 writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
@@ -85,8 +84,8 @@ class Style (Manager) :
         '''If the source is from a PT project, check to see if there is a
         (project-wide) custom stylesheet to install. If not, we are done.
         This style file is not required.'''
-
-        if not os.path.isfile(self.customStyleFile) :
+        cusStyFile = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
+        if not os.path.isfile(cusStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
                 if not installPTCustomStyles(self.project.local, self.customStyleFile) :
                     writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style file in PT project not found.')
