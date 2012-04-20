@@ -51,6 +51,11 @@ class Xetex (Manager) :
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
         self.xetexOutputFolder      = os.path.join(self.project.local.projProcessFolder, 'Output')
+        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
+        self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+        self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
+        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.layoutConfig           = {}
 
         # This manager is dependent on usfm_Layout. Load it if needed.
@@ -149,29 +154,38 @@ class Xetex (Manager) :
                 writeObject.close()
                 writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.extFile))
 
-#####################################################################################################
 
-    def makeMacPackFile (self) :
-        '''Install the macro package we need to render this component.'''
+    def makeUsfmMacLinkFile (self) :
+        '''Create the main macro link file for the USFM macro package 
+        and install the package we need to render this component. This
+        function is hard coded for this macro package. A more generalized
+        way may be needed.'''
 
         # Copy in the standard package
-        self.copyInMacros()
+        self.copyInMacros(self.cType)
+
+        mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+
+        # Make the macLinkFile file that will link the project with
+        # the macro package. Customize it as needed.
+
+        macLinkFile = getattr(self, self.cType + 'MacLinkFile')
+        writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
+        writeObject.write('% ' + fName(macLinkFile) + ' created: ' + tStamp() + '\n')
+        writeObject.write('\\input \"' + mainMacroFile + '\"\n')
 
         # If we are using marginal verses then we will need this
         if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
             self.copyInMargVerse()
+            writeObject.write('\\input \"' + self.ptxMargVerseFile + '\"\n')
         else :
             self.removeMargVerse()
 
-        # Make the usfmTex.tex file that will link the project with
-        # the macro package. Customize it as needed.
-        
-        # FIXME: We will need some way to know what the possible files are
-        # then look for them and add them as we find them.
+        writeObject.close()
+        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(macLinkFile))
 
         return True
 
-#######################################################################################################
 
     def makeGlobSty (self) :
         '''The Global style file is required for rendering but it is created/aquired
@@ -215,8 +229,10 @@ class Xetex (Manager) :
         for f in self.primOut['cidTex'] :
             # This is for required files, if something fails here we should die
             if str2bool(self.files[f][1]) :
-                if not getattr(self, 'make' + f[0].upper() + f[1:])() :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Failed to create: ' + fName(getattr(self, f)) + ' This file is required.')
+                try :
+                    getattr(self, 'make' + f[0].upper() + f[1:])()
+                except :
+                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
                     return
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
@@ -408,28 +424,31 @@ class Xetex (Manager) :
             return True
 
 
-    def copyInMacros (self) :
+    def copyInMacros (self, cType) :
         '''Copy in the right macro set for this component and renderer combination.'''
 
-        macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
-        copyExempt      = [fName(self.extFile), fName(self.ptxMargVerseFile)]
+        if cType.lower() == 'usfm' :
+            macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
+            macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+            copyExempt      = [fName(self.extFile), fName(self.ptxMargVerseFile)]
 
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(macrosTarget) :
-            os.makedirs(macrosTarget)
+            # Copy in to the process folder the macro package for this component
+            if not os.path.isdir(macrosTarget) :
+                os.makedirs(macrosTarget)
 
-        mCopy = False
-        for root, dirs, files in os.walk(macrosSource) :
-            for f in files :
-                fTarget = os.path.join(macrosTarget, f)
-                if fName(f) not in copyExempt :
-                    if not os.path.isfile(fTarget) :
-                        shutil.copy(os.path.join(macrosSource, f), fTarget)
-                        mCopy = True
-                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
+            mCopy = False
+            for root, dirs, files in os.walk(macrosSource) :
+                for f in files :
+                    fTarget = os.path.join(macrosTarget, f)
+                    if fName(f) not in copyExempt :
+                        if not os.path.isfile(fTarget) :
+                            shutil.copy(os.path.join(macrosSource, f), fTarget)
+                            mCopy = True
+                            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
 
-        return mCopy
+            return mCopy
+        else :
+            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'No macro package for : ' + cType)
 
 
     def addMeasureUnit (self, val) :
@@ -533,11 +552,10 @@ class Xetex (Manager) :
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         self.setFile                = os.path.join(self.project.local.projProcessFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projProcessFolder, self.extFileName)
-        self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
-        self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
-        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
+
+        # The macro link file is named according to the type of component
+        setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projProcessFolder, self.cType + 'MacLinkFile.tex'))
+        macLinkFile = self.cType + 'MacLinkFile'
 
         # Process file information
         #   ID                      tType           Required    Description
@@ -553,6 +571,7 @@ class Xetex (Manager) :
             'globSty'           : ['stylesheet',    True,       'Primary global component type styles'],
             'extFile'           : ['input',         False,      'XeTeX extention settings file'],
             'setFile'           : ['input',         True,       'XeTeX main settings file'],
+             macLinkFile        : ['input',         True,       'Macro package link file'],
             'macPackFile'       : ['input',         True,       'Macro package link file'],
             'hyphenTexFile'     : ['input',         False,      'XeTeX hyphenation data file'],
             'fontConfFile'      : ['None',          True,       'Project fonts configuration file'],
@@ -563,19 +582,29 @@ class Xetex (Manager) :
         # Primary output files and their Dependencies (in necessary order)
             # OrderID      FileID     Dependencies List
         self.primOut    =   {
-            'cidTex' : ['macPackFile', 'setFile', 'extFile', 'cidExt', 'globSty', 'custSty', 'cidSty', 'hyphenTexFile', 'cidUsfm'],
-            'cidPdf' : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'macPackFile', 'hyphenTexFile']
+            'cidTex' : [macLinkFile, 'setFile', 'extFile', 'cidExt', 'globSty', 'custSty', 'cidSty', 'hyphenTexFile', 'cidUsfm'],
+            'cidPdf' : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
                             }
 
         # With all the new values defined start running here
         self.makeCidTex()
 
+        # Create the PDF (if needed)
+        render = False
+        if os.path.isfile(self.cidPdf) :
+            for k in self.primOut['cidPdf'] :
+                thisFile = getattr(self, k)
+                if os.path.isfile(thisFile) :
+                    if isOlder(self.cidPdf, thisFile) :
+                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(thisFile) + ' the ' + fName(self.cidPdf) + ' needs to be rerendered.')
+                        render = True
+        else :
+            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
+            render = True
 
-# FIXME: This is where we need to do the dependency checking on all the possible
-# files that could effect the rendering of the PDF file
+        if render :
+            self.makeCidPdf()
 
-        self.makeCidPdf()
-        
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :

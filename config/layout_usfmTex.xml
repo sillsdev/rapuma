@@ -34,7 +34,7 @@ Todo:
             <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
             <key>useMarginalVerses</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
         <setting>
             <name>USFM TeX After Verse Space Factor</name>
