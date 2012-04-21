@@ -564,7 +564,7 @@ class Xetex (Manager) :
         self.files      =   {
             'cidPdf'            : ['None',          False,       'PDF output file'],
             'cidTex'            : ['None',          True,       'Main TeX control file'],
-            'cidUsfm'           : ['input',         True,       'USFM text working file'],
+            'cidUsfm'           : ['ptxfile',       True,       'USFM text working file'],
             'cidPics'           : ['None',          False,      'Scripture illustrations placement file'],
             'cidAdj'            : ['None',          False,      'Scripture text adjustments file'],
             'cidExt'            : ['input',         False,      'Component macro/extention and override file'],
@@ -589,7 +589,7 @@ class Xetex (Manager) :
                             }
 
         # With all the new values defined start running here
-#        self.makeCidTex()
+        self.makeCidTex()
 
         # Create the PDF (if needed)
         render = False
