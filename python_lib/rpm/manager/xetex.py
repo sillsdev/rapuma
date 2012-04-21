@@ -113,10 +113,12 @@ class Xetex (Manager) :
 
         # Create the environment that XeTeX will use. This will be temporarily set
         # just before XeTeX is run.
-        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacPackFolder + ':.'
+        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacPackFolder + ':' + self.project.local.projProcessFolder + ':.'
 
         # Create the command XeTeX will run with
         command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + self.cidTex
+
+        print command
 
         # Create the output folder, XeTeX will fail without it
         if not os.path.isdir(self.xetexOutputFolder) :
@@ -587,7 +589,7 @@ class Xetex (Manager) :
                             }
 
         # With all the new values defined start running here
-        self.makeCidTex()
+#        self.makeCidTex()
 
         # Create the PDF (if needed)
         render = False
