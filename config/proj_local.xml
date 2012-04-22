@@ -124,16 +124,16 @@ Todo:
         <setting>
             <name>Project Process Folder</name>
             <key>projProcessFolder</key>
-            <description>The main project processing folder.</description>
+            <description>The main project components processing folder.</description>
             <type>string</type>
-            <value>Process</value>
+            <value>Components</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
             <key>projMacrosFolder</key>
             <description>The folder where all processing scripts and macros are kept.</description>
-            <type>list</type>
-            <value>Process,Macros</value>
+            <type>string</type>
+            <value>Macros</value>
         </setting>
         <setting>
             <name>Project Fonts Folder</name>
@@ -141,13 +141,6 @@ Todo:
             <description>The folder where all the fonts for a project are kept.</description>
             <type>string</type>
             <value>Fonts</value>
-        </setting>
-        <setting>
-            <name>Project Text Folder</name>
-            <key>projTextFolder</key>
-            <description>The folder where all working text to be processed is kept.</description>
-            <type>string</type>
-            <value>WorkingText</value>
         </setting>
         <setting>
             <name>Project Hyphenation Folder</name>

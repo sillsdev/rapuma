@@ -77,8 +77,13 @@ class Text (Manager) :
             writeToLog(self.project.local, self.project.userConfig, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
             return
 
+        # Make target folder if needed
+        targetFolder = os.path.join(self.project.local.projProcessFolder, cid)
+        if not os.path.isdir(targetFolder) :
+            os.makedirs(targetFolder)
+
         ptSource = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
-        target = os.path.join(self.project.local.projTextFolder, cid + '.' + cType.lower())
+        target = os.path.join(targetFolder, cid + '.' + cType.lower())
 
         # Copy the source to the working text folder
         # FIXME: At some point dependency checking might need to be done

@@ -50,7 +50,6 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
-        self.xetexOutputFolder      = os.path.join(self.project.local.projProcessFolder, 'Output')
         self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
         self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
@@ -116,13 +115,7 @@ class Xetex (Manager) :
         texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacPackFolder + ':' + self.project.local.projProcessFolder + ':.'
 
         # Create the command XeTeX will run with
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.xetexOutputFolder + ' ' + self.cidTex
-
-        print command
-
-        # Create the output folder, XeTeX will fail without it
-        if not os.path.isdir(self.xetexOutputFolder) :
-            os.makedirs(self.xetexOutputFolder)
+        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
 
         # Run XeTeX and collect the return code for analysis
         rCode = -1
@@ -538,13 +531,14 @@ class Xetex (Manager) :
         self.files                  = {}
         self.primOut                = {}
         self.cid                    = cid
-        self.cidUsfm                = os.path.join(self.project.local.projTextFolder, self.cid + '.usfm')
-        self.cidPdf                 = os.path.join(self.xetexOutputFolder, self.cid + '.pdf')
-        self.cidTex                 = os.path.join(self.project.local.projProcessFolder, self.cid + '.tex')
+        self.cidFolder              = os.path.join(self.project.local.projProcessFolder, self.cid)
+        self.cidUsfm                = os.path.join(self.cidFolder, self.cid + '.usfm')
+        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
+        self.cidTex                 = os.path.join(self.cidFolder, self.cid + '.tex')
         self.cidExt                 = os.path.join(self.project.local.projProcessFolder, self.cid + '-ext.tex')
         self.cidSty                 = os.path.join(self.project.local.projProcessFolder, self.cid + '.sty')
-        self.cidAdj                 = os.path.join(self.project.local.projTextFolder, self.cid + '.adj')
-        self.cidPics                = os.path.join(self.project.local.projTextFolder, self.cid + '.piclist')
+        self.cidAdj                 = os.path.join(self.cidFolder, self.cid + '.adj')
+        self.cidPics                = os.path.join(self.cidFolder, self.cid + '.piclist')
         self.custSty                = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
         self.globSty                = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
@@ -554,6 +548,10 @@ class Xetex (Manager) :
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         self.setFile                = os.path.join(self.project.local.projProcessFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projProcessFolder, self.extFileName)
+        
+        # Make sure we have a component folder in place before we do anything
+        if not os.path.isdir(self.cidFolder) :
+            os.makedirs(self.cidFolder)
 
         # The macro link file is named according to the type of component
         setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projProcessFolder, self.cType + 'MacLinkFile.tex'))
