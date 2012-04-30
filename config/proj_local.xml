@@ -203,6 +203,13 @@ Todo:
             <type>list</type>
             <value>resources,lib_share,illustrations</value>
         </setting>
+        <setting>
+            <name>RPM Examples Folder</name>
+            <key>rpmExamplesFolder</key>
+            <description>The rpm examples folder where various test projects are kept.</description>
+            <type>list</type>
+            <value>resources,lib_examples</value>
+        </setting>
     </section>
 </root>
 

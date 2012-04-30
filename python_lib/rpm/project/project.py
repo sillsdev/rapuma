@@ -236,7 +236,7 @@ class Project (object) :
 ###############################################################################
 
 
-    def run(self, command, opts, userConfig) :
+    def run (self, command, opts, userConfig) :
         '''Run a command'''
 
         if command in self.commands :
