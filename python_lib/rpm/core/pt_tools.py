@@ -93,6 +93,6 @@ def parseSSF (fileName) :
     '''Parse a Paratext SSF file and return a configobj to be used in
     other processes.'''
 
-    return xmlfiletodict(head + '.' + tail.upper())
+    return xmlfiletodict(fileName)
 
 

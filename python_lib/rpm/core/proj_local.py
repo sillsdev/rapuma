@@ -76,7 +76,6 @@ class ProjLocal (object) :
         # Extract just the file names from these
         localTypes = ['ProjFiles', 'UserFiles', 'RpmFiles']
 
-
         # Add some additional necessary params
         self.lockExt = '.lock'
 

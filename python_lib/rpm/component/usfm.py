@@ -105,19 +105,24 @@ class Usfm (Component) :
         if self.sourceEditor.lower() == 'paratext' :
             ptPath = os.path.dirname(self.project.local.projHome)
             projID = os.path.split(ptPath)[1]
-            print projID
+            ssfFile = os.path.join(ptPath, projID + '.ssf')
+            print ssfFile
+            # PT can have either an uc or lc extention. This
+            # will test for both and assumes that if it is using
+            # uc, the whole name will be uc, otherwise, just the
+            # the extention is lc.
             
-if os.path.isfile(head + '.' + tail.upper()) :
-    return xmlfiletodict(head + '.' + tail.upper())
-elif os.path.isfile(head + '.' + tail.lower()) :
-    return xmlfiletodict(head + '.' + tail.lower())
-else :
-    terminal('Cannot find: ' + fName(fileName))
+# The big issue now is we don't know where we might be when we run this. Normally
+# we are in the projHome but if this is a demo run for the first time, we might
+# be in the source home area. What to do?
+            
+            if os.path.isfile(os.path.join(ptPath, projID + '.SSF')) :
+                self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, projID + '.SSF'))
+            elif os.path.isfile(os.path.join(ptPath, projID + '.ssf')) :
+                self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, projID + '.ssf'))
+            else :
+                terminal('Cannot find: ' + fName(ssfFile))
 
-            
-            
-            print 'bbbbbbbbbbbbbbbbbbbb', os.path.join(ptPath, )
-            self.ptSSFConf = parseSSF(ssfFile)
 
 
 ###############################################################################
