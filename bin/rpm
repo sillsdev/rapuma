@@ -269,22 +269,30 @@ def initProject (pid) :
 ###############################################################################
 
 
-def createExampleTestProject (exampID) :
+def getExampleSourceProject (exampID) :
     '''Create a test project from example projects located in the 
     example_lib folder in the RPM system. This is for system testing
     and nifty canned demos.'''
 
-    # FIXME: This is hard coded, if the lib moves, this breaks.
-    exampleFile = os.path.join(rpmHome, 'resources', 'lib_examples', exampID + '.zip')
-    demoFile = os.path.join(projHome, exampID, exampID + '.rpmDemo')
+    exampleFile = os.path.join(local.rpmExamplesFolder, exampID + '.zip')
+    demoFile = os.path.join(local.projHome, exampID, exampID + '.rpmDemo')
     thisZipFile = zipfile.ZipFile(exampleFile, 'r')
     if os.path.isfile(exampleFile) :
         thisZipFile.extractall()
-        os.chdir(os.path.join(projHome, exampID))
+
+
+def runExamplePubDemoProject (demoID) :
+    '''Run an example demo file to test/demonstrate a project.'''
+
+    demoFile = os.path.join(local.projHome, demoID + '.rpmDemo')
+    if os.path.isfile(demoFile) :
         demo = codecs.open(demoFile, "r", encoding='utf_8')
         for line in demo :
             if line[:1] != '#' and line[:1] != '' :
                 rCode = os.system(line)
+    else :
+        terminal('File not found: ' + fName(demoFile))
+
 
 
 ###############################################################################
@@ -345,8 +353,10 @@ def userArguments (args) :
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
     elif sys.argv[1].lower() == 'test' :
-        if args['example_id'] :
-            createExampleTestProject(args['example_id'])
+        if args['source_id'] :
+            getExampleSourceProject(args['source_id'])
+        if args['demo_id'] :
+            runExamplePubDemoProject(args['demo_id'])
     else:
         terminal('Error: Command not recognized! ')
         sys.exit()
@@ -389,7 +399,8 @@ compCommand.add_argument('-c', '--style_component', action='store_true', help='C
 
 # Add testing subprocess arguments
 compCommand = subparsers.add_parser('test', help='General system testing commands help')
-compCommand.add_argument('-e', '--example_id', help='Example ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
+compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
+compCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
 
 
 # Send the collected arguments to the handler

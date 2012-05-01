@@ -115,6 +115,13 @@ Todo:
         <sectionID>ProjFolders</sectionID>
         <description>Any folder name that is, or could be, used in a project needs to be stored here.</description>
         <setting>
+            <name>Project Parent Folder</name>
+            <key>projParentFolder</key>
+            <description>The parent folder this project is located in.</description>
+            <type>string</type>
+            <value>..</value>
+        </setting>
+        <setting>
             <name>Project Configuration Folder</name>
             <key>projConfFolder</key>
             <description>The project configuration folder where all configuration files are kept.</description>

@@ -98,10 +98,29 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-        # Add some ParaTExt values if needed
+###############################################################################
+# Working here to get the right ssf file passed on for parsing
+
+        # Get the ParaTExt project settings if this is a PT project
         if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFFile = os.path.split(os.path.dirname(self.project.local.projHome))[1] + '.SSF'
-            self.ptSSFConf = parseSSF(self.ptSSFFile)
+            ptPath = os.path.dirname(self.project.local.projHome)
+            projID = os.path.split(ptPath)[1]
+            print projID
+            
+if os.path.isfile(head + '.' + tail.upper()) :
+    return xmlfiletodict(head + '.' + tail.upper())
+elif os.path.isfile(head + '.' + tail.lower()) :
+    return xmlfiletodict(head + '.' + tail.lower())
+else :
+    terminal('Cannot find: ' + fName(fileName))
+
+            
+            
+            print 'bbbbbbbbbbbbbbbbbbbb', os.path.join(ptPath, )
+            self.ptSSFConf = parseSSF(ssfFile)
+
+
+###############################################################################
 
         # Update default font if needed
         if not self.primaryFont :

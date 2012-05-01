@@ -61,19 +61,38 @@ def installPTCustomStyles (local, customStyleFile) :
         return True
 
 
+def xmltodict(element):
+    if not isinstance(element, ElementTree.Element):
+        raise ValueError("must pass xml.etree.ElementTree.Element object")
+
+    def xmltodict_handler(parent_element):
+        result = dict()
+        for element in parent_element:
+            if len(element):
+                obj = xmltodict_handler(element)
+            else:
+                obj = element.text
+
+            if result.get(element.tag):
+                if hasattr(result[element.tag], "append"):
+                    result[element.tag].append(obj)
+                else:
+                    result[element.tag] = [result[element.tag], obj]
+            else:
+                result[element.tag] = obj
+        return result
+
+    return {element.tag: xmltodict_handler(element)}
+
+
+def xmlfiletodict(filename):
+    return xmltodict(ElementTree.parse(filename).getroot())
+
+
 def parseSSF (fileName) :
     '''Parse a Paratext SSF file and return a configobj to be used in
     other processes.'''
 
-    # FIXME: This will take a little doing to generalize this so for
-    # now I'll return a configobj with the stuff I need to have for testing.
-    thisObj = ConfigObj()
-    buildConfSection(thisObj, 'ScriptureText')
-    thisObj['ScriptureText']['Name'] = 'SPT'
-    thisObj['ScriptureText']['FileNamePostPart'] = 'SPT.SFM'
-    thisObj['ScriptureText']['FileNameBookNameForm'] = '41MAT'
-    thisObj['ScriptureText']['DefaultFont'] = 'Padauk'
-
-    return thisObj
+    return xmlfiletodict(head + '.' + tail.upper())
 
 
