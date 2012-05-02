@@ -152,7 +152,8 @@ class Usfm (Component) :
                 self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
                 self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
         else :
-            self.project.managers['usfm_Font'].checkFonts('Usfm')
+            # This will double check that all the fonts are installed
+            self.project.managers['usfm_Font'].installFont('Usfm')
 
 
 

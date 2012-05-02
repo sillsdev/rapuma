@@ -261,7 +261,7 @@ def xmlToDict (element) :
 
     print 'xmlToDict not working right yet. Fix probl with isinstance'
 
-#    if not isinstance(element, ElementTree.Element):
+#    if not isinstance(element, ElementTree.Element()):
 #        raise ValueError("must pass xml.etree.ElementTree.Element object")
 
     def xmltodict_handler(parent_element):

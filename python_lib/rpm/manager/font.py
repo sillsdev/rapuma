@@ -77,12 +77,6 @@ class Font (Manager) :
 ###############################################################################
 
 
-    def checkFonts (self, cType) :
-        '''Check for the exsistance of fonts for this component type.
-        If they are not there, install them.'''
-
-        print 'Arg! This is not done yet!'
-        
 
     def setPrimaryFont (self, font, cType) :
         '''Set the primary font for the project.'''
@@ -90,7 +84,7 @@ class Font (Manager) :
         self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
         # Load the primary font if it is not there already
         self.recordFont(font, cType)
-        self.installFont(font, cType)
+        self.installFont(cType)
         writeConfFile(self.project.projConfig)
         writeToLog(self.project, 'LOG', 'Set primary font to: ' + font)
 
@@ -142,7 +136,7 @@ class Font (Manager) :
             return False
 
 
-    def installFont (self, font, cType) :
+    def installFont (self, cType) :
         '''Install (copy) a font into a project. This needs to take place
         after the font has been recorded in the project configuration file.'''
 
