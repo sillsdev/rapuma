@@ -247,6 +247,44 @@ def override_section (self, aSection) :
     return self
 
 
+def xmlFileToDict (fileName) :
+    tree =  ElementTree.parse(fileName)
+    root = tree.getroot()
+    return xmlToDict(root)
+
+
+def xmlToDict (element) :
+    '''This will turn a normal XML file into a standard Python dictionary.
+    I picked up this clever pice of code from here:
+        http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
+    A guy named josch submitted it. I have modified it a little.'''
+
+    print 'xmlToDict not working right yet. Fix probl with isinstance'
+
+#    if not isinstance(element, ElementTree.Element):
+#        raise ValueError("must pass xml.etree.ElementTree.Element object")
+
+    def xmltodict_handler(parent_element):
+        result = dict()
+        for element in parent_element:
+            if len(element):
+                obj = xmltodict_handler(element)
+            else:
+                obj = element.text
+
+            if result.get(element.tag):
+                if hasattr(result[element.tag], "append"):
+                    result[element.tag].append(obj)
+                else:
+                    result[element.tag] = [result[element.tag], obj]
+            else:
+                result[element.tag] = obj
+        return result
+
+    # Return the dictionary
+    return {element.tag: xmltodict_handler(element)}
+
+
 # This will reasign the standard ConfigObj function that works much like ours
 # but not quite what we need for working with XML as one of the inputs.
 Section.override = override_section

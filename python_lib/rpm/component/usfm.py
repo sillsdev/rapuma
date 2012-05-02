@@ -100,10 +100,12 @@ class Usfm (Component) :
 
         # Get the ParaTExt project settings if this is a PT project
         if self.sourceEditor.lower() == 'paratext' :
-        
+
             # Not sure where the PT SSF file is. We will get a list of
             # files from the cwd and the parent. If it exsists, it should
             # be in one of those folders
+            ssfFileName = ''
+            ptPath = ''
             parentFolder = os.path.dirname(self.project.local.projHome)
             localFolder = self.project.local.projHome
             parentIDL = os.path.split(parentFolder)[1] + '.ssf'
@@ -113,44 +115,44 @@ class Usfm (Component) :
             fLParent = os.listdir(parentFolder)
             fLLocal = os.listdir(localFolder)
             if parentIDL in fLParent :
-                ssfFile = parentIDL
+                ssfFileName = parentIDL
                 ptPath = parentFolder
             elif parentIDU in fLParent :
-                ssfFile = parentIDU
+                ssfFileName = parentIDU
                 ptPath = parentFolder
             elif localIDL in localFolder :
-                ssfFile = localIDL
+                ssfFileName = localIDL
                 ptPath = localFolder
             elif localIDU in localFolder :
-                ssfFile = localIDU
+                ssfFileName = localIDU
                 ptPath = localFolder
-            else :
-                terminal('Cannot find: ' + fName(ssfFile))
 
             # Go get the dictionary
-            self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, ssfFile))
+            ssfFile = os.path.join(ptPath, ssfFileName)
+            if os.path.isfile(ssfFile) :
+                self.ptSSFConf = xmlFileToDict(ssfFile)
+
+#                self.ptSSFConf =    {
+#                    'ScriptureText' : { 'Name' : 'SPT', 
+#                                        'FileNamePostPart' : 'SPT.SFM', 
+#                                        'FileNameBookNameForm' : '41MAT', 
+#                                        'DefaultFont' : 'Padauk'}
+#                                    }
+
+            else :
+                writeToLog(self.project, 'ERR', 'The ParaTExt SSF file [' + fName(ssfFile) + '] could not be found.')
+
         else :
-            writeToLog(self.project, 'ERR', 'The ParaTExt SSF file could not be found.')
+            writeToLog(self.project, 'ERR', 'Sorry, RPM does not support settings from projects using the ' + self.sourceEditor + ' source editor.')
 
-
-
-################################################################################
-
-# FIXME: primary font does not seem to be getting copied in
-
-        # Update default font if needed
-        if not self.primaryFont :
+       # Update default font if needed
+        if not self.primaryFont or self.primaryFont == 'None' :
             # Get the primaryFont from PT if that is the editor
             if self.sourceEditor.lower() == 'paratext' :
                 self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
                 self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
-
-
-
-
-#####################################################################################
-
-
+        else :
+            self.project.managers['usfm_Font'].checkFonts('Usfm')
 
 
 

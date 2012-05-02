@@ -54,7 +54,7 @@ class Font (Manager) :
         if not os.path.isfile(self.project.local.fontConfFile) :
             self.fontConfig.filename = self.project.local.fontConfFile
             writeConfFile(self.fontConfig)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new font config: font.__init__()')
+            writeToLog(self.project, 'LOG', 'Write out new font config: font.__init__()')
         else :
             self.fontConfig = ConfigObj(self.project.local.fontConfFile)
 
@@ -76,6 +76,13 @@ class Font (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+
+    def checkFonts (self, cType) :
+        '''Check for the exsistance of fonts for this component type.
+        If they are not there, install them.'''
+
+        print 'Arg! This is not done yet!'
+        
 
     def setPrimaryFont (self, font, cType) :
         '''Set the primary font for the project.'''
@@ -139,7 +146,6 @@ class Font (Manager) :
         '''Install (copy) a font into a project. This needs to take place
         after the font has been recorded in the project configuration file.'''
 
-
         for font in self.project.projConfig['CompTypes'][cType]['installedFonts'] :
             fontInfo = self.fontConfig['Fonts'][font]
             # Make the font family folder for this typeface
@@ -168,7 +174,7 @@ class Font (Manager) :
                     fontSource = os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)
                 # Crash and burn if the font file is not found
                 if not fontSource :
-                    self.project.writeToLog('ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
+                    writeToLog(self.project, 'ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
                     return False
                 # Copy the font file if need be
                 fontFilePath = os.path.join(self.project.local.projFontsFolder, thisFolder, fontFileName)

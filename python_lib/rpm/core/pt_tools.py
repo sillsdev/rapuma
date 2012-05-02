@@ -61,38 +61,10 @@ def installPTCustomStyles (local, customStyleFile) :
         return True
 
 
-def xmltodict(element):
-    if not isinstance(element, ElementTree.Element):
-        raise ValueError("must pass xml.etree.ElementTree.Element object")
+#def parseSSF (fileName) :
+#    '''Parse a Paratext SSF file and return a configobj to be used in
+#    other processes.'''
 
-    def xmltodict_handler(parent_element):
-        result = dict()
-        for element in parent_element:
-            if len(element):
-                obj = xmltodict_handler(element)
-            else:
-                obj = element.text
-
-            if result.get(element.tag):
-                if hasattr(result[element.tag], "append"):
-                    result[element.tag].append(obj)
-                else:
-                    result[element.tag] = [result[element.tag], obj]
-            else:
-                result[element.tag] = obj
-        return result
-
-    return {element.tag: xmltodict_handler(element)}
-
-
-def xmlfiletodict(filename):
-    return xmltodict(ElementTree.parse(filename).getroot())
-
-
-def parseSSF (fileName) :
-    '''Parse a Paratext SSF file and return a configobj to be used in
-    other processes.'''
-
-    return xmlfiletodict(fileName)
+#    return xmlfiletodict(fileName)
 
 
