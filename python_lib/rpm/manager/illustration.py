@@ -58,7 +58,7 @@ class Illustration (Manager) :
         if not os.path.isfile(self.project.local.illustrationConfFile) :
             self.illustrationConfig.filename = self.project.local.illustrationConfFile
             writeConfFile(self.illustrationConfig)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new illustration config: illustration.__init__()')
+            writeToLog(self.project, 'LOG', 'Write out new illustration config: illustration.__init__()')
         else :
             self.fontConfig = ConfigObj(self.project.local.illustrationConfFile)
 

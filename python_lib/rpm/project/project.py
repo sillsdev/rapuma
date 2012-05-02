@@ -90,7 +90,7 @@ class Project (object) :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
 
-        writeToLog(self.local, self.userConfig, 'LOG', 'Created the [' + fullName + '] manager object.')
+        writeToLog(self, 'LOG', 'Created the [' + fullName + '] manager object.')
         return self.managers[fullName]
 
 
@@ -119,7 +119,7 @@ class Project (object) :
                     self.projConfig['Managers'][fullName][k] = v
 
             writeConfFile(self.projConfig)
-            writeToLog(self.local, self.userConfig, 'LOG', 'Write out to config: project.addManager()')
+            writeToLog(self, 'LOG', 'Write out to config: project.addManager()')
 
 
 ###############################################################################
@@ -169,9 +169,9 @@ class Project (object) :
             self.components[cid] = compobj
             # Save our config settings
             writeConfFile(self.projConfig)
-            writeToLog(self.local, self.userConfig, 'MSG', 'Added the [' + cid + '] component to the project')
+            writeToLog(self, 'MSG', 'Added the [' + cid + '] component to the project')
         else :
-            writeToLog(self.local, self.userConfig, 'MSG', 'The [' + cid + '] component already exists in this project.')
+            writeToLog(self, 'MSG', 'The [' + cid + '] component already exists in this project.')
 
 
     def addComponentType (self, cType) :

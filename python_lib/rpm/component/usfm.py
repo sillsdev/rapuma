@@ -98,34 +98,45 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-###############################################################################
-# Working here to get the right ssf file passed on for parsing
-
         # Get the ParaTExt project settings if this is a PT project
         if self.sourceEditor.lower() == 'paratext' :
-            ptPath = os.path.dirname(self.project.local.projHome)
-            projID = os.path.split(ptPath)[1]
-            ssfFile = os.path.join(ptPath, projID + '.ssf')
-            print ssfFile
-            # PT can have either an uc or lc extention. This
-            # will test for both and assumes that if it is using
-            # uc, the whole name will be uc, otherwise, just the
-            # the extention is lc.
-            
-# The big issue now is we don't know where we might be when we run this. Normally
-# we are in the projHome but if this is a demo run for the first time, we might
-# be in the source home area. What to do?
-            
-            if os.path.isfile(os.path.join(ptPath, projID + '.SSF')) :
-                self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, projID + '.SSF'))
-            elif os.path.isfile(os.path.join(ptPath, projID + '.ssf')) :
-                self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, projID + '.ssf'))
+        
+            # Not sure where the PT SSF file is. We will get a list of
+            # files from the cwd and the parent. If it exsists, it should
+            # be in one of those folders
+            parentFolder = os.path.dirname(self.project.local.projHome)
+            localFolder = self.project.local.projHome
+            parentIDL = os.path.split(parentFolder)[1] + '.ssf'
+            parentIDU = os.path.split(parentFolder)[1] + '.SSF'
+            localIDL = os.path.split(localFolder)[1] + '.ssf'
+            localIDU = os.path.split(localFolder)[1] + '.SSF'
+            fLParent = os.listdir(parentFolder)
+            fLLocal = os.listdir(localFolder)
+            if parentIDL in fLParent :
+                ssfFile = parentIDL
+                ptPath = parentFolder
+            elif parentIDU in fLParent :
+                ssfFile = parentIDU
+                ptPath = parentFolder
+            elif localIDL in localFolder :
+                ssfFile = localIDL
+                ptPath = localFolder
+            elif localIDU in localFolder :
+                ssfFile = localIDU
+                ptPath = localFolder
             else :
                 terminal('Cannot find: ' + fName(ssfFile))
 
+            # Go get the dictionary
+            self.ptSSFConf = xmlfiletodict(os.path.join(ptPath, ssfFile))
+        else :
+            writeToLog(self.project, 'ERR', 'The ParaTExt SSF file could not be found.')
 
 
-###############################################################################
+
+################################################################################
+
+# FIXME: primary font does not seem to be getting copied in
 
         # Update default font if needed
         if not self.primaryFont :
@@ -133,6 +144,13 @@ class Usfm (Component) :
             if self.sourceEditor.lower() == 'paratext' :
                 self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
                 self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
+
+
+
+
+#####################################################################################
+
+
 
 
 
@@ -149,7 +167,7 @@ class Usfm (Component) :
             terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
             self.cid = self.cfg['name']
         else :
-            self.project.writeToLog('ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
+            writeToLog(self.project, 'ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
             return
 
         # Set up specific required elements for this type of component with our managers

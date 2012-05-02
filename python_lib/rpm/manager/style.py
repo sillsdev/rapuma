@@ -75,9 +75,9 @@ class Style (Manager) :
         if not os.path.isfile(globalStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
                 installPTStyles(self.project.local, self.mainStyleFile)
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Main style file copied in from PT project.')
+                writeToLog(self.project, 'LOG', 'Main style file copied in from PT project.')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Main style file creation not supported yet.')
+                writeToLog(self.project, 'ERR', 'Main style file creation not supported yet.')
 
 
     def installCompTypeOverrideStyles (self) :
@@ -88,7 +88,7 @@ class Style (Manager) :
         if not os.path.isfile(cusStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
                 if not installPTCustomStyles(self.project.local, self.customStyleFile) :
-                    writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Custom style file in PT project not found.')
+                    writeToLog(self.project, 'LOG', 'Custom style file in PT project not found.')
                     self.createCustomUsfmStyles()
             else :
                 self.createCustomUsfmStyles()
@@ -98,7 +98,7 @@ class Style (Manager) :
         '''Create a custom project-wide USFM style file for this project.
         This USFM style file will override the main component type styles.'''
 
-        writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Custom style file creation not supported yet.')
+        writeToLog(self.project, 'ERR', 'Custom style file creation not supported yet.')
 
 
     def createCompOverrideUsfmStyles (self, cid) :
@@ -106,7 +106,7 @@ class Style (Manager) :
         This file will override specific styles from preceeding style
         files loaded before it.'''
 
-        writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Component style override file creation not supported yet.')
+        writeToLog(self.project, 'ERR', 'Component style override file creation not supported yet.')
 
 
 

@@ -74,7 +74,7 @@ class Text (Manager) :
         if ptConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
             thisFile = compPrefix + cid.upper() + ptConf['ScriptureText']['FileNamePostPart']
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
+            writeToLog(self.project, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
             return
 
         # Make target folder if needed
@@ -90,9 +90,9 @@ class Text (Manager) :
         if not os.path.isfile(target) :
             if os.path.isfile(ptSource) :
                 shutil.copy(ptSource, target)
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied [' + fName(ptSource) + '] to [' + fName(target) + '] in project.')
+                writeToLog(self.project, 'LOG', 'Copied [' + fName(ptSource) + '] to [' + fName(target) + '] in project.')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', ptSource + ' not found.')
+                writeToLog(self.project, 'LOG', ptSource + ' not found.')
 
 
 

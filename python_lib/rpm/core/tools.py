@@ -264,7 +264,7 @@ Section.override = override_section
 #   2) Warning event going to log and terminal if debugging is turned on
 #   3) Error event going to the log and terminal
 
-def writeToLog (local, uc, code, msg, mod = None) :
+def writeToLog (project, code, msg, mod = None) :
     '''Send an event to the log file. and the terminal if specified.
     Everything gets written to the log.  Whether a message gets written to
     the terminal or not depends on what type (code) it is.  There are four
@@ -273,6 +273,10 @@ def writeToLog (local, uc, code, msg, mod = None) :
         LOG = Messages that go only to the log file
         WRN = Warnings that go to the terminal and log file
         ERR = Errors that go to both the terminal and log file.'''
+
+    # Get information from the project object
+    local = project.local
+    uc = project.userConfig
 
     # Build the mod line
     if mod :

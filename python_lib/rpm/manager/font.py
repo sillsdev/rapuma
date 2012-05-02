@@ -85,7 +85,7 @@ class Font (Manager) :
         self.recordFont(font, cType)
         self.installFont(font, cType)
         writeConfFile(self.project.projConfig)
-        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Set primary font to: ' + font)
+        writeToLog(self.project, 'LOG', 'Set primary font to: ' + font)
 
 
     def recordFont (self, font, cType) :
@@ -98,7 +98,7 @@ class Font (Manager) :
         fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
         fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
-            self.project.writeToLog('ERR', 'Halt! ' + font + '.xml not found.')
+            writeToLog(self.project, 'ERR', 'Halt! ' + font + '.xml not found.')
             return False
 
         # See if this is already in the config
@@ -128,7 +128,7 @@ class Font (Manager) :
 
             writeConfFile(self.fontConfig)
             writeConfFile(self.project.projConfig)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', font + ' font setup information added to project config')
+            writeToLog(self.project, 'LOG', font + ' font setup information added to project config')
             return True
 
         else :

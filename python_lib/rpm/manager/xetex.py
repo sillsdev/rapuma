@@ -72,7 +72,7 @@ class Xetex (Manager) :
         # rendered every time, which is not helpful.
         try :
             version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Version number present, not running persistant values: layout.__init__()')
+            writeToLog(self.project, 'LOG', 'Version number present, not running persistant values: layout.__init__()')
         except :
             # No version number means we need to merge the default and usfmTex layout settings
             newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
@@ -85,7 +85,7 @@ class Xetex (Manager) :
             self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
             self.layoutConfig = layoutCopy
             writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Write out new layout config: layout.__init__()')
+            writeToLog(self.project, 'LOG', 'Write out new layout config: layout.__init__()')
 
         # Get settings for this component
         self.managerSettings = self.project.projConfig['Managers'][self.manager]
@@ -123,11 +123,11 @@ class Xetex (Manager) :
 
         # Analyse the return code
         if rCode == int(0) :
-            writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Rendering of [' + fName(self.cidTex) + '] successful.')
+            writeToLog(self.project, 'MSG', 'Rendering of [' + fName(self.cidTex) + '] successful.')
         elif rCode in self.xetexErrorCodes :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Rendering [' + fName(self.cidTex) + '] was unsuccessful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
+            writeToLog(self.project, 'ERR', 'Rendering [' + fName(self.cidTex) + '] was unsuccessful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
+            writeToLog(self.project, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
 
 
     def makeExtFile (self) :
@@ -147,7 +147,7 @@ class Xetex (Manager) :
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
                 writeObject.write('% ' + self.extFileName + ' created: ' + tStamp() + '\n')
                 writeObject.close()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.extFile))
+                writeToLog(self.project, 'LOG', 'Created: ' + fName(self.extFile))
 
 
     def makeUsfmMacLinkFile (self) :
@@ -177,7 +177,7 @@ class Xetex (Manager) :
             self.removeMargVerse()
 
         writeObject.close()
-        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(macLinkFile))
+        writeToLog(self.project, 'LOG', 'Created: ' + fName(macLinkFile))
 
         return True
 
@@ -190,7 +190,7 @@ class Xetex (Manager) :
         if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+            writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
 
 
     def makeCidUsfm (self) :
@@ -201,7 +201,7 @@ class Xetex (Manager) :
         if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+            writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
 
 
     def makeCidTex (self) :
@@ -227,7 +227,7 @@ class Xetex (Manager) :
                 try :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
-                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
+                    writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
                     return
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
@@ -359,7 +359,7 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Created: ' + fName(self.setFile))
+            writeToLog(self.project, 'LOG', 'Created: ' + fName(self.setFile))
 
         # Start the main part of the function here
 
@@ -368,14 +368,14 @@ class Xetex (Manager) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
                 makeIt()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Layout settings changed, ' + fName(self.setFile) + ' recreated.')
+                writeToLog(self.project, 'LOG', 'Layout settings changed, ' + fName(self.setFile) + ' recreated.')
             elif isOlder(self.setFile, self.fontConfFile) :
                 # Something changed in the font conf file
                 makeIt()
-                writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Font settings changed, ' + fName(self.setFile) + ' recreated.')
+                writeToLog(self.project, 'LOG', 'Font settings changed, ' + fName(self.setFile) + ' recreated.')
         else :
             makeIt()
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.setFile) + ' missing, created a new one.')
+            writeToLog(self.project, 'LOG', fName(self.setFile) + ' missing, created a new one.')
 
         return True
 
@@ -408,7 +408,7 @@ class Xetex (Manager) :
         if not os.path.isfile(self.ptxMargVerseFile) :
             shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
             return True
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
+            writeToLog(self.project, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
 
 
     def removeMargVerse (self) :
@@ -439,11 +439,11 @@ class Xetex (Manager) :
                         if not os.path.isfile(fTarget) :
                             shutil.copy(os.path.join(macrosSource, f), fTarget)
                             mCopy = True
-                            writeToLog(self.project.local, self.project.userConfig, 'LOG', 'Copied macro: ' + fName(fTarget))
+                            writeToLog(self.project, 'LOG', 'Copied macro: ' + fName(fTarget))
 
             return mCopy
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'ERR', 'No macro package for : ' + cType)
+            writeToLog(self.project, 'ERR', 'No macro package for : ' + cType)
 
 
     def addMeasureUnit (self, val) :
@@ -596,10 +596,10 @@ class Xetex (Manager) :
                 thisFile = getattr(self, k)
                 if os.path.isfile(thisFile) :
                     if isOlder(self.cidPdf, thisFile) :
-                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(thisFile) + ' the ' + fName(self.cidPdf) + ' needs to be rerendered.')
+                        writeToLog(self.project, 'LOG', 'There has been a change in ' + fName(thisFile) + ' the ' + fName(self.cidPdf) + ' needs to be rerendered.')
                         render = True
         else :
-            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
+            writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
             render = True
 
         if render :
@@ -608,9 +608,9 @@ class Xetex (Manager) :
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
+                writeToLog(self.project, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
             else :
-                writeToLog(self.project.local, self.project.userConfig, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
+                writeToLog(self.project, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
 
 
 
@@ -627,10 +627,10 @@ class Xetex (Manager) :
 #                    if isOlder(self.cidTex, self.tcfDependOrder[r][2]) :
 #                        # Something changed in this dependent file
 #                        self.makeTexControlFile()
-#                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
+#                        writeToLog(self.project, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
 #        else :
 #            self.makeTexControlFile()
-#            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
+#            writeToLog(self.project, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
 
 
 #    def pdfDependCheck (self) :
@@ -642,10 +642,10 @@ class Xetex (Manager) :
 #            for r in self.pdfDependents :
 #                if os.path.isfile(self.pdfDependents[r][1]) :
 #                    if isOlder(self.cidPdf, self.pdfDependents[r][1]) :
-#                        writeToLog(self.project.local, self.project.userConfig, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
+#                        writeToLog(self.project, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
 #                        self.renderCidPdf()
 #        else :
-#            writeToLog(self.project.local, self.project.userConfig, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
+#            writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
 #            self.renderCidPdf()
 
 
@@ -689,7 +689,7 @@ class Xetex (Manager) :
 #                    continue
 
 #                elif self.tcfDependents[r][0] == 'hyp' :
-#                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Hyphenation file creation not supported yet.')
+#                    writeToLog(self.project, 'ERR', 'Hyphenation file creation not supported yet.')
 #                    continue
 
 #                elif self.tcfDependents[r][0] == 'non' :
@@ -698,6 +698,6 @@ class Xetex (Manager) :
 #                    continue
 
 #                else :
-#                    writeToLog(self.project.local, self.project.userConfig, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
+#                    writeToLog(self.project, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
 
 
