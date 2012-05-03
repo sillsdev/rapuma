@@ -97,6 +97,7 @@ class Font (Manager) :
         # a file located with the font. The system expects to find it in:
         # ~/resources/lib_share/Fonts/[FontID]
         fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
+        print fontDir
         fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
             writeToLog(self.project, 'ERR', 'Halt! ' + font + '.xml not found.')
@@ -163,9 +164,11 @@ class Font (Manager) :
                 # Find the source font file name and path, always use the user's version
                 fontFileName = fontConfig[tf]['file']
                 fontSource = None
-                # System version
+                print os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)
+                # System font version
                 if os.path.isfile(os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)) :
                     fontSource = os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)
+
                 # Crash and burn if the font file is not found
                 if not fontSource :
                     writeToLog(self.project, 'ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')

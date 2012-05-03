@@ -149,6 +149,8 @@ class Usfm (Component) :
         if not self.primaryFont or self.primaryFont == 'None' :
             # Get the primaryFont from PT if that is the editor
             if self.sourceEditor.lower() == 'paratext' :
+                # Strip out all spaces from the name to prevent mis-match with lib names
+#                self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont'].replace(' ', '')
                 self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
                 self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
         else :

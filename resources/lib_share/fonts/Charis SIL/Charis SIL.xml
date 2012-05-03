@@ -27,14 +27,14 @@ Todo:
             <key>fontID</key>
             <description>The internal ID code of this font family.</description>
             <type>string</type>
-            <value>CharisSIL</value>
+            <value>Charis SIL</value>
         </setting>
         <setting>
             <name>Font Folder</name>
             <key>fontFolder</key>
             <description>The font family folder name.</description>
             <type>string</type>
-            <value>CharisSIL</value>
+            <value>Charis SIL</value>
         </setting>
         <setting>
             <name>Features</name>
