@@ -138,7 +138,7 @@ class Project (object) :
 
         # If the object already exists just return it
         if cid in self.components : return self.components[cid]
-        
+
         # Otherwise, create a new one and return it
         cfg = self.projConfig['Components'][cid]
         cType = cfg['type']
@@ -147,6 +147,26 @@ class Project (object) :
         self.components[cid] = compobj
 
         return compobj
+
+
+    def addMetaComponent (self, mid, cidList, cType) :
+        '''Add a meta component to the project'''
+
+        # Add/check individual components
+        thisList = cidList.split()
+        for c in thisList :
+            self.addComponent(c, cType)
+
+        # Add the info to the components
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], mid)
+        self.projConfig['Components'][mid]['name'] = mid
+        self.projConfig['Components'][mid]['type'] = cType
+        self.projConfig['Components'][mid]['list'] = thisList
+
+        # Save our config settings
+        writeConfFile(self.projConfig)
+        writeToLog(self, 'MSG', 'Added the [' + mid + '] meta component to the project')
 
 
     def addComponent (self, cid, cType) :
@@ -203,7 +223,7 @@ class Project (object) :
         # Call on the font manager to install the font we want for this component
         self.createManager(cType, 'font')
         self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
-        self.managers[cType + '_Font'].installFont(font, cType.capitalize())
+        self.managers[cType + '_Font'].installFont(cType.capitalize())
 
 
     def setPrimaryFont (self, font, cType) :

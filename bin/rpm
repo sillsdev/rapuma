@@ -328,6 +328,8 @@ def userArguments (args) :
             aProject = initProject(args['project_id'])
             if args['component_new'] :
                 aProject.addComponent(args['component_id'], args['component_type'])
+            if args['meta_id'] :
+                aProject.addMetaComponent(args['meta_id'], args['meta_list'], args['component_type'])
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
         else :
@@ -379,7 +381,9 @@ projCommand.add_argument('-d', '--project_delete', action='store_true', help='De
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
+compCommand.add_argument('-l', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
+compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
 compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
 compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 # Add font subprocess arguments

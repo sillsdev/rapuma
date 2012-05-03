@@ -167,27 +167,35 @@ class Usfm (Component) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
 
-        # Is this a valid component ID for this component type?
-        if self.cfg['name'] in self.compIDs :
-            terminal("Rendering: " + self.compIDs[self.cfg['name']][0])
-            self.cid = self.cfg['name']
+        def renderComponent (cid) :
+            # Is this a valid component ID for this component type?
+            if cid in self.compIDs :
+                terminal("Rendering: " + self.compIDs[cid][0])
+                self.cid = cid
+            else :
+                writeToLog(self.project, 'ERR', 'Component [' + cid + '] is not supported by the USFM component type.')
+                return
+
+            # Set up specific required elements for this type of component with our managers
+            self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
+            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
+            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
+
+            # Run any preprocess checks or conversions
+            
+            # Run any illustration processes needed
+            
+            # Run any hyphenation or word break routines
+
+            # Run the renderer as specified in the users config to produce the output
+            self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
+
+        # Is this a meta component
+        if self.cfg['list'] :
+            for c in self.cfg['list'] :
+                renderComponent(c)
         else :
-            writeToLog(self.project, 'ERR', 'Component [' + self.cfg['name'] + '] is not supported by the USFM component type.')
-            return
-
-        # Set up specific required elements for this type of component with our managers
-        self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, self.cfg['name'], 'Usfm', self.compIDs[self.cfg['name']][1])
-        self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
-        self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
-
-        # Run any preprocess checks or conversions
-        
-        # Run any illustration processes needed
-        
-        # Run any hyphenation or word break routines
-
-        # Run the renderer as specified in the users config to produce the output
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
+            renderComponent(self.cfg['name'])
 
 
 
