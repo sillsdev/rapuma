@@ -98,61 +98,20 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-        # Get the ParaTExt project settings if this is a PT project
+        # Make a PT settings dictionary
         if self.sourceEditor.lower() == 'paratext' :
-
-            # Not sure where the PT SSF file is. We will get a list of
-            # files from the cwd and the parent. If it exsists, it should
-            # be in one of those folders
-            ssfFileName = ''
-            ptPath = ''
-            parentFolder = os.path.dirname(self.project.local.projHome)
-            localFolder = self.project.local.projHome
-            parentIDL = os.path.split(parentFolder)[1] + '.ssf'
-            parentIDU = os.path.split(parentFolder)[1] + '.SSF'
-            localIDL = os.path.split(localFolder)[1] + '.ssf'
-            localIDU = os.path.split(localFolder)[1] + '.SSF'
-            fLParent = os.listdir(parentFolder)
-            fLLocal = os.listdir(localFolder)
-            if parentIDL in fLParent :
-                ssfFileName = parentIDL
-                ptPath = parentFolder
-            elif parentIDU in fLParent :
-                ssfFileName = parentIDU
-                ptPath = parentFolder
-            elif localIDL in localFolder :
-                ssfFileName = localIDL
-                ptPath = localFolder
-            elif localIDU in localFolder :
-                ssfFileName = localIDU
-                ptPath = localFolder
-
-            # Go get the dictionary
-            ssfFile = os.path.join(ptPath, ssfFileName)
-            if os.path.isfile(ssfFile) :
-                self.ptSSFConf = xmlFileToDict(ssfFile)
-
-#                self.ptSSFConf =    {
-#                    'ScriptureText' : { 'Name' : 'SPT', 
-#                                        'FileNamePostPart' : 'SPT.SFM', 
-#                                        'FileNameBookNameForm' : '41MAT', 
-#                                        'DefaultFont' : 'Padauk'}
-#                                    }
-
-            else :
-                writeToLog(self.project, 'ERR', 'The ParaTExt SSF file [' + fName(ssfFile) + '] could not be found.')
-
-        else :
-            writeToLog(self.project, 'ERR', 'Sorry, RPM does not support settings from projects using the ' + self.sourceEditor + ' source editor.')
+            self.ptSSFConf = getPTSettings(self.project.local.projHome)
 
        # Update default font if needed
         if not self.primaryFont or self.primaryFont == 'None' :
             # Get the primaryFont from PT if that is the editor
             if self.sourceEditor.lower() == 'paratext' :
-                # Strip out all spaces from the name to prevent mis-match with lib names
-#                self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont'].replace(' ', '')
                 self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
                 self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
+            else :
+                writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy fonts into project.')
+                terminal('RPM halting now!')
+                sys.exit()
         else :
             # This will double check that all the fonts are installed
             self.project.managers['usfm_Font'].installFont('Usfm')
@@ -177,8 +136,14 @@ class Usfm (Component) :
                 return
 
             # Set up specific required elements for this type of component with our managers
-            self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
-            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
+            if self.sourceEditor.lower() == 'paratext' :
+                self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
+            else :
+                writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy source text.')
+                terminal('RPM halting now!')
+                sys.exit()
+
+            self.project.managers['usfm_Style'].installCompTypeGlobalStyles(self.ptSSFConf)
             self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
 
             # Run any preprocess checks or conversions
@@ -191,7 +156,7 @@ class Usfm (Component) :
             self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
 
         # Is this a meta component
-        if self.cfg['list'] :
+        if testForSetting(self.cfg, 'list') :
             for c in self.cfg['list'] :
                 renderComponent(c)
         else :

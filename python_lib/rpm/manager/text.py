@@ -65,14 +65,19 @@ class Text (Manager) :
 ###############################################################################
 
 
-    def installPTWorkingText (self, ptConf, cid, cType, compPrefix) :
+    def installPTWorkingText (self, ptConf, cid, cType, compNum) :
         '''Find the source text in the local PT project and install it into
         the working text folder of the project with the proper name.'''
 
         # Build up the source and working file names based on what we find
         # in the PT project SSF file
         if ptConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
-            thisFile = compPrefix + cid.upper() + ptConf['ScriptureText']['FileNamePostPart']
+            prePart = ptConf['ScriptureText']['FileNamePrePart']
+            postPart = ptConf['ScriptureText']['FileNamePostPart']
+            if prePart :
+                thisFile = prePart + compNum + cid.upper() + postPart
+            else :
+                thisFile = compNum + cid.upper() + postPart
         else :
             writeToLog(self.project, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
             return

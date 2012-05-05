@@ -61,10 +61,42 @@ def installPTCustomStyles (local, customStyleFile) :
         return True
 
 
-#def parseSSF (fileName) :
-#    '''Parse a Paratext SSF file and return a configobj to be used in
-#    other processes.'''
+def getPTSettings (home) :
+    '''Get the ParaTExt project settings from the parent/source PT project.
+    Turn the data into a dictionary.'''
 
-#    return xmlfiletodict(fileName)
+    # Not sure where the PT SSF file might be. We will get a list of
+    # files from the cwd and the parent. If it exsists, it should
+    # be in one of those folders
+    ssfFileName = ''
+    ptPath = ''
+    parentFolder = os.path.dirname(home)
+    localFolder = home
+    parentIDL = os.path.split(parentFolder)[1] + '.ssf'
+    parentIDU = os.path.split(parentFolder)[1] + '.SSF'
+    localIDL = os.path.split(localFolder)[1] + '.ssf'
+    localIDU = os.path.split(localFolder)[1] + '.SSF'
+    fLParent = os.listdir(parentFolder)
+    fLLocal = os.listdir(localFolder)
+    if parentIDL in fLParent :
+        ssfFileName = parentIDL
+        ptPath = parentFolder
+    elif parentIDU in fLParent :
+        ssfFileName = parentIDU
+        ptPath = parentFolder
+    elif localIDL in localFolder :
+        ssfFileName = localIDL
+        ptPath = localFolder
+    elif localIDU in localFolder :
+        ssfFileName = localIDU
+        ptPath = localFolder
+
+    # Return the dictionary
+    ssfFile = os.path.join(ptPath, ssfFileName)
+    if os.path.isfile(ssfFile) :
+        return xmlFileToDict(ssfFile)
+
+    else :
+        writeToLog(self.project, 'ERR', 'The ParaTExt SSF file [' + fName(ssfFile) + '] could not be found.')
 
 

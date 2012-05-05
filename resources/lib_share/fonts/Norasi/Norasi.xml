@@ -73,7 +73,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>regular</value>
         </setting>
         <setting>
@@ -148,7 +148,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>bold</value>
         </setting>
         <setting>
@@ -223,7 +223,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>italic</value>
         </setting>
         <setting>
@@ -298,7 +298,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>bolditalic</value>
         </setting>
         <setting>
@@ -373,7 +373,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>oblique</value>
         </setting>
         <setting>
@@ -448,7 +448,7 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
+            <type>list</type>
             <value>boldoblique</value>
         </setting>
         <setting>

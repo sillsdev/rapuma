@@ -47,6 +47,7 @@ class Xetex (Manager) :
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
+        self.Ctype              = cType.capitalize()
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
@@ -55,7 +56,12 @@ class Xetex (Manager) :
         self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
         self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
+        self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.layoutConfig           = {}
+        self.ptSSFConf              = {}
+        # Make a PT settings dictionary
+        if self.sourceEditor.lower() == 'paratext' :
+            self.ptSSFConf          = getPTSettings(self.project.local.projHome)
 
         # This manager is dependent on usfm_Layout. Load it if needed.
         if 'usfm_Layout' not in self.project.managers :
@@ -112,7 +118,10 @@ class Xetex (Manager) :
 
         # Create the environment that XeTeX will use. This will be temporarily set
         # just before XeTeX is run.
-        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' + self.projMacPackFolder + ':' + self.project.local.projProcessFolder + ':.'
+        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' \
+                        + self.projMacPackFolder + ':' \
+                        + self.project.local.projProcessFolder + ':' \
+                        + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
 
         # Create the command XeTeX will run with
         command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
@@ -191,6 +200,8 @@ class Xetex (Manager) :
             return True
         else :
             writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+            terminal('RPM halting now!')
+            sys.exit()
 
 
     def makeCidUsfm (self) :
@@ -202,6 +213,8 @@ class Xetex (Manager) :
             return True
         else :
             writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+            terminal('RPM halting now!')
+            sys.exit()
 
 
     def makeCidTex (self) :
@@ -548,7 +561,10 @@ class Xetex (Manager) :
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         self.setFile                = os.path.join(self.project.local.projProcessFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projProcessFolder, self.extFileName)
-        
+        if self.sourceEditor.lower() == 'paratext' :
+            self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
+            self.globSty            = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+
         # Make sure we have a component folder in place before we do anything
         if not os.path.isdir(self.cidFolder) :
             os.makedirs(self.cidFolder)

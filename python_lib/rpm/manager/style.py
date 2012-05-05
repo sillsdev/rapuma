@@ -65,7 +65,7 @@ class Style (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def installCompTypeGlobalStyles (self) :
+    def installCompTypeGlobalStyles (self, ptConf) :
         '''If the source is from a PT project, check to see if there is a
         (project-wide) stylesheet to install. If not, we will make one.
         This file is required as a minimum for components of this type to
@@ -74,10 +74,16 @@ class Style (Manager) :
         globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
         if not os.path.isfile(globalStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
-                installPTStyles(self.project.local, self.mainStyleFile)
-                writeToLog(self.project, 'LOG', 'Main style file copied in from PT project.')
+                # Override default styleFile name with what we find in the PT conf
+                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+                globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+                if not os.path.isfile(globalStyFile) :
+                    installPTStyles(self.project.local, self.mainStyleFile)
+                    writeToLog(self.project, 'LOG', 'Main style file copied in from PT project.')
             else :
-                writeToLog(self.project, 'ERR', 'Main style file creation not supported yet.')
+                writeToLog(self.project, 'ERR', 'Main style file creation not supported yet. This is a required file.')
+                terminal('RPM halting now!')
+                sys.exit()
 
 
     def installCompTypeOverrideStyles (self) :
