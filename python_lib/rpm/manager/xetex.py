@@ -47,7 +47,7 @@ class Xetex (Manager) :
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
-        self.Ctype              = cType.capitalize()
+        self.Ctype                  = cType.capitalize()
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
@@ -192,14 +192,14 @@ class Xetex (Manager) :
 
 
     def makeGlobSty (self) :
-        '''The Global style file is required for rendering but it is created/aquired
-        by the component type manager. This will check to see if it is there, and
+        '''The Global style file is required for rendering but is dependent
+        on the USFM working file. This will check to see if it is there, and
         try to quite gracefully if it is not.'''
 
         if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
+            writeToLog(self.project, 'ERR', 'makeGlobSty() - Not found: [' + fName(self.cidUsfm) + ']. This is required, system should halt.')
             terminal('RPM halting now!')
             sys.exit()
 
@@ -217,9 +217,80 @@ class Xetex (Manager) :
             sys.exit()
 
 
-    def makeCidTex (self) :
-        '''Create the control file that will be used for rendering this
-        component. This is run every time rendering is called on.'''
+#    def makeCidTex (self) :
+#        '''Create the control file that will be used for rendering this
+#        component. This is run every time rendering is called on.'''
+
+#        def setLine (fileName) :
+
+#            '''Internal function to return the file name in a formated 
+#            line according to the type it is.'''
+
+#            if self.files[fileName][0] == 'input' :
+#                if os.path.isfile(getattr(self, fileName)) :
+#                    return '\\input \"' + getattr(self, fileName) + '\"\n'
+
+#            elif self.files[fileName][0] in ['stylesheet', 'ptxfile'] :
+#                if os.path.isfile(getattr(self, fileName)) :
+#                    return '\\' + self.files[fileName][0] + '{' + getattr(self, fileName) + '}\n'
+
+#        # Create or refresh any required files
+#        for f in self.primOut['cidTex'] :
+#            # This is for required files, if something fails here we should die
+#            if str2bool(self.files[f][1]) :
+#                try :
+#                    getattr(self, 'make' + f[0].upper() + f[1:])()
+#                except :
+#                    writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
+#                    terminal('RPM halting now!')
+#                    sys.exit()
+#            # Non required files are handled different we will look for
+#            # each one and try to make it if it is not there but will 
+#            # not complain if we cannot do it
+#            else :
+#                if not os.path.isfile(getattr(self, f)) :
+#                    try :
+#                        getattr(self, 'make' + f[0].upper() + f[1:])()
+#                    except :
+#                        pass
+#                    
+
+#        # Create the control file 
+#        writeObject = codecs.open(self.cidTex, "w", encoding='utf_8')
+#        writeObject.write('% ' + fName(self.cidTex) + ' created: ' + tStamp() + '\n')
+#        writeObject.write('% This file is auto-generated. Do not bother editing it.\n')
+#        # We allow for a number of different types of lines
+#        for f in self.primOut['cidTex'] :
+#            if setLine(f) :
+#                writeObject.write(setLine(f))
+
+#        # Finish the process
+#        writeObject.write('\\bye\n')
+#        writeObject.close()
+#        return True
+
+
+
+
+
+#######################################################################################
+
+
+
+
+
+
+
+
+    def makeControlTex (self, typeID) :
+        '''Create a TeX control file (global or component) that will be used for 
+        rendering a component or meta component. This is run every time rendering
+        is called on.'''
+
+        if typeID == 'globalTex' :
+            ctrlFile = self.globalTex
+        else :
+            ctrlFile = getattr(self, typeID)
 
         def setLine (fileName) :
             '''Internal function to return the file name in a formated 
@@ -233,15 +304,20 @@ class Xetex (Manager) :
                 if os.path.isfile(getattr(self, fileName)) :
                     return '\\' + self.files[fileName][0] + '{' + getattr(self, fileName) + '}\n'
 
+        print 'aaaaaaaaaa', ctrlFile
+
+# Something really wrong here!
+
         # Create or refresh any required files
-        for f in self.primOut['cidTex'] :
+        for f in self.primOut[typeID] :
             # This is for required files, if something fails here we should die
             if str2bool(self.files[f][1]) :
                 try :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
                     writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
-                    return
+                    terminal('RPM halting now!')
+                    sys.exit()
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
             # not complain if we cannot do it
@@ -251,21 +327,38 @@ class Xetex (Manager) :
                         getattr(self, 'make' + f[0].upper() + f[1:])()
                     except :
                         pass
-                    
+
+        print 'bbbbbbbbbb', ctrlFile
 
         # Create the control file 
-        writeObject = codecs.open(self.cidTex, "w", encoding='utf_8')
-        writeObject.write('% ' + fName(self.cidTex) + ' created: ' + tStamp() + '\n')
-        writeObject.write('% This file is auto-generated. Do not bother editing it.\n')
+        writeObject = codecs.open(ctrlFile, "w", encoding='utf_8')
+        writeObject.write('% ' + fName(ctrlFile) + ' created: ' + tStamp() + '\n')
+        writeObject.write('% This file is auto-generated on every run. Do not bother to try to edit it.\n')
         # We allow for a number of different types of lines
-        for f in self.primOut['cidTex'] :
+        for f in self.primOut[typeID] :
             if setLine(f) :
                 writeObject.write(setLine(f))
+        # If this is a global file, then put in the links to the component(s) to render
+        if typeID == 'globalTex' :
+            if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+                for c in self.project.projConfig['Components'][self.cid]['list'] :
+                    # Make sure we are working with the right cid file names
+                    # This needs to be done for meta components
+                    self.buildCidFileNames(c)
+                    writeObject.write(setLine(c + 'Tex'))
+            else :
+                    writeObject.write(setLine('cidTex'))
 
         # Finish the process
         writeObject.write('\\bye\n')
         writeObject.close()
         return True
+
+
+
+
+
+
 
 
     def makeSetFile (self) :
@@ -276,7 +369,7 @@ class Xetex (Manager) :
 
         def makeIt () :
             '''Internal function to build the setFile.'''
-        
+
             # Get the default and TeX macro values and merge them into one dictionary
             x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
             y = self.makeTexSettingsDict(self.macLayoutValFile)
@@ -532,6 +625,19 @@ class Xetex (Manager) :
             raise IOError, "Can't open " + xmlFile
 
 
+    def buildCidFileNames (self, thisCid) :
+        '''Because it might be necessary to build cid file names multiple times,
+        this function will do that. (Maybe there is a better way to do this?)'''
+
+        self.cidFolder          = os.path.join(self.project.local.projProcessFolder, thisCid)
+        self.cidUsfm            = os.path.join(self.cidFolder, thisCid + '.usfm')
+        self.cidTex             = os.path.join(self.cidFolder, thisCid + '.tex')
+        self.cidExt             = os.path.join(self.cidFolder, thisCid + '-ext.tex')
+        self.cidSty             = os.path.join(self.cidFolder, thisCid + '.sty')
+        self.cidAdj             = os.path.join(self.cidFolder, thisCid + '.adj')
+        self.cidPics            = os.path.join(self.cidFolder, thisCid + '.piclist')
+
+
 ###############################################################################
 ################################# Main Function ###############################
 ###############################################################################
@@ -544,16 +650,9 @@ class Xetex (Manager) :
         self.files                  = {}
         self.primOut                = {}
         self.cid                    = cid
-        self.cidFolder              = os.path.join(self.project.local.projProcessFolder, self.cid)
-        self.cidUsfm                = os.path.join(self.cidFolder, self.cid + '.usfm')
-        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
-        self.cidTex                 = os.path.join(self.cidFolder, self.cid + '.tex')
-        self.cidExt                 = os.path.join(self.project.local.projProcessFolder, self.cid + '-ext.tex')
-        self.cidSty                 = os.path.join(self.project.local.projProcessFolder, self.cid + '.sty')
-        self.cidAdj                 = os.path.join(self.cidFolder, self.cid + '.adj')
-        self.cidPics                = os.path.join(self.cidFolder, self.cid + '.piclist')
         self.custSty                = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
         self.globSty                = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
+        self.globalTex              = os.path.join(self.project.local.projProcessFolder, 'global.tex')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
         self.layoutConfFile         = self.project.local.layoutConfFile
         self.fontConfFile           = self.project.local.fontConfFile
@@ -564,6 +663,12 @@ class Xetex (Manager) :
         if self.sourceEditor.lower() == 'paratext' :
             self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
             self.globSty            = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+
+        # Build the initial cid names/paths
+        self.buildCidFileNames(self.cid)
+
+        # There should only ever be one name for the cid PDF file
+        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
 
         # Make sure we have a component folder in place before we do anything
         if not os.path.isdir(self.cidFolder) :
@@ -576,8 +681,9 @@ class Xetex (Manager) :
         # Process file information
         #   ID                      tType           Required    Description
         self.files      =   {
-            'cidPdf'            : ['None',          False,       'PDF output file'],
-            'cidTex'            : ['None',          True,       'Main TeX control file'],
+            'cidPdf'            : ['None',          False,      'PDF output file'],
+            'globalTex'         : ['None',          True,       'Main TeX control file'],
+            'cidTex'            : ['None',          True,       'TeX control file for an individual component'],
             'cidUsfm'           : ['ptxfile',       True,       'USFM text working file'],
             'cidPics'           : ['None',          False,      'Scripture illustrations placement file'],
             'cidAdj'            : ['None',          False,      'Scripture text adjustments file'],
@@ -596,14 +702,29 @@ class Xetex (Manager) :
                             }
 
         # Primary output files and their Dependencies (in necessary order)
-            # OrderID      FileID     Dependencies List
+        # FIXME: for meta comps and the cidPdf we may need to embed a list that
+        # represents each of the subcomponents for a cid, that would be processed
+        # to see if any changes were made causing a rerendering of the PDF comp.
+        # For now we just need to get it working.
         self.primOut    =   {
-            'cidTex' : [macLinkFile, 'setFile', 'extFile', 'cidExt', 'globSty', 'custSty', 'cidSty', 'hyphenTexFile', 'cidUsfm'],
-            'cidPdf' : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
+            'globalTex'     : [macLinkFile, 'setFile', 'extFile', 'globSty', 'custSty', 'hyphenTexFile', 'cidTex'],
+            'cidTex'        : ['cidExt', 'cidSty', 'cidUsfm'],
+            'cidPdf'        : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
                             }
 
         # With all the new values defined start running here
-        self.makeCidTex()
+
+        # Check if this is a meta component, preprocess all subcomponents
+        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+            for c in self.project.projConfig['Components'][self.cid]['list'] :
+                # Adjust the file names for this cid
+                self.buildCidFileNames(c)
+                self.makeControlTex('cidTex')
+        else :
+            self.makeControlTex('cidTex')
+
+        # Create the global TeX file that will link to the cidTex file(s) we just made
+        self.makeControlTex('globalTex')
 
         # Create the PDF (if needed)
         render = False
@@ -629,91 +750,5 @@ class Xetex (Manager) :
                 writeToLog(self.project, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
 
 
-
-
-#    def controlDependCheck (self) :
-#        '''Dependency check for the main TeX control file. The cidTex is dependent on 
-#        files that are listed in self.tcfDependOrder. If any have changed since the
-#        last time the cidTex was created, it will be recreated. If it is missing, it
-#        will be created.'''
-
-#        if os.path.isfile(self.cidTex) :
-#            for r in self.tcfDependOrder :
-#                if os.path.isfile(self.tcfDependOrder[r][2]) :
-#                    if isOlder(self.cidTex, self.tcfDependOrder[r][2]) :
-#                        # Something changed in this dependent file
-#                        self.makeTexControlFile()
-#                        writeToLog(self.project, 'LOG', 'There has been a change in , ' + fName(self.tcfDependOrder[r][2]) + ' the ' + fName(self.cidTex) + ' has been recreated.')
-#        else :
-#            self.makeTexControlFile()
-#            writeToLog(self.project, 'LOG', fName(self.cidTex) + ' was not found, created a new one.')
-
-
-#    def pdfDependCheck (self) :
-#        '''This will check to see if all the dependents of the cidPdf
-#        file are younger than itself. If not, the cidPdf will be rendered.'''
-
-#        # Create the PDF (if needed)
-#        if os.path.isfile(self.cidPdf) :
-#            for r in self.pdfDependents :
-#                if os.path.isfile(self.pdfDependents[r][1]) :
-#                    if isOlder(self.cidPdf, self.pdfDependents[r][1]) :
-#                        writeToLog(self.project, 'LOG', 'There has been a change in ' + fName(self.pdfDependents[r][1]) + ' the ' + fName(self.cidPdf) + ' has been rerendered.')
-#                        self.renderCidPdf()
-#        else :
-#            writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, a new one has been rendered.')
-#            self.renderCidPdf()
-
-
-#    def makeTexControlDependents (self) :
-#        '''Using the information passed to this module created by other managers
-#        it will create all the final forms of files needed to render the
-#        current component with the XeTeX renderer. The final file made is
-
-#        the cidTex file which is needed to control rendering of the source.'''
-
-#        # Create (if needed) the above files in the order they are listed.
-#        # These files are dependents of the cidTex file
-#        for r in self.tcfDependents :
-#            if not os.path.isfile(self.tcfDependents[r][2]) :
-#                if self.tcfDependents[r][0] == 'mac' :
-#                    self.copyInMacros()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'mar' :
-#                    self.copyInMargVerse()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'set' :
-#                    self.makeSetTex()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'ext' :
-#                    self.makeTexExtentionsFile()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'sty' :
-#                    self.project.managers[self.cType + '_Style'].createCompOverrideUsfmStyles(self.cid)
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'cus' :
-#                    self.project.managers[self.cType + '_Style'].installCompTypeOverrideStyles()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'glo' :
-#                    self.project.managers[self.cType + '_Style'].installCompTypeGlobalStyles()
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'hyp' :
-#                    writeToLog(self.project, 'ERR', 'Hyphenation file creation not supported yet.')
-#                    continue
-
-#                elif self.tcfDependents[r][0] == 'non' :
-#                    # This is being added in the Usfm compType too, do we want that?
-#                    # I think we probably should but the function will need to be reworked.
-#                    continue
-
-#                else :
-#                    writeToLog(self.project, 'ERR', 'Type: [' + self.tcfDependents[r][0] + '] not supported')
 
 

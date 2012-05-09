@@ -126,41 +126,47 @@ class Usfm (Component) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
 
-        def renderComponent (cid) :
-            # Is this a valid component ID for this component type?
+        self.cid = self.cfg['name']
+
+        def preProcessComponent (cid) :
+            '''This will prepare a component for rendering by checking for
+            and/or creating any subcomponents it needs to render properly.'''
+
+            # First see if this is a valid component
             if cid in self.compIDs :
-                terminal("Rendering: " + self.compIDs[cid][0])
-                self.cid = cid
+                terminal("Preprocessing: " + self.compIDs[cid][0])
+
+                # See if the working text is present
+                if self.sourceEditor.lower() == 'paratext' :
+                    self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
+                else :
+                    writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy source text.')
+                    terminal('RPM halting now!')
+                    sys.exit()
+
+                # Check on the component styles
+                self.project.managers['usfm_Style'].installCompTypeGlobalStyles(self.ptSSFConf)
+                self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
+
+                # Run any preprocess checks or conversions
+                
+                # Run any illustration processes needed
+                
+                # Run any hyphenation or word break routines
+
             else :
-                writeToLog(self.project, 'ERR', 'Component [' + cid + '] is not supported by the USFM component type.')
+                writeToLog(self.project, 'ERR', 'Invalid component ID: [' + cid + '], cannot be preprocessed.')
                 return
 
-            # Set up specific required elements for this type of component with our managers
-            if self.sourceEditor.lower() == 'paratext' :
-                self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
-            else :
-                writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy source text.')
-                terminal('RPM halting now!')
-                sys.exit()
-
-            self.project.managers['usfm_Style'].installCompTypeGlobalStyles(self.ptSSFConf)
-            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
-
-            # Run any preprocess checks or conversions
-            
-            # Run any illustration processes needed
-            
-            # Run any hyphenation or word break routines
-
-            # Run the renderer as specified in the users config to produce the output
-            self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
-
-        # Is this a meta component
+        # If this is a meta component, preprocess all subcomponents
         if testForSetting(self.cfg, 'list') :
             for c in self.cfg['list'] :
-                renderComponent(c)
+                preProcessComponent(c)
         else :
-            renderComponent(self.cfg['name'])
+            preProcessComponent(self.cid)
+
+        # With everything in place we can render the component
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
 
 
 
