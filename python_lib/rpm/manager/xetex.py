@@ -128,7 +128,11 @@ class Xetex (Manager) :
 
 # FIXME: With meta comps we want the output directed to the process folder
         
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
+        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+
+
+
+            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
 
 
 
@@ -225,71 +229,6 @@ class Xetex (Manager) :
             sys.exit()
 
 
-#    def makeCidTex (self) :
-#        '''Create the control file that will be used for rendering this
-#        component. This is run every time rendering is called on.'''
-
-#        def setLine (fileName) :
-
-#            '''Internal function to return the file name in a formated 
-#            line according to the type it is.'''
-
-#            if self.files[fileName][0] == 'input' :
-#                if os.path.isfile(getattr(self, fileName)) :
-#                    return '\\input \"' + getattr(self, fileName) + '\"\n'
-
-#            elif self.files[fileName][0] in ['stylesheet', 'ptxfile'] :
-#                if os.path.isfile(getattr(self, fileName)) :
-#                    return '\\' + self.files[fileName][0] + '{' + getattr(self, fileName) + '}\n'
-
-#        # Create or refresh any required files
-#        for f in self.primOut['cidTex'] :
-#            # This is for required files, if something fails here we should die
-#            if str2bool(self.files[f][1]) :
-#                try :
-#                    getattr(self, 'make' + f[0].upper() + f[1:])()
-#                except :
-#                    writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
-#                    terminal('RPM halting now!')
-#                    sys.exit()
-#            # Non required files are handled different we will look for
-#            # each one and try to make it if it is not there but will 
-#            # not complain if we cannot do it
-#            else :
-#                if not os.path.isfile(getattr(self, f)) :
-#                    try :
-#                        getattr(self, 'make' + f[0].upper() + f[1:])()
-#                    except :
-#                        pass
-#                    
-
-#        # Create the control file 
-#        writeObject = codecs.open(self.cidTex, "w", encoding='utf_8')
-#        writeObject.write('% ' + fName(self.cidTex) + ' created: ' + tStamp() + '\n')
-#        writeObject.write('% This file is auto-generated. Do not bother editing it.\n')
-#        # We allow for a number of different types of lines
-#        for f in self.primOut['cidTex'] :
-#            if setLine(f) :
-#                writeObject.write(setLine(f))
-
-#        # Finish the process
-#        writeObject.write('\\bye\n')
-#        writeObject.close()
-#        return True
-
-
-
-
-
-#######################################################################################
-
-
-
-
-
-
-
-
     def makeControlTex (self, typeID) :
         '''Create a TeX control file (global or component) that will be used for 
         rendering a component or meta component. This is run every time rendering
@@ -362,12 +301,6 @@ class Xetex (Manager) :
         writeObject.write('\\bye\n')
         writeObject.close()
         return True
-
-
-
-
-
-
 
 
     def makeSetFile (self) :
