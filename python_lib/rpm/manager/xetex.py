@@ -116,6 +116,9 @@ class Xetex (Manager) :
         # should be in place. Here we do the rendering process. The result 
         # should be a PDF file.
 
+        # Be sure the file names for this component are good
+        self.buildCidFileNames(self.cid)
+
         # Create the environment that XeTeX will use. This will be temporarily set
         # just before XeTeX is run.
         texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' \
@@ -124,19 +127,11 @@ class Xetex (Manager) :
                         + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
 
         # Create the command XeTeX will run with
-
-
-# FIXME: With meta comps we want the output directed to the process folder
-        
         if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
-
-
-
-            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
-
-
-
-
+            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.project.local.projProcessFolder + ' ' + self.globalTex
+            # Rename to the right meta component name
+        else :
+            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.globalTex
 
         # Run XeTeX and collect the return code for analysis
         rCode = -1
@@ -149,6 +144,23 @@ class Xetex (Manager) :
             writeToLog(self.project, 'ERR', 'Rendering [' + fName(self.cidTex) + '] was unsuccessful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
         else :
             writeToLog(self.project, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
+
+        # Change the file names to the right ones
+#        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+#            # Rename to the right meta component name
+#            if os.path.isfile(self.globalPdf) :
+#                os.rename(self.globalPdf, os.path.join(self.project.local.projProcessFolder, self.cid + '.pdf'))
+#        else :
+#            # Rename to the right component name
+#            if os.path.isfile(self.globalPdf) :
+#                os.rename(self.globalPdf, self.cidPdf)
+
+# FIXME: Start here
+
+        print 'yyyyyyyyyy', self.globalPdf
+        if os.path.isfile(self.globalPdf) :
+            print 'zzzzzzzzzzzz', self.cidPdf
+            os.rename(self.globalPdf, self.cidPdf)
 
 
     def makeExtFile (self) :
@@ -244,15 +256,16 @@ class Xetex (Manager) :
             line according to the type it is.'''
 
             output = ''
+            if not fileID == 'cidTex' :
+                if self.files[fileID][0] == 'input' :
+                    if os.path.isfile(getattr(self, fileID)) :
+                        output = '\\input \"' + getattr(self, fileID) + '\"\n'
 
-            if self.files[fileID][0] == 'input' :
-                if os.path.isfile(getattr(self, fileID)) :
-                    print 'zzzzzzz', getattr(self, fileID)
-                    output = '\\input \"' + getattr(self, fileID) + '\"\n'
-
-            elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
-                if os.path.isfile(getattr(self, fileID)) :
-                    output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
+                elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
+                    if os.path.isfile(getattr(self, fileID)) :
+                        output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
+            else :
+                output = '\\input \"' + getattr(self, 'cidTex') + '\"\n'
 
             return output
 
@@ -296,9 +309,9 @@ class Xetex (Manager) :
                     writeObject.write(setLine('cidTex'))
             else :
                     writeObject.write(setLine('cidTex'))
+            writeObject.write('\\bye\n')
 
         # Finish the process
-        writeObject.write('\\bye\n')
         writeObject.close()
         return True
 
@@ -578,6 +591,7 @@ class Xetex (Manager) :
         self.cidSty             = os.path.join(self.cidFolder, thisCid + '.sty')
         self.cidAdj             = os.path.join(self.cidFolder, thisCid + '.adj')
         self.cidPics            = os.path.join(self.cidFolder, thisCid + '.piclist')
+        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
 
 
 ###############################################################################
@@ -595,6 +609,7 @@ class Xetex (Manager) :
         self.custSty                = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
         self.globSty                = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
         self.globalTex              = os.path.join(self.project.local.projProcessFolder, 'global.tex')
+        self.globalPdf              = os.path.join(self.project.local.projProcessFolder, 'global.pdf')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
         self.layoutConfFile         = self.project.local.layoutConfFile
         self.fontConfFile           = self.project.local.fontConfFile
@@ -608,9 +623,6 @@ class Xetex (Manager) :
 
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
-
-        # There should only ever be one name for the cid PDF file
-        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
 
         # Make sure we have a component folder in place before we do anything
         if not os.path.isdir(self.cidFolder) :
