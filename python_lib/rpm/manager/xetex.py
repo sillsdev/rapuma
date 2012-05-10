@@ -124,7 +124,15 @@ class Xetex (Manager) :
                         + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
 
         # Create the command XeTeX will run with
+
+
+# FIXME: With meta comps we want the output directed to the process folder
+        
         command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.cidTex
+
+
+
+
 
         # Run XeTeX and collect the return code for analysis
         rCode = -1
@@ -292,21 +300,23 @@ class Xetex (Manager) :
         else :
             ctrlFile = getattr(self, typeID)
 
-        def setLine (fileName) :
+        def setLine (fileID) :
             '''Internal function to return the file name in a formated 
             line according to the type it is.'''
 
-            if self.files[fileName][0] == 'input' :
-                if os.path.isfile(getattr(self, fileName)) :
-                    return '\\input \"' + getattr(self, fileName) + '\"\n'
+            output = ''
 
-            elif self.files[fileName][0] in ['stylesheet', 'ptxfile'] :
-                if os.path.isfile(getattr(self, fileName)) :
-                    return '\\' + self.files[fileName][0] + '{' + getattr(self, fileName) + '}\n'
+            if self.files[fileID][0] == 'input' :
+                if os.path.isfile(getattr(self, fileID)) :
+                    print 'zzzzzzz', getattr(self, fileID)
+                    output = '\\input \"' + getattr(self, fileID) + '\"\n'
 
-        print 'aaaaaaaaaa', ctrlFile
+            elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
+                if os.path.isfile(getattr(self, fileID)) :
+                    output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
 
-# Something really wrong here!
+            return output
+
 
         # Create or refresh any required files
         for f in self.primOut[typeID] :
@@ -328,7 +338,6 @@ class Xetex (Manager) :
                     except :
                         pass
 
-        print 'bbbbbbbbbb', ctrlFile
 
         # Create the control file 
         writeObject = codecs.open(ctrlFile, "w", encoding='utf_8')
@@ -345,7 +354,7 @@ class Xetex (Manager) :
                     # Make sure we are working with the right cid file names
                     # This needs to be done for meta components
                     self.buildCidFileNames(c)
-                    writeObject.write(setLine(c + 'Tex'))
+                    writeObject.write(setLine('cidTex'))
             else :
                     writeObject.write(setLine('cidTex'))
 
@@ -707,7 +716,7 @@ class Xetex (Manager) :
         # to see if any changes were made causing a rerendering of the PDF comp.
         # For now we just need to get it working.
         self.primOut    =   {
-            'globalTex'     : [macLinkFile, 'setFile', 'extFile', 'globSty', 'custSty', 'hyphenTexFile', 'cidTex'],
+            'globalTex'     : [macLinkFile, 'setFile', 'extFile', 'globSty', 'custSty', 'hyphenTexFile'],
             'cidTex'        : ['cidExt', 'cidSty', 'cidUsfm'],
             'cidPdf'        : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
                             }
