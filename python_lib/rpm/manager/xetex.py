@@ -126,12 +126,8 @@ class Xetex (Manager) :
                         + self.project.local.projProcessFolder + ':' \
                         + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
 
-        # Create the command XeTeX will run with
-        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
-            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.project.local.projProcessFolder + ' ' + self.globalTex
-            # Rename to the right meta component name
-        else :
-            command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.globalTex
+        # Create the command XeTeX will run with and point it to the masterTex file
+        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.masterTex
 
         # Run XeTeX and collect the return code for analysis
         rCode = -1
@@ -145,22 +141,9 @@ class Xetex (Manager) :
         else :
             writeToLog(self.project, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
 
-        # Change the file names to the right ones
-#        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
-#            # Rename to the right meta component name
-#            if os.path.isfile(self.globalPdf) :
-#                os.rename(self.globalPdf, os.path.join(self.project.local.projProcessFolder, self.cid + '.pdf'))
-#        else :
-#            # Rename to the right component name
-#            if os.path.isfile(self.globalPdf) :
-#                os.rename(self.globalPdf, self.cidPdf)
-
-# FIXME: Start here
-
-        print 'yyyyyyyyyy', self.globalPdf
-        if os.path.isfile(self.globalPdf) :
-            print 'zzzzzzzzzzzz', self.cidPdf
-            os.rename(self.globalPdf, self.cidPdf)
+        # Change the masterPDF file name to the cidPdf file name to make it easier to track
+        if os.path.isfile(self.masterPdf) :
+            os.rename(self.masterPdf, self.cidPdf)
 
 
     def makeExtFile (self) :
@@ -216,16 +199,19 @@ class Xetex (Manager) :
 
 
     def makeGlobSty (self) :
-        '''The Global style file is required for rendering but is dependent
-        on the USFM working file. This will check to see if it is there, and
-        try to quite gracefully if it is not.'''
+        '''This actually doesn't make anything.  The Global style file is
+        required for rendering but is dependent on the USFM working file.  This
+        will check to see if it is there, and try to quite gracefully if it is
+        not.  The exception to this would be if this is a meta component, then
+        it doesn't worry about it.'''
 
-        if os.path.isfile(self.cidUsfm) :
-            return True
-        else :
-            writeToLog(self.project, 'ERR', 'makeGlobSty() - Not found: [' + fName(self.cidUsfm) + ']. This is required, system should halt.')
-            terminal('RPM halting now!')
-            sys.exit()
+        if not self.cidMeta :
+            if os.path.isfile(self.cidUsfm) :
+                return True
+            else :
+                writeToLog(self.project, 'ERR', 'makeGlobSty() - Not found: [' + fName(self.cidUsfm) + ']. This is required, system should halt.')
+                terminal('RPM halting now!')
+                sys.exit()
 
 
     def makeCidUsfm (self) :
@@ -246,8 +232,8 @@ class Xetex (Manager) :
         rendering a component or meta component. This is run every time rendering
         is called on.'''
 
-        if typeID == 'globalTex' :
-            ctrlFile = self.globalTex
+        if typeID == 'masterTex' :
+            ctrlFile = self.masterTex
         else :
             ctrlFile = getattr(self, typeID)
 
@@ -300,8 +286,8 @@ class Xetex (Manager) :
             if setLine(f) :
                 writeObject.write(setLine(f))
         # If this is a global file, then put in the links to the component(s) to render
-        if typeID == 'globalTex' :
-            if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+        if typeID == 'masterTex' :
+            if self.cidMeta :
                 for c in self.project.projConfig['Components'][self.cid]['list'] :
                     # Make sure we are working with the right cid file names
                     # This needs to be done for meta components
@@ -581,17 +567,21 @@ class Xetex (Manager) :
 
 
     def buildCidFileNames (self, thisCid) :
-        '''Because it might be necessary to build cid file names multiple times,
-        this function will do that. (Maybe there is a better way to do this?)'''
+        '''Because it might be necessary to build cid file names multiple times
+        during a session, this function will do that.  I don't know if this is
+        really clever or stupid, but it works. (Maybe there is a better way to
+        do this?)'''
 
         self.cidFolder          = os.path.join(self.project.local.projProcessFolder, thisCid)
         self.cidUsfm            = os.path.join(self.cidFolder, thisCid + '.usfm')
         self.cidTex             = os.path.join(self.cidFolder, thisCid + '.tex')
+        self.masterTex          = os.path.join(self.cidFolder, 'master.tex')
         self.cidExt             = os.path.join(self.cidFolder, thisCid + '-ext.tex')
         self.cidSty             = os.path.join(self.cidFolder, thisCid + '.sty')
         self.cidAdj             = os.path.join(self.cidFolder, thisCid + '.adj')
         self.cidPics            = os.path.join(self.cidFolder, thisCid + '.piclist')
-        self.cidPdf                 = os.path.join(self.cidFolder, self.cid + '.pdf')
+        self.cidPdf             = os.path.join(self.cidFolder, self.cid + '.pdf')
+        self.masterPdf          = os.path.join(self.cidFolder, 'master.pdf')
 
 
 ###############################################################################
@@ -606,10 +596,9 @@ class Xetex (Manager) :
         self.files                  = {}
         self.primOut                = {}
         self.cid                    = cid
+        self.cidMeta                = False
         self.custSty                = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
         self.globSty                = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
-        self.globalTex              = os.path.join(self.project.local.projProcessFolder, 'global.tex')
-        self.globalPdf              = os.path.join(self.project.local.projProcessFolder, 'global.pdf')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
         self.layoutConfFile         = self.project.local.layoutConfFile
         self.fontConfFile           = self.project.local.fontConfFile
@@ -620,6 +609,10 @@ class Xetex (Manager) :
         if self.sourceEditor.lower() == 'paratext' :
             self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
             self.globSty            = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+
+        # Check to see if this is a meta component, set flag if so
+        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+            self.cidMeta            = True
 
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
@@ -635,8 +628,9 @@ class Xetex (Manager) :
         # Process file information
         #   ID                      tType           Required    Description
         self.files      =   {
-            'cidPdf'            : ['None',          False,      'PDF output file'],
-            'globalTex'         : ['None',          True,       'Main TeX control file'],
+            'cidPdf'            : ['None',          False,      'Final PDF output file'],
+            'masterPdf'         : ['None',          False,      'Initial PDF output file to be renamed to cidPdf'],
+            'masterTex'         : ['None',          True,       'Main TeX control file for a component or meta-component'],
             'cidTex'            : ['None',          True,       'TeX control file for an individual component'],
             'cidUsfm'           : ['ptxfile',       True,       'USFM text working file'],
             'cidPics'           : ['None',          False,      'Scripture illustrations placement file'],
@@ -661,7 +655,7 @@ class Xetex (Manager) :
         # to see if any changes were made causing a rerendering of the PDF comp.
         # For now we just need to get it working.
         self.primOut    =   {
-            'globalTex'     : [macLinkFile, 'setFile', 'extFile', 'globSty', 'custSty', 'hyphenTexFile'],
+            'masterTex'     : [macLinkFile, 'setFile', 'extFile', 'globSty', 'custSty', 'hyphenTexFile'],
             'cidTex'        : ['cidExt', 'cidSty', 'cidUsfm'],
             'cidPdf'        : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
                             }
@@ -669,7 +663,7 @@ class Xetex (Manager) :
         # With all the new values defined start running here
 
         # Check if this is a meta component, preprocess all subcomponents
-        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
+        if self.cidMeta :
             for c in self.project.projConfig['Components'][self.cid]['list'] :
                 # Adjust the file names for this cid
                 self.buildCidFileNames(c)
@@ -678,7 +672,8 @@ class Xetex (Manager) :
             self.makeControlTex('cidTex')
 
         # Create the global TeX file that will link to the cidTex file(s) we just made
-        self.makeControlTex('globalTex')
+        self.buildCidFileNames(self.cid)
+        self.makeControlTex('masterTex')
 
         # Create the PDF (if needed)
         render = False
