@@ -32,6 +32,20 @@ from tools import *
 ###############################################################################
 
 
+def mapPTTextSettings (managerSettings, ptSettings, reset=False) :
+    '''Map the text settings from a PT project SSF file into the text
+    manager's settings.'''
+
+    # Get the SSF XML object
+    # Find the appropreate text settings we need
+    # Merge them with the manager settings object
+    # Overwrite exsisting settings if reset set to True
+
+# Work here ###################################################################
+                
+    return managerSettings
+
+
 def installPTStyles (local, mainStyleFile) :
     '''Go get the style sheet from the local PT project this is in
     and install it into the project where and how it needs to be.'''

@@ -98,24 +98,13 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-        # Make a PT settings dictionary
-        if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFConf = getPTSettings(self.project.local.projHome)
-
-       # Update default font if needed
+       # Update default font if needed, font manager will figure out which
+       # font to use or it will die there.
         if not self.primaryFont or self.primaryFont == 'None' :
-            # Get the primaryFont from PT if that is the editor
-            if self.sourceEditor.lower() == 'paratext' :
-                self.primaryFont = self.ptSSFConf['ScriptureText']['DefaultFont']
-                self.project.managers['usfm_Font'].setPrimaryFont(self.primaryFont, 'Usfm')
-            else :
-                writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy fonts into project.')
-                terminal('RPM halting now!')
-                sys.exit()
+                self.project.managers['usfm_Font'].setPrimaryFont('', 'Usfm')
         else :
             # This will double check that all the fonts are installed
             self.project.managers['usfm_Font'].installFont('Usfm')
-
 
 
 ###############################################################################
@@ -137,12 +126,7 @@ class Usfm (Component) :
                 terminal("Preprocessing: " + self.compIDs[cid][0])
 
                 # See if the working text is present
-                if self.sourceEditor.lower() == 'paratext' :
-                    self.project.managers['usfm_Text'].installPTWorkingText(self.ptSSFConf, cid, 'Usfm', self.compIDs[cid][1])
-                else :
-                    writeToLog(self.project, 'ERR', 'Editor not supported [' + self.sourceEditor + '] Cannot copy source text.')
-                    terminal('RPM halting now!')
-                    sys.exit()
+                self.project.managers['usfm_Text'].installUsfmWorkingText(cid)
 
                 # Check on the component styles
                 self.project.managers['usfm_Style'].installCompTypeGlobalStyles(self.ptSSFConf)

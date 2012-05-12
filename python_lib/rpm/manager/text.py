@@ -46,6 +46,7 @@ class Text (Manager) :
         self.project            = project
         self.cfg                = cfg
         self.cType              = cType
+        self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
@@ -65,39 +66,61 @@ class Text (Manager) :
 ###############################################################################
 
 
-    def installPTWorkingText (self, ptConf, cid, cType, compNum) :
-        '''Find the source text in the local PT project and install it into
-        the working text folder of the project with the proper name.'''
+    def installUsfmWorkingText (self, cid) :
+        '''Find the USFM source text and installs it into the working text
+        folder of the project with the proper name.'''
 
-        # Build up the source and working file names based on what we find
-        # in the PT project SSF file
-        if ptConf['ScriptureText']['FileNameBookNameForm'] == '41MAT' :
-            prePart = ptConf['ScriptureText']['FileNamePrePart']
-            postPart = ptConf['ScriptureText']['FileNamePostPart']
-            if prePart :
-                thisFile = prePart + compNum + cid.upper() + postPart
+        # Check to see what the source editor is and adjust settings if needed
+        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
+        if sourceEditor.lower() == 'paratext' :
+            ptSet = getPTSettings(self.project.local.projHome)
+            # In this situation we don't want to make any changes to exsiting
+            # settings so the reset is set to False
+            newCompSet = mapPTTextSettings(self.compSettings, ptSet, False)
+            if newCompSet != self.compSettings :
+                # Merge in the new settings and save them
+                
+# Work here ###################################################################
+                
+                pass
+        else :
+            writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
+            dieNow()
+
+
+        compNum     = '00'
+        if self.nameFormID == '41MAT' :
+            if self.prePart :
+                thisFile = self.prePart + compNum + cid.upper() + self.postPart
             else :
                 thisFile = compNum + cid.upper() + postPart
         else :
-            writeToLog(self.project, 'ERR', 'The PT Book Name Form: [' + ptConf['ScriptureText']['FileNameBookNameForm'] + '] is not supported yet.')
-            return
+            if not self.nameFormID :
+                writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.')
+            else :
+                writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID [' + self.nameFormID + '] is not recognized by this system. Please contact the system developer about this problem.')
+
+            # Both of the above are bad news so we need to take down the system now
+            dieNow()
 
         # Make target folder if needed
         targetFolder = os.path.join(self.project.local.projProcessFolder, cid)
         if not os.path.isdir(targetFolder) :
             os.makedirs(targetFolder)
 
-        ptSource = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
-        target = os.path.join(targetFolder, cid + '.' + cType.lower())
+        source = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        target = os.path.join(targetFolder, cid + '.usfm')
 
         # Copy the source to the working text folder
         # FIXME: At some point dependency checking might need to be done
         if not os.path.isfile(target) :
-            if os.path.isfile(ptSource) :
-                shutil.copy(ptSource, target)
-                writeToLog(self.project, 'LOG', 'Copied [' + fName(ptSource) + '] to [' + fName(target) + '] in project.')
+            if os.path.isfile(source) :
+            
+# Here we want to use the usfm parser to do the copy opperation.
+                shutil.copy(source, target)
+                writeToLog(self.project, 'LOG', 'Copied [' + fName(source) + '] to [' + fName(target) + '] in project.')
             else :
-                writeToLog(self.project, 'LOG', ptSource + ' not found.')
+                writeToLog(self.project, 'LOG', source + ' not found.')
 
 
 

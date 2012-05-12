@@ -31,6 +31,15 @@ import pprint
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+def dieNow () :
+    '''When something bad happens we don't want undue embarrasment by letting
+    the system find its own place to crash.  We'll take it down with this
+    command and will have hopefully provided the user with a useful message as
+    to why this happened.'''
+
+    terminal('RPM halting now!')
+    sys.exit()
+
 
 def isOlder (child, parent) :
     '''Check to see if the child (dependent) is older (has accumulated more

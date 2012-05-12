@@ -210,8 +210,7 @@ class Xetex (Manager) :
                 return True
             else :
                 writeToLog(self.project, 'ERR', 'makeGlobSty() - Not found: [' + fName(self.cidUsfm) + ']. This is required, system should halt.')
-                terminal('RPM halting now!')
-                sys.exit()
+                dieNow()
 
 
     def makeCidUsfm (self) :
@@ -223,8 +222,7 @@ class Xetex (Manager) :
             return True
         else :
             writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
-            terminal('RPM halting now!')
-            sys.exit()
+            dieNow()
 
 
     def makeControlTex (self, typeID) :
@@ -264,8 +262,8 @@ class Xetex (Manager) :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
                     writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
-                    terminal('RPM halting now!')
-                    sys.exit()
+                    dieNow()
+
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
             # not complain if we cannot do it
@@ -275,7 +273,6 @@ class Xetex (Manager) :
                         getattr(self, 'make' + f[0].upper() + f[1:])()
                     except :
                         pass
-
 
         # Create the control file 
         writeObject = codecs.open(ctrlFile, "w", encoding='utf_8')

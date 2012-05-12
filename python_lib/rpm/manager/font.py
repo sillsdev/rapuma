@@ -81,6 +81,10 @@ class Font (Manager) :
     def setPrimaryFont (self, font, cType) :
         '''Set the primary font for the project.'''
 
+# FIXME: This will need to somehow know what editor we are using and
+# if there is a primary font set for it. If not, then it should die
+# and tell the user to set the primary font.
+
         self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
         # Load the primary font if it is not there already
         self.recordFont(font, cType)

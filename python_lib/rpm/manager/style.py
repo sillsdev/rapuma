@@ -81,9 +81,9 @@ class Style (Manager) :
                     installPTStyles(self.project.local, self.mainStyleFile)
                     writeToLog(self.project, 'LOG', 'Main style file copied in from PT project.')
             else :
+                # Quite here
                 writeToLog(self.project, 'ERR', 'Main style file creation not supported yet. This is a required file.')
-                terminal('RPM halting now!')
-                sys.exit()
+                dieNow()
 
 
     def installCompTypeOverrideStyles (self) :
