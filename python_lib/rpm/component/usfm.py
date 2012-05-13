@@ -70,6 +70,23 @@ class Usfm (Component) :
             # This will double check that all the fonts are installed
             self.project.managers['usfm_Font'].installFont('Usfm')
 
+# FIXME: Start here, how can we get text file info into the proj conf for when we need it.
+
+        # Check to see what the source editor is and adjust settings if needed
+        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
+        if sourceEditor.lower() == 'paratext' :
+            ptSet = getPTSettings(self.project.local.projHome)
+            # In this situation we don't want to make any changes to exsiting
+            # settings so the reset is set to False
+            oldCompSet = self.compSettings.dict()
+            newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, False)
+            if not newCompSet == oldCompSet :
+                self.compSettings.merge(newCompSet)
+                writeConfFile(self.project.projConfig)
+        else :
+            writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
+            dieNow()
+
 
 ###############################################################################
 ############################ Functions Begin Here #############################

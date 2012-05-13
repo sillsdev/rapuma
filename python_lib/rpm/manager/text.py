@@ -85,17 +85,12 @@ class Text (Manager) :
             writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
             dieNow()
 
-        compNum     = '00'
         if self.nameFormID == '41MAT' :
-        
-# FIXME: Start here - Build the source main file name part in a consistant/intelligent way
-
-            compNum = getUsfmCidInfo(cid)[1]
-
+            mainName = getUsfmCidInfo(cid)[1] + cid.upper()
             if self.prePart :
-                thisFile = self.prePart + compNum + cid.upper() + self.postPart
+                thisFile = self.prePart + mainName + self.postPart
             else :
-                thisFile = compNum + cid.upper() + postPart
+                thisFile = mainName + postPart
         else :
             if not self.nameFormID :
                 writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.')
