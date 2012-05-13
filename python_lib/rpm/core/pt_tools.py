@@ -32,18 +32,35 @@ from tools import *
 ###############################################################################
 
 
-def mapPTTextSettings (managerSettings, ptSettings, reset=False) :
+def getPTFont (home) :
+    '''Just return the name of the font used in a PT project.'''
+
+    ssf = getPTSettings(home)
+    return ssf['ScriptureText']['DefaultFont']
+
+
+def mapPTTextSettings (sysSet, ptSet, reset=False) :
     '''Map the text settings from a PT project SSF file into the text
     manager's settings.'''
 
-    # Get the SSF XML object
-    # Find the appropreate text settings we need
-    # Merge them with the manager settings object
-    # Overwrite exsisting settings if reset set to True
+    # A PT to RPM text mapping dictionary
+    mapping   = {
+                'FileNameBookNameForm'    : 'nameFormID',
+                'FileNamePrePart'         : 'prePart',
+                'FileNamePostPart'        : 'postPart'
+                }
 
-# Work here ###################################################################
-                
-    return managerSettings
+    # Loop through all the PT settings and check against the mapping
+    for k in mapping.keys() :
+        try :
+            if sysSet[mapping[k]] == '' or sysSet[mapping[k]] == 'None' :
+                sysSet[mapping[k]] = ptSet['ScriptureText'][k]
+            elif reset == True :
+                sysSet[mapping[k]] = ptSet['ScriptureText'][k]
+        except :
+            pass
+
+    return sysSet
 
 
 def installPTStyles (local, mainStyleFile) :

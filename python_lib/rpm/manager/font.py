@@ -46,6 +46,7 @@ class Font (Manager) :
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType
+        self.Ctype                      = cType.capitalize()
         self.fontConfig                 = ConfigObj()
         self.project                    = project
         self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
@@ -81,16 +82,30 @@ class Font (Manager) :
     def setPrimaryFont (self, font, cType) :
         '''Set the primary font for the project.'''
 
-# FIXME: This will need to somehow know what editor we are using and
-# if there is a primary font set for it. If not, then it should die
-# and tell the user to set the primary font.
+        if not font :
+            sEditor = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+            if sEditor.lower() == 'paratext' :
+                font = getPTFont(self.project.local.projHome)
+                # Test for font
+                if not font :
+                    writeToLog(self.project, 'ERR', 'Failed to find in ParaTExt project. A primary font must be set before this component can be successfully rendered.')
+                    dieNow()
+            else :
+                # Quite here
+                if not sEditor :
+                    writeToLog(self.project, 'ERR', 'No source editor was found for this project. Please enter this setting before continuing.')
+                else :
+                    writeToLog(self.project, 'ERR', 'Source editor [' + sEditor + '] is not supported. Please enter a supported editor setting before continuing or contact the system developer to add support for your editor.')
+                dieNow()
 
+        # If this didn't die already we should be able to record and install now
         self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
         # Load the primary font if it is not there already
         self.recordFont(font, cType)
         self.installFont(cType)
         writeConfFile(self.project.projConfig)
         writeToLog(self.project, 'LOG', 'Set primary font to: ' + font)
+        return True
 
 
     def recordFont (self, font, cType) :
@@ -103,8 +118,8 @@ class Font (Manager) :
         fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
         fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
-            writeToLog(self.project, 'ERR', 'Halt! ' + font + '.xml not found.')
-            return False
+            writeToLog(self.project, 'ERR', 'Font file [' + font + '.xml] not found. (font.recordFont())')
+            dieNow()
 
         # See if this is already in the config
         if not testForSetting(self.fontConfig, 'Fonts') :

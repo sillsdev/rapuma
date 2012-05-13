@@ -76,20 +76,22 @@ class Text (Manager) :
             ptSet = getPTSettings(self.project.local.projHome)
             # In this situation we don't want to make any changes to exsiting
             # settings so the reset is set to False
-            newCompSet = mapPTTextSettings(self.compSettings, ptSet, False)
-            if newCompSet != self.compSettings :
-                # Merge in the new settings and save them
-                
-# Work here ###################################################################
-                
-                pass
+            oldCompSet = self.compSettings.dict()
+            newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, False)
+            if not newCompSet == oldCompSet :
+                self.compSettings.merge(newCompSet)
+                writeConfFile(self.project.projConfig)
         else :
             writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
             dieNow()
 
-
         compNum     = '00'
         if self.nameFormID == '41MAT' :
+        
+# FIXME: Start here - How do we get the comp number out of the Usfm manager?
+# we need that number to build the right source file name.
+        
+            compNum = ???
             if self.prePart :
                 thisFile = self.prePart + compNum + cid.upper() + self.postPart
             else :
@@ -109,6 +111,7 @@ class Text (Manager) :
             os.makedirs(targetFolder)
 
         source = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        print source
         target = os.path.join(targetFolder, cid + '.usfm')
 
         # Copy the source to the working text folder
@@ -120,7 +123,7 @@ class Text (Manager) :
                 shutil.copy(source, target)
                 writeToLog(self.project, 'LOG', 'Copied [' + fName(source) + '] to [' + fName(target) + '] in project.')
             else :
-                writeToLog(self.project, 'LOG', source + ' not found.')
+                writeToLog(self.project, 'LOG', 'Source file: [' + source + '] not found! Cannot copy to project.')
 
 
 
