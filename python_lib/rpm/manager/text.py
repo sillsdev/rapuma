@@ -88,10 +88,10 @@ class Text (Manager) :
         compNum     = '00'
         if self.nameFormID == '41MAT' :
         
-# FIXME: Start here - How do we get the comp number out of the Usfm manager?
-# we need that number to build the right source file name.
-        
-            compNum = ???
+# FIXME: Start here - Build the source main file name part in a consistant/intelligent way
+
+            compNum = getUsfmCidInfo(cid)[1]
+
             if self.prePart :
                 thisFile = self.prePart + compNum + cid.upper() + self.postPart
             else :
