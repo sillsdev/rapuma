@@ -141,7 +141,10 @@ def hasUsfmCidInfo (cid) :
 def getUsfmCidInfo (cid) :
     '''Return a list of info about a specific cid used in the PT context.'''
 
-    return usfmCidInfo()[cid]
+    try :
+        return usfmCidInfo()[cid]
+    except :
+        return False
 
 
 def usfmCidInfo () :

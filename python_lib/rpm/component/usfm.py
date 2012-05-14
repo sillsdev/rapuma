@@ -62,7 +62,7 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-       # Update default font if needed, font manager will figure out which
+       # Update default font if needed, usfm_Font manager will figure out which
        # font to use or it will die there.
         if not self.primaryFont or self.primaryFont == 'None' :
             self.project.managers['usfm_Font'].setPrimaryFont('', 'Usfm')
@@ -70,22 +70,10 @@ class Usfm (Component) :
             # This will double check that all the fonts are installed
             self.project.managers['usfm_Font'].installFont('Usfm')
 
-# FIXME: Start here, how can we get text file info into the proj conf for when we need it.
-
-        # Check to see what the source editor is and adjust settings if needed
-        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
-        if sourceEditor.lower() == 'paratext' :
-            ptSet = getPTSettings(self.project.local.projHome)
-            # In this situation we don't want to make any changes to exsiting
-            # settings so the reset is set to False
-            oldCompSet = self.compSettings.dict()
-            newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, False)
-            if not newCompSet == oldCompSet :
-                self.compSettings.merge(newCompSet)
-                writeConfFile(self.project.projConfig)
-        else :
-            writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
-            dieNow()
+        # To better facilitate rendering that might be happening on this run, we
+        # will update source file names and other settings used in the usfm_Text
+        # manager (It might be better to do this elsewhere, but where?)
+        self.project.managers['usfm_Text'].updateManagerSettings()
 
 
 ###############################################################################
@@ -103,8 +91,8 @@ class Usfm (Component) :
             and/or creating any subcomponents it needs to render properly.'''
 
             # First see if this is a valid component
-            if hasUsfmCidInfo(self.cid) :
-                terminal("Preprocessing: " + getUsfmCidInfo(self.cid)[0])
+            if hasUsfmCidInfo(cid) :
+                terminal("Preprocessing: " + getUsfmCidInfo(cid)[0])
 
                 # See if the working text is present
                 self.project.managers['usfm_Text'].installUsfmWorkingText(cid)
@@ -122,6 +110,7 @@ class Usfm (Component) :
             else :
                 writeToLog(self.project, 'ERR', 'Invalid component ID: [' + cid + '], cannot be preprocessed.')
                 return
+
 
         # If this is a meta component, preprocess all subcomponents
         if testForSetting(self.cfg, 'list') :

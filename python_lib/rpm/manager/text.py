@@ -26,6 +26,9 @@ from configobj import ConfigObj, Section
 from tools import *
 from pt_tools import *
 from manager import Manager
+import palaso.sfm as sfm
+#import palaso.sfm.usfm as usfm
+from palaso.sfm import usfm, style, pprint, element, text
 
 
 ###############################################################################
@@ -65,12 +68,9 @@ class Text (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+    def updateManagerSettings (self) :
+        '''Update the settings for this manager if needed.'''
 
-    def installUsfmWorkingText (self, cid) :
-        '''Find the USFM source text and installs it into the working text
-        folder of the project with the proper name.'''
-
-        # Check to see what the source editor is and adjust settings if needed
         sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
         if sourceEditor.lower() == 'paratext' :
             ptSet = getPTSettings(self.project.local.projHome)
@@ -84,6 +84,16 @@ class Text (Manager) :
         else :
             writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
             dieNow()
+
+        return True
+
+
+    def installUsfmWorkingText (self, cid) :
+        '''Find the USFM source text and installs it into the working text
+        folder of the project with the proper name.'''
+
+        # Check to see if settings need updating
+        self.updateManagerSettings()
 
         if self.nameFormID == '41MAT' :
             mainName = getUsfmCidInfo(cid)[1] + cid.upper()
@@ -106,19 +116,26 @@ class Text (Manager) :
             os.makedirs(targetFolder)
 
         source = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
-        print source
         target = os.path.join(targetFolder, cid + '.usfm')
 
         # Copy the source to the working text folder
         # FIXME: At some point dependency checking might need to be done
-        if not os.path.isfile(target) :
-            if os.path.isfile(source) :
-            
-# Here we want to use the usfm parser to do the copy opperation.
-                shutil.copy(source, target)
-                writeToLog(self.project, 'LOG', 'Copied [' + fName(source) + '] to [' + fName(target) + '] in project.')
-            else :
-                writeToLog(self.project, 'LOG', 'Source file: [' + source + '] not found! Cannot copy to project.')
+        if not isOlder(target, source) :
+            if not os.path.isfile(target) :
+                if os.path.isfile(source) :
+                    # Use the Palaso USFM parser to bring in the text and
+                    # clean it up if needed
+                    fh = codecs.open(source, 'r', 'utf_8_sig')
+                    doc = usfm.parser(fh)
+                    tidy = sfm.pprint(doc)
+                    writeout = codecs.open(target, "w", "utf-8")
+                    writeout.write(tidy)
+                    writeout.close
+                    # FIXME: Add a hook here for custom post processing here
+                    # for things like encoding and word changes.
+                    writeToLog(self.project, 'LOG', 'Copied [' + fName(source) + '] to [' + fName(target) + '] in project.')
+                else :
+                    writeToLog(self.project, 'LOG', 'Source file: [' + source + '] not found! Cannot copy to project.')
 
 
 

@@ -45,6 +45,10 @@ def isOlder (child, parent) :
     '''Check to see if the child (dependent) is older (has accumulated more
     time) than the parent.  Return true if it is.'''
 
+    # If the child file is missing, it cannot be older than the parent
+    if not os.path.isfile(child) :
+        return False
+
     childTime = int(os.path.getctime(child))
     parentTime = int(os.path.getctime(parent))
     if childTime < parentTime :

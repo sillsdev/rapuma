@@ -672,11 +672,18 @@ class Xetex (Manager) :
         self.buildCidFileNames(self.cid)
         self.makeControlTex('masterTex')
 
+
+# Start here: How should we look at the cidUsfm file for checking dependency
+# Right now, it doesn't seem to factor in on that
+
+
+
         # Create the PDF (if needed)
         render = False
         if os.path.isfile(self.cidPdf) :
             for k in self.primOut['cidPdf'] :
                 thisFile = getattr(self, k)
+                print thisFile
                 if os.path.isfile(thisFile) :
                     if isOlder(self.cidPdf, thisFile) :
                         writeToLog(self.project, 'LOG', 'There has been a change in ' + fName(thisFile) + ' the ' + fName(self.cidPdf) + ' needs to be rerendered.')
