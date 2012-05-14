@@ -672,6 +672,7 @@ class Xetex (Manager) :
         self.buildCidFileNames(self.cid)
         self.makeControlTex('masterTex')
 
+#########################################################################################
 
 # Start here: How should we look at the cidUsfm file for checking dependency
 # Right now, it doesn't seem to factor in on that
@@ -691,6 +692,13 @@ class Xetex (Manager) :
         else :
             writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
             render = True
+
+
+
+###################################################################################
+
+
+
 
         if render :
             self.makeCidPdf()
