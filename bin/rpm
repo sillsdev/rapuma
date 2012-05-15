@@ -354,6 +354,13 @@ def userArguments (args) :
                 aProject.createComponentStyleFile(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+    elif sys.argv[1].lower() == 'settings' :
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
+            if args['configuration'] :
+                aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
+        else :
+            terminal('Cannot find [' + args['project_id'] + '] project.')
     elif sys.argv[1].lower() == 'test' :
         if args['source_id'] :
             getExampleSourceProject(args['source_id'])
@@ -400,7 +407,13 @@ compCommand.add_argument('-i', '--project_id', help='Project ID (required for al
 compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 compCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
 compCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
-
+# Add settings subprocess arguments
+compCommand = subparsers.add_parser('settings', help='General settings handling commands help')
+compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+compCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
+compCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
+compCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
+compCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
 # Add testing subprocess arguments
 compCommand = subparsers.add_parser('test', help='General system testing commands help')
 compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')

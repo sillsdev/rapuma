@@ -266,13 +266,15 @@ class Project (object) :
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 
-    def changeSystemSetting (self, key, value) :
+    def changeConfigSetting (self, config, section, key, value) :
         '''Change global default setting (key, value) in the System section of
 
         the RPM user settings file.  This will write out changes
         immediately.'''
 
-        pass
+        writeToLog(self, 'MSG', 'Changed  [' + config + '] setting.')
+
+
 
 
 
