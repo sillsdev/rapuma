@@ -682,12 +682,15 @@ class Xetex (Manager) :
         # Create the PDF (if needed)
         render = False
         if os.path.isfile(self.cidPdf) :
-            for k in self.primOut['cidPdf'] :
+            fList = self.primOut['cidPdf']
+            # Add the cidUsfm into the list here so 
+            # that file is covered as a dependent
+            fList.append('cidUsfm')
+            for k in fList :
                 thisFile = getattr(self, k)
-                print thisFile
                 if os.path.isfile(thisFile) :
                     if isOlder(self.cidPdf, thisFile) :
-                        writeToLog(self.project, 'LOG', 'There has been a change in ' + fName(thisFile) + ' the ' + fName(self.cidPdf) + ' needs to be rerendered.')
+                        writeToLog(self.project, 'LOG', 'There has been a change in [' + fName(thisFile) + '], [' + fName(self.cidPdf) + '] needs to be rerendered.')
                         render = True
         else :
             writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
@@ -702,6 +705,8 @@ class Xetex (Manager) :
 
         if render :
             self.makeCidPdf()
+        else :
+            writeToLog(self.project, 'LOG', 'No changes to dependent files found, [' + fName(self.cidPdf) + '] does not need to be rerendered at this time.')
 
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :

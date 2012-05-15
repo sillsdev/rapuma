@@ -270,12 +270,10 @@ def xmlToDict (element) :
     '''This will turn a normal XML file into a standard Python dictionary.
     I picked up this clever pice of code from here:
         http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
-    A guy named josch submitted it. I have modified it a little.'''
+    A guy named josch submitted it. I have modified it a little to work in RPM.'''
 
-    print 'xmlToDict not working right yet. Fix probl with isinstance'
-
-#    if not isinstance(element, ElementTree.Element()):
-#        raise ValueError("must pass xml.etree.ElementTree.Element object")
+    if not isinstance(element, ElementTree.Element):
+        raise ValueError("must pass xml.etree.ElementTree.Element object")
 
     def xmltodict_handler(parent_element):
         result = dict()
