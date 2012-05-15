@@ -23,6 +23,7 @@
 import codecs, os, sys, fileinput
 from datetime import *
 from xml.etree import ElementTree
+#import xml.etree.ElementTree as ElementTree
 
 from configobj import ConfigObj, Section
 import pprint
@@ -272,8 +273,9 @@ def xmlToDict (element) :
         http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
     A guy named josch submitted it. I have modified it a little to work in RPM.'''
 
-    if not isinstance(element, ElementTree.Element):
-        raise ValueError("must pass xml.etree.ElementTree.Element object")
+    print 'Fix isinstance() problem in tools.xmlToDict()'
+#    if not isinstance(element, ElementTree.Element):
+#        raise ValueError("must pass xml.etree.ElementTree.Element object")
 
     def xmltodict_handler(parent_element):
         result = dict()
