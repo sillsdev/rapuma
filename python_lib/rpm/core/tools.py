@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, fileinput
+import codecs, os, sys, re, fileinput
 from datetime import *
 from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
@@ -65,6 +65,59 @@ def fName (fullPath) :
     return os.path.split(fullPath)[1]
 
 
+def addToList (thisList, item) :
+    '''Generic function to add an item to any list if it isn't there already.
+    If not, just return the list contents or an empty list.'''
+
+    if len(thisList) != 0 :
+        if item not in thisList :
+            listOrder = []
+            listOrder = thisList
+            listOrder.append(item)
+            return listOrder
+        else :
+            return thisList
+    else :
+        return thisList
+
+
+def str2bool (str) :
+    '''Simple boolean tester'''
+
+    if isinstance(str, basestring) and str.lower() in ['0','false','no']:
+        return False
+    else:
+        return bool(str)
+
+
+def escapePath (path) :
+    '''Escape irregular characters in a path.'''
+
+    # FIXME: It would seem that all that is needed is to put
+    # quotes around the path to make them acceptable to
+    # system calls. For now we will use this. We might need
+    # to do more such as is commented below. Stay tuned...
+    return '"%s"' % ( path )
+
+#    return '"%s"' % (
+#        path
+#        .replace('\\', '\\\\')
+#        .replace('"', '\"')
+#        .replace('$', '\$')
+#        .replace('`', '\`')
+#        .replace(' ', '\ ')
+#    )
+
+    # FIXME: Be nice if we could use re instead of .replace
+    # np = re.sub(r'([ ()\"\'\[\]])', '\\1', path)
+
+
+
+###############################################################################
+########################## Config/Dictionary routines #########################
+###############################################################################
+
+
 def confObjCompare (objA, objB, path) :
     '''Do a simple compare on two ConfigObj objects.'''
 
@@ -97,22 +150,6 @@ def getPersistantSettings (confSection, defaultSettingsFile) :
         return newConf
 
 
-def addToList (thisList, item) :
-    '''Generic function to add an item to any list if it isn't there already.
-    If not, just return the list contents or an empty list.'''
-
-    if len(thisList) != 0 :
-        if item not in thisList :
-            listOrder = []
-            listOrder = thisList
-            listOrder.append(item)
-            return listOrder
-        else :
-            return thisList
-    else :
-        return thisList
-
-
 def testForSetting (conf, key1, key2 = None) :
     '''Using a try statement, this will test for a setting in a config object.
     If its not there it returns None.'''
@@ -124,15 +161,6 @@ def testForSetting (conf, key1, key2 = None) :
             return conf[key1]
     except :
         return
-
-
-def str2bool (str):
-    '''Simple boolean tester'''
-
-    if isinstance(str, basestring) and str.lower() in ['0','false','no']:
-        return False
-    else:
-        return bool(str)
 
 
 def isConfSection (confObj, section) :

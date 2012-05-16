@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# This assumes we are starting in the "My Paratext Projects" folder
+
 rpm test -s SPT && cd SPT && rpm test -d PUB-MYMR-JAS
 cd ..
 rpm test -s KYUL && cd KYUL && rpm test -d PUB-KYUL-JAS

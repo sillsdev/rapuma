@@ -20,7 +20,7 @@
 # this process
 
 import os, shutil
-
+import subprocess
 
 # Load the local classes
 from tools import *
@@ -120,18 +120,22 @@ class Xetex (Manager) :
         self.buildCidFileNames(self.cid)
 
         # Create the environment that XeTeX will use. This will be temporarily set
-        # just before XeTeX is run.
-        texInputsLine = 'TEXINPUTS=' + self.project.local.projHome + ':' \
+        # by subprocess.call() just before XeTeX is run.
+        texInputsLine = self.project.local.projHome + ':' \
                         + self.projMacPackFolder + ':' \
                         + self.project.local.projProcessFolder + ':' \
                         + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
 
-        # Create the command XeTeX will run with and point it to the masterTex file
-        command = 'export ' + texInputsLine + ' && ' + 'xetex ' + '-output-directory=' + self.cidFolder + ' ' + self.masterTex
+        # Create the environment dictionary that will be fed into subprocess.call()
+        envDict = dict(os.environ)
+        envDict['TEXINPUTS'] = texInputsLine
 
-        # Run XeTeX and collect the return code for analysis
-        rCode = -1
-        rCode = os.system(command)
+        # Create the XeTeX command argument list that subprocess.call()
+        # will run with
+        cmds = ['xetex', '-output-directory=' + self.cidFolder, self.masterTex]
+
+        # Run the XeTeX and collect the return code for analysis
+        rCode = subprocess.call(cmds, env = envDict)
 
         # Analyse the return code
         if rCode == int(0) :
@@ -183,12 +187,12 @@ class Xetex (Manager) :
         macLinkFile = getattr(self, self.cType + 'MacLinkFile')
         writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
         writeObject.write('% ' + fName(macLinkFile) + ' created: ' + tStamp() + '\n')
-        writeObject.write('\\input \"' + mainMacroFile + '\"\n')
+        writeObject.write('\\input ' + escapePath(mainMacroFile) + '\n')
 
         # If we are using marginal verses then we will need this
         if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
             self.copyInMargVerse()
-            writeObject.write('\\input \"' + self.ptxMargVerseFile + '\"\n')
+            writeObject.write('\\input ' + escapePath(self.ptxMargVerseFile) + '\n')
         else :
             self.removeMargVerse()
 
@@ -243,13 +247,13 @@ class Xetex (Manager) :
             if not fileID == 'cidTex' :
                 if self.files[fileID][0] == 'input' :
                     if os.path.isfile(getattr(self, fileID)) :
-                        output = '\\input \"' + getattr(self, fileID) + '\"\n'
+                        output = '\\input ' + escapePath(getattr(self, fileID)) + '\n'
 
                 elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
                     if os.path.isfile(getattr(self, fileID)) :
                         output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
             else :
-                output = '\\input \"' + getattr(self, 'cidTex') + '\"\n'
+                output = '\\input ' + escapePath(getattr(self, 'cidTex')) + '\n'
 
             return output
 
@@ -672,13 +676,6 @@ class Xetex (Manager) :
         self.buildCidFileNames(self.cid)
         self.makeControlTex('masterTex')
 
-#########################################################################################
-
-# Start here: How should we look at the cidUsfm file for checking dependency
-# Right now, it doesn't seem to factor in on that
-
-
-
         # Create the PDF (if needed)
         render = False
         if os.path.isfile(self.cidPdf) :
@@ -696,13 +693,6 @@ class Xetex (Manager) :
             writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
             render = True
 
-
-
-###################################################################################
-
-
-
-
         if render :
             self.makeCidPdf()
         else :
@@ -710,7 +700,7 @@ class Xetex (Manager) :
 
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
-            if self.displayPdfOutput(self.cidPdf) :
+            if self.displayPdfOutput(escapePath(self.cidPdf)) :
                 writeToLog(self.project, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
             else :
                 writeToLog(self.project, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
