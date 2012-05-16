@@ -2,12 +2,21 @@ RPM ToDo List
 
 This contains a listing of things that should be worked on sooner than later.
 
-Last edited: Wed 16 May 2012 05:17:53 PM ICT 
+Last edited: Wed 16 May 2012 07:36:21 PM ICT  
 
 1) In the context of a PT project, get the system to look for the .sty files
     in the local project first, then out into the parent (My Paratext Projects)
     folder. This way, if the project was a backup, it will be sure to get the
     right .sty files in case mods needed to be made.
     
-2) Look for subprocess calles that use os.system() and change them over to
+2) Look for subprocess calls that use os.system() and change them over to
     the much nicer subprocess.call() module.
+    
+3) Begin adding repo capabilities. Start with useRepository flag and build some
+    routines that will add a designated file to the projects repo. Later, make
+    some kind of s/r command. Look to see what Chorus might do for us.
+    
+4) Add a paper size dictionary that can be used to automatically fill in the
+    width and height of the page.  This might already exsit so do a search for
+    one first.
+

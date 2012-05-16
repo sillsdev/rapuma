@@ -79,17 +79,31 @@ def installPTStyles (local, mainStyleFile) :
 
 
 def installPTCustomStyles (local, customStyleFile) :
-    '''Look in a PT project for a custom override style file and
-    copy it into the project if it is there.'''
+    '''Look in a PT project for a custom override style file and copy it into
+    the project if it is there.  If it is not there, go one more folder up in
+    case you are located in the [My Paratext Projects] folder.  If it is not
+    there, then return False.'''
 
-    # There may, or may not, be a custom style file. We need to look
-    ptCustomStyles = os.path.join(os.path.dirname(local.projHome), customStyleFile)
-    projCustomStyles = os.path.join(local.projProcessFolder, customStyleFile)
-    # We will start with a very simple copy operation. Once we get going
-    # we will need to make this more sophisticated.
-    if os.path.isfile(ptCustomStyles) :
-        shutil.copy(ptCustomStyles, projCustomStyles)
-        return True
+    # There may, or may not, be a custom style file in the parent folder.
+    # If it is not there we look in the grandparent's folder
+    parent              = os.path.dirname(local.projHome)
+    grandparent         = os.path.dirname(parent)
+    targetCustomStyles  = os.path.join(local.projProcessFolder, customStyleFile)
+    projectCustomStyles = os.path.join(parent, customStyleFile)
+    ptCustomStyles      = os.path.join(grandparent, customStyleFile)
+    searchOrder         = [projectCustomStyles, ptCustomStyles]
+    # We will start by searching in order from the inside out and stop
+    # as soon as we find one. If none is found, return False. If one is
+    # found in the target folder, we will not overwrite it and return False
+    if not os.path.isfile(targetCustomStyles) :
+        for sFile in searchOrder :
+            print sFile
+            if os.path.isfile(sFile) :
+                try :
+                    shutil.copy(sFile, targetCustomStyles)
+                    return True
+                except :
+                    return False
 
 
 def getPTSettings (home) :
