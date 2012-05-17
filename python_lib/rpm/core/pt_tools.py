@@ -86,8 +86,7 @@ def installPTCustomStyles (local, customStyleFile) :
 
     # There may, or may not, be a custom style file in the parent folder.
     # If it is not there we look in the grandparent's folder
-    parent              = os.path.dirname(local.projHome)
-    grandparent         = os.path.dirname(parent)
+    (parent, grandparent) = ancestorsPath(local.projHome)
     targetCustomStyles  = os.path.join(local.projProcessFolder, customStyleFile)
     projectCustomStyles = os.path.join(parent, customStyleFile)
     ptCustomStyles      = os.path.join(grandparent, customStyleFile)
@@ -97,7 +96,6 @@ def installPTCustomStyles (local, customStyleFile) :
     # found in the target folder, we will not overwrite it and return False
     if not os.path.isfile(targetCustomStyles) :
         for sFile in searchOrder :
-            print sFile
             if os.path.isfile(sFile) :
                 try :
                     shutil.copy(sFile, targetCustomStyles)

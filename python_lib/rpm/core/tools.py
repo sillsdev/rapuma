@@ -113,8 +113,19 @@ def escapePath (path) :
 
 
 def ancestorsPath (homePath) :
-    ''''''
-    pass
+    '''This will start in the current folder/directory and return the paths of
+    the two directories above it.  You can't know where you are unless you know
+    where you come from.'''
+
+    parent              = os.path.dirname(homePath)
+    if not os.path.isdir(parent) :
+        parent = None
+
+    grandparent         = os.path.dirname(parent)
+    if not os.path.isdir(grandparent) or grandparent == parent :
+        grandparent = None
+
+    return (parent, grandparent)
 
 
 ###############################################################################
