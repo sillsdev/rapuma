@@ -190,6 +190,27 @@ Todo:
             <value>resources</value>
         </setting>
         <setting>
+            <name>RPM Component Type Folder</name>
+            <key>rpmCompTypeFolder</key>
+            <description>The rpm component type folder where component resources are kept.</description>
+            <type>list</type>
+            <value>resources,lib_compTypes</value>
+        </setting>
+        <setting>
+            <name>RPM Documentation Folder</name>
+            <key>rpmDocumentFolder</key>
+            <description>The rpm document folder where RPM documentation is kept.</description>
+            <type>list</type>
+            <value>resources,lib_docs</value>
+        </setting>
+        <setting>
+            <name>RPM Examples Folder</name>
+            <key>rpmExamplesFolder</key>
+            <description>The rpm examples folder where various test projects are kept.</description>
+            <type>list</type>
+            <value>resources,lib_examples</value>
+        </setting>
+        <setting>
             <name>RPM Libray Share Folder</name>
             <key>rpmLibShareFolder</key>
             <description>The rpm resource folder where various RPM system resources are kept.</description>
@@ -216,13 +237,6 @@ Todo:
             <description>The rpm resource folder where various RPM system resources are kept.</description>
             <type>list</type>
             <value>resources,lib_share,illustrations</value>
-        </setting>
-        <setting>
-            <name>RPM Examples Folder</name>
-            <key>rpmExamplesFolder</key>
-            <description>The rpm examples folder where various test projects are kept.</description>
-            <type>list</type>
-            <value>resources,lib_examples</value>
         </setting>
     </section>
 </root>

@@ -71,14 +71,27 @@ def installPTStyles (local, mainStyleFile) :
     from the RPM system.'''
 
     # As this is call is for a PT based project, it is certain the style
-    # file should be found in the parent folder.
-    ptStyles = os.path.join(os.path.dirname(local.projHome), mainStyleFile)
-    projStyles = os.path.join(local.projProcessFolder, mainStyleFile)
-    # We will start with a very simple copy operation. Once we get going
-    # we will need to make this more sophisticated.
-    if os.path.isfile(ptStyles) :
-        shutil.copy(ptStyles, projStyles)
-        return True
+    # file should be found in the parent or grandparent folder. If that
+    # exact file is not found in either place, a substitute will be
+    # copied in from RPM and given the designated name.
+    (parent, grandparent)   = ancestorsPath(local.projHome)
+    targetStyles            = os.path.join(local.projProcessFolder, mainStyleFile)
+    ptProjStyles            = os.path.join(parent, mainStyleFile)
+    ptStyles                = os.path.join(grandparent, mainStyleFile)
+    rpmStyles               = os.path.join(local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
+    searchOrder             = [ptProjStyles, ptStyles, rpmStyles]
+
+    # We will start by searching in order from the inside out and stop
+    # as soon as we find one. If none is found, return False. If one is
+    # found in the target folder, we will not overwrite it and return False
+    if not os.path.isfile(targetStyles) :
+        for sFile in searchOrder :
+            if os.path.isfile(sFile) :
+                try :
+                    shutil.copy(sFile, targetStyles)
+                    return True
+                except :
+                    return False
 
 
 def installPTCustomStyles (local, customStyleFile) :
@@ -89,11 +102,11 @@ def installPTCustomStyles (local, customStyleFile) :
 
     # There may, or may not, be a custom style file in the parent folder.
     # If it is not there we look in the grandparent's folder
-    (parent, grandparent) = ancestorsPath(local.projHome)
-    targetCustomStyles  = os.path.join(local.projProcessFolder, customStyleFile)
-    projectCustomStyles = os.path.join(parent, customStyleFile)
-    ptCustomStyles      = os.path.join(grandparent, customStyleFile)
-    searchOrder         = [projectCustomStyles, ptCustomStyles]
+    (parent, grandparent)   = ancestorsPath(local.projHome)
+    targetCustomStyles      = os.path.join(local.projProcessFolder, customStyleFile)
+    ptProjectCustomStyles   = os.path.join(parent, customStyleFile)
+    ptCustomStyles          = os.path.join(grandparent, customStyleFile)
+    searchOrder             = [ptProjectCustomStyles, ptCustomStyles]
     # We will start by searching in order from the inside out and stop
     # as soon as we find one. If none is found, return False. If one is
     # found in the target folder, we will not overwrite it and return False
