@@ -65,7 +65,10 @@ def mapPTTextSettings (sysSet, ptSet, reset=False) :
 
 def installPTStyles (local, mainStyleFile) :
     '''Go get the style sheet from the local PT project this is in
-    and install it into the project where and how it needs to be.'''
+    and install it into the project where and how it needs to be. If it
+    doesn't find it there go to the [My Paratext Projects] folder and
+    look there. If none is found a default file will come be copied in
+    from the RPM system.'''
 
     # As this is call is for a PT based project, it is certain the style
     # file should be found in the parent folder.

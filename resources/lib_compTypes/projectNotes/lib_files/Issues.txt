@@ -1,8 +1,0 @@
-Content-Type: text/x-zim-wiki
-Wiki-Format: zim 0.4
-
-====== Project Issues ======
-
-Use the Issues button in the ptxplus manager to enter an issue note on this page.
-
-
