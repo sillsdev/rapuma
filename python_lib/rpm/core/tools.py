@@ -224,14 +224,14 @@ def writeConfFile (config) :
     # housekeeping we will create a GeneralSettings section with
     # a last edit date key/value.
     buildConfSection(config, 'GeneralSettings')
-    try :
-        config['GeneralSettings']['lastEdit'] = tStamp()
-        config.write()
-        return True
+#    try :
+    config['GeneralSettings']['lastEdit'] = tStamp()
+    config.write()
+    return True
 
-    except :
-        terminal('\nERROR: Could not write to: ' + config.filename)
-        return False
+#    except :
+#        terminal('\nERROR: Could not write to: ' + config.filename)
+#        return False
 
 
 def xml_to_section (fname) :

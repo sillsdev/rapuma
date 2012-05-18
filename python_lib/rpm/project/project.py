@@ -266,15 +266,35 @@ class Project (object) :
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 
-    def changeConfigSetting (self, config, section, key, value) :
-        '''Change global default setting (key, value) in the System section of
+    def changeConfigSetting (self, config, section, key, newValue) :
+        '''Change a value in a specified config/section/key.  This will 
+        write out changes immediately. If this is called internally, the
+        calling function will need to reload to the config for the
+        changes to take place in the current session. This is currently
+        designed to work more as a single call to RPM.'''
 
-        the RPM user settings file.  This will write out changes
-        immediately.'''
+        oldValue = ''
+        confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+        confObj = ConfigObj(confFile)
+        outConfObj = confObj
+        # Walk our confObj to get to the section we want
+        for s in section.split('/') :
+            confObj = confObj[s]
 
-        writeToLog(self, 'MSG', 'Changed  [' + config + '] setting.')
+        # Get the old value for reporting
+        oldValue = confObj[key]
+        # Insert the new value in its proper form
+        if type(oldValue) == list :
+            newValue = newValue.split(',')
+            confObj[key] = newValue
+        else :
+            confObj[key] = newValue
 
-
+        # Write out the original copy of the confObj which now 
+        # has the change in it, then report what we did
+        outConfObj.filename = confFile
+        if writeConfFile(outConfObj) :
+            writeToLog(self, 'MSG', 'Changed  [' + config + '][' + section + '][' + key + '] setting from \"' + str(oldValue) + '\" to \"' + str(newValue) + '\"')
 
 
 
