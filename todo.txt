@@ -6,6 +6,8 @@ Last edited: Fri 18 May 2012 04:27:35 PM ICT
 
 1) Look for subprocess calls that use os.system() and change them over to
     the much nicer subprocess.call() module.
+    
+    Start working at: xetex.displayPdfOutput()
 
 2) Add a paper size dictionary that can be used to automatically fill in the
     width and height of the page.  This might already exsit so do a search for

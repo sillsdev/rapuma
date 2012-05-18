@@ -436,11 +436,26 @@ class Xetex (Manager) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
         if str2bool(self.usePdfViewer) :
+
+# FIXME: Be albe to bring in the commands from the config as
+# a list or a string. Many times a list will be needed
+
             # Build the viewer command
-            command = self.pdfViewer + ' ' + pdfFile + ' &'
-            rCode = os.system(command)
-            # FIXME: May want to analyse the return code from viewer
-            return True
+            cmds = [self.pdfViewer, '-w', pdfFile]
+            print cmds
+            # Run the XeTeX and collect the return code for analysis
+            rCode = subprocess.call(cmds)
+
+            # Analyse the return code
+            if not rCode == int(0) :
+                writeToLog(self.project, 'ERR', 'PDF viewer failed with error code number: ' + rCode)
+
+
+
+#            command = self.pdfViewer + ' ' + pdfFile + ' &'
+#            rCode = os.system(command)
+#            # FIXME: May want to analyse the return code from viewer
+#            return True
 
 
     def copyInMargVerse (self) :
@@ -700,7 +715,7 @@ class Xetex (Manager) :
 
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
-            if self.displayPdfOutput(escapePath(self.cidPdf)) :
+            if self.displayPdfOutput(self.cidPdf) :
                 writeToLog(self.project, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
             else :
                 writeToLog(self.project, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
