@@ -437,25 +437,16 @@ class Xetex (Manager) :
 
         if str2bool(self.usePdfViewer) :
 
-# FIXME: Be albe to bring in the commands from the config as
-# a list or a string. Many times a list will be needed
-
             # Build the viewer command
-            cmds = [self.pdfViewer, '-w', pdfFile]
-            print cmds
+            self.pdfViewer.append(pdfFile)
             # Run the XeTeX and collect the return code for analysis
-            rCode = subprocess.call(cmds)
+            rCode = subprocess.call(self.pdfViewer)
 
             # Analyse the return code
             if not rCode == int(0) :
                 writeToLog(self.project, 'ERR', 'PDF viewer failed with error code number: ' + rCode)
-
-
-
-#            command = self.pdfViewer + ' ' + pdfFile + ' &'
-#            rCode = os.system(command)
-#            # FIXME: May want to analyse the return code from viewer
-#            return True
+            else :
+                return True
 
 
     def copyInMargVerse (self) :

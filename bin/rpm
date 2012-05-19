@@ -55,7 +55,7 @@ sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'component'))
 import codecs, shutil, operator, argparse, zipfile
 from datetime import *
 from configobj import ConfigObj
-import pprint
+
 
 # Load the local classes
 from proj_local import ProjLocal
@@ -284,15 +284,19 @@ def getExampleSourceProject (exampID) :
 def runExamplePubDemoProject (demoID) :
     '''Run an example demo file to test/demonstrate a project.'''
 
+    # FIXME: Everywhere else we use subprocess.call() to do a process.  However,
+    # in this case it takes too much fiddling to get a these more complex RPM
+    # calls to run from within RPM.  To make it easy, we use os.system() to make
+    # the call out.
     demoFile = os.path.join(local.projHome, demoID + '.rpmDemo')
     if os.path.isfile(demoFile) :
         demo = codecs.open(demoFile, "r", encoding='utf_8')
         for line in demo :
-            if line[:1] != '#' and line[:1] != '' :
-                rCode = os.system(line)
+            if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
+                os.system(line)
+        return True
     else :
         terminal('File not found: ' + fName(demoFile))
-
 
 
 ###############################################################################
