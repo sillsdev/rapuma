@@ -29,7 +29,7 @@ Todo:
     <setting>
         <name>Source File Name Form ID</name>
         <key>nameFormID</key>
-        <description>An ID that points to a description of a predeterminied form that the main part of the file name of the source file will take.</description>
+        <description>An ID that maps to a description of a predeterminied form that the main part of the file name of the source file will take.</description>
         <type>string</type>
         <value></value>
     </setting>

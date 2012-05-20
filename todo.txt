@@ -2,19 +2,21 @@ RPM ToDo List
 
 This contains a listing of things that should be worked on sooner than later.
 
-Last edited: Fri 18 May 2012 04:27:35 PM ICT 
+Last edited: Sun 20 May 2012 11:57:19 AM ICT 
 
-1) Look for subprocess calls that use os.system() and change them over to
-    the much nicer subprocess.call() module.
-    
-    Start working at: xetex.displayPdfOutput()
+Update pt_tools.getPTSettings() to look in parent and grandparent folders for
+    the .ssf file.
 
-2) Add a paper size dictionary that can be used to automatically fill in the
-    width and height of the page.  This might already exsit so do a search for
-    one first.
+Update the KYUL example with latest source (without \sls marker).
 
-3) Begin adding repo capabilities. Start with useRepository flag and build some
+Begin adding repo capabilities. Start with useRepository flag and build some
     routines that will add a designated file to the projects repo. Later, make
     some kind of s/r command. Look to see what Chorus might do for us.
 
+Add a paper size dictionary that can be used to automatically fill in the
+    width and height of the page.  This might already exsit so do a search for
+    one first.
 
+Add a switch to the add component command that would have the system do a
+    little preprocess check on the incoming text. If it fails, deliver the error
+    message to user in a resonable form.

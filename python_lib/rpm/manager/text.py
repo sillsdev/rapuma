@@ -81,6 +81,9 @@ class Text (Manager) :
             if not newCompSet == oldCompSet :
                 self.compSettings.merge(newCompSet)
                 writeConfFile(self.project.projConfig)
+                # Be sure to update the current session settings
+                for k, v in self.compSettings.iteritems() :
+                    setattr(self, k, v)
         else :
             writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
             dieNow()
@@ -94,13 +97,12 @@ class Text (Manager) :
 
         # Check to see if settings need updating
         self.updateManagerSettings()
-
         if self.nameFormID == '41MAT' :
             mainName = getUsfmCidInfo(cid)[1] + cid.upper()
-            if self.prePart :
+            if self.prePart and self.prePart != 'None' :
                 thisFile = self.prePart + mainName + self.postPart
             else :
-                thisFile = mainName + postPart
+                thisFile = mainName + self.postPart
         else :
             if not self.nameFormID :
                 writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.')
@@ -119,7 +121,6 @@ class Text (Manager) :
         target = os.path.join(targetFolder, cid + '.usfm')
 
         # Copy the source to the working text folder
-        # FIXME: At some point dependency checking might need to be done
         if not isOlder(target, source) :
             if not os.path.isfile(target) :
                 if os.path.isfile(source) :
