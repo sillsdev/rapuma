@@ -316,7 +316,7 @@ def xmlToDict (element) :
         http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
     A guy named josch submitted it. I have modified it a little to work in RPM.'''
 
-    print 'Fix isinstance() problem in tools.xmlToDict()'
+    # FIXME: print 'Fix isinstance() problem in tools.xmlToDict()'
 #    if not isinstance(element, ElementTree.Element):
 #        raise ValueError("must pass xml.etree.ElementTree.Element object")
 

@@ -4,6 +4,12 @@ This contains a listing of things that should be worked on sooner than later.
 
 Last edited: Sun 20 May 2012 11:57:19 AM ICT 
 
+Notes: Add postional args to arg parse for things that do not need options like -i
+    add a todo list for required things on render, etc. instead of just dieing, point the user to the list.
+    add a "do not edit" warning on the rest of the XeTeX .tex files
+    send master.log to MH
+
+
 Update pt_tools.getPTSettings() to look in parent and grandparent folders for
     the .ssf file.
 
