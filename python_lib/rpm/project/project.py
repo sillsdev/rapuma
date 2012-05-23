@@ -78,12 +78,6 @@ class Project (object) :
                 os.makedirs(getattr(self.local, folder))
 
 
-# FIXME: Testing here
-        self.log.writeToLog('PROJ000', ['Arg1', 'Arg2'])
-
-
-
-
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
@@ -97,7 +91,7 @@ class Project (object) :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
 
-        writeToLog(self, 'LOG', 'Created the [' + fullName + '] manager object.')
+        self.log.writeToLog('PROJ-005', [fullName])
         return self.managers[fullName]
 
 
@@ -125,8 +119,8 @@ class Project (object) :
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
                     self.projConfig['Managers'][fullName][k] = v
 
-            writeConfFile(self.projConfig)
-            writeToLog(self, 'LOG', 'Write out to config: project.addManager()')
+            if writeConfFile(self.projConfig) :
+                self.log.writeToLog('PROJ-010')
 
 
 ###############################################################################
@@ -172,8 +166,8 @@ class Project (object) :
         self.projConfig['Components'][mid]['list'] = thisList
 
         # Save our config settings
-        writeConfFile(self.projConfig)
-        writeToLog(self, 'MSG', 'Added the [' + mid + '] meta component to the project')
+        if writeConfFile(self.projConfig) :
+            self.log.writeToLog(self, 'PROJ-0015', [mid])
 
 
     def addComponent (self, cid, cType) :
@@ -195,10 +189,10 @@ class Project (object) :
             compobj = getattr(module, cType.capitalize())(self, cfg)
             self.components[cid] = compobj
             # Save our config settings
-            writeConfFile(self.projConfig)
-            writeToLog(self, 'MSG', 'Added the [' + cid + '] component to the project')
+            if writeConfFile(self.projConfig) :
+                self.log.writeToLog('PROJ-025', [cid])
         else :
-            writeToLog(self, 'MSG', 'The [' + cid + '] component already exists in this project.')
+            self.log.writeToLog('PROJ-030', [cid])
 
 
     def addComponentType (self, cType) :
@@ -301,7 +295,7 @@ class Project (object) :
         # has the change in it, then report what we did
         outConfObj.filename = confFile
         if writeConfFile(outConfObj) :
-            writeToLog(self, 'MSG', 'Changed  [' + config + '][' + section + '][' + key + '] setting from \"' + str(oldValue) + '\" to \"' + str(newValue) + '\"')
+            self.log.writeToLog(self, 'PROJ-030', [config, section, key, str(oldValue), str(newValue)])
 
 
 

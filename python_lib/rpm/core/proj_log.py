@@ -44,12 +44,67 @@ class ProjLog (object) :
         #    ERR = Errors that go to both the terminal and log file
         #    TOD = Messages that will go to a special todo file to guide the user
         self.errorCodes     = {
-            'PROJ000' : ['MSG', 'Messages that deal with issues on the project level, file one: <<1>>, file two: <<2>>'],
-            'COMP000' : ['MSG', 'Component level messages'],
-            'FONT000' : ['MSG', 'Font issue messages'],
-            'STYL000' : ['MSG', 'Messages for style level issues'],
-            'SETG000' : ['MSG', 'Messages for setting issues'],
-            'TEST000' : ['MSG', 'Test level messages']
+
+            'PROJ-000' : ['MSG', 'Messages that deal with issues on the project level, file one: <<1>>, file two: <<2>>'],
+            'PROJ-005' : ['LOG', 'Created the [<<1>>] manager object.'],
+            'PROJ-010' : ['MSG', 'Wrote out project config file'],
+            'PROJ-015' : ['MSG', 'Added the [<<1>>] meta component to the project'],
+            'PROJ-020' : ['MSG', 'Added the [<<1>>] component to the project'],
+            'PROJ-025' : ['MSG', 'The [<<1>>] component already exists in this project.'],
+            'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\"'],
+            'PROJ-035' : ['MSG', 'PROJ-035 - Unassigned error message ID.'],
+            'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
+
+            'COMP-000' : ['MSG', 'Component level messages'],
+            'COMP-005' : ['MSG', 'COMP-005 - Unassigned error message ID.'],
+            'COMP-010' : ['MSG', 'COMP-010 - Unassigned error message ID.'],
+            'COMP-015' : ['MSG', 'COMP-015 - Unassigned error message ID.'],
+            'COMP-020' : ['MSG', 'COMP-020 - Unassigned error message ID.'],
+            'COMP-025' : ['MSG', 'COMP-025 - Unassigned error message ID.'],
+            'COMP-030' : ['MSG', 'COMP-030 - Unassigned error message ID.'],
+            'COMP-035' : ['MSG', 'COMP-035 - Unassigned error message ID.'],
+            'COMP-040' : ['MSG', 'COMP-040 - Unassigned error message ID.'],
+
+            'FONT-000' : ['MSG', 'Font issue messages'],
+            'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
+            'FONT-010' : ['MSG', 'FONT-010 - Unassigned error message ID.'],
+            'FONT-015' : ['MSG', 'FONT-015 - Unassigned error message ID.'],
+            'FONT-020' : ['MSG', 'FONT-020 - Unassigned error message ID.'],
+            'FONT-025' : ['MSG', 'FONT-025 - Unassigned error message ID.'],
+            'FONT-030' : ['MSG', 'FONT-030 - Unassigned error message ID.'],
+            'FONT-035' : ['MSG', 'FONT-035 - Unassigned error message ID.'],
+            'FONT-040' : ['MSG', 'FONT-040 - Unassigned error message ID.'],
+
+            'STYL-000' : ['MSG', 'Messages for style level issues'],
+            'STYL-005' : ['MSG', 'STYL-005 - Unassigned error message ID.'],
+            'STYL-010' : ['MSG', 'STYL-010 - Unassigned error message ID.'],
+            'STYL-015' : ['MSG', 'STYL-015 - Unassigned error message ID.'],
+            'STYL-020' : ['MSG', 'STYL-020 - Unassigned error message ID.'],
+            'STYL-025' : ['MSG', 'STYL-025 - Unassigned error message ID.'],
+            'STYL-030' : ['MSG', 'STYL-030 - Unassigned error message ID.'],
+            'STYL-035' : ['MSG', 'STYL-035 - Unassigned error message ID.'],
+            'STYL-040' : ['MSG', 'STYL-040 - Unassigned error message ID.'],
+
+            'SETG-000' : ['MSG', 'Messages for setting issues'],
+            'SETG-005' : ['MSG', 'SETG-005 - Unassigned error message ID.'],
+            'SETG-010' : ['MSG', 'SETG-010 - Unassigned error message ID.'],
+            'SETG-015' : ['MSG', 'SETG-015 - Unassigned error message ID.'],
+            'SETG-020' : ['MSG', 'SETG-020 - Unassigned error message ID.'],
+            'SETG-025' : ['MSG', 'SETG-025 - Unassigned error message ID.'],
+            'SETG-030' : ['MSG', 'SETG-030 - Unassigned error message ID.'],
+            'SETG-035' : ['MSG', 'SETG-035 - Unassigned error message ID.'],
+            'SETG-040' : ['MSG', 'SETG-040 - Unassigned error message ID.'],
+
+            'TEST-000' : ['MSG', 'Test level messages'],
+            'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],
+            'TEST-010' : ['MSG', 'TEST-010 - Unassigned error message ID.'],
+            'TEST-015' : ['MSG', 'TEST-015 - Unassigned error message ID.'],
+            'TEST-020' : ['MSG', 'TEST-020 - Unassigned error message ID.'],
+            'TEST-025' : ['MSG', 'TEST-025 - Unassigned error message ID.'],
+            'TEST-030' : ['MSG', 'TEST-030 - Unassigned error message ID.'],
+            'TEST-035' : ['MSG', 'TEST-035 - Unassigned error message ID.'],
+            'TEST-040' : ['MSG', 'TEST-040 - Unassigned error message ID.']
+
                               }
 
 
@@ -82,16 +137,18 @@ class ProjLog (object) :
             msg = self.errorCodes[errCode][1]
             code = self.errorCodes[errCode][0]
         else :
-            terminal('\nThe code: [' + code + '] is not recognized by the RPM system.')
+            terminal('\nThe code: [' + errCode + '] is not recognized by the RPM system.')
             dieNow()
 
-        # Now s/r any args that need to be added to msg.
+        # If args were given, do s/r on them and add 
+        # args info that needs to be added to msg.
         # Look for a <<#>> pattern replace it with
         # the corresponding position in the args list.
-        c = 0
-        for a in args :
-            c +=1
-            msg = msg.replace('<<' + str(c) + '>>', args[c-1])
+        if args :
+            c = 0
+            for a in args :
+                c +=1
+                msg = msg.replace('<<' + str(c) + '>>', args[c-1])
 
         # Write out everything but LOG messages to the terminal
         if code != 'LOG' and code != 'TOD' :
