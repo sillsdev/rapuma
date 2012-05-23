@@ -59,6 +59,7 @@ from configobj import ConfigObj
 
 # Load the local classes
 from proj_local import ProjLocal
+from proj_log import ProjLog
 from tools import *
 from user_config import UserConfig
 from proj_config import ProjConfig
@@ -67,6 +68,7 @@ from project import Project
 # Instantiate User classes
 local           = ProjLocal(rpmHome, userHome, projHome)
 uc              = UserConfig(local)
+log             = ProjLog(local, uc)
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
@@ -97,7 +99,7 @@ def newProject (uc, pc, pid, ptype = None, pname = None, pdir = None) :
         pdir = os.path.abspath(pdir)
 
     # Adjust our project paths according to the pdir we got
-    local = ProjLocal(rpmHome, userHome, pdir)
+    local   = ProjLocal(rpmHome, userHome, pdir)
 
     # Run some basic tests to see if this project can be created
     # Look for project in current folder
@@ -257,10 +259,11 @@ def isProject (pid) :
 def initProject (pid) :
     '''Initialize an existing project according to the project ID given.'''
 
-    local = ProjLocal(rpmHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
-    pc = ProjConfig(local)
+    local   = ProjLocal(rpmHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
+    pc      = ProjConfig(local)
+    log     = ProjLog(local, uc)
     if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-        aProject = Project(uc.userConfig, pc.projConfig, local)
+        aProject = Project(uc.userConfig, pc.projConfig, local, log)
         return aProject
 
 

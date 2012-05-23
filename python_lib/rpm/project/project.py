@@ -36,12 +36,13 @@ import user_config as userConfig
 
 class Project (object) :
 
-    def __init__(self, userConfig, projConfig, local) :
+    def __init__(self, userConfig, projConfig, local, log) :
         '''Instantiate this class.'''
 
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
+        self.log                    = log
         self.components             = {}
         self.componentType          = {}
         self.managers               = {}
@@ -75,6 +76,12 @@ class Project (object) :
         for folder in self.local.projFolders :
             if not os.path.isdir(getattr(self.local, folder)) :
                 os.makedirs(getattr(self.local, folder))
+
+
+# FIXME: Testing here
+        self.log.writeToLog('PROJ000', ['Arg1', 'Arg2'])
+
+
 
 
 ###############################################################################

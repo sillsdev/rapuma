@@ -347,6 +347,56 @@ Section.override = override_section
 
 
 ###############################################################################
+################################# Terminal Output #############################
+###############################################################################
+
+
+def terminal (msg) :
+    '''Send a message to the terminal with a little formating to make it
+    look nicer.'''
+
+    # Output the message and wrap it if it is over 60 chars long.
+    print wordWrap(msg, 60)
+
+
+def terminalError (msg) :
+    '''Send an error message to the terminal with a little formating to make it
+    look nicer.'''
+
+    # Output the message and wrap it if it is over 60 chars long.
+    print '\n' + wordWrap('\tError: ' + msg, 60) + '\n'
+
+
+def wordWrap (text, width) :
+    '''A word-wrap function that preserves existing line breaks
+        and most spaces in the text. Expects that existing line
+        breaks are linux style newlines (\n).'''
+
+    def func(line, word) :
+        nextword = word.split("\n", 1)[0]
+        n = len(line) - line.rfind('\n') - 1 + len(nextword)
+        if n >= width:
+            sep = "\n"
+        else:
+            sep = " "
+        return '%s%s%s' % (line, sep, word)
+    text = text.split(" ")
+    while len(text) > 1:
+        text[0] = func(text.pop(0), text[0])
+    return text[0]
+
+
+def tStamp () :
+    '''Create a simple time stamp for logging and timing purposes.'''
+
+    date_time, secs = str(datetime.now()).split(".")
+    
+    return date_time
+
+
+# FIXME: This section should be depricated soon
+
+###############################################################################
 ################################# Logging routines ############################
 ###############################################################################
 
@@ -480,51 +530,6 @@ def trimLog (logFile, limit = 1000) :
         return True
     else :
         return False
-
-
-############################### Terminal Output ###############################
-
-def terminal (msg) :
-    '''Send a message to the terminal with a little formating to make it
-    look nicer.'''
-
-    # Output the message and wrap it if it is over 60 chars long.
-    print wordWrap(msg, 60)
-
-
-def terminalError (msg) :
-    '''Send an error message to the terminal with a little formating to make it
-    look nicer.'''
-
-    # Output the message and wrap it if it is over 60 chars long.
-    print '\n' + wordWrap('\tError: ' + msg, 60) + '\n'
-
-
-def wordWrap (text, width) :
-    '''A word-wrap function that preserves existing line breaks
-        and most spaces in the text. Expects that existing line
-        breaks are linux style newlines (\n).'''
-
-    def func(line, word) :
-        nextword = word.split("\n", 1)[0]
-        n = len(line) - line.rfind('\n') - 1 + len(nextword)
-        if n >= width:
-            sep = "\n"
-        else:
-            sep = " "
-        return '%s%s%s' % (line, sep, word)
-    text = text.split(" ")
-    while len(text) > 1:
-        text[0] = func(text.pop(0), text[0])
-    return text[0]
-
-
-def tStamp () :
-    '''Create a simple time stamp for logging and timing purposes.'''
-
-    date_time, secs = str(datetime.now()).split(".")
-    
-    return date_time
 
 
 
