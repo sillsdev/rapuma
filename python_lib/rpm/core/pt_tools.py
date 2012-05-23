@@ -155,9 +155,6 @@ def getPTSettings (home) :
     if os.path.isfile(ssfFile) :
         return xmlFileToDict(ssfFile)
 
-    else :
-        writeToLog(self.project, 'ERR', 'The ParaTExt SSF file [' + fName(ssfFile) + '] could not be found.')
-
 
 def hasUsfmCidInfo (cid) :
     '''Return True if this cid is in the PT USFM cid info dictionary.'''

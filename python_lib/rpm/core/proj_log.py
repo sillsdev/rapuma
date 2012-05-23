@@ -47,23 +47,34 @@ class ProjLog (object) :
 
             'PROJ-000' : ['MSG', 'Messages that deal with issues on the project level, file one: <<1>>, file two: <<2>>'],
             'PROJ-005' : ['LOG', 'Created the [<<1>>] manager object.'],
-            'PROJ-010' : ['MSG', 'Wrote out project config file'],
-            'PROJ-015' : ['MSG', 'Added the [<<1>>] meta component to the project'],
-            'PROJ-020' : ['MSG', 'Added the [<<1>>] component to the project'],
+            'PROJ-010' : ['MSG', 'Wrote out project configuration file.'],
+            'PROJ-015' : ['MSG', 'Added the [<<1>>] meta component to the project.'],
+            'PROJ-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'PROJ-025' : ['MSG', 'The [<<1>>] component already exists in this project.'],
-            'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\"'],
+            'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
             'PROJ-035' : ['MSG', 'PROJ-035 - Unassigned error message ID.'],
             'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
 
             'COMP-000' : ['MSG', 'Component level messages'],
-            'COMP-005' : ['MSG', 'COMP-005 - Unassigned error message ID.'],
-            'COMP-010' : ['MSG', 'COMP-010 - Unassigned error message ID.'],
-            'COMP-015' : ['MSG', 'COMP-015 - Unassigned error message ID.'],
-            'COMP-020' : ['MSG', 'COMP-020 - Unassigned error message ID.'],
-            'COMP-025' : ['MSG', 'COMP-025 - Unassigned error message ID.'],
-            'COMP-030' : ['MSG', 'COMP-030 - Unassigned error message ID.'],
-            'COMP-035' : ['MSG', 'COMP-035 - Unassigned error message ID.'],
-            'COMP-040' : ['MSG', 'COMP-040 - Unassigned error message ID.'],
+            'COMP-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
+            'COMP-010' : ['ERR', 'Invalid component ID: [<<1>>], cannot be preprocessed.'],
+            'COMP-015' : ['LOG', 'Version number present, not running persistant values.'],
+            'COMP-020' : ['LOG', 'Wrote out new layout configuration file.'],
+            'COMP-025' : ['MSG', 'Rendering of [<<1>>] successful.'],
+            'COMP-030' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
+            'COMP-035' : ['ERR', 'XeTeX error code [<<1>>] not understood by RPM.'],
+            'COMP-040' : ['MSG', 'Created: <<1>>'],
+            'COMP-045' : ['ERR', 'File not found: <<1>>'],
+            'COMP-050' : ['TOD', 'File <<1>> is missing. Check the error log for an import error for this required file. The system cannot render without it.'],
+            'COMP-055' : ['MSG', 'COMP-055 - Unassigned error message ID.'],
+            'COMP-060' : ['MSG', 'COMP-060 - Unassigned error message ID.'],
+            'COMP-065' : ['MSG', 'COMP-065 - Unassigned error message ID.'],
+            'COMP-070' : ['MSG', 'COMP-070 - Unassigned error message ID.'],
+            'COMP-075' : ['MSG', 'COMP-075 - Unassigned error message ID.'],
+            'COMP-080' : ['MSG', 'COMP-080 - Unassigned error message ID.'],
+            'COMP-085' : ['MSG', 'COMP-085 - Unassigned error message ID.'],
+            'COMP-090' : ['MSG', 'COMP-090 - Unassigned error message ID.'],
+            'COMP-100' : ['MSG', 'COMP-100 - Unassigned error message ID.'],
 
             'FONT-000' : ['MSG', 'Font issue messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
@@ -174,7 +185,8 @@ class ProjLog (object) :
                 # Now log the event to the top of the log file using preAppend().
                 self.preAppend(eventLine, self.local.projLogFile)
 
-                # FIXME: Add the TOD list output here
+                # FIXME: Add the TOD list output here, also, output any TODs 
+                # to the error log as well as these are bad errors.
 
                 # Write errors and warnings to the error log file
                 if code == 'WRN' and self.usrConf['System']['debugging'] == 'True':

@@ -61,7 +61,10 @@ class Xetex (Manager) :
         self.ptSSFConf              = {}
         # Make a PT settings dictionary
         if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFConf          = getPTSettings(self.project.local.projHome)
+            self.ptSSFConf = getPTSettings(self.project.local.projHome)
+            if not len(self.ptSSFConf) :
+                self.project.log.writeToLog('COMP-005')
+
 
         # This manager is dependent on usfm_Layout. Load it if needed.
         if 'usfm_Layout' not in self.project.managers :
@@ -78,7 +81,8 @@ class Xetex (Manager) :
         # rendered every time, which is not helpful.
         try :
             version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
-            writeToLog(self.project, 'LOG', 'Version number present, not running persistant values: layout.__init__()')
+# FIXME: Something wrong with the error being reported.
+            self.project.log.writeToLog('COMP-010')
         except :
             # No version number means we need to merge the default and usfmTex layout settings
             newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
@@ -90,8 +94,8 @@ class Xetex (Manager) :
             layoutCopy.merge(macVals)
             self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
             self.layoutConfig = layoutCopy
-            writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig)
-            writeToLog(self.project, 'LOG', 'Write out new layout config: layout.__init__()')
+            if writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig) :
+                self.project.log.writeToLog('COMP-020')
 
         # Get settings for this component
         self.managerSettings = self.project.projConfig['Managers'][self.manager]
@@ -139,11 +143,11 @@ class Xetex (Manager) :
 
         # Analyse the return code
         if rCode == int(0) :
-            writeToLog(self.project, 'MSG', 'Rendering of [' + fName(self.cidTex) + '] successful.')
+            self.project.log.writeToLog('COMP-025', [fName(self.cidTex)])
         elif rCode in self.xetexErrorCodes :
-            writeToLog(self.project, 'ERR', 'Rendering [' + fName(self.cidTex) + '] was unsuccessful. ' + self.xetexErrorCodes[rCode] + ' (' + str(rCode) + ')')
+            self.project.log.writeToLog('COMP-030', [fName(self.cidTex), self.xetexErrorCodes[rCode], str(rCode)])
         else :
-            writeToLog(self.project, 'ERR', 'XeTeX error code [' + str(rCode) + '] not understood by RPM.')
+            self.project.log.writeToLog('COMP-035', [str(rCode)])
 
         # Change the masterPDF file name to the cidPdf file name to make it easier to track
         if os.path.isfile(self.masterPdf) :
@@ -167,7 +171,7 @@ class Xetex (Manager) :
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
                 writeObject.write('% ' + self.extFileName + ' created: ' + tStamp() + '\n')
                 writeObject.close()
-                writeToLog(self.project, 'LOG', 'Created: ' + fName(self.extFile))
+                self.project.log.writeToLog('COMP-040', [fName(self.extFile)])
 
 
     def makeUsfmMacLinkFile (self) :
@@ -197,7 +201,7 @@ class Xetex (Manager) :
             self.removeMargVerse()
 
         writeObject.close()
-        writeToLog(self.project, 'LOG', 'Created: ' + fName(macLinkFile))
+        self.project.log.writeToLog('COMP-040', [fName(macLinkFile)])
 
         return True
 
@@ -213,8 +217,8 @@ class Xetex (Manager) :
             if os.path.isfile(self.cidUsfm) :
                 return True
             else :
-                writeToLog(self.project, 'ERR', 'makeGlobSty() - Not found: [' + fName(self.cidUsfm) + ']. This is required, system should halt.')
-                dieNow()
+                self.project.log.writeToLog('COMP-045', [fName(self.cidUsfm)])
+                self.project.log.writeToLog('COMP-050', [fName(self.cidUsfm)])
 
 
     def makeCidUsfm (self) :

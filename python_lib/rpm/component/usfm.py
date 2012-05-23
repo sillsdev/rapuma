@@ -108,8 +108,8 @@ class Usfm (Component) :
                 # Run any hyphenation or word break routines
 
             else :
-                writeToLog(self.project, 'ERR', 'Invalid component ID: [' + cid + '], cannot be preprocessed.')
-                return
+                self.project.log.writeToLog('COMP-010', [cid])
+                return False
 
 
         # If this is a meta component, preprocess all subcomponents
