@@ -6,6 +6,7 @@
   <file path="file:///home/dennis/Projects/rpm/bin/rpm"/>
   <file path="file:///home/dennis/.config/rpm/rpm.conf"/>
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/project.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/proj_log.py"/>
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/book.py"/>
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/manager.py"/>
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/tools.py"/>

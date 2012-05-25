@@ -2,9 +2,7 @@ RPM ToDo List
 
 This contains a listing of things that should be worked on sooner than later.
 
-Last edited: Tue 22 May 2012 03:00:23 PM ICT 
-
-Add more "do not edit" warnings to any remaining auto-generated files the system makes
+Last edited: Fri 25 May 2012 07:17:22 PM ICT 
 
 Add positional arguments to argparse for parts of categories that do not need
     them as an option. Example: rpm project KYU-LATN-NTCAT -n (would start a new project)

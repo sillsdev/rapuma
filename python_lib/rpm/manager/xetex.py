@@ -50,7 +50,7 @@ class Xetex (Manager) :
         self.Ctype                  = cType.capitalize()
         self.manager                = self.cType + '_Xetex'
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
-        self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['viewerCommand']
+        self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
         self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
@@ -81,13 +81,7 @@ class Xetex (Manager) :
         # rendered every time, which is not helpful.
         try :
             version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
-
-
-
-# FIXME: Something wrong with the error being reported.
-            self.project.log.writeToLog('COMP-010')
-
-
+            self.project.log.writeToLog('COMP-010', [version])
         except :
             # No version number means we need to merge the default and usfmTex layout settings
             newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
@@ -159,6 +153,12 @@ class Xetex (Manager) :
             os.rename(self.masterPdf, self.cidPdf)
 
 
+    def texFileHeader (self, fName) :
+        '''Create a generic file header for a non-editable .tex file.'''
+
+        return '% ' + fName + ' created: ' + tStamp() + '\n' \
+            + '% This file is auto-generated, do not bother editing it\n\n'
+
     def makeExtFile (self) :
         '''Create/copy a TeX extentions file that has custom code for this project.'''
 
@@ -174,7 +174,7 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
-                writeObject.write('% ' + self.extFileName + ' created: ' + tStamp() + '\n')
+                writeObject.write(self.texFileHeader(self.extFileName))
                 writeObject.close()
                 self.project.log.writeToLog('COMP-040', [fName(self.extFile)])
 
@@ -195,7 +195,7 @@ class Xetex (Manager) :
 
         macLinkFile = getattr(self, self.cType + 'MacLinkFile')
         writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
-        writeObject.write('% ' + fName(macLinkFile) + ' created: ' + tStamp() + '\n')
+        writeObject.write(self.texFileHeader(fName(macLinkFile)))
         writeObject.write('\\input ' + escapePath(mainMacroFile) + '\n')
 
         # If we are using marginal verses then we will need this
@@ -223,7 +223,6 @@ class Xetex (Manager) :
                 return True
             else :
                 self.project.log.writeToLog('COMP-045', [fName(self.cidUsfm)])
-                self.project.log.writeToLog('COMP-050', [fName(self.cidUsfm)])
 
 
     def makeCidUsfm (self) :
@@ -234,8 +233,7 @@ class Xetex (Manager) :
         if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            writeToLog(self.project, 'ERR', 'USFM working text not found: ' + fName(self.cidUsfm) + ' This is required, system should halt.')
-            dieNow()
+            self.project.log.writeToLog('COMP-050', [fName(self.cidUsfm)])
 
 
     def makeControlTex (self, typeID) :
@@ -274,8 +272,7 @@ class Xetex (Manager) :
                 try :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
-                    writeToLog(self.project, 'ERR', 'make' + f[0].upper() + f[1:] + '() failed to create required file: ' + fName(getattr(self, f)))
-                    dieNow()
+                    self.project.log.writeToLog('COMP-055', [f[0].upper() + f[1:], fName(getattr(self, f))])
 
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
@@ -289,8 +286,7 @@ class Xetex (Manager) :
 
         # Create the control file 
         writeObject = codecs.open(ctrlFile, "w", encoding='utf_8')
-        writeObject.write('% ' + fName(ctrlFile) + ' created: ' + tStamp() + '\n')
-        writeObject.write('% This file is auto-generated on every run. Do not bother to try to edit it.\n')
+        writeObject.write(self.texFileHeader(fName(ctrlFile)))
         # We allow for a number of different types of lines
         for f in self.primOut[typeID] :
             if setLine(f) :
@@ -327,7 +323,7 @@ class Xetex (Manager) :
             macTexVals = dict(y.items() + x.items())
 
             writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
-            writeObject.write('% ' + fName(self.setFile) + ' created: ' + tStamp() + '\n')
+            writeObject.write(self.texFileHeader(fName(self.setFile)))
 
             # Bring in the settings from the layoutConfig
             cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
@@ -416,7 +412,7 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            writeToLog(self.project, 'LOG', 'Created: ' + fName(self.setFile))
+            self.project.log.writeToLog('COMP-040', [fName(self.setFile)])
 
         # Start the main part of the function here
 
@@ -425,14 +421,14 @@ class Xetex (Manager) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
                 makeIt()
-                writeToLog(self.project, 'LOG', 'Layout settings changed, ' + fName(self.setFile) + ' recreated.')
+                self.project.log.writeToLog('COMP-060', [fName(self.setFile)])
             elif isOlder(self.setFile, self.fontConfFile) :
                 # Something changed in the font conf file
                 makeIt()
-                writeToLog(self.project, 'LOG', 'Font settings changed, ' + fName(self.setFile) + ' recreated.')
+                self.project.log.writeToLog('COMP-060', [fName(self.setFile)])
         else :
             makeIt()
-            writeToLog(self.project, 'LOG', fName(self.setFile) + ' missing, created a new one.')
+            self.project.log.writeToLog('COMP-065', [fName(self.setFile)])
 
         return True
 
@@ -470,8 +466,8 @@ class Xetex (Manager) :
 
         if not os.path.isfile(self.ptxMargVerseFile) :
             shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            self.project.log.writeToLog('COMP-070', [fName(self.ptxMargVerseFile)])
             return True
-            writeToLog(self.project, 'LOG', 'Copied macro: ' + fName(self.ptxMargVerseFile))
 
 
     def removeMargVerse (self) :
@@ -502,11 +498,11 @@ class Xetex (Manager) :
                         if not os.path.isfile(fTarget) :
                             shutil.copy(os.path.join(macrosSource, f), fTarget)
                             mCopy = True
-                            writeToLog(self.project, 'LOG', 'Copied macro: ' + fName(fTarget))
+                            self.project.log.writeToLog('COMP-070', [fName(fTarget)])
 
             return mCopy
         else :
-            writeToLog(self.project, 'ERR', 'No macro package for : ' + cType)
+            self.project.log.writeToLog('COMP-075', [cType])
 
 
     def addMeasureUnit (self, val) :
@@ -702,23 +698,23 @@ class Xetex (Manager) :
                 thisFile = getattr(self, k)
                 if os.path.isfile(thisFile) :
                     if isOlder(self.cidPdf, thisFile) :
-                        writeToLog(self.project, 'LOG', 'There has been a change in [' + fName(thisFile) + '], [' + fName(self.cidPdf) + '] needs to be rerendered.')
+                        self.project.log.writeToLog('COMP-080', [fName(thisFile), fName(self.cidPdf)])
                         render = True
         else :
-            writeToLog(self.project, 'LOG', fName(self.cidPdf) + ' not found, will be rendered.')
+            self.project.log.writeToLog('COMP-085', [fName(self.cidPdf)])
             render = True
 
         if render :
             self.makeCidPdf()
         else :
-            writeToLog(self.project, 'LOG', 'No changes to dependent files found, [' + fName(self.cidPdf) + '] does not need to be rerendered at this time.')
+            self.project.log.writeToLog('COMP-090', [fName(self.cidPdf)])
 
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
-                writeToLog(self.project, 'MSG', 'Routing ' + fName(self.cidPdf) + ' to PDF viewer.')
+                self.project.log.writeToLog('COMP-095', [fName(self.cidPdf)])
             else :
-                writeToLog(self.project, 'MSG', fName(self.cidPdf) + ' cannot be viewed, PDF viewer turned off.')
+                self.project.log.writeToLog('COMP-100', [fName(self.cidPdf)])
 
 
 
