@@ -52,7 +52,7 @@ sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'project'))
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'component'))
 
 # Load standard Python modules
-import codecs, shutil, operator, argparse, zipfile
+import codecs, shutil, operator, argparse, zipfile, subprocess
 from datetime import *
 from configobj import ConfigObj
 
@@ -267,6 +267,16 @@ def initProject (pid) :
         return aProject
 
 
+def accessHtmlHelp () :
+    '''Call on the RPM basic HTML help system.'''
+
+    # Build the viewer command
+    cmds = uc.userConfig['System']['htmlHelpViewerCommand']
+    cmds.append(local.rpmHelpIndexFile)
+    # Run the viewer command
+    rCode = subprocess.call(cmds)
+
+
 ###############################################################################
 ############################### Testing Functions #############################
 ###############################################################################
@@ -314,10 +324,6 @@ def runExamplePubDemoProject (demoID) :
 # The argument handler
 def userArguments (args) :
     '''Process incoming command arguments.'''
-
-    if args['about'] :
-        terminal('\n' + systemName + ' version ' + systemVersion + '\n')
-        terminal('About: ' + systemAbout + '\n')
 
     if sys.argv[1].lower() == 'project' :
         local   = ProjLocal(rpmHome, userHome, projHome)
@@ -373,6 +379,13 @@ def userArguments (args) :
             getExampleSourceProject(args['source_id'])
         if args['demo_id'] :
             runExamplePubDemoProject(args['demo_id'])
+    # Extra help access
+    elif sys.argv[2].lower() == 'help' :
+        if args['about'] :
+            terminal('\n' + systemName + ' version ' + systemVersion + '\n')
+            terminal('About: ' + systemAbout + '\n')
+        if args['basic'] :
+            accessHtmlHelp()
     else:
         terminal('Error: Command not recognized! ')
         sys.exit()
@@ -381,8 +394,9 @@ def userArguments (args) :
 parser = argparse.ArgumentParser(description=systemName)
 subparsers = parser.add_subparsers(help='sub-command help')
 
-# Add main arguments
+# Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'About RPM')
+parser.add_argument('-b', '--basic', action='store_true', help = 'Basic RPM help (in HTML)')
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
@@ -425,7 +439,8 @@ compCommand.add_argument('-v', '--value', help='A new value to add or change to 
 compCommand = subparsers.add_parser('test', help='General system testing commands help')
 compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
 compCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
-
+# Add help subprocess arguments
+compCommand = subparsers.add_parser('help', help='General system help')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))

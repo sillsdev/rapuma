@@ -90,6 +90,13 @@ Todo:
             <type>list</type>
             <value>config,layout_default.xml</value>
         </setting>
+        <setting>
+            <name>RPM Help Index File</name>
+            <key>rpmHelpIndexFile</key>
+            <description>The name of the HTML index file for the RPM basic help system.</description>
+            <type>list</type>
+            <value>resources,lib_docs,index.html</value>
+        </setting>
     </section>
     <section>
         <name>User Folders</name>

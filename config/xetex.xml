@@ -35,7 +35,7 @@ Todo:
     </setting>
     <setting>
         <name>PDF Viewer Command</name>
-        <key>viewerCommand</key>
+        <key>pdfViewerCommand</key>
         <description>The command needed to view the PDF output created by this module.</description>
         <type>list</type>
         <value>evince,-w</value>

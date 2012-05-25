@@ -81,8 +81,13 @@ class Xetex (Manager) :
         # rendered every time, which is not helpful.
         try :
             version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
+
+
+
 # FIXME: Something wrong with the error being reported.
             self.project.log.writeToLog('COMP-010')
+
+
         except :
             # No version number means we need to merge the default and usfmTex layout settings
             newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
