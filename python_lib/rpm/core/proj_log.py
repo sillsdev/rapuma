@@ -47,7 +47,7 @@ class ProjLog (object) :
 
             'PROJ-000' : ['MSG', 'Messages that deal with issues on the project level, file one: <<1>>, file two: <<2>>'],
             'PROJ-005' : ['LOG', 'Created the [<<1>>] manager object.'],
-            'PROJ-010' : ['MSG', 'Wrote out project configuration file.'],
+            'PROJ-010' : ['LOG', 'Wrote out project configuration file.'],
             'PROJ-015' : ['MSG', 'Added the [<<1>>] meta component to the project.'],
             'PROJ-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'PROJ-025' : ['MSG', 'The [<<1>>] component already exists in this project.'],

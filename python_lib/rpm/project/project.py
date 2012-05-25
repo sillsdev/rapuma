@@ -295,7 +295,7 @@ class Project (object) :
         # has the change in it, then report what we did
         outConfObj.filename = confFile
         if writeConfFile(outConfObj) :
-            self.log.writeToLog(self, 'PROJ-030', [config, section, key, str(oldValue), str(newValue)])
+            self.log.writeToLog('PROJ-030', [config, section, key, str(oldValue), str(newValue)])
 
 
 
