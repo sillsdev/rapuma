@@ -63,7 +63,7 @@ class Xetex (Manager) :
         if self.sourceEditor.lower() == 'paratext' :
             self.ptSSFConf = getPTSettings(self.project.local.projHome)
             if not len(self.ptSSFConf) :
-                self.project.log.writeToLog('COMP-005')
+                self.project.log.writeToLog('XTEX-005')
 
 
         # This manager is dependent on usfm_Layout. Load it if needed.
@@ -81,7 +81,7 @@ class Xetex (Manager) :
         # rendered every time, which is not helpful.
         try :
             version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
-            self.project.log.writeToLog('COMP-010', [version])
+            self.project.log.writeToLog('XTEX-010', [version])
         except :
             # No version number means we need to merge the default and usfmTex layout settings
             newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
@@ -94,7 +94,7 @@ class Xetex (Manager) :
             self.project.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
             self.layoutConfig = layoutCopy
             if writeConfFile(self.project.managers[self.cType + '_Layout'].layoutConfig) :
-                self.project.log.writeToLog('COMP-020')
+                self.project.log.writeToLog('XTEX-020')
 
         # Get settings for this component
         self.managerSettings = self.project.projConfig['Managers'][self.manager]
@@ -142,11 +142,11 @@ class Xetex (Manager) :
 
         # Analyse the return code
         if rCode == int(0) :
-            self.project.log.writeToLog('COMP-025', [fName(self.cidTex)])
+            self.project.log.writeToLog('XTEX-025', [fName(self.cidTex)])
         elif rCode in self.xetexErrorCodes :
-            self.project.log.writeToLog('COMP-030', [fName(self.cidTex), self.xetexErrorCodes[rCode], str(rCode)])
+            self.project.log.writeToLog('XTEX-030', [fName(self.cidTex), self.xetexErrorCodes[rCode], str(rCode)])
         else :
-            self.project.log.writeToLog('COMP-035', [str(rCode)])
+            self.project.log.writeToLog('XTEX-035', [str(rCode)])
 
         # Change the masterPDF file name to the cidPdf file name to make it easier to track
         if os.path.isfile(self.masterPdf) :
@@ -176,7 +176,7 @@ class Xetex (Manager) :
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
                 writeObject.write(self.texFileHeader(self.extFileName))
                 writeObject.close()
-                self.project.log.writeToLog('COMP-040', [fName(self.extFile)])
+                self.project.log.writeToLog('XTEX-040', [fName(self.extFile)])
 
 
     def makeUsfmMacLinkFile (self) :
@@ -206,7 +206,7 @@ class Xetex (Manager) :
             self.removeMargVerse()
 
         writeObject.close()
-        self.project.log.writeToLog('COMP-040', [fName(macLinkFile)])
+        self.project.log.writeToLog('XTEX-040', [fName(macLinkFile)])
 
         return True
 
@@ -222,7 +222,7 @@ class Xetex (Manager) :
             if os.path.isfile(self.cidUsfm) :
                 return True
             else :
-                self.project.log.writeToLog('COMP-045', [fName(self.cidUsfm)])
+                self.project.log.writeToLog('XTEX-045', [fName(self.cidUsfm)])
 
 
     def makeCidUsfm (self) :
@@ -233,7 +233,7 @@ class Xetex (Manager) :
         if os.path.isfile(self.cidUsfm) :
             return True
         else :
-            self.project.log.writeToLog('COMP-050', [fName(self.cidUsfm)])
+            self.project.log.writeToLog('XTEX-050', [fName(self.cidUsfm)])
 
 
     def makeControlTex (self, typeID) :
@@ -272,7 +272,7 @@ class Xetex (Manager) :
                 try :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
-                    self.project.log.writeToLog('COMP-055', [f[0].upper() + f[1:], fName(getattr(self, f))])
+                    self.project.log.writeToLog('XTEX-055', [f[0].upper() + f[1:], fName(getattr(self, f))])
 
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
@@ -412,7 +412,7 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            self.project.log.writeToLog('COMP-040', [fName(self.setFile)])
+            self.project.log.writeToLog('XTEX-040', [fName(self.setFile)])
 
         # Start the main part of the function here
 
@@ -421,14 +421,14 @@ class Xetex (Manager) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
                 makeIt()
-                self.project.log.writeToLog('COMP-060', [fName(self.setFile)])
+                self.project.log.writeToLog('XTEX-060', [fName(self.setFile)])
             elif isOlder(self.setFile, self.fontConfFile) :
                 # Something changed in the font conf file
                 makeIt()
-                self.project.log.writeToLog('COMP-060', [fName(self.setFile)])
+                self.project.log.writeToLog('XTEX-060', [fName(self.setFile)])
         else :
             makeIt()
-            self.project.log.writeToLog('COMP-065', [fName(self.setFile)])
+            self.project.log.writeToLog('XTEX-065', [fName(self.setFile)])
 
         return True
 
@@ -449,7 +449,7 @@ class Xetex (Manager) :
 
             # Analyse the return code
             if not rCode == int(0) :
-                writeToLog(self.project, 'ERR', 'PDF viewer failed with error code number: ' + rCode)
+                self.project.log.writeToLog('XTEX-105', [rCode])
             else :
                 return True
 
@@ -466,7 +466,7 @@ class Xetex (Manager) :
 
         if not os.path.isfile(self.ptxMargVerseFile) :
             shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
-            self.project.log.writeToLog('COMP-070', [fName(self.ptxMargVerseFile)])
+            self.project.log.writeToLog('XTEX-070', [fName(self.ptxMargVerseFile)])
             return True
 
 
@@ -498,11 +498,11 @@ class Xetex (Manager) :
                         if not os.path.isfile(fTarget) :
                             shutil.copy(os.path.join(macrosSource, f), fTarget)
                             mCopy = True
-                            self.project.log.writeToLog('COMP-070', [fName(fTarget)])
+                            self.project.log.writeToLog('XTEX-070', [fName(fTarget)])
 
             return mCopy
         else :
-            self.project.log.writeToLog('COMP-075', [cType])
+            self.project.log.writeToLog('XTEX-075', [cType])
 
 
     def addMeasureUnit (self, val) :
@@ -698,23 +698,23 @@ class Xetex (Manager) :
                 thisFile = getattr(self, k)
                 if os.path.isfile(thisFile) :
                     if isOlder(self.cidPdf, thisFile) :
-                        self.project.log.writeToLog('COMP-080', [fName(thisFile), fName(self.cidPdf)])
+                        self.project.log.writeToLog('XTEX-080', [fName(thisFile), fName(self.cidPdf)])
                         render = True
         else :
-            self.project.log.writeToLog('COMP-085', [fName(self.cidPdf)])
+            self.project.log.writeToLog('XTEX-085', [fName(self.cidPdf)])
             render = True
 
         if render :
             self.makeCidPdf()
         else :
-            self.project.log.writeToLog('COMP-090', [fName(self.cidPdf)])
+            self.project.log.writeToLog('XTEX-090', [fName(self.cidPdf)])
 
         # Review the results if desired
         if os.path.isfile(self.cidPdf) :
             if self.displayPdfOutput(self.cidPdf) :
-                self.project.log.writeToLog('COMP-095', [fName(self.cidPdf)])
+                self.project.log.writeToLog('XTEX-095', [fName(self.cidPdf)])
             else :
-                self.project.log.writeToLog('COMP-100', [fName(self.cidPdf)])
+                self.project.log.writeToLog('XTEX-100', [fName(self.cidPdf)])
 
 
 

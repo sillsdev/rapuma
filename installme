@@ -1,9 +1,9 @@
 Manual installation instructions for the developer version of the RPM package
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 19/11/2011
+	Last edited: 21/06/2012
 
 
-These are instruction for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently oneiric, 11.10). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
+These are instruction for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 REQUIRED PACKAGES
@@ -27,23 +27,32 @@ Next, in the terminal, you need to install all the necessary packages to run the
 
 Required:
 
-	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte python-argparse pdftk 
+	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte python-argparse pdftk mercurial meld
 
-Suggested:
+Another required package is the Palaso Python library. RPM depends on a couple parts of that.
+At this time, that package needs to be added to your system by cloning the project, then
+following the install proceedure. It can be cloned from here:
 
-    sudo apt-get install libgtk2-spell-perl mercurial meld tortoisehg tortoisehg-nautilus
+    http://hg.palaso.org/palaso-python
+
+When you install (run the setup.py script) without special settings you will probably get
+this error:
+
+    ImportError: No module named Pyrex.Distutils.extension
+
+Rerun with this syntax:
+
+    sudo setup.py install --nokmn
+
+Suggested additional packages:
+
+    sudo apt-get install libgtk2-spell-perl tortoisehg
 
 Suggested SIL Packages:
 
 sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
 
 (Note: On newer versions of Ubuntu, the SIL repo may not be up to date so some of the above may not be available.)
-
-Another suggested program would be a modified version of XeTeX. You may need this if you are processing complex scripts. This version includes the latest features and bug fixes.
-
-	sudo apt-get install texlive-xetex-snapshot
-
-That will remove the other version and replace it with version 3.1415926-2.2-0.999.7 or greater.
 
 Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
 
@@ -115,9 +124,10 @@ Now, you will need to link a couple utilities that are good to run globally out 
 
 This should complete the manual installation of rpm. Now you should be able to start the program from your terminal at any location with:
 
-	rpm
+	rpm -h
 
-Go a head, give it a try. What you should see is a RPM control panel come up but there will obviously be no project displayed. Work needs to be done to the display to gray-out parts of the display that are not relevant when there is no project but it works for now.
+Go a head, give it a try. What you should see is an RPM help screen. That's about all it
+does for now.
 
 
 
