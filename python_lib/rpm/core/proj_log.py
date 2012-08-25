@@ -55,6 +55,13 @@ class ProjLog (object) :
             'PROJ-035' : ['MSG', 'PROJ-035 - Unassigned error message ID.'],
             'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
 
+            'COMP-000' : ['MSG', 'Component module messages'],
+            'COMP-010' : ['MSG', 'The component ID: [<<1>>] was not found.'],
+            'COMP-020' : ['MSG', 'COMP-020 - Unassigned error message ID.'],
+            'COMP-030' : ['MSG', 'COMP-030 - Unassigned error message ID.'],
+            'COMP-040' : ['MSG', 'COMP-040 - Unassigned error message ID.'],
+            'COMP-050' : ['MSG', 'COMP-050 - Unassigned error message ID.'],
+
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
             'XTEX-010' : ['LOG', 'Version number: [<<1>>], was found. Assumed persistent values have been merged.'],
@@ -83,12 +90,12 @@ class ProjLog (object) :
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['MSG', 'TEXT-005 - Unassigned error message ID.'],
-            'TEXT-010' : ['MSG', 'TEXT-010 - Unassigned error message ID.'],
+            'TEXT-010' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             'TEXT-015' : ['MSG', 'TEXT-015 - Unassigned error message ID.'],
-            'TEXT-020' : ['MSG', 'TEXT-020 - Unassigned error message ID.'],
-            'TEXT-025' : ['MSG', 'TEXT-025 - Unassigned error message ID.'],
-            'TEXT-030' : ['MSG', 'TEXT-030 - Unassigned error message ID.'],
-            'TEXT-035' : ['MSG', 'TEXT-035 - Unassigned error message ID.'],
+            'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.'],
+            'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. Please contact the system developer about this problem.'],
+            'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
+            'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project.'],
             'TEXT-040' : ['MSG', 'TEXT-040 - Unassigned error message ID.'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
@@ -185,10 +192,11 @@ class ProjLog (object) :
         if os.path.isfile(self.local.projConfFile) :
 
             # Build the event line
-            if code == 'ERR' :
-                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + mod + msg + '\"'
-            else :
-                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
+            eventLine = '\"' + tStamp() + '\", \"' + msg + '\"'
+#            if code == 'ERR' :
+#                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + mod + msg + '\"'
+#            else :
+#                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
 
             # Do we need a log file made?
             try :

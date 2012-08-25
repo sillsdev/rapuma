@@ -126,6 +126,12 @@ This should complete the manual installation of rpm. Now you should be able to s
 
 	rpm -h
 
+If you are doing development work on RPM, you can access a simple development environment by creating a custom launcher with this command:
+
+	gnome-desktop-item-edit ~/Desktop/ --create-new
+
+For the command use: ~/Projects/rpm/rpm_dev.sh
+
 Go a head, give it a try. What you should see is an RPM help screen. That's about all it
 does for now.
 

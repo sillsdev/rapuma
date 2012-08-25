@@ -85,14 +85,14 @@ class Text (Manager) :
                 for k, v in self.compSettings.iteritems() :
                     setattr(self, k, v)
         else :
-            writeToLog(self.project, 'ERR', 'Source file editor [' + sourceEditor + '] is not recognized by this system. Please double check the name used for the source text editor setting.')
+            self.project.log.writeToLog('TEXT-010', [sourceEditor])
             dieNow()
 
         return True
 
 
     def installUsfmWorkingText (self, cid) :
-        '''Find the USFM source text and installs it into the working text
+        '''Find the USFM source text and install it into the working text
         folder of the project with the proper name.'''
 
         # Check to see if settings need updating
@@ -105,9 +105,9 @@ class Text (Manager) :
                 thisFile = mainName + self.postPart
         else :
             if not self.nameFormID :
-                writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.')
+                self.project.log.writeToLog('TEXT-020')
             else :
-                writeToLog(self.project, 'ERR', 'Source file name could not be built because the Name Form ID [' + self.nameFormID + '] is not recognized by this system. Please contact the system developer about this problem.')
+                self.project.log.writeToLog('TEXT-025', [self.nameFormID])
 
             # Both of the above are bad news so we need to take down the system now
             dieNow()
@@ -134,9 +134,9 @@ class Text (Manager) :
                     writeout.close
                     # FIXME: Add a hook here for custom post processing here
                     # for things like encoding and word changes.
-                    writeToLog(self.project, 'LOG', 'Copied [' + fName(source) + '] to [' + fName(target) + '] in project.')
+                    self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
                 else :
-                    writeToLog(self.project, 'LOG', 'Source file: [' + source + '] not found! Cannot copy to project.')
+                    self.project.log.writeToLog('TEXT-035', [source])
 
 
 

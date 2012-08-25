@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil
+import codecs, os, sys, shutil, dircache
 from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
@@ -121,34 +121,49 @@ def installPTCustomStyles (local, customStyleFile) :
 
 
 def getPTSettings (home) :
-    '''Get the ParaTExt project settings from the parent/source PT project.
-    Turn the data into a dictionary.'''
+    '''Look for the ParaTExt project settings file. The immediat PT project
+    is the parent folder and the PT environment that the PT projet is found
+    in, if any, is the grandparent folder. the .ssf (settings) file in the
+    grandparent folder takes presidence over the one found in the parent folder.
+    This function will determine where the primary .ssf file is and turn the
+    data into a dictionary for the system to use.'''
 
-    # Not sure where the PT SSF file might be. We will get a list of
-    # files from the cwd and the parent. If it exsists, it should
-    # be in one of those folders
+    # Not sure where the PT SSF file might be or even what its name is.
+    # Starting in parent, we should find the first .ssf file. That will
+    # give us the name of the file. Then we will look in the grandparent
+    # folder and if we find the same named file there, that will be
+    # harvested for the settings. Otherwise, the settings will be taken
+    # from the parent folder.
     ssfFileName = ''
     ptPath = ''
     parentFolder = os.path.dirname(home)
-    localFolder = home
-    parentIDL = os.path.split(parentFolder)[1] + '.ssf'
-    parentIDU = os.path.split(parentFolder)[1] + '.SSF'
-    localIDL = os.path.split(localFolder)[1] + '.ssf'
-    localIDU = os.path.split(localFolder)[1] + '.SSF'
-    fLParent = os.listdir(parentFolder)
-    fLLocal = os.listdir(localFolder)
-    if parentIDL in fLParent :
-        ssfFileName = parentIDL
-        ptPath = parentFolder
-    elif parentIDU in fLParent :
-        ssfFileName = parentIDU
-        ptPath = parentFolder
-    elif localIDL in localFolder :
-        ssfFileName = localIDL
-        ptPath = localFolder
-    elif localIDU in localFolder :
-        ssfFileName = localIDU
-        ptPath = localFolder
+    grandparentFolder = os.path.dirname(parentFolder)
+
+    # Get a file list from the parent folder and look for a .ssf/.SSF file
+    # This assumes there is (has to be) only one ssf/SSF file in the folder.
+    # The main problem at this point is we don't really know the name of
+    # the file, only the extention.
+    parentFileList = dircache.listdir(parentFolder)
+    grandparentFileList = dircache.listdir(grandparentFolder)
+
+    # Parent first to find the actual settings file name. Right now, there
+    # can only be 2 possibilities, either ssf or SSF. (No one in their right
+    # mind would ever use mixed case on an extention. That would be stupid!)
+    for f in parentFileList :
+        if os.path.isfile(os.path.join(parentFolder, f)) :
+            if f.split('.')[1] == 'ssf' or f.split('.')[1] == 'SSF' :
+                ssfFileName = f
+                ptPath = parentFolder
+
+    # Now now look in the grandparent folder and change to override settings
+    # file if there is one
+    for f in grandparentFileList :
+        if os.path.isfile(os.path.join(grandparentFolder, f)) :
+            ucn = ssfFileName.split('.')[0] + '.' + ssfFileName.split('.')[1].upper()
+            lcn = ssfFileName.split('.')[0] + '.' + ssfFileName.split('.')[1].lower()
+            if f == (ucn or lcn) :
+                ssfFileName = f
+                ptPath = grandparentFolder
 
     # Return the dictionary
     ssfFile = os.path.join(ptPath, ssfFileName)

@@ -190,9 +190,9 @@ class Project (object) :
             self.components[cid] = compobj
             # Save our config settings
             if writeConfFile(self.projConfig) :
-                self.log.writeToLog('PROJ-025', [cid])
+                self.log.writeToLog('PROJ-020', [cid])
         else :
-            self.log.writeToLog('PROJ-030', [cid])
+            self.log.writeToLog('PROJ-025', [cid])
 
 
     def addComponentType (self, cType) :
