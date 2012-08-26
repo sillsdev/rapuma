@@ -78,11 +78,16 @@ terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 ############################## RPM Functions ##############################
 ###########################################################################
 
-def newProject (uc, pc, pid, ptype = None, pname = None, pdir = None) :
+#def newProject (uc, pc, pid, pdir = None, ptype = None, pname = None) :
+def newProject (uc, pc, pid, ptype = None, pname = None) :
     '''Create a new publishing project.'''
 
-    # Because we may need to rewrite local, declare it global here
-    global local
+    # Because the location of where a project is to be created could be
+    # different than the cwd, we will count on pc.local to have all the
+    # correct information. 
+    
+    # FIXME: Move the ptype and pname vars up to the arg processor which
+    # calls this function.
 
     # Check the ptype
     if not ptype :
@@ -92,33 +97,24 @@ def newProject (uc, pc, pid, ptype = None, pname = None, pdir = None) :
     if not pname :
         pname = 'The ' + pid + ' project'
 
-    # Grab the cwd if pdir is empty for the default
-    if not pdir or pdir == '.' :
-        pdir = os.path.join(os.getcwd(), pid)
-    else :
-        pdir = os.path.abspath(pdir)
-
-    # Adjust our project paths according to the pdir we got
-    local   = ProjLocal(rpmHome, userHome, pdir)
-
     # Run some basic tests to see if this project can be created
     # Look for project in current folder
-    if not os.path.isfile(local.projConfFile) :
+    if not os.path.isfile(pc.local.projConfFile) :
         # Look for locked project in current folder
-        if os.path.isfile(local.projConfFile + local.lockExt) :
+        if os.path.isfile(pc.local.projConfFile + pc.local.lockExt) :
             terminal('ERR: Halt! Locked project already defined in target folder')
             return
         # Look for project in parent folder (don't want project in project)
-        elif os.path.isfile(os.path.join(os.path.dirname(local.projHome), local.projConfFileName)) :
+        elif os.path.isfile(os.path.join(os.path.dirname(pc.local.projHome), pc.local.projConfFileName)) :
             terminal('ERR: Halt! Live project already defined in parent folder')
             return
         # Look for locked project in parent folder (prevent project in project)
-        elif os.path.isfile(os.path.join(os.path.dirname(local.projHome), local.projConfFileName + local.lockExt)) :
+        elif os.path.isfile(os.path.join(os.path.dirname(pc.local.projHome), pc.local.projConfFileName + pc.local.lockExt)) :
             terminal('ERR: Halt! Locked project already defined in parent folder')
             return
         # Check if path to parent is valid
-        elif not os.path.isdir(os.path.dirname(local.projHome)) :
-            terminal('ERR: Halt! Not a valid (parent) path: ' + local.projHome)
+        elif not os.path.isdir(os.path.dirname(pc.local.projHome)) :
+            terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(pc.local.projHome))
             return
         # Test if this project already exists in the user's config file.
         elif uc.isRegisteredProject(pid) :
@@ -129,14 +125,14 @@ def newProject (uc, pc, pid, ptype = None, pname = None, pdir = None) :
         return
 
     # If we made it to this point, we need to make a new project folder
-    if not os.path.exists(local.projConfFolder) :
-        os.makedirs(local.projConfFolder)
+    if not os.path.exists(pc.local.projConfFolder) :
+        os.makedirs(pc.local.projConfFolder)
 
     # Create a new version of the project config file
-    pc.makeNewProjConf(local, pid, ptype, pname)
+    pc.makeNewProjConf(pc.local, pid, ptype, pname)
 
     # Add project to local RPM project registry
-    uc.registerProject(pid, pname, ptype, local.projHome)
+    uc.registerProject(pid, pname, ptype, pc.local.projHome)
 
     # Report what we did
     terminal('Created new project [' + pid + ']')
@@ -325,17 +321,37 @@ def runExamplePubDemoProject (demoID) :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
+    # Project level commands
     if sys.argv[1].lower() == 'project' :
-        local   = ProjLocal(rpmHome, userHome, projHome)
-        pc      = ProjConfig(local)
+        # Creating a new project
         if args['project_new'] :
-            newProject(uc, pc, args['project_id'])
+        # FIXME: Add additional vars to this for project type and name and add them to the options
+            if args['project_folder'] :
+                # If a project folder is given (other than CWD) We need to
+                # modify the local settings and pass them on to proj config
+                # settings (internal)
+                projFolder = os.path.join(args['project_folder'], args['project_id'])
+                local   = ProjLocal(rpmHome, userHome, projFolder)
+                pc      = ProjConfig(local)
+                newProject(uc, pc, args['project_id'])
+            else :
+                # With no different project location given we will make sure
+                # we use the default projHome set when the script started.
+                projFolder = os.path.join(projHome, args['project_id'])
+                local   = ProjLocal(rpmHome, userHome, projFolder)
+                pc      = ProjConfig(local)
+                newProject(uc, pc, args['project_id'])
+        # Locking an exsisting project
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
+        # Unlocking an exsisting project
         elif args['project_unlock'] :
             unlockProject(uc, args['project_id'])
+        # Deleting an exsisting project
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
+
+    # Component level commands
     elif sys.argv[1].lower() == 'component' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
@@ -347,6 +363,8 @@ def userArguments (args) :
                 aProject.renderComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+
+    # Font level commands
     elif sys.argv[1].lower() == 'font' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
@@ -358,6 +376,8 @@ def userArguments (args) :
                 aProject.setPrimaryFont(args['font_name'], args['component_type'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+
+    # Style level commands
     elif sys.argv[1].lower() == 'style' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
@@ -367,6 +387,8 @@ def userArguments (args) :
                 aProject.createComponentStyleFile(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+
+    # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
@@ -374,11 +396,14 @@ def userArguments (args) :
                 aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+
+    # Testing commands
     elif sys.argv[1].lower() == 'test' :
         if args['source_id'] :
             getExampleSourceProject(args['source_id'])
         if args['demo_id'] :
             runExamplePubDemoProject(args['demo_id'])
+
     # Extra help access
     elif sys.argv[2].lower() == 'help' :
         if args['about'] :
@@ -386,6 +411,8 @@ def userArguments (args) :
             terminal('About: ' + systemAbout + '\n')
         if args['basic'] :
             accessHtmlHelp()
+
+    # Totally lost
     else:
         terminal('Error: Command not recognized! ')
         sys.exit()
@@ -400,19 +427,29 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic RPM help
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
-projCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+#projCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+projCommand.add_argument('project_id', help='Project ID (positional argument required for all actions)')
 projCommand.add_argument('-n', '--project_new', action='store_true', help='Create a new project on this computer.')
 projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
+projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
+
+
+# WORKING HERE
+
+# The following args will have the right positional args defined
+
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
-compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+#compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+compCommand.add_argument('project_id', help='Project ID (positional argument required for all actions)')
+#compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
+compCommand.add_argument('component_id', help='The component ID (required for component_new and component_render).')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-l', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
-compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
 compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
 # Add font subprocess arguments
 compCommand = subparsers.add_parser('font', help='General font handling commands help')
@@ -435,6 +472,12 @@ compCommand.add_argument('-c', '--configuration', help='The configuration set th
 compCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
 compCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
 compCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
+
+
+
+########################################################
+
+
 # Add testing subprocess arguments
 compCommand = subparsers.add_parser('test', help='General system testing commands help')
 compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
