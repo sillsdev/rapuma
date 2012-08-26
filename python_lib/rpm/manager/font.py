@@ -55,7 +55,7 @@ class Font (Manager) :
         if not os.path.isfile(self.project.local.fontConfFile) :
             self.fontConfig.filename = self.project.local.fontConfFile
             writeConfFile(self.fontConfig)
-            writeToLog(self.project, 'LOG', 'Write out new font config: font.__init__()')
+            self.project.log.writeToLog('FONT-010')
         else :
             self.fontConfig = ConfigObj(self.project.local.fontConfFile)
 
@@ -88,14 +88,14 @@ class Font (Manager) :
                 font = getPTFont(self.project.local.projHome)
                 # Test for font
                 if not font :
-                    writeToLog(self.project, 'ERR', 'Failed to find in ParaTExt project. A primary font must be set before this component can be successfully rendered.')
+                    self.project.log.writeToLog('FONT-020')
                     dieNow()
             else :
                 # Quite here
                 if not sEditor :
-                    writeToLog(self.project, 'ERR', 'No source editor was found for this project. Please enter this setting before continuing.')
+                    self.project.log.writeToLog('FONT-025')
                 else :
-                    writeToLog(self.project, 'ERR', 'Source editor [' + sEditor + '] is not supported. Please enter a supported editor setting before continuing or contact the system developer to add support for your editor.')
+                    self.project.log.writeToLog('FONT-030', [sEditor])
                 dieNow()
 
         # If this didn't die already we should be able to record and install now
@@ -104,7 +104,7 @@ class Font (Manager) :
         self.recordFont(font, cType)
         self.installFont(cType)
         writeConfFile(self.project.projConfig)
-        writeToLog(self.project, 'LOG', 'Set primary font to: ' + font)
+        self.project.log.writeToLog('FONT-035', [font])
         return True
 
 
@@ -118,7 +118,7 @@ class Font (Manager) :
         fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
         fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
-            writeToLog(self.project, 'ERR', 'Font file [' + font + '.xml] not found. (font.recordFont())')
+            self.project.log.writeToLog('FONT-040', [font])
             dieNow()
 
         # See if this is already in the config
@@ -148,7 +148,7 @@ class Font (Manager) :
 
             writeConfFile(self.fontConfig)
             writeConfFile(self.project.projConfig)
-            writeToLog(self.project, 'LOG', font + ' font setup information added to project config')
+            self.project.log.writeToLog('FONT-045', [font])
             return True
 
         else :
@@ -188,7 +188,7 @@ class Font (Manager) :
 
                 # Crash and burn if the font file is not found
                 if not fontSource :
-                    writeToLog(self.project, 'ERR', 'Halt! ' + fontSource + 'not found.', 'fontsTex.initAuxiliary()')
+                    self.project.log.writeToLog('FONT-050', [fontSource])
                     return False
                 # Copy the font file if need be
                 fontFilePath = os.path.join(self.project.local.projFontsFolder, thisFolder, fontFileName)

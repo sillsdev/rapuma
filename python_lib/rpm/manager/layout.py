@@ -51,7 +51,7 @@ class Layout (Manager) :
             self.layoutConfig  = ConfigObj(getXMLSettings(self.project.local.rpmLayoutDefaultFile))
             self.layoutConfig.filename = self.project.local.layoutConfFile
             writeConfFile(self.layoutConfig)
-            writeToLog(self.project, 'LOG', 'Write out new layout config: layout.__init__()')
+            self.project.log.writeToLog('LYOT-010')
         else :
             self.layoutConfig = ConfigObj(self.project.local.layoutConfFile)
 

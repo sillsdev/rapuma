@@ -195,6 +195,13 @@ class Project (object) :
             self.log.writeToLog('PROJ-025', [cid])
 
 
+    def deleteComponent (self, cid) :
+        '''This will delete a component from an exsisting object.'''
+
+        # FIXME: Implement this function
+        self.log.writeToLog('COMP-030')
+
+
     def addComponentType (self, cType) :
         '''Add (register) a component type to the config if it 
         is not there already.'''
