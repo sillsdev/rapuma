@@ -328,15 +328,13 @@ def userArguments (args) :
         # FIXME: Add additional vars to this for project type and name and add them to the options
             if args['project_folder'] :
                 # If a project folder is given (other than CWD) We need to
-                # modify the local settings and pass them on to proj config
-                # settings (internal)
+                # resolve it and pass it on to proj config settings (internal)
+                customLocal = os.path.abspath(args['project_folder'])
+                if not os.path.isdir(customLocal) :
+                    terminal('Cannot resolve path. The path [' + customLocal + '] is not valid! Halting project creation process.')
+                    sys.exit()
 
-
-
-
-# FIXME: We need to be sure that the folder path we put into local is an absolute 
-# path, not just a child folder name! This breaks other things.
-                projFolder = os.path.join(args['project_folder'], args['project_id'])
+                projFolder = os.path.join(customLocal, args['project_id'])
                 local   = ProjLocal(rpmHome, userHome, projFolder)
                 pc      = ProjConfig(local)
                 newProject(uc, pc, args['project_id'])
@@ -347,11 +345,6 @@ def userArguments (args) :
                 local   = ProjLocal(rpmHome, userHome, projFolder)
                 pc      = ProjConfig(local)
                 newProject(uc, pc, args['project_id'])
-
-
-
-
-
         # Locking an exsisting project
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
@@ -374,6 +367,8 @@ def userArguments (args) :
                 aProject.addMetaComponent(args['meta_id'], args['meta_list'], args['component_type'])
             if args['component_render'] :
                 aProject.renderComponent(args['component_id'])
+            if args['component_view'] :
+                aProject.viewComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 
@@ -440,61 +435,60 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic RPM help
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
-projCommand.add_argument('project_id', help='A specific project ID (positional argument required for all actions)')
+projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-n', '--project_new', action='store_true', help='Create a new project on this computer.')
 projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
 
-
-# WORKING HERE
-
-# The following args will have the right positional args defined
-
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
-#compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
-compCommand.add_argument('project_id', help='Project ID (positional argument required for all actions)')
-#compCommand.add_argument('-c', '--component_id', help='The component ID (required for component_new and component_render).')
+compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('component_id', help='A specific component ID (required for component_new and component_render).')
+compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
 compCommand.add_argument('-l', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
+
+#FIXME: next command not implemented yet
+compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component.')
+
+
 compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
-compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
+
+#FIXME: do we need to use 'compCommand' on all the following or do they need to be changed to contextual lables?
+
 # Add font subprocess arguments
 compCommand = subparsers.add_parser('font', help='General font handling commands help')
-compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
-compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
+compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+compCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a font for this type of component.')
 compCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
 compCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
 compCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
 compCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
+
 # Add style subprocess arguments
 compCommand = subparsers.add_parser('style', help='General font handling commands help')
-compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
-compCommand.add_argument('-t', '--component_type', help='The component type (required for component_new and component_font).')
+compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+compCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a style for this type of component.')
 compCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
 compCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
+
 # Add settings subprocess arguments
 compCommand = subparsers.add_parser('settings', help='General settings handling commands help')
-compCommand.add_argument('-i', '--project_id', help='Project ID (required for all actions)')
+compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
 compCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
 compCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
 compCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
 
-
-
-########################################################
-
-
 # Add testing subprocess arguments
 compCommand = subparsers.add_parser('test', help='General system testing commands help')
 compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
 compCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
+
 # Add help subprocess arguments
 compCommand = subparsers.add_parser('help', help='General system help')
 
@@ -511,7 +505,7 @@ userArguments(vars(parser.parse_args()))
 if os.path.isfile(local.projLogFile) :
     trimLog(local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
-## In case there are any Canadians using this, politely say good bye
+# In case there are any Canadians using this, politely say good bye
 terminal('\n\t\tThank you, please come again!\n')
 
 

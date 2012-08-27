@@ -138,7 +138,6 @@ def getPTSettings (home) :
     ptPath = ''
     parentFolder = os.path.dirname(home)
     grandparentFolder = os.path.dirname(parentFolder)
-    print 'xxxxxxxxxxxxxxx', parentFolder
     # Get a file list from the parent folder and look for a .ssf/.SSF file
     # This assumes there is (has to be) only one ssf/SSF file in the folder.
     # The main problem at this point is we don't really know the name of

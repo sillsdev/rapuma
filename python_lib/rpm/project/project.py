@@ -26,6 +26,7 @@ import codecs, os, sys, shutil, imp
 
 # Load the local classes
 from tools import *
+from pt_tools import *
 import manager as mngr
 import component as cmpt
 import user_config as userConfig
@@ -127,11 +128,26 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def viewComponent (self, cid) :
+        '''View a single component. This will check for the exsistance of a
+        rendered component and view it. If it doesn't exsist it will render it.'''
+
+        # FIXME: Implement this function
+        self.log.writeToLog('COMP-035')
+
+        return False
+
+
     def renderComponent (self, cid) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
 
-        self.createComponent(cid).render()
+        # Check for cid in config
+        if hasUsfmCidInfo(cid) :
+            self.createComponent(cid).render()
+        else :
+            self.log.writeToLog('COMP-010', [cid])
+            return False
 
 
     def createComponent (self, cid) :

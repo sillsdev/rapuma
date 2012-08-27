@@ -80,10 +80,10 @@ class Style (Manager) :
                 globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
                 if not os.path.isfile(globalStyFile) :
                     installPTStyles(self.project.local, self.mainStyleFile)
-                    writeToLog('STYL-010')
+                    self.project.log.writeToLog('STYL-010')
             else :
                 # Quite here
-                writeToLog('STYL-015')
+                self.project.log.writeToLog('STYL-015')
                 dieNow()
 
 
@@ -95,7 +95,7 @@ class Style (Manager) :
         if not os.path.isfile(cusStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
                 if not installPTCustomStyles(self.project.local, self.customStyleFile) :
-                    writeToLog('STYL-020')
+                    self.project.log.writeToLog('STYL-020')
                     self.createCustomUsfmStyles()
             else :
                 self.createCustomUsfmStyles()
@@ -105,7 +105,7 @@ class Style (Manager) :
         '''Create a custom project-wide USFM style file for this project.
         This USFM style file will override the main component type styles.'''
 
-        writeToLog('STYL-030')
+        self.project.log.writeToLog('STYL-030')
 
 
     def createCompOverrideUsfmStyles (self, cid) :
@@ -113,7 +113,7 @@ class Style (Manager) :
         This file will override specific styles from preceeding style
         files loaded before it.'''
 
-        writeToLog('STYL-040')
+        self.project.log.writeToLog('STYL-040')
 
 
 

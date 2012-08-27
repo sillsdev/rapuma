@@ -56,9 +56,10 @@ class ProjLog (object) :
             'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
 
             'COMP-000' : ['MSG', 'Component module messages'],
-            'COMP-010' : ['MSG', 'The component ID: [<<1>>] was not found.'],
+            'COMP-010' : ['MSG', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
             'COMP-020' : ['MSG', 'COMP-020 - Unassigned error message ID.'],
             'COMP-030' : ['ERR', 'The delete component function has not been implemented yet. This component will have to be manually removed. Sorry about that.'],
+            'COMP-035' : ['ERR', 'The view component function has not been implemented yet. Sorry about that.'],
             'COMP-040' : ['MSG', 'COMP-040 - Unassigned error message ID.'],
             'COMP-050' : ['MSG', 'COMP-050 - Unassigned error message ID.'],
 
@@ -79,7 +80,7 @@ class ProjLog (object) :
             'XTEX-070' : ['LOG', 'Copied macro: <<1>>'],
             'XTEX-075' : ['ERR', 'No macro package for : <<1>>'],
             'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],
-            'XTEX-085' : ['LOG', '<<1>> not found, it will be rendered.'],
+            'XTEX-085' : ['MSG', '<<1>> not found, it cannot be viewed.'],
             'XTEX-090' : ['LOG', 'No changes to dependent files found, [<<1>>] does not need to be rerendered at this time.'],
             'XTEX-095' : ['MSG', 'Routing <<1>> to PDF viewer.'],
             'XTEX-100' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],

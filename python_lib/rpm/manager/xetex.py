@@ -702,7 +702,7 @@ class Xetex (Manager) :
                         render = True
         else :
             self.project.log.writeToLog('XTEX-085', [fName(self.cidPdf)])
-            render = True
+#            render = True
 
         if render :
             self.makeCidPdf()
