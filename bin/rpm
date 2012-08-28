@@ -365,10 +365,16 @@ def userArguments (args) :
                 aProject.deleteComponent(args['component_id'])
             if args['meta_id'] :
                 aProject.addMetaComponent(args['meta_id'], args['meta_list'], args['component_type'])
+            # Render vs. view command is just a matter of forcing the component
+            # to be rendered if render is selected by the user. Otherwise, if
+            # only view is requested, force is set to False and the component
+            # will not be rerendered if it already exsists.
             if args['component_render'] :
-                aProject.renderComponent(args['component_id'])
+                force = True
+                aProject.renderComponent(args['component_id'], force)
             if args['component_view'] :
-                aProject.viewComponent(args['component_id'])
+                force = False
+                aProject.renderComponent(args['component_id'], force)
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 

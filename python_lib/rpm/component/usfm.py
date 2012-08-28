@@ -80,7 +80,7 @@ class Usfm (Component) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-    def render(self) :
+    def render(self, force) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
 
@@ -119,11 +119,9 @@ class Usfm (Component) :
         else :
             preProcessComponent(self.cid)
 
-
-# FIXME: Can we pass render or view through this?
-
-        # With everything in place we can render the component
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid)
+        # With everything in place we can render the component and we pass-through
+        # the force (render/view) command so the renderer will do the right thing.
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid, force)
 
 
 

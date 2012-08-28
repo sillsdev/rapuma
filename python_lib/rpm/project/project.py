@@ -138,40 +138,35 @@ class Project (object) :
         return cidPdf
 
 
+#    def viewComponent (self, cid) :
+#        '''View a single component. This will check for the exsistance of a
+#        rendered component and view it. If it doesn't exsist it will render it.'''
+
+#        # Check for cid in config
+#        if hasUsfmCidInfo(cid) :
+#            # See if the file exists. If it does not, we'll render it
+#            thisPdf = self.getPdfPathName(cid)
+#            if not os.path.isfile(thisPdf) :
+#                self.createComponent(cid).render()
+#            else :
+#                self.createComponent(cid).view()
+#        else :
+#            self.log.writeToLog('COMP-010', [cid])
+#            return False
 
 
-
-# Can we pass view or render through the createComponent() function? How?
-
-    def viewComponent (self, cid) :
-        '''View a single component. This will check for the exsistance of a
-        rendered component and view it. If it doesn't exsist it will render it.'''
-
-        # Check for cid in config
-        if hasUsfmCidInfo(cid) :
-            # See if the file exists. If it does not, we'll render it
-            thisPdf = self.getPdfPathName(cid)
-            if not os.path.isfile(thisPdf) :
-                self.createComponent(cid).render()
-            else :
-                self.createComponent(cid).view()
-        else :
-            self.log.writeToLog('COMP-010', [cid])
-            return False
-
-
-    def renderComponent (self, cid) :
+    def renderComponent (self, cid, force = False) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
 
-        # First we delete the PDF for this component if there is one
-        thisPdf = self.getPdfPathName(cid)
-        if os.path.isfile(thisPdf) :
-            os.remove(thisPdf)
+#        # First we delete the PDF for this component if there is one
+#        thisPdf = self.getPdfPathName(cid)
+#        if os.path.isfile(thisPdf) :
+#            os.remove(thisPdf)
 
         # Check for cid in config
         if hasUsfmCidInfo(cid) :
-            self.createComponent(cid).render()
+            self.createComponent(cid).render(force)
         else :
             self.log.writeToLog('COMP-010', [cid])
             return False

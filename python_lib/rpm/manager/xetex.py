@@ -600,9 +600,7 @@ class Xetex (Manager) :
 ################################# Main Function ###############################
 ###############################################################################
 
-# FIXME: Can we pass a view or render command here?
-
-    def run (self, cid) :
+    def run (self, cid, force) :
         '''This will check all the dependencies for a component and then
         use XeTeX to render it.'''
 
@@ -688,6 +686,14 @@ class Xetex (Manager) :
         # Create the global TeX file that will link to the cidTex file(s) we just made
         self.buildCidFileNames(self.cid)
         self.makeControlTex('masterTex')
+
+        # If the user gave the render (-r) command we will force the rendering
+        # of this component here by deleting any previously rendered PDF. However,
+        # if the view (-v) command was given, we will pass and just view, or, if
+        # needed, render the PDF.
+        if force :
+            if os.path.isfile(self.cidPdf) :
+                os.remove(self.cidPdf)
 
         # Create the PDF (if needed)
         render = False
