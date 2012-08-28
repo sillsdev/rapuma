@@ -128,19 +128,46 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def getPdfPathName (self, cid) :
+        '''This is a crude way to create a file name and path. It may not be
+        the best way.'''
+
+        cidFolder          = os.path.join(self.local.projProcessFolder, cid)
+        cidPdf             = os.path.join(cidFolder, cid + '.pdf')
+
+        return cidPdf
+
+
+
+
+
+# Can we pass view or render through the createComponent() function? How?
+
     def viewComponent (self, cid) :
         '''View a single component. This will check for the exsistance of a
         rendered component and view it. If it doesn't exsist it will render it.'''
 
-        # FIXME: Implement this function
-        self.log.writeToLog('COMP-035')
-
-        return False
+        # Check for cid in config
+        if hasUsfmCidInfo(cid) :
+            # See if the file exists. If it does not, we'll render it
+            thisPdf = self.getPdfPathName(cid)
+            if not os.path.isfile(thisPdf) :
+                self.createComponent(cid).render()
+            else :
+                self.createComponent(cid).view()
+        else :
+            self.log.writeToLog('COMP-010', [cid])
+            return False
 
 
     def renderComponent (self, cid) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
+
+        # First we delete the PDF for this component if there is one
+        thisPdf = self.getPdfPathName(cid)
+        if os.path.isfile(thisPdf) :
+            os.remove(thisPdf)
 
         # Check for cid in config
         if hasUsfmCidInfo(cid) :
@@ -148,6 +175,11 @@ class Project (object) :
         else :
             self.log.writeToLog('COMP-010', [cid])
             return False
+
+
+
+
+
 
 
     def createComponent (self, cid) :

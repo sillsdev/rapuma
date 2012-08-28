@@ -115,9 +115,9 @@ class Xetex (Manager) :
 ###############################################################################
 
     def makeCidPdf (self) :
-        # When this is called all the files necessary to render this component 
-        # should be in place. Here we do the rendering process. The result 
-        # should be a PDF file.
+        '''When this is called all the files necessary to render this component 
+        should be in place. Here we do the rendering process. The result 
+        should be a PDF file.'''
 
         # Be sure the file names for this component are good
         self.buildCidFileNames(self.cid)
@@ -600,6 +600,8 @@ class Xetex (Manager) :
 ################################# Main Function ###############################
 ###############################################################################
 
+# FIXME: Can we pass a view or render command here?
+
     def run (self, cid) :
         '''This will check all the dependencies for a component and then
         use XeTeX to render it.'''
@@ -702,7 +704,7 @@ class Xetex (Manager) :
                         render = True
         else :
             self.project.log.writeToLog('XTEX-085', [fName(self.cidPdf)])
-#            render = True
+            render = True
 
         if render :
             self.makeCidPdf()

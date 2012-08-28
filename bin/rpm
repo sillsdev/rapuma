@@ -445,17 +445,13 @@ projCommand.add_argument('-f', '--project_folder', help='Location of the project
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-compCommand.add_argument('component_id', help='A specific component ID (required for component_new and component_render).')
+compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
 compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
 compCommand.add_argument('-l', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
-
-#FIXME: next command not implemented yet
-compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component.')
-
-
+compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')
 compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
 
 # Add font subprocess arguments
