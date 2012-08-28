@@ -458,39 +458,37 @@ compCommand.add_argument('-v', '--component_view', action='store_true', help='Vi
 
 compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
 
-#FIXME: do we need to use 'compCommand' on all the following or do they need to be changed to contextual lables?
-
 # Add font subprocess arguments
-compCommand = subparsers.add_parser('font', help='General font handling commands help')
-compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-compCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a font for this type of component.')
-compCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
-compCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
-compCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
-compCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
+fontCommand = subparsers.add_parser('font', help='General font handling commands help')
+fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+fontCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a font for this type of component.')
+fontCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
+fontCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
+fontCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
+fontCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
 
 # Add style subprocess arguments
-compCommand = subparsers.add_parser('style', help='General font handling commands help')
-compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-compCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a style for this type of component.')
-compCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
-compCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
+styleCommand = subparsers.add_parser('style', help='General font handling commands help')
+styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+styleCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a style for this type of component.')
+styleCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
+styleCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
 
 # Add settings subprocess arguments
-compCommand = subparsers.add_parser('settings', help='General settings handling commands help')
-compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-compCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
-compCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
-compCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
-compCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
+settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
+settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+settingsCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
+settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
+settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
+settingsCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
 
 # Add testing subprocess arguments
-compCommand = subparsers.add_parser('test', help='General system testing commands help')
-compCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
-compCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
+testCommand = subparsers.add_parser('test', help='General system testing commands help')
+testCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
+testCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
 
 # Add help subprocess arguments
-compCommand = subparsers.add_parser('help', help='General system help')
+helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))
