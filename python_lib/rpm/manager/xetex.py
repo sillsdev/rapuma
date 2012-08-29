@@ -694,6 +694,7 @@ class Xetex (Manager) :
         if force :
             if os.path.isfile(self.cidPdf) :
                 os.remove(self.cidPdf)
+                self.project.log.writeToLog('XTEX-110', [fName(self.cidPdf)])
 
         # Create the PDF (if needed)
         render = False

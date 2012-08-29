@@ -148,36 +148,36 @@ class Text (Manager) :
 
         if not isOlder(target, source) :
             if not os.path.isfile(target) :
-                    # Use the Palaso USFM parser to bring in the text and
-                    # clean it up if needed
-                    fh = codecs.open(source, 'r', 'utf_8_sig')
-                    doc = usfm.parser(fh)
-                    tidy = sfm.pprint(doc)
-                    writeout = codecs.open(target, "w", "utf-8")
-                    writeout.write(tidy)
-                    writeout.close
+                # Use the Palaso USFM parser to bring in the text and
+                # clean it up if needed
+                fh = codecs.open(source, 'r', 'utf_8_sig')
+                doc = usfm.parser(fh)
+                tidy = sfm.pprint(doc)
+                writeout = codecs.open(target, "w", "utf-8")
+                writeout.write(tidy)
+                writeout.close
 
 
 # Working here
 
 
-                    # Now that the source has been copied to the target
-                    # we can look for post processes to do. There are two
-                    # kinds. One is for all files of a certain type and
-                    # will be performed first. The second type of post
-                    # process is for a specific component and is done last.
-                    if os.path.isfile(typePostProcess) :
-                        self.project.log.writeToLog('TEXT-050', [self.cType])
+                # Now that the source has been copied to the target
+                # we can look for post processes to do. There are two
+                # kinds. One is for all files of a certain type and
+                # will be performed first. The second type of post
+                # process is for a specific component and is done last.
+                if os.path.isfile(typePostProcess) :
+                    self.project.log.writeToLog('TEXT-050', [self.cType])
 
-                    if os.path.isfile(compPostProcess) :
-                        self.project.log.writeToLog('TEXT-055', [cid])
-
-
+                if os.path.isfile(compPostProcess) :
+                    self.project.log.writeToLog('TEXT-055', [cid])
 
 
-                    self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
 
 
+                self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
+
+        return True
 
 
 

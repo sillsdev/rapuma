@@ -138,43 +138,20 @@ class Project (object) :
         return cidPdf
 
 
-#    def viewComponent (self, cid) :
-#        '''View a single component. This will check for the exsistance of a
-#        rendered component and view it. If it doesn't exsist it will render it.'''
-
-#        # Check for cid in config
-#        if hasUsfmCidInfo(cid) :
-#            # See if the file exists. If it does not, we'll render it
-#            thisPdf = self.getPdfPathName(cid)
-#            if not os.path.isfile(thisPdf) :
-#                self.createComponent(cid).render()
-#            else :
-#                self.createComponent(cid).view()
-#        else :
-#            self.log.writeToLog('COMP-010', [cid])
-#            return False
-
-
     def renderComponent (self, cid, force = False) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
 
-#        # First we delete the PDF for this component if there is one
-#        thisPdf = self.getPdfPathName(cid)
-#        if os.path.isfile(thisPdf) :
-#            os.remove(thisPdf)
-
         # Check for cid in config
         if hasUsfmCidInfo(cid) :
-            self.createComponent(cid).render(force)
+            try :
+                self.createComponent(cid).render(force)
+                return True
+            except :
+                return False
         else :
             self.log.writeToLog('COMP-010', [cid])
             return False
-
-
-
-
-
 
 
     def createComponent (self, cid) :
@@ -184,11 +161,15 @@ class Project (object) :
         if cid in self.components : return self.components[cid]
 
         # Otherwise, create a new one and return it
-        cfg = self.projConfig['Components'][cid]
-        cType = cfg['type']
-        module = __import__(cType)
-        compobj = getattr(module, cType.capitalize())(self, cfg)
-        self.components[cid] = compobj
+        if testForSetting(self.projConfig, 'Components', cid) :
+            cfg = self.projConfig['Components'][cid]
+            cType = cfg['type']
+            module = __import__(cType)
+            compobj = getattr(module, cType.capitalize())(self, cfg)
+            self.components[cid] = compobj
+        else :
+            self.log.writeToLog('COMP-040', [cid])
+            return False
 
         return compobj
 
@@ -216,6 +197,7 @@ class Project (object) :
 
 # FIXME: we need to stop this next process (adding to the conf) if the 
 # comp type is locked or maybe even if the source doesn't exsist. How do we do that?
+# We also should add folders and working text at this point so it is ready to render later.
 
     def addComponent (self, cid, cType) :
         '''This will add a component to the object we created 
@@ -223,6 +205,11 @@ class Project (object) :
 
         # First test to see if the compType is already listed
 #        self.addComponentType(cType)
+
+        # See if the working text is present, quite if it is not
+        self.createManager(cType, 'text')
+        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid) :
+            return False
 
         if not testForSetting(self.projConfig, 'Components', cid) :
             buildConfSection(self.projConfig, 'Components')

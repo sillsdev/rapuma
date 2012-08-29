@@ -91,7 +91,7 @@ class Usfm (Component) :
 
             # First see if this is a valid component
             if hasUsfmCidInfo(cid) :
-                terminal("Preprocessing: " + getUsfmCidInfo(cid)[0])
+                self.project.log.writeToLog('COMP-050', [getUsfmCidInfo(cid)[0]])
 
                 # See if the working text is present, quite if it is not
                 if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
@@ -111,6 +111,7 @@ class Usfm (Component) :
                 self.project.log.writeToLog('COMP-010', [cid])
                 return False
 
+            return True
 
         # If this is a meta component, preprocess all subcomponents
         # Stop if it breaks at any point
@@ -126,5 +127,5 @@ class Usfm (Component) :
         # the force (render/view) command so the renderer will do the right thing.
         self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid, force)
 
-
+        return True
 
