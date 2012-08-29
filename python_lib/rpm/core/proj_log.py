@@ -96,8 +96,11 @@ class ProjLog (object) :
             'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.'],
             'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. Please contact the system developer about this problem.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
-            'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project.'],
-            'TEXT-040' : ['MSG', 'TEXT-040 - Unassigned error message ID.'],
+            'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
+            'TEXT-040' : ['WRN', 'The <<1>> component type is locked and cannot have any text modifications done to any files of this type at this time.'],
+            'TEXT-045' : ['WRN', 'The <<1>> component is locked and cannot have any text modifications done to it at this time.'],
+            'TEXT-050' : ['ERR', 'Post processing on <<1>> component types is not implemented yet!'],
+            'TEXT-055' : ['ERR', 'Post processing for the <<1>> component is not implemented yet!'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],

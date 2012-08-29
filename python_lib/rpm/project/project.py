@@ -213,6 +213,10 @@ class Project (object) :
             self.log.writeToLog(self, 'PROJ-0015', [mid])
 
 
+
+# FIXME: we need to stop this next process (adding to the conf) if the 
+# comp type is locked or maybe even if the source doesn't exsist. How do we do that?
+
     def addComponent (self, cid, cType) :
         '''This will add a component to the object we created 
         above in createComponent().'''
@@ -236,6 +240,10 @@ class Project (object) :
                 self.log.writeToLog('PROJ-020', [cid])
         else :
             self.log.writeToLog('PROJ-025', [cid])
+
+
+
+
 
 
     def deleteComponent (self, cid) :
@@ -332,8 +340,12 @@ class Project (object) :
         for s in section.split('/') :
             confObj = confObj[s]
 
-        # Get the old value for reporting
-        oldValue = confObj[key]
+        # Get the old value, if there is one, for reporting
+        try :
+            oldValue = confObj[key]
+        except :
+            pass
+
         # Insert the new value in its proper form
         if type(oldValue) == list :
             newValue = newValue.split(',')

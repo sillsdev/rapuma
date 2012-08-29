@@ -117,13 +117,37 @@ class Text (Manager) :
         if not os.path.isdir(targetFolder) :
             os.makedirs(targetFolder)
 
-        source = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
-        target = os.path.join(targetFolder, cid + '.usfm')
+        source          = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        target          = os.path.join(targetFolder, cid + '.usfm')
+        compLock        = os.path.join(targetFolder, '.lock')
+        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
+        compPostProcess = os.path.join(targetFolder, 'postProcess')
+        typePostProcess = os.path.join(os.path.dirname(targetFolder), self.cType + '-postProcess')
 
-        # Copy the source to the working text folder
+        # Copy the source to the working text folder. We do not want to do
+        # this if the there already is a target and it is newer than the 
+        # source text, that would indicate some edits have been done and we
+        # do not want to loose the work. However, if it is older that would
+        # indicate the source has been updated so unless the folder is locked
+        # we will want to update the target.
+        
+        # First check for a general lock on all components of this type.
+        if os.path.isfile(typeLock) :
+            self.project.log.writeToLog('TEXT-040', [self.cType])
+            return False
+
+        # Now look for a lock on this specific component
+        if os.path.isfile(compLock) :
+            self.project.log.writeToLog('TEXT-045', [cid])
+            return False
+
+        # Look for the source now
+        if not os.path.isfile(source) :
+            self.project.log.writeToLog('TEXT-035', [source])
+            return False
+
         if not isOlder(target, source) :
             if not os.path.isfile(target) :
-                if os.path.isfile(source) :
                     # Use the Palaso USFM parser to bring in the text and
                     # clean it up if needed
                     fh = codecs.open(source, 'r', 'utf_8_sig')
@@ -132,11 +156,26 @@ class Text (Manager) :
                     writeout = codecs.open(target, "w", "utf-8")
                     writeout.write(tidy)
                     writeout.close
-                    # FIXME: Add a hook here for custom post processing here
-                    # for things like encoding and word changes.
+
+
+# Working here
+
+
+                    # Now that the source has been copied to the target
+                    # we can look for post processes to do. There are two
+                    # kinds. One is for all files of a certain type and
+                    # will be performed first. The second type of post
+                    # process is for a specific component and is done last.
+                    if os.path.isfile(typePostProcess) :
+                        self.project.log.writeToLog('TEXT-050', [self.cType])
+
+                    if os.path.isfile(compPostProcess) :
+                        self.project.log.writeToLog('TEXT-055', [cid])
+
+
+
+
                     self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
-                else :
-                    self.project.log.writeToLog('TEXT-035', [source])
 
 
 

@@ -55,7 +55,6 @@ class Usfm (Component) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-#        self.usfmManagers = ['preprocess', 'illustration', 'hyphenation']
         self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
 
         # Init the general managers
@@ -94,8 +93,9 @@ class Usfm (Component) :
             if hasUsfmCidInfo(cid) :
                 terminal("Preprocessing: " + getUsfmCidInfo(cid)[0])
 
-                # See if the working text is present
-                self.project.managers['usfm_Text'].installUsfmWorkingText(cid)
+                # See if the working text is present, quite if it is not
+                if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
+                    return False
 
                 # Check on the component styles
                 self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
@@ -113,11 +113,14 @@ class Usfm (Component) :
 
 
         # If this is a meta component, preprocess all subcomponents
+        # Stop if it breaks at any point
         if testForSetting(self.cfg, 'list') :
             for c in self.cfg['list'] :
-                preProcessComponent(c)
+                if not preProcessComponent(c) :
+                    return False
         else :
-            preProcessComponent(self.cid)
+            if not preProcessComponent(self.cid) :
+                return False
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
