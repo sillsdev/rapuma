@@ -118,8 +118,12 @@ class Text (Manager) :
         target          = os.path.join(targetFolder, cid + '.usfm')
         compLock        = os.path.join(targetFolder, '.lock')
         typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
-        compPostProcess = os.path.join(targetFolder, 'postProcess')
-        typePostProcess = os.path.join(os.path.dirname(targetFolder), self.cType + '-postProcess')
+
+
+# FIXME: The postProcess name and path is all wrong!
+
+
+        postProcess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-' + self.project.local.postProcessFile)
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 
@@ -164,15 +168,15 @@ class Text (Manager) :
 
 
                 # Now that the source has been copied to the target
-                # we can look for post processes to do. There are two
-                # kinds. One is for all files of a certain type and
-                # will be performed first. The second type of post
-                # process is for a specific component and is done last.
-                if os.path.isfile(typePostProcess) :
+                # we can look for post processes to do. These processes
+                # can be very complex but have to relate to only one
+                # file to start them. The name is specified in the
+                # proj_local file and has a cType prefix attached to
+                # fix it to a type of component.
+                print 'zzzzzzzzzzzzz', postProcess
+                if os.path.isfile(postProcess) :
                     self.project.log.writeToLog('TEXT-050', [self.cType])
 
-                if os.path.isfile(compPostProcess) :
-                    self.project.log.writeToLog('TEXT-055', [cid])
 
 
 

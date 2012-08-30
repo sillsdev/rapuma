@@ -108,7 +108,7 @@ class ProjLog (object) :
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
             'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
             'TEXT-050' : ['ERR', 'Post processing on <<1>> component types is not implemented yet!'],
-            'TEXT-055' : ['ERR', 'Post processing for the <<1>> component is not implemented yet!'],
+            'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
