@@ -99,15 +99,6 @@ def escapePath (path) :
     # to do more such as is commented below. Stay tuned...
     return '"%s"' % ( path )
 
-#    return '"%s"' % (
-#        path
-#        .replace('\\', '\\\\')
-#        .replace('"', '\"')
-#        .replace('$', '\$')
-#        .replace('`', '\`')
-#        .replace(' ', '\ ')
-#    )
-
     # FIXME: Be nice if we could use re instead of .replace
     # np = re.sub(r'([ ()\"\'\[\]])', '\\1', path)
 
@@ -394,116 +385,9 @@ def tStamp () :
     return date_time
 
 
-# FIXME: This section should be depricated soon
-
 ###############################################################################
-################################# Logging routines ############################
+########################## Misc Text File Functions ###########################
 ###############################################################################
-
-# These have to do with keeping a running project log file.  Everything done is
-# recorded in the log file and that file is trimmed to a length that is
-# specified in the system settings.  Everything is channeled to the log file but
-# depending on what has happened, they are classed in three levels:
-#   1) Common event going to log and terminal
-#   2) Warning event going to log and terminal if debugging is turned on
-#   3) Error event going to the log and terminal
-
-# The next two log writing functions have been depricated and the newer version
-# of this routine found in proj_log.writeToLog. This can be deleted at some point.
-
-
-#def writeToLog (project, code, msg, mod = None) :
-#    '''Send an event to the log file. and the terminal if specified.
-#    Everything gets written to the log.  Whether a message gets written to
-#    the terminal or not depends on what type (code) it is.  There are four
-#    codes:
-#        MSG = General messages go to both the terminal and log file
-#        LOG = Messages that go only to the log file
-#        WRN = Warnings that go to the terminal and log file
-#        ERR = Errors that go to both the terminal and log file.'''
-
-#    # Get information from the project object
-#    local = project.local
-#    uc = project.userConfig
-
-#    # Build the mod line
-#    if mod :
-#        mod = mod + ': '
-#    else :
-#        mod = ''
-
-#    # Write out everything but LOG messages to the terminal
-#    if code != 'LOG' :
-#        terminal('\n' + code + ' - ' + msg)
-
-#    # Test to see if this is a live project by seeing if the project conf is
-#    # there.  If it is, we can write out log files.  Otherwise, why bother?
-#    if os.path.isfile(local.projConfFile) :
-
-#        # Build the event line
-#        if code == 'ERR' :
-#            eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + mod + msg + '\"'
-#        else :
-#            eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
-
-#        # Do we need a log file made?
-#        try :
-#            if not os.path.isfile(local.projLogFile) or os.path.getsize(local.projLogFile) == 0 :
-#                writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
-#                writeObject.write('RPM event log file created: ' + tStamp() + '\n')
-#                writeObject.close()
-
-#            # Now log the event to the top of the log file using preAppend().
-#            preAppend(eventLine, local.projLogFile)
-
-#            # Write errors and warnings to the error log file
-#            if code == 'WRN' and uc['System']['debugging'] == 'True':
-#                writeToErrorLog(local.projErrorLogFile, eventLine)
-
-#            if code == 'ERR' :
-#                writeToErrorLog(local.projErrorLogFile, eventLine)
-
-#        except :
-#            terminal("Failed to write message to log file: " + msg)
-
-#    return
-
-
-#def writeToErrorLog (errorLog, eventLine) :
-#    '''In a perfect world there would be no errors, but alas there are and
-#    we need to put them in a special file that can be accessed after the
-#    process is run.  The error file from the previous session is deleted at
-#    the begining of each new run.'''
-
-#    try :
-#        # Because we want to read errors from top to bottom, we don't pre append
-#        # them to the error log file.
-#        if not os.path.isfile(errorLog) :
-#            writeObject = codecs.open(errorLog, "w", encoding='utf_8')
-#        else :
-#            writeObject = codecs.open(errorLog, "a", encoding='utf_8')
-
-#        # Write and close
-#        writeObject.write(eventLine + '\n')
-#        writeObject.close()
-#    except :
-#        terminal('Error writing this event to error log: ' + eventLine)
-
-#    return
-
-
-def preAppend (line, file_name) :
-    '''Got the following code out of a Python forum.  This will pre-append a
-    line to the begining of a file.'''
-
-    fobj = fileinput.FileInput(file_name, inplace=1)
-    first_line = fobj.readline()
-    sys.stdout.write("%s\n%s" % (line, first_line))
-    for line in fobj:
-        sys.stdout.write("%s" % line)
-
-    fobj.close()
-
 
 def trimLog (logFile, limit = 1000) :
     '''Trim a log file.  This will take an existing log file and

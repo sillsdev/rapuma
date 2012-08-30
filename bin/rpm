@@ -375,6 +375,15 @@ def userArguments (args) :
             if args['component_view'] :
                 force = False
                 aProject.renderComponent(args['component_id'], force)
+            # Component and component type locking and unlocking
+            if args['component_lock'] and args['component_type'] :
+                aProject.lockComponent(args['component_id'], args['component_type'])
+            elif args['component_lock'] :
+                aProject.lockComponent(args['component_id'])
+            elif args['component_unlock'] and args['component_type'] :
+                aProject.unlockComponent(args['component_id'], args['component_type'])
+            elif args['component_unlock'] :
+                aProject.unlockComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 
@@ -431,6 +440,17 @@ def userArguments (args) :
         terminal('Error: Command not recognized! ')
         sys.exit()
 
+    # During a process, a number of log entries will be made and written out.
+    # Over time the log file could get very large. To control the size, there
+    # is a setting in the user config file that limits the number of lines in
+    # the log file. The default is 1000 but it can be adjusted if needed. The
+    # following call here will trim the log file to its specified limit. This
+    # is done here as there should be no further operations done at this point.
+    if os.path.isfile(aProject.local.projLogFile) :
+        trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+
+
+
 # Setup the arg parser
 parser = argparse.ArgumentParser(description=systemName)
 subparsers = parser.add_subparsers(help='sub-command help')
@@ -443,7 +463,7 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic RPM help
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-n', '--project_new', action='store_true', help='Create a new project on this computer.')
-projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project so it cannot be acted on.')
+projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project out of the local RPM system so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
@@ -455,10 +475,12 @@ compCommand.add_argument('component_id', help='A specific component ID required 
 compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
-compCommand.add_argument('-l', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
+compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
+compCommand.add_argument('-e', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')
-compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
+compCommand.add_argument('-l', '--component_lock', action='store_true', help='Lock a component so the working text cannot be copied over if the source is updated. By adding they type code (-t), an entire set of components can be locked.')
+compCommand.add_argument('-u', '--component_unlock', action='store_true', help='Unlock a component, or a set of components by adding the component type (-t), so working text can be updated with newer source.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
@@ -500,10 +522,6 @@ userArguments(vars(parser.parse_args()))
 ########################### Close out the session #############################
 ###############################################################################
 
-
-# Now trim the log file if it is needed
-if os.path.isfile(local.projLogFile) :
-    trimLog(local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
 # In case there are any Canadians using this, politely say good bye
 terminal('\n\t\tThank you, please come again!\n')

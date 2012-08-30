@@ -203,9 +203,6 @@ class Project (object) :
         '''This will add a component to the object we created 
         above in createComponent().'''
 
-        # First test to see if the compType is already listed
-#        self.addComponentType(cType)
-
         # See if the working text is present, quite if it is not
         self.createManager(cType, 'text')
         if not self.managers[cType + '_Text'].installUsfmWorkingText(cid) :
@@ -228,16 +225,77 @@ class Project (object) :
         else :
             self.log.writeToLog('PROJ-025', [cid])
 
+        return True
 
 
+    def lockComponent (self, cid, ctype = None) :
+        '''Create a component lock so that the working text cannot be updated
+        by newer source files. If the component type code is included, install
+        a lock file in the process folder that will prevent all components of
+        the same type from being updated.'''
 
+        compLockFile = os.path.join(self.local.projProcessFolder, cid, cid + self.local.lockExt)
+        if ctype :
+            typeLockFile = os.path.join(self.local.projProcessFolder, ctype + self.local.lockExt)
+
+        def writeLock (fn) :
+            writeout = codecs.open(fn, "w", "utf-8")
+#            writeout.write(fn)
+            writeout.close
+
+        if cid and ctype :
+            writeLock(typeLockFile)
+            self.log.writeToLog('COMP-021', [ctype])
+        else :
+            writeLock(compLockFile)
+            self.log.writeToLog('COMP-020', [cid])
+
+
+    def unlockComponent (self, cid, ctype = None) :
+        '''Unlock (delete the lock file) of a specific component or a set of
+        components of the same type.'''
+
+        compLockFile = os.path.join(self.local.projProcessFolder, cid, cid + self.local.lockExt)
+        if ctype :
+            typeLockFile = os.path.join(self.local.projProcessFolder, ctype + self.local.lockExt)
+
+        if cid and ctype :
+            try :
+                os.remove(typeLockFile)
+                self.log.writeToLog('COMP-026', [ctype])
+            except :
+                self.log.writeToLog('COMP-028', [ctype])
+        else :
+            try :
+                os.remove(compLockFile)
+                self.log.writeToLog('COMP-025', [cid])
+            except :
+                self.log.writeToLog('COMP-027', [cid])
 
 
     def deleteComponent (self, cid) :
-        '''This will delete a component from an exsisting object.'''
+        '''This will delete a specific component from a project which
+        includes both the configuration entry and the physical files.'''
 
-        # FIXME: Implement this function
-        self.log.writeToLog('COMP-030')
+        # We will not bother if it is not in the config file.
+        # Otherwise, delete both the config and physical files
+        if isConfSection(self.projConfig['Components'], cid) :
+            del self.projConfig['Components'][cid]
+            # Sanity check
+            if not isConfSection(self.projConfig['Components'], cid) :
+                writeConfFile(self.projConfig)
+                self.log.writeToLog('COMP-030')
+            # Hopefully all went well with config delete, now on to the files
+            compFolder = os.path.join(self.local.projProcessFolder, cid)
+            if os.path.isdir(compFolder) :
+                shutil.rmtree(compFolder)
+                self.log.writeToLog('COMP-031', [cid])
+            else :
+                self.log.writeToLog('COMP-032', [cid])
+
+            self.log.writeToLog('COMP-033', [cid])
+        else :
+            self.log.writeToLog('COMP-035', [cid])
 
 
     def addComponentType (self, cType) :

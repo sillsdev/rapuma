@@ -27,12 +27,12 @@ from tools import *
 
 class ProjLog (object) :
 
-    def __init__(self, local, usrConf) :
+    def __init__(self, local, userConf) :
         '''Do the primary initialization for this manager.'''
 
         # Set values for this manager
         self.local              = local
-        self.usrConf            = usrConf
+        self.userConfig          = userConf.userConfig
 
         # Error Codes
         # Each 4 letter ID type corresponds to a section in the options parser
@@ -57,11 +57,19 @@ class ProjLog (object) :
 
             'COMP-000' : ['MSG', 'Component module messages'],
             'COMP-010' : ['MSG', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
-            'COMP-020' : ['MSG', 'COMP-020 - Unassigned error message ID.'],
-            'COMP-030' : ['ERR', 'The delete component function has not been implemented yet. This component will have to be manually removed. Sorry about that.'],
-            'COMP-035' : ['ERR', 'The view component function has not been implemented yet. Sorry about that.'],
-            'COMP-040' : ['ERR', 'There is no listing in the configuration file for <<1>>. Please add this component to render it.'],
-            'COMP-050' : ['LOG', 'Preprocessing checks for rendering <<1>>.'],
+            'COMP-020' : ['MSG', 'The [<<1>>] component has been locked. The working text for this componet can no longer be updated.'],
+            'COMP-021' : ['MSG', 'The [<<1>>] component type has been locked. The working text for any component of this type can no longer be updated.'],
+            'COMP-025' : ['MSG', 'The [<<1>>] component has been unlocked. The working text for this componet can now be updated.'],
+            'COMP-026' : ['MSG', 'The [<<1>>] component type has been unlocked. The working text for any components of type can now be updated.'],
+            'COMP-027' : ['WRN', 'No lock file was found for the [<<1>>] component. You should be able to update the working text for this component.'],
+            'COMP-028' : ['WRN', 'No lock file was found for the [<<1>>] component type. You should be able to update working text for any component of this type.'],
+            'COMP-030' : ['LOG', 'The [<<1>>] component section has been deleted from the project configuration file.'],
+            'COMP-031' : ['LOG', 'The [<<1>>] component folder has been deleted from your hard drive.'],
+            'COMP-032' : ['LOG', 'There is no folder found for the [<<1>>] component. No files have been deleted by this operation.'],
+            'COMP-033' : ['MSG', 'The [<<1>>] component has been completly deleted from your system. This includes configuration as well as files.'],
+            'COMP-035' : ['ERR', 'There was no entry in the project configuration file for the [<<1>>] component. The delete component command cannot be completed.'],
+            'COMP-040' : ['ERR', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
+            'COMP-050' : ['LOG', 'Preprocessing checks for rendering [<<1>>].'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -97,8 +105,8 @@ class ProjLog (object) :
             'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. Please contact the system developer about this problem.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            'TEXT-040' : ['WRN', 'The <<1>> component type is locked and cannot have any text modifications done to any files of this type at this time.'],
-            'TEXT-045' : ['WRN', 'The <<1>> component is locked and cannot have any text modifications done to it at this time.'],
+            'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
+            'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
             'TEXT-050' : ['ERR', 'Post processing on <<1>> component types is not implemented yet!'],
             'TEXT-055' : ['ERR', 'Post processing for the <<1>> component is not implemented yet!'],
 
@@ -165,6 +173,18 @@ class ProjLog (object) :
 ############################### Logging Functions #############################
 ###############################################################################
 
+# These have to do with keeping a running project log file.  Everything done is
+# recorded in the log file and that file is trimmed to a length that is
+# specified in the system settings.  Everything is channeled to the log file but
+# depending on what has happened, they are classed in three levels:
+#   1) [MSG] - Common event going to log and terminal
+#   2) [WRN] - Warning event going to log and terminal if debugging is turned on
+#   3) [ERR] - Error event going to the log and terminal
+#   4) [LOG] - Messages that go only to the log file to help with debugging
+# FIXME: Following not implemented yet
+#   5) [TOD] - To do list. Output to a file that helps guide the user.
+
+
     def writeToLog (self, errCode, args=None, mod=None) :
         '''Send an event to one of the log files or the terminal if specified.
         Everything gets written to a log.  Where a message gets written to
@@ -212,13 +232,14 @@ class ProjLog (object) :
         if os.path.isfile(self.local.projConfFile) :
 
             # Build the event line
-            eventLine = '\"' + tStamp() + '\", \"' + msg + '\"'
+            eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
 #            if code == 'ERR' :
 #                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + mod + msg + '\"'
 #            else :
 #                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
 
             # Do we need a log file made?
+
             try :
                 if not os.path.isfile(self.local.projLogFile) or os.path.getsize(self.local.projLogFile) == 0 :
                     writeObject = codecs.open(self.local.projLogFile, "w", encoding='utf_8')
@@ -232,7 +253,7 @@ class ProjLog (object) :
                 # to the error log as well as these are bad errors.
 
                 # Write errors and warnings to the error log file
-                if code == 'WRN' and self.usrConf['System']['debugging'] == 'True':
+                if code == 'WRN' and self.userConfig['System']['debugging'] == 'True':
                     self.writeToErrorLog(self.local.projErrorLogFile, eventLine)
 
                 if code == 'ERR' :

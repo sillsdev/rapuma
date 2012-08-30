@@ -112,12 +112,9 @@ class Text (Manager) :
             # Both of the above are bad news so we need to take down the system now
             dieNow()
 
-        # Make target folder if needed
-        targetFolder = os.path.join(self.project.local.projProcessFolder, cid)
-        if not os.path.isdir(targetFolder) :
-            os.makedirs(targetFolder)
-
+        # Start the process by building paths and file names, if we made it this far
         source          = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
         target          = os.path.join(targetFolder, cid + '.usfm')
         compLock        = os.path.join(targetFolder, '.lock')
         typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
@@ -146,6 +143,11 @@ class Text (Manager) :
             self.project.log.writeToLog('TEXT-035', [source])
             return False
 
+        # Make target folder if needed
+        if not os.path.isdir(targetFolder) :
+            os.makedirs(targetFolder)
+
+        # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) :
             if not os.path.isfile(target) :
                 # Use the Palaso USFM parser to bring in the text and
