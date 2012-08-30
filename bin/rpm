@@ -242,29 +242,24 @@ def deleteProject (uc, pid = None) :
     return True
 
 
-
-
-# Working here!
-
-
-
-
-def installPostProcess (pid, ctype) :
+def installPostProcess (pid, ctype, remove = False) :
     '''Install the default post_process.py script into the project
     processing folder for a specified component type. This script
     will be run on every file of that type that is imported into
     the project.'''
 
     home = uc.userConfig['Projects'][pid]['projectPath']
-    source = os.path.join(local.rpmCompTypeFolder, ctype, ctype + '-post_process.py')
+    source = os.path.join(local.rpmCompTypeFolder, ctype, 'post_process.py')
+
+
+# FIXME: target path is missing the project folder 
+
     target = os.path.join(home, ctype + '-post_process.py')
-    print target
-    terminal('Installed component post_process.py for the [' + ctype + '] component type.')
-
-
-
-#######################
-
+    if not os.path.isfile(target) :
+        if shutil.copy(source, target) :
+            terminal('Installed component post process file: [' + fName(target) + '] into process folder.')
+    else :
+        terminal('The file: [' + fName(target) + '] already exsists. Cannot copy over old file. Please manually remove it if you want a fresh copy installed.')
 
 
 def isProject (pid) :
