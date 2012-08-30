@@ -242,6 +242,31 @@ def deleteProject (uc, pid = None) :
     return True
 
 
+
+
+# Working here!
+
+
+
+
+def installPostProcess (pid, ctype) :
+    '''Install the default post_process.py script into the project
+    processing folder for a specified component type. This script
+    will be run on every file of that type that is imported into
+    the project.'''
+
+    home = uc.userConfig['Projects'][pid]['projectPath']
+    source = os.path.join(local.rpmCompTypeFolder, ctype, ctype + '-post_process.py')
+    target = os.path.join(home, ctype + '-post_process.py')
+    print target
+    terminal('Installed component post_process.py for the [' + ctype + '] component type.')
+
+
+
+#######################
+
+
+
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.'''
 
@@ -341,10 +366,10 @@ def userArguments (args) :
             else :
                 # With no different project location given we will make sure
                 # we use the default projHome set when the script started.
+                newProject(uc, pc, args['project_id'])
                 projFolder = os.path.join(projHome, args['project_id'])
                 local   = ProjLocal(rpmHome, userHome, projFolder)
                 pc      = ProjConfig(local)
-                newProject(uc, pc, args['project_id'])
         # Locking an exsisting project
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
@@ -354,6 +379,9 @@ def userArguments (args) :
         # Deleting an exsisting project
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
+        # Install post process script, cType is required
+        elif args['post_process'] :
+            installPostProcess(args['project_id'], args['post_process'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -446,9 +474,11 @@ def userArguments (args) :
     # the log file. The default is 1000 but it can be adjusted if needed. The
     # following call here will trim the log file to its specified limit. This
     # is done here as there should be no further operations done at this point.
-    if os.path.isfile(aProject.local.projLogFile) :
-        trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
-
+    
+    # Note: This will not work with "project" commands (aProject is not declaired)
+    if not sys.argv[1].lower() == 'project' :
+        if os.path.isfile(aProject.local.projLogFile) :
+            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
 
 # Setup the arg parser
@@ -467,6 +497,7 @@ projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
+projCommand.add_argument('-p', '--post_process', help='Install the default post_process.py script for a component type into the project process folder. You must specify a component type.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')

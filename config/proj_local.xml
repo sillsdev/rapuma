@@ -78,13 +78,6 @@ Todo:
             <type>string</type>
             <value>error.log</value>
         </setting>
-        <setting>
-            <name>Project Component Post-process File</name>
-            <key>postProcessFile</key>
-            <description>The name of the file that, if used, contains post-processing instructions for components when they are being added to the system.</description>
-            <type>string</type>
-            <value>post_process.sh</value>
-        </setting>
     </section>
     <section>
         <name>RPM Files</name>

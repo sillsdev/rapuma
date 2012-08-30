@@ -54,6 +54,7 @@ class ProjLog (object) :
             'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
             'PROJ-035' : ['MSG', 'PROJ-035 - Unassigned error message ID.'],
             'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
+            'PROJ-050' : ['MSG', 'NOT WORKING YET! - Installed post_process.py script for the [<<1>>] component type.'],
 
             'COMP-000' : ['MSG', 'Component module messages'],
             'COMP-010' : ['MSG', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
