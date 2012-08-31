@@ -248,13 +248,13 @@ def installPostProcess (pid, ctype, remove = False) :
     will be run on every file of that type that is imported into
     the project.'''
 
+    # Build paths and names we need
     home = uc.userConfig['Projects'][pid]['projectPath']
     source = os.path.join(local.rpmCompTypeFolder, ctype, 'post_process.py')
-
-
-# FIXME: target path is missing the project folder 
-
-    target = os.path.join(home, ctype + '-post_process.py')
+    # Because we cannot always be sure that listed paths and local paths
+    # match, we need to build our own project folder path at this point
+    projProcessFolder = os.path.join(home, os.path.basename(local.projProcessFolder))
+    target = os.path.join(projProcessFolder, ctype + '-post_process.py')
     if not os.path.isfile(target) :
         if shutil.copy(source, target) :
             terminal('Installed component post process file: [' + fName(target) + '] into process folder.')
@@ -361,10 +361,10 @@ def userArguments (args) :
             else :
                 # With no different project location given we will make sure
                 # we use the default projHome set when the script started.
-                newProject(uc, pc, args['project_id'])
                 projFolder = os.path.join(projHome, args['project_id'])
                 local   = ProjLocal(rpmHome, userHome, projFolder)
                 pc      = ProjConfig(local)
+                newProject(uc, pc, args['project_id'])
         # Locking an exsisting project
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
@@ -377,6 +377,9 @@ def userArguments (args) :
         # Install post process script, cType is required
         elif args['post_process'] :
             installPostProcess(args['project_id'], args['post_process'])
+        # Run the post process script on all the files of a component type, cType is required
+        elif args['run_process'] :
+            postProcessType(args['project_id'], args['run_process'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -407,6 +410,9 @@ def userArguments (args) :
                 aProject.unlockComponent(args['component_id'], args['component_type'])
             elif args['component_unlock'] :
                 aProject.unlockComponent(args['component_id'])
+            # Run post processes on a single component
+            elif args['run_process'] :
+                aProject.postProcessComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 
@@ -471,9 +477,9 @@ def userArguments (args) :
     # is done here as there should be no further operations done at this point.
     
     # Note: This will not work with "project" commands (aProject is not declaired)
-    if not sys.argv[1].lower() == 'project' :
-        if os.path.isfile(aProject.local.projLogFile) :
-            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+#    if not sys.argv[1].lower() == 'project' :
+#        if os.path.isfile(aProject.local.projLogFile) :
+#            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
 
 # Setup the arg parser
@@ -493,6 +499,7 @@ projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Un
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
 projCommand.add_argument('-p', '--post_process', help='Install the default post_process.py script for a component type into the project process folder. You must specify a component type.')
+projCommand.add_argument('-r', '--run_process', help='Run the post_process.py script on all files of a specified component type in the project process folder. You must specify a component type.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -507,6 +514,7 @@ compCommand.add_argument('-r', '--component_render', action='store_true', help='
 compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')
 compCommand.add_argument('-l', '--component_lock', action='store_true', help='Lock a component so the working text cannot be copied over if the source is updated. By adding they type code (-t), an entire set of components can be locked.')
 compCommand.add_argument('-u', '--component_unlock', action='store_true', help='Unlock a component, or a set of components by adding the component type (-t), so working text can be updated with newer source.')
+compCommand.add_argument('-p', '--run_process', action='store_true', help='Run the post_process.py script on a single component.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

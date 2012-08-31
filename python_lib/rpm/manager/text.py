@@ -162,25 +162,20 @@ class Text (Manager) :
                 writeout.close
 
 
-# Working here
+        # Finally, run any working text post processes
+        self.postProcessWorkingText([cid])
 
-
-                # Now that the source has been copied to the target
-                # we can look for post processes to do. These processes
-                # can be very complex but have to relate to only one
-                # file to start them. The name is specified in the
-                # proj_local file and has a cType prefix attached to
-                # fix it to a type of component.
-                if os.path.isfile(postProcess) :
-                    self.project.log.writeToLog('TEXT-050', [self.cType])
-
-
-
-
-
-                self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
+        self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
 
         return True
+
+
+    def postProcessWorkingText (self, cid) :
+        '''Run post processes on component text if a post process
+        script exsists in the process folder.'''
+
+        self.project.log.writeToLog('TEXT-050')
+
 
 
 

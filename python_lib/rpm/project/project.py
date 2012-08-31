@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp
+import codecs, os, sys, shutil, imp, subprocess
 #from configobj import ConfigObj, Section
 
 
@@ -203,6 +203,9 @@ class Project (object) :
         '''This will add a component to the object we created 
         above in createComponent().'''
 
+        # Inject the component type into the config file.
+        self.addComponentType(cType)
+
         # See if the working text is present, quite if it is not
         self.createManager(cType, 'text')
         if not self.managers[cType + '_Text'].installUsfmWorkingText(cid) :
@@ -315,6 +318,24 @@ class Project (object) :
             # Save the setting rightaway
             writeConfFile(self.projConfig)
 
+
+    def postProcessComponent (self, cid) :
+        '''Run a post process on the working text of a single component file.'''
+
+        # Create target file path and name
+        ctype = self.projConfig['Components'][cid]['type']
+        target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + ctype)
+        if os.path.isfile(target) :
+            self.runPostProcess(target, ctype)
+        else :
+            self.log.writeToLog('COMP-060', [target])
+
+
+    def runPostProcess (self, target, ctype) :
+        '''Run a post process on a file, in place.'''
+
+        script = os.path.join(self.local.projProcessFolder, ctype + '-post_process.py')
+        subprocess.call([script, target])
 
 ###############################################################################
 ################################ Font Functions ###############################

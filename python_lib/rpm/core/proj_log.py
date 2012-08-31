@@ -71,6 +71,7 @@ class ProjLog (object) :
             'COMP-035' : ['ERR', 'There was no entry in the project configuration file for the [<<1>>] component. The delete component command cannot be completed.'],
             'COMP-040' : ['ERR', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
             'COMP-050' : ['LOG', 'Preprocessing checks for rendering [<<1>>].'],
+            'COMP-060' : ['ERR', 'Could not post process, file not found: [<<1>>].'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -108,7 +109,7 @@ class ProjLog (object) :
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
             'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
-            'TEXT-050' : ['ERR', 'Post processing on <<1>> component types is not implemented yet!'],
+            'TEXT-050' : ['ERR', 'Post processing is not implemented yet!'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
