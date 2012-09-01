@@ -170,6 +170,25 @@ def getPTSettings (home) :
         return xmlFileToDict(ssfFile)
 
 
+
+
+
+# FIXME: working here, need to think about returning more than just false or maybe pass to anoher function?
+
+
+
+
+def isValidCID (pc, cid) :
+    '''Try to figure out if this is a valid component.'''
+
+    if not hasUsfmCidInfo(cid) :
+        if pc['Components'][cid]['list'] :
+            for i in pc['Components'][cid]['list'] :
+                if not hasUsfmCidInfo(i) :
+                    return False
+    return True
+
+
 def hasUsfmCidInfo (cid) :
     '''Return True if this cid is in the PT USFM cid info dictionary.'''
 

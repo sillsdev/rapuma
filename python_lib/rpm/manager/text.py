@@ -73,11 +73,16 @@ class Text (Manager) :
 
         sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
         if sourceEditor.lower() == 'paratext' :
+            # Do a compare on the settings
             ptSet = getPTSettings(self.project.local.projHome)
-            # In this situation we don't want to make any changes to exsiting
-            # settings so the reset is set to False
             oldCompSet = self.compSettings.dict()
-            newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, False)
+            # Don't overwrite manager settings (default sets reset to False) if
+            # there already is a setting present on the nameFormID.
+            if self.project.projConfig['Managers']['usfm_Text']['nameFormID'] :
+                newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet)
+            else :
+                newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, True)
+
             if not newCompSet == oldCompSet :
                 self.compSettings.merge(newCompSet)
                 writeConfFile(self.project.projConfig)

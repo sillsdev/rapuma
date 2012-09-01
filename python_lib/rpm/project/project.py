@@ -143,7 +143,7 @@ class Project (object) :
         object, then render it.'''
 
         # Check for cid in config
-        if hasUsfmCidInfo(cid) :
+        if isValidCID(self.projConfig, cid) :
             try :
                 self.createComponent(cid).render(force)
                 return True
@@ -174,7 +174,7 @@ class Project (object) :
         return compobj
 
 
-    def addMetaComponent (self, mid, cidList, cType) :
+    def addMetaComponent (self, cid, cidList, cType) :
         '''Add a meta component to the project'''
 
         # Add/check individual components
@@ -184,14 +184,14 @@ class Project (object) :
 
         # Add the info to the components
         buildConfSection(self.projConfig, 'Components')
-        buildConfSection(self.projConfig['Components'], mid)
-        self.projConfig['Components'][mid]['name'] = mid
-        self.projConfig['Components'][mid]['type'] = cType
-        self.projConfig['Components'][mid]['list'] = thisList
+        buildConfSection(self.projConfig['Components'], cid)
+        self.projConfig['Components'][cid]['name'] = cid
+        self.projConfig['Components'][cid]['type'] = cType
+        self.projConfig['Components'][cid]['list'] = thisList
 
         # Save our config settings
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog(self, 'PROJ-0015', [mid])
+            self.log.writeToLog('PROJ-015', [cid])
 
 
 
@@ -304,17 +304,17 @@ class Project (object) :
     def addComponentType (self, cType) :
         '''Add (register) a component type to the config if it 
         is not there already.'''
-        
-        cType = cType.capitalize()
+
+        Ctype = cType.capitalize()
         # Build the comp type config section
-        if not testForSetting(self.projConfig, 'CompTypes', cType) :
+        if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
             buildConfSection(self.projConfig, 'CompTypes')
-            buildConfSection(self.projConfig['CompTypes'], cType)
+            buildConfSection(self.projConfig['CompTypes'], Ctype)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][cType], os.path.join(self.local.rpmConfigFolder, 'usfm.xml'))
-        if newSectionSettings != self.projConfig['CompTypes'][cType] :
-            self.projConfig['CompTypes'][cType] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rpmConfigFolder, 'usfm.xml'))
+        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
+            self.projConfig['CompTypes'][Ctype] = newSectionSettings
             # Save the setting rightaway
             writeConfFile(self.projConfig)
 

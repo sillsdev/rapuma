@@ -169,6 +169,7 @@ class Font (Manager) :
             # Copy in all the files
             self.copyInFont(fontInfo)
 
+        self.project.log.writeToLog('FONT-060', [font])
         return True
 
 

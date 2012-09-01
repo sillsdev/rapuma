@@ -234,7 +234,7 @@ def deleteProject (uc, pid = None) :
     if os.path.isdir(local.projHome) :
         shutil.rmtree(local.projHome)
     else :
-        terminal('Warning: [' + pid + '] project could not be found, un able to delete project files.')
+        terminal('Warning: [' + pid + '] project could not be found, unable to delete project files.')
         return
 
     # Report the process is done
@@ -386,11 +386,17 @@ def userArguments (args) :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
             if args['component_new'] :
-                aProject.addComponent(args['component_id'], args['component_type'])
+                if args['component_type'] :
+                    if args['meta_list'] :
+                        aProject.addMetaComponent(args['component_id'], args['meta_list'], args['component_type'])
+                    else :
+                        aProject.addComponent(args['component_id'], args['component_type'])
+                else :
+                    terminal('Must supply a component type (-t xxxx) to create a component.')
             if args['component_delete'] :
                 aProject.deleteComponent(args['component_id'])
-            if args['meta_id'] :
-                aProject.addMetaComponent(args['meta_id'], args['meta_list'], args['component_type'])
+#            if args['meta_id'] :
+#                aProject.addMetaComponent(args['meta_id'], args['meta_list'], args['component_type'])
             # Render vs. view command is just a matter of forcing the component
             # to be rendered if render is selected by the user. Otherwise, if
             # only view is requested, force is set to False and the component
@@ -508,7 +514,7 @@ compCommand.add_argument('component_id', help='A specific component ID required 
 compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
-compCommand.add_argument('-m', '--meta_id', help='The meta component ID.')
+#compCommand.add_argument('-m', '--meta_component', action='store_true', help='Indicate if this is a meta component.')
 compCommand.add_argument('-e', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')

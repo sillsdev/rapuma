@@ -88,7 +88,7 @@ class Usfm (Component) :
             and/or creating any subcomponents it needs to render properly.'''
 
             # First see if this is a valid component
-            if hasUsfmCidInfo(cid) :
+            if isValidCID(self.project.projConfig, cid) :
                 self.project.log.writeToLog('COMP-050', [getUsfmCidInfo(cid)[0]])
 
                 # See if the working text is present, quite if it is not

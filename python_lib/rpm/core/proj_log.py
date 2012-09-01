@@ -109,7 +109,7 @@ class ProjLog (object) :
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
             'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
-            'TEXT-050' : ['ERR', 'Post processing is not implemented yet!'],
+            'TEXT-050' : ['ERR', 'Text installation post processing is not fully implemented yet!'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
@@ -122,7 +122,8 @@ class ProjLog (object) :
             'FONT-035' : ['MSG', 'Set the project primary font to: <<1>>'],
             'FONT-040' : ['ERR', 'Font file [<<1>>.xml] not found. (font.recordFont())'],
             'FONT-045' : ['LOG', '<<1>> font setup information added to project config'],
-            'FONT-050' : ['ERR', 'Halt! <<!>> not found. (font.copyInFont()'],
+            'FONT-050' : ['ERR', 'Halt! [<<1>>] not found. - font.copyInFont()'],
+            'FONT-060' : ['MSG', 'Completed installing the [<<1>>] font. - font.installFont()'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-005' : ['MSG', 'LYOT-005 - Unassigned error message ID.'],
