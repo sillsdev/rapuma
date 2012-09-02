@@ -88,26 +88,25 @@ class Usfm (Component) :
             and/or creating any subcomponents it needs to render properly.'''
 
             # First see if this is a valid component
-            if isValidCID(self.project.projConfig, cid) :
-                self.project.log.writeToLog('COMP-050', [getUsfmCidInfo(cid)[0]])
-
-                # See if the working text is present, quite if it is not
-                if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
-                    return False
-
-                # Check on the component styles
-                self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
-                self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
-
-                # Run any preprocess checks or conversions
-                
-                # Run any illustration processes needed
-                
-                # Run any hyphenation or word break routines
-
-            else :
+            valid = isValidCID(self.project.projConfig, cid)
+            print valid
+            if not valid == True:
                 self.project.log.writeToLog('COMP-010', [cid])
                 return False
+
+            # See if the working text is present, quite if it is not
+            if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
+                return False
+
+            # Check on the component styles
+            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
+            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
+
+            # Run any preprocess checks or conversions
+            
+            # Run any illustration processes needed
+            
+            # Run any hyphenation or word break routines
 
             return True
 

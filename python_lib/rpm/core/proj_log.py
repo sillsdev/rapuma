@@ -70,7 +70,7 @@ class ProjLog (object) :
             'COMP-033' : ['MSG', 'The [<<1>>] component has been completly deleted from your system. This includes configuration as well as files.'],
             'COMP-035' : ['ERR', 'There was no entry in the project configuration file for the [<<1>>] component. The delete component command cannot be completed.'],
             'COMP-040' : ['ERR', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
-            'COMP-050' : ['LOG', 'Preprocessing checks for rendering [<<1>>].'],
+            'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
             'COMP-060' : ['ERR', 'Could not post process, file not found: [<<1>>].'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],

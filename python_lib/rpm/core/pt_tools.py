@@ -185,7 +185,7 @@ def isValidCID (pc, cid) :
         if pc['Components'][cid]['list'] :
             for i in pc['Components'][cid]['list'] :
                 if not hasUsfmCidInfo(i) :
-                    return False
+                    return i
     return True
 
 
