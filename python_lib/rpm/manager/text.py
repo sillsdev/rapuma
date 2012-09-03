@@ -165,12 +165,11 @@ class Text (Manager) :
                 writeout = codecs.open(target, "w", "utf-8")
                 writeout.write(tidy)
                 writeout.close
+                self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
 
-
-        # Finally, run any working text post processes
-        self.postProcessWorkingText([cid])
-
-        self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
+                # Run any working text post processes on the newly aquired text
+                if self.postProcessWorkingText([cid]) :
+                    self.project.log.writeToLog('TEXT-060', [target])
 
         return True
 

@@ -152,6 +152,7 @@ class Font (Manager) :
             return True
 
         else :
+            self.project.log.writeToLog('FONT-047', [font])
             return False
 
 
@@ -167,16 +168,21 @@ class Font (Manager) :
                 os.makedirs(fontFamilyFolder)
 
             # Copy in all the files
-            self.copyInFont(fontInfo)
+            copied  = self.copyInFont(fontInfo)
 
-        self.project.log.writeToLog('FONT-060', [font])
+        if copied > 0 :
+            self.project.log.writeToLog('FONT-060', [font, fontFamilyFolder])
+        else :
+            self.project.log.writeToLog('FONT-062')
+
         return True
 
 
     def copyInFont (self, fontConfig) :
         '''Copy a font into a project and register it in the config.'''
 
-            # Now loop through all the typefaces in this family and copy over the files
+        copied = 0
+        # Now loop through all the typefaces in this family and copy over the files
         for tf in fontConfig.keys() :
             thisFolder = fontConfig['FontInformation']['fontFolder']
             if tf[:8] == 'Typeface' :
@@ -195,5 +201,8 @@ class Font (Manager) :
                 fontFilePath = os.path.join(self.project.local.projFontsFolder, thisFolder, fontFileName)
                 if not os.path.isfile(fontFilePath) :
                     shutil.copy(fontSource, fontFilePath)
+                    self.project.log.writeToLog('FONT-070', [fontFilePath])
+                    copied +=1
 
+        return copied
 

@@ -87,11 +87,11 @@ class Usfm (Component) :
             '''This will prepare a component for rendering by checking for
             and/or creating any subcomponents it needs to render properly.'''
 
-            # First see if this is a valid component
-            valid = isValidCID(self.project.projConfig, cid)
-            print valid
-            if not valid == True:
-                self.project.log.writeToLog('COMP-010', [cid])
+            # First see if this is a valid component. This is a little
+            # redundant as this is done in project.py as well. It should
+            # be caught there first but just in case we'll do it here too.
+            if not isValidCID(self.project.projConfig, cid) :
+                self.project.log.writeToLog('COMP-010', ['cid'])
                 return False
 
             # See if the working text is present, quite if it is not

@@ -37,6 +37,13 @@ Todo:
             <value>Norasi</value>
         </setting>
         <setting>
+            <name>Font Version</name>
+            <key>fontVersion</key>
+            <description>The general version number of this font (Individual font versions my vary).</description>
+            <type>string</type>
+            <value>4.009</value>
+        </setting>
+        <setting>
             <name>Features</name>
             <key>features</key>
             <description>The features that will be used for this font.</description>

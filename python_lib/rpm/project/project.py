@@ -150,7 +150,11 @@ class Project (object) :
             except :
                 return False
         else :
-            self.log.writeToLog('COMP-010', [cid])
+            bad = findBadComp(self.projConfig, cid)
+            if bad == cid :
+                self.log.writeToLog('COMP-011', [cid])
+            else :
+                self.log.writeToLog('COMP-012', [bad,cid])
             return False
 
 

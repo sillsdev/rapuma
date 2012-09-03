@@ -622,9 +622,8 @@ class Xetex (Manager) :
             self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
             self.globSty            = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
 
-        # Check to see if this is a meta component, set flag if so
-        if testForSetting(self.project.projConfig['Components'][self.cid], 'list') :
-            self.cidMeta            = True
+        # Set this flag to True if it is a meta component
+        self.cidMeta                = isMetaComponent(self.project.projConfig, self.cid)
 
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
@@ -691,6 +690,10 @@ class Xetex (Manager) :
         # of this component here by deleting any previously rendered PDF. However,
         # if the view (-v) command was given, we will pass and just view, or, if
         # needed, render the PDF.
+        # Adjust the cidPdf path if this is a meta component because it got
+        # messed with by the makeControlTex() processes. FIXME: This could
+        # probably be better.
+        self.buildCidFileNames(self.cid)
         if force :
             if os.path.isfile(self.cidPdf) :
                 os.remove(self.cidPdf)

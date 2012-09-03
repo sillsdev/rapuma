@@ -57,7 +57,9 @@ class ProjLog (object) :
             'PROJ-050' : ['MSG', 'NOT WORKING YET! - Installed post_process.py script for the [<<1>>] component type.'],
 
             'COMP-000' : ['MSG', 'Component module messages'],
-            'COMP-010' : ['MSG', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
+            'COMP-010' : ['ERR', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
+            'COMP-011' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] it may not be a valid ID.'],
+            'COMP-012' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] found in the meta component list: [<<2>>], it may not be a valid ID.'],
             'COMP-020' : ['MSG', 'The [<<1>>] component has been locked. The working text for this componet can no longer be updated.'],
             'COMP-021' : ['MSG', 'The [<<1>>] component type has been locked. The working text for any component of this type can no longer be updated.'],
             'COMP-025' : ['MSG', 'The [<<1>>] component has been unlocked. The working text for this componet can now be updated.'],
@@ -111,6 +113,7 @@ class ProjLog (object) :
             'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
             'TEXT-050' : ['ERR', 'Text installation post processing is not fully implemented yet!'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
+            'TEXT-060' : ['LOG', 'Completed post processing on component working text.'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
@@ -122,8 +125,11 @@ class ProjLog (object) :
             'FONT-035' : ['MSG', 'Set the project primary font to: <<1>>'],
             'FONT-040' : ['ERR', 'Font file [<<1>>.xml] not found. (font.recordFont())'],
             'FONT-045' : ['LOG', '<<1>> font setup information added to project config'],
+            'FONT-047' : ['ERR', 'No record found for the [<<1>>].'],
             'FONT-050' : ['ERR', 'Halt! [<<1>>] not found. - font.copyInFont()'],
-            'FONT-060' : ['MSG', 'Completed installing the [<<1>>] font. - font.installFont()'],
+            'FONT-060' : ['MSG', 'There were <<1>> new font files copied into the [<<2>>] project font folder. - font.installFont()'],
+            'FONT-062' : ['LOG', 'No update to fonts folder needed. - font.installFont()'],
+            'FONT-070' : ['LOG', 'Copied the [<<1>>] font file into the project. - font.copyInFont()'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-005' : ['MSG', 'LYOT-005 - Unassigned error message ID.'],

@@ -170,23 +170,40 @@ def getPTSettings (home) :
         return xmlFileToDict(ssfFile)
 
 
+def isMetaComponent (pc, cid) :
+    '''Return True if this component has a list of component in it.'''
 
-
-
-# FIXME: working here, need to think about returning more than just false or maybe pass to anoher function?
-
-
+    try :
+        l = pc['Components'][cid]['list']
+        return True
+    except :
+        return False
 
 
 def isValidCID (pc, cid) :
     '''Try to figure out if this is a valid component.'''
 
-    if not hasUsfmCidInfo(cid) :
-        if pc['Components'][cid]['list'] :
+    if hasUsfmCidInfo(cid) :
+        return True
+    else :
+        if isMetaComponent(pc, cid) :
             for i in pc['Components'][cid]['list'] :
                 if not hasUsfmCidInfo(i) :
-                    return i
-    return True
+                    return False
+            # If no bad components were found it must be okay
+            return True
+
+
+def findBadComp (pc, cid) :
+    '''Much like isValidCID() but it returns the first offending
+    cid ID it finds.'''
+
+    if isMetaComponent(pc, cid) :
+        for i in pc['Components'][cid]['list'] :
+            if not hasUsfmCidInfo(i) :
+                return i
+            else :
+                return cid
 
 
 def hasUsfmCidInfo (cid) :
