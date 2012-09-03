@@ -242,7 +242,7 @@ def deleteProject (uc, pid = None) :
     return True
 
 
-def installPostProcess (pid, ctype, remove = False) :
+def installPostProcess (pid, ctype) :
     '''Install the default post_process.py script into the project
     processing folder for a specified component type. This script
     will be run on every file of that type that is imported into
@@ -256,7 +256,8 @@ def installPostProcess (pid, ctype, remove = False) :
     projProcessFolder = os.path.join(home, os.path.basename(local.projProcessFolder))
     target = os.path.join(projProcessFolder, ctype + '-post_process.py')
     if not os.path.isfile(target) :
-        if shutil.copy(source, target) :
+        # No return from shutil.copy() is good
+        if not shutil.copy(source, target) :
             terminal('Installed component post process file: [' + fName(target) + '] into process folder.')
     else :
         terminal('The file: [' + fName(target) + '] already exsists. Cannot copy over old file. Please manually remove it if you want a fresh copy installed.')
@@ -512,7 +513,6 @@ compCommand.add_argument('component_id', help='A specific component ID required 
 compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
-#compCommand.add_argument('-m', '--meta_component', action='store_true', help='Indicate if this is a meta component.')
 compCommand.add_argument('-e', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
 compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')

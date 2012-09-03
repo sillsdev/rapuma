@@ -171,7 +171,7 @@ class Font (Manager) :
             copied  = self.copyInFont(fontInfo)
 
         if copied > 0 :
-            self.project.log.writeToLog('FONT-060', [font, fontFamilyFolder])
+            self.project.log.writeToLog('FONT-060', [str(copied), fontFamilyFolder])
         else :
             self.project.log.writeToLog('FONT-062')
 

@@ -247,7 +247,7 @@ class Project (object) :
 
         def writeLock (fn) :
             writeout = codecs.open(fn, "w", "utf-8")
-#            writeout.write(fn)
+            writeout.write(fn)
             writeout.close
 
         if cid and ctype :

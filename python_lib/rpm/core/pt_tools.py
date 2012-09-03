@@ -202,8 +202,9 @@ def findBadComp (pc, cid) :
         for i in pc['Components'][cid]['list'] :
             if not hasUsfmCidInfo(i) :
                 return i
-            else :
-                return cid
+    else :
+        if not hasUsfmCidInfo(cid) :
+            return cid
 
 
 def hasUsfmCidInfo (cid) :
