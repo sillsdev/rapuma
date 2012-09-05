@@ -48,6 +48,7 @@ class ProjLog (object) :
             'PROJ-000' : ['MSG', 'Project module messages'],
             'PROJ-005' : ['LOG', 'Created the [<<1>>] manager object.'],
             'PROJ-010' : ['LOG', 'Wrote out project configuration file.'],
+            'PROJ-011' : ['ERR', 'Failed to write out project configuration file.'],
             'PROJ-015' : ['MSG', 'Added the [<<1>>] meta component to the project.'],
             'PROJ-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'PROJ-025' : ['MSG', 'The [<<1>>] component already exists in this project.'],
@@ -74,6 +75,9 @@ class ProjLog (object) :
             'COMP-040' : ['ERR', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
             'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
             'COMP-060' : ['ERR', 'Could not post process, file not found: [<<1>>].'],
+            'COMP-065' : ['LOG', 'Post processes completed successfully on: [<<1>>].'],
+            'COMP-067' : ['ERR', 'Post processes script: [<<1>>] was called on the component: [<<2>>] but the script was not found in the project.'],
+            'COMP-068' : ['TDO', 'Use the command: [rpm project <project ID> -p <component type>] to install the post process shell script. Modify this script as necessary to complete any post process that need to be done to your components.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -111,7 +115,7 @@ class ProjLog (object) :
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
             'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
-            'TEXT-050' : ['ERR', 'Text installation post processing is not fully implemented yet!'],
+            'TEXT-050' : ['LOG', 'Working text file for [<<1>>] has been completed.'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
             'TEXT-060' : ['LOG', 'Completed post processing on component working text.'],
 

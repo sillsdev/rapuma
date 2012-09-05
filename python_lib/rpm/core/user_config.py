@@ -119,5 +119,9 @@ class UserConfig (object) :
         
         del self.userConfig['Projects'][pid]
         self.userConfig.write()
+        
+        # Check to see if we were succeful
+        if not isConfSection(self.userConfig['Projects'], pid) :
+            return True
 
 

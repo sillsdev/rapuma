@@ -167,8 +167,8 @@ class Font (Manager) :
             if not os.path.isdir(fontFamilyFolder) :
                 os.makedirs(fontFamilyFolder)
 
-            # Copy in all the files
-            copied  = self.copyInFont(fontInfo)
+        # Copy in all the files
+        copied  = self.copyInFont(fontInfo)
 
         if copied > 0 :
             self.project.log.writeToLog('FONT-060', [str(copied), fontFamilyFolder])

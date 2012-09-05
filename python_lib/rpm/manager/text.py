@@ -167,22 +167,10 @@ class Text (Manager) :
                 writeout.close
                 self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
 
-                # Run any working text post processes on the newly aquired text
-                if self.postProcessWorkingText([target]) :
-                    self.project.log.writeToLog('TEXT-060', [target])
+#                # Run any working text post processes on the newly aquired text
+#                if self.postProcessWorkingText([cid]) :
+#                    self.project.log.writeToLog('TEXT-060', [cid])
 
         return True
-
-
-    def postProcessWorkingText (self, target) :
-        '''Run post processes on component text if a post process
-        script exsists in the process folder.'''
-
-        for f in target :
-            self.project.log.writeToLog('TEXT-050')
-        
-        return True
-
-
 
 

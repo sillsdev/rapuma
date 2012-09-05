@@ -122,6 +122,8 @@ class Project (object) :
 
             if writeConfFile(self.projConfig) :
                 self.log.writeToLog('PROJ-010')
+            else :
+                self.log.writeToLog('PROJ-011')
 
 
 ###############################################################################
@@ -197,6 +199,10 @@ class Project (object) :
         if writeConfFile(self.projConfig) :
             self.log.writeToLog('PROJ-015', [cid])
 
+        # We should be done at this point. Post processes should have
+        # been run on any of the individual components added above
+        return True
+
 
 
 # FIXME: we need to stop this next process (adding to the conf) if the 
@@ -231,6 +237,10 @@ class Project (object) :
                 self.log.writeToLog('PROJ-020', [cid])
         else :
             self.log.writeToLog('PROJ-025', [cid])
+
+        # Run any working text post processes on the new component text
+        if self.postProcessComponent(cid) :
+            self.log.writeToLog('TEXT-060', [cid])
 
         return True
 
@@ -327,19 +337,60 @@ class Project (object) :
         '''Run a post process on the working text of a single component file.'''
 
         # Create target file path and name
-        ctype = self.projConfig['Components'][cid]['type']
-        target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + ctype)
+        cType = self.projConfig['Components'][cid]['type']
+        target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
         if os.path.isfile(target) :
-            self.runPostProcess(target, ctype)
+            self.runPostProcess(target, cType, cid)
         else :
             self.log.writeToLog('COMP-060', [target])
 
 
-    def runPostProcess (self, target, ctype) :
+    def runPostProcess (self, target, cType, cid) :
         '''Run a post process on a file, in place.'''
 
-        script = os.path.join(self.local.projProcessFolder, ctype + '-post_process.py')
-        subprocess.call([script, target])
+        script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
+        if os.path.isfile(script) :
+            if subprocess.call([script, target]) == 0 :
+                self.log.writeToLog('COMP-065', [fName(target)])
+        else :
+            self.log.writeToLog('COMP-067', [fName(script), cid])
+
+
+    def postProcessType (self, cType) :
+        '''Run the post process on every component of a specified type.'''
+
+        good = 0
+        valid = 0
+        target = ''
+        def runIt (target, cType, c) :
+            if os.path.isfile(target) :
+                self.runPostProcess(target, cType, c)
+                return True
+            else :
+                self.log.writeToLog('COMP-060', [target])
+
+        for c in self.projConfig['Components'].keys() :
+            # We only want a specific type of component and we want to weed 
+            # out any meta components
+            if self.projConfig['Components'][c]['type'] == cType :
+                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                try :
+                    # If the component has a list, then it is a meta component
+                    # we will want to skip those
+                    l = self.projConfig['Components'][c]['list']
+                    pass
+                except :
+                    # An exception is good in this case
+                    valid +=1
+                    if runIt(target, cType, c) :
+                        good +=1
+
+        # Simple test to see if all the componets were processed
+        if good == valid :
+            return True
+        else :
+            return False
+
 
 ###############################################################################
 ################################ Font Functions ###############################

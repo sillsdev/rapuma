@@ -228,17 +228,20 @@ def deleteProject (uc, pid = None) :
 
     # Remove references from user rpm.conf
     if uc.unregisterProject(pid) :
-        terminal('Removed [' + pid + '] from user configuration file.')
+        terminal('Removed [' + pid + '] from user configuration.')
+    else :
+        terminal('Failed to remove [' + pid + '] from user configuration.')
 
     # Delete everything in the project path
     if os.path.isdir(local.projHome) :
         shutil.rmtree(local.projHome)
+        terminal('Removed project files for [' + pid + '] from hard drive.')
     else :
         terminal('Warning: [' + pid + '] project could not be found, unable to delete project files.')
         return
 
     # Report the process is done
-    terminal('Project [' + pid + '] has been removed from the system configuration and hard drive.')
+    terminal('Removal process for [' + pid + '] is completed.')
     return True
 
 
@@ -258,9 +261,20 @@ def installPostProcess (pid, ctype) :
     if not os.path.isfile(target) :
         # No return from shutil.copy() is good
         if not shutil.copy(source, target) :
-            terminal('Installed component post process file: [' + fName(target) + '] into process folder.')
+            terminal('Installed component type post process shell script: [' + fName(target) + '] into process folder.')
     else :
         terminal('The file: [' + fName(target) + '] already exsists. Cannot copy over old file. Please manually remove it if you want a fresh copy installed.')
+
+
+def postProcessType (pid, cType) :
+    '''This is a dummy function that will pass off to one of the same name in the
+    project manager . It will run the post process on every component of a specified type.'''
+
+    aProject = initProject(pid)
+    if aProject.postProcessType(cType) :
+        return True
+    else :
+        terminal('\nOne or more post processes failed. Please check the project log for more details.')
 
 
 def isProject (pid) :
