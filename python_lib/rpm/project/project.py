@@ -392,6 +392,49 @@ class Project (object) :
             return False
 
 
+    def installPostProcess (self, pid, ctype = None) :
+        '''Install the post_process.py script into the project processing
+        folder for a specified component type. This script will be run on 
+        every file of that type that is imported into the project.'''
+
+        def copyIn (target) :
+            if not os.path.isfile(target) :
+                # No return from shutil.copy() is good
+                if not shutil.copy(source, target) :
+                    self.log.writeToLog('COMP-070', [fName(target)])
+            else :
+                self.log.writeToLog('COMP-072', [fName(target)])
+                return False
+
+        # Build paths and names we need
+        home = self.userConfig['Projects'][pid]['projectPath']
+        parent = os.path.dirname(home)
+        gather = os.path.join(parent, 'gather')
+        if os.path.isdir(gather) :
+            parent = gather
+
+        # Since we do not know the cType we will take the first one we find
+        # FIXME: This will break if there is more than one kind 
+        compTypes = self.userConfig['System']['recognizedComponentTypes']
+        source = ''
+        for ct in compTypes :
+            fn = ct + '-post_process.py'
+            if os.path.isfile(os.path.join(parent, fn)) :
+                source = os.path.join(parent, fn)
+            else :
+                source = os.path.join(self.local.rpmCompTypeFolder, ct, fn)
+
+        # In case this is a new project we may need to make a process (components) folder
+        if not os.path.isdir(self.local.projProcessFolder) :
+            os.mkdir(self.local.projProcessFolder)
+
+        target = os.path.join(self.local.projProcessFolder, fName(source))
+
+        # Some day when we copy in multiple post process scripts we will need this
+        copyIn(target)
+        return True
+
+
 ###############################################################################
 ################################ Font Functions ###############################
 ###############################################################################

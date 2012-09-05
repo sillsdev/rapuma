@@ -245,30 +245,20 @@ def deleteProject (uc, pid = None) :
     return True
 
 
-def installPostProcess (pid, ctype) :
-    '''Install the default post_process.py script into the project
-    processing folder for a specified component type. This script
-    will be run on every file of that type that is imported into
-    the project.'''
+def installPostProcess (pid, cType) :
+    '''This is a dummy function that will pass off to one of the same name in the
+    project manager.'''
 
-    # Build paths and names we need
-    home = uc.userConfig['Projects'][pid]['projectPath']
-    source = os.path.join(local.rpmCompTypeFolder, ctype, 'post_process.py')
-    # Because we cannot always be sure that listed paths and local paths
-    # match, we need to build our own project folder path at this point
-    projProcessFolder = os.path.join(home, os.path.basename(local.projProcessFolder))
-    target = os.path.join(projProcessFolder, ctype + '-post_process.py')
-    if not os.path.isfile(target) :
-        # No return from shutil.copy() is good
-        if not shutil.copy(source, target) :
-            terminal('Installed component type post process shell script: [' + fName(target) + '] into process folder.')
+    aProject = initProject(pid)
+    if aProject.installPostProcess(pid, cType) :
+        return True
     else :
-        terminal('The file: [' + fName(target) + '] already exsists. Cannot copy over old file. Please manually remove it if you want a fresh copy installed.')
+        terminal('\nPost processes script instalation failed. Please check the project log for more details.')
 
 
 def postProcessType (pid, cType) :
     '''This is a dummy function that will pass off to one of the same name in the
-    project manager . It will run the post process on every component of a specified type.'''
+    project manager. It will run the post process on every component of a specified type.'''
 
     aProject = initProject(pid)
     if aProject.postProcessType(cType) :
@@ -323,7 +313,7 @@ def getExampleSourceProject (exampID) :
     thisZipFile = zipfile.ZipFile(exampleFile, 'r')
     if os.path.isfile(exampleFile) :
         thisZipFile.extractall()
-
+        terminal('Extracted the [' + exampID + '] ParaTExt example project.')
 
 def runExamplePubDemoProject (demoID) :
     '''Run an example demo file to test/demonstrate a project.'''
@@ -380,19 +370,25 @@ def userArguments (args) :
                 local   = ProjLocal(rpmHome, userHome, projFolder)
                 pc      = ProjConfig(local)
                 newProject(uc, pc, args['project_id'])
+
         # Locking an exsisting project
         elif args['project_lock'] :
             lockProject(uc, args['project_id'])
+
         # Unlocking an exsisting project
         elif args['project_unlock'] :
             unlockProject(uc, args['project_id'])
+
         # Deleting an exsisting project
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
-        # Install post process script, cType is required
+
+        # Install post process script, cType is required (part of argv)
         elif args['post_process'] :
             installPostProcess(args['project_id'], args['post_process'])
-        # Run the post process script on all the files of a component type, cType is required
+
+        # Run the post process script on all the files of a component type,
+        # cType is required (part of argv)
         elif args['run_process'] :
             postProcessType(args['project_id'], args['run_process'])
 
@@ -410,6 +406,7 @@ def userArguments (args) :
                     terminal('Must supply a component type (-t xxxx) to create a component.')
             if args['component_delete'] :
                 aProject.deleteComponent(args['component_id'])
+
             # Render vs. view command is just a matter of forcing the component
             # to be rendered if render is selected by the user. Otherwise, if
             # only view is requested, force is set to False and the component
@@ -420,6 +417,7 @@ def userArguments (args) :
             if args['component_view'] :
                 force = False
                 aProject.renderComponent(args['component_id'], force)
+
             # Component and component type locking and unlocking
             if args['component_lock'] and args['component_type'] :
                 aProject.lockComponent(args['component_id'], args['component_type'])
@@ -429,6 +427,7 @@ def userArguments (args) :
                 aProject.unlockComponent(args['component_id'], args['component_type'])
             elif args['component_unlock'] :
                 aProject.unlockComponent(args['component_id'])
+
             # Run post processes on a single component
             elif args['run_process'] :
                 aProject.postProcessComponent(args['component_id'])

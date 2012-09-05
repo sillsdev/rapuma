@@ -134,10 +134,17 @@ def getPTSettings (home) :
     # folder and if we find the same named file there, that will be
     # harvested for the settings. Otherwise, the settings will be taken
     # from the parent folder.
+    # Note: Starting with PT 7 the "gather" folder was introduced to
+    # projects. We will need to look in that folder as well for the 
+    # .ssf file.
     ssfFileName = ''
     ptPath = ''
     parentFolder = os.path.dirname(home)
     grandparentFolder = os.path.dirname(parentFolder)
+    gatherFolder = os.path.join(parentFolder, 'gather')
+    # For now, we will assume that if there is a gather folder, it must have a .ssf file in it
+    if os.path.isdir(gatherFolder) :
+        parentFolder = gatherFolder
     # Get a file list from the parent folder and look for a .ssf/.SSF file
     # This assumes there is (has to be) only one ssf/SSF file in the folder.
     # The main problem at this point is we don't really know the name of

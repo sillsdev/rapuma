@@ -61,6 +61,13 @@ Todo:
             <type>list</type>
             <value>w3m</value>
         </setting>
+        <setting>
+            <name>Recognized Component Types</name>
+            <key>recognizedComponentTypes</key>
+            <description>A list of valid component types that are recognized by the RPM system.</description>
+            <type>list</type>
+            <value>usfm</value>
+        </setting>
     </section>
     <section>
         <name>Resources</name>

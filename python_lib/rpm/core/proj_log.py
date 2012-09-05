@@ -78,6 +78,8 @@ class ProjLog (object) :
             'COMP-065' : ['LOG', 'Post processes completed successfully on: [<<1>>].'],
             'COMP-067' : ['ERR', 'Post processes script: [<<1>>] was called on the component: [<<2>>] but the script was not found in the project.'],
             'COMP-068' : ['TDO', 'Use the command: [rpm project <project ID> -p <component type>] to install the post process shell script. Modify this script as necessary to complete any post process that need to be done to your components.'],
+            'COMP-070' : ['MSG', 'Installed component type post process shell script: [<<1>>] into process folder.'],
+            'COMP-072' : ['ERR', 'The file: [<<1>>] already exsists. Cannot copy over old file. Please manually remove it if you want a fresh copy installed.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

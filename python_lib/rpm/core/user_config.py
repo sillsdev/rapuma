@@ -30,7 +30,6 @@ class UserConfig (object) :
 
     def __init__(self, local) :
         '''Intitate the whole class and create the object.'''
-        
 
         self.local  = local
         # Check to see if the file is there, then read it in and break it into
