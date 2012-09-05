@@ -471,7 +471,18 @@ class Project (object) :
 ################################ Style Functions ##############################
 ###############################################################################
 
-# FIXME: add the style file creation calls here
+    def createCustomStyleFile (self, cType) :
+        '''Create/copy a custom style file.'''
+
+        self.createManager(cType, 'style')
+        self.managers[cType + '_Style'].installCompTypeOverrideStyles()
+
+
+    def createDefaultStyleFile (self, cType) :
+        '''Create/copy the default style file.'''
+
+        self.createManager(cType, 'style')
+        self.managers[cType + '_Style'].installCompTypeGlobalStyles()
 
 
 ###############################################################################

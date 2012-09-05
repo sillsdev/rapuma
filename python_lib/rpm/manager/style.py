@@ -75,12 +75,22 @@ class Style (Manager) :
         globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
         if not os.path.isfile(globalStyFile) :
             if self.sourceEditor.lower() == 'paratext' :
+                # Build paths and names we need
+                parent = os.path.dirname(self.project.local.projHome)
+                gather = os.path.join(parent, 'gather')
+                if os.path.isdir(gather) :
+                    parent = gather
+
                 # Override default styleFile name with what we find in the PT conf
                 self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-                globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-                if not os.path.isfile(globalStyFile) :
+                source = os.path.join(parent, self.mainStyleFile)
+                target = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+                if not os.path.isfile(target) :
                     installPTStyles(self.project.local, self.mainStyleFile)
-                    self.project.log.writeToLog('STYL-010')
+                    # Change, if necessary, the main style file name
+                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = self.mainStyleFile
+                    if writeConfFile(self.project.projConfig) :
+                        self.project.log.writeToLog('STYL-010')
             else :
                 # Quite here
                 self.project.log.writeToLog('STYL-015')
@@ -91,12 +101,24 @@ class Style (Manager) :
         '''If the source is from a PT project, check to see if there is a
         (project-wide) custom stylesheet to install. If not, we are done.
         This style file is not required.'''
-        cusStyFile = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
-        if not os.path.isfile(cusStyFile) :
+
+        target = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
+        if not os.path.isfile(target) :
             if self.sourceEditor.lower() == 'paratext' :
-                if not installPTCustomStyles(self.project.local, self.customStyleFile) :
-                    self.project.log.writeToLog('STYL-020')
-                    self.createCustomUsfmStyles()
+                # Build paths and names we need
+                parent = os.path.dirname(self.project.local.projHome)
+                gather = os.path.join(parent, 'gather')
+                if os.path.isdir(gather) :
+                    parent = gather
+
+                source = os.path.join(parent, self.customStyleFile)
+                if os.path.isfile(source) :
+                    shutil.copy(source, target)
+                    self.project.log.writeToLog('STYL-025', [fName(target)])
+                else :
+                    if not installPTCustomStyles(self.project.local, self.customStyleFile) :
+                        self.project.log.writeToLog('STYL-020')
+                        self.createCustomUsfmStyles()
             else :
                 self.createCustomUsfmStyles()
 

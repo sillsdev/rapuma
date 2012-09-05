@@ -451,6 +451,8 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'style' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
+            if args['style_default'] :
+                aProject.createDefaultStyleFile(args['component_type'])
             if args['style_override'] :
                 aProject.createCustomStyleFile(args['component_type'])
             if args['style_component'] :
@@ -546,6 +548,7 @@ fontCommand.add_argument('-p', '--font_primary', action='store_true', help='Set,
 styleCommand = subparsers.add_parser('style', help='General font handling commands help')
 styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 styleCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a style for this type of component.')
+styleCommand.add_argument('-d', '--style_default', action='store_true', help='Create a default style file for this component type.')
 styleCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
 styleCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
 

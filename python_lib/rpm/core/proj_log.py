@@ -156,7 +156,7 @@ class ProjLog (object) :
             'STYL-010' : ['LOG', 'Main style file copied in from PT project.'],
             'STYL-015' : ['ERR', 'Main style file creation not supported yet. This is a required file.'],
             'STYL-020' : ['LOG', 'Custom style file in PT project not found.'],
-            'STYL-025' : ['MSG', 'STYL-025 - Unassigned error message ID.'],
+            'STYL-025' : ['MSG', 'Project custom style [<<1>>] file has been copied to the project.'],
             'STYL-030' : ['ERR', 'Custom style file creation not supported yet.'],
             'STYL-035' : ['MSG', 'STYL-035 - Unassigned error message ID.'],
             'STYL-040' : ['ERR', 'Component style override file creation not supported yet.'],
