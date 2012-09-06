@@ -350,8 +350,11 @@ class Project (object) :
 
         script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
         if os.path.isfile(script) :
-            if subprocess.call([script, target]) == 0 :
+            err = subprocess.call([script, target])
+            if err == 0 :
                 self.log.writeToLog('COMP-065', [fName(target)])
+            else :
+                self.log.writeToLog('COMP-066', [fName(target), str(err)])
         else :
             self.log.writeToLog('COMP-067', [fName(script), cid])
 
