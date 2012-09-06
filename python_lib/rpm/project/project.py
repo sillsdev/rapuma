@@ -395,47 +395,56 @@ class Project (object) :
             return False
 
 
-    def installPostProcess (self, pid, ctype = None) :
+    def installPostProcess (self, pid, cType = None) :
         '''Install the post_process.py script into the project processing
         folder for a specified component type. This script will be run on 
-        every file of that type that is imported into the project.'''
+        every file of that type that is imported into the project. Some
+        projects will have their own specially developed post process
+        script. We will look in the parent folder first to see if any
+        exsists and grab those first. If one does not exsist we can copy
+        a default script.'''
 
-        def copyIn (target) :
-            if not os.path.isfile(target) :
-                # No return from shutil.copy() is good
-                if not shutil.copy(source, target) :
-                    self.log.writeToLog('COMP-070', [fName(target)])
-            else :
-                self.log.writeToLog('COMP-072', [fName(target)])
-                return False
+        # In case this is a new project we may need to make a process (components) folder
+        if not os.path.isdir(self.local.projProcessFolder) :
+            os.mkdir(self.local.projProcessFolder)
 
-        # Build paths and names we need
+        # Set the default paths/names
+        editor = ''
+        source = ''
+        target = ''
+        # If there is no cType or no CompTypes yet then we'll do the best we can
+        # to set the default paths
+        if cType :
+            source = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.py')
+            target = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
+        else :
+            # This is somewhat of a guess, we'll get the first one we find
+            # but this might need to be changed at some point.
+            compTypes = self.userConfig['System']['recognizedComponentTypes']
+            for ct in compTypes :
+                fn = ct + '-post_process.py'
+                source = os.path.join(self.local.rpmCompTypeFolder, ct, fn)
+                target = os.path.join(self.local.projProcessFolder, ct + '-post_process.py')
+
+        # Look a little harder to see if there is a source closer by
         home = self.userConfig['Projects'][pid]['projectPath']
         parent = os.path.dirname(home)
         gather = os.path.join(parent, 'gather')
         if os.path.isdir(gather) :
             parent = gather
 
-        # Since we do not know the cType we will take the first one we find
-        # FIXME: This will break if there is more than one kind 
-        compTypes = self.userConfig['System']['recognizedComponentTypes']
-        source = ''
-        for ct in compTypes :
-            fn = ct + '-post_process.py'
-            if os.path.isfile(os.path.join(parent, fn)) :
-                source = os.path.join(parent, fn)
-            else :
-                source = os.path.join(self.local.rpmCompTypeFolder, ct, fn)
+        if os.path.isfile(os.path.join(parent, self.projectIDCode + '.py')) :
+            source = os.path.join(parent, self.projectIDCode + '.py')
 
-        # In case this is a new project we may need to make a process (components) folder
-        if not os.path.isdir(self.local.projProcessFolder) :
-            os.mkdir(self.local.projProcessFolder)
-
-        target = os.path.join(self.local.projProcessFolder, fName(source))
-
-        # Some day when we copy in multiple post process scripts we will need this
-        copyIn(target)
-        return True
+        # If nothing else is there, copy in the new script
+        if not os.path.isfile(target) :
+            # No return from shutil.copy() is good
+            if not shutil.copy(source, target) :
+                self.log.writeToLog('COMP-070', [fName(target), fName(source)])
+            return True
+        else :
+            self.log.writeToLog('COMP-072', [fName(target)])
+            return False
 
 
 ###############################################################################
