@@ -397,11 +397,14 @@ def userArguments (args) :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
             if args['component_new'] :
+                force = None
+                if args['component_force'] :
+                    force = True
                 if args['component_type'] :
                     if args['meta_list'] :
-                        aProject.addMetaComponent(args['component_id'], args['meta_list'], args['component_type'])
+                        aProject.addMetaComponent(args['component_id'], args['meta_list'], args['component_type'], force)
                     else :
-                        aProject.addComponent(args['component_id'], args['component_type'])
+                        aProject.addComponent(args['component_id'], args['component_type'], force)
                 else :
                     terminal('Must supply a component type (-t xxxx) to create a component.')
             if args['component_delete'] :
@@ -527,6 +530,7 @@ compCommand.add_argument('project_id', help='Project ID (a positional argument r
 compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
 compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
+compCommand.add_argument('-f', '--component_force', action='store_true', help='Force the install (reinstall) of a component. This is used with the -n command.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
 compCommand.add_argument('-e', '--meta_list', help='Create a list of components for this new meta component. They must be of the same type.')
 compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')

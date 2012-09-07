@@ -96,9 +96,20 @@ class Text (Manager) :
         return True
 
 
-    def installUsfmWorkingText (self, cid) :
+    def installUsfmWorkingText (self, cid, force = False) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name.'''
+
+        def copyAndClean (source, target) :
+            # Use the Palaso USFM parser to bring in the text and
+            # clean it up if needed
+            fh = codecs.open(source, 'r', 'utf_8_sig')
+            doc = usfm.parser(fh)
+            tidy = sfm.pprint(doc)
+            writeout = codecs.open(target, "w", "utf-8")
+            writeout.write(tidy)
+            writeout.close
+            self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
 
         # Check to see if settings need updating
         self.updateManagerSettings()
@@ -155,22 +166,14 @@ class Text (Manager) :
             os.makedirs(targetFolder)
 
         # Now do the age checks and copy if source is newer than target
-        if not isOlder(target, source) :
-            if not os.path.isfile(target) :
-                # Use the Palaso USFM parser to bring in the text and
-                # clean it up if needed
-                fh = codecs.open(source, 'r', 'utf_8_sig')
-                doc = usfm.parser(fh)
-                tidy = sfm.pprint(doc)
-                writeout = codecs.open(target, "w", "utf-8")
-                writeout.write(tidy)
-                writeout.close
-                self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
+        if not isOlder(target, source) or force :
+            if not os.path.isfile(target) or force :
+                copyAndClean(source, target)
+                return True
 
-#                # Run any working text post processes on the newly aquired text
-#                if self.postProcessWorkingText([cid]) :
-#                    self.project.log.writeToLog('TEXT-060', [cid])
-
-        return True
+        # Even if we fail the two tests above, if the force switch is on, we copy
+#        if force :
+#            copyAndClean(source, target)
+#            return True
 
 

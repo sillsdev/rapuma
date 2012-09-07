@@ -144,13 +144,17 @@ class Project (object) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
 
+
+        import pdb; pdb.set_trace()
+
         # Check for cid in config
         if isValidCID(self.projConfig, cid) :
-            try :
-                self.createComponent(cid).render(force)
-                return True
-            except :
-                return False
+            self.createComponent(cid).render(force)
+#            try :
+#                self.createComponent(cid).render(force)
+#                return True
+#            except :
+#                return False
         else :
             bad = findBadComp(self.projConfig, cid)
             if bad == cid :
@@ -180,13 +184,13 @@ class Project (object) :
         return compobj
 
 
-    def addMetaComponent (self, cid, cidList, cType) :
+    def addMetaComponent (self, cid, cidList, cType, force = False) :
         '''Add a meta component to the project'''
 
         # Add/check individual components
         thisList = cidList.split()
         for c in thisList :
-            self.addComponent(c, cType)
+            self.addComponent(c, cType, force)
 
         # Add the info to the components
         buildConfSection(self.projConfig, 'Components')
@@ -209,7 +213,7 @@ class Project (object) :
 # comp type is locked or maybe even if the source doesn't exsist. How do we do that?
 # We also should add folders and working text at this point so it is ready to render later.
 
-    def addComponent (self, cid, cType) :
+    def addComponent (self, cid, cType, force = False) :
         '''This will add a component to the object we created 
         above in createComponent().'''
 
@@ -218,7 +222,7 @@ class Project (object) :
 
         # See if the working text is present, quite if it is not
         self.createManager(cType, 'text')
-        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid) :
+        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
             return False
 
         if not testForSetting(self.projConfig, 'Components', cid) :
@@ -236,7 +240,10 @@ class Project (object) :
             if writeConfFile(self.projConfig) :
                 self.log.writeToLog('PROJ-020', [cid])
         else :
-            self.log.writeToLog('PROJ-025', [cid])
+            if force :
+                self.log.writeToLog('PROJ-025', [cid])
+            else :
+                self.log.writeToLog('PROJ-026', [cid])
 
         # Run any working text post processes on the new component text
         if self.postProcessComponent(cid) :
