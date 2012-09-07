@@ -77,7 +77,7 @@ class ProjLog (object) :
             'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
             'COMP-060' : ['ERR', 'Could not post process, file not found: [<<1>>].'],
             'COMP-065' : ['MSG', 'Post processes completed successfully on: [<<1>>].'],
-            'COMP-066' : ['ERR', 'Post processes did not completed successfully on: [<<1>>], <<2>> error(s) occurred.'],
+            'COMP-066' : ['ERR', 'Post processes did not completed successfully on: [<<1>>], some errors may have occurred. If there is a log for this process script, check it for details.'],
             'COMP-067' : ['ERR', 'Post processes script: [<<1>>] was called on the component: [<<2>>] but the script was not found in the project.'],
             'COMP-068' : ['TDO', 'Use the command: [rpm project <project ID> -p <component type>] to install the post process shell script. Modify this script as necessary to complete any post process that need to be done to your components.'],
             'COMP-070' : ['MSG', 'Installed component type post process shell script: [<<1>>] into process folder from source: [<<2>>].'],

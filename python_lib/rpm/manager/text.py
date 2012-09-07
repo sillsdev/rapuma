@@ -146,6 +146,8 @@ class Text (Manager) :
         # indicate the source has been updated so unless the folder is locked
         # we will want to update the target.
         
+#        import pdb; pdb.set_trace()
+
         # First check for a general lock on all components of this type.
         if os.path.isfile(typeLock) :
             self.project.log.writeToLog('TEXT-040', [self.cType])
@@ -171,9 +173,8 @@ class Text (Manager) :
                 copyAndClean(source, target)
                 return True
 
-        # Even if we fail the two tests above, if the force switch is on, we copy
-#        if force :
-#            copyAndClean(source, target)
-#            return True
+        # If the text is there, we should return True so do a last check to see
+        if os.path.isfile(target) :
+            return True
 
 

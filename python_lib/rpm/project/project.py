@@ -144,17 +144,13 @@ class Project (object) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
 
-
-        import pdb; pdb.set_trace()
-
         # Check for cid in config
         if isValidCID(self.projConfig, cid) :
-            self.createComponent(cid).render(force)
-#            try :
-#                self.createComponent(cid).render(force)
-#                return True
-#            except :
-#                return False
+            try :
+                self.createComponent(cid).render(force)
+                return True
+            except :
+                return False
         else :
             bad = findBadComp(self.projConfig, cid)
             if bad == cid :
