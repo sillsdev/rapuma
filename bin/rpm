@@ -442,11 +442,13 @@ def userArguments (args) :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
             if args['font_new'] :
-                aProject.addComponentFont(args['font_name'], args['component_type'])
+                aProject.addComponentFont(args['component_type'], args['font_name'])
             if args['font_remove'] :
-                aProject.removeComponentFont(args['font_name'], args['component_type'])
+                aProject.removeComponentFont(args['component_type'], args['font_name'])
             if args['font_primary'] :
-                aProject.setPrimaryFont(args['font_name'], args['component_type'])
+                aProject.setPrimaryFont(args['component_type'], args['font_name'])
+            if args['font_mapping'] :
+                aProject.addFontMapping(args['component_type'], args['font_name'], args['font_mapping'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 
@@ -542,11 +544,12 @@ compCommand.add_argument('-p', '--run_process', action='store_true', help='Run t
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-fontCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a font for this type of component.')
+fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
 fontCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
 fontCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
-fontCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove a font from this project.')
+fontCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove the font named in -f from this project.')
 fontCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
+fontCommand.add_argument('-m', '--font_mapping', help='Add a font mapping for a specified font and component type.')
 
 # Add style subprocess arguments
 styleCommand = subparsers.add_parser('style', help='General font handling commands help')

@@ -454,32 +454,42 @@ class Project (object) :
 ################################ Font Functions ###############################
 ###############################################################################
 
-    def addComponentFont (self, font, cType) :
-        '''Add a font to a component.'''
+    def addComponentFont (self, cType, font) :
+        '''Add a font to a component type.'''
 
         self.addComponentType(cType)
-        # Call on the font manager to install the font we want for this component
+        # Call on the font manager to install the font we want for this
+        # component type
         self.createManager(cType, 'font')
-        self.managers[cType + '_Font'].recordFont(font, cType.capitalize())
+        self.managers[cType + '_Font'].recordFont(cType.capitalize(), font)
         self.managers[cType + '_Font'].installFont(cType.capitalize())
 
 
-    def setPrimaryFont (self, font, cType) :
-        '''Set the primary font for a component.'''
+    def setPrimaryFont (self, cType, font) :
+        '''Set the primary font for a component type.'''
 
-        module = __import__(cType)
+        self.dummyObject(cType)
+        self.managers[cType + '_Font'].setPrimaryFont(cType.capitalize(), font)
+
+
+    def dummyObject (self, cType) :
+        '''Create a component type object so that functions from
+        that manager can be called.'''
+
+        Ctype = cType.capitalize()
         # FIXME: In this next call we use a blank dict to load the
         # comp config section. As long as we call a manager that
         # doesn't need it, we are okay. Otherwise, this needs fixing.
-        compobj = getattr(module, cType.capitalize())(self, {})
-        self.managers[cType + '_Font'].setPrimaryFont(font, cType.capitalize())
+        module = __import__(cType)
+        compobj = getattr(module, Ctype)(self, {})
 
 
-    def removeComponentFont (self, font, cType) :
-        '''Remove a font from a component. Remove from the system if
+    def removeComponentFont (self, cType, font) :
+        '''Remove a font from a component type. Remove from the system if
         it is not used in any other component.'''
 
-        terminal('Forget it dude, this is not implemented yet.')
+        self.createManager(cType, 'font')
+        self.managers[cType + '_Font'].removeFont(cType, font)
 
 
 ###############################################################################

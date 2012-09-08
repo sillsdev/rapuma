@@ -19,7 +19,21 @@ Todo:
         <key>useFontFeatures</key>
         <description>Turn on (or off) all font features.</description>
         <type>boolean</type>
-        <value>True</value>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Alternate Font Mappings</name>
+        <key>useFontMappings</key>
+        <description>Turn on (or off) font mappings.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Font Mapping List</name>
+        <key>fontMappingList</key>
+        <description>A list of alternate TECKit font mappings installed for use with this component type.</description>
+        <type>list</type>
+        <value></value>
     </setting>
 </root>
 

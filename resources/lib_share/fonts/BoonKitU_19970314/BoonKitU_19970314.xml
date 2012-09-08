@@ -16,6 +16,13 @@ Todo:
         <sectionID>FontInformation</sectionID>
         <description>General information for this typeface family.</description>
         <setting>
+            <name>RPM Font Family Name</name>
+            <key>rpmFontFamilyName</key>
+            <description>The name of this typeface family used in the RPM system. This is to enable correct versioning of fonts in projects. This is the font family name followed by a date string of about when the font was produced/released. This name must be used when referencing a font, not just the font family name.</description>
+            <type>string</type>
+            <value>BoonKitU_19970314</value>
+        </setting>
+        <setting>
             <name>Font Family Name</name>
             <key>fontFamilyName</key>
             <description>The name of this typeface family.</description>
@@ -32,16 +39,30 @@ Todo:
         <setting>
             <name>Font Folder</name>
             <key>fontFolder</key>
-            <description>The font family folder name.</description>
+            <description>The font family folder name. This should match the RPM Font Family Name.</description>
             <type>string</type>
-            <value>BoonKitU</value>
+            <value>BoonKitU_19970314</value>
         </setting>
         <setting>
             <name>Features</name>
             <key>features</key>
             <description>The features that will be used for this font.</description>
             <type>list</type>
-            <value></value>
+            <value>GR</value>
+        </setting>
+        <setting>
+            <name>Mappings</name>
+            <key>mappings</key>
+            <description>Alternate TECKit glyphe mappings that can be used with this font.</description>
+            <type>list</type>
+            <value>lana_renumber</value>
+        </setting>
+        <setting>
+            <name>Mapping Default</name>
+            <key>mappingDefault</key>
+            <description>The default TECKit glyphe mappings that will be used with this font.</description>
+            <type>list</type>
+            <value>lana_renumber</value>
         </setting>
     </section>
     <section>

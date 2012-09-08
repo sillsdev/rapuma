@@ -79,7 +79,7 @@ class Font (Manager) :
 
 
 
-    def setPrimaryFont (self, font, cType) :
+    def setPrimaryFont (self, cType, font) :
         '''Set the primary font for the project.'''
 
         if not font :
@@ -101,14 +101,14 @@ class Font (Manager) :
         # If this didn't die already we should be able to record and install now
         self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
         # Load the primary font if it is not there already
-        self.recordFont(font, cType)
+        self.recordFont(cType, font)
         self.installFont(cType)
         writeConfFile(self.project.projConfig)
         self.project.log.writeToLog('FONT-035', [font])
         return True
 
 
-    def recordFont (self, font, cType) :
+    def recordFont (self, cType, font) :
         '''Check for the exsitance of a font in the font conf file.
         If there is one, return, if not add it.'''
 
@@ -176,6 +176,26 @@ class Font (Manager) :
             self.project.log.writeToLog('FONT-062')
 
         return True
+
+
+    def removeFont (self, cType, font) :
+        '''Remove a font from a project, unless it is in use by another 
+        component type. Then just disconnect it from the calling component type.'''
+
+        def removePConfSettings (cType, font) :
+            print 'remove settings only'
+
+
+        # Look in other cTypes for the same font
+        for ct in self.project.projConfig['CompTypes'].keys() :
+            if ct != cType :
+                fonts = self.project.projConfig['CompTypes'][ct]['installedFonts']
+                # If we find the font is in another cType we only remove it from the
+                # target component settings
+                if font in fonts :
+                    removePConfSettings(cType, font)
+                    return True
+
 
 
     def copyInFont (self, fontConfig) :

@@ -1,0 +1,14 @@
+EncodingName            "SIL-LANANumberRemapping-2012"
+DescriptiveName         "Remaps Latin numbers to LANA number block"
+Version                 "1"
+Contact                 "mailto:dennis_drescher@sil.org"
+RegistrationAuthority   "SIL"
+RegistrationName        "LANANumberRemapping"
+Copyright               "(c) SIL"
+
+pass(Unicode)
+
+Class [digitL]          = ( U+0030 .. U+0039 )
+Class [digitU]          = ( U+1A90 .. U+1A99 )
+
+[digitL]      <> [digitU]
