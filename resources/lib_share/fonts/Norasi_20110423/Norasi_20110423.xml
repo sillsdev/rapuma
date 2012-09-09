@@ -1,0 +1,526 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: Norasi.xml
+Description:
+This is a font settings file. All default settings for this font are specified here.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <sectionID>FontInformation</sectionID>
+        <description>General information for this typeface family.</description>
+        <setting>
+            <name>RPM Font Family Name</name>
+            <key>rpmFontFamilyName</key>
+            <description>The name of this typeface family used in the RPM system. This is to enable correct versioning of fonts in projects. This is the font family name followed by a date string of about when the font was produced/released. This name must be used when referencing a font, not just the font family name.</description>
+            <type>string</type>
+            <value>Norasi_20110423</value>
+        </setting>
+        <setting>
+            <name>Font Family Name</name>
+            <key>fontFamilyName</key>
+            <description>The name of this typeface family.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Font ID</name>
+            <key>fontID</key>
+            <description>The internal ID code of this font family.</description>
+            <type>string</type>
+            <value>Norasi Minor</value>
+        </setting>
+        <setting>
+            <name>Font Folder</name>
+            <key>fontFolder</key>
+            <description>The font family folder name.</description>
+            <type>string</type>
+            <value>Norasi_20110423</value>
+        </setting>
+        <setting>
+            <name>Font Version</name>
+            <key>fontVersion</key>
+            <description>The general version number of this font (Individual font versions my vary).</description>
+            <type>string</type>
+            <value>4.012</value>
+        </setting>
+        <setting>
+            <name>Features</name>
+            <key>features</key>
+            <description>The features that will be used for this font.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mappings</name>
+            <key>mappings</key>
+            <description>Alternate TECKit glyphe mappings that can be used with this font.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping Default</name>
+            <key>mappingDefault</key>
+            <description>The default TECKit glyphe mappings that will be used with this font.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Regular</name>
+        <sectionID>TypefaceRegular</sectionID>
+        <description>Settings for the regular typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Regular</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>regular</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Bold</name>
+        <sectionID>TypefaceBold</sectionID>
+        <description>Settings for the bold typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi-Bold.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Bold</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>bold</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Italic</name>
+        <sectionID>TypefaceItalic</sectionID>
+        <description>Settings for the italic typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi-Italic.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Italic</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>italic</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Bold Italic</name>
+        <sectionID>TypefaceBoldItalic</sectionID>
+        <description>Settings for the bold italic typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi-BoldItalic.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>BoldItalic</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>bolditalic</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Oblique</name>
+        <sectionID>TypefaceOblique</sectionID>
+        <description>Settings for the oblique typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi-Oblique.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>Oblique</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>oblique</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+    <section>
+        <name>Typeface Bold Oblique</name>
+        <sectionID>TypefaceBoldOblique</sectionID>
+        <description>Settings for the bold italic typeface font.</description>
+        <setting>
+            <name>File</name>
+            <key>file</key>
+            <description>File name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi-BoldOblique.ttf</value>
+        </setting>
+        <setting>
+            <name>Name</name>
+            <key>name</key>
+            <description>The name for this typeface.</description>
+            <type>string</type>
+            <value>Norasi</value>
+        </setting>
+        <setting>
+            <name>Style</name>
+            <key>style</key>
+            <description>The style of this typeface.</description>
+            <type>string</type>
+            <value>BoldOblique</value>
+        </setting>
+        <setting>
+            <name>TeXMapping</name>
+            <key>texMapping</key>
+            <description>The TeX font style this typeface maps to.</description>
+            <type>list</type>
+            <value>boldoblique</value>
+        </setting>
+        <setting>
+            <name>Type</name>
+            <key>type</key>
+            <description>The type of font for this typeface.</description>
+            <type>string</type>
+            <value>TrueType font</value>
+        </setting>
+        <setting>
+            <name>Version</name>
+            <key>version</key>
+            <description>The version of this typeface.</description>
+            <type>string</type>
+            <value>Version 004.012: 2011-04-23 </value>
+        </setting>
+        <setting>
+            <name>Font Copyright</name>
+            <key>copyright</key>
+            <description>The copyright information for this typeface.</description>
+            <type>string</type>
+            <value>Copyright (C) 1999, The National Font Project (v.beta). Yannis Haralambous, Virach Sornlertlamvanich and Anutara Tantraporn. All rights reserved.</value>
+        </setting>
+        <setting>
+            <name>Description</name>
+            <key>description</key>
+            <description>Any description text included in the font.</description>
+            <type>string</type>
+            <value>This font was developed under the National Font Project at NECTEC as to be a free licensed font for Thai users and developers.</value>
+        </setting>
+        <setting>
+            <name>Modify</name>
+            <key>modify</key>
+            <description>Request any modifications for this typeface such as bolding.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Mapping</name>
+            <key>mapping</key>
+            <description>Specify a file that might contain any character mapping modifications.</description>
+            <type>string</type>
+            <value>None</value>
+        </setting>
+    </section>
+</root>
+

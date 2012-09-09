@@ -108,6 +108,22 @@ class Font (Manager) :
         return True
 
 
+    def checkForSubFont (self, font) :
+        '''Return the true name of the font to be used if the one given
+        is pointing to a substitute font in the same font family.'''
+
+        fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
+        if not os.path.isfile(fontInfo) :
+            self.project.log.writeToLog('FONT-040', [font])
+            dieNow()
+
+        fInfo = getXMLSettings(fontInfo)
+        if testForSetting(fInfo['FontInformation'], 'substituteFontName') :
+            return fInfo['FontInformation']['substituteFontName']
+        else :
+            return font
+
+
     def recordFont (self, cType, font) :
         '''Check for the exsitance of a font in the font conf file.
         If there is one, return, if not add it.'''
@@ -115,7 +131,6 @@ class Font (Manager) :
         # It is expected that all the necessary meta data for this font is in
         # a file located with the font. The system expects to find it in:
         # ~/resources/lib_share/Fonts/[FontID]
-        fontDir = os.path.join(self.project.local.rpmFontsFolder, font)
         fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
         if not os.path.isfile(fontInfo) :
             self.project.log.writeToLog('FONT-040', [font])
@@ -126,7 +141,9 @@ class Font (Manager) :
             buildConfSection (self.fontConfig, 'Fonts')
 
         record = False
-        if not testForSetting(self.fontConfig['Fonts'], font) :
+        if testForSetting(self.fontConfig['Fonts'], font) :
+            record = True
+        else :
             buildConfSection (self.fontConfig['Fonts'], font)
             record = True
 

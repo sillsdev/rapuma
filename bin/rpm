@@ -354,7 +354,13 @@ def userArguments (args) :
             if args['project_folder'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
-                customLocal = os.path.abspath(args['project_folder'])
+                if args['project_folder'][0] == '~' :
+                    # Look for "~/" shorthand path and replace it with the actual "home"
+                    customLocal = args['project_folder'].replace('~', os.environ.get('HOME'))
+                else :
+                    # Otherwise run abspath on it and send it on
+                    customLocal = os.path.abspath(args['project_folder'])
+
                 if not os.path.isdir(customLocal) :
                     terminal('Cannot resolve path. The path [' + customLocal + '] is not valid! Halting project creation process.')
                     sys.exit()
@@ -522,7 +528,7 @@ projCommand.add_argument('-n', '--project_new', action='store_true', help='Creat
 projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock a project out of the local RPM system so it cannot be acted on.')
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
-projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target.')
+projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target. This is used only for project creation (-n).')
 projCommand.add_argument('-p', '--post_process', help='Install the default post_process.py script for a component type into the project process folder. You must specify a component type.')
 projCommand.add_argument('-r', '--run_process', help='Run the post_process.py script on all files of a specified component type in the project process folder. You must specify a component type.')
 

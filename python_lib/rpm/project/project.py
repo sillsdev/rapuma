@@ -460,15 +460,21 @@ class Project (object) :
         self.addComponentType(cType)
         # Call on the font manager to install the font we want for this
         # component type
+        Ctype = cType.capitalize()
+        # Change the font name if this points to a substitute font name
         self.createManager(cType, 'font')
-        self.managers[cType + '_Font'].recordFont(cType.capitalize(), font)
-        self.managers[cType + '_Font'].installFont(cType.capitalize())
+        font = self.managers[cType + '_Font'].checkForSubFont(font)
+        self.managers[cType + '_Font'].recordFont(Ctype, font)
+        self.managers[cType + '_Font'].installFont(Ctype)
 
 
     def setPrimaryFont (self, cType, font) :
         '''Set the primary font for a component type.'''
 
-        self.dummyObject(cType)
+        self.createManager(cType, 'font')
+        # FIXME: Do we need this?
+#        self.dummyObject(cType)
+        font = self.managers[cType + '_Font'].checkForSubFont(font)
         self.managers[cType + '_Font'].setPrimaryFont(cType.capitalize(), font)
 
 
