@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess
+import codecs, os, sys, shutil, imp, subprocess, zipfile
 #from configobj import ConfigObj, Section
 
 
@@ -140,6 +140,14 @@ class Project (object) :
         return cidPdf
 
 
+    def isComponentType (self, cType) :
+        '''Simple test to see if a component exsists. Return True if it is.'''
+
+        Ctype = cType.capitalize()
+        if testForSetting(self.projConfig, 'CompTypes', Ctype) :
+            return True
+
+
     def renderComponent (self, cid, force = False) :
         '''Render a single component. This will ensure there is a component
         object, then render it.'''
@@ -214,7 +222,8 @@ class Project (object) :
         above in createComponent().'''
 
         # Inject the component type into the config file.
-        self.addComponentType(cType)
+        if not isComponentType(cType) :
+            self.addComponentType(cType)
 
         # See if the working text is present, quite if it is not
         self.createManager(cType, 'text')
@@ -246,6 +255,53 @@ class Project (object) :
             self.log.writeToLog('TEXT-060', [cid])
 
         return True
+
+
+    def deleteComponent (self, cid) :
+        '''This will delete a specific component from a project which
+        includes both the configuration entry and the physical files.'''
+
+        # We will not bother if it is not in the config file.
+        # Otherwise, delete both the config and physical files
+        if isConfSection(self.projConfig['Components'], cid) :
+            del self.projConfig['Components'][cid]
+            # Sanity check
+            if not isConfSection(self.projConfig['Components'], cid) :
+                writeConfFile(self.projConfig)
+                self.log.writeToLog('COMP-030')
+            # Hopefully all went well with config delete, now on to the files
+            compFolder = os.path.join(self.local.projProcessFolder, cid)
+            if os.path.isdir(compFolder) :
+                shutil.rmtree(compFolder)
+                self.log.writeToLog('COMP-031', [cid])
+            else :
+                self.log.writeToLog('COMP-032', [cid])
+
+            self.log.writeToLog('COMP-033', [cid])
+        else :
+            self.log.writeToLog('COMP-035', [cid])
+
+
+    def addComponentType (self, cType) :
+        '''Add (register) a component type to the config if it 
+        is not there already.'''
+
+        Ctype = cType.capitalize()
+        if not isComponentType(cType) :
+            # Build the comp type config section
+            buildConfSection(self.projConfig, 'CompTypes')
+            buildConfSection(self.projConfig['CompTypes'], Ctype)
+
+            # Get persistant values from the config if there are any
+            newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rpmConfigFolder, cType + '.xml'))
+            if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
+                self.projConfig['CompTypes'][Ctype] = newSectionSettings
+                # Save the setting rightaway
+                writeConfFile(self.projConfig)
+            return True
+
+
+# FIXME: We will lock via the config, not lock files
 
 
     def lockComponent (self, cid, ctype = None) :
@@ -293,112 +349,65 @@ class Project (object) :
                 self.log.writeToLog('COMP-027', [cid])
 
 
-    def deleteComponent (self, cid) :
-        '''This will delete a specific component from a project which
-        includes both the configuration entry and the physical files.'''
+###############################################################################
+############################ Post Process Functions ###########################
+###############################################################################
 
-        # We will not bother if it is not in the config file.
-        # Otherwise, delete both the config and physical files
-        if isConfSection(self.projConfig['Components'], cid) :
-            del self.projConfig['Components'][cid]
-            # Sanity check
-            if not isConfSection(self.projConfig['Components'], cid) :
-                writeConfFile(self.projConfig)
-                self.log.writeToLog('COMP-030')
-            # Hopefully all went well with config delete, now on to the files
-            compFolder = os.path.join(self.local.projProcessFolder, cid)
-            if os.path.isdir(compFolder) :
-                shutil.rmtree(compFolder)
-                self.log.writeToLog('COMP-031', [cid])
-            else :
-                self.log.writeToLog('COMP-032', [cid])
+    def runPostProcess (self, cType, cid = None) :
+        '''Run a post process on a single component file or all the files
+        of a specified type.'''
 
-            self.log.writeToLog('COMP-033', [cid])
-        else :
-            self.log.writeToLog('COMP-035', [cid])
-
-
-    def addComponentType (self, cType) :
-        '''Add (register) a component type to the config if it 
-        is not there already.'''
-
-        Ctype = cType.capitalize()
-        # Build the comp type config section
-        if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
-            buildConfSection(self.projConfig, 'CompTypes')
-            buildConfSection(self.projConfig['CompTypes'], Ctype)
-
-        # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rpmConfigFolder, 'usfm.xml'))
-        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
-            self.projConfig['CompTypes'][Ctype] = newSectionSettings
-            # Save the setting rightaway
-            writeConfFile(self.projConfig)
-
-
-    def postProcessComponent (self, cid) :
-        '''Run a post process on the working text of a single component file.'''
+        # First test to see that we have a valid cType specified dive out here
+        # if it is not
+        if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
+            self.log.writeToLog('POST-010', [cType])
+            return False
 
         # Create target file path and name
-        cType = self.projConfig['Components'][cid]['type']
-        target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
-        if os.path.isfile(target) :
-            self.runPostProcess(target, cType, cid)
-        else :
-            self.log.writeToLog('COMP-060', [target])
+        if cid :
+            target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            if os.path.isfile(target) :
+                self.postProcessComponent(target, cType, cid)
+                return True
+            else :
+                self.log.writeToLog('POST-020', [target])
+
+        # No CID means we want to do the entire set of components
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
+            if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
+                self.log.writeToLog('POST-030', [cType])
+                return False
+
+        # If we made it this far we can assume it is okay to post process
+        # everything for this component type
+        for c in self.projConfig['Components'].keys() :
+            if self.projConfig['Components'][c]['type'] == cType :
+                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                self.postProcessComponent(target, cType, c)
+
+        return True
 
 
-    def runPostProcess (self, target, cType, cid) :
-        '''Run a post process on a file, in place.'''
+    def postProcessComponent (self, target, cType, cid) :
+        '''Run a post process on a single component file, in place.'''
+
+        # First check to see if this specific component is locked
+        if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
+            self.log.writeToLog('POST-040', [cid])
 
         script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
         if os.path.isfile(script) :
             err = subprocess.call([script, target])
             if err == 0 :
-                self.log.writeToLog('COMP-065', [fName(target)])
+                self.log.writeToLog('POST-050', [fName(target)])
             else :
-                self.log.writeToLog('COMP-066', [fName(target), str(err)])
+                self.log.writeToLog('POST-060', [fName(target), str(err)])
         else :
-            self.log.writeToLog('COMP-067', [fName(script), cid])
+            self.log.writeToLog('POST-070', [fName(script), cid])
+            self.log.writeToLog('POST-075')
 
 
-    def postProcessType (self, cType) :
-        '''Run the post process on every component of a specified type.'''
-
-        good = 0
-        valid = 0
-        target = ''
-        def runIt (target, cType, c) :
-            if os.path.isfile(target) :
-                self.runPostProcess(target, cType, c)
-                return True
-            else :
-                self.log.writeToLog('COMP-060', [target])
-
-        for c in self.projConfig['Components'].keys() :
-            # We only want a specific type of component and we want to weed 
-            # out any meta components
-            if self.projConfig['Components'][c]['type'] == cType :
-                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
-                try :
-                    # If the component has a list, then it is a meta component
-                    # we will want to skip those
-                    l = self.projConfig['Components'][c]['list']
-                    pass
-                except :
-                    # An exception is good in this case
-                    valid +=1
-                    if runIt(target, cType, c) :
-                        good +=1
-
-        # Simple test to see if all the componets were processed
-        if good == valid :
-            return True
-        else :
-            return False
-
-
-    def installPostProcess (self, pid, cType = None) :
+    def installPostProcess (self, cType, script = None) :
         '''Install the post_process.py script into the project processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
@@ -407,47 +416,61 @@ class Project (object) :
         exsists and grab those first. If one does not exsist we can copy
         a default script.'''
 
-        # In case this is a new project we may need to make a process (components) folder
+        # In case this is a new project we may need to install a component
+        # type and make a process (components) folder
+        if not self.isComponentType(cType) :
+            self.addComponentType(cType)
+
         if not os.path.isdir(self.local.projProcessFolder) :
             os.mkdir(self.local.projProcessFolder)
 
-        # Set the default paths/names
-        editor = ''
-        source = ''
-        target = ''
-        # If there is no cType or no CompTypes yet then we'll do the best we can
-        # to set the default paths
-        if cType :
-            source = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.py')
-            target = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
-        else :
-            # This is somewhat of a guess, we'll get the first one we find
-            # but this might need to be changed at some point.
-            compTypes = self.userConfig['System']['recognizedComponentTypes']
-            for ct in compTypes :
-                fn = ct + '-post_process.py'
-                source = os.path.join(self.local.rpmCompTypeFolder, ct, fn)
-                target = os.path.join(self.local.projProcessFolder, ct + '-post_process.py')
-
-        # Look a little harder to see if there is a source closer by
-        home = self.userConfig['Projects'][pid]['projectPath']
-        parent = os.path.dirname(home)
-        gather = os.path.join(parent, 'gather')
-        if os.path.isdir(gather) :
-            parent = gather
-
-        if os.path.isfile(os.path.join(parent, self.projectIDCode + '.py')) :
-            source = os.path.join(parent, self.projectIDCode + '.py')
-
-        # If nothing else is there, copy in the new script
-        if not os.path.isfile(target) :
-            # No return from shutil.copy() is good
-            if not shutil.copy(source, target) :
-                self.log.writeToLog('COMP-070', [fName(target), fName(source)])
-            return True
-        else :
-            self.log.writeToLog('COMP-072', [fName(target)])
+        # First check to see if there already is a script, return if there is
+        defaultTarget = os.path.join(self.local.projProcessFolder, 'usfm-post_process.py')
+        if os.path.isfile(defaultTarget) :
+            self.log.writeToLog('POST-080', [defaultTarget])
             return False
+
+        # Check to see if we have a custom post process script to use
+        # If something goes wrong here we will want to quite
+        if script :
+            if not os.path.isfile(script) :
+                self.log.writeToLog('POST-085', [script])
+                return False
+            else :
+                scriptTarget = os.path.join(self.local.projProcessFolder, fName(script))
+                # Now copy it in. No return from shutil.copy() is good
+                if not shutil.copy(script, scriptTarget) :
+                    self.log.writeToLog('POST-090', [fName(script)])
+                    # Check if it needs to be unzipped
+#                    if fName(scriptTarget).split('.')[len(fName(scriptTarget).split('.'))-1].lower() == 'zip' :
+                    if zipfile.is_zipfile(scriptTarget) :
+                        myzip = zipfile.ZipFile(scriptTarget, 'r')
+                        print myzip.testzip()
+                        myzip.extractall(self.local.projProcessFolder)
+                        os.remove(scriptTarget)
+                        # A valid zip file will always contain a file named usfm-post_process.py
+                        if os.path.isfile(defaultTarget) :
+                            self.log.writeToLog('POST-100', [fName(scriptTarget)])
+                        else :
+                            self.log.writeToLog('POST-105', [fName(scriptTarget)])
+                            return False
+
+                    self.log.writeToLog('POST-110', [fName(scriptTarget)])
+                    return True
+
+        # No script was found, just copy in a default starter script
+        source = os.path.join(self.local.rpmCompTypeFolder, cType, 'usfm-post_process.py')
+        # Remember, no news from shutil.copy() is good news
+        if not shutil.copy(source, defaultTarget) :
+            self.log.writeToLog('POST-120', [fName(defaultTarget), fName(source)])
+            return True
+
+
+    def lockPostProcess (self, cid = None) :
+        '''Lock a component or component type so no post processing can happen to it.'''
+
+        pass
+
 
 
 ###############################################################################

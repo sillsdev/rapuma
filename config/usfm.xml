@@ -48,5 +48,12 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
+    <setting>
+        <name>Is Locked</name>
+        <key>isLocked</key>
+        <description>All the installed components of this type will be prevented from undergoing any automated processing of any kind that involves changing the working text.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
 </root>
 

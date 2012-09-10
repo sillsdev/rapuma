@@ -245,28 +245,6 @@ def deleteProject (uc, pid = None) :
     return True
 
 
-def installPostProcess (pid, cType) :
-    '''This is a dummy function that will pass off to one of the same name in the
-    project manager.'''
-
-    aProject = initProject(pid)
-    if aProject.installPostProcess(pid, cType) :
-        return True
-    else :
-        terminal('\nPost processes script instalation failed. Please check the project log for more details.')
-
-
-def postProcessType (pid, cType) :
-    '''This is a dummy function that will pass off to one of the same name in the
-    project manager. It will run the post process on every component of a specified type.'''
-
-    aProject = initProject(pid)
-    if aProject.postProcessType(cType) :
-        return True
-    else :
-        terminal('\nOne or more post processes failed. Please check the project log for more details.')
-
-
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.'''
 
@@ -389,15 +367,6 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
 
-        # Install post process script, cType is required (part of argv)
-        elif args['post_process'] :
-            installPostProcess(args['project_id'], args['post_process'])
-
-        # Run the post process script on all the files of a component type,
-        # cType is required (part of argv)
-        elif args['run_process'] :
-            postProcessType(args['project_id'], args['run_process'])
-
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
         if isProject(args['project_id']) :
@@ -437,9 +406,6 @@ def userArguments (args) :
             elif args['component_unlock'] :
                 aProject.unlockComponent(args['component_id'])
 
-            # Run post processes on a single component
-            elif args['run_process'] :
-                aProject.postProcessComponent(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
 
@@ -479,6 +445,32 @@ def userArguments (args) :
                 aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
+
+    # Post processing commands
+    elif sys.argv[1].lower() == 'process' :
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
+
+        # Run a post process command on a component or component type
+        if args['run_process'] :
+            if args['component_id'] :
+                aProject.runPostProcess(args['component_type'], args['component_id'])
+            else :
+                aProject.runPostProcess(args['component_type'])
+
+        # Install a custom or a default post process script
+        elif args['install_process'] :
+            if args['file_name'] :
+                aProject.installPostProcess(args['component_type'], args['file_name'])
+            else :
+                aProject.installPostProcess(args['component_type'])
+
+        # Lock a process from happening on a component or component type
+        elif args['lock_process'] :
+            if args['component_id'] :
+                aProject.lockPostProcess(args['component_type'], args['component_id'])
+            else :
+                aProject.lockPostProcess(args['component_type'])
 
     # Testing commands
     elif sys.argv[1].lower() == 'test' :
@@ -529,8 +521,6 @@ projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target. This is used only for project creation (-n).')
-projCommand.add_argument('-p', '--post_process', help='Install the default post_process.py script for a component type into the project process folder. You must specify a component type.')
-projCommand.add_argument('-r', '--run_process', help='Run the post_process.py script on all files of a specified component type in the project process folder. You must specify a component type.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -545,7 +535,6 @@ compCommand.add_argument('-r', '--component_render', action='store_true', help='
 compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')
 compCommand.add_argument('-l', '--component_lock', action='store_true', help='Lock a component so the working text cannot be copied over if the source is updated. By adding they type code (-t), an entire set of components can be locked.')
 compCommand.add_argument('-u', '--component_unlock', action='store_true', help='Unlock a component, or a set of components by adding the component type (-t), so working text can be updated with newer source.')
-compCommand.add_argument('-p', '--run_process', action='store_true', help='Run the post_process.py script on a single component.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
@@ -572,6 +561,16 @@ settingsCommand.add_argument('-c', '--configuration', help='The configuration se
 settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
 settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
+
+# Add Post Processing subprocess arguments
+processCommand = subparsers.add_parser('process', help='General settings for handling component post processing commands.')
+processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+processCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
+processCommand.add_argument('-c', '--component_id', help='If used with the -r command, a post process will run on only the specified component.')
+processCommand.add_argument('-r', '--run_process', action='store_true', help='Run the post_process.py script. If not component (-c) is specified, it will run on all components of the specified type.')
+processCommand.add_argument('-i', '--install_process', action='store_true', help='Install the default post_process.py script for a component type into the project process folder. If you have a specific system compatable script you wish to install, use the -f argument to point to it.')
+processCommand.add_argument('-f', '--file_name', help='The path and file name of a specific post process to be installed.')
+processCommand.add_argument('-l', '--lock_process', help='Lock or unlock a post process from running on a component type. If a component (-c) is specified, only that single component will be locked.')
 
 # Add testing subprocess arguments
 testCommand = subparsers.add_parser('test', help='General system testing commands help')
