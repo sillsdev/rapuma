@@ -75,6 +75,8 @@ class ProjLog (object) :
             'COMP-035' : ['ERR', 'There was no entry in the project configuration file for the [<<1>>] component. The delete component command cannot be completed.'],
             'COMP-040' : ['ERR', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
             'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
+            'COMP-060' : ['MSG', 'The [<<1>>] component type has been added to the project.'],
+            'COMP-065' : ['ERR', 'Adding the [<<1>>] component type to the project failed.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

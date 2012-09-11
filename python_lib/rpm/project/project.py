@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess, zipfile
+import codecs, os, sys, shutil, imp, subprocess, tarfile
 #from configobj import ConfigObj, Section
 
 
@@ -222,7 +222,7 @@ class Project (object) :
         above in createComponent().'''
 
         # Inject the component type into the config file.
-        if not isComponentType(cType) :
+        if not self.isComponentType(cType) :
             self.addComponentType(cType)
 
         # See if the working text is present, quite if it is not
@@ -251,7 +251,7 @@ class Project (object) :
                 self.log.writeToLog('PROJ-026', [cid])
 
         # Run any working text post processes on the new component text
-        if self.postProcessComponent(cid) :
+        if self.runPostProcess(cType, cid) :
             self.log.writeToLog('TEXT-060', [cid])
 
         return True
@@ -287,7 +287,7 @@ class Project (object) :
         is not there already.'''
 
         Ctype = cType.capitalize()
-        if not isComponentType(cType) :
+        if not self.isComponentType(cType) :
             # Build the comp type config section
             buildConfSection(self.projConfig, 'CompTypes')
             buildConfSection(self.projConfig['CompTypes'], Ctype)
@@ -298,7 +298,14 @@ class Project (object) :
                 self.projConfig['CompTypes'][Ctype] = newSectionSettings
                 # Save the setting rightaway
                 writeConfFile(self.projConfig)
-            return True
+            
+            # Sanity check
+            if self.isComponentType(cType) :
+                self.log.writeToLog('COMP-060', [cType])
+                return True
+            else :
+                self.log.writeToLog('COMP-065', [cType])
+                return False
 
 
 # FIXME: We will lock via the config, not lock files
@@ -442,13 +449,11 @@ class Project (object) :
                 if not shutil.copy(script, scriptTarget) :
                     self.log.writeToLog('POST-090', [fName(script)])
                     # Check if it needs to be unzipped
-#                    if fName(scriptTarget).split('.')[len(fName(scriptTarget).split('.'))-1].lower() == 'zip' :
-                    if zipfile.is_zipfile(scriptTarget) :
-                        myzip = zipfile.ZipFile(scriptTarget, 'r')
-                        print myzip.testzip()
-                        myzip.extractall(self.local.projProcessFolder)
+                    if tarfile.is_tarfile(scriptTarget) :
+                        mytar = tarfile.open(scriptTarget, 'r')
+                        mytar.extractall(self.local.projProcessFolder)
                         os.remove(scriptTarget)
-                        # A valid zip file will always contain a file named usfm-post_process.py
+                        # A valid tar file will always contain a file named usfm-post_process.py
                         if os.path.isfile(defaultTarget) :
                             self.log.writeToLog('POST-100', [fName(scriptTarget)])
                         else :

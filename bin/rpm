@@ -52,7 +52,7 @@ sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'project'))
 sys.path.insert(0, os.path.join(rpmHome, 'python_lib', 'rpm', 'component'))
 
 # Load standard Python modules
-import codecs, shutil, operator, argparse, zipfile, subprocess
+import codecs, shutil, operator, argparse, subprocess, tarfile
 from datetime import *
 from configobj import ConfigObj
 
@@ -209,6 +209,15 @@ def unlockProject (uc, pid = None) :
     return True
 
 
+def addComponentType (uc, pid, cType) :
+    '''Add a component type to a project.'''
+
+    if isProject(pid) :
+        aProject = initProject(pid)
+        aProject.addComponentType(cType)
+
+
+
 def deleteProject (uc, pid = None) :
     '''Delete a project fromthe RPM system registry and from the hard drive.'''
 
@@ -286,11 +295,11 @@ def getExampleSourceProject (exampID) :
     example_lib folder in the RPM system. This is for system testing
     and nifty canned demos.'''
 
-    exampleFile = os.path.join(local.rpmExamplesFolder, exampID + '.zip')
+    exampleFile = os.path.join(local.rpmExamplesFolder, exampID + '.tar.gz')
     demoFile = os.path.join(local.projHome, exampID, exampID + '.rpmDemo')
-    thisZipFile = zipfile.ZipFile(exampleFile, 'r')
+    thisTarFile = tarfile.open(exampleFile, 'r')
     if os.path.isfile(exampleFile) :
-        thisZipFile.extractall()
+        thisTarFile.extractall()
         terminal('Extracted the [' + exampID + '] ParaTExt example project.')
 
 def runExamplePubDemoProject (demoID) :
@@ -324,6 +333,26 @@ def runExamplePubDemoProject (demoID) :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
+    def compTypeNotValid (cType) :
+        terminal('The component type given [' + cType + '] is not valid.')
+
+
+    def noResolve (path) :
+        terminal('Cannot resolve path. The path [' + path + '] is not valid! Process halting.')
+
+
+
+    def resolvePath (path) :
+        '''Resolve the '~' in a path if there is one with the actual home path.'''
+
+        if path[0] == '~' :
+            # Look for "~/" shorthand path and replace it with the actual "home"
+            return path.replace('~', os.environ.get('HOME'))
+        else :
+            # Otherwise run abspath on it and send it on
+            return os.path.abspath(path)
+
+
     # Project level commands
     if sys.argv[1].lower() == 'project' :
         # Creating a new project
@@ -332,15 +361,9 @@ def userArguments (args) :
             if args['project_folder'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
-                if args['project_folder'][0] == '~' :
-                    # Look for "~/" shorthand path and replace it with the actual "home"
-                    customLocal = args['project_folder'].replace('~', os.environ.get('HOME'))
-                else :
-                    # Otherwise run abspath on it and send it on
-                    customLocal = os.path.abspath(args['project_folder'])
-
+                customLocal = resolvePath(args['project_folder'])
                 if not os.path.isdir(customLocal) :
-                    terminal('Cannot resolve path. The path [' + customLocal + '] is not valid! Halting project creation process.')
+                    noResolve(customLocal)
                     sys.exit()
 
                 projFolder = os.path.join(customLocal, args['project_id'])
@@ -367,10 +390,17 @@ def userArguments (args) :
         elif args['project_delete'] :
             deleteProject(uc, args['project_id'])
 
+        # Add a component type to an exsisting project
+        elif args['compType_add'] :
+            addComponentType(uc, args['project_id'], args['compType_add'])
+
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
+            if not aProject.isComponentType(args['component_type']) :
+                compTypeNotValid(args['component_type'])
+                return False
             if args['component_new'] :
                 force = None
                 if args['component_force'] :
@@ -413,13 +443,16 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'font' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
+            if not aProject.isComponentType(args['component_type']) :
+                compTypeNotValid(args['component_type'])
+                return False
             if args['font_new'] :
                 aProject.addComponentFont(args['component_type'], args['font_name'])
-            if args['font_remove'] :
+            elif args['font_remove'] :
                 aProject.removeComponentFont(args['component_type'], args['font_name'])
-            if args['font_primary'] :
+            elif args['font_primary'] :
                 aProject.setPrimaryFont(args['component_type'], args['font_name'])
-            if args['font_mapping'] :
+            elif args['font_mapping'] :
                 aProject.addFontMapping(args['component_type'], args['font_name'], args['font_mapping'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
@@ -428,11 +461,14 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'style' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
+            if not aProject.isComponentType(args['component_type']) :
+                compTypeNotValid(args['component_type'])
+                return False
             if args['style_default'] :
                 aProject.createDefaultStyleFile(args['component_type'])
-            if args['style_override'] :
+            elif args['style_override'] :
                 aProject.createCustomStyleFile(args['component_type'])
-            if args['style_component'] :
+            elif args['style_component'] :
                 aProject.createComponentStyleFile(args['component_id'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
@@ -450,6 +486,9 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'process' :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
+            if not aProject.isComponentType(args['component_type']) :
+                compTypeNotValid(args['component_type'])
+                return False
 
         # Run a post process command on a component or component type
         if args['run_process'] :
@@ -461,7 +500,12 @@ def userArguments (args) :
         # Install a custom or a default post process script
         elif args['install_process'] :
             if args['file_name'] :
-                aProject.installPostProcess(args['component_type'], args['file_name'])
+                filePath = resolvePath(args['file_name'])
+                print filePath
+                if not os.path.isfile(filePath) :
+                    noResolve(filePath)
+                    sys.exit()
+                aProject.installPostProcess(args['component_type'], filePath)
             else :
                 aProject.installPostProcess(args['component_type'])
 
@@ -521,12 +565,13 @@ projCommand.add_argument('-l', '--project_lock', action='store_true', help='Lock
 projCommand.add_argument('-u', '--project_unlock', action='store_true', help='Unlock a project. There must be a locked project configuration file present.')
 projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target. This is used only for project creation (-n).')
+projCommand.add_argument('-c', '--compType_add', help='Add a component type to the project.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+compCommand.add_argument('component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
-compCommand.add_argument('-t', '--component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
 compCommand.add_argument('-f', '--component_force', action='store_true', help='Force the install (reinstall) of a component. This is used with the -n command.')
 compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
@@ -549,7 +594,7 @@ fontCommand.add_argument('-m', '--font_mapping', help='Add a font mapping for a 
 # Add style subprocess arguments
 styleCommand = subparsers.add_parser('style', help='General font handling commands help')
 styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-styleCommand.add_argument('-t', '--component_type', help='The component type is needed when adding a style for this type of component.')
+styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component.')
 styleCommand.add_argument('-d', '--style_default', action='store_true', help='Create a default style file for this component type.')
 styleCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
 styleCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
