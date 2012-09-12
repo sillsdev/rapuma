@@ -140,8 +140,15 @@ class Project (object) :
         return cidPdf
 
 
-    def isComponentType (self, cType) :
+    def isComponent (self, cid) :
         '''Simple test to see if a component exsists. Return True if it is.'''
+
+        if testForSetting(self.projConfig, 'Components', cid) :
+            return True
+
+
+    def isComponentType (self, cType) :
+        '''Simple test to see if a component type exsists. Return True if it is.'''
 
         Ctype = cType.capitalize()
         if testForSetting(self.projConfig, 'CompTypes', Ctype) :
@@ -306,54 +313,128 @@ class Project (object) :
             else :
                 self.log.writeToLog('COMP-065', [cType])
                 return False
-
-
-# FIXME: We will lock via the config, not lock files
-
-
-    def lockComponent (self, cid, ctype = None) :
-        '''Create a component lock so that the working text cannot be updated
-        by newer source files. If the component type code is included, install
-        a lock file in the process folder that will prevent all components of
-        the same type from being updated.'''
-
-        compLockFile = os.path.join(self.local.projProcessFolder, cid, cid + self.local.lockExt)
-        if ctype :
-            typeLockFile = os.path.join(self.local.projProcessFolder, ctype + self.local.lockExt)
-
-        def writeLock (fn) :
-            writeout = codecs.open(fn, "w", "utf-8")
-            writeout.write(fn)
-            writeout.close
-
-        if cid and ctype :
-            writeLock(typeLockFile)
-            self.log.writeToLog('COMP-021', [ctype])
         else :
-            writeLock(compLockFile)
-            self.log.writeToLog('COMP-020', [cid])
+            self.log.writeToLog('COMP-062', [cType])
+            return False
 
 
-    def unlockComponent (self, cid, ctype = None) :
-        '''Unlock (delete the lock file) of a specific component or a set of
-        components of the same type.'''
+###############################################################################
+############################### Locking Functions #############################
+###############################################################################
 
-        compLockFile = os.path.join(self.local.projProcessFolder, cid, cid + self.local.lockExt)
-        if ctype :
-            typeLockFile = os.path.join(self.local.projProcessFolder, ctype + self.local.lockExt)
+    def testIsLocked (self, item) :
+        '''Test to see if a project, component type, or component are
+        locked. Start at the top of the hierarchy and return True if an
+        item is found that is locked above the target item or True if
+        the item is locked. '''
 
-        if cid and ctype :
-            try :
-                os.remove(typeLockFile)
-                self.log.writeToLog('COMP-026', [ctype])
-            except :
-                self.log.writeToLog('COMP-028', [ctype])
+        if str2bool(testForSetting(self.userConfig['Projects'], item, 'isLocked')) == True :
+            return True
+        elif str2bool(testForSetting(self.projConfig['CompTypes'], item.capitalize(), 'isLocked')) == True :
+            return True
+        elif str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
+            return True
         else :
-            try :
-                os.remove(compLockFile)
-                self.log.writeToLog('COMP-025', [cid])
-            except :
-                self.log.writeToLog('COMP-027', [cid])
+            return False
+
+
+    def lockProject (self) :
+        '''Lock an entire project so no components in it can be processed.'''
+
+        if not self.testIsLocked(self.projectIDCode) :
+            self.userConfig['Projects'][self.projectIDCode]['isLocked'] = True
+            writeConfFile(self.userConfig)
+            self.log.writeToLog('LOCK-018', [self.projectIDCode])
+            return True
+
+
+    def unlockProject (self) :
+        '''Unlock a project so all components can be processed.'''
+
+        if self.testIsLocked(self.projectIDCode) :
+            self.userConfig['Projects'][self.projectIDCode]['isLocked'] = False
+            writeConfFile(self.userConfig)
+            self.log.writeToLog('LOCK-028', [self.projectIDCode])
+            return True
+
+
+    def lockComponentType (self, cType) :
+        '''Lock a component type so those components cannot be processed.
+        However, if the project is locked we will not bother.'''
+
+        Ctype = cType.capitalize()
+        if not self.testIsLocked(self.projectIDCode) :
+            if not self.testIsLocked(Ctype) :
+                self.projConfig['CompTypes'][Ctype]['isLocked'] = True
+                writeConfFile(self.projConfig)
+                self.log.writeToLog('LOCK-038', [cType])
+            else :
+                self.log.writeToLog('LOCK-038', [cType])
+            return True
+        else :
+            self.log.writeToLog('LOCK-007', [Ctype])
+            return False
+
+
+    def unlockComponentType (self, cType) :
+        '''Unlock a component type so components can be processed.'''
+
+        Ctype = cType.capitalize()
+        if not self.testIsLocked(self.projectIDCode) :
+            if self.testIsLocked(Ctype) :
+                self.projConfig['CompTypes'][Ctype]['isLocked'] = False
+                writeConfFile(self.projConfig)
+                self.log.writeToLog('LOCK-048', [cType])
+            else :
+                self.log.writeToLog('LOCK-048', [cType])
+            return True
+        else :
+            self.log.writeToLog('LOCK-007', [Ctype])
+            return False
+
+
+    def lockComponent (self, cid) :
+        '''Lock a component so it cannot be processed.'''
+
+        if self.isComponent (cid) :
+            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
+            if not self.testIsLocked(self.projectIDCode) :
+                if not self.testIsLocked(Ctype) :
+                    self.projConfig['Components'][cid]['isLocked'] = True
+                    writeConfFile(self.projConfig)
+                    self.log.writeToLog('LOCK-058', [cid])
+                    return True
+                else :
+                    self.log.writeToLog('LOCK-009', [cid, Ctype])
+                    return False
+            else :
+                self.log.writeToLog('LOCK-008', [cid])
+                return False
+        else :
+            self.log.writeToLog('LOCK-055', [cid])
+            return False
+
+
+    def unlockComponent (self, cid) :
+        '''Unlock a component so it can be processed.'''
+
+        if self.isComponent (cid) :
+            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
+            if not self.testIsLocked(self.projectIDCode) :
+                if not self.testIsLocked(Ctype) :
+                    self.projConfig['Components'][cid]['isLocked'] = False
+                    writeConfFile(self.projConfig)
+                    self.log.writeToLog('LOCK-068', [cid])
+                    return True
+                else :
+                    self.log.writeToLog('LOCK-009', [cid, Ctype])
+                    return False
+            else :
+                self.log.writeToLog('LOCK-008', [Ctype])
+                return False
+        else :
+            self.log.writeToLog('LOCK-055', [cid])
+            return False
 
 
 ###############################################################################
@@ -471,13 +552,6 @@ class Project (object) :
             return True
 
 
-    def lockPostProcess (self, cid = None) :
-        '''Lock a component or component type so no post processing can happen to it.'''
-
-        pass
-
-
-
 ###############################################################################
 ################################ Font Functions ###############################
 ###############################################################################
@@ -557,6 +631,17 @@ class Project (object) :
         else :
 
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
+
+
+    def isProject (self, pid) :
+        '''Look up in the user config to see if a project is registered. This
+        is a duplicate of the function in the main rpm file.'''
+
+        try :
+            if pid in self.userConfig['Projects'] :
+                return True
+        except :
+            return False
 
 
     def changeConfigSetting (self, config, section, key, newValue) :

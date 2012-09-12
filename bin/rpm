@@ -139,83 +139,12 @@ def newProject (uc, pc, pid, ptype = None, pname = None) :
     return True
 
 
-def lockProject (uc, pid = None) :
-    '''Lock a project out of the RPM system.  This will not remove the
-    project data but will 'disable' the project by taking its reference
-    out of the user's config file and locking the project.conf file.'''
-
-    global local
-
-    # If no pid was given this fails
-    if not pid :
-        terminal('Error: Project ID code not given or found. lock operation failed.')
-        return
-
-    # Check if project is registered with RPM and get real path and reinit local paths
-    if not uc.userConfig['Projects'][pid] :
-        terminal('Error: Not a valid registered project, cannot continue with lock operation.')
-        return
-    else :
-        local = ProjLocal(rpmHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
-
-    # Wanting to be humane, we don't actually remove or delete anything, just lock it down
-    if os.path.isfile(local.projConfFile) :
-        os.rename(local.projConfFile, local.projConfFile + local.lockExt)
-    else :
-        terminal('Error: No project configuration file was found, lock operation failed.')
-        return
-
-    # If we made it this far, remove references from user rpm.conf
-    uc.unregisterProject(pid)
-
-    # Report the process is done
-    terminal('Project [' + pid + '] is locked and removed from system configuration.')
-    return True
-
-
-def unlockProject (uc, pid = None) :
-    '''Unlock a project by removing the lock extention from the project.conf file.
-    Then add a reference back into the user config file. Because there is no real
-    fixed path to the project given, this assumes that it is starting at the same
-    level as the project folder. If not, it will fail.'''
-
-    global local
-
-    # If no pid was given this fails
-    if not pid :
-        terminal('Error: Project ID code not given or found. unlock operation failed.')
-        return
-
-    # Check if project is registered with RPM and get real path and reinit local paths
-    if testForSetting(uc.userConfig, 'Projects', pid) :
-        terminal('Error: Project is already registered, cannot continue with unlock operation.')
-        return
-    else :
-        local = ProjLocal(rpmHome, userHome, os.path.join(projHome, pid))
-
-    # Unlock the project conf file
-    if os.path.isfile(local.projConfFile + local.lockExt) :
-        os.rename(local.projConfFile + local.lockExt, local.projConfFile)
-    else :
-        terminal('Error: No locked configuration file was found, unlock operation failed.')
-        return
-
-    # If we made it this far, add references to the user rpm.conf file
-    pc = ConfigObj(local.projConfFile)
-    uc.registerProject(pid, pc['ProjectInfo']['projectName'], pc['ProjectInfo']['projectType'], local.projHome)
-
-    # Report the process is done
-    terminal('Project [' + pid + '] unlocked and added to the system configuration.')
-    return True
-
-
 def addComponentType (uc, pid, cType) :
     '''Add a component type to a project.'''
 
     if isProject(pid) :
         aProject = initProject(pid)
         aProject.addComponentType(cType)
-
 
 
 def deleteProject (uc, pid = None) :
@@ -393,6 +322,7 @@ def userArguments (args) :
             if not aProject.isComponentType(args['component_type']) :
                 compTypeNotValid(args['component_type'])
                 return False
+            # Add a new component
             if args['component_new'] :
                 force = None
                 if args['component_force'] :
@@ -404,9 +334,9 @@ def userArguments (args) :
                         aProject.addComponent(args['component_id'], args['component_type'], force)
                 else :
                     terminal('Must supply a component type (-t xxxx) to create a component.')
+            # Delete a component
             if args['component_delete'] :
                 aProject.deleteComponent(args['component_id'])
-
             # Render vs. view command is just a matter of forcing the component
             # to be rendered if render is selected by the user. Otherwise, if
             # only view is requested, force is set to False and the component
@@ -414,6 +344,7 @@ def userArguments (args) :
             if args['component_render'] :
                 force = True
                 aProject.renderComponent(args['component_id'], force)
+            # View only
             if args['component_view'] :
                 force = False
                 aProject.renderComponent(args['component_id'], force)
@@ -428,6 +359,7 @@ def userArguments (args) :
             if not aProject.isComponentType(args['component_type']) :
                 compTypeNotValid(args['component_type'])
                 return False
+
             if args['font_new'] :
                 aProject.addComponentFont(args['component_type'], args['font_name'])
             elif args['font_remove'] :
@@ -446,6 +378,7 @@ def userArguments (args) :
             if not aProject.isComponentType(args['component_type']) :
                 compTypeNotValid(args['component_type'])
                 return False
+
             if args['style_default'] :
                 aProject.createDefaultStyleFile(args['component_type'])
             elif args['style_override'] :
@@ -492,49 +425,34 @@ def userArguments (args) :
                 aProject.installPostProcess(args['component_type'])
 
     # Locking commands
-    
-# FIXME: Working here
-    
-    
-    # Remember to try to work in the hyarchical structure proj/cType/comp
-    
-            # Locking an exsisting project
-        elif args['project_lock'] :
-            lockProject(uc, args['project_id'])
+    elif sys.argv[1].lower() == 'locking' :
+        if isProject(args['project_id']) :
+            aProject = initProject(args['project_id'])
 
-        # Unlocking an exsisting project
-        elif args['project_unlock'] :
-            unlockProject(uc, args['project_id'])
-
-
-
-        # Lock a process from happening on a component or component type
-        elif args['lock_process'] :
-            if args['component_id'] :
-                aProject.lockPostProcess(args['component_type'], args['component_id'])
-            else :
-                aProject.lockPostProcess(args['component_type'])
-
-
-
-            # Component and component type locking and unlocking
-            if args['component_lock'] and args['component_type'] :
-                aProject.lockComponent(args['component_id'], args['component_type'])
-            elif args['component_lock'] :
-                aProject.lockComponent(args['component_id'])
-            elif args['component_unlock'] and args['component_type'] :
-                aProject.unlockComponent(args['component_id'], args['component_type'])
-            elif args['component_unlock'] :
-                aProject.unlockComponent(args['component_id'])
-
-
-
-
+        # Lock the whole project
+        if args['lock'] and not args['component_type'] and not args['component_id'] :
+            aProject.lockProject()
+        # Unlock the whole project
+        elif args['unlock'] and not args['component_type'] and not args['component_id'] :
+            aProject.unlockProject()
+        # Lock a component type
+        elif args['lock'] and args['component_type'] :
+            aProject.lockComponentType(args['component_type'])
+        # Unlock a component type
+        elif args['unlock'] and args['component_type'] :
+            aProject.unlockComponentType(args['component_type'])
+        # Lock a component
+        elif args['lock'] and args['component_id'] :
+            aProject.lockComponent(args['component_id'])
+        # Unlock a component
+        elif args['unlock'] and args['component_id'] :
+            aProject.unlockComponent(args['component_id'])
 
     # Testing commands
     elif sys.argv[1].lower() == 'test' :
         if args['source_id'] :
             getExampleSourceProject(args['source_id'])
+
         if args['demo_id'] :
             runExamplePubDemoProject(args['demo_id'])
 
@@ -543,6 +461,7 @@ def userArguments (args) :
         if args['about'] :
             terminal('\n' + systemName + ' version ' + systemVersion + '\n')
             terminal('About: ' + systemAbout + '\n')
+
         if args['basic'] :
             accessHtmlHelp()
 
@@ -628,7 +547,7 @@ processCommand.add_argument('-i', '--install_process', action='store_true', help
 processCommand.add_argument('-f', '--file_name', help='The path and file name of a specific post process to be installed.')
 
 # Add Project Locking subprocess arguments
-lockCommand = subparsers.add_parser('lock', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
+lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
 lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
 lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
