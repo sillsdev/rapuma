@@ -351,6 +351,11 @@ class Xetex (Manager) :
 
                         writeObject.write(line + '\n')
 
+
+# FIXME: Working here - problem with fpath, it is not the actual font folder name
+
+
+
             # Add all the font def commands
             writeObject.write('\n% Font Definitions\n')
             fpath = ''

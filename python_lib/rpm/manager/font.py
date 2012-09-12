@@ -78,7 +78,6 @@ class Font (Manager) :
 ###############################################################################
 
 
-
     def setPrimaryFont (self, cType, font) :
         '''Set the primary font for the project.'''
 

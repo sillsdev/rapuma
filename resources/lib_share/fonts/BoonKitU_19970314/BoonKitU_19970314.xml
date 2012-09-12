@@ -44,27 +44,33 @@ Todo:
             <value>BoonKitU_19970314</value>
         </setting>
         <setting>
+            <name>RPM Configuration Version</name>
+            <key>rpmConfigurationVersion</key>
+            <description>The version of this RPM font bundle set which will change whenever modifications are made to it.</description>
+            <type>string</type>
+            <value>00.00.01</value>
+        </setting>
+        <setting>
             <name>Features</name>
             <key>features</key>
-            <description>The features that will be used for this font.</description>
+            <description>The feature codes that are included in the font and could be used by the rendering application.</description>
             <type>list</type>
             <value>GR</value>
         </setting>
         <setting>
             <name>Mappings</name>
             <key>mappings</key>
-            <description>Alternate TECKit glyphe mappings that can be used with this font.</description>
-            <type>list</type>
-            <value>lana_renumber</value>
-        </setting>
-        <setting>
-            <name>Mapping Default</name>
-            <key>mappingDefault</key>
-            <description>The default TECKit glyphe mappings that will be used with this font.</description>
+            <description>Alternate TECKit glyphe mappings included in the bundle that can be used with this font.</description>
             <type>list</type>
             <value>lana_renumber</value>
         </setting>
     </section>
+
+
+Add a new section here that will contain the usfmTeX mapping information, all the information needed to form a font \def line should be contained here, not in the python code
+
+Add a new section here that will contain all the typeface information, remove all the TeX information
+
     <section>
         <name>Typeface Regular</name>
         <sectionID>TypefaceRegular</sectionID>
@@ -94,8 +100,8 @@ Todo:
             <name>TeXMapping</name>
             <key>texMapping</key>
             <description>The TeX font style this typeface maps to.</description>
-            <type>string</type>
-            <value>regular</value>
+            <type>list</type>
+            <value>regular,italic,bold,bolditalic</value>
         </setting>
         <setting>
             <name>Type</name>
