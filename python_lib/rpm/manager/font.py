@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, tarfile
 
 
 # Load the local classes
@@ -81,29 +81,29 @@ class Font (Manager) :
     def setPrimaryFont (self, cType, font) :
         '''Set the primary font for the project.'''
 
-        if not font :
-            sEditor = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-            if sEditor.lower() == 'paratext' :
-                font = getPTFont(self.project.local.projHome)
-                # Test for font
-                if not font :
-                    self.project.log.writeToLog('FONT-020')
-                    dieNow()
-            else :
-                # Quite here
-                if not sEditor :
-                    self.project.log.writeToLog('FONT-025')
-                else :
-                    self.project.log.writeToLog('FONT-030', [sEditor])
-                dieNow()
+#        if not font :
+#            sEditor = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+#            if sEditor.lower() == 'paratext' :
+#                font = getPTFont(self.project.local.projHome)
+#                # Test for font
+#                if not font :
+#                    self.project.log.writeToLog('FONT-020')
+#                    dieNow()
+#            else :
+#                # Quite here
+#                if not sEditor :
+#                    self.project.log.writeToLog('FONT-025')
+#                else :
+#                    self.project.log.writeToLog('FONT-030', [sEditor])
+#                dieNow()
 
         # If this didn't die already we should be able to record and install now
         self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
-        # Load the primary font if it is not there already
-        self.recordFont(cType, font)
-        self.installFont(cType)
+#        # Load the primary font if it is not there already
+#        self.recordFont(cType, font)
+# #       self.installFont(cType)
         writeConfFile(self.project.projConfig)
-        self.project.log.writeToLog('FONT-035', [font])
+#        self.project.log.writeToLog('FONT-035', [font])
         return True
 
 
@@ -111,12 +111,12 @@ class Font (Manager) :
         '''Return the true name of the font to be used if the one given
         is pointing to a substitute font in the same font family.'''
 
-        fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
-        if not os.path.isfile(fontInfo) :
+        metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        if not os.path.isfile(metaDataSource) :
             self.project.log.writeToLog('FONT-040', [font])
             dieNow()
 
-        fInfo = getXMLSettings(fontInfo)
+        fInfo = getXMLSettings(metaDataSource)
         if testForSetting(fInfo['FontInformation'], 'substituteFontName') :
             return fInfo['FontInformation']['substituteFontName']
         else :
@@ -124,31 +124,18 @@ class Font (Manager) :
 
 
     def recordFont (self, cType, font) :
-        '''Check for the exsitance of a font in the font conf file.
-        If there is one, return, if not add it.'''
+        '''Check for the exsitance of the specified font in the font folder.
+        Then extract the meta data into the appropreate configurations.'''
 
-        # It is expected that all the necessary meta data for this font is in
-        # a file located with the font. The system expects to find it in:
-        # ~/resources/lib_share/Fonts/[FontID]
-        fontInfo = os.path.join(self.project.local.rpmFontsFolder, font, font + '.xml')
-        if not os.path.isfile(fontInfo) :
+        metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        if not os.path.isfile(metaDataSource) :
             self.project.log.writeToLog('FONT-040', [font])
             dieNow()
 
-        # See if this is already in the config
-        if not testForSetting(self.fontConfig, 'Fonts') :
-            buildConfSection (self.fontConfig, 'Fonts')
-
-        record = False
-        if testForSetting(self.fontConfig['Fonts'], font) :
-            record = True
-        else :
-            buildConfSection (self.fontConfig['Fonts'], font)
-            record = True
-
-        if record :
+        # See if this font is already in the config
+        if not testForSetting(self.fontConfig, 'Fonts', font) :
             # Inject the font info into the project format config file.
-            fInfo = getXMLSettings(fontInfo)
+            fInfo = getXMLSettings(metaDataSource)
             self.fontConfig['Fonts'][font] = fInfo.dict()
 
             # Record the font with the component type that called it
@@ -172,26 +159,24 @@ class Font (Manager) :
             return False
 
 
-    def installFont (self, cType) :
-        '''Install (copy) a font into a project. This needs to take place
-        after the font has been recorded in the project configuration file.'''
+    def installFont (self, font) :
+        '''Install (copy) a font into a project. The font is bundled with
+        other necessary components in a tar.gz file. It will need to be
+        extrcted into the project font folder before the meta data can
+        be looked at and added to the project to be acted on. This function 
+        does that.'''
 
-        for font in self.project.projConfig['CompTypes'][cType]['installedFonts'] :
-            fontInfo = self.fontConfig['Fonts'][font]
-            # Make the font family folder for this typeface
-            fontFamilyFolder = os.path.join(self.project.local.projFontsFolder, fontInfo['FontInformation']['fontFolder'])
-            if not os.path.isdir(fontFamilyFolder) :
-                os.makedirs(fontFamilyFolder)
-
-        # Copy in all the files
-        copied  = self.copyInFont(fontInfo)
-
-        if copied > 0 :
-            self.project.log.writeToLog('FONT-060', [str(copied), fontFamilyFolder])
-        else :
-            self.project.log.writeToLog('FONT-062')
-
-        return True
+        source = os.path.join(self.project.local.rpmFontsFolder, font + '.tar.gz')
+        if tarfile.is_tarfile(source) :
+            mytar = tarfile.open(source, 'r')
+            mytar.extractall(self.project.local.projFontsFolder)
+            # Double check extract operation by looking for meta data file
+            if os.path.join(self.project.local.projFontsFolder, font, font + '.xml') :
+                self.project.log.writeToLog('FONT-060', [fName(source)])
+                return True
+            else :
+                self.project.log.writeToLog('FONT-065')
+                return False
 
 
     def removeFont (self, cType, font) :
@@ -213,32 +198,4 @@ class Font (Manager) :
                     return True
 
 
-
-    def copyInFont (self, fontConfig) :
-        '''Copy a font into a project and register it in the config.'''
-
-        copied = 0
-        # Now loop through all the typefaces in this family and copy over the files
-        for tf in fontConfig.keys() :
-            thisFolder = fontConfig['FontInformation']['fontFolder']
-            if tf[:8] == 'Typeface' :
-                # Find the source font file name and path, always use the user's version
-                fontFileName = fontConfig[tf]['file']
-                fontSource = None
-                # System font version
-                if os.path.isfile(os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)) :
-                    fontSource = os.path.join(self.project.local.rpmFontsFolder, thisFolder, fontFileName)
-
-                # Crash and burn if the font file is not found
-                if not fontSource :
-                    self.project.log.writeToLog('FONT-050', [fontSource])
-                    return False
-                # Copy the font file if need be
-                fontFilePath = os.path.join(self.project.local.projFontsFolder, thisFolder, fontFileName)
-                if not os.path.isfile(fontFilePath) :
-                    shutil.copy(fontSource, fontFilePath)
-                    self.project.log.writeToLog('FONT-070', [fontFilePath])
-                    copied +=1
-
-        return copied
 

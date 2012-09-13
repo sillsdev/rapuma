@@ -314,7 +314,7 @@ class Project (object) :
                 self.log.writeToLog('COMP-065', [cType])
                 return False
         else :
-            self.log.writeToLog('COMP-062', [cType])
+            # Bow out gracefully
             return False
 
 
@@ -563,11 +563,22 @@ class Project (object) :
         # Call on the font manager to install the font we want for this
         # component type
         Ctype = cType.capitalize()
-        # Change the font name if this points to a substitute font name
+        
+        
+        
+# Cannot do this if you cannot get at the font.xml file maybe that needs to live outside the bundle?
+        
+        # Change the font name if the value given points to a
+        # substitute font name
         self.createManager(cType, 'font')
         font = self.managers[cType + '_Font'].checkForSubFont(font)
+
+
+
+        # Physically install the font files
+        self.managers[cType + '_Font'].installFont(font)
+        # Record in the project the font meta data 
         self.managers[cType + '_Font'].recordFont(Ctype, font)
-        self.managers[cType + '_Font'].installFont(Ctype)
 
 
     def setPrimaryFont (self, cType, font) :
