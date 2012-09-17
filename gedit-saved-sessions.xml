@@ -16,6 +16,29 @@
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/text.py"/>
   <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/style.py"/>
 </session>
+<session name="FontInstall">
+  <file path="file:///home/dennis/Projects/rpm/rpm_dev.sh"/>
+  <file path="file:///home/dennis/Projects/rpm/testRPM.sh"/>
+  <file path="file:///home/dennis/Projects/rpm/bin/rpm"/>
+  <file path="file:///home/dennis/.config/rpm/rpm.conf"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/project.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/proj_log.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/book.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/project/manager.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/tools.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/pt_tools.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/component/usfm.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/xetex.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/text.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/style.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/manager/font.py"/>
+  <file path="file:///home/dennis/Projects/rpm/python_lib/rpm/core/user_config.py"/>
+  <file path="file:///home/dennis/Projects/rpm/resources/lib_share/fonts/BoonKitU_0.33/BoonKitU_0.33.xml"/>
+  <file path="file:///home/dennis/Publishing/testArea/rpm_dev/My%20Paratext%20Projects/NOD/PUB-LANA-ACT/Components/xetex_settings_usfm.tex"/>
+  <file path="file:///home/dennis/Publishing/testArea/rpm_dev/My%20Paratext%20Projects/NOD/PUB-LANA-ACT/Config/font.conf"/>
+  <file path="file:///home/dennis/Publishing/testArea/rpm_dev/My%20Paratext%20Projects/NOD/PUB-LANA-ACT/Config/project.conf"/>
+  <file path="file:///home/dennis/Projects/rpm/resources/lib_examples/NOD/PUB-LANA-ACT.rpmDemo"/>
+</session>
 <session name="PostProcessing">
   <file path="file:///home/dennis/Projects/rpm/rpm_dev.sh"/>
   <file path="file:///home/dennis/Projects/rpm/testRPM.sh"/>

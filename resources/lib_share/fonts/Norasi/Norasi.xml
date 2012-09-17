@@ -20,7 +20,7 @@ Todo:
             <key>substituteFontName</key>
             <description>If there are multiple versions this font in the system, this value will point to the latest most stable font.</description>
             <type>string</type>
-            <value>Norasi_20110423</value>
+            <value>Norasi_4.012</value>
         </setting>
     </section>
 </root>

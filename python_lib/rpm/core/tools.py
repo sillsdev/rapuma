@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput
+import codecs, os, sys, re, fileinput, zipfile
 from datetime import *
 from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
@@ -63,6 +63,17 @@ def fName (fullPath) :
     using os.path.split().'''
 
     return os.path.split(fullPath)[1]
+
+
+def resolvePath (path) :
+    '''Resolve the '~' in a path if there is one with the actual home path.'''
+
+    if path[0] == '~' :
+        # Look for "~/" shorthand path and replace it with the actual "home"
+        return path.replace('~', os.environ.get('HOME'))
+    else :
+        # Otherwise run abspath on it and send it on
+        return os.path.abspath(path)
 
 
 def addToList (thisList, item) :
@@ -117,6 +128,19 @@ def ancestorsPath (homePath) :
         grandparent = None
 
     return (parent, grandparent)
+
+
+def isInZip(file, zip) :
+    '''Look for a specific file in a tar file.'''
+
+    zipInfo = zipfile.ZipFile(zip)
+    nList = zipInfo.namelist()
+    for i in nList :
+        try :
+            if i.split('/')[1] == file :
+                return True
+        except :
+            return False
 
 
 ###############################################################################

@@ -219,18 +219,9 @@ class Project (object) :
         return True
 
 
-
-# FIXME: we need to stop this next process (adding to the conf) if the 
-# comp type is locked or maybe even if the source doesn't exsist. How do we do that?
-# We also should add folders and working text at this point so it is ready to render later.
-
     def addComponent (self, cid, cType, force = False) :
         '''This will add a component to the object we created 
         above in createComponent().'''
-
-        # Inject the component type into the config file.
-        if not self.isComponentType(cType) :
-            self.addComponentType(cType)
 
         # See if the working text is present, quite if it is not
         self.createManager(cType, 'text')
@@ -581,14 +572,14 @@ class Project (object) :
         self.managers[cType + '_Font'].recordFont(Ctype, font)
 
 
-    def setPrimaryFont (self, cType, font) :
-        '''Set the primary font for a component type.'''
+#    def setPrimaryFont (self, cType, font) :
+#        '''Set the primary font for a component type.'''
 
-        self.createManager(cType, 'font')
-        # FIXME: Do we need this?
-#        self.dummyObject(cType)
-        font = self.managers[cType + '_Font'].checkForSubFont(font)
-        self.managers[cType + '_Font'].setPrimaryFont(cType.capitalize(), font)
+#        self.createManager(cType, 'font')
+#        # FIXME: Do we need this?
+##        self.dummyObject(cType)
+#        font = self.managers[cType + '_Font'].checkForSubFont(font)
+#        self.managers[cType + '_Font'].setPrimaryFont(cType.capitalize(), font)
 
 
     def dummyObject (self, cType) :

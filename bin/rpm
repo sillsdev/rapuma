@@ -25,9 +25,9 @@
 import os, sys
 
 # Set basic system vars
-systemName = "Rapid Publication Manager (RPM)"
-systemVersion = "0.0.1"
-systemAbout = "RPM is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). RPM stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org."
+#systemName = "Rapid Publication Manager (RPM)"
+#systemVersion = "0.0.1"
+#systemAbout = "RPM is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). RPM stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org."
 
 # Set the RPM base program path
 rpmHome = os.environ.get('RPM_BASE')
@@ -70,6 +70,11 @@ local           = ProjLocal(rpmHome, userHome, projHome)
 uc              = UserConfig(local)
 log             = ProjLog(local, uc)
 
+# Pull some info from the user config
+systemName      = uc.userConfig['System']['systemName']
+systemVersion   = uc.userConfig['System']['systemVersion']
+systemAbout     = uc.userConfig['System']['systemAbout']
+
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 
@@ -78,7 +83,6 @@ terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 ############################## RPM Functions ##############################
 ###########################################################################
 
-#def newProject (uc, pc, pid, pdir = None, ptype = None, pname = None) :
 def newProject (uc, pc, pid, ptype = None, pname = None) :
     '''Create a new publishing project.'''
 
@@ -86,9 +90,6 @@ def newProject (uc, pc, pid, ptype = None, pname = None) :
     # different than the cwd, we will count on pc.local to have all the
     # correct information. 
     
-    # FIXME: Move the ptype and pname vars up to the arg processor which
-    # calls this function.
-
     # Check the ptype
     if not ptype :
         ptype = 'book'
@@ -139,14 +140,6 @@ def newProject (uc, pc, pid, ptype = None, pname = None) :
     return True
 
 
-def addComponentType (uc, pid, cType) :
-    '''Add a component type to a project.'''
-
-    if isProject(pid) :
-        aProject = initProject(pid)
-        aProject.addComponentType(cType)
-
-
 def deleteProject (uc, pid = None) :
     '''Delete a project fromthe RPM system registry and from the hard drive.'''
 
@@ -186,11 +179,8 @@ def deleteProject (uc, pid = None) :
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.'''
 
-    try :
-        if pid in uc.userConfig['Projects'] :
-            return True
-    except :
-        return False
+    if pid in uc.userConfig['Projects'] :
+        return True
 
 
 def initProject (pid) :
@@ -215,41 +205,6 @@ def accessHtmlHelp () :
 
 
 ###############################################################################
-############################### Testing Functions #############################
-###############################################################################
-
-
-def getExampleSourceProject (exampID) :
-    '''Create a test project from example projects located in the 
-    example_lib folder in the RPM system. This is for system testing
-    and nifty canned demos.'''
-
-    exampleFile = os.path.join(local.rpmExamplesFolder, exampID + '.tar.gz')
-    demoFile = os.path.join(local.projHome, exampID, exampID + '.rpmDemo')
-    thisTarFile = tarfile.open(exampleFile, 'r')
-    if os.path.isfile(exampleFile) :
-        thisTarFile.extractall()
-        terminal('Extracted the [' + exampID + '] ParaTExt example project.')
-
-def runExamplePubDemoProject (demoID) :
-    '''Run an example demo file to test/demonstrate a project.'''
-
-    # FIXME: Everywhere else we use subprocess.call() to do a process.  However,
-    # in this case it takes too much fiddling to get a these more complex RPM
-    # calls to run from within RPM.  To make it easy, we use os.system() to make
-    # the call out.
-    demoFile = os.path.join(local.projHome, demoID + '.rpmDemo')
-    if os.path.isfile(demoFile) :
-        demo = codecs.open(demoFile, "r", encoding='utf_8')
-        for line in demo :
-            if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
-                os.system(line)
-        return True
-    else :
-        terminal('File not found: ' + fName(demoFile))
-
-
-###############################################################################
 ############################# RPM Command Center ##############################
 ###############################################################################
 
@@ -262,131 +217,134 @@ def runExamplePubDemoProject (demoID) :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
-    def compTypeNotValid (cType) :
-        terminal('The component type given [' + cType + '] is not valid.')
+    # Extra help access
+    if sys.argv[1].lower() == 'help' :
+        if args['about'] :
+            terminal('\n' + systemName + ' version ' + systemVersion + '\n')
+            terminal('About: ' + systemAbout + '\n')
+            return
 
+        if args['basic'] :
+            accessHtmlHelp()
+            return
 
-    def noResolve (path) :
-        terminal('Cannot resolve path. The path [' + path + '] is not valid! Process halting.')
-
-
-
-    def resolvePath (path) :
-        '''Resolve the '~' in a path if there is one with the actual home path.'''
-
-        if path[0] == '~' :
-            # Look for "~/" shorthand path and replace it with the actual "home"
-            return path.replace('~', os.environ.get('HOME'))
+    # Test project ID
+    if sys.argv[1].lower() != 'project' :
+        if not isProject(args['project_id']) :
+            sys.exit('Error: Project ID given is not valid! Process halted.\n')
         else :
-            # Otherwise run abspath on it and send it on
-            return os.path.abspath(path)
-
+            # Now setup the project and look for and test the component type if needed
+            aProject = initProject(args['project_id'])
+            if sys.argv[2].lower() != 'settings' or sys.argv[2].lower() != 'locking' :
+                if not aProject.isComponentType(args['component_type']) :
+                    if not aProject.addComponentType(args['component_type']) :
+                        sys.exit()
 
     # Project level commands
     if sys.argv[1].lower() == 'project' :
         # Creating a new project
-        if args['project_new'] :
-        # FIXME: Add additional vars to this for project type and name and add them to the options
-            if args['project_folder'] :
+        if args['add'] :
+            if args['path'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
-                customLocal = resolvePath(args['project_folder'])
+                customLocal = resolvePath(args['path'])
                 if not os.path.isdir(customLocal) :
-                    noResolve(customLocal)
-                    sys.exit()
-
-                projFolder = os.path.join(customLocal, args['project_id'])
-                local   = ProjLocal(rpmHome, userHome, projFolder)
-                pc      = ProjConfig(local)
-                newProject(uc, pc, args['project_id'])
+                    sys.exit('Cannot resolve the given path. Process halting.')
+                else :
+                    projFolder = os.path.join(customLocal, args['project_id'])
             else :
                 # With no different project location given we will make sure
                 # we use the default projHome set when the script started.
                 projFolder = os.path.join(projHome, args['project_id'])
-                local   = ProjLocal(rpmHome, userHome, projFolder)
-                pc      = ProjConfig(local)
-                newProject(uc, pc, args['project_id'])
 
-        # Deleting an exsisting project
-        elif args['project_delete'] :
+            # Create the project
+            local   = ProjLocal(rpmHome, userHome, projFolder)
+            pc      = ProjConfig(local)
+            newProject(uc, pc, args['project_id'], args['type'].lower(), args['name'])
+
+        # Remove an exsisting project
+        elif args['remove'] :
             deleteProject(uc, args['project_id'])
 
-        # Add a component type to an exsisting project
-        elif args['component_type'] :
-            addComponentType(uc, args['project_id'], args['component_type'])
+    # Group level commands
+    elif sys.argv[1].lower() == 'group' :
+
+        # Add a new component
+        if args['add'] :
+            aProject.addMetaComponent(args['component_id'], args['component_type'], args['force'])
+
+        # Delete a component
+        elif args['remove'] :
+            aProject.deleteComponent(args['component_id'])
+        # Render vs. view command is just a matter of forcing the component
+        # to be rendered if render is selected by the user. Otherwise, if
+        # only view is requested, force is set to False and the component
+        # will not be rerendered if it already exsists.
+        elif args['execute'] :
+            aProject.renderGroup(args['component_id'], args['force'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
-        if isProject(args['project_id']) :
-            aProject = initProject(args['project_id'])
-            if not aProject.isComponentType(args['component_type']) :
-                compTypeNotValid(args['component_type'])
-                return False
-            # Add a new component
-            if args['component_new'] :
-                force = None
-                if args['component_force'] :
-                    force = True
-                if args['component_type'] :
-                    if args['component_meta'] :
-                        aProject.addMetaComponent(args['component_id'], args['component_meta'], args['component_type'], force)
-                    else :
-                        aProject.addComponent(args['component_id'], args['component_type'], force)
-                else :
-                    terminal('Must supply a component type (-t xxxx) to create a component.')
-            # Delete a component
-            if args['component_delete'] :
-                aProject.deleteComponent(args['component_id'])
-            # Render vs. view command is just a matter of forcing the component
-            # to be rendered if render is selected by the user. Otherwise, if
-            # only view is requested, force is set to False and the component
-            # will not be rerendered if it already exsists.
-            if args['component_render'] :
-                force = True
-                aProject.renderComponent(args['component_id'], force)
-            # View only
-            if args['component_view'] :
-                force = False
-                aProject.renderComponent(args['component_id'], force)
 
-        else :
-            terminal('Cannot find [' + args['project_id'] + '] project.')
+        # Add a new component
+        if args['add'] :
+            if args['force'] :
+                aProject.addComponent(args['component_id'], args['component_type'], args['force'])
+
+        # Delete a component
+        if args['remove'] :
+            aProject.deleteComponent(args['component_id'])
+        # Render vs. view command is just a matter of forcing the component
+        # to be rendered if render is selected by the user. Otherwise, if
+        # only view is requested, if force is set to False and the component
+        # will not be rerendered if it already exsists.
+        if args['execute'] :
+            aProject.renderComponent(args['component_id'], args['force'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
-        if isProject(args['project_id']) :
-            aProject = initProject(args['project_id'])
-            if not aProject.isComponentType(args['component_type']) :
-                compTypeNotValid(args['component_type'])
-                return False
 
-            if args['font_new'] :
-                aProject.addComponentFont(args['component_type'], args['font_name'])
-            elif args['font_remove'] :
-                aProject.removeComponentFont(args['component_type'], args['font_name'])
-            elif args['font_primary'] :
-                aProject.setPrimaryFont(args['component_type'], args['font_name'])
-            elif args['font_mapping'] :
-                aProject.addFontMapping(args['component_type'], args['font_name'], args['font_mapping'])
-        else :
-            terminal('Cannot find [' + args['project_id'] + '] project.')
+        if args['add'] :
+            aProject.addComponentFont(args['component_type'], args['font_id'], args['force'])
+        elif args['remove'] :
+            aProject.removeComponentFont(args['component_type'], args['font_id'], args['force'])
+        elif args['main'] :
+            aProject.createManager(args['component_type'], 'font')
+            font = aProject.managers[args['component_type'] + '_Font'].checkForSubFont(args['font_id'])
+            aProject.managers[args['component_type'] + '_Font'].setPrimaryFont(args['component_type'].capitalize(), args['font_id'], args['force'])
+
+#            aProject.setPrimaryFont(args['component_type'], args['font_id'], args['force'])
 
     # Style level commands
     elif sys.argv[1].lower() == 'style' :
-        if isProject(args['project_id']) :
-            aProject = initProject(args['project_id'])
-            if not aProject.isComponentType(args['component_type']) :
-                compTypeNotValid(args['component_type'])
-                return False
 
-            if args['style_default'] :
-                aProject.createDefaultStyleFile(args['component_type'])
-            elif args['style_override'] :
-                aProject.createCustomStyleFile(args['component_type'])
-            elif args['style_component'] :
-                aProject.createComponentStyleFile(args['component_id'])
-        else :
-            terminal('Cannot find [' + args['project_id'] + '] project.')
+        if args['add'] :
+            aProject.createStyleFile(args['component_type'], args['force'])
+        elif args['remove'] :
+            aProject.removeStyleFile(args['component_type'], args['force'])
+
+    # Post processing commands
+    elif sys.argv[1].lower() == 'process' :
+
+        # Run a post process command on a component or component type
+        if args['execute'] :
+            if args['component_id'] :
+                aProject.runPostProcess(args['component_type'], args['component_id'])
+            else :
+                aProject.runPostProcess(args['component_type'])
+
+        # Install a custom or a default post process script
+        elif args['add'] :
+            if args['path'] :
+                filePath = resolvePath(args['path'])
+                if not os.path.isfile(filePath) :
+                    noResolve(filePath)
+                    sys.exit()
+                aProject.installPostProcess(args['component_type'], filePath)
+            else :
+                aProject.installPostProcess(args['component_type'])
+        elif args['remove'] :
+            aProject.removePostProcess(args['component_type'])
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
@@ -396,33 +354,6 @@ def userArguments (args) :
                 aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
         else :
             terminal('Cannot find [' + args['project_id'] + '] project.')
-
-    # Post processing commands
-    elif sys.argv[1].lower() == 'process' :
-        if isProject(args['project_id']) :
-            aProject = initProject(args['project_id'])
-            if not aProject.isComponentType(args['component_type']) :
-                compTypeNotValid(args['component_type'])
-                return False
-
-        # Run a post process command on a component or component type
-        if args['run_process'] :
-            if args['component_id'] :
-                aProject.runPostProcess(args['component_type'], args['component_id'])
-            else :
-                aProject.runPostProcess(args['component_type'])
-
-        # Install a custom or a default post process script
-        elif args['install_process'] :
-            if args['file_name'] :
-                filePath = resolvePath(args['file_name'])
-                print filePath
-                if not os.path.isfile(filePath) :
-                    noResolve(filePath)
-                    sys.exit()
-                aProject.installPostProcess(args['component_type'], filePath)
-            else :
-                aProject.installPostProcess(args['component_type'])
 
     # Locking commands
     elif sys.argv[1].lower() == 'locking' :
@@ -448,23 +379,6 @@ def userArguments (args) :
         elif args['unlock'] and args['component_id'] :
             aProject.unlockComponent(args['component_id'])
 
-    # Testing commands
-    elif sys.argv[1].lower() == 'test' :
-        if args['source_id'] :
-            getExampleSourceProject(args['source_id'])
-
-        if args['demo_id'] :
-            runExamplePubDemoProject(args['demo_id'])
-
-    # Extra help access
-    elif sys.argv[2].lower() == 'help' :
-        if args['about'] :
-            terminal('\n' + systemName + ' version ' + systemVersion + '\n')
-            terminal('About: ' + systemAbout + '\n')
-
-        if args['basic'] :
-            accessHtmlHelp()
-
     # Totally lost
     else:
         terminal('Error: Command not recognized! ')
@@ -483,51 +397,84 @@ def userArguments (args) :
 #            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
 
+###############################################################################
+############################### Argparser Setup ###############################
+###############################################################################
+
+# We will try to maintain a common syntax in all the subparsers Some common
+# argument options are:
+#   -a = add something
+#   -r = remove something
+#   -e = execute something
+#   -f = force the execution of something
+#   -p = path (and file name) of something
+
 # Setup the arg parser
 parser = argparse.ArgumentParser(description=systemName)
 subparsers = parser.add_subparsers(help='sub-command help')
 
+# Add help subprocess arguments
+helpCommand = subparsers.add_parser('help', help='General system help')
+
 # Add main arguments (first postion options)
-parser.add_argument('-a', '--about', action='store_true', help = 'About RPM')
+parser.add_argument('-a', '--about', action='store_true', help = 'Information about RPM')
 parser.add_argument('-b', '--basic', action='store_true', help = 'Basic RPM help (in HTML)')
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-projCommand.add_argument('-n', '--project_new', action='store_true', help='Create a new project on this computer.')
-projCommand.add_argument('-d', '--project_delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
-projCommand.add_argument('-f', '--project_folder', help='Location of the project home folder if the current working directory is not the actual target. This is used only for project creation (-n).')
-projCommand.add_argument('-t', '--component_type', help='Add a component type to the project.')
+projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
+projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
+projCommand.add_argument('-p', '--path', help='Path to the project home folder if the current working directory is not the actual target. This can be used when adding a project.')
+projCommand.add_argument('-t', '--type', help='If creating a new project, give a valid project type code.')
+projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
+
+# Add group subprocess arguments
+groupCommand = subparsers.add_parser('group', help='General project component group management commands help')
+groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+groupCommand.add_argument('component_type', help='The component type is needed for creating a new component group.')
+groupCommand.add_argument('group_id', help='A specific group ID required for creating a new component group.')
+groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
+groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
+groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
+groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a component group in this project.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('component_type', help='The component type is needed for creating a new component.')
 compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
-compCommand.add_argument('-n', '--component_new', action='store_true', help='Create a new component for this project.')
-compCommand.add_argument('-d', '--component_delete', action='store_true', help='Delete an existing component from this project.')
-compCommand.add_argument('-f', '--component_force', action='store_true', help='Force the install (reinstall) of a component. This is used with the -n command.')
-compCommand.add_argument('-m', '--component_meta', help='Create a list of components for this new meta component. They must be of the same type.')
-compCommand.add_argument('-r', '--component_render', action='store_true', help='Render a single component in this project.')
-compCommand.add_argument('-v', '--component_view', action='store_true', help='View the rendered output of a specific component, if it does not exsist it will render the component as well.')
+compCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
+compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
+compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
+compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-fontCommand.add_argument('-f', '--font_name', help='The font family name. The name given has to have an RPM font configuration file associated with it.')
-fontCommand.add_argument('-n', '--font_new', action='store_true', help='Add a new font for this project.')
-fontCommand.add_argument('-r', '--font_remove', action='store_true', help='Remove the font named in -f from this project.')
-fontCommand.add_argument('-p', '--font_primary', action='store_true', help='Set, and install if necessary, the primary font for this project. The font family name given has to have an RPM font configuration file associated with it.')
-fontCommand.add_argument('-m', '--font_mapping', help='Add a font mapping for a specified font and component type.')
+fontCommand.add_argument('font_id', help='The font family name ID. The ID given has to be a valid system font.')
+fontCommand.add_argument('-a', '--add', action='store_true', help='Add a new font for a specific comonent type.')
+fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the font of a specified ID from this project.')
+fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
+fontCommand.add_argument('-m', '--main', action='store_true', help='Set, the specified (valid system) font to be the main (primary) font for this component type.')
 
 # Add style subprocess arguments
-styleCommand = subparsers.add_parser('style', help='General font handling commands help')
+styleCommand = subparsers.add_parser('style', help='General style handling commands help')
 styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component.')
-styleCommand.add_argument('-d', '--style_default', action='store_true', help='Create a default style file for this component type.')
-styleCommand.add_argument('-o', '--style_override', action='store_true', help='Create a custom style (override) file for this component type.')
-styleCommand.add_argument('-c', '--style_component', action='store_true', help='Create a component level style override file.')
+styleCommand.add_argument('-a', '--add', action='store_true', help='Add a new style for a specific comonent type.')
+styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a style file for this component type.')
+styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
+
+# Add post processing subprocess arguments
+processCommand = subparsers.add_parser('process', help='General settings for handling component post processing commands.')
+processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+processCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
+processCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project process folder. If you do not specify a process a default process script.')
+processCommand.add_argument('-r', '--remove', action='store_true', help='Remove a post process for a component type from the project process folder.')
+processCommand.add_argument('-p', '--path', help='The path and file name of a specific post process to be installed.')
+processCommand.add_argument('-e', '--execute', action='store_true', help='Execute a post process script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
 
 # Add settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
@@ -537,30 +484,19 @@ settingsCommand.add_argument('-s', '--section', help='The section path to the ke
 settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
 
-# Add Post Processing subprocess arguments
-processCommand = subparsers.add_parser('process', help='General settings for handling component post processing commands.')
-processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-processCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-processCommand.add_argument('-c', '--component_id', help='If used with the -r command, a post process will run on only the specified component.')
-processCommand.add_argument('-r', '--run_process', action='store_true', help='Run the post_process.py script. If not component (-c) is specified, it will run on all components of the specified type.')
-processCommand.add_argument('-i', '--install_process', action='store_true', help='Install the default post_process.py script for a component type into the project process folder. If you have a specific system compatable script you wish to install, use the -f argument to point to it.')
-processCommand.add_argument('-f', '--file_name', help='The path and file name of a specific post process to be installed.')
-
 # Add Project Locking subprocess arguments
 lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
 lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+lockCommand.add_argument('lock_type', help='Specify either a valid component or component type to be locked. If nothing is specified the project will be locked so no processing can take place.')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
 lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
-lockCommand.add_argument('-c', '--component_id', help='If used with the -l or -u commands, and the project or component type is not locked, this will lock an individual component from being processed.')
-lockCommand.add_argument('-t', '--component_type', help='If used with the -l or -u commands, and the project is not locked, this will lock an component type to prevent processes from happening to any components of that type.')
+
+# The following needs to be taken out
 
 # Add testing subprocess arguments
-testCommand = subparsers.add_parser('test', help='General system testing commands help')
-testCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
-testCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
-
-# Add help subprocess arguments
-helpCommand = subparsers.add_parser('help', help='General system help')
+#testCommand = subparsers.add_parser('test', help='General system testing commands help')
+#testCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
+#testCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))

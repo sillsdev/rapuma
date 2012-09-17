@@ -82,7 +82,7 @@ SYSTEM INSTALLATION AND SETUP
 For easier operation it is necessary to get RPM properly located in your system. The first thing that needs to be done is to link rpm.conf file (that will be in your user folder) to /etc folder. That is done with:
 
 	sudo ln -sf ~/.config/rpm/rpm.conf /etc/rpm.conf
-	
+
 Note that if you go look at /etc/rpm.conf you will see that it is a broken link. That is because ~/.config/rpm/rpm.conf does not yet exsist, but it will after you run RPM for the first time, then every thing will be happy.
 
 Now we will get RPM in your path by editing the ~/.profile file. To do that use this command:
@@ -94,7 +94,7 @@ Add this to the end of the file you just opened on its own line:
     # Export the RPM user and system paths
     export RPM_BASE="$HOME/Projects/rpm"
     export RPM_USER="$HOME/.config/rpm"
-	
+
 Save the file and close it. Next time you reboot or login, the new path settings will be there.
 
 If you don't want to reboot right now and you just want to get it working on the current login (terminal) use:
@@ -117,6 +117,7 @@ Next we need link RPM (main program) to /usr/local/bin so it can be started from
 Now, you will need to link a couple utilities that are good to run globally out of the ~/bin folder and some links that will enable you to right-click from the Nautilus file browser. To make these links, run each of these commands in order:
 
 	sudo ln -s ~/Projects/rpm/bin/rpm /usr/local/bin/rpm
+	sudo ln -s ~/Projects/rpm/bin/rpm_demo /usr/local/bin/rpm_demo
 	ln -s ~/Projects/rpm/bin/sh/multi-txtconv.sh ~/bin/multi-txtconv.sh
 	ln -s ~/Projects/rpm/bin/python/lib_extras/get-clip ~/bin/get-clip
 	ln -s ~/Projects/rpm/bin/sh/rpm ~/.gnome2/nautilus-scripts/RPM
