@@ -92,6 +92,13 @@ def addToList (thisList, item) :
         return thisList
 
 
+def removeFromList (thisList, item) :
+    '''Generic function to remove an item to any list if it is there.
+    If not, just return the list contents or an empty list.'''
+
+    pass
+
+
 def str2bool (str) :
     '''Simple boolean tester'''
 

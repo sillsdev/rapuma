@@ -81,26 +81,29 @@ class Font (Manager) :
     def setPrimaryFont (self, cType, font, force = None) :
         '''Set the primary font for the project.'''
 
-        def setIt (font) :
-            self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
+        def setIt (Ctype, font) :
+            self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = font
             writeConfFile(self.project.projConfig)
             # Sanity check
-            if self.project.projConfig['CompTypes'][cType]['primaryFont'] == font :
+            if self.project.projConfig['CompTypes'][Ctype]['primaryFont'] == font :
                 return True
 
-        # First check to see if it is already the primary font
-        if not self.project.projConfig['CompTypes'][cType]['primaryFont'] == font :
-            if setIt :
-                self.project.log.writeToLog('FONT-035', [cType,font])
+        Ctype = cType.capitalize()
+        # First check to see if it is already has a primary font set
+        if self.project.projConfig['CompTypes'][Ctype]['primaryFont'] == '' :
+            if setIt(Ctype, font) :
+                self.project.log.writeToLog('FONT-035', [Ctype,font])
                 return True
+        elif force :
+            if setIt(Ctype, font) :
+                self.project.log.writeToLog('FONT-032', [font,Ctype])
+                return True
+        elif self.project.projConfig['CompTypes'][Ctype]['primaryFont'] :
+            self.project.log.writeToLog('FONT-037', [self.project.projConfig['CompTypes'][Ctype]['primaryFont'],Ctype])
+            return True
         else :
-            if force :
-                if setIt :
-                    self.project.log.writeToLog('FONT-032', [font,cType])
-                    return True
-            else :
-                self.project.log.writeToLog('FONT-030', [font,cType])
-                return True
+            self.project.log.writeToLog('FONT-030', [font,Ctype])
+            return True
 
         return False
 
@@ -134,69 +137,155 @@ class Font (Manager) :
             dieNow()
 
 
-    def recordFont (self, cType, font) :
+    def recordFont (self, cType, font, force = None) :
         '''Check for the exsitance of the specified font in the font folder.
-        Then extract the meta data into the appropreate configurations.'''
+        Then extract the meta data into the appropreate configurations.
+        If the force flag has been set then delete the old settings and
+        install the new settings (or just reset to default settings).'''
 
+        # Set vars do initial checks
         metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        Ctype = cType.capitalize()
         if not os.path.isfile(metaDataSource) :
             self.project.log.writeToLog('FONT-040', [font])
             dieNow()
 
-        # See if this font is already in the config
+        # See if this font is already in the font config file
         if not testForSetting(self.fontConfig, 'Fonts', font) :
             buildConfSection(self.fontConfig, 'Fonts')
-            # Inject the font info into the project format config file.
+
+        # Set as primary for the calling cType if there is none now
+        if not self.project.projConfig['CompTypes'][Ctype]['primaryFont'] :
+            self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = font
+
+        # If force was set, force the settings, otherwise, let them be
+        if force :
+            try :
+                del self.fontConfig['Fonts'][font]
+            except :
+                pass
+            # (Re)Inject the font info into the project format config file.
             fInfo = getXMLSettings(metaDataSource)
             self.fontConfig['Fonts'][font] = fInfo.dict()
-
-            # Record the font with the component type that called it
-            if not self.project.projConfig['CompTypes'][cType]['primaryFont'] :
-                self.project.projConfig['CompTypes'][cType]['primaryFont'] = font
-
-            if len(self.project.projConfig['CompTypes'][cType]['installedFonts']) == 0 :
-                self.project.projConfig['CompTypes'][cType]['installedFonts'] = [font]
-            else :
-                fontList = self.project.projConfig['CompTypes'][cType]['installedFonts']
-                if fontList != [font] :
-                    self.project.projConfig['CompTypes'][cType]['installedFonts'] = addToList(fontList, font)
-
             writeConfFile(self.fontConfig)
-            writeConfFile(self.project.projConfig)
+            # Adjust installed fonts list if needed
+            if len(self.project.projConfig['CompTypes'][Ctype]['installedFonts']) == 0 :
+                self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = [font]
+            else :
+                fontList = self.project.projConfig['CompTypes'][Ctype]['installedFonts']
+                if fontList != [font] :
+                    self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = addToList(fontList, font)
+            primFont = self.project.projConfig['CompTypes'][Ctype]['primaryFont']
+            if primFont != font and (primFont == '' or primFont == 'None') :
+                self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = font
+
             self.project.log.writeToLog('FONT-045', [font])
+            writeConfFile(self.project.projConfig)
             return True
 
         else :
-            self.project.log.writeToLog('FONT-047', [font])
-            return False
+            if testForSetting(self.fontConfig['Fonts'], font) :
+                self.project.log.writeToLog('FONT-047', [font])
+            else :
+                # Inject the font info into the project font config file if it is not there.
+                try :
+                    x = self.fontConfig['Fonts'][font]
+                except :
+                    fInfo = getXMLSettings(metaDataSource)
+                    self.fontConfig['Fonts'][font] = fInfo.dict()
+                    writeConfFile(self.fontConfig)
+                    self.project.log.writeToLog('FONT-045', [font])
+
+            # Adjust installed fonts list if needed
+            if len(self.project.projConfig['CompTypes'][Ctype]['installedFonts']) == 0 :
+                self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = [font]
+            else :
+                fontList = self.project.projConfig['CompTypes'][Ctype]['installedFonts']
+                if fontList != [font] :
+                    self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = addToList(fontList, font)
+
+            primFont = self.project.projConfig['CompTypes'][Ctype]['primaryFont']
+            if primFont != font and (primFont == '' or primFont == 'None') :
+                self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = font
+
+            self.project.log.writeToLog('FONT-045', [font])
+            writeConfFile(self.project.projConfig)
+            return True
+
 
 
     def installFont (self, font, force = None) :
         '''Install (copy) a font into a project. The font is bundled with
-        other necessary components in a tar.gz file. It will need to be
-        extrcted into the project font folder before the meta data can
-        be looked at and added to the project to be acted on. This function 
-        does that.'''
+        other necessary components in a .zip file. If the font folder is
+        already there we assume there is a font there and we do not proceed.
+        If the force flag is set, then we delete any exsisting font and
+        extract a new one in its place.'''
+
+        def extract (source, confXml) :
+            if zipfile.is_zipfile(source) :
+                myzip = zipfile.ZipFile(source, 'r')
+                myzip.extractall(self.project.local.projFontsFolder)
+                # Double check extract
+                if os.path.isfile(confXml) :
+                    return True
+
         source = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
-        if zipfile.is_zipfile(source) :
-            myzip = zipfile.ZipFile(source, 'r')
-            myzip.extractall(self.project.local.projFontsFolder)
-            # Double check extract operation by looking for meta data file
-            if os.path.join(self.project.local.projFontsFolder, font, font + '.xml') :
+        confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        if force :
+            try :
+                shutil.rmtree(os.path.join(self.project.local.projFontsFolder, font))
+            except :
+                pass
+            if extract(source, confXml) :
                 self.project.log.writeToLog('FONT-060', [fName(source)])
                 return True
             else :
-                self.project.log.writeToLog('FONT-065')
+                self.project.log.writeToLog('FONT-065', [fName(source)])
                 return False
+        else :
+            # With nothing done yet, check for meta data file
+            if os.path.isfile(confXml) :
+                self.project.log.writeToLog('FONT-062', [fName(source)])
+                return True
+            else :
+                if extract(source, confXml) :
+                    self.project.log.writeToLog('FONT-067', [fName(source)])
+                    return True
+                else :
+                    self.project.log.writeToLog('FONT-065')
+                    return False
+
+
+
+# Working on removeal, not all there yet
+
 
 
     def removeFont (self, cType, font, force = None) :
         '''Remove a font from a project, unless it is in use by another 
-        component type. Then just disconnect it from the calling component type.'''
+        component type. Then just disconnect it from the calling component
+        type. However, if the force switch is set, remove it, regardless.'''
 
-        def removePConfSettings (cType, font) :
-            pass
+        def removePConfSettings (Ctype, font) :
+            # Adjust installed fonts list if needed
+            fontList = self.project.projConfig['CompTypes'][Ctype]['installedFonts']
+            primFont = self.project.projConfig['CompTypes'][Ctype]['primaryFont']
+            if fontList == [font] :
+                fontList.remove(font)
+                self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = fontList
+            print primFont
+            if primFont == font :
+                self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = None
 
+        def removeFConfSettings (font) :
+            try :
+                del self.fontConfig['Fonts'][font]
+                return True
+            except :
+                return False
+
+
+        Ctype = cType.capitalize()
 
         # Look in other cTypes for the same font
         for ct in self.project.projConfig['CompTypes'].keys() :
@@ -207,8 +296,12 @@ class Font (Manager) :
                 # target component settings
                 if font in fonts :
                     useCount +=1
-#                    removePConfSettings(cType, font)
+                    removePConfSettings(Ctype, font)
+                    removeFConfSettings(font)
+                    writeConfFile(self.fontConfig)
+                    writeConfFile(self.project.projConfig)
                     return True
+
 
 
 

@@ -303,17 +303,24 @@ def userArguments (args) :
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
+        aProject.createManager(args['component_type'], 'font')
+        font = aProject.managers[args['component_type'] + '_Font'].checkForSubFont(args['font_id'])
 
         if args['add'] :
-            aProject.addComponentFont(args['component_type'], args['font_id'], args['force'])
+            # Physically install the font files
+            aProject.managers[args['component_type'] + '_Font'].installFont(font, args['force'])
+            # Record in the project the font meta data 
+            aProject.managers[args['component_type'] + '_Font'].recordFont(args['component_type'], font, args['force'])
         elif args['remove'] :
-            aProject.removeComponentFont(args['component_type'], args['font_id'], args['force'])
+            aProject.managers[args['component_type'] + '_Font'].removeFont(args['component_type'], font, args['force'])
         elif args['main'] :
-            aProject.createManager(args['component_type'], 'font')
-            font = aProject.managers[args['component_type'] + '_Font'].checkForSubFont(args['font_id'])
-            aProject.managers[args['component_type'] + '_Font'].setPrimaryFont(args['component_type'].capitalize(), args['font_id'], args['force'])
+            aProject.managers[args['component_type'] + '_Font'].setPrimaryFont(args['component_type'].capitalize(), font, args['force'])
 
-#            aProject.setPrimaryFont(args['component_type'], args['font_id'], args['force'])
+
+
+# Move these to the style manager
+
+
 
     # Style level commands
     elif sys.argv[1].lower() == 'style' :
@@ -322,6 +329,13 @@ def userArguments (args) :
             aProject.createStyleFile(args['component_type'], args['force'])
         elif args['remove'] :
             aProject.removeStyleFile(args['component_type'], args['force'])
+
+
+
+
+
+
+
 
     # Post processing commands
     elif sys.argv[1].lower() == 'process' :

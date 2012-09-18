@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: usfm.xml
+Description:
+This is a component type description for USFM type component to be used 
+in most any type of project.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Component Renderer</name>
+        <key>renderer</key>
+        <description>The render for this kind of component. The value must correspond with a RPM method written for this specific renderer.</description>
+        <type>string</type>
+        <value>xetex</value>
+    </setting>
+    <setting>
+        <name>Source Editor</name>
+        <key>sourceEditor</key>
+        <description>The editor the source text comes from.</description>
+        <type>string</type>
+        <value>paratext</value>
+    </setting>
+    <setting>
+        <name>Format Style File</name>
+        <key>styleFile</key>
+        <description>The default format style file.</description>
+        <type>string</type>
+        <value>usfm.sty</value>
+    </setting>
+    <setting>
+        <name>Primary Font</name>
+        <key>primaryFont</key>
+        <description>The primary font used for rendering component text.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Installed fonts</name>
+        <key>installedFonts</key>
+        <description>All the installed font families that this component will need to render correctly.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Is Locked</name>
+        <key>isLocked</key>
+        <description>All the installed components of this type will be prevented from undergoing any automated processing of any kind that involves changing the working text.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+</root>
+
