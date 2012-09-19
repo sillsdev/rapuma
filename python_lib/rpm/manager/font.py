@@ -114,6 +114,10 @@ class Font (Manager) :
 
         # Check for the font family bundle
         zipSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
+        if not os.path.isfile(os.path.join(zipSource)) :
+            self.project.log.writeToLog('FONT-041', [fName(zipSource)])
+            dieNow()
+
         if isInZip(font + '.xml', zipSource) :
             xmlFile = font + '/' + font + '.xml'
             tmpFolder = os.path.join(self.project.local.projConfFolder, font)
@@ -133,7 +137,7 @@ class Font (Manager) :
             else :
                 return font
         else :
-            self.project.log.writeToLog('FONT-040', [font])
+            self.project.log.writeToLog('FONT-040', [font + '.xml'])
             dieNow()
 
 
@@ -147,7 +151,7 @@ class Font (Manager) :
         metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
         Ctype = cType.capitalize()
         if not os.path.isfile(metaDataSource) :
-            self.project.log.writeToLog('FONT-040', [font])
+            self.project.log.writeToLog('FONT-040', [fName(metaDataSource)])
             dieNow()
 
         # See if this font is already in the font config file
@@ -240,7 +244,7 @@ class Font (Manager) :
                 self.project.log.writeToLog('FONT-060', [fName(source)])
                 return True
             else :
-                self.project.log.writeToLog('FONT-065', [fName(source)])
+                self.project.log.writeToLog('FONT-065', [font])
                 return False
         else :
             # With nothing done yet, check for meta data file
@@ -252,7 +256,7 @@ class Font (Manager) :
                     self.project.log.writeToLog('FONT-067', [fName(source)])
                     return True
                 else :
-                    self.project.log.writeToLog('FONT-065')
+                    self.project.log.writeToLog('FONT-065', [font])
                     return False
 
 
@@ -262,20 +266,23 @@ class Font (Manager) :
 
 
     def removeFont (self, cType, font, force = None) :
-        '''Remove a font from a project, unless it is in use by another 
-        component type. Then just disconnect it from the calling component
-        type. However, if the force switch is set, remove it, regardless.'''
+        '''Remove a font from a component type which will virtually disconnect 
+        it from the calling component type. However, if the force switch is set,
+        then remove the font, regardless as to if it is used by another component
+        or not. This is useful for purging a font from a project but should be
+        used with care.'''
 
         def removePConfSettings (Ctype, font) :
             # Adjust installed fonts list if needed
             fontList = self.project.projConfig['CompTypes'][Ctype]['installedFonts']
             primFont = self.project.projConfig['CompTypes'][Ctype]['primaryFont']
-            if fontList == [font] :
+            if font in fontList :
                 fontList.remove(font)
                 self.project.projConfig['CompTypes'][Ctype]['installedFonts'] = fontList
-            print primFont
+            # There has to be a primary font no matter what. If the font being
+            # removed was primary, then try setting the first 
             if primFont == font :
-                self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = None
+                self.project.projConfig['CompTypes'][Ctype]['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
             try :
@@ -284,24 +291,30 @@ class Font (Manager) :
             except :
                 return False
 
-
+        # CompTypes need first letter capitalized to find them
         Ctype = cType.capitalize()
 
-        # Look in other cTypes for the same font
-        for ct in self.project.projConfig['CompTypes'].keys() :
-            useCount = 0
-            if ct != cType :
-                fonts = self.project.projConfig['CompTypes'][ct]['installedFonts']
-                # If we find the font is in another cType we only remove it from the
-                # target component settings
-                if font in fonts :
-                    useCount +=1
-                    removePConfSettings(Ctype, font)
-                    removeFConfSettings(font)
-                    writeConfFile(self.fontConfig)
-                    writeConfFile(self.project.projConfig)
-                    return True
+        # Remove settings for this font if we find it in the specified cType
+        if font in self.project.projConfig['CompTypes'][Ctype]['installedFonts'] :
+            removePConfSettings(Ctype, font)
+            self.project.log.writeToLog('FONT-080', [font,Ctype])
+            if force :
+                shutil.rmtree(os.path.join(self.project.local.projFontsFolder, font))
+                # Since this is a force we want to delete settings in the fontConfFile too
+                removeFConfSettings(font)
+                # Now remove settings from all the other cTypes
+                for ct in self.project.projConfig['CompTypes'].keys() :
+                    if ct != cType :
+                        removePConfSettings(ct.capitalize(), font)
+                self.project.log.writeToLog('FONT-082', [font,])
 
+            # Write out the new settings files
+            writeConfFile(self.fontConfig)
+            writeConfFile(self.project.projConfig)
+            return True
+        else :
+            self.project.log.writeToLog('FONT-085', [font,Ctype])
+            return False
 
 
 
