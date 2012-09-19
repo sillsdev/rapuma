@@ -479,7 +479,7 @@ class Project (object) :
         if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
             self.log.writeToLog('POST-040', [cid])
 
-        ppFolder = 
+#        ppFolder = 
         script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
         if os.path.isfile(script) :
             err = subprocess.call([script, target])
@@ -501,74 +501,72 @@ class Project (object) :
         bundled in a system compatable way). If "script" is not specified
         we will copy in a default script that the user can modify. This is
         currently limited to Python scripts only which do in-place processes
-        on the target files.'''
+        on the target files. The script needs to have the same name as the
+        zip file it is bundled in, except the extention is .py instead of
+        the bundle .zip extention.'''
 
-
-# Add to the confFile a post process script name that will be used for processing.
-# Get rid of the default scrip name for any script that is specified
 
         # Define some internal vars
-        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, fName(script).split('.')[0])
-        scriptTarget        = os.path.join(scriptTargetFolder, fName(script))
-        if script :
-            defaultTarget   = os.path.join(self.local.projProcessFolder, fName(script).split('.')[0], cType + '-post_process.py')
-        else :
-            defaultTarget   = os.path.join(self.local.projProcessFolder, cType + '-post_process', cType + '-post_process.py')
-        rpmSource           = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.py')
+        if not script :
+            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.zip')
+        scriptSourceFolder  = os.path.split(script)[0]
+        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, 'PostProcess')
+        scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
 
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
         if not self.isComponentType(cType) :
             self.addComponentType(cType)
 
-        if not os.path.isdir(self.local.projProcessFolder) :
-            os.mkdir(self.local.projProcessFolder)
+        # Make the target folder if needed
+        if not os.path.isdir(scriptTargetFolder) :
+            os.makedirs(scriptTargetFolder)
 
         # First check to see if there already is a script, return if there is
-        if os.path.isfile(defaultTarget) and not force :
-            self.log.writeToLog('POST-080', [fName(defaultTarget)])
+        if os.path.isfile(scriptTarget) and not force :
+            self.log.writeToLog('POST-080', [fName(scriptTarget)])
             return False
 
-        def extractScript () :
-            # Now copy it in. No return from shutil.copy() is good
-            if not shutil.copy(script, scriptTarget) :
-                self.log.writeToLog('POST-090', [fName(script)])
-                # Check if it needs to be unzipped
-                if zipfile.is_zipfile(scriptTarget) :
-                    myzip = zipfile.ZipFile(scriptTarget, 'r')
-                    myzip.extractall(self.local.projProcessFolder)
-                    os.remove(scriptTarget)
-                    # A valid zip file will always contain a file named cType + '-post_process.py'
-                    if os.path.isfile(defaultTarget) :
-                        self.log.writeToLog('POST-100', [fName(scriptTarget)])
-                    else :
-                        self.log.writeToLog('POST-105', [fName(scriptTarget)])
-                        return False
-                    return True
-
-        # Check to see if we have a custom post process script to use
-        # If something goes wrong here we will want to quite
-        if script :
-            if not os.path.isfile(script) :
-                self.log.writeToLog('POST-085', [fName(script)])
+        def test () :
+            # Test for successful extraction
+            if os.path.isfile(scriptTarget) :
+                self.log.writeToLog('POST-100', [fName(scriptTarget)])
+                return True
+            else :
+                self.log.writeToLog('POST-105', [fName(scriptTarget)])
                 return False
 
-        # No script found, we can proceed
-        if not os.path.isdir(scriptTargetFolder) :
-            os.mkdir(scriptTargetFolder)
-            extractScript()
-            self.log.writeToLog('POST-110', [fName(scriptTarget)])
-        else :
-            if force :
-                extractScript()
-                self.log.writeToLog('POST-115', [fName(scriptTarget)])
-        return True
+        def extract() :
+            myZip = zipfile.ZipFile(script, 'r')
+            for f in myZip.namelist() :
+                data = myZip.read(f, script)
+                # Pretty sure zip represents directory separator char as "/" regardless of OS
+                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
+                try :
+                    myFile = open(myPath, "wb")
+                    myFile.write(data)
+                    myFile.close()
+                except :
+                    pass
+            myZip.close()
 
-        # No script was found, just copy in a default starter script
-        # Remember, no news from shutil.copy() is good news
-        if not shutil.copy(rpmSource, defaultTarget) :
-            self.log.writeToLog('POST-120', [fName(defaultTarget), fName(rpmSource)])
-            return True
+        # No script found, we can proceed
+        if not os.path.isfile(scriptTarget) :
+            extract()
+            if not test() :
+                dieNow()
+            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+        elif force :
+            extract()
+            if not test() :
+                dieNow()
+            self.log.writeToLog('POST-115', [fName(scriptTarget)])
+
+        # Record the script with the cType
+        self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = fName(scriptTarget)
+        writeConfFile(self.projConfig)
+
+        return True
 
 
     def removePostProcess (self, cType) :

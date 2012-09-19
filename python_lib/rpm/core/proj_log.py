@@ -178,7 +178,7 @@ class ProjLog (object) :
             'POST-080' : ['ERR', 'The file: [<<1>>] already exsists. Cannot copy over old file. Please use -f (force) to remove it if you want to install a fresh or different file.'],
             'POST-085' : ['ERR', 'Source script not found: [<<1>>]'],
             'POST-090' : ['LOG', 'Copied in custom post process file: [<<1>>] into process folder.'],
-            'POST-100' : ['LOG', 'The contents of the file [<<1>>] have been extracted into the process folder.'],
+            'POST-100' : ['MSG', 'The contents of the file [<<1>>] have been extracted into the process folder.'],
             'POST-105' : ['ERR', 'The contents of the file [<<1>>] failed to be extracted into the process folder. Install custom post processing script failed.'],
             'POST-110' : ['MSG', 'Post processing script: [<<1>>] has been installed into the process folder and should be ready for use.'],
             'POST-115' : ['MSG', 'Force switch was set (-f). Post processing script: [<<1>>] has been installed into the process folder and should be ready for use.'],
