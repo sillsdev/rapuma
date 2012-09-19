@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess, tarfile
+import codecs, os, sys, shutil, imp, subprocess, zipfile
 #from configobj import ConfigObj, Section
 
 
@@ -446,8 +446,8 @@ class Project (object) :
         if cid :
             target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
             if os.path.isfile(target) :
-                self.postProcessComponent(target, cType, cid)
-                return True
+                if self.postProcessComponent(target, cType, cid) :
+                    return True
             else :
                 self.log.writeToLog('POST-020', [target])
 
@@ -469,11 +469,17 @@ class Project (object) :
 
     def postProcessComponent (self, target, cType, cid) :
         '''Run a post process on a single component file, in place.'''
+        
+        
+        
+# We will make this look for a specific file name for this component and it will
+# use that script, not a default script name.
 
         # First check to see if this specific component is locked
         if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
             self.log.writeToLog('POST-040', [cid])
 
+        ppFolder = 
         script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
         if os.path.isfile(script) :
             err = subprocess.call([script, target])
@@ -486,14 +492,29 @@ class Project (object) :
             self.log.writeToLog('POST-075')
 
 
-    def installPostProcess (self, cType, script = None) :
-        '''Install the post_process.py script into the project processing
+    def installPostProcess (self, cType, script = None, force = None) :
+        '''Install a post process script into the main components processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
         projects will have their own specially developed post process
-        script. We will look in the parent folder first to see if any
-        exsists and grab those first. If one does not exsist we can copy
-        a default script.'''
+        script. Use the "script" var to specify a process (which should be
+        bundled in a system compatable way). If "script" is not specified
+        we will copy in a default script that the user can modify. This is
+        currently limited to Python scripts only which do in-place processes
+        on the target files.'''
+
+
+# Add to the confFile a post process script name that will be used for processing.
+# Get rid of the default scrip name for any script that is specified
+
+        # Define some internal vars
+        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, fName(script).split('.')[0])
+        scriptTarget        = os.path.join(scriptTargetFolder, fName(script))
+        if script :
+            defaultTarget   = os.path.join(self.local.projProcessFolder, fName(script).split('.')[0], cType + '-post_process.py')
+        else :
+            defaultTarget   = os.path.join(self.local.projProcessFolder, cType + '-post_process', cType + '-post_process.py')
+        rpmSource           = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.py')
 
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
@@ -504,43 +525,60 @@ class Project (object) :
             os.mkdir(self.local.projProcessFolder)
 
         # First check to see if there already is a script, return if there is
-        defaultTarget = os.path.join(self.local.projProcessFolder, 'usfm-post_process.py')
-        if os.path.isfile(defaultTarget) :
-            self.log.writeToLog('POST-080', [defaultTarget])
+        if os.path.isfile(defaultTarget) and not force :
+            self.log.writeToLog('POST-080', [fName(defaultTarget)])
             return False
+
+        def extractScript () :
+            # Now copy it in. No return from shutil.copy() is good
+            if not shutil.copy(script, scriptTarget) :
+                self.log.writeToLog('POST-090', [fName(script)])
+                # Check if it needs to be unzipped
+                if zipfile.is_zipfile(scriptTarget) :
+                    myzip = zipfile.ZipFile(scriptTarget, 'r')
+                    myzip.extractall(self.local.projProcessFolder)
+                    os.remove(scriptTarget)
+                    # A valid zip file will always contain a file named cType + '-post_process.py'
+                    if os.path.isfile(defaultTarget) :
+                        self.log.writeToLog('POST-100', [fName(scriptTarget)])
+                    else :
+                        self.log.writeToLog('POST-105', [fName(scriptTarget)])
+                        return False
+                    return True
 
         # Check to see if we have a custom post process script to use
         # If something goes wrong here we will want to quite
         if script :
             if not os.path.isfile(script) :
-                self.log.writeToLog('POST-085', [script])
+                self.log.writeToLog('POST-085', [fName(script)])
                 return False
-            else :
-                scriptTarget = os.path.join(self.local.projProcessFolder, fName(script))
-                # Now copy it in. No return from shutil.copy() is good
-                if not shutil.copy(script, scriptTarget) :
-                    self.log.writeToLog('POST-090', [fName(script)])
-                    # Check if it needs to be unzipped
-                    if tarfile.is_tarfile(scriptTarget) :
-                        mytar = tarfile.open(scriptTarget, 'r')
-                        mytar.extractall(self.local.projProcessFolder)
-                        os.remove(scriptTarget)
-                        # A valid tar file will always contain a file named usfm-post_process.py
-                        if os.path.isfile(defaultTarget) :
-                            self.log.writeToLog('POST-100', [fName(scriptTarget)])
-                        else :
-                            self.log.writeToLog('POST-105', [fName(scriptTarget)])
-                            return False
 
-                    self.log.writeToLog('POST-110', [fName(scriptTarget)])
-                    return True
+        # No script found, we can proceed
+        if not os.path.isdir(scriptTargetFolder) :
+            os.mkdir(scriptTargetFolder)
+            extractScript()
+            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+        else :
+            if force :
+                extractScript()
+                self.log.writeToLog('POST-115', [fName(scriptTarget)])
+        return True
 
         # No script was found, just copy in a default starter script
-        source = os.path.join(self.local.rpmCompTypeFolder, cType, 'usfm-post_process.py')
         # Remember, no news from shutil.copy() is good news
-        if not shutil.copy(source, defaultTarget) :
-            self.log.writeToLog('POST-120', [fName(defaultTarget), fName(source)])
+        if not shutil.copy(rpmSource, defaultTarget) :
+            self.log.writeToLog('POST-120', [fName(defaultTarget), fName(rpmSource)])
             return True
+
+
+    def removePostProcess (self, cType) :
+        '''Remove (actually disconnect) a post process script from a
+        component type. This will not actually remove the script. That
+        would need to be done manually. Rather, this will remove the
+        script name entry from the component type so the process cannot
+        be accessed for this specific component.'''
+
+        pass
 
 
 ###############################################################################
