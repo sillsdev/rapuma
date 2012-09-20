@@ -195,8 +195,8 @@ class Project (object) :
         return compobj
 
 
-    def addMetaComponent (self, cid, cidList, cType, force = False) :
-        '''Add a meta component to the project'''
+    def addComponentGroup (self, cid, cidList, cType, force = False) :
+        '''Add a component group to the project'''
 
         # Add/check individual components
         thisList = cidList.split()
@@ -212,7 +212,7 @@ class Project (object) :
 
         # Save our config settings
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog('PROJ-015', [cid])
+            self.log.writeToLog('GRUP-015', [cid])
 
         # We should be done at this point. Post processes should have
         # been run on any of the individual components added above
@@ -223,12 +223,7 @@ class Project (object) :
         '''This will add a component to the object we created 
         above in createComponent().'''
 
-        # See if the working text is present, quite if it is not
-        self.createManager(cType, 'text')
-        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
-            return False
-
-        if not testForSetting(self.projConfig, 'Components', cid) :
+        def insertComponent () :
             buildConfSection(self.projConfig, 'Components')
             buildConfSection(self.projConfig['Components'], cid)
             self.projConfig['Components'][cid]['name'] = cid
@@ -241,12 +236,22 @@ class Project (object) :
             self.components[cid] = compobj
             # Save our config settings
             if writeConfFile(self.projConfig) :
-                self.log.writeToLog('PROJ-020', [cid])
+                return True
+
+        if not testForSetting(self.projConfig, 'Components', cid) :
+            insertComponent()
+            self.log.writeToLog('COMP-020', [cid])
+        elif force :
+            insertComponent()
+            self.log.writeToLog('COMP-022', [cid])
         else :
-            if force :
-                self.log.writeToLog('PROJ-025', [cid])
-            else :
-                self.log.writeToLog('PROJ-026', [cid])
+            self.log.writeToLog('COMP-025', [cid])
+            return False
+
+        # See if the working text is present, quite if it is not
+        self.createManager(cType, 'text')
+        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
+            return False
 
         # Run any working text post processes on the new component text
         if self.runPostProcess(cType, cid) :
@@ -255,8 +260,8 @@ class Project (object) :
         return True
 
 
-    def deleteComponent (self, cid) :
-        '''This will delete a specific component from a project which
+    def removeComponent (self, cid) :
+        '''This will remove a specific component from a project which
         includes both the configuration entry and the physical files.'''
 
         # We will not bother if it is not in the config file.
@@ -436,8 +441,7 @@ class Project (object) :
         '''Run a post process on a single component file or all the files
         of a specified type.'''
 
-        # First test to see that we have a valid cType specified dive out here
-        # if it is not
+        # First test to see that we have a valid cType specified quite if not
         if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
             self.log.writeToLog('POST-010', [cType])
             return False
@@ -448,10 +452,13 @@ class Project (object) :
             if os.path.isfile(target) :
                 if self.postProcessComponent(target, cType, cid) :
                     return True
+                else :
+                    return False
             else :
                 self.log.writeToLog('POST-020', [target])
+                return False
 
-        # No CID means we want to do the entire set of components
+        # No CID means we want to do the entire set of components check for lock
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
             if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
                 self.log.writeToLog('POST-030', [cType])
@@ -469,21 +476,29 @@ class Project (object) :
 
     def postProcessComponent (self, target, cType, cid) :
         '''Run a post process on a single component file, in place.'''
-        
-        
-        
-# We will make this look for a specific file name for this component and it will
-# use that script, not a default script name.
 
         # First check to see if this specific component is locked
         if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
             self.log.writeToLog('POST-040', [cid])
+            return False
 
-#        ppFolder = 
-        script = os.path.join(self.local.projProcessFolder, cType + '-post_process.py')
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postProcessScript') :
+            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        else :
+            self.log.writeToLog('POST-055', [cType.capitalize()])
+            return False
+
+        script = os.path.join(self.local.projPostProcessScriptsFolder, scriptFileName)
         if os.path.isfile(script) :
+            # subprocess will fail if permissions are not set on the
+            # script we want to run. The correct permission should have
+            # been set when we did the installation.
             err = subprocess.call([script, target])
             if err == 0 :
+                # Successful completion means no more processing should
+                # be done on this component. As such, we will automatically
+                # lock it so that will not happen by accident.
+                self.lockComponent(cid)
                 self.log.writeToLog('POST-050', [fName(target)])
             else :
                 self.log.writeToLog('POST-060', [fName(target), str(err)])
@@ -574,6 +589,12 @@ class Project (object) :
             if not test() :
                 dieNow()
             self.log.writeToLog('POST-115', [fName(scriptTarget)])
+
+        # I have not found a way to preserve permissions of the files comming
+        # out of a zip archive. To make sure the post processing script will
+        # actually work when it needs to run. Changing the permissions to
+        # 777 may not be the best way but it will work for now.
+        os.chmod(scriptTarget, int("0777", 8))
 
         # Record the script with the cType
         self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = fName(scriptTarget)

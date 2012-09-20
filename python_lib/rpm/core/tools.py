@@ -76,6 +76,12 @@ def resolvePath (path) :
         return os.path.abspath(path)
 
 
+def escapePath (path) :
+    '''Put escape characters in a path.'''
+
+    return path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
+
+
 def addToList (thisList, item) :
     '''Generic function to add an item to any list if it isn't there already.
     If not, just return the list contents or an empty list.'''

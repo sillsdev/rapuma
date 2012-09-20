@@ -24,11 +24,6 @@
 
 import os, sys
 
-# Set basic system vars
-#systemName = "Rapid Publication Manager (RPM)"
-#systemVersion = "0.0.1"
-#systemAbout = "RPM is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). RPM stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org."
-
 # Set the RPM base program path
 rpmHome = os.environ.get('RPM_BASE')
 if not rpmHome :
@@ -288,17 +283,16 @@ def userArguments (args) :
 
         # Add a new component
         if args['add'] :
-            if args['force'] :
-                aProject.addComponent(args['component_id'], args['component_type'], args['force'])
+            aProject.addComponent(args['component_id'], args['component_type'], args['force'])
 
         # Delete a component
-        if args['remove'] :
+        elif args['remove'] :
             aProject.deleteComponent(args['component_id'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
-        if args['execute'] :
+        elif args['execute'] :
             aProject.renderComponent(args['component_id'], args['force'])
 
     # Font level commands
@@ -406,9 +400,9 @@ def userArguments (args) :
     # is done here as there should be no further operations done at this point.
     
     # Note: This will not work with "project" commands (aProject is not declaired)
-#    if not sys.argv[1].lower() == 'project' :
-#        if os.path.isfile(aProject.local.projLogFile) :
-#            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+    if not sys.argv[1].lower() == 'project' :
+        if os.path.isfile(aProject.local.projLogFile) :
+            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
 
 
 ###############################################################################

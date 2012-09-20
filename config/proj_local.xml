@@ -119,7 +119,7 @@ Todo:
         <setting>
             <name>Scripts Library Path</name>
             <key>libScripts</key>
-            <description>Path to the local user scripts library.</description>
+            <description>Path to the local user scripts library. This contains scripts for project text processing.</description>
             <type>string</type>
             <value>None</value>
         </setting>
@@ -148,6 +148,13 @@ Todo:
             <description>The main project components processing folder.</description>
             <type>string</type>
             <value>Components</value>
+        </setting>
+        <setting>
+            <name>Project Post Process Scripts Folder</name>
+            <key>projPostProcessScriptsFolder</key>
+            <description>The main project components processing folder.</description>
+            <type>list</type>
+            <value>Components,PostProcess</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
