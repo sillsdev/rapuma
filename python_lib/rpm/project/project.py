@@ -318,6 +318,12 @@ class Project (object) :
 ############################### Locking Functions #############################
 ###############################################################################
 
+
+
+# Narrow this down to just two general functions for locking and unlocking
+
+
+
     def testIsLocked (self, item) :
         '''Test to see if a project, component type, or component are
         locked. Start at the top of the hierarchy and return True if an
@@ -334,8 +340,12 @@ class Project (object) :
             return False
 
 
-    def lockProject (self) :
-        '''Lock an entire project so no components in it can be processed.'''
+# working here
+
+
+
+    def lock (self, target) :
+        '''Lock and prevent processing on pid/cType/cid.'''
 
         if not self.testIsLocked(self.projectIDCode) :
             self.userConfig['Projects'][self.projectIDCode]['isLocked'] = True
@@ -344,8 +354,8 @@ class Project (object) :
             return True
 
 
-    def unlockProject (self) :
-        '''Unlock a project so all components can be processed.'''
+    def unlock (self, target) :
+        '''Unlock and enable processing on pid/cType/cid.'''
 
         if self.testIsLocked(self.projectIDCode) :
             self.userConfig['Projects'][self.projectIDCode]['isLocked'] = False
@@ -354,83 +364,83 @@ class Project (object) :
             return True
 
 
-    def lockComponentType (self, cType) :
-        '''Lock a component type so those components cannot be processed.
-        However, if the project is locked we will not bother.'''
+#    def lockComponentType (self, cType) :
+#        '''Lock a component type so those components cannot be processed.
+#        However, if the project is locked we will not bother.'''
 
-        Ctype = cType.capitalize()
-        if not self.testIsLocked(self.projectIDCode) :
-            if not self.testIsLocked(Ctype) :
-                self.projConfig['CompTypes'][Ctype]['isLocked'] = True
-                writeConfFile(self.projConfig)
-                self.log.writeToLog('LOCK-038', [cType])
-            else :
-                self.log.writeToLog('LOCK-038', [cType])
-            return True
-        else :
-            self.log.writeToLog('LOCK-007', [Ctype])
-            return False
-
-
-    def unlockComponentType (self, cType) :
-        '''Unlock a component type so components can be processed.'''
-
-        Ctype = cType.capitalize()
-        if not self.testIsLocked(self.projectIDCode) :
-            if self.testIsLocked(Ctype) :
-                self.projConfig['CompTypes'][Ctype]['isLocked'] = False
-                writeConfFile(self.projConfig)
-                self.log.writeToLog('LOCK-048', [cType])
-            else :
-                self.log.writeToLog('LOCK-048', [cType])
-            return True
-        else :
-            self.log.writeToLog('LOCK-007', [Ctype])
-            return False
+#        Ctype = cType.capitalize()
+#        if not self.testIsLocked(self.projectIDCode) :
+#            if not self.testIsLocked(Ctype) :
+#                self.projConfig['CompTypes'][Ctype]['isLocked'] = True
+#                writeConfFile(self.projConfig)
+#                self.log.writeToLog('LOCK-038', [cType])
+#            else :
+#                self.log.writeToLog('LOCK-038', [cType])
+#            return True
+#        else :
+#            self.log.writeToLog('LOCK-007', [Ctype])
+#            return False
 
 
-    def lockComponent (self, cid) :
-        '''Lock a component so it cannot be processed.'''
+#    def unlockComponentType (self, cType) :
+#        '''Unlock a component type so components can be processed.'''
 
-        if self.isComponent (cid) :
-            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
-            if not self.testIsLocked(self.projectIDCode) :
-                if not self.testIsLocked(Ctype) :
-                    self.projConfig['Components'][cid]['isLocked'] = True
-                    writeConfFile(self.projConfig)
-                    self.log.writeToLog('LOCK-058', [cid])
-                    return True
-                else :
-                    self.log.writeToLog('LOCK-009', [cid, Ctype])
-                    return False
-            else :
-                self.log.writeToLog('LOCK-008', [cid])
-                return False
-        else :
-            self.log.writeToLog('LOCK-055', [cid])
-            return False
+#        Ctype = cType.capitalize()
+#        if not self.testIsLocked(self.projectIDCode) :
+#            if self.testIsLocked(Ctype) :
+#                self.projConfig['CompTypes'][Ctype]['isLocked'] = False
+#                writeConfFile(self.projConfig)
+#                self.log.writeToLog('LOCK-048', [cType])
+#            else :
+#                self.log.writeToLog('LOCK-048', [cType])
+#            return True
+#        else :
+#            self.log.writeToLog('LOCK-007', [Ctype])
+#            return False
 
 
-    def unlockComponent (self, cid) :
-        '''Unlock a component so it can be processed.'''
+#    def lockComponent (self, cid) :
+#        '''Lock a component so it cannot be processed.'''
 
-        if self.isComponent (cid) :
-            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
-            if not self.testIsLocked(self.projectIDCode) :
-                if not self.testIsLocked(Ctype) :
-                    self.projConfig['Components'][cid]['isLocked'] = False
-                    writeConfFile(self.projConfig)
-                    self.log.writeToLog('LOCK-068', [cid])
-                    return True
-                else :
-                    self.log.writeToLog('LOCK-009', [cid, Ctype])
-                    return False
-            else :
-                self.log.writeToLog('LOCK-008', [Ctype])
-                return False
-        else :
-            self.log.writeToLog('LOCK-055', [cid])
-            return False
+#        if self.isComponent (cid) :
+#            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
+#            if not self.testIsLocked(self.projectIDCode) :
+#                if not self.testIsLocked(Ctype) :
+#                    self.projConfig['Components'][cid]['isLocked'] = True
+#                    writeConfFile(self.projConfig)
+#                    self.log.writeToLog('LOCK-058', [cid])
+#                    return True
+#                else :
+#                    self.log.writeToLog('LOCK-009', [cid, Ctype])
+#                    return False
+#            else :
+#                self.log.writeToLog('LOCK-008', [cid])
+#                return False
+#        else :
+#            self.log.writeToLog('LOCK-055', [cid])
+#            return False
+
+
+#    def unlockComponent (self, cid) :
+#        '''Unlock a component so it can be processed.'''
+
+#        if self.isComponent (cid) :
+#            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
+#            if not self.testIsLocked(self.projectIDCode) :
+#                if not self.testIsLocked(Ctype) :
+#                    self.projConfig['Components'][cid]['isLocked'] = False
+#                    writeConfFile(self.projConfig)
+#                    self.log.writeToLog('LOCK-068', [cid])
+#                    return True
+#                else :
+#                    self.log.writeToLog('LOCK-009', [cid, Ctype])
+#                    return False
+#            else :
+#                self.log.writeToLog('LOCK-008', [Ctype])
+#                return False
+#        else :
+#            self.log.writeToLog('LOCK-055', [cid])
+#            return False
 
 
 ###############################################################################
@@ -495,11 +505,11 @@ class Project (object) :
             # been set when we did the installation.
             err = subprocess.call([script, target])
             if err == 0 :
+                self.log.writeToLog('POST-050', [fName(target)])
                 # Successful completion means no more processing should
                 # be done on this component. As such, we will automatically
                 # lock it so that will not happen by accident.
                 self.lockComponent(cid)
-                self.log.writeToLog('POST-050', [fName(target)])
             else :
                 self.log.writeToLog('POST-060', [fName(target), str(err)])
         else :

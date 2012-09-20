@@ -287,7 +287,7 @@ def userArguments (args) :
 
         # Delete a component
         elif args['remove'] :
-            aProject.deleteComponent(args['component_id'])
+            aProject.removeComponent(args['component_id'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
@@ -368,24 +368,12 @@ def userArguments (args) :
         if isProject(args['project_id']) :
             aProject = initProject(args['project_id'])
 
-        # Lock the whole project
-        if args['lock'] and not args['component_type'] and not args['component_id'] :
-            aProject.lockProject()
-        # Unlock the whole project
-        elif args['unlock'] and not args['component_type'] and not args['component_id'] :
-            aProject.unlockProject()
-        # Lock a component type
-        elif args['lock'] and args['component_type'] :
-            aProject.lockComponentType(args['component_type'])
-        # Unlock a component type
-        elif args['unlock'] and args['component_type'] :
-            aProject.unlockComponentType(args['component_type'])
-        # Lock a component
-        elif args['lock'] and args['component_id'] :
-            aProject.lockComponent(args['component_id'])
-        # Unlock a component
-        elif args['unlock'] and args['component_id'] :
-            aProject.unlockComponent(args['component_id'])
+        # Lock proj/cType/cid
+        if args['lock'] :
+            aProject.lock(args['lock_target'])
+        # Unlock proj/cType/cid
+        elif args['unlock'] :
+            aProject.unlock(args['lock_target'])
 
     # Totally lost
     else:
@@ -497,7 +485,7 @@ settingsCommand.add_argument('-v', '--value', help='A new value to add or change
 # Add Project Locking subprocess arguments
 lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
 lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-lockCommand.add_argument('lock_type', help='Specify either a valid component or component type to be locked. If nothing is specified the project will be locked so no processing can take place.')
+lockCommand.add_argument('-t', '--lock_target', help='Specify either a valid component or component type to be locked/unlocked. If nothing is specified the project will be locked/unlocked.')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
 lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
 
