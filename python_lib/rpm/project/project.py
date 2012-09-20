@@ -512,6 +512,19 @@ class Project (object) :
         scriptSourceFolder  = os.path.split(script)[0]
         scriptTargetFolder  = os.path.join(self.local.projProcessFolder, 'PostProcess')
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
+        try :
+            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        except :
+            oldScript       = ''
+
+        # First check for prexsisting script record
+        if not force :
+            if oldScript == fName(scriptTarget) :
+                self.log.writeToLog('POST-081')
+                return False
+            elif oldScript != '' :
+                self.log.writeToLog('POST-080', [oldScript])
+                return False
 
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
@@ -522,9 +535,9 @@ class Project (object) :
         if not os.path.isdir(scriptTargetFolder) :
             os.makedirs(scriptTargetFolder)
 
-        # First check to see if there already is a script, return if there is
+        # First check to see if there already is a script file, return if there is
         if os.path.isfile(scriptTarget) and not force :
-            self.log.writeToLog('POST-080', [fName(scriptTarget)])
+            self.log.writeToLog('POST-082', [fName(scriptTarget)])
             return False
 
         def test () :
@@ -574,10 +587,19 @@ class Project (object) :
         component type. This will not actually remove the script. That
         would need to be done manually. Rather, this will remove the
         script name entry from the component type so the process cannot
-        be accessed for this specific component.'''
+        be accessed for this specific component type.'''
 
-        pass
+        # Get old setting
+        old = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        # Reset the field to ''
+        if old != '' :
+            self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = ''
+            writeConfFile(self.projConfig)
+            self.log.writeToLog('POST-130', [old,cType.capitalize()])
+        else :
+            self.log.writeToLog('POST-135', [cType.capitalize()])
 
+        return True
 
 ###############################################################################
 ################################ Style Functions ##############################
