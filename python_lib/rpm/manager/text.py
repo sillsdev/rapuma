@@ -129,15 +129,15 @@ class Text (Manager) :
             dieNow()
 
         # Start the process by building paths and file names, if we made it this far.
-        # Note the file name for the postProcess is hard coded. This will become a part
+        # Note the file name for the preprocess is hard coded. This will become a part
         # of the total system and this file will be copied in when the user requests to
-        # post processing.
+        # preprocessing.
         source          = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
         targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
         target          = os.path.join(targetFolder, cid + '.usfm')
         compLock        = os.path.join(targetFolder, '.lock')
         typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
-        postProcess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-post_process.py')
+        preprocess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-preprocess.py')
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 

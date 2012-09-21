@@ -214,7 +214,7 @@ class Project (object) :
         if writeConfFile(self.projConfig) :
             self.log.writeToLog('GRUP-015', [cid])
 
-        # We should be done at this point. Post processes should have
+        # We should be done at this point. Preprocesses should have
         # been run on any of the individual components added above
         return True
 
@@ -253,8 +253,8 @@ class Project (object) :
         if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
             return False
 
-        # Run any working text post processes on the new component text
-        if self.runPostProcess(cType, cid) :
+        # Run any working text preprocesses on the new component text
+        if self.runPreprocess(cType, cid) :
             self.log.writeToLog('TEXT-060', [cid])
 
         return True
@@ -444,84 +444,84 @@ class Project (object) :
 
 
 ###############################################################################
-############################ Post Process Functions ###########################
+############################# Preprocess Functions ############################
 ###############################################################################
 
-    def runPostProcess (self, cType, cid = None) :
-        '''Run a post process on a single component file or all the files
+    def runPreprocess (self, cType, cid = None) :
+        '''Run a preprocess on a single component file or all the files
         of a specified type.'''
 
         # First test to see that we have a valid cType specified quite if not
         if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
-            self.log.writeToLog('POST-010', [cType])
+            self.log.writeToLog('PREP-010', [cType])
             return False
 
         # Create target file path and name
         if cid :
             target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
             if os.path.isfile(target) :
-                if self.postProcessComponent(target, cType, cid) :
+                if self.preprocessComponent(target, cType, cid) :
                     return True
                 else :
                     return False
             else :
-                self.log.writeToLog('POST-020', [target])
+                self.log.writeToLog('PREP-020', [target])
                 return False
 
         # No CID means we want to do the entire set of components check for lock
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
             if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
-                self.log.writeToLog('POST-030', [cType])
+                self.log.writeToLog('PREP-030', [cType])
                 return False
 
-        # If we made it this far we can assume it is okay to post process
+        # If we made it this far we can assume it is okay to preprocess
         # everything for this component type
         for c in self.projConfig['Components'].keys() :
             if self.projConfig['Components'][c]['type'] == cType :
                 target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
-                self.postProcessComponent(target, cType, c)
+                self.preprocessComponent(target, cType, c)
 
         return True
 
 
-    def postProcessComponent (self, target, cType, cid) :
-        '''Run a post process on a single component file, in place.'''
+    def preprocessComponent (self, target, cType, cid) :
+        '''Run a preprocess on a single component file, in place.'''
 
         # First check to see if this specific component is locked
         if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
-            self.log.writeToLog('POST-040', [cid])
+            self.log.writeToLog('PREP-040', [cid])
             return False
 
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postProcessScript') :
-            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
+            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
         else :
-            self.log.writeToLog('POST-055', [cType.capitalize()])
+            self.log.writeToLog('PREP-055', [cType.capitalize()])
             return False
 
-        script = os.path.join(self.local.projPostProcessScriptsFolder, scriptFileName)
+        script = os.path.join(self.local.projPreprocessScriptsFolder, scriptFileName)
         if os.path.isfile(script) :
             # subprocess will fail if permissions are not set on the
             # script we want to run. The correct permission should have
             # been set when we did the installation.
             err = subprocess.call([script, target])
             if err == 0 :
-                self.log.writeToLog('POST-050', [fName(target)])
+                self.log.writeToLog('PREP-050', [fName(target)])
                 # Successful completion means no more processing should
                 # be done on this component. As such, we will automatically
                 # lock it so that will not happen by accident.
                 self.lockComponent(cid)
             else :
-                self.log.writeToLog('POST-060', [fName(target), str(err)])
+                self.log.writeToLog('PREP-060', [fName(target), str(err)])
         else :
-            self.log.writeToLog('POST-070', [fName(script), cid])
-            self.log.writeToLog('POST-075')
+            self.log.writeToLog('PREP-070', [fName(script), cid])
+            self.log.writeToLog('PREP-075')
 
 
-    def installPostProcess (self, cType, script = None, force = None) :
-        '''Install a post process script into the main components processing
+    def installPreprocess (self, cType, script = None, force = None) :
+        '''Install a preprocess script into the main components processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
-        projects will have their own specially developed post process
+        projects will have their own specially developed preprocess
         script. Use the "script" var to specify a process (which should be
         bundled in a system compatable way). If "script" is not specified
         we will copy in a default script that the user can modify. This is
@@ -533,22 +533,22 @@ class Project (object) :
 
         # Define some internal vars
         if not script :
-            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-post_process.zip')
+            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-preprocess.zip')
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, 'PostProcess')
+        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, 'Preprocess')
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
         try :
-            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
         except :
             oldScript       = ''
 
         # First check for prexsisting script record
         if not force :
             if oldScript == fName(scriptTarget) :
-                self.log.writeToLog('POST-081')
+                self.log.writeToLog('PREP-081')
                 return False
             elif oldScript != '' :
-                self.log.writeToLog('POST-080', [oldScript])
+                self.log.writeToLog('PREP-080', [oldScript])
                 return False
 
         # In case this is a new project we may need to install a component
@@ -562,16 +562,16 @@ class Project (object) :
 
         # First check to see if there already is a script file, return if there is
         if os.path.isfile(scriptTarget) and not force :
-            self.log.writeToLog('POST-082', [fName(scriptTarget)])
+            self.log.writeToLog('PREP-082', [fName(scriptTarget)])
             return False
 
         def test () :
             # Test for successful extraction
             if os.path.isfile(scriptTarget) :
-                self.log.writeToLog('POST-100', [fName(scriptTarget)])
+                self.log.writeToLog('PREP-100', [fName(scriptTarget)])
                 return True
             else :
-                self.log.writeToLog('POST-105', [fName(scriptTarget)])
+                self.log.writeToLog('PREP-105', [fName(scriptTarget)])
                 return False
 
         def extract() :
@@ -593,42 +593,42 @@ class Project (object) :
             extract()
             if not test() :
                 dieNow()
-            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+            self.log.writeToLog('PREP-110', [fName(scriptTarget)])
         elif force :
             extract()
             if not test() :
                 dieNow()
-            self.log.writeToLog('POST-115', [fName(scriptTarget)])
+            self.log.writeToLog('PREP-115', [fName(scriptTarget)])
 
         # I have not found a way to preserve permissions of the files comming
-        # out of a zip archive. To make sure the post processing script will
+        # out of a zip archive. To make sure the preprocessing script will
         # actually work when it needs to run. Changing the permissions to
         # 777 may not be the best way but it will work for now.
         os.chmod(scriptTarget, int("0777", 8))
 
         # Record the script with the cType
-        self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = fName(scriptTarget)
+        self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(scriptTarget)
         writeConfFile(self.projConfig)
 
         return True
 
 
-    def removePostProcess (self, cType) :
-        '''Remove (actually disconnect) a post process script from a
+    def removePreprocess (self, cType) :
+        '''Remove (actually disconnect) a preprocess script from a
         component type. This will not actually remove the script. That
         would need to be done manually. Rather, this will remove the
         script name entry from the component type so the process cannot
         be accessed for this specific component type.'''
 
         # Get old setting
-        old = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        old = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
         # Reset the field to ''
         if old != '' :
-            self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = ''
+            self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = ''
             writeConfFile(self.projConfig)
-            self.log.writeToLog('POST-130', [old,cType.capitalize()])
+            self.log.writeToLog('PREP-130', [old,cType.capitalize()])
         else :
-            self.log.writeToLog('POST-135', [cType.capitalize()])
+            self.log.writeToLog('PREP-135', [cType.capitalize()])
 
         return True
 

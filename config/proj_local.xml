@@ -150,11 +150,11 @@ Todo:
             <value>Components</value>
         </setting>
         <setting>
-            <name>Project Post Process Scripts Folder</name>
-            <key>projPostProcessScriptsFolder</key>
+            <name>Project Preprocess Scripts Folder</name>
+            <key>projPreprocessScriptsFolder</key>
             <description>The main project components processing folder.</description>
             <type>list</type>
-            <value>Components,PostProcess</value>
+            <value>Components,Preprocess</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
