@@ -265,19 +265,24 @@ def userArguments (args) :
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
 
-        # Add a new component
+        # Add a new component group
         if args['add'] :
-            aProject.addMetaComponent(args['component_id'], args['component_type'], args['force'])
+            if not args['list'] :
+                sys.exit('Must use -l (--list) when adding a component group. Process halted!')
+            else :
+                aProject.addComponentGroup(args['component_type'], args['group_id'], args['list'], args['force'])
 
-        # Delete a component
+        # Delete a group component
         elif args['remove'] :
-            aProject.deleteComponent(args['component_id'])
+            # If -f is used, it will be passed to removeComponent() to delete 
+            # every file in the group
+            aProject.removeGroupComponent(args['group_id'], args['force'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, force is set to False and the component
         # will not be rerendered if it already exsists.
         elif args['execute'] :
-            aProject.renderGroup(args['component_id'], args['force'])
+            aProject.renderGroup(args['group_id'], args['force'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -288,7 +293,8 @@ def userArguments (args) :
 
         # Delete a component
         elif args['remove'] :
-            aProject.removeComponent(args['component_id'])
+            # If -f is used, we delete all the files with this cid
+            aProject.removeComponent(args['component_id'], args['force'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
@@ -311,26 +317,14 @@ def userArguments (args) :
         elif args['main'] :
             aProject.managers[args['component_type'] + '_Font'].setPrimaryFont(args['component_type'].capitalize(), font, args['force'])
 
-
-
-# Move these to the style manager
-
-
-
     # Style level commands
     elif sys.argv[1].lower() == 'style' :
+        aProject.createManager(args['component_type'], 'style')
 
         if args['add'] :
-            aProject.createStyleFile(args['component_type'], args['force'])
+            aProject.managers[args['component_type'] + '_Style'].addStyleFile(args['component_type'], args['style_file'], args['force'])
         elif args['remove'] :
-            aProject.removeStyleFile(args['component_type'], args['force'])
-
-
-
-
-
-
-
+            aProject.managers[args['component_type'] + '_Style'].removeStyleFile(args['component_type'], args['force'])
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
@@ -432,7 +426,8 @@ groupCommand.add_argument('project_id', help='Project ID (a positional argument 
 groupCommand.add_argument('component_type', help='The component type is needed for creating a new component group.')
 groupCommand.add_argument('group_id', help='A specific group ID required for creating a new component group.')
 groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
-groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
+groupCommand.add_argument('-r', '--remove', action='store_true', help='Remove an existing component from this project.')
+groupCommand.add_argument('-l', '--list', help='A list of components to be in this group. This must be used if adding a group. It is not needed for removal.')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a component group in this project.')
 
@@ -462,6 +457,7 @@ styleCommand.add_argument('project_id', help='Project ID (a positional argument 
 styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component.')
 styleCommand.add_argument('-a', '--add', action='store_true', help='Add a new style for a specific comonent type.')
 styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a style file for this component type.')
+styleCommand.add_argument('-s', '--style_file', help='If a specific style file is required, use this argument to provide the fill path and name.')
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
 
 # Add text preprocessing subprocess arguments

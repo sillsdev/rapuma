@@ -70,10 +70,14 @@ class ProjLog (object) :
             'COMP-060' : ['MSG', 'The [<<1>>] component type has been added to the project.'],
             'COMP-065' : ['ERR', 'Adding the [<<1>>] component type to the project failed.'],
 
-
             'GRUP-000' : ['MSG', 'Group processing messages'],
             'GRUP-010' : ['MSG', ''],
             'GRUP-015' : ['MSG', 'Added the [<<1>>] component group to the project.'],
+            'GRUP-070' : ['ERR', 'The component group [<<1>>] is locked. Process halted! Please unlock it before continuing. - project.removeGroupComponent()'],
+            'GRUP-071' : ['ERR', 'The configuration setting for the [<<1>>] group does not appear valid. Process halted! - project.removeGroupComponent()'],
+            'GRUP-073' : ['MSG', 'Force switch was set (-f). The component group [<<1>>] was removed along with all related components. To bad if you did not meant to do that. :-( - project.removeGroupComponent()'],
+            'GRUP-075' : ['MSG', 'The configuration listing for the component group [<<1>>] has been removed from the project. - project.removeGroupComponent()'],
+            'GRUP-077' : ['LOG', 'Config settings successfully written out for the deletion of the component group [<<1>>] - project.removeGroupComponent()'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

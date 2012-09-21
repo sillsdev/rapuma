@@ -65,77 +65,125 @@ class Style (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
-    def installCompTypeGlobalStyles (self) :
-        '''If the source is from a PT project, check to see if there is a
-        (project-wide) stylesheet to install. If not, we will make one.
-        This file is required as a minimum for components of this type to
-        render. This function must succeed.'''
 
-        ptConf = getPTSettings(self.project.local.projHome)
-        globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-        if not os.path.isfile(globalStyFile) :
-            if self.sourceEditor.lower() == 'paratext' :
-                # Build paths and names we need
-                parent = os.path.dirname(self.project.local.projHome)
-                gather = os.path.join(parent, 'gather')
-                if os.path.isdir(gather) :
-                    parent = gather
+    def addStyleFile (self, cType, customStyleFile = None, force = False) :
+        '''Add a style file for a specified component type. It should be as
+        generlized as possible. If force is set to True, overwrite any
+        exsisting files.'''
 
-                # Override default styleFile name with what we find in the PT conf
-                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-                source = os.path.join(parent, self.mainStyleFile)
-                target = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-                if not os.path.isfile(target) :
-                    installPTStyles(self.project.local, self.mainStyleFile)
-                    # Change, if necessary, the main style file name
-                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = self.mainStyleFile
-                    if writeConfFile(self.project.projConfig) :
-                        self.project.log.writeToLog('STYL-010')
+        def installFile () :
+            shutil.copy(styleFile, target)
+
+        # Set some vars
+        styleFile = customStyleFile
+        target = os.path.join(self.project.local.projProcessFolder, cType + '.sty')
+
+        if cType.lower() == 'usfm' :
+            styleFile = self.findUsfmStyleFile()
+            installFile()
+            self.project.log.writeToLog('STYL-000')
+        else :
+            self.project.log.writeToLog('STYL-000')
+
+
+
+    def removeStyleFile (self, cType, force) :
+        '''Remove a style file from a specified component type. However, if
+        the type is locked, bow out gracefully, unless force is set to True.'''
+
+        def removeFile () :
+            if os.path.isfile(styleFile) :
+                os.remove(styleFile)
+                self.project.log.writeToLog('STYL-000')
             else :
-                # Quite here
-                self.project.log.writeToLog('STYL-015')
-                dieNow()
+                self.project.log.writeToLog('STYL-000')
 
+        # Set some vars
+        styleFile = os.path.join(self.project.local.projProcessFolder, cType + '.sty')
 
-    def installCompTypeOverrideStyles (self) :
-        '''If the source is from a PT project, check to see if there is a
-        (project-wide) custom stylesheet to install. If not, we are done.
-        This style file is not required.'''
-
-        target = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
-        if not os.path.isfile(target) :
-            if self.sourceEditor.lower() == 'paratext' :
-                # Build paths and names we need
-                parent = os.path.dirname(self.project.local.projHome)
-                gather = os.path.join(parent, 'gather')
-                if os.path.isdir(gather) :
-                    parent = gather
-
-                source = os.path.join(parent, self.customStyleFile)
-                if os.path.isfile(source) :
-                    shutil.copy(source, target)
-                    self.project.log.writeToLog('STYL-025', [fName(target)])
-                else :
-                    if not installPTCustomStyles(self.project.local, self.customStyleFile) :
-                        self.project.log.writeToLog('STYL-020')
-                        self.createCustomUsfmStyles()
+        if force :
+            removeFile()
+        else :
+            if self.project.isLocked(cType) :
+                self.project.log.writeToLog('STYL-000')
             else :
-                self.createCustomUsfmStyles()
+                removeFile()
+                self.project.log.writeToLog('STYL-000')
 
 
-    def createCustomUsfmStyles (self) :
-        '''Create a custom project-wide USFM style file for this project.
-        This USFM style file will override the main component type styles.'''
+    def findUsfmStyleFile (self) :
+        '''Return the full path to a USFM style file that can be
+        installed into this project.'''
 
+        fileName = ''
         self.project.log.writeToLog('STYL-030')
+        return fileName
 
 
-    def createCompOverrideUsfmStyles (self, cid) :
-        '''Create a component override style file for a single component.
-        This file will override specific styles from preceeding style
-        files loaded before it.'''
+#    def installCompTypeGlobalStyles (self) :
+#        '''If the source is from a PT project, check to see if there is a
+#        (project-wide) stylesheet to install. If not, we will make one.
+#        This file is required as a minimum for components of this type to
+#        render. This function must succeed.'''
 
-        self.project.log.writeToLog('STYL-040')
+#        ptConf = getPTSettings(self.project.local.projHome)
+#        globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+#        if not os.path.isfile(globalStyFile) :
+#            if self.sourceEditor.lower() == 'paratext' :
+#                # Build paths and names we need
+#                parent = os.path.dirname(self.project.local.projHome)
+#                gather = os.path.join(parent, 'gather')
+#                if os.path.isdir(gather) :
+#                    parent = gather
+
+#                # Override default styleFile name with what we find in the PT conf
+#                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+#                source = os.path.join(parent, self.mainStyleFile)
+#                target = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+#                if not os.path.isfile(target) :
+#                    installPTStyles(self.project.local, self.mainStyleFile)
+#                    # Change, if necessary, the main style file name
+#                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = self.mainStyleFile
+#                    if writeConfFile(self.project.projConfig) :
+#                        self.project.log.writeToLog('STYL-010')
+#            else :
+#                # Quite here
+#                self.project.log.writeToLog('STYL-015')
+#                dieNow()
+
+
+#    def installCompTypeOverrideStyles (self) :
+#        '''If the source is from a PT project, check to see if there is a
+#        (project-wide) custom stylesheet to install. If not, we are done.
+#        This style file is not required.'''
+
+#        target = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
+#        if not os.path.isfile(target) :
+#            if self.sourceEditor.lower() == 'paratext' :
+#                # Build paths and names we need
+#                parent = os.path.dirname(self.project.local.projHome)
+#                gather = os.path.join(parent, 'gather')
+#                if os.path.isdir(gather) :
+#                    parent = gather
+
+#                source = os.path.join(parent, self.customStyleFile)
+#                if os.path.isfile(source) :
+#                    shutil.copy(source, target)
+#                    self.project.log.writeToLog('STYL-025', [fName(target)])
+#                else :
+#                    if not installPTCustomStyles(self.project.local, self.customStyleFile) :
+#                        self.project.log.writeToLog('STYL-020')
+#                        self.createCustomUsfmStyles()
+#            else :
+#                self.createCustomUsfmStyles()
+
+
+#    def createCompOverrideUsfmStyles (self, cid) :
+#        '''Create a component override style file for a single component.
+#        This file will override specific styles from preceeding style
+#        files loaded before it.'''
+
+#        self.project.log.writeToLog('STYL-040')
 
 
 

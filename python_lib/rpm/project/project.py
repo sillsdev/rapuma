@@ -195,24 +195,25 @@ class Project (object) :
         return compobj
 
 
-    def addComponentGroup (self, cid, cidList, cType, force = False) :
-        '''Add a component group to the project'''
+    def addComponentGroup (self, cType, gid, thisList, force = False) :
+        '''Add a component group to the project. If any of the individual
+        components are missing, it will try to add them to the project.'''
 
         # Add/check individual components
-        thisList = cidList.split()
-        for c in thisList :
-            self.addComponent(c, cType, force)
+        cidList = thisList.split()
+        for cid in cidList :
+            self.addComponent(cid, cType, force)
 
         # Add the info to the components
         buildConfSection(self.projConfig, 'Components')
-        buildConfSection(self.projConfig['Components'], cid)
-        self.projConfig['Components'][cid]['name'] = cid
-        self.projConfig['Components'][cid]['type'] = cType
-        self.projConfig['Components'][cid]['list'] = thisList
+        buildConfSection(self.projConfig['Components'], gid)
+        self.projConfig['Components'][gid]['name'] = gid
+        self.projConfig['Components'][gid]['type'] = cType
+        self.projConfig['Components'][gid]['list'] = cidList
 
         # Save our config settings
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-015', [cid])
+            self.log.writeToLog('GRUP-015', [gid])
 
         # We should be done at this point. Preprocesses should have
         # been run on any of the individual components added above
@@ -221,7 +222,11 @@ class Project (object) :
 
     def addComponent (self, cid, cType, force = False) :
         '''This will add a component to the object we created 
-        above in createComponent().'''
+        above in createComponent(). If the component is already
+        listed in the project configuration it will not proceed
+        unless force is set to True. Then it will remove the
+        component listing, along with its files so a fresh
+        copy can be added to the project.'''
 
         def insertComponent () :
             buildConfSection(self.projConfig, 'Components')
@@ -250,6 +255,8 @@ class Project (object) :
             return False
 
         # See if the working text is present, quite if it is not
+        # FIXME: This is not good in the long-run if this is not
+        # usfm type text this cannot work
         self.createManager(cType, 'text')
         if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
             return False
@@ -261,9 +268,46 @@ class Project (object) :
         return True
 
 
-    def removeComponent (self, cid) :
-        '''This will remove a specific component from a project which
-        includes both the configuration entry and the physical files.'''
+    def removeGroupComponent (self, gid, force = False) :
+        '''This will remove a component group from a project 
+        If force is set to True, the configuration entries
+        as well as the physical files will be removed. Otherwise
+        only the group configuration will be removed. The
+        group component must be unlocked before this can
+        be done.'''
+
+        # Test for group lock
+        if isLocked() :
+            self.log.writeToLog('GRUP-070', [gid])
+            return False
+
+        # Check for force flag
+        if force :
+            if testForSetting(self.projConfig['Components'][gid], 'list') :
+                cidList = self.projConfig['Components'][gid]['list']
+            else :
+                self.log.writeToLog('GRUP-071', [gid])
+                return False
+            for cid in cidList :
+                self.removeComponent(cid, force)
+            del self.projConfig['Components'][gid]
+            self.log.writeToLog('GRUP-073', [gid])
+        # Just a normal setting delete
+        else :
+            del self.projConfig['Components'][gid]
+            self.log.writeToLog('GRUP-075', [gid])
+
+        # Write and report
+        if writeConfFile(self.projConfig) :
+            self.log.writeToLog('GRUP-077')
+            return True
+
+
+    def removeComponent (self, cid, force = False) :
+        '''This will remove a specific component from a project
+        configuration. However, if force is set to True both the
+        configuration entry and the physical files will be removed.
+        If the component is locked, the function will abort.'''
 
         # We will not bother if it is not in the config file.
         # Otherwise, delete both the config and physical files
@@ -319,7 +363,7 @@ class Project (object) :
 ############################### Locking Functions #############################
 ###############################################################################
 
-    def testIsLocked (self, item) :
+    def isLocked (self, item) :
         '''Test to see if a project, component type, or component are
         locked. Start at the top of the hierarchy and return True if an
         item is found that is locked above the target item or True if
@@ -405,7 +449,7 @@ class Project (object) :
         '''Run a preprocess on a single component file, in place.'''
 
         # First check to see if this specific component is locked
-        if testForSetting(self.projConfig['Components'][cid], 'isLocked') :
+        if self.isLocked(cid) :
             self.log.writeToLog('PREP-040', [cid])
             return False
 
