@@ -242,6 +242,7 @@ class Project (object) :
             insertComponent()
             self.log.writeToLog('COMP-020', [cid])
         elif force :
+            self.removeComponent(cid)
             insertComponent()
             self.log.writeToLog('COMP-022', [cid])
         else :
@@ -318,12 +319,6 @@ class Project (object) :
 ############################### Locking Functions #############################
 ###############################################################################
 
-
-
-# Narrow this down to just two general functions for locking and unlocking
-
-
-
     def testIsLocked (self, item) :
         '''Test to see if a project, component type, or component are
         locked. Start at the top of the hierarchy and return True if an
@@ -340,107 +335,28 @@ class Project (object) :
             return False
 
 
-# working here
+    def lockUnlock (self, target, lock = True) :
+        '''Lock or unlock to enable or disable processing on pid/cType/cid.'''
 
-
-
-    def lock (self, target) :
-        '''Lock and prevent processing on pid/cType/cid.'''
-
-        if not self.testIsLocked(self.projectIDCode) :
-            self.userConfig['Projects'][self.projectIDCode]['isLocked'] = True
+        # Check each of the kinds of targets to see which one is the target
+        if self.isProject(target) :
+            self.userConfig['Projects'][target]['isLocked'] = lock
+        elif self.isComponentType(target.capitalize()) :
+            self.projConfig['CompTypes'][target.capitalize()]['isLocked'] = lock
+        elif self.isComponent(target) :
+            self.projConfig['Components'][target]['isLocked'] = lock
+        else :
+            # Arggg, this is not good
+            self.log.writeToLog('LOCK-005', [target])
+            return False
+        # Save settings
+        if self.isProject(target) :
             writeConfFile(self.userConfig)
-            self.log.writeToLog('LOCK-018', [self.projectIDCode])
-            return True
-
-
-    def unlock (self, target) :
-        '''Unlock and enable processing on pid/cType/cid.'''
-
-        if self.testIsLocked(self.projectIDCode) :
-            self.userConfig['Projects'][self.projectIDCode]['isLocked'] = False
-            writeConfFile(self.userConfig)
-            self.log.writeToLog('LOCK-028', [self.projectIDCode])
-            return True
-
-
-#    def lockComponentType (self, cType) :
-#        '''Lock a component type so those components cannot be processed.
-#        However, if the project is locked we will not bother.'''
-
-#        Ctype = cType.capitalize()
-#        if not self.testIsLocked(self.projectIDCode) :
-#            if not self.testIsLocked(Ctype) :
-#                self.projConfig['CompTypes'][Ctype]['isLocked'] = True
-#                writeConfFile(self.projConfig)
-#                self.log.writeToLog('LOCK-038', [cType])
-#            else :
-#                self.log.writeToLog('LOCK-038', [cType])
-#            return True
-#        else :
-#            self.log.writeToLog('LOCK-007', [Ctype])
-#            return False
-
-
-#    def unlockComponentType (self, cType) :
-#        '''Unlock a component type so components can be processed.'''
-
-#        Ctype = cType.capitalize()
-#        if not self.testIsLocked(self.projectIDCode) :
-#            if self.testIsLocked(Ctype) :
-#                self.projConfig['CompTypes'][Ctype]['isLocked'] = False
-#                writeConfFile(self.projConfig)
-#                self.log.writeToLog('LOCK-048', [cType])
-#            else :
-#                self.log.writeToLog('LOCK-048', [cType])
-#            return True
-#        else :
-#            self.log.writeToLog('LOCK-007', [Ctype])
-#            return False
-
-
-#    def lockComponent (self, cid) :
-#        '''Lock a component so it cannot be processed.'''
-
-#        if self.isComponent (cid) :
-#            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
-#            if not self.testIsLocked(self.projectIDCode) :
-#                if not self.testIsLocked(Ctype) :
-#                    self.projConfig['Components'][cid]['isLocked'] = True
-#                    writeConfFile(self.projConfig)
-#                    self.log.writeToLog('LOCK-058', [cid])
-#                    return True
-#                else :
-#                    self.log.writeToLog('LOCK-009', [cid, Ctype])
-#                    return False
-#            else :
-#                self.log.writeToLog('LOCK-008', [cid])
-#                return False
-#        else :
-#            self.log.writeToLog('LOCK-055', [cid])
-#            return False
-
-
-#    def unlockComponent (self, cid) :
-#        '''Unlock a component so it can be processed.'''
-
-#        if self.isComponent (cid) :
-#            Ctype = self.projConfig['Components'][cid]['type'].capitalize()
-#            if not self.testIsLocked(self.projectIDCode) :
-#                if not self.testIsLocked(Ctype) :
-#                    self.projConfig['Components'][cid]['isLocked'] = False
-#                    writeConfFile(self.projConfig)
-#                    self.log.writeToLog('LOCK-068', [cid])
-#                    return True
-#                else :
-#                    self.log.writeToLog('LOCK-009', [cid, Ctype])
-#                    return False
-#            else :
-#                self.log.writeToLog('LOCK-008', [Ctype])
-#                return False
-#        else :
-#            self.log.writeToLog('LOCK-055', [cid])
-#            return False
+        else :
+            writeConfFile(self.projConfig)
+        # Report back
+        self.log.writeToLog('LOCK-028', [target,str(lock)])
+        return True
 
 
 ###############################################################################
@@ -469,6 +385,7 @@ class Project (object) :
                 return False
 
         # No CID means we want to do the entire set of components check for lock
+        import pdb; pdb.set_trace()
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
             if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
                 self.log.writeToLog('PREP-030', [cType])
@@ -509,7 +426,7 @@ class Project (object) :
                 # Successful completion means no more processing should
                 # be done on this component. As such, we will automatically
                 # lock it so that will not happen by accident.
-                self.lockComponent(cid)
+                self.lockUnlock(cid, True)
             else :
                 self.log.writeToLog('PREP-060', [fName(target), str(err)])
         else :

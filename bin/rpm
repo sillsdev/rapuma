@@ -228,9 +228,10 @@ def userArguments (args) :
         if not isProject(args['project_id']) :
             sys.exit('Error: Project ID given is not valid! Process halted.\n')
         else :
+#            import pdb; pdb.set_trace()
             # Now setup the project and look for and test the component type if needed
             aProject = initProject(args['project_id'])
-            if sys.argv[2].lower() != 'settings' or sys.argv[2].lower() != 'locking' :
+            if sys.argv[1].lower() != 'settings' and sys.argv[1].lower() != 'locking' :
                 if not aProject.isComponentType(args['component_type']) :
                     if not aProject.addComponentType(args['component_type']) :
                         sys.exit()
@@ -370,10 +371,10 @@ def userArguments (args) :
 
         # Lock proj/cType/cid
         if args['lock'] :
-            aProject.lock(args['lock_target'])
+            aProject.lockUnlock(args['lock_target'], True)
         # Unlock proj/cType/cid
         elif args['unlock'] :
-            aProject.unlock(args['lock_target'])
+            aProject.lockUnlock(args['lock_target'], False)
 
     # Totally lost
     else:
