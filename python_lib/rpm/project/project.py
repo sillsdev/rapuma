@@ -407,6 +407,17 @@ class Project (object) :
 ############################# Preprocess Functions ############################
 ###############################################################################
 
+# Pre and Post processes are virtually the same. The difference is that a
+# preprocess will be used to prepare text for rendering. A post process will
+# be used for other extra activities like round-tripping the text and creating
+# associated outputs for the project. Another difference is that there can only
+# be one preprocessing script associated with the project and it is run only
+# on importing text. Whereas with post processing there can be a number of
+# scripts associated with a project.
+
+# At some point both types of scripts may need to be combined for unified
+# management. But for now, they will stay seperate.
+
     def runPreprocess (self, cType, cid = None) :
         '''Run a preprocess on a single component file or all the files
         of a specified type.'''
@@ -429,7 +440,6 @@ class Project (object) :
                 return False
 
         # No CID means we want to do the entire set of components check for lock
-        import pdb; pdb.set_trace()
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
             if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
                 self.log.writeToLog('PREP-030', [cType])
@@ -459,7 +469,7 @@ class Project (object) :
             self.log.writeToLog('PREP-055', [cType.capitalize()])
             return False
 
-        script = os.path.join(self.local.projPreprocessScriptsFolder, scriptFileName)
+        script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
         if os.path.isfile(script) :
             # subprocess will fail if permissions are not set on the
             # script we want to run. The correct permission should have
@@ -483,10 +493,12 @@ class Project (object) :
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
         projects will have their own specially developed preprocess
+
         script. Use the "script" var to specify a process (which should be
         bundled in a system compatable way). If "script" is not specified
         we will copy in a default script that the user can modify. This is
         currently limited to Python scripts only which do in-place processes
+
         on the target files. The script needs to have the same name as the
         zip file it is bundled in, except the extention is .py instead of
         the bundle .zip extention.'''
@@ -496,7 +508,7 @@ class Project (object) :
         if not script :
             script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-preprocess.zip')
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTargetFolder  = os.path.join(self.local.projProcessFolder, 'Preprocess')
+        scriptTargetFolder  = self.local.projProcessScriptsFolder
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
         try :
             oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
@@ -576,6 +588,7 @@ class Project (object) :
 
     def removePreprocess (self, cType) :
         '''Remove (actually disconnect) a preprocess script from a
+
         component type. This will not actually remove the script. That
         would need to be done manually. Rather, this will remove the
         script name entry from the component type so the process cannot
@@ -588,10 +601,195 @@ class Project (object) :
             self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = ''
             writeConfFile(self.projConfig)
             self.log.writeToLog('PREP-130', [old,cType.capitalize()])
+
         else :
             self.log.writeToLog('PREP-135', [cType.capitalize()])
 
         return True
+
+
+###############################################################################
+############################ Post Process Functions ###########################
+###############################################################################
+
+    def runPostProcess (self, cType, cid = None) :
+        '''Run a post process on a single component file or all the files
+        of a specified type.'''
+
+        # First test to see that we have a valid cType specified quite if not
+        if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
+            self.log.writeToLog('POST-010', [cType])
+            return False
+
+        # Create target file path and name
+        if cid :
+            target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            if os.path.isfile(target) :
+                if self.postProcessComponent(target, cType, cid) :
+                    return True
+                else :
+                    return False
+            else :
+                self.log.writeToLog('POST-020', [target])
+                return False
+
+        # If we made it this far we can assume it is okay to preprocess
+        # everything for this component type
+        for c in self.projConfig['Components'].keys() :
+            if self.projConfig['Components'][c]['type'] == cType :
+                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                self.preprocessComponent(target, cType, c)
+
+        return True
+
+
+    def postProcessComponent (self, target, cType, cid) :
+        '''Run a post process on a single component file. A post process 
+        will output to a different container/file. As such, we do not have
+        to check to see if there is any locked components.'''
+
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postProcessScript') :
+            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        else :
+            self.log.writeToLog('POST-055', [cType.capitalize()])
+            return False
+
+        script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
+        if os.path.isfile(script) :
+            # subprocess will fail if permissions are not set on the
+            # script we want to run. The correct permission should have
+            # been set when we did the installation.
+            err = subprocess.call([script, target])
+            if err == 0 :
+                self.log.writeToLog('POST-050', [fName(target)])
+                # Successful completion means no more processing should
+                # be done on this component. As such, we will automatically
+                # lock it so that will not happen by accident.
+                self.lockUnlock(cid, True)
+            else :
+                self.log.writeToLog('POST-060', [fName(target), str(err)])
+        else :
+            self.log.writeToLog('POST-070', [fName(script), cid])
+            self.log.writeToLog('POST-075')
+
+
+    def installPreprocess (self, cType, script = None, force = None) :
+        '''Install a post process script into the main components processing
+        folder for a specified component type. This script will be run on 
+        every file of that type that is imported into the project. Some
+        projects will have their own specially developed post process
+        script. Use the "script" var to specify a process (which should be
+        bundled in a system compatable way). If "script" is not specified
+        we will copy in a default script that the user can modify. This is
+        currently limited to Python scripts only which do in-place processes
+        on the target files. The script needs to have the same name as the
+        zip file it is bundled in, except the extention is .py instead of
+        the bundle .zip extention.'''
+
+
+        # Define some internal vars
+        if not script :
+            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-postprocess.zip')
+        scriptSourceFolder  = os.path.split(script)[0]
+        scriptTargetFolder  = self.local.projProcessScriptsFolder
+        scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
+        try :
+            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        except :
+            oldScript       = ''
+
+        # First check for prexsisting script record
+        if not force :
+            if oldScript == fName(scriptTarget) :
+                self.log.writeToLog('POST-081')
+                return False
+            elif oldScript != '' :
+                self.log.writeToLog('POST-080', [oldScript])
+                return False
+
+        # In case this is a new project we may need to install a component
+        # type and make a process (components) folder
+        if not self.isComponentType(cType) :
+            self.addComponentType(cType)
+
+        # Make the target folder if needed
+        if not os.path.isdir(scriptTargetFolder) :
+            os.makedirs(scriptTargetFolder)
+
+        # First check to see if there already is a script file, return if there is
+        if os.path.isfile(scriptTarget) and not force :
+            self.log.writeToLog('POST-082', [fName(scriptTarget)])
+            return False
+
+        def test () :
+            # Test for successful extraction
+            if os.path.isfile(scriptTarget) :
+                self.log.writeToLog('POST-100', [fName(scriptTarget)])
+                return True
+            else :
+                self.log.writeToLog('POST-105', [fName(scriptTarget)])
+                return False
+
+        def extract() :
+            myZip = zipfile.ZipFile(script, 'r')
+            for f in myZip.namelist() :
+                data = myZip.read(f, script)
+                # Pretty sure zip represents directory separator char as "/" regardless of OS
+                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
+                try :
+                    myFile = open(myPath, "wb")
+                    myFile.write(data)
+                    myFile.close()
+                except :
+                    pass
+            myZip.close()
+
+        # No script found, we can proceed
+        if not os.path.isfile(scriptTarget) :
+            extract()
+            if not test() :
+                dieNow()
+            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+        elif force :
+            extract()
+            if not test() :
+                dieNow()
+            self.log.writeToLog('PREP-115', [fName(scriptTarget)])
+
+        # I have not found a way to preserve permissions of the files comming
+        # out of a zip archive. To make sure the preprocessing script will
+        # actually work when it needs to run. Changing the permissions to
+        # 777 may not be the best way but it will work for now.
+        os.chmod(scriptTarget, int("0777", 8))
+
+        # Record the script with the cType
+        self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = fName(scriptTarget)
+        writeConfFile(self.projConfig)
+
+        return True
+
+
+    def removePreprocess (self, cType) :
+        '''Remove (actually disconnect) a preprocess script from a
+
+        component type. This will not actually remove the script. That
+        would need to be done manually. Rather, this will remove the
+        script name entry from the component type so the process cannot
+        be accessed for this specific component type.'''
+
+        # Get old setting
+        old = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        # Reset the field to ''
+        if old != '' :
+            self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = ''
+            writeConfFile(self.projConfig)
+            self.log.writeToLog('POST-130', [old,cType.capitalize()])
+
+        else :
+            self.log.writeToLog('POST-135', [cType.capitalize()])
+
+        return True
+
 
 ###############################################################################
 ################################ Style Functions ##############################

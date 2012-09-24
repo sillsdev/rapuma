@@ -345,9 +345,32 @@ def userArguments (args) :
                     terminal('The following path does not appear to be valid: ' + filePath)
                     sys.exit()
             aProject.installPreprocess(args['component_type'], filePath, args['force'])
-        # Disconnect a preprocessing script from the component type (this does not remove it)
+        # Disconnect a preprocessing script from the component type (this does not physically remove it)
         elif args['remove'] :
             aProject.removePreprocess(args['component_type'])
+
+    # Post processing commands
+    elif sys.argv[1].lower() == 'postprocess' :
+
+        # Run a post process command on a component or component type
+        # Because we can lock at all levels, there is no need for (-f --force)
+        # to be used here. If a component ID is given it will only run on that
+        # component. Otherwise, all components of the specified type.
+        if args['execute'] :
+            aProject.runPostProcess(args['component_type'], args['component_id'])
+
+        # Install a custom or a default post process script, force to overwrite what is there
+        elif args['add'] :
+            filePath = None
+            if args['script'] :
+                filePath = resolvePath(args['script'])
+                if not os.path.isfile(filePath) :
+                    terminal('The following path does not appear to be valid: ' + filePath)
+                    sys.exit()
+            aProject.installPostProcess(args['component_type'], filePath, args['force'])
+        # Disconnect a post process script from the component type (this does not physically remove it)
+        elif args['remove'] :
+            aProject.removePostProcess(args['component_type'])
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
@@ -427,7 +450,7 @@ groupCommand.add_argument('component_type', help='The component type is needed f
 groupCommand.add_argument('group_id', help='A specific group ID required for creating a new component group.')
 groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
 groupCommand.add_argument('-r', '--remove', action='store_true', help='Remove an existing component from this project.')
-groupCommand.add_argument('-l', '--list', help='A list of components to be in this group. This must be used if adding a group. It is not needed for removal.')
+groupCommand.add_argument('-l', '--list', help='A list of components to be in this group. This must be used if adding a group. It is not needed for removal. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a component group in this project.')
 
@@ -461,15 +484,26 @@ styleCommand.add_argument('-s', '--style_file', help='If a specific style file i
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
 
 # Add text preprocessing subprocess arguments
-processCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
-processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-processCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-processCommand.add_argument('-a', '--add', action='store_true', help='Install a preprocess into the project process folder. If you do not specify a process a default process script.')
-processCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a preprocess from the component type. This does not remove the actual script from the project. That needs to be done manually.')
-processCommand.add_argument('-f', '--force', action='store_true', help='Force a preprocess script to be updated, replaced or brought back to default condition for this component type.')
-processCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a preprocess script for a specific component type will be run only on that component.')
-processCommand.add_argument('-s', '--script', help='A valid path and file name of a specific preprocess script to be installed.')
-processCommand.add_argument('-e', '--execute', action='store_true', help='Execute a preprocess script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
+preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
+preprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+preprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
+preprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a preprocess into the project process folder. If you do not specify a process a default process script.')
+preprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a preprocess from the component type. This does not remove the actual script from the project. That needs to be done manually.')
+preprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a preprocess script to be updated, replaced or brought back to default condition for this component type.')
+preprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a preprocess script for a specific component type will be run only on that component.')
+preprocessCommand.add_argument('-s', '--script', help='A valid path and file name of a specific preprocess script to be installed.')
+preprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a preprocess script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
+
+# Add text post processing subprocess arguments
+postprocessCommand = subparsers.add_parser('postprocess', help='General settings for handling component post processing commands.')
+postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
+postprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project process folder. If you do not specify a process a default process script.')
+postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a post process from the component type. This does not remove the actual script from the project. That needs to be done manually.')
+postprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a post process script to be updated, replaced or brought back to default condition for this component type.')
+postprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a post process script for a specific component type will be run only on that component.')
+postprocessCommand.add_argument('-s', '--script', help='A valid path and file name of a specific post process script to be installed.')
+postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a post process script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
 
 # Add settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')

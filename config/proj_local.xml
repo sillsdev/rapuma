@@ -151,10 +151,10 @@ Todo:
         </setting>
         <setting>
             <name>Project Preprocess Scripts Folder</name>
-            <key>projPreprocessScriptsFolder</key>
+            <key>projProcessScriptsFolder</key>
             <description>The main project components processing folder.</description>
             <type>list</type>
-            <value>Components,Preprocess</value>
+            <value>Components,Scripts</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
