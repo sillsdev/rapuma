@@ -98,9 +98,10 @@ class Usfm (Component) :
             if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
                 return False
 
+# FIXME: Reimplement styles
             # Check on the component styles
-            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
-            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
+#            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
+#            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
 
             # Run any preprocess checks or conversions
             

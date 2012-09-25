@@ -148,8 +148,8 @@ class Text (Manager) :
 
         targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
         target          = os.path.join(targetFolder, cid + '.usfm')
-        compLock        = os.path.join(targetFolder, '.lock')
-        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
+#        compLock        = os.path.join(targetFolder, '.lock')
+#        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
         preprocess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-preprocess.py')
 
         # Copy the source to the working text folder. We do not want to do
@@ -159,18 +159,19 @@ class Text (Manager) :
         # indicate the source has been updated so unless the folder is locked
         # we will want to update the target.
         
-#        import pdb; pdb.set_trace()
 
-        # First check for a general lock on all components of this type.
-        if os.path.isfile(typeLock) :
-            self.project.log.writeToLog('TEXT-040', [self.cType])
-            return False
+# FIXME: The locking need to reimplemented
+#        # First check for a general lock on all components of this type.
+#        if os.path.isfile(typeLock) :
+#            self.project.log.writeToLog('TEXT-040', [self.cType])
+#            return False
 
-        # Now look for a lock on this specific component
-        if os.path.isfile(compLock) :
-            self.project.log.writeToLog('TEXT-045', [cid])
-            return False
+#        # Now look for a lock on this specific component
+#        if os.path.isfile(compLock) :
+#            self.project.log.writeToLog('TEXT-045', [cid])
+#            return False
 
+        import pdb; pdb.set_trace()
         # Look for the source now
         if not os.path.isfile(source) :
             self.project.log.writeToLog('TEXT-035', [source])
