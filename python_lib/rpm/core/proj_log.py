@@ -110,7 +110,7 @@ class ProjLog (object) :
             'TEXT-010' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             'TEXT-015' : ['MSG', 'TEXT-015 - Unassigned error message ID.'],
             'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.'],
-            'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. Please contact the system developer about this problem.'],
+            'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. You may need to manually set/change this system setting.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
@@ -190,6 +190,7 @@ class ProjLog (object) :
             'PREP-120' : ['MSG', 'Copied in default preprocess file: [<<1>>] into Scripts folder from source: [<<2>>].'],
             'PREP-130' : ['MSG', 'Removed [<<1>>] script reference from the [<<2>>] component type.'],
             'PREP-135' : ['MSG', 'There was no preprocess script for comonent type [<<1>>] found in the project configuration.'],
+            'PREP-140' : ['ERR', 'Preprocessing script is an unrecognized type: [<<1>>] Cannot continue with installation.'],
 
             'POST-000' : ['MSG', 'Messages for post processing issues (mainly found in project.py)'],
             'POST-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],

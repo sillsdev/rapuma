@@ -161,6 +161,11 @@ def getPTSettings (home) :
                 ssfFileName = f
                 ptPath = parentFolder
 
+    # At this point we need a sanity test. If no ssfFileName is present
+    # then there probably isn't one and we should just return False now
+    if not ssfFileName :
+        return False
+
     # Now now look in the grandparent folder and change to override settings
     # file if there is one
     for f in grandparentFileList :

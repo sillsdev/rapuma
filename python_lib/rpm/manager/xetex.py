@@ -62,7 +62,7 @@ class Xetex (Manager) :
         # Make a PT settings dictionary
         if self.sourceEditor.lower() == 'paratext' :
             self.ptSSFConf = getPTSettings(self.project.local.projHome)
-            if not len(self.ptSSFConf) :
+            if not self.ptSSFConf :
                 self.project.log.writeToLog('XTEX-005')
 
 

@@ -240,6 +240,9 @@ def userArguments (args) :
     if sys.argv[1].lower() == 'project' :
         # Creating a new project
         if args['add'] :
+            if not args['type'] :
+                sys.exit('Project type is missing from command argument. Process halted!')
+
             if args['path'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
@@ -509,7 +512,7 @@ postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Ex
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
 settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 settingsCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
-settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed.')
+settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
 settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
 

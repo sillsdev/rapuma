@@ -458,55 +458,62 @@ class Project (object) :
     def preprocessComponent (self, target, cType, cid) :
         '''Run a preprocess on a single component file, in place.'''
 
+        scriptFileName = None
+
         # First check to see if this specific component is locked
         if self.isLocked(cid) :
             self.log.writeToLog('PREP-040', [cid])
             return False
 
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
-            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
+            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] != 'None' :
+                scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
         else :
             self.log.writeToLog('PREP-055', [cType.capitalize()])
             return False
 
-        script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
-        if os.path.isfile(script) :
-            # subprocess will fail if permissions are not set on the
-            # script we want to run. The correct permission should have
-            # been set when we did the installation.
-            err = subprocess.call([script, target])
-            if err == 0 :
-                self.log.writeToLog('PREP-050', [fName(target)])
-                # Successful completion means no more processing should
-                # be done on this component. As such, we will automatically
-                # lock it so that will not happen by accident.
-                self.lockUnlock(cid, True)
+        if scriptFileName :
+            script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
+            if os.path.isfile(script) :
+                # subprocess will fail if permissions are not set on the
+                # script we want to run. The correct permission should have
+                # been set when we did the installation.
+                err = subprocess.call([script, target])
+                if err == 0 :
+                    self.log.writeToLog('PREP-050', [fName(target)])
+                    # Successful completion means no more processing should
+                    # be done on this component. As such, we will automatically
+                    # lock it so that will not happen by accident.
+                    self.lockUnlock(cid, True)
+                else :
+                    self.log.writeToLog('PREP-060', [fName(target), str(err)])
             else :
-                self.log.writeToLog('PREP-060', [fName(target), str(err)])
+                self.log.writeToLog('PREP-070', [fName(script), cid])
+                self.log.writeToLog('PREP-075')
         else :
-            self.log.writeToLog('PREP-070', [fName(script), cid])
-            self.log.writeToLog('PREP-075')
+            # No scriptFileName means no preprocess installed quite quietly
+            return False
 
 
     def installPreprocess (self, cType, script = None, force = None) :
         '''Install a preprocess script into the main components processing
         folder for a specified component type. This script will be run on 
-        every file of that type that is imported into the project. Some
-        projects will have their own specially developed preprocess
-
-        script. Use the "script" var to specify a process (which should be
-        bundled in a system compatable way). If "script" is not specified
-        we will copy in a default script that the user can modify. This is
-        currently limited to Python scripts only which do in-place processes
-
-        on the target files. The script needs to have the same name as the
-        zip file it is bundled in, except the extention is .py instead of
-        the bundle .zip extention.'''
-
+        every file of that type that is imported into the project. 
+        
+        Some projects will have their own specially developed preprocess
+        script. Use the "script" var to point to a script or script bundle.
+        If "script" is not specified we will copy in a default script that 
+        the user can modify. This is currently limited to Python scripts 
+        only which do in-place processes on the target files. The script 
+        needs to have the same name as the zip file it is bundled in, except 
+        the extention is .py instead of the bundle .zip extention.'''
 
         # Define some internal vars
         if not script :
             script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-preprocess.zip')
+        else :
+            script          = resolvePath(script)
+
         scriptSourceFolder  = os.path.split(script)[0]
         scriptTargetFolder  = self.local.projProcessScriptsFolder
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
@@ -547,28 +554,34 @@ class Project (object) :
                 self.log.writeToLog('PREP-105', [fName(scriptTarget)])
                 return False
 
-        def extract() :
-            myZip = zipfile.ZipFile(script, 'r')
-            for f in myZip.namelist() :
-                data = myZip.read(f, script)
-                # Pretty sure zip represents directory separator char as "/" regardless of OS
-                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
-                try :
-                    myFile = open(myPath, "wb")
-                    myFile.write(data)
-                    myFile.close()
-                except :
-                    pass
-            myZip.close()
+        def direct () :
+            if fName(scriptTarget).split('.')[1].lower() == 'py' :
+                shutil.copy(script, scriptTarget)
+            elif fName(scriptTarget).split('.')[1].lower() == 'zip' :
+                myZip = zipfile.ZipFile(script, 'r')
+                for f in myZip.namelist() :
+                    data = myZip.read(f, script)
+                    # Pretty sure zip represents directory separator char as "/" regardless of OS
+                    myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
+                    try :
+                        myFile = open(myPath, "wb")
+                        myFile.write(data)
+                        myFile.close()
+                    except :
+                        pass
+                myZip.close()
+            else :
+                self.log.writeToLog('PREP-140', [fName(scriptTarget)])
+                dieNow()
 
         # No script found, we can proceed
         if not os.path.isfile(scriptTarget) :
-            extract()
+            direct()
             if not test() :
                 dieNow()
             self.log.writeToLog('PREP-110', [fName(scriptTarget)])
         elif force :
-            extract()
+            direct()
             if not test() :
                 dieNow()
             self.log.writeToLog('PREP-115', [fName(scriptTarget)])
@@ -638,7 +651,7 @@ class Project (object) :
         for c in self.projConfig['Components'].keys() :
             if self.projConfig['Components'][c]['type'] == cType :
                 target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
-                self.preprocessComponent(target, cType, c)
+                self.postProcessComponent(target, cType, c)
 
         return True
 
@@ -648,8 +661,8 @@ class Project (object) :
         will output to a different container/file. As such, we do not have
         to check to see if there is any locked components.'''
 
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postProcessScript') :
-            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postprocessScripts') :
+            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
         else :
             self.log.writeToLog('POST-055', [cType.capitalize()])
             return False
@@ -673,7 +686,7 @@ class Project (object) :
             self.log.writeToLog('POST-075')
 
 
-    def installPreprocess (self, cType, script = None, force = None) :
+    def installPostProcess (self, cType, script = None, force = None) :
         '''Install a post process script into the main components processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
@@ -694,7 +707,7 @@ class Project (object) :
         scriptTargetFolder  = self.local.projProcessScriptsFolder
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
         try :
-            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
         except :
             oldScript       = ''
 
@@ -763,13 +776,13 @@ class Project (object) :
         os.chmod(scriptTarget, int("0777", 8))
 
         # Record the script with the cType
-        self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = fName(scriptTarget)
+        self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts'] = fName(scriptTarget)
         writeConfFile(self.projConfig)
 
         return True
 
 
-    def removePreprocess (self, cType) :
+    def removePostProcess (self, cType) :
         '''Remove (actually disconnect) a preprocess script from a
 
         component type. This will not actually remove the script. That
@@ -778,10 +791,10 @@ class Project (object) :
         be accessed for this specific component type.'''
 
         # Get old setting
-        old = self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript']
+        old = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
         # Reset the field to ''
         if old != '' :
-            self.projConfig['CompTypes'][cType.capitalize()]['postProcessScript'] = ''
+            self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts'] = ''
             writeConfFile(self.projConfig)
             self.log.writeToLog('POST-130', [old,cType.capitalize()])
 

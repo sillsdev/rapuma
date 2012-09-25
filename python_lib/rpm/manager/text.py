@@ -51,6 +51,11 @@ class Text (Manager) :
         self.cType              = cType
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.axSourcePath       = self.project.projConfig['CompTypes'][self.Ctype]['axillarySourcePath']
+        if self.axSourcePath and self.axSourcePath != 'None' :
+            self.axSourcePath = resolvePath(self.axSourcePath)
+        else :
+            self.axSourcePath = None
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
@@ -132,7 +137,15 @@ class Text (Manager) :
         # Note the file name for the preprocess is hard coded. This will become a part
         # of the total system and this file will be copied in when the user requests to
         # preprocessing.
-        source          = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+        
+        # Current assuption is that source text is located in a directory above the
+        # that is the default. In case that is not the case, we can override that and
+        # specify a path to the source. If that exists, then we will use that instead.
+        if self.axSourcePath :
+            source      = os.path.join(self.axSourcePath, thisFile)
+        else :
+            source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+
         targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
         target          = os.path.join(targetFolder, cid + '.usfm')
         compLock        = os.path.join(targetFolder, '.lock')
