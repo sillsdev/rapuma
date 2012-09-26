@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess, zipfile
+import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO
 #from configobj import ConfigObj, Section
 
 
@@ -833,13 +833,6 @@ class Project (object) :
         # FIXME - Todo: add post processing script feature
         # FIXME - Todo: add bundling process
 
-# Working on this
-        def zipUp (fileList) :
-            archFile = os.path.join(path, self.projectIDCode + '-export.zip')
-            with ZipFile(archFile, 'w') as myzip:
-                for f in fileList :
-                    myzip.write(f)
-
         # Figure out target path
         if path :
             path = resolvePath(path)
@@ -855,8 +848,13 @@ class Project (object) :
         projSty = self.projConfig['CompTypes']['Usfm']['styleFile']
 
         # Start the main process here
+        if bundle :
+            archFile = os.path.join(path, self.projectIDCode + '-export.zip')
+            myzip = zipfile.ZipFile(archFile, 'w')
+
         if testForSetting(self.projConfig['Components'][cid], 'list') :
             # Process as list of components
+
             for c in self.projConfig['Components'][cid]['list'] :
                 cName = formPTName(self.projConfig, c)
                 # Test, no name = no success
@@ -866,8 +864,17 @@ class Project (object) :
 
                 target = os.path.join(path, cName)
                 source = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
-                if not usfmCopy(source, target, projSty) :
-                    self.log.writeToLog('XPRT-020', [fName(target)])
+                    
+                if bundle :
+                    strObj = StringIO.StringIO()
+                    for l in open(source, "rb") :
+                        strObj.write(l)
+
+                    myzip.writestr(cName, strObj.getvalue())
+                    strObj.close()
+                else :
+                    if not usfmCopy(source, target, projSty) :
+                        self.log.writeToLog('XPRT-020', [fName(target)])
         else :
             # Process an individual component
             cName = formPTName(self.projConfig, cid)
@@ -878,9 +885,21 @@ class Project (object) :
 
             target = os.path.join(path, cName)
             source = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
-            if not usfmCopy(source, target, projSty) :
-                self.log.writeToLog('XPRT-020', [fName(target)])
+            if bundle :
+                strObj = StringIO.StringIO()
+                for l in open(source, "rb") :
+                    strObj.write(l)
 
+                myzip.writestr(cName, strObj.getvalue())
+                strObj.close()
+            else :
+                if not usfmCopy(source, target, projSty) :
+                    self.log.writeToLog('XPRT-020', [fName(target)])
+
+        if bundle :
+            myzip.close()
+
+        return True
 
 ###############################################################################
 ############################ System Level Functions ###########################
