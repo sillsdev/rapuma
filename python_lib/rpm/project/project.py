@@ -823,6 +823,66 @@ class Project (object) :
 
 
 ###############################################################################
+############################## Exporting Functions ############################
+###############################################################################
+
+
+    def export (self, cType, cid, path = None, script = None, bundle = False) :
+        '''Facilitate the exporting of project text.'''
+        
+        # FIXME - Todo: add post processing script feature
+        # FIXME - Todo: add bundling process
+
+# Working on this
+        def zipUp (fileList) :
+            archFile = os.path.join(path, self.projectIDCode + '-export.zip')
+            with ZipFile(archFile, 'w') as myzip:
+                for f in fileList :
+                    myzip.write(f)
+
+        # Figure out target path
+        if path :
+            path = resolvePath(path)
+        else :
+            parentFolder = os.path.dirname(self.local.projHome)
+            path = os.path.join(parentFolder, 'Export')
+
+        # Make target folder if needed
+        if not os.path.isdir(path) :
+            os.makedirs(path)
+
+        # Will need the stylesheet for copy
+        projSty = self.projConfig['CompTypes']['Usfm']['styleFile']
+
+        # Start the main process here
+        if testForSetting(self.projConfig['Components'][cid], 'list') :
+            # Process as list of components
+            for c in self.projConfig['Components'][cid]['list'] :
+                cName = formPTName(self.projConfig, c)
+                # Test, no name = no success
+                if not cName :
+                    self.log.writeToLog('XPRT-010')
+                    dieNow()
+
+                target = os.path.join(path, cName)
+                source = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                if not usfmCopy(source, target, projSty) :
+                    self.log.writeToLog('XPRT-020', [fName(target)])
+        else :
+            # Process an individual component
+            cName = formPTName(self.projConfig, cid)
+            # Test, no name = no success
+            if not cName :
+                self.log.writeToLog('XPRT-010')
+                dieNow()
+
+            target = os.path.join(path, cName)
+            source = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            if not usfmCopy(source, target, projSty) :
+                self.log.writeToLog('XPRT-020', [fName(target)])
+
+
+###############################################################################
 ############################ System Level Functions ###########################
 ###############################################################################
 

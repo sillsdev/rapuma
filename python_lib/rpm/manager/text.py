@@ -26,10 +26,6 @@ from configobj import ConfigObj, Section
 from tools import *
 from pt_tools import *
 from manager import Manager
-import palaso.sfm as sfm
-#import palaso.sfm.usfm as usfm
-from palaso.sfm import usfm, style, pprint, element, text
-
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -105,33 +101,16 @@ class Text (Manager) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name.'''
 
-        def copyAndClean (source, target) :
-            # Use the Palaso USFM parser to bring in the text and
-            # clean it up if needed
-            fh = codecs.open(source, 'r', 'utf_8_sig')
-            doc = usfm.parser(fh)
-            tidy = sfm.pprint(doc)
-            writeout = codecs.open(target, "w", "utf-8")
-            writeout.write(tidy)
-            writeout.close
-            self.project.log.writeToLog('TEXT-030', [fName(source), fName(target)])
-
         # Check to see if settings need updating
         self.updateManagerSettings()
-        if self.nameFormID == '41MAT' :
-            mainName = getUsfmCidInfo(cid)[1] + cid.upper()
-            if self.prePart and self.prePart != 'None' :
-                thisFile = self.prePart + mainName + self.postPart
-            else :
-                thisFile = mainName + self.postPart
-        else :
-            if not self.nameFormID :
-                self.project.log.writeToLog('TEXT-020')
-            else :
-                self.project.log.writeToLog('TEXT-025', [self.nameFormID])
-
-            # Both of the above are bad news so we need to take down the system now
+        thisFile = formPTName(self.project.projConfig, cid)
+        # Test, no name = no success
+        if not thisFile :
+            self.project.log.writeToLog('TEXT-020')
             dieNow()
+
+        # Will need the stylesheet for copy
+        projSty = os.path.join(self.project.local.projProcessFolder, self.project.projConfig['CompTypes']['Usfm']['styleFile'])
 
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part
@@ -147,7 +126,7 @@ class Text (Manager) :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
         targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
-        target          = os.path.join(targetFolder, cid + '.usfm')
+        target          = os.path.join(targetFolder, cid + '.' + self.cType)
 #        compLock        = os.path.join(targetFolder, '.lock')
 #        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
         preprocess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-preprocess.py')
@@ -160,7 +139,7 @@ class Text (Manager) :
         # we will want to update the target.
         
 
-# FIXME: The locking need to reimplemented
+# FIXME: The locking needs to be reimplemented
 #        # First check for a general lock on all components of this type.
 #        if os.path.isfile(typeLock) :
 #            self.project.log.writeToLog('TEXT-040', [self.cType])
@@ -171,7 +150,7 @@ class Text (Manager) :
 #            self.project.log.writeToLog('TEXT-045', [cid])
 #            return False
 
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
         # Look for the source now
         if not os.path.isfile(source) :
             self.project.log.writeToLog('TEXT-035', [source])
@@ -184,8 +163,11 @@ class Text (Manager) :
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
-                copyAndClean(source, target)
-                return True
+                if usfmCopy(source, target, projSty) :
+                    return True
+                else :
+                    self.project.log.writeToLog('TEXT-070', [source,fName(target)])
+                    return False
 
         # If the text is there, we should return True so do a last check to see
         if os.path.isfile(target) :

@@ -109,8 +109,7 @@ class ProjLog (object) :
             'TEXT-005' : ['MSG', 'TEXT-005 - Unassigned error message ID.'],
             'TEXT-010' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             'TEXT-015' : ['MSG', 'TEXT-015 - Unassigned error message ID.'],
-            'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing. Double check to see which editor created the source text.'],
-            'TEXT-025' : ['ERR', 'Source file name could not be built because the Name Form ID [<<1>>] is not recognized by this system. You may need to manually set/change this system setting.'],
+            'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing or incorrect. Double check to see which editor created the source text.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
@@ -118,6 +117,7 @@ class ProjLog (object) :
             'TEXT-050' : ['LOG', 'Working text file for [<<1>>] has been completed.'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
             'TEXT-060' : ['LOG', 'Completed preprocessing on component working text.'],
+            'TEXT-070' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in usfmCopy().'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
@@ -236,6 +236,13 @@ class ProjLog (object) :
             'SETG-030' : ['MSG', 'SETG-030 - Unassigned error message ID.'],
             'SETG-035' : ['MSG', 'SETG-035 - Unassigned error message ID.'],
             'SETG-040' : ['MSG', 'SETG-040 - Unassigned error message ID.'],
+
+            'XPRT-000' : ['MSG', 'Messages for export issues (probably only in project.py)'],
+            'XPRT-005' : ['MSG', 'Unassigned error message ID.'],
+            'XPRT-010' : ['ERR', 'Export file name could not be formed with available configuration information.'],
+            'XPRT-020' : ['ERR', 'Unable to export: [<<1>>].'],
+            'XPRT-030' : ['MSG', 'Unassigned error message ID.'],
+            'XPRT-040' : ['MSG', 'Unassigned error message ID.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

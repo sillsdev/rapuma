@@ -25,11 +25,80 @@ from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
 from tools import *
+import palaso.sfm as sfm
+from palaso.sfm import usfm, style, pprint, element, text
 
 
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
+
+
+def usfmCopy (source, target, projSty = None) :
+    '''Use the Palaso USFM parser to bring in the text and clean it up if 
+    needed. If projSty (path + file name) is not used, the sfm parser
+    will use a default style file to drive the process which may lead to
+    undesirable results. A style file should normally be used to avoid this.'''
+
+    # For testing
+    projSty = None
+
+    # Load in the source text
+    fh = codecs.open(source, 'rt', 'utf_8_sig')
+    
+    # Create the object
+    if projSty :
+        stylesheet = usfm.default_stylesheet.copy()
+        sytlesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+        stylesheet.update(stylesheet_extra)
+        doc = usfm.parser(fh, stylesheet)
+    else :
+        doc = usfm.parser(fh)
+
+    # Check/Clean up the text
+    tidy = sfm.pprint(doc)
+
+    # Write to the target
+    writeout = codecs.open(target, "wt", "utf_8_sig")
+    writeout.write(tidy)
+    writeout.close
+    return True
+    
+#    try :
+##        usfm.parser(source, stylesheet=opts.stylesheet, error_level=opts.error_level)
+##        usfm.parser(source, stylesheet=opts.stylesheet, '')
+#        fh = codecs.open(source, 'rt', 'utf_8_sig')
+#        doc = usfm.parser(fh, stylesheet = projSty)
+#        tidy = sfm.pprint(doc)
+#        writeout = codecs.open(target, "wt", "utf_8_sig")
+#        writeout.write(tidy)
+#        writeout.close
+#        return True
+#    except :
+#        return False
+
+
+def formPTName (projConfig, cid) :
+    '''Using valid PT project settings from the project configuration, form
+    a valid PT file name that can be used for a number of operations.'''
+
+    # FIXME: Currently very simplistic, will need to be more refined for
+    #           number of use cases.
+
+    try :
+        nameFormID = projConfig['Managers']['usfm_Text']['nameFormID']
+        postPart = projConfig['Managers']['usfm_Text']['postPart']
+        prePart = projConfig['Managers']['usfm_Text']['prePart']
+
+        if nameFormID == '41MAT' :
+            mainName = getUsfmCidInfo(cid)[1] + cid.upper()
+            if prePart and prePart != 'None' :
+                thisFile = prePart + mainName + postPart
+            else :
+                thisFile = mainName + postPart
+        return thisFile
+    except :
+        return False
 
 
 def getPTFont (home) :

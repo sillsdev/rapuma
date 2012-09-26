@@ -376,16 +376,23 @@ def userArguments (args) :
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
-        if isProject(args['project_id']) :
-            aProject = initProject(args['project_id'])
-            if args['configuration'] :
-                aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
+        if not isProject(args['project_id']) :
+            sys.exit('Project ID is missing or incorrect. Process halted!')
         else :
-            terminal('Cannot find [' + args['project_id'] + '] project.')
+            # Init the project
+            aProject = initProject(args['project_id'])
+            # Check further for required args
+            if not args['configuration'] :
+                sys.exit('Configuration name is missing from command argument. Process halted!')
+            else :
+                aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
 
     # Locking commands
     elif sys.argv[1].lower() == 'locking' :
-        if isProject(args['project_id']) :
+        if not isProject(args['project_id']) :
+            sys.exit('Project ID is missing or incorrect. Process halted!')
+        else :
+            # Init the project
             aProject = initProject(args['project_id'])
 
         # Lock proj/cType/cid
@@ -394,6 +401,23 @@ def userArguments (args) :
         # Unlock proj/cType/cid
         elif args['unlock'] :
             aProject.lockUnlock(args['lock_target'], False)
+
+    # Exporting commands
+    elif sys.argv[1].lower() == 'export' :
+        if not isProject(args['project_id']) :
+            sys.exit('Project ID is missing or incorrect. Process halted!')
+        else :
+            # Init the project
+            aProject = initProject(args['project_id'])
+            # Check further for required args
+            if not args['component_type'] :
+                sys.exit('Component type ID is missing from command argument. Process halted!')
+            if not args['component_id'] :
+                sys.exit('Component ID is missing from command argument. Process halted!')
+
+        # Execute an export
+        if args['execute'] :
+            aProject.export(args['component_type'], args['component_id'], args['path'], args['script'], args['bundle'])
 
     # Totally lost
     else:
@@ -424,6 +448,7 @@ def userArguments (args) :
 #   -e = execute something
 #   -f = force the execution of something
 #   -p = path (and file name) of something
+#   -s = script name (may include path) of a processing script (one exception)
 
 # Setup the arg parser
 parser = argparse.ArgumentParser(description=systemName)
@@ -444,6 +469,7 @@ projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a p
 projCommand.add_argument('-p', '--path', help='Path to the project home folder if the current working directory is not the actual target. This can be used when adding a project.')
 projCommand.add_argument('-t', '--type', help='If creating a new project, give a valid project type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
+projCommand.add_argument('-b', '--bundle', help='[NOT IMPLEMENTED] Create a bundle (archive) of the entire project.')
 
 # Add group subprocess arguments
 groupCommand = subparsers.add_parser('group', help='General project component group management commands help')
@@ -521,13 +547,18 @@ lockCommand.add_argument('project_id', help='Project ID (a positional argument r
 lockCommand.add_argument('-t', '--lock_target', help='Specify either a valid component or component type to be locked/unlocked. If nothing is specified the project will be locked/unlocked.')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
 lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
+lockCommand.add_argument('-f', '--force', action='store_true', help='Force all components under a component type or group to have their [islocked] switch set to True or False, depending on the operation. Without Force, the [islocked] switch is set for only the target. All components under that target will remain untouched.')
 
-# The following needs to be taken out
+# Add Project exporting subprocess arguments
+exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')
+exportCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+exportCommand.add_argument('component_type', help='Component ID (a positional argument required for all actions with this subprocess)')
+exportCommand.add_argument('component_id', help='Specify a valid component ID to be exported. Exporting works only with components or component groups.')
+exportCommand.add_argument('-p', '--path', help='Optional - This will specify a path/folder where the exported data is output to. Default is to create an export folder in the source folder and output to that.')
+exportCommand.add_argument('-s', '--script', help='Optional - The name of an installed post process script to be used in the export process. Default will just blind copy the working text to the export folder.')
+exportCommand.add_argument('-e', '--execute', action='store_true', help='Execute an export operation.')
+exportCommand.add_argument('-b', '--bundle', action='store_true', help='[NOT IMPLEMENTED] Bundle the exported file(s) into a single compressed file.')
 
-# Add testing subprocess arguments
-#testCommand = subparsers.add_parser('test', help='General system testing commands help')
-#testCommand.add_argument('-s', '--source_id', help='Example source ID of the test project taken from the example library you want to setup. This should be a valid ZIP file name, without the .zip extention.')
-#testCommand.add_argument('-d', '--demo_id', help='Example demo ID of the publishing test project taken from the source example that was (or is to be) setup. The ID is combined with a \'.rpmDemo\' extention which should be a valid file name.')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))
