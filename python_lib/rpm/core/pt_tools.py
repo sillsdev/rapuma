@@ -40,6 +40,8 @@ def usfmCopy (source, target, projSty = None) :
     will use a default style file to drive the process which may lead to
     undesirable results. A style file should normally be used to avoid this.'''
 
+# FIXME: Tim is working on fixing a bug in the sfm parser
+
     # For testing
     projSty = None
 
@@ -189,13 +191,19 @@ def installPTCustomStyles (local, customStyleFile) :
                     return False
 
 
-def getPTSettings (home) :
+def getPTSettings (home, axSourcePath = None) :
     '''Look for the ParaTExt project settings file. The immediat PT project
     is the parent folder and the PT environment that the PT projet is found
     in, if any, is the grandparent folder. the .ssf (settings) file in the
     grandparent folder takes presidence over the one found in the parent folder.
     This function will determine where the primary .ssf file is and turn the
     data into a dictionary for the system to use.'''
+
+    # If an axSourcePath is given, this is not a "real" PT project. We will
+    # substitute home with axSourcePath and use that location to look for
+    # the settings we need.
+    if axSourcePath :
+        home = axSourcePath
 
     # Not sure where the PT SSF file might be or even what its name is.
     # Starting in parent, we should find the first .ssf file. That will
@@ -208,9 +216,15 @@ def getPTSettings (home) :
     # .ssf file.
     ssfFileName = ''
     ptPath = ''
-    parentFolder = os.path.dirname(home)
-    grandparentFolder = os.path.dirname(parentFolder)
-    gatherFolder = os.path.join(parentFolder, 'gather')
+    if axSourcePath :
+        parentFolder = home
+        grandparentFolder = os.path.dirname(parentFolder)
+        gatherFolder = os.path.join(parentFolder, 'gather')
+    else :
+        parentFolder = os.path.dirname(home)
+        grandparentFolder = os.path.dirname(parentFolder)
+        gatherFolder = os.path.join(parentFolder, 'gather')
+        
     # For now, we will assume that if there is a gather folder, it must have a .ssf file in it
     if os.path.isdir(gatherFolder) :
         parentFolder = gatherFolder

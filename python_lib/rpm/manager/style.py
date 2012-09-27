@@ -66,10 +66,36 @@ class Style (Manager) :
 ###############################################################################
 
 
+# FIXME: This should not be PT-centric
+# Behavior is to prefer the project styles over auto-generated styles.
+# Look in the editor environment first for the style file that is there
+# and use that. If that can't be found, then auto-generate, fail if that
+# does not work. However, if a customStyleFile is specified, that will
+# take presedent over anything else.
+
     def addStyleFile (self, cType, customStyleFile = None, force = False) :
         '''Add a style file for a specified component type. It should be as
-        generlized as possible. If force is set to True, overwrite any
-        exsisting files.'''
+        generlized as possible. If a style file already exsists, end the 
+        process. There should only be one style file for component type.
+        Specific overrides can be added at the component level.
+        
+        If force is set to True, overwrite any config settings for exsisting
+        style file but do not remove the exsisting file.
+        
+        The customStyleFile setting can work in two ways. With a full path and
+        file name, it can Point to a new style file that will be copied into the
+        project. Or, if only a file name is specified, with no specified path,
+        RPM will then re-install an existing publishing project style file 
+        already in the Components folder. If it doesn't find it, then it will
+        auto-generate and install a new one and then use the specified
+        customStyleFile name.'''
+
+
+    # FIXME: add force behavior
+    # FIXME: add customStyleFile behavior
+    # FIXME: add auto-generate style file
+    # FIXME: 
+    # FIXME: 
 
         def installFile () :
             shutil.copy(styleFile, target)

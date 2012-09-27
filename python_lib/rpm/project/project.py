@@ -827,11 +827,12 @@ class Project (object) :
 ###############################################################################
 
 
-    def export (self, cType, cid, path = None, script = None, bundle = False) :
+    def export (self, cType, cid, path = None, script = None, bundle = False, force = False) :
         '''Facilitate the exporting of project text.'''
         
         # FIXME - Todo: add post processing script feature
-        # FIXME - Todo: add bundling process
+        # FIXME - Todo: finish add bundling process
+        # FIXME - Todo: add force file overwrite (add date stamp to bundle file names)
 
         # Figure out target path
         if path :
@@ -849,6 +850,7 @@ class Project (object) :
 
         # Start the main process here
         if bundle :
+                                                            # FIXME: add date stamp to archFile name
             archFile = os.path.join(path, self.projectIDCode + '-export.zip')
             myzip = zipfile.ZipFile(archFile, 'w')
 
@@ -898,6 +900,7 @@ class Project (object) :
 
         if bundle :
             myzip.close()
+            self.log.writeToLog('XPRT-030', [fName(archFile)])
 
         return True
 

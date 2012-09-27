@@ -75,7 +75,7 @@ class Text (Manager) :
         sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
         if sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = getPTSettings(self.project.local.projHome)
+            ptSet = getPTSettings(self.project.local.projHome, self.axSourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.

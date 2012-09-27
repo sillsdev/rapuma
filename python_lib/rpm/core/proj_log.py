@@ -59,7 +59,7 @@ class ProjLog (object) :
             'COMP-012' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] found in the meta component list: [<<2>>], it may not be a valid ID.'],
             'COMP-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'COMP-022' : ['MSG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
-            'COMP-025' : ['MSG', 'There are configuration settings for the [<<1>>] component. Use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
+            'COMP-025' : ['MSG', 'The [<<1>>] component is already listed in the RPM project configuration and is locked. Please unlock or use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
             'COMP-030' : ['LOG', 'The [<<1>>] component section has been deleted from the project configuration file.'],
             'COMP-031' : ['LOG', 'The [<<1>>] component folder has been deleted from your hard drive.'],
             'COMP-032' : ['LOG', 'There is no folder found for the [<<1>>] component. No files have been deleted by this operation.'],
@@ -241,7 +241,7 @@ class ProjLog (object) :
             'XPRT-005' : ['MSG', 'Unassigned error message ID.'],
             'XPRT-010' : ['ERR', 'Export file name could not be formed with available configuration information.'],
             'XPRT-020' : ['ERR', 'Unable to export: [<<1>>].'],
-            'XPRT-030' : ['MSG', 'Unassigned error message ID.'],
+            'XPRT-030' : ['MSG', 'Files exported to [<<1>>].'],
             'XPRT-040' : ['MSG', 'Unassigned error message ID.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
