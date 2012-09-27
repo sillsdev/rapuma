@@ -146,7 +146,7 @@ def installPTStyles (local, mainStyleFile) :
     # exact file is not found in either place, a substitute will be
     # copied in from RPM and given the designated name.
     (parent, grandparent)   = ancestorsPath(local.projHome)
-    targetStyles            = os.path.join(local.projProcessFolder, mainStyleFile)
+    targetStyles            = os.path.join(local.projComponentsFolder, mainStyleFile)
     ptProjStyles            = os.path.join(parent, mainStyleFile)
     ptStyles                = os.path.join(grandparent, mainStyleFile)
     rpmStyles               = os.path.join(local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
@@ -174,7 +174,7 @@ def installPTCustomStyles (local, customStyleFile) :
     # There may, or may not, be a custom style file in the parent folder.
     # If it is not there we look in the grandparent's folder
     (parent, grandparent)   = ancestorsPath(local.projHome)
-    targetCustomStyles      = os.path.join(local.projProcessFolder, customStyleFile)
+    targetCustomStyles      = os.path.join(local.projComponentsFolder, customStyleFile)
     ptProjectCustomStyles   = os.path.join(parent, customStyleFile)
     ptCustomStyles          = os.path.join(grandparent, customStyleFile)
     searchOrder             = [ptProjectCustomStyles, ptCustomStyles]

@@ -134,7 +134,7 @@ class Project (object) :
         '''This is a crude way to create a file name and path. It may not be
         the best way.'''
 
-        cidFolder          = os.path.join(self.local.projProcessFolder, cid)
+        cidFolder          = os.path.join(self.local.projComponentsFolder, cid)
         cidPdf             = os.path.join(cidFolder, cid + '.pdf')
 
         return cidPdf
@@ -318,7 +318,7 @@ class Project (object) :
                 writeConfFile(self.projConfig)
                 self.log.writeToLog('COMP-030')
             # Hopefully all went well with config delete, now on to the files
-            compFolder = os.path.join(self.local.projProcessFolder, cid)
+            compFolder = os.path.join(self.local.projComponentsFolder, cid)
             if os.path.isdir(compFolder) :
                 shutil.rmtree(compFolder)
                 self.log.writeToLog('COMP-031', [cid])
@@ -429,7 +429,7 @@ class Project (object) :
 
         # Create target file path and name
         if cid :
-            target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
             if os.path.isfile(target) :
                 if self.preprocessComponent(target, cType, cid) :
                     return True
@@ -449,7 +449,7 @@ class Project (object) :
         # everything for this component type
         for c in self.projConfig['Components'].keys() :
             if self.projConfig['Components'][c]['type'] == cType :
-                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                target = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
                 self.preprocessComponent(target, cType, c)
 
         return True
@@ -473,7 +473,7 @@ class Project (object) :
             return False
 
         if scriptFileName :
-            script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
+            script = os.path.join(self.local.projScriptsFolder, scriptFileName)
             if os.path.isfile(script) :
                 # subprocess will fail if permissions are not set on the
                 # script we want to run. The correct permission should have
@@ -515,7 +515,7 @@ class Project (object) :
             script          = resolvePath(script)
 
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTargetFolder  = self.local.projProcessScriptsFolder
+        scriptTargetFolder  = self.local.projScriptsFolder
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
         try :
             oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
@@ -636,7 +636,7 @@ class Project (object) :
 
         # Create target file path and name
         if cid :
-            target = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
             if os.path.isfile(target) :
                 if self.postProcessComponent(target, cType, cid) :
                     return True
@@ -650,7 +650,7 @@ class Project (object) :
         # everything for this component type
         for c in self.projConfig['Components'].keys() :
             if self.projConfig['Components'][c]['type'] == cType :
-                target = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                target = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
                 self.postProcessComponent(target, cType, c)
 
         return True
@@ -667,7 +667,7 @@ class Project (object) :
             self.log.writeToLog('POST-055', [cType.capitalize()])
             return False
 
-        script = os.path.join(self.local.projProcessScriptsFolder, scriptFileName)
+        script = os.path.join(self.local.projScriptsFolder, scriptFileName)
         if os.path.isfile(script) :
             # subprocess will fail if permissions are not set on the
             # script we want to run. The correct permission should have
@@ -704,7 +704,7 @@ class Project (object) :
         if not script :
             script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-postprocess.zip')
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTargetFolder  = self.local.projProcessScriptsFolder
+        scriptTargetFolder  = self.local.projScriptsFolder
         scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
         try :
             oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
@@ -865,7 +865,7 @@ class Project (object) :
                     dieNow()
 
                 target = os.path.join(path, cName)
-                source = os.path.join(self.local.projProcessFolder, c, c + '.' + cType)
+                source = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
                     
                 if bundle :
                     strObj = StringIO.StringIO()
@@ -886,7 +886,7 @@ class Project (object) :
                 dieNow()
 
             target = os.path.join(path, cName)
-            source = os.path.join(self.local.projProcessFolder, cid, cid + '.' + cType)
+            source = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
             if bundle :
                 strObj = StringIO.StringIO()
                 for l in open(source, "rb") :

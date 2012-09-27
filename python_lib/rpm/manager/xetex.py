@@ -126,8 +126,8 @@ class Xetex (Manager) :
         # by subprocess.call() just before XeTeX is run.
         texInputsLine = self.project.local.projHome + ':' \
                         + self.projMacPackFolder + ':' \
-                        + self.project.local.projProcessFolder + ':' \
-                        + os.path.join(self.project.local.projProcessFolder, self.cid) + ':.'
+                        + self.project.local.projComponentsFolder + ':' \
+                        + os.path.join(self.project.local.projComponentsFolder, self.cid) + ':.'
 
         # Create the environment dictionary that will be fed into subprocess.call()
         envDict = dict(os.environ)
@@ -589,7 +589,7 @@ class Xetex (Manager) :
         really clever or stupid, but it works. (Maybe there is a better way to
         do this?)'''
 
-        self.cidFolder          = os.path.join(self.project.local.projProcessFolder, thisCid)
+        self.cidFolder          = os.path.join(self.project.local.projComponentsFolder, thisCid)
         self.cidUsfm            = os.path.join(self.cidFolder, thisCid + '.usfm')
         self.cidTex             = os.path.join(self.cidFolder, thisCid + '.tex')
         self.masterTex          = os.path.join(self.cidFolder, 'master.tex')
@@ -614,18 +614,18 @@ class Xetex (Manager) :
         self.primOut                = {}
         self.cid                    = cid
         self.cidMeta                = False
-        self.custSty                = os.path.join(self.project.local.projProcessFolder, 'custom.sty')
-        self.globSty                = os.path.join(self.project.local.projProcessFolder, 'usfm.sty')
+#        self.custSty                = os.path.join(self.project.local.projComponentsFolder, 'custom.sty')
+#        self.globSty                = os.path.join(self.project.local.projComponentsFolder, 'usfm.sty')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
         self.layoutConfFile         = self.project.local.layoutConfFile
         self.fontConfFile           = self.project.local.fontConfFile
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        self.setFile                = os.path.join(self.project.local.projProcessFolder, self.setFileName)
-        self.extFile                = os.path.join(self.project.local.projProcessFolder, self.extFileName)
+        self.setFile                = os.path.join(self.project.local.projComponentsFolder, self.setFileName)
+        self.extFile                = os.path.join(self.project.local.projComponentsFolder, self.extFileName)
         if self.sourceEditor.lower() == 'paratext' :
             self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
-            self.globSty            = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
+            self.globSty            = os.path.join(self.project.local.projComponentsFolder, self.mainStyleFile)
 
         # Set this flag to True if it is a meta component
         self.cidMeta                = isMetaComponent(self.project.projConfig, self.cid)
@@ -638,7 +638,7 @@ class Xetex (Manager) :
             os.makedirs(self.cidFolder)
 
         # The macro link file is named according to the type of component
-        setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projProcessFolder, self.cType + 'MacLinkFile.tex'))
+        setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projComponentsFolder, self.cType + 'MacLinkFile.tex'))
         macLinkFile = self.cType + 'MacLinkFile'
 
         # Process file information

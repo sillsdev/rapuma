@@ -67,13 +67,8 @@ class Style (Manager) :
 
 
 # FIXME: This should not be PT-centric
-# Behavior is to prefer the project styles over auto-generated styles.
-# Look in the editor environment first for the style file that is there
-# and use that. If that can't be found, then auto-generate, fail if that
-# does not work. However, if a customStyleFile is specified, that will
-# take presedent over anything else.
 
-    def addStyleFile (self, cType, customStyleFile = None, force = False) :
+    def addStyleFile (self, cType, sFile = None, force = False) :
         '''Add a style file for a specified component type. It should be as
         generlized as possible. If a style file already exsists, end the 
         process. There should only be one style file for component type.
@@ -82,40 +77,73 @@ class Style (Manager) :
         If force is set to True, overwrite any config settings for exsisting
         style file but do not remove the exsisting file.
         
-        The customStyleFile setting can work in two ways. With a full path and
-        file name, it can Point to a new style file that will be copied into the
+        The sFile setting can work in two ways. With a full path and file
+        name, it can Point to a new style file that will be copied into the
         project. Or, if only a file name is specified, with no specified path,
         RPM will then re-install an existing publishing project style file 
         already in the Components folder. If it doesn't find it, then it will
         auto-generate and install a new one and then use the specified
-        customStyleFile name.'''
+        sFile name.'''
 
-
+    # FIXME: add sFile behavior
     # FIXME: add force behavior
-    # FIXME: add customStyleFile behavior
     # FIXME: add auto-generate style file
-    # FIXME: 
-    # FIXME: 
 
-        def installFile () :
-            shutil.copy(styleFile, target)
-
-        # Set some vars
-        styleFile = customStyleFile
-        target = os.path.join(self.project.local.projProcessFolder, cType + '.sty')
-
-        if cType.lower() == 'usfm' :
-            styleFile = self.findUsfmStyleFile()
-            installFile()
-            self.project.log.writeToLog('STYL-000')
+        # Get/make the custom style file name.
+        if sFile :
+            # Good, we're done!
+            if os.path.isfile(sFile) :
+                target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
+                # Copy and set
+                if not shutil.copy(sFile, target) :
+                    self.project.projConfig['CompTypes'][Ctype]['styleFile'] = fName(sFile)
+                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = fName(sFile)
+                    writeConfFile(self.project.projConfig)
+                    self.project.log.writeToLog('STYL-000', [fName(sFile)])
+                    return True
+                else :
+                    # Failed, do tell why
+                    self.project.log.writeToLog('STYL-000', [sFile])
+                    return False
+            else :
+                # Hopefully this is already there, just needs 
+                # to be set in the config
+                target = os.path.join(self.project.local.projStylesFolder, sFile)
+                if os.path.isfile(target) :
+                    self.project.projConfig['CompTypes'][Ctype]['styleFile'] = sFile
+                    writeConfFile(self.project.projConfig)
+                    self.project.log.writeToLog('STYL-000', [sFile])
+                    return True
+                else :
+                    # Failed, do tell why
+                    self.project.log.writeToLog('STYL-000', [sFile])
+                    return False
         else :
-            self.project.log.writeToLog('STYL-000')
-
+            if cType.lower() == 'usfm' :
+                # If no sFile was specified, try installng a PT project style file
+                if self.installCompTypeGlobalStyles() :
+                    self.project.log.writeToLog('STYL-000')
+                    return True
+                else :
+                    # None was specified, none found, lets make one
+                    if self.autoGenSty(cType) :
+                        self.project.log.writeToLog('STYL-000')
+                        return True
+                    else :
+                        # If we havn't figured it out by now we are hosed'
+                        self.project.log.writeToLog('STYL-000')
+                        dieNow()
+            else :
+                # We don't know what this type is so we shouldn't process it
+                self.project.log.writeToLog('STYL-000')
+                dieNow()
 
 
     def removeStyleFile (self, cType, force) :
         '''Remove a style file from a specified component type. However, if
         the type is locked, bow out gracefully, unless force is set to True.'''
+
+    # FIXME: This is not even close to working
 
         def removeFile () :
             if os.path.isfile(styleFile) :
@@ -125,7 +153,7 @@ class Style (Manager) :
                 self.project.log.writeToLog('STYL-000')
 
         # Set some vars
-        styleFile = os.path.join(self.project.local.projProcessFolder, cType + '.sty')
+        styleFile = os.path.join(self.project.local.projComponentsFolder, cType + '.sty')
 
         if force :
             removeFile()
@@ -137,45 +165,58 @@ class Style (Manager) :
                 self.project.log.writeToLog('STYL-000')
 
 
-    def findUsfmStyleFile (self) :
-        '''Return the full path to a USFM style file that can be
-        installed into this project.'''
 
-        fileName = ''
-        self.project.log.writeToLog('STYL-030')
-        return fileName
+    def autoGenSty (self, cType, sName = None) :
+        '''Auto-generate a style file based on project data.'''
+
+    # FIXME: add real auto-generation of sfm style files
+
+        if sName :
+            target = os.path.join(self.project.local.projStylesFolder, sName)
+        else :
+            target = os.path.join(self.project.local.projStylesFolder, cType + '.sty')
+
+        # Here some real profound stuff should happen with the 
+        # fancy sfm parser. However, for now we'll just copy in 
+        # a default sty file.
+        source = os.path.join(self.project.local.rpmCompTypeFolder, cType,  cType + '.sty')
+        if not shutil.copy(source, target) :
+            return True
+        else :
+            return False
 
 
-#    def installCompTypeGlobalStyles (self) :
-#        '''If the source is from a PT project, check to see if there is a
-#        (project-wide) stylesheet to install. If not, we will make one.
-#        This file is required as a minimum for components of this type to
-#        render. This function must succeed.'''
+    def installCompTypeGlobalStyles (self) :
+        '''If the source is from a PT project, check to see if there is a
+        (project-wide) stylesheet to install. If not, we will make one.
+        This file is required as a minimum for components of this type to
+        render. This function must succeed.'''
 
-#        ptConf = getPTSettings(self.project.local.projHome)
-#        globalStyFile = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-#        if not os.path.isfile(globalStyFile) :
-#            if self.sourceEditor.lower() == 'paratext' :
-#                # Build paths and names we need
-#                parent = os.path.dirname(self.project.local.projHome)
-#                gather = os.path.join(parent, 'gather')
-#                if os.path.isdir(gather) :
-#                    parent = gather
+        ptConf = getPTSettings(self.project.local.projHome)
+        globalStyFile = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+        if not os.path.isfile(globalStyFile) :
+            if self.sourceEditor.lower() == 'paratext' :
+                # Build paths and names we need
+                parent = os.path.dirname(self.project.local.projHome)
+                gather = os.path.join(parent, 'gather')
+                if os.path.isdir(gather) :
+                    parent = gather
 
-#                # Override default styleFile name with what we find in the PT conf
-#                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-#                source = os.path.join(parent, self.mainStyleFile)
-#                target = os.path.join(self.project.local.projProcessFolder, self.mainStyleFile)
-#                if not os.path.isfile(target) :
-#                    installPTStyles(self.project.local, self.mainStyleFile)
-#                    # Change, if necessary, the main style file name
-#                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = self.mainStyleFile
-#                    if writeConfFile(self.project.projConfig) :
-#                        self.project.log.writeToLog('STYL-010')
-#            else :
-#                # Quite here
-#                self.project.log.writeToLog('STYL-015')
-#                dieNow()
+                # Override default styleFile name with what we find in the PT conf
+                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+                print self.mainStyleFile
+                source = os.path.join(parent, self.mainStyleFile)
+                target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+                if not os.path.isfile(target) :
+                    installPTStyles(self.project.local, self.mainStyleFile)
+                    # Change, if necessary, the main style file name
+                    self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = self.mainStyleFile
+                    self.project.projConfig['CompTypes'][self.Ctype]['styleFile'] = self.mainStyleFile
+                    if writeConfFile(self.project.projConfig) :
+                        return True
+            else :
+                # Quite here
+                return False
 
 
 #    def installCompTypeOverrideStyles (self) :
@@ -183,7 +224,7 @@ class Style (Manager) :
 #        (project-wide) custom stylesheet to install. If not, we are done.
 #        This style file is not required.'''
 
-#        target = os.path.join(self.project.local.projProcessFolder, self.customStyleFile)
+#        target = os.path.join(self.project.local.projComponentsFolder, self.customStyleFile)
 #        if not os.path.isfile(target) :
 #            if self.sourceEditor.lower() == 'paratext' :
 #                # Build paths and names we need

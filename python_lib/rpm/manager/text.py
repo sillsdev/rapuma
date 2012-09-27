@@ -110,7 +110,7 @@ class Text (Manager) :
             dieNow()
 
         # Will need the stylesheet for copy
-        projSty = os.path.join(self.project.local.projProcessFolder, self.project.projConfig['CompTypes']['Usfm']['styleFile'])
+        projSty = os.path.join(self.project.local.projComponentsFolder, self.project.projConfig['CompTypes']['Usfm']['styleFile'])
 
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part
@@ -125,11 +125,11 @@ class Text (Manager) :
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
-        targetFolder    = os.path.join(self.project.local.projProcessFolder, cid)
+        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
         target          = os.path.join(targetFolder, cid + '.' + self.cType)
 #        compLock        = os.path.join(targetFolder, '.lock')
 #        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
-        preprocess     = os.path.join(self.project.local.projProcessFolder, self.cType + '-preprocess.py')
+        preprocess     = os.path.join(self.project.local.projComponentsFolder, self.cType + '-preprocess.py')
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 

@@ -69,8 +69,13 @@ def resolvePath (path) :
     '''Resolve the '~' in a path if there is one with the actual home path.'''
 
     if path[0] == '~' :
-        # Look for "~/" shorthand path and replace it with the actual "home"
-        return path.replace('~', os.environ.get('HOME'))
+        try :
+            # This should be the best way
+            return os.path.expanduser(path)
+        except :
+            # Manually look for "~/" shorthand path and replace it 
+            # with the actual "home"
+            return path.replace('~', os.environ.get('HOME'))
     else :
         # Otherwise run abspath on it and send it on
         return os.path.abspath(path)

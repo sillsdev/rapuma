@@ -143,23 +143,30 @@ Todo:
             <value>Config</value>
         </setting>
         <setting>
-            <name>Project Process Folder</name>
-            <key>projProcessFolder</key>
-            <description>The main project components processing folder.</description>
+            <name>Project Components Folder</name>
+            <key>projComponentsFolder</key>
+            <description>The folder were project components are kept.</description>
             <type>string</type>
             <value>Components</value>
         </setting>
         <setting>
-            <name>Project Preprocess Scripts Folder</name>
-            <key>projProcessScriptsFolder</key>
-            <description>The main project components processing folder.</description>
-            <type>list</type>
-            <value>Components,Scripts</value>
+            <name>Project Scripts Folder</name>
+            <key>projScriptsFolder</key>
+            <description>The folder where all the project custom processing scripts are kept.</description>
+            <type>string</type>
+            <value>Scripts</value>
+        </setting>
+        <setting>
+            <name>Project Styles Folder</name>
+            <key>projStylesFolder</key>
+            <description>The folder where all component type styles are kept.</description>
+            <type>string</type>
+            <value>Styles</value>
         </setting>
         <setting>
             <name>Project Macros Folder</name>
             <key>projMacrosFolder</key>
-            <description>The folder where all processing scripts and macros are kept.</description>
+            <description>The folder where all macros, or scripts, that drive the rendering process are kept.</description>
             <type>string</type>
             <value>Macros</value>
         </setting>
