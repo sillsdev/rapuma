@@ -76,15 +76,11 @@ def resolvePath (path) :
             # Manually look for "~/" shorthand path and replace it 
             # with the actual "home"
             return path.replace('~', os.environ.get('HOME'))
+    elif path == '' or path == 'None' :
+        return None
     else :
         # Otherwise run abspath on it and send it on
         return os.path.abspath(path)
-
-
-def escapePath (path) :
-    '''Put escape characters in a path.'''
-
-    return path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
 
 
 def addToList (thisList, item) :
@@ -120,16 +116,22 @@ def str2bool (str) :
 
 
 def escapePath (path) :
-    '''Escape irregular characters in a path.'''
+    '''Put escape characters in a path.'''
 
-    # FIXME: It would seem that all that is needed is to put
-    # quotes around the path to make them acceptable to
-    # system calls. For now we will use this. We might need
-    # to do more such as is commented below. Stay tuned...
-    return '"%s"' % ( path )
+    return path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
 
-    # FIXME: Be nice if we could use re instead of .replace
-    # np = re.sub(r'([ ()\"\'\[\]])', '\\1', path)
+
+#def escapePath (path) :
+#    '''Escape irregular characters in a path.'''
+
+#    # FIXME: It would seem that all that is needed is to put
+#    # quotes around the path to make them acceptable to
+#    # system calls. For now we will use this. We might need
+#    # to do more such as is commented below. Stay tuned...
+#    return '"%s"' % ( path )
+
+#    # FIXME: Be nice if we could use re instead of .replace
+#    # np = re.sub(r'([ ()\"\'\[\]])', '\\1', path)
 
 
 def ancestorsPath (homePath) :

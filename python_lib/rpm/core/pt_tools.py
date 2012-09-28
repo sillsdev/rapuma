@@ -34,28 +34,33 @@ from palaso.sfm import usfm, style, pprint, element, text
 ###############################################################################
 
 
-def usfmCopy (source, target, projSty = None) :
+def usfmCopy (source, target, projSty = None, errLevel = sfm.level.Content) :
     '''Use the Palaso USFM parser to bring in the text and clean it up if 
     needed. If projSty (path + file name) is not used, the sfm parser
     will use a default style file to drive the process which may lead to
-    undesirable results. A style file should normally be used to avoid this.'''
-
-# FIXME: Tim is working on fixing a bug in the sfm parser
-
-    # For testing
-    projSty = None
+    undesirable results. A style file should normally be used to avoid this.
+    
+    Error level reporting is possible with the usfm.parser. The following
+    are the error it can report:
+    Note            = -1    Just give output warning, do not stop
+    Marker          =  0    Stop on any out of place marker
+    Content         =  1    Stop on mal-formed content
+    Structure       =  2    Stop on ???
+    Unrecoverable   =  100  Stop on most anything that is wrong
+    
+    The default is Content. To change this the calling function must pass
+    another level like "sfm.level.Note" or one of the other levels.'''
 
     # Load in the source text
     fh = codecs.open(source, 'rt', 'utf_8_sig')
-    
     # Create the object
     if projSty :
         stylesheet = usfm.default_stylesheet.copy()
-        sytlesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+        stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
         stylesheet.update(stylesheet_extra)
-        doc = usfm.parser(fh, stylesheet)
+        doc = usfm.parser(fh, stylesheet, error_level=errLevel)
     else :
-        doc = usfm.parser(fh)
+        doc = usfm.parser(fh, error_level=errLevel)
 
     # Check/Clean up the text
     tidy = sfm.pprint(doc)
@@ -65,19 +70,6 @@ def usfmCopy (source, target, projSty = None) :
     writeout.write(tidy)
     writeout.close
     return True
-    
-#    try :
-##        usfm.parser(source, stylesheet=opts.stylesheet, error_level=opts.error_level)
-##        usfm.parser(source, stylesheet=opts.stylesheet, '')
-#        fh = codecs.open(source, 'rt', 'utf_8_sig')
-#        doc = usfm.parser(fh, stylesheet = projSty)
-#        tidy = sfm.pprint(doc)
-#        writeout = codecs.open(target, "wt", "utf_8_sig")
-#        writeout.write(tidy)
-#        writeout.close
-#        return True
-#    except :
-#        return False
 
 
 def formPTName (projConfig, cid) :
@@ -134,61 +126,42 @@ def mapPTTextSettings (sysSet, ptSet, reset=False) :
     return sysSet
 
 
-def installPTStyles (local, mainStyleFile) :
-    '''Go get the style sheet from the local PT project this is in
-    and install it into the project where and how it needs to be. If it
-    doesn't find it there go to the [My Paratext Projects] folder and
-    look there. If none is found a default file will come be copied in
-    from the RPM system.'''
+def styleFileIsValid (source) :
+    '''Check to see if a style file is valid, or not.'''
 
-    # As this is call is for a PT based project, it is certain the style
-    # file should be found in the parent or grandparent folder. If that
-    # exact file is not found in either place, a substitute will be
-    # copied in from RPM and given the designated name.
-    (parent, grandparent)   = ancestorsPath(local.projHome)
-    targetStyles            = os.path.join(local.projComponentsFolder, mainStyleFile)
-    ptProjStyles            = os.path.join(parent, mainStyleFile)
-    ptStyles                = os.path.join(grandparent, mainStyleFile)
-    rpmStyles               = os.path.join(local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
-    searchOrder             = [ptProjStyles, ptStyles, rpmStyles]
-
-    # We will start by searching in order from the inside out and stop
-    # as soon as we find one. If none is found, return False. If one is
-    # found in the target folder, we will not overwrite it and return False
-    if not os.path.isfile(targetStyles) :
-        for sFile in searchOrder :
-            if os.path.isfile(sFile) :
-                try :
-                    shutil.copy(sFile, targetStyles)
-                    return True
-                except :
-                    return False
+    try :
+        stylesheet = usfm.default_stylesheet.copy()
+        stylesheet_extra = style.parse(open(os.path.expanduser(source),'r'))
+        stylesheet.update(stylesheet_extra)
+        return True
+    except :
+        return False
 
 
-def installPTCustomStyles (local, customStyleFile) :
-    '''Look in a PT project for a custom override style file and copy it into
-    the project if it is there.  If it is not there, go one more folder up in
-    case you are located in the [My Paratext Projects] folder.  If it is not
-    there, then return False.'''
+#def installPTCustomStyles (local, customStyleFile) :
+#    '''Look in a PT project for a custom override style file and copy it into
+#    the project if it is there.  If it is not there, go one more folder up in
+#    case you are located in the [My Paratext Projects] folder.  If it is not
+#    there, then return False.'''
 
-    # There may, or may not, be a custom style file in the parent folder.
-    # If it is not there we look in the grandparent's folder
-    (parent, grandparent)   = ancestorsPath(local.projHome)
-    targetCustomStyles      = os.path.join(local.projComponentsFolder, customStyleFile)
-    ptProjectCustomStyles   = os.path.join(parent, customStyleFile)
-    ptCustomStyles          = os.path.join(grandparent, customStyleFile)
-    searchOrder             = [ptProjectCustomStyles, ptCustomStyles]
-    # We will start by searching in order from the inside out and stop
-    # as soon as we find one. If none is found, return False. If one is
-    # found in the target folder, we will not overwrite it and return False
-    if not os.path.isfile(targetCustomStyles) :
-        for sFile in searchOrder :
-            if os.path.isfile(sFile) :
-                try :
-                    shutil.copy(sFile, targetCustomStyles)
-                    return True
-                except :
-                    return False
+#    # There may, or may not, be a custom style file in the parent folder.
+#    # If it is not there we look in the grandparent's folder
+#    (parent, grandparent)   = ancestorsPath(local.projHome)
+#    targetCustomStyles      = os.path.join(local.projComponentsFolder, customStyleFile)
+#    ptProjectCustomStyles   = os.path.join(parent, customStyleFile)
+#    ptCustomStyles          = os.path.join(grandparent, customStyleFile)
+#    searchOrder             = [ptProjectCustomStyles, ptCustomStyles]
+#    # We will start by searching in order from the inside out and stop
+#    # as soon as we find one. If none is found, return False. If one is
+#    # found in the target folder, we will not overwrite it and return False
+#    if not os.path.isfile(targetCustomStyles) :
+#        for sFile in searchOrder :
+#            if os.path.isfile(sFile) :
+#                try :
+#                    shutil.copy(sFile, targetCustomStyles)
+#                    return True
+#                except :
+#                    return False
 
 
 def getPTSettings (home, axSourcePath = None) :

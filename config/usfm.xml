@@ -30,9 +30,9 @@ Todo:
     <setting>
         <name>Format Style File</name>
         <key>styleFile</key>
-        <description>The default format style file.</description>
+        <description>The installed style file for this component type.</description>
         <type>string</type>
-        <value>usfm.sty</value>
+        <value></value>
     </setting>
     <setting>
         <name>Primary Font</name>
@@ -70,9 +70,9 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Axillary Source Path</name>
-        <key>axillarySourcePath</key>
-        <description>This is an override path to component type specific source files. If an unknown editor is being used or if the source needs to come from outside the editing environment. This setting will override automated source path routines. Beware, this setting may be localized only and will not work on other systems.</description>
+        <name>Alternate Source Path</name>
+        <key>altSourcePath</key>
+        <description>This is an alternate path to component type specific source files. If an unknown editor is being used or if the source needs to come from outside the editing environment. This setting will override automated source path routines. Beware, this setting may be localized only and will not work on other systems.</description>
         <type>string</type>
         <value></value>
     </setting>

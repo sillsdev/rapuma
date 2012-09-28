@@ -315,9 +315,9 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'style' :
         aProject.createManager(args['component_type'], 'style')
         if args['add'] :
-            aProject.managers[args['component_type'] + '_Style'].addStyleFile(args['component_type'], args['path'], args['force'])
+            aProject.managers[args['component_type'] + '_Style'].addStyleFile(args['path'], args['force'])
         elif args['remove'] :
-            aProject.managers[args['component_type'] + '_Style'].removeStyleFile(args['component_type'], args['force'])
+            aProject.managers[args['component_type'] + '_Style'].removeStyleFile(args['force'])
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
@@ -363,12 +363,14 @@ def userArguments (args) :
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
-        if not args['configuration'] :
-            sys.exit('Configuration name is missing from command argument. Process halted!')
-            if not (args['section'] or args['key'] or args['value']) :
-                sys.exit('Must provide a section, key and value. Process halted!')
-            else :
+        aProject = initProject(args['project_id'])
+        if args['configuration'] :
+            if (args['section'] or args['key'] or args['value']) :
                 aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
+            else :
+                sys.exit('Must provide a section, key and value. Process halted!')
+        else :
+            sys.exit('Configuration name is missing from command argument. Process halted!')
 
     # Locking commands
     elif sys.argv[1].lower() == 'locking' :

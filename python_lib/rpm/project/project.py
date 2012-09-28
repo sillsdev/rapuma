@@ -805,24 +805,6 @@ class Project (object) :
 
 
 ###############################################################################
-################################ Style Functions ##############################
-###############################################################################
-
-    def createCustomStyleFile (self, cType) :
-        '''Create/copy a custom style file.'''
-
-        self.createManager(cType, 'style')
-        self.managers[cType + '_Style'].installCompTypeOverrideStyles()
-
-
-    def createDefaultStyleFile (self, cType) :
-        '''Create/copy the default style file.'''
-
-        self.createManager(cType, 'style')
-        self.managers[cType + '_Style'].installCompTypeGlobalStyles()
-
-
-###############################################################################
 ############################## Exporting Functions ############################
 ###############################################################################
 
@@ -847,7 +829,7 @@ class Project (object) :
 
         # Will need the stylesheet for copy
         projSty = self.projConfig['CompTypes']['Usfm']['styleFile']
-
+        projSty = os.path.join(self.local.projStylesFolder, projSty)
         # Start the main process here
         if bundle :
                                                             # FIXME: add date stamp to archFile name
@@ -877,6 +859,8 @@ class Project (object) :
                 else :
                     if not usfmCopy(source, target, projSty) :
                         self.log.writeToLog('XPRT-020', [fName(target)])
+
+            self.log.writeToLog('XPRT-030', [path])
         else :
             # Process an individual component
             cName = formPTName(self.projConfig, cid)
