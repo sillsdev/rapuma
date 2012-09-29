@@ -17,14 +17,14 @@ Todo:
         <key>mainStyleFile</key>
         <description>The main style file for this project.</description>
         <type>string</type>
-        <value>usfm.sty</value>
+        <value></value>
     </setting>
     <setting>
         <name>Custom Style File</name>
         <key>customStyleFile</key>
         <description>The custom style file, if needed, for this project.</description>
         <type>string</type>
-        <value>custom.sty</value>
+        <value></value>
     </setting>
 </root>
 

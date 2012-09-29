@@ -73,7 +73,6 @@ systemAbout     = uc.userConfig['System']['systemAbout']
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 
-
 ###########################################################################
 ############################## RPM Functions ##############################
 ###########################################################################
@@ -318,6 +317,8 @@ def userArguments (args) :
             aProject.managers[args['component_type'] + '_Style'].addStyleFile(args['path'], args['force'])
         elif args['remove'] :
             aProject.managers[args['component_type'] + '_Style'].removeStyleFile(args['force'])
+        elif args['validate'] :
+            aProject.managers[args['component_type'] + '_Style'].validateStyleFile(args['path'])
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
@@ -479,6 +480,7 @@ styleCommand.add_argument('-a', '--add', action='store_true', help='Add a new st
 styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a style file for this component type.')
 styleCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific style file is required or to be auto-generated. Otherwise, a default will be used.')
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
+styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
 
 # Add text preprocessing subprocess arguments
 preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
@@ -526,7 +528,7 @@ exportCommand.add_argument('component_id', help='Specify a valid component ID to
 exportCommand.add_argument('-p', '--path', help='Optional - This will specify a path/folder where the exported data is output to. Default is to create an export folder in the source folder and output to that.')
 exportCommand.add_argument('-s', '--script', help='Optional - The name of an installed post process script to be used in the export process. Default will just blind copy the working text to the export folder.')
 exportCommand.add_argument('-e', '--execute', action='store_true', help='Execute an export operation.')
-exportCommand.add_argument('-b', '--bundle', action='store_true', help='[NOT IMPLEMENTED] Bundle the exported file(s) into a single compressed file.')
+exportCommand.add_argument('-b', '--bundle', action='store_true', help='Bundle the exported file(s) into a single compressed file.')
 exportCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting file(s) of the same name.')
 
 

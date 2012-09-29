@@ -28,13 +28,6 @@ Todo:
         <value>paratext</value>
     </setting>
     <setting>
-        <name>Format Style File</name>
-        <key>styleFile</key>
-        <description>The installed style file for this component type.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
         <name>Primary Font</name>
         <key>primaryFont</key>
         <description>The primary font used for rendering component text.</description>

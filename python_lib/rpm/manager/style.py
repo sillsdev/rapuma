@@ -66,9 +66,7 @@ class Style (Manager) :
 ###############################################################################
 
 
-# FIXME: This should not be PT-centric
-
-    def addStyleFile (self, sFile = None, force = False) :
+    def addStyleFile (self, sFile = '', force = False) :
         '''Add a style file for a specified component type. It should be as
         generlized as possible. If a style file already exsists, end the 
         process. There should only be one default style file for component type.
@@ -82,56 +80,60 @@ class Style (Manager) :
         obtain a valid style file.
         
         If force is set to True, it will overwrite any config settings of the
-        exsisting style file and remove the exsisting file. It will also force
-        validation by copying in, if necessary, a "clean" valid copy of the
-        necessary style sheet if anything is found wrong with the proposed
-        style file or the one provided in the project.
+        exsisting style file and remove the exsisting file. It will, however,
+        fail if the incoming style sheet doesn't validate. This could leave
+        the project in a situation where it will not render because the style
+        file is missing.
         
-        The sFile setting can work in two ways. With a full path and file
-        name, it can Point to a new style file that will be copied into the
-        project. Or, if only a file name is specified, with no specified path,
-        RPM will then re-install an existing publishing project style file 
-        already in the Styles folder. If it doesn't find it, then it will
-        copy in a new one.'''
+        The sFile setting points to a new style file that will be copied into
+        the project. That style file will need to be validated as well.'''
 
         def sSet (target) :
             # Double check other proceedures, record if good, die if not
             if os.path.isfile(target) :
-                self.project.projConfig['CompTypes'][self.Ctype]['styleFile'] = fName(target)
                 self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = fName(target)
                 writeConfFile(self.project.projConfig)
-                self.project.log.writeToLog('STYL-090', [fName(target),self.cType])
+                self.project.log.writeToLog('STYL-010', [fName(target),self.cType])
                 return True
             else :
-                self.project.log.writeToLog('STYL-100', [target])
+                self.project.log.writeToLog('STYL-020', [target])
                 dieNow()
 
-        # If force is not set, the first thing we want to do is see
-        # if the file exsists, quite here.
-        target = os.path.join(self.project.local.projStylesFolder, self.project.projConfig['CompTypes'][self.Ctype]['styleFile'])
-        if not force :
-            if os.path.isfile(target) :
-                self.project.log.writeToLog('STYL-010', [fName(target),self.cType])
-                return False
+        # Set the target if known, if not, set it anyway
+        if self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] :
+            target = os.path.join(self.project.local.projStylesFolder, self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'])
+        else :
+            target = os.path.join(self.project.local.projStylesFolder, 'usfm.sty')
+            self.project.log.writeToLog('STYL-030', [fName(target)])
+
+        # If force is set, the first thing we want to do is remove the old file and settings
+        # Otherwise, check to see if style file matched the settings, if it does, quite
+        if force :
+            self.removeStyleFile(force)
+        else :
+            if self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] == fName(target) :
+                self.project.log.writeToLog('STYL-040', [fName(target),self.cType])
+                return
 
         # Get/make the custom style file name.
         if sFile :
+            target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
             # Good, we're done!
             if os.path.isfile(sFile) :
-                if styleFileIsValid(source) :
+                if styleFileIsValid(sFile) :
                     # Force validate the source before we copy it into the project
                     if force :
                         # If shutil returns something, there is a problem
                         # Problems with failed style file copying are fatal
-                        if not shutil.copy(sFile, os.path.join(self.project.local.projStylesFolder, fName(sFile))) :
-                            self.project.log.writeToLog('STYL-070', [fName(source)])
+                        if not shutil.copy(sFile, target) :
+                            self.project.log.writeToLog('STYL-050', [fName(sFile)])
                     else :
                         # Copy if the file is not there
                         if not os.path.isfile(target) :
-                            shutil.copy(source, target)
-                            self.project.log.writeToLog('STYL-080', [fName(source)])
+                            shutil.copy(sFile, target)
+                            self.project.log.writeToLog('STYL-060', [fName(sFile)])
                 else :
-                    self.project.log.writeToLog('STYL-140', [fName(source)])
+                    self.project.log.writeToLog('STYL-070', [fName(sFile)])
                     return False
 
                 if sSet(target) :
@@ -139,97 +141,58 @@ class Style (Manager) :
             else :
                 # Hopefully this is already there, just needs 
                 # to be set in the config
-                if os.path.isfile(os.path.join(self.project.local.projStylesFolder, sFile)) :
-                    sSet(os.path.join(self.project.local.projStylesFolder, sFile))
+                if os.path.isfile(target) :
+                    sSet(target)
                     return True
                 else :
                     # Failed, do tell why
-                    self.project.log.writeToLog('STYL-020', [sFile])
+                    self.project.log.writeToLog('STYL-080', [sFile])
                     dieNow()
         else :
             if self.cType.lower() == 'usfm' :
                 # If no sFile was specified, try installng a PT project style file
                 # or a backup system style file
-                sFile = self.installCompTypeStyleFile(force)
-                if sFile and os.path.isfile(sFile) :
-                    sSet(sFile)
-                    if not force :
-                        self.project.log.writeToLog('STYL-030', [fName(sFile)])
+                if self.sourceEditor.lower() == 'paratext' :
+                    ptConf = getPTSettings(self.project.local.projHome)
+                    # Override default styleFile name if we found something in the PT conf
+                    if ptConf :
+                        self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
                     else :
-                        self.project.log.writeToLog('STYL-035', [fName(sFile)])
-                    return True
+                        if not self.mainStyleFile :
+                            self.mainStyleFile = 'usfm.sty'
+
+                    target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+                    # The way this is handled is specific to the editor
+                    if os.path.isfile(target) :
+                        if not self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] :
+                            sSet(target)
+                    else :
+                        # As this is call is for a PT based project, it is certain the style
+                        # file should be found in the parent or grandparent folder. If that
+                        # exact file is not found in either place, a substitute will be
+                        # copied in from RPM and given the designated name.
+                        altSourcePath               = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'])
+                        (parent, grandparent)       = ancestorsPath(self.project.local.projHome)
+                        altSourceStyle              = os.path.join(altSourcePath, self.mainStyleFile)
+                        ptProjStyle                 = os.path.join(parent, self.mainStyleFile)
+                        ptStyle                     = os.path.join(grandparent, self.mainStyleFile)
+                        rpmStyle                    = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
+                        searchOrder                 = [altSourceStyle, ptProjStyle, ptStyle, rpmStyle]
+
+                        # We will start by searching in order from the inside out and stop
+                        # as soon as we find one.
+                        for sFile in searchOrder :
+                            if os.path.isfile(sFile) :
+                                if styleFileIsValid(sFile) :
+                                    if not shutil.copy(sFile, target) :
+                                        sSet(target)
+                                else :
+                                    self.project.log.writeToLog('STYL-070', [sFile,self.cType])
+                            else : 
+                                self.project.log.writeToLog('STYL-090', [sFile])
+
                 else :
-                    # If we havn't got it yet, we are hosed'
-                    self.project.log.writeToLog('STYL-050')
-                    dieNow()
-            else :
-                # We don't know how to work with this type is so we shouldn't process it
-                self.project.log.writeToLog('STYL-060')
-                dieNow()
-
-
-    def installCompTypeStyleFile (self, force) :
-        '''If the source is from a PT project, check to see if there is a
-        (project-wide) stylesheet to install. If not, we will make one.
-        This file is required as a minimum for components of this type to
-        render. This function must succeed.'''
-
-        if self.sourceEditor.lower() == 'paratext' :
-            ptConf = getPTSettings(self.project.local.projHome)
-            # Override default styleFile name if we found something in the PT conf
-            try :
-                self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-            except :
-                pass
-            target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
-            # To force, simply get rid of the current target and reinstall
-            if force :
-                try :
-                    os.remove(target)
-                except :
-                    pass
-
-            # The way this is handled is specific to the editor
-            if not os.path.isfile(target) :
-                return self.installUsfmStyle(force)
-            else :
-                return None
-        else :
-            sys.exit('Error: Editor [' + self.sourceEditor + '] not recognized')
-
-
-    def installUsfmStyle (self, force = False) :
-        '''Go get the style sheet from the local PT project this is in
-        and install it into the project where and how it needs to be. If it
-        doesn't find it there go to the [My Paratext Projects] folder and
-        look there. If none is found a default file will come be copied in
-        from the RPM system.'''
-
-        # As this is call is for a PT based project, it is certain the style
-        # file should be found in the parent or grandparent folder. If that
-        # exact file is not found in either place, a substitute will be
-        # copied in from RPM and given the designated name.
-        altSourcePath               = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'])
-        (parent, grandparent)       = ancestorsPath(self.project.local.projHome)
-        targetStyle                 = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
-        altSourceStyle              = os.path.join(altSourcePath, self.mainStyleFile)
-        ptProjStyle                 = os.path.join(parent, self.mainStyleFile)
-        ptStyle                     = os.path.join(grandparent, self.mainStyleFile)
-        rpmStyle                    = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
-        searchOrder                 = [altSourceStyle, ptProjStyle, ptStyle, rpmStyle]
-
-        # We will start by searching in order from the inside out and stop
-        # as soon as we find one.
-        if not os.path.isfile(targetStyle) or force :
-            for sFile in searchOrder :
-                if os.path.isfile(sFile) :
-                    if styleFileIsValid(sFile) :
-                        if not shutil.copy(sFile, targetStyle) :
-                            return targetStyle
-                    else :
-                        self.project.log.writeToLog('STYL-130', [sFile,self.cType])
-                else : 
-                    self.project.log.writeToLog('STYL-105', [sFile])
+                    sys.exit('Error: Editor [' + self.sourceEditor + '] not recognized')
 
 
     def removeStyleFile (self, force) :
@@ -238,30 +201,32 @@ class Style (Manager) :
         the file from the project as well.'''
 
         # Make sure there is something to do
-        try :
-            oldStyle = self.project.projConfig['CompTypes'][self.Ctype]['styleFile']
-            if oldStyle == 'None' :
-                self.project.log.writeToLog('STYL-110', [self.cType])
-                return
-        except :
-            self.project.log.writeToLog('STYL-110', [self.cType])
+        oldStyle = self.project.projConfig['Managers']['usfm_Style']['mainStyleFile']
+        if not oldStyle :
+            self.project.log.writeToLog('STYL-100', [self.cType])
             return
-
-        self.project.projConfig['CompTypes'][self.Ctype]['styleFile'] = None
-        self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = None
-        writeConfFile(self.project.projConfig)
-
-        if force :
-            target = os.path.join(self.project.local.projStylesFolder, oldStyle)
-            try :
-                os.remove(target)
-            except :
-                pass
-            self.project.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
         else :
-            self.project.log.writeToLog('STYL-130', [fName(oldStyle),self.cType])
+            self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] = ''
+            self.mainStyleFile = ''
+            writeConfFile(self.project.projConfig)
 
-        return True
+            if force :
+                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
+                if os.path.isfile(target) :
+                    os.remove(target)
+
+                self.project.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
+            else :
+                self.project.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
+
+            return True
+
+
+    def validateStyleFile (self, path) :
+        '''Use the USFM parser to validate a style file.'''
+
+        self.project.log.writeToLog('STYL-150')
+
 
 
 #    def installCompTypeOverrideStyles (self) :

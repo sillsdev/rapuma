@@ -111,7 +111,7 @@ def str2bool (str) :
 
     if isinstance(str, basestring) and str.lower() in ['0','false','no']:
         return False
-    else:
+    else :
         return bool(str)
 
 
