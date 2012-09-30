@@ -241,7 +241,8 @@ class ProjLog (object) :
             'XPRT-010' : ['ERR', 'Export file name could not be formed with available configuration information.'],
             'XPRT-020' : ['ERR', 'Unable to export: [<<1>>].'],
             'XPRT-030' : ['MSG', 'Files exported to [<<1>>].'],
-            'XPRT-040' : ['MSG', 'Unassigned error message ID.'],
+            'XPRT-040' : ['MSG', 'Begining export, please wait...'],
+            'XPRT-050' : ['MSG', 'Unassigned error message ID.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

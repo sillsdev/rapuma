@@ -384,7 +384,7 @@ class Project (object) :
             # components in a list
             if testForSetting(self.projConfig['Components'][cid], 'list') :
                 cList = True
-                for c in self.projConfig['Components'].keys() :
+                for c in self.projConfig['Components'][cid]['list'] :
                     self.projConfig['Components'][c]['isLocked'] = lock
             
             else :
@@ -815,8 +815,6 @@ class Project (object) :
         '''Facilitate the exporting of project text.'''
         
         # FIXME - Todo: add post processing script feature
-        # FIXME - Todo: finish add bundling process
-        # FIXME - Todo: add force file overwrite (add date stamp to bundle file names)
 
         # Figure out target path
         if path :
@@ -829,18 +827,16 @@ class Project (object) :
         if not os.path.isdir(path) :
             os.makedirs(path)
 
-        # Will need the stylesheet for copy
-        projSty = self.projConfig['CompTypes']['Usfm']['styleFile']
-        projSty = os.path.join(self.local.projStylesFolder, projSty)
-        # Start the main process here
-        if bundle :
-                                                            # FIXME: add date stamp to archFile name
-            archFile = os.path.join(path, self.projectIDCode + '-export.zip')
-            myzip = zipfile.ZipFile(archFile, 'w')
+        # Start a list for one or more files we will process
+        fList = []
 
+        # Will need the stylesheet for copy
+        projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
+        projSty = os.path.join(self.local.projStylesFolder, projSty)
         if testForSetting(self.projConfig['Components'][cid], 'list') :
             # Process as list of components
 
+            self.log.writeToLog('XPRT-040')
             for c in self.projConfig['Components'][cid]['list'] :
                 cName = formPTName(self.projConfig, c)
                 # Test, no name = no success
@@ -850,19 +846,10 @@ class Project (object) :
 
                 target = os.path.join(path, cName)
                 source = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
-                    
-                if bundle :
-                    strObj = StringIO.StringIO()
-                    for l in open(source, "rb") :
-                        strObj.write(l)
-
-                    myzip.writestr(cName, strObj.getvalue())
-                    strObj.close()
+                if not usfmCopy(source, target, projSty) :
+                    self.log.writeToLog('XPRT-020', [fName(target)])
                 else :
-                    if not usfmCopy(source, target, projSty) :
-                        self.log.writeToLog('XPRT-020', [fName(target)])
-
-            self.log.writeToLog('XPRT-030', [path])
+                    fList.append(target)
         else :
             # Process an individual component
             cName = formPTName(self.projConfig, cid)
@@ -873,22 +860,40 @@ class Project (object) :
 
             target = os.path.join(path, cName)
             source = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            if bundle :
-                strObj = StringIO.StringIO()
-                for l in open(source, "rb") :
-                    strObj.write(l)
-
-                myzip.writestr(cName, strObj.getvalue())
-                strObj.close()
+            if not usfmCopy(source, target, projSty) :
+                self.log.writeToLog('XPRT-020', [fName(target)])
             else :
-                if not usfmCopy(source, target, projSty) :
-                    self.log.writeToLog('XPRT-020', [fName(target)])
+                fList.append(target)
 
+        # Start the main process here
         if bundle :
+            archFile = os.path.join(path, cid + '_' + ymd() + '.zip')
+            # Hopefully, this is a one time operation but if force is not True,
+            # we will expand the file name so nothing is lost.
+            if not force :
+                if os.path.isfile(archFile) :
+                    archFile = os.path.join(path, cid + '_' + fullFileTimeStamp() + '.zip')
+
+            myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
+            for f in fList :
+                # Create a string object from the contents of the file
+                strObj = StringIO.StringIO()
+                for l in open(f, "rb") :
+                    strObj.write(l)
+                # Write out string object to zip
+                myzip.writestr(fName(f), strObj.getvalue())
+                strObj.close()
+            # Close out the zip and report
             myzip.close()
+            # Clean out the folder
+            for f in fList :
+                os.remove(f)
             self.log.writeToLog('XPRT-030', [fName(archFile)])
+        else :
+            self.log.writeToLog('XPRT-030', [path])
 
         return True
+
 
 ###############################################################################
 ############################ System Level Functions ###########################

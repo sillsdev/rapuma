@@ -121,19 +121,6 @@ def escapePath (path) :
     return path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
 
 
-#def escapePath (path) :
-#    '''Escape irregular characters in a path.'''
-
-#    # FIXME: It would seem that all that is needed is to put
-#    # quotes around the path to make them acceptable to
-#    # system calls. For now we will use this. We might need
-#    # to do more such as is commented below. Stay tuned...
-#    return '"%s"' % ( path )
-
-#    # FIXME: Be nice if we could use re instead of .replace
-#    # np = re.sub(r'([ ()\"\'\[\]])', '\\1', path)
-
-
 def ancestorsPath (homePath) :
     '''This will start in the current folder/directory and return the paths of
     the two directories above it.  You can't know where you are unless you know
@@ -151,7 +138,7 @@ def ancestorsPath (homePath) :
 
 
 def isInZip(file, zip) :
-    '''Look for a specific file in a tar file.'''
+    '''Look for a specific file in a zip file.'''
 
     zipInfo = zipfile.ZipFile(zip)
     nList = zipInfo.namelist()
@@ -424,9 +411,25 @@ def wordWrap (text, width) :
 def tStamp () :
     '''Create a simple time stamp for logging and timing purposes.'''
 
-    date_time, secs = str(datetime.now()).split(".")
-    
-    return date_time
+    return str(datetime.now()).split(".")[0]
+
+
+def ymd () :
+    '''Return a year month day string (numbers).'''
+
+    return tStamp().split()[0].replace('-', '')
+
+
+def time () :
+    '''Return a simple unformated time string (h m s numbers).'''
+
+    return tStamp().split()[1].replace(':', '')
+
+
+def fullFileTimeStamp () :
+    '''Create a full time stamp that will work in a file name.'''
+
+    return ymd() + time()
 
 
 ###############################################################################
