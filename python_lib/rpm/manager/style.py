@@ -171,9 +171,11 @@ class Style (Manager) :
                         # file should be found in the parent or grandparent folder. If that
                         # exact file is not found in either place, a substitute will be
                         # copied in from RPM and given the designated name.
-                        altSourcePath               = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'])
+                        altSourceStyle              = ''
+                        if self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'] :
+                            altSourcePath           = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'])
+                            altSourceStyle          = os.path.join(altSourcePath, self.mainStyleFile)
                         (parent, grandparent)       = ancestorsPath(self.project.local.projHome)
-                        altSourceStyle              = os.path.join(altSourcePath, self.mainStyleFile)
                         ptProjStyle                 = os.path.join(parent, self.mainStyleFile)
                         ptStyle                     = os.path.join(grandparent, self.mainStyleFile)
                         rpmStyle                    = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'usfm.sty')

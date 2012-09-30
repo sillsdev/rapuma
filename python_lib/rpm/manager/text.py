@@ -47,9 +47,10 @@ class Text (Manager) :
         self.cType              = cType
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
-        self.axSourcePath       = self.project.projConfig['CompTypes'][self.Ctype]['axillarySourcePath']
-        if self.axSourcePath :
-            self.axSourcePath = resolvePath(self.axSourcePath)
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'axillarySourcePath') :
+            self.axSourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['axillarySourcePath']
+            if self.axSourcePath :
+                self.axSourcePath = resolvePath(self.axSourcePath)
         else :
             self.axSourcePath = ''
 
@@ -109,8 +110,13 @@ class Text (Manager) :
             self.project.log.writeToLog('TEXT-020')
             dieNow()
 
-        # Will need the stylesheet for copy
-        projSty = os.path.join(self.project.local.projComponentsFolder, self.project.projConfig['CompTypes']['Usfm']['styleFile'])
+        # Will need the stylesheet for copy if that has not been added
+        # to the project yet, we will do that now
+        projSty = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
+        if not projSty == '' :
+            projSty = os.path.join(self.project.local.projComponentsFolder, projSty)
+        else :
+            self.project.managers[self.cType + '_Style'].addStyleFile()
 
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part

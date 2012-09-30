@@ -180,6 +180,11 @@ def getPersistantSettings (confSection, defaultSettingsFile) :
         newConf = {}
         for k, v, in compDefaults.iteritems() :
             if not testForSetting(confSection, k) :
+# FIXME: Not sure if this next part is good or not. This will look for
+# a "None" type to be passed to it then it will replace it with an empty
+# string to outupt to the config object. This may not be the best way. 
+                if not v :
+                    v = ''
                 newConf[k] = v
             else :
                 newConf[k] = confSection[k]
@@ -311,19 +316,19 @@ def override_section (self, aSection) :
     return self
 
 
-def override_section (self, aSection) :
-    '''Overrides settings by using the XML defaults and then merging those with
-    items in the configobj that match.'''
+#def override_section (self, aSection) :
+#    '''Overrides settings by using the XML defaults and then merging those with
+#    items in the configobj that match.'''
 
-    # Look for the key and value in object of items created from itself
-    for k, v in self.items() :
-        if k in aSection :
-            if isinstance(v, dict) and isinstance(aSection[k], dict) :
-                v.override(aSection[k])
-            elif not isinstance(v, dict) and not isinstance(aSection[k], dict) :
-                self[k] = aSection[k]
-    # Return the overridden object
-    return self
+#    # Look for the key and value in object of items created from itself
+#    for k, v in self.items() :
+#        if k in aSection :
+#            if isinstance(v, dict) and isinstance(aSection[k], dict) :
+#                v.override(aSection[k])
+#            elif not isinstance(v, dict) and not isinstance(aSection[k], dict) :
+#                self[k] = aSection[k]
+#    # Return the overridden object
+#    return self
 
 
 def xmlFileToDict (fileName) :
