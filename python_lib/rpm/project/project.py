@@ -364,42 +364,44 @@ class Project (object) :
 ###############################################################################
 
     def isLocked (self, item) :
-        '''Test to see if a project, component type, or component are
-        locked. Start at the top of the hierarchy and return True if an
-        item is found that is locked above the target item or True if
-        the item is locked. '''
+        '''Test to see if a component is locked.Return True if the item is 
+        locked. '''
 
-        if str2bool(testForSetting(self.userConfig['Projects'], item, 'isLocked')) == True :
-            return True
-        elif str2bool(testForSetting(self.projConfig['CompTypes'], item.capitalize(), 'isLocked')) == True :
-            return True
-        elif str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
+        if str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
             return True
         else :
             return False
 
 
-    def lockUnlock (self, target, lock = True) :
-        '''Lock or unlock to enable or disable processing on pid/cType/cid.'''
+    def lockUnlock (self, cid, lock = True) :
+        '''Lock or unlock to enable or disable a cid. If the cid is a group
+        then all the components will be locked/unlocked in that group as well.'''
 
-        # Check each of the kinds of targets to see which one is the target
-        if self.isProject(target) :
-            self.userConfig['Projects'][target]['isLocked'] = lock
-        elif self.isComponentType(target.capitalize()) :
-            self.projConfig['CompTypes'][target.capitalize()]['isLocked'] = lock
-        elif self.isComponent(target) :
-            self.projConfig['Components'][target]['isLocked'] = lock
+        # Check if the component is locked
+        cList = False
+        if self.isComponent(cid) :
+            # Lists are treated different we will lock or unlock all
+            # components in a list
+            if testForSetting(self.projConfig['Components'][cid], 'list') :
+                cList = True
+                for c in self.projConfig['Components'].keys() :
+                    self.projConfig['Components'][c]['isLocked'] = lock
+            
+            else :
+                self.projConfig['Components'][cid]['isLocked'] = lock
+                
+            # Update the projConfig
+            writeConfFile(self.projConfig)
         else :
             # Arggg, this is not good
-            self.log.writeToLog('LOCK-005', [target])
+            self.log.writeToLog('LOCK-010', [cid])
             return False
-        # Save settings
-        if self.isProject(target) :
-            writeConfFile(self.userConfig)
-        else :
-            writeConfFile(self.projConfig)
+
         # Report back
-        self.log.writeToLog('LOCK-028', [target,str(lock)])
+        if cList :
+            self.log.writeToLog('LOCK-020', [cid,str(lock)])
+        else :
+            self.log.writeToLog('LOCK-030', [cid,str(lock)])
         return True
 
 

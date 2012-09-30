@@ -375,12 +375,13 @@ def userArguments (args) :
 
     # Locking commands
     elif sys.argv[1].lower() == 'locking' :
-        # Lock proj/cType/cid
+        aProject = initProject(args['project_id'])
+        # Lock component
         if args['lock'] :
-            aProject.lockUnlock(args['lock_target'], True)
-        # Unlock proj/cType/cid
+            aProject.lockUnlock(args['component_id'], True)
+        # Unlock component
         elif args['unlock'] :
-            aProject.lockUnlock(args['lock_target'], False)
+            aProject.lockUnlock(args['component_id'], False)
 
     # Exporting commands
     elif sys.argv[1].lower() == 'export' :
@@ -515,10 +516,9 @@ settingsCommand.add_argument('-v', '--value', help='A new value to add or change
 # Add Project Locking subprocess arguments
 lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
 lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-lockCommand.add_argument('-t', '--lock_target', help='Specify either a valid component or component type to be locked/unlocked. If nothing is specified the project will be locked/unlocked.')
+lockCommand.add_argument('component_id', help='A specific component ID required for locking or unlocking.')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
 lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
-lockCommand.add_argument('-f', '--force', action='store_true', help='Force all components under a component type or group to have their [islocked] switch set to True or False, depending on the operation. Without Force, the [islocked] switch is set for only the target. All components under that target will remain untouched.')
 
 # Add Project exporting subprocess arguments
 exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')

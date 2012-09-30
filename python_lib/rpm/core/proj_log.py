@@ -219,15 +219,10 @@ class ProjLog (object) :
             'POST-135' : ['MSG', 'There was no post process script for comonent type [<<1>>] found in the project configuration.'],
 
             'LOCK-000' : ['MSG', 'Messages for project and component locking.'],
-            'LOCK-005' : ['ERR', 'The [<<1>>] target code is not valid. This process cannot continue. You must have a valid project ID code and component or component type code if you wish to lock or unlock a specific component or component type.'],
-            'LOCK-007' : ['ERR', 'The locking process on the [<<1>>] component type cannot continue because the project is locked.'],
-            'LOCK-008' : ['ERR', 'The locking process on the [<<1>>] component cannot continue because the project is locked.'],
-            'LOCK-009' : ['ERR', 'The locking process on the [<<1>>] component cannot continue because its component type [<<2>>] is locked.'],
-            'LOCK-018' : ['WRN', 'The [<<1>>] project has been locked and no further text processing can be done to it unless it is unlocked (-u).'],
-            'LOCK-028' : ['MSG', 'The lock setting on [<<1>>] has been set to [<<2>>].'],
-            'LOCK-038' : ['MSG', 'The [<<1>>] component type has been locked. No components of this type can be processed.'],
-            'LOCK-048' : ['MSG', 'The [<<1>>] component type has been unlocked. Components of this type can be processed now.'],
-            'LOCK-055' : ['ERR', 'The [<<1>>] component is not found in this project. Process halted.'],
+            'LOCK-010' : ['ERR', 'The [<<1>>] component is not found in this project. Process halted.'],
+            'LOCK-020' : ['MSG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
+            'LOCK-030' : ['MSG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
+
             'LOCK-058' : ['MSG', 'The [<<1>>] component has been locked. No further text processes can be run on it unless it is unlocked (-u).'],
             'LOCK-068' : ['MSG', 'The [<<1>>] component has been unlocked. This component can be processed.'],
 
