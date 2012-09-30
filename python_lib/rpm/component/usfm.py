@@ -98,13 +98,6 @@ class Usfm (Component) :
             if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
                 return False
 
-# FIXME: Reimplement styles
-            # Check on the component styles
-#            self.project.managers['usfm_Style'].installCompTypeGlobalStyles()
-#            self.project.managers['usfm_Style'].installCompTypeOverrideStyles()
-
-            # Run any preprocess checks or conversions
-            
             # Run any illustration processes needed
             
             # Run any hyphenation or word break routines
@@ -123,6 +116,7 @@ class Usfm (Component) :
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
+        print self.renderer.capitalize()
         self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid, force)
 
         return True

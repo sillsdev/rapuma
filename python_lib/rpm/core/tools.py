@@ -121,6 +121,11 @@ def escapePath (path) :
     return path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
 
 
+def quotePath (path) :
+    '''Put quote markers around a path.'''
+
+    return '\"' + path + '\"'
+
 def ancestorsPath (homePath) :
     '''This will start in the current folder/directory and return the paths of
     the two directories above it.  You can't know where you are unless you know

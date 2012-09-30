@@ -174,6 +174,10 @@ class Text (Manager) :
                 else :
                     self.project.log.writeToLog('TEXT-070', [source,fName(target)])
                     return False
+#            else :
+#                return True
+#        else :
+#            return True
 
         # If the text is there, we should return True so do a last check to see
         if os.path.isfile(target) :

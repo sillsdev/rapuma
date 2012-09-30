@@ -69,6 +69,8 @@ class ProjLog (object) :
             'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
             'COMP-060' : ['MSG', 'The [<<1>>] component type has been added to the project.'],
             'COMP-065' : ['ERR', 'Adding the [<<1>>] component type to the project failed.'],
+            'COMP-070' : ['ERR', 'Failed to render the [<<1>>] component. - project.renderComponent()'],
+            'COMP-080' : ['ERR', 'Validate component is not implemented yet!'],
 
             'GRUP-000' : ['MSG', 'Group processing messages'],
             'GRUP-010' : ['MSG', ''],

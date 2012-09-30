@@ -295,6 +295,8 @@ def userArguments (args) :
         # will not be rerendered if it already exsists.
         elif args['execute'] :
             aProject.renderComponent(args['component_id'], args['force'])
+        elif args['validate'] :
+            aProject.validateComponent(args['component_id'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -462,6 +464,7 @@ compCommand.add_argument('-a', '--add', action='store_true', help='Add a new com
 compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
+compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a component file.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

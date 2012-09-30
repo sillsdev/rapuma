@@ -165,6 +165,7 @@ class Project (object) :
                 self.createComponent(cid).render(force)
                 return True
             except :
+                self.log.writeToLog('COMP-070', [cid])
                 return False
         else :
             bad = findBadComp(self.projConfig, cid)
@@ -174,6 +175,12 @@ class Project (object) :
                 self.log.writeToLog('COMP-012', [bad,cid])
             return False
 
+
+    def validateComponent (self, cid) :
+        '''Validate a component (cannot be a group) return True if it is good.
+        If not, output the errors and return False.'''
+
+        self.log.writeToLog('COMP-080')
 
     def createComponent (self, cid) :
         '''Create a component object that can be acted on.'''
@@ -906,7 +913,6 @@ class Project (object) :
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
-
             terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 

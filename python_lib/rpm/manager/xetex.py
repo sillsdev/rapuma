@@ -196,12 +196,12 @@ class Xetex (Manager) :
         macLinkFile = getattr(self, self.cType + 'MacLinkFile')
         writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
         writeObject.write(self.texFileHeader(fName(macLinkFile)))
-        writeObject.write('\\input ' + escapePath(mainMacroFile) + '\n')
+        writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
 
         # If we are using marginal verses then we will need this
         if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
             self.copyInMargVerse()
-            writeObject.write('\\input ' + escapePath(self.ptxMargVerseFile) + '\n')
+            writeObject.write('\\input ' + quotePath(self.ptxMargVerseFile) + '\n')
         else :
             self.removeMargVerse()
 
@@ -254,13 +254,14 @@ class Xetex (Manager) :
             if not fileID == 'cidTex' :
                 if self.files[fileID][0] == 'input' :
                     if os.path.isfile(getattr(self, fileID)) :
-                        output = '\\input ' + escapePath(getattr(self, fileID)) + '\n'
+                        output = '\\input ' + quotePath(getattr(self, fileID)) + '\n'
 
                 elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
                     if os.path.isfile(getattr(self, fileID)) :
+#                        output = '\\' + self.files[fileID][0] + '{' + quotePath(getattr(self, fileID)) + '}\n'
                         output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
             else :
-                output = '\\input ' + escapePath(getattr(self, 'cidTex')) + '\n'
+                output = '\\input ' + quotePath(getattr(self, 'cidTex')) + '\n'
 
             return output
 
@@ -614,6 +615,7 @@ class Xetex (Manager) :
         self.primOut                = {}
         self.cid                    = cid
         self.cidMeta                = False
+        self.custSty                = ''
 #        self.custSty                = os.path.join(self.project.local.projComponentsFolder, 'custom.sty')
 #        self.globSty                = os.path.join(self.project.local.projComponentsFolder, 'usfm.sty')
         self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
@@ -623,19 +625,23 @@ class Xetex (Manager) :
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         self.setFile                = os.path.join(self.project.local.projComponentsFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projComponentsFolder, self.extFileName)
-        if self.sourceEditor.lower() == 'paratext' :
-            self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
-            self.globSty            = os.path.join(self.project.local.projComponentsFolder, self.mainStyleFile)
+        self.mainStyleFile          = self.project.projConfig['Managers']['usfm_Style']['mainStyleFile']
+        self.globSty                = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+#        if self.sourceEditor.lower() == 'paratext' :
+#            self.mainStyleFile      = self.ptSSFConf['ScriptureText']['StyleSheet']
+#            self.globSty            = os.path.join(self.project.local.projComponentsFolder, self.mainStyleFile)
 
         # Set this flag to True if it is a meta component
         self.cidMeta                = isMetaComponent(self.project.projConfig, self.cid)
+
+#        import pdb; pdb.set_trace()
 
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
 
         # Make sure we have a component folder in place before we do anything
-        if not os.path.isdir(self.cidFolder) :
-            os.makedirs(self.cidFolder)
+#        if not os.path.isdir(self.cidFolder) :
+#            os.makedirs(self.cidFolder)
 
         # The macro link file is named according to the type of component
         setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projComponentsFolder, self.cType + 'MacLinkFile.tex'))
