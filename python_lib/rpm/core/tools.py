@@ -128,11 +128,11 @@ def ancestorsPath (homePath) :
 
     parent              = os.path.dirname(homePath)
     if not os.path.isdir(parent) :
-        parent = None
+        parent = ''
 
     grandparent         = os.path.dirname(parent)
     if not os.path.isdir(grandparent) or grandparent == parent :
-        grandparent = None
+        grandparent = ''
 
     return (parent, grandparent)
 

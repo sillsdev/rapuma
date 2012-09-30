@@ -330,7 +330,7 @@ def userArguments (args) :
             aProject.runPreprocess(args['component_type'], args['component_id'])
         # Install a custom or a default preprocess script, force to overwrite what is there
         elif args['add'] :
-            filePath = None
+            filePath = ''
             if args['path'] :
                 filePath = resolvePath(args['path'])
                 if not os.path.isfile(filePath) :
@@ -351,7 +351,7 @@ def userArguments (args) :
             aProject.runPostProcess(args['component_type'], args['component_id'])
         # Install a custom or a default post process script, force to overwrite what is there
         elif args['add'] :
-            filePath = None
+            filePath = ''
             if args['path'] :
                 filePath = resolvePath(args['path'])
                 if not os.path.isfile(filePath) :

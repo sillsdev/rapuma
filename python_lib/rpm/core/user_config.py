@@ -51,7 +51,7 @@ class UserConfig (object) :
         try :
             userProjs = self.userConfig['Projects']
         except :
-            userProjs = None
+            userProjs = ''
 
         # Create a new conf object based on all the XML default settings
         # Then override them with any exsiting user settings.

@@ -563,14 +563,14 @@ class Xetex (Manager) :
             # Create an empty dictionary
             data = {}
             # Extract the section/key/value data
-            thisSection = None; thisTex = None; thisBoolDep = None
+            thisSection = ''; thisTex = ''; thisBoolDep = ''
             for event, elem in ElementTree.iterparse(xmlFile):
                 if elem.tag == 'setting' :
                     if thisTex or thisBoolDep :
                         data[thisSection] = {'usfmTex' : thisTex, 'boolDepend' : thisBoolDep}
-                    thisSection = None
-                    thisTex = None
-                    thisBoolDep = None
+                    thisSection = ''
+                    thisTex = ''
+                    thisBoolDep = ''
                 if elem.tag == 'key' :
                     thisSection = elem.text
                 elif elem.tag == 'usfmTex' :

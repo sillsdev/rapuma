@@ -460,7 +460,7 @@ class Project (object) :
     def preprocessComponent (self, target, cType, cid) :
         '''Run a preprocess on a single component file, in place.'''
 
-        scriptFileName = None
+        scriptFileName = ''
 
         # First check to see if this specific component is locked
         if self.isLocked(cid) :
@@ -468,7 +468,7 @@ class Project (object) :
             return False
 
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
-            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] != 'None' :
+            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
                 scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
         else :
             self.log.writeToLog('PREP-055', [cType.capitalize()])

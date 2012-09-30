@@ -48,10 +48,10 @@ class Text (Manager) :
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
         self.axSourcePath       = self.project.projConfig['CompTypes'][self.Ctype]['axillarySourcePath']
-        if self.axSourcePath and self.axSourcePath != 'None' :
+        if self.axSourcePath :
             self.axSourcePath = resolvePath(self.axSourcePath)
         else :
-            self.axSourcePath = None
+            self.axSourcePath = ''
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
