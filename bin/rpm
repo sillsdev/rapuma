@@ -77,16 +77,16 @@ terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 ############################## RPM Functions ##############################
 ###########################################################################
 
-def newProject (uc, pc, pid, ptype = None, pname = None) :
+def newProject (uc, pc, pid, pmid = None, pname = None) :
     '''Create a new publishing project.'''
 
     # Because the location of where a project is to be created could be
     # different than the cwd, we will count on pc.local to have all the
     # correct information. 
     
-    # Check the ptype
-    if not ptype :
-        ptype = 'book'
+    # Check the pmid
+    if not pmid :
+        pmid = 'book'
 
     # Check the pname, make one up if there isn't any
     if not pname :
@@ -124,10 +124,10 @@ def newProject (uc, pc, pid, ptype = None, pname = None) :
         os.makedirs(pc.local.projConfFolder)
 
     # Create a new version of the project config file
-    pc.makeNewProjConf(pc.local, pid, ptype, pname)
+    pc.makeNewProjConf(pc.local, pid, pmid, pname)
 
     # Add project to local RPM project registry
-    uc.registerProject(pid, pname, ptype, pc.local.projHome)
+    uc.registerProject(pid, pname, pmid, pc.local.projHome)
 
     # Report what we did
     terminal('Created new project [' + pid + ']')
@@ -237,8 +237,8 @@ def userArguments (args) :
     if sys.argv[1].lower() == 'project' :
         # Creating a new project
         if args['add'] :
-            if not args['type'] :
-                sys.exit('Project type is missing from command argument. Process halted!')
+            if not args['media'] :
+                sys.exit('Project media type ID is missing from command argument. Process halted!')
             if args['path'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
@@ -254,7 +254,7 @@ def userArguments (args) :
             # Create the project
             local   = ProjLocal(rpmHome, userHome, projFolder)
             pc      = ProjConfig(local)
-            newProject(uc, pc, args['project_id'], args['type'].lower(), args['name'])
+            newProject(uc, pc, args['project_id'], args['media'].lower(), args['name'])
 
         # Remove an exsisting project
         elif args['remove'] :
@@ -438,7 +438,7 @@ projCommand.add_argument('project_id', help='Project ID (a positional argument r
 projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
 projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-p', '--path', help='Path to the project home folder if the current working directory is not the actual target. This can be used when adding a project.')
-projCommand.add_argument('-t', '--type', help='If creating a new project, give a valid project type code.')
+projCommand.add_argument('-m', '--media', help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-b', '--bundle', help='[NOT IMPLEMENTED] Create a bundle (archive) of the entire project.')
 

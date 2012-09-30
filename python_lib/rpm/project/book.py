@@ -7,7 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This class will handle upper level project tasks for the book media type.
 
 # History:
 # 20111207 - djd - Started with intial file

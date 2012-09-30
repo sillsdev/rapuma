@@ -17,9 +17,9 @@ Todo:
         <sectionID>ProjectInfo</sectionID>
         <description>This section contains general project info for this project.</description>
         <setting>
-            <name>Project Type</name>
-            <key>projectType</key>
-            <description>This project type name.</description>
+            <name>Project Media ID Code</name>
+            <key>projectMediaIDCode</key>
+            <description>This project media ID code.</description>
             <type>string</type>
             <value>book</value>
         </setting>

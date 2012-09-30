@@ -95,7 +95,7 @@ class UserConfig (object) :
             pass
 
 
-    def registerProject (self, pid, pname, ptype, projHome) :
+    def registerProject (self, pid, pname, pmid, projHome) :
         '''If it is already not there, add information about this project to the
         user's rpm.conf located in the user's config folder.'''
 
@@ -105,10 +105,10 @@ class UserConfig (object) :
             buildConfSection(self.userConfig['Projects'], pid)
 
             # Now add the project data
-            self.userConfig['Projects'][pid]['projectName']          = pname
-            self.userConfig['Projects'][pid]['projectType']          = ptype
-            self.userConfig['Projects'][pid]['projectPath']          = projHome
-            self.userConfig['Projects'][pid]['projectCreateDate']    = tStamp()
+            self.userConfig['Projects'][pid]['projectName']         = pname
+            self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
+            self.userConfig['Projects'][pid]['projectPath']         = projHome
+            self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
             self.userConfig.write()
             return True
 

@@ -38,20 +38,20 @@ class ProjConfig (object) :
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :
             self.projConfig = ConfigObj(self.local.projConfFile)
-            self.projectType = self.projConfig['ProjectInfo']['projectType']
+            self.projectMediaIDCode = self.projConfig['ProjectInfo']['projectMediaIDCode']
             self.projConfig.filename = self.local.projConfFile
 
 
-    def makeNewProjConf (self, local, pid, ptype, pname) :
+    def makeNewProjConf (self, local, pid, pmid, pname) :
         '''Create a new project configuration file for a new project.'''
 
-        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rpmConfigFolder, ptype + '.xml')))
+        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rpmConfigFolder, pmid + '.xml')))
         # Insert intitial project settings
-        self.projConfig['ProjectInfo']['projectType']              = ptype
-        self.projConfig['ProjectInfo']['projectName']              = pname
-        self.projConfig['ProjectInfo']['projectCreateDate']        = tStamp()
-        self.projConfig['ProjectInfo']['projectIDCode']            = pid
-        self.projConfig.filename = local.projConfFile
+        self.projConfig['ProjectInfo']['projectMediaIDCode']        = pmid
+        self.projConfig['ProjectInfo']['projectName']               = pname
+        self.projConfig['ProjectInfo']['projectCreateDate']         = tStamp()
+        self.projConfig['ProjectInfo']['projectIDCode']             = pid
+        self.projConfig.filename                                    = local.projConfFile
         self.projConfig.write()
 
 

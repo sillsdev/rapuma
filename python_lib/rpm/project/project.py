@@ -47,7 +47,7 @@ class Project (object) :
         self.components             = {}
         self.componentType          = {}
         self.managers               = {}
-        self.projectType            = self.projConfig['ProjectInfo']['projectType']
+        self.projectMediaIDCode     = self.projConfig['ProjectInfo']['projectMediaIDCode']
         self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
 
         # Do some cleanup like getting rid of the last sessions error log file.
@@ -58,12 +58,12 @@ class Project (object) :
             pass
 
         # Initialize the project type
-        m = __import__(self.projectType)
-        self.__class__ = getattr(m, self.projectType[0].upper() + self.projectType[1:])
+        m = __import__(self.projectMediaIDCode)
+        self.__class__ = getattr(m, self.projectMediaIDCode[0].upper() + self.projectMediaIDCode[1:])
 
         # Update the existing config file with the project type XML file
         # if needed
-        newXmlDefaults = os.path.join(self.local.rpmConfigFolder, self.projectType + '.xml')
+        newXmlDefaults = os.path.join(self.local.rpmConfigFolder, self.projectMediaIDCode + '.xml')
         xmlConfig = getXMLSettings(newXmlDefaults)
         newConf = ConfigObj(xmlConfig.dict()).override(self.projConfig)
         for s,v in self.projConfig.items() :
