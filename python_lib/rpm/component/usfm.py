@@ -116,7 +116,6 @@ class Usfm (Component) :
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
-        print self.renderer.capitalize()
         self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid, force)
 
         return True

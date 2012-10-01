@@ -99,6 +99,8 @@ class Project (object) :
     def loadManager (self, cType, mType) :
         '''Do basic load on a manager.'''
 
+#        import pdb; pdb.set_trace()
+
         fullName = cType + '_' + mType.capitalize()
         cfg = self.projConfig['Managers'][fullName]
         module = __import__(mType)
@@ -110,6 +112,7 @@ class Project (object) :
         '''Create a manager reference in the project config that components will point to.'''
 
         fullName = cType + '_' + mType.capitalize()
+        managerDefaults = None
         # Insert the Manager section if it is not already there
         buildConfSection(self.projConfig, 'Managers')
         if not testForSetting(self.projConfig['Managers'], fullName) :
@@ -121,9 +124,9 @@ class Project (object) :
                     self.projConfig['Managers'][fullName][k] = v
 
             if writeConfFile(self.projConfig) :
-                self.log.writeToLog('PROJ-010')
+                self.log.writeToLog('PROJ-010',[fullName])
             else :
-                self.log.writeToLog('PROJ-011')
+                self.log.writeToLog('PROJ-011',[fullName])
 
 
 ###############################################################################

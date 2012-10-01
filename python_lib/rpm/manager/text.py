@@ -114,7 +114,7 @@ class Text (Manager) :
         # to the project yet, we will do that now
         projSty = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         if not projSty == '' :
-            projSty = os.path.join(self.project.local.projComponentsFolder, projSty)
+            projSty = os.path.join(self.project.local.projStylesFolder, projSty)
         else :
             self.project.managers[self.cType + '_Style'].addStyleFile()
 

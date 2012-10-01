@@ -63,7 +63,7 @@ class Illustration (Manager) :
             self.fontConfig = ConfigObj(self.project.local.illustrationConfFile)
 
         # Get persistant values from the config if there are any
-        manager = self.cType + '_Font'
+        manager = self.cType + '_Illustration'
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings

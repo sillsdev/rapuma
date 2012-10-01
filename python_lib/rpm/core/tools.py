@@ -188,8 +188,8 @@ def getPersistantSettings (confSection, defaultSettingsFile) :
 # FIXME: Not sure if this next part is good or not. This will look for
 # a "None" type to be passed to it then it will replace it with an empty
 # string to outupt to the config object. This may not be the best way. 
-                if not v :
-                    v = ''
+#                if not v :
+#                    v = ''
                 newConf[k] = v
             else :
                 newConf[k] = confSection[k]
@@ -295,7 +295,12 @@ def xml_add_section (data, doc) :
             else :
                 data[s.find('key').text] = []
         else :
-            data[s.find('key').text] = val
+            # We do not want "None" ending up in the config file
+            # This seems to be the best place to get rid of it.
+            if val :
+                data[s.find('key').text] = val
+            else :
+                data[s.find('key').text] = ''
 
     # Find all the sections then call this same function to grab the keys and
     # values all the settings in the section

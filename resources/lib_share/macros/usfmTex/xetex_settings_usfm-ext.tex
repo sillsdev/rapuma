@@ -20,12 +20,16 @@
 %\sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
 %\sethook{after}{s1}{\baselineskip=\remblskip}
 
+%%%%% WORKING TEXT LINE SPACING
+%%%%% Take out a little space between lines in working text
+\def\suckupline{\vskip -\baselineskip}
+\def\suckuphalfline{\vskip -0.5\baselineskip}
+\def\suckupqline{\vskip -0.25\baselineskip}
 
-%%%%% Skip a line in the working text
+%%%%% Skip some space in the working text
 \def\skipline{\vskip\baselineskip}
-
-%%%%% Skip just half a line in the working text (use carefully)
 \def\skiphalfline{\vskip 0.5\baselineskip}
+\def\skipqline{\vskip 0.25\baselineskip}
 
 %%%%% Additional Marginal Verse Settings
 % For marginal verse output we need to insert this right here.

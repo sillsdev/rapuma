@@ -258,7 +258,6 @@ class Xetex (Manager) :
 
                 elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
                     if os.path.isfile(getattr(self, fileID)) :
-#                        output = '\\' + self.files[fileID][0] + '{' + quotePath(getattr(self, fileID)) + '}\n'
                         output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
             else :
                 output = '\\input ' + quotePath(getattr(self, 'cidTex')) + '\n'
@@ -352,61 +351,44 @@ class Xetex (Manager) :
 
                         writeObject.write(line + '\n')
 
-
-# FIXME: Working here - problem with fpath, it is not the actual font folder name
-
-
-
             # Add all the font def commands
             writeObject.write('\n% Font Definitions\n')
             fpath = ''
             featureString = ''
-            for f in self.project.projConfig['CompTypes'][self.cType.capitalize()]['installedFonts'] :
+            for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
+
+#                import pdb; pdb.set_trace()
+
                 fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
-                features = fInfo['FontInformation']['features']
-                # Create the primary fonts that will be used with TeX
-                if self.project.projConfig['CompTypes'][self.cType.capitalize()]['primaryFont'] == f :
+                useMapping = fInfo['FontInformation']['defaultMapping']
+                fontPath = os.path.join(self.project.local.projFontsFolder, f)
+
+                # Create the fonts settings that will be used with TeX
+                if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
+                    # Primary
                     writeObject.write('\n% These are normal use fonts for this type of component.\n')
-                    features = fInfo['FontInformation']['features']
-                    for tf in fInfo :
-                        if tf[:8] == 'Typeface' :
-                            tmc = 0
-                            for tm in fInfo[tf]['texMapping'] :
-                                startDef    = '\\def\\' + fInfo[tf]['texMapping'][tmc] + '{'
-                                fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]"
-                                endDef      = "\"}\n"
-                                featureString = ''
-                                for i in features :
-                                    featureString += '/' + i
+                    for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
+                        if useMapping :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
+                        else :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
+                    # Secondary
+                    writeObject.write('\n% These are font settings for other custom uses.\n')
+                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
+                        if useMapping :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
+                        else :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
 
-                                modsString = ''
-                                for m in fInfo[tf]['modify'] :
-                                    modsString += ':' + m
-
-                                tmc +=1
-                                writeObject.write(startDef + fpath + featureString + modsString + endDef)
-
-                else :
-                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
-                    features = fInfo['FontInformation']['features']
-                    for tf in fInfo :
-                        if tf[:8] == 'Typeface' :
-                            tmc = 0
-                            for tm in fInfo[tf]['texMapping'] :
-                                name = fInfo[tf]['name'].lower().replace(' ', '')
-                                startDef    = '\\def\\' + name + fInfo[tf]['texMapping'][tmc] + '{'
-                                fpath       = "\"[" + os.path.join('..', self.project.local.projFontsFolder, fInfo[tf]['name'], fInfo[tf]['file']) + "]\""
-                                endDef      = "}\n"
-                                featureString = ''
-                                for i in features :
-                                    featureString += ':' + i
-
-                                modsString = ''
-                                for m in fInfo[tf]['modify'] :
-                                    modsString += ':' + m
-
-                                tmc +=1
-                                writeObject.write(startDef + fpath + featureString + modsString + endDef)
+                # There maybe additional fonts for this component. Their secondary settings need to be captured
+                if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
+                    # Secondary (only)
+                    writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
+                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
+                        if useMapping :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
+                        else :
+                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
 
             # Add special custom commands (may want to parameterize these at some point)
             writeObject.write('\n% Special commands\n')
@@ -427,11 +409,15 @@ class Xetex (Manager) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
                 makeIt()
-                self.project.log.writeToLog('XTEX-060', [fName(self.setFile)])
+                self.project.log.writeToLog('XTEX-060', [fName(self.layoutConfFile),fName(self.setFile)])
             elif isOlder(self.setFile, self.fontConfFile) :
                 # Something changed in the font conf file
                 makeIt()
-                self.project.log.writeToLog('XTEX-060', [fName(self.setFile)])
+                self.project.log.writeToLog('XTEX-060', [fName(self.fontConfFile),fName(self.setFile)])
+            elif isOlder(self.setFile, self.project.local.projConfFile) :
+                # Something changed in the proj conf file
+                makeIt()
+                self.project.log.writeToLog('XTEX-060', [fName(self.project.local.projConfFile),fName(self.setFile)])
         else :
             makeIt()
             self.project.log.writeToLog('XTEX-065', [fName(self.setFile)])

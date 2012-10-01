@@ -15,23 +15,30 @@ Todo:
 
 <root>
     <setting>
-        <name>Use Font Features</name>
-        <key>useFontFeatures</key>
-        <description>Turn on (or off) all font features.</description>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
-    <setting>
-        <name>Use Alternate Font Mappings</name>
-        <key>useFontMappings</key>
-        <description>Turn on (or off) font mappings.</description>
-        <type>boolean</type>
-        <value>False</value>
+        <name>Use Font Mappings</name>
+        <key>useMapping</key>
+        <description>The name of the font mapping file you wish to use.</description>
+        <type>string</type>
+        <value></value>
     </setting>
     <setting>
         <name>Font Mapping List</name>
-        <key>fontMappingList</key>
+        <key>installedMappings</key>
         <description>A list of alternate TECKit font mappings installed for use with this component type.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Primary Font</name>
+        <key>primaryFont</key>
+        <description>The primary font used for rendering component text.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Installed fonts</name>
+        <key>installedFonts</key>
+        <description>All the installed font families that this component will need to render correctly.</description>
         <type>list</type>
         <value></value>
     </setting>

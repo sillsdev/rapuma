@@ -28,27 +28,6 @@ Todo:
         <value>paratext</value>
     </setting>
     <setting>
-        <name>Primary Font</name>
-        <key>primaryFont</key>
-        <description>The primary font used for rendering component text.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Installed fonts</name>
-        <key>installedFonts</key>
-        <description>All the installed font families that this component will need to render correctly.</description>
-        <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Is Locked</name>
-        <key>isLocked</key>
-        <description>All the installed components of this type will be prevented from undergoing any automated processing of any kind that involves changing the working text.</description>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
-    <setting>
         <name>Preprocess Script</name>
         <key>preprocessScript</key>
         <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>

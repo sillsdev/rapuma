@@ -117,7 +117,11 @@ def mapPTTextSettings (sysSet, ptSet, reset=False) :
     for k in mapping.keys() :
         try :
             if sysSet[mapping[k]] == '' or sysSet[mapping[k]] == 'None' :
-                sysSet[mapping[k]] = ptSet['ScriptureText'][k]
+                # This is for getting rid of "None" settings in the config
+                if not ptSet['ScriptureText'][k] :
+                    sysSet[mapping[k]] = ''
+                else :
+                    sysSet[mapping[k]] = ptSet['ScriptureText'][k]
             elif reset == True :
                 sysSet[mapping[k]] = ptSet['ScriptureText'][k]
         except :
