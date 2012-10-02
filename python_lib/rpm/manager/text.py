@@ -104,6 +104,12 @@ class Text (Manager) :
 
         # Check to see if settings need updating
         self.updateManagerSettings()
+        # Check if there is a font installed
+        if not self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] :
+            font = self.project.managers[self.cType + '_Font'].checkForSubFont(self.ptDefaultFont)
+            self.project.managers[self.cType + '_Font'].installFont(font)
+            self.project.managers[self.cType + '_Font'].recordFont(self.cType, font)
+
         thisFile = formPTName(self.project.projConfig, cid)
         # Test, no name = no success
         if not thisFile :

@@ -40,5 +40,12 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
+    <setting>
+        <name>ParaTExt Default Font</name>
+        <key>ptDefaultFont</key>
+        <description>If this project is connected to a ParaTExt project, record the default project font.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 

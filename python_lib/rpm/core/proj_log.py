@@ -50,8 +50,8 @@ class ProjLog (object) :
             'PROJ-010' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
             'PROJ-011' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
             'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
-            'PROJ-035' : ['MSG', 'PROJ-035 - Unassigned error message ID.'],
-            'PROJ-040' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
+            'PROJ-040' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            'PROJ-050' : ['MSG', 'PROJ-040 - Unassigned error message ID.'],
 
             'COMP-000' : ['MSG', 'Component processing messages'],
             'COMP-010' : ['ERR', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],

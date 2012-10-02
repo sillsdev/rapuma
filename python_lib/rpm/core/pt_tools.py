@@ -102,15 +102,18 @@ def getPTFont (home) :
     return ssf['ScriptureText']['DefaultFont']
 
 
-def mapPTTextSettings (sysSet, ptSet, reset=False) :
+def mapPTTextSettings (sysSet, ptSet, force=False) :
     '''Map the text settings from a PT project SSF file into the text
-    manager's settings.'''
+    manager's settings. If no setting is present in the config, add
+    what is in the PT SSF. If force is True, replace any exsisting
+    settings.'''
 
     # A PT to RPM text mapping dictionary
     mapping   = {
-                'FileNameBookNameForm'    : 'nameFormID',
-                'FileNamePrePart'         : 'prePart',
-                'FileNamePostPart'        : 'postPart'
+                'FileNameBookNameForm'      : 'nameFormID',
+                'FileNamePrePart'           : 'prePart',
+                'FileNamePostPart'          : 'postPart',
+                'DefaultFont'               : 'ptDefaultFont'
                 }
 
     # Loop through all the PT settings and check against the mapping
@@ -122,7 +125,7 @@ def mapPTTextSettings (sysSet, ptSet, reset=False) :
                     sysSet[mapping[k]] = ''
                 else :
                     sysSet[mapping[k]] = ptSet['ScriptureText'][k]
-            elif reset == True :
+            elif force :
                 sysSet[mapping[k]] = ptSet['ScriptureText'][k]
         except :
             pass

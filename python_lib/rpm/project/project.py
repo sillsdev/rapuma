@@ -91,9 +91,8 @@ class Project (object) :
         if fullName not in self.managers :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
-
-        self.log.writeToLog('PROJ-005', [fullName])
-        return self.managers[fullName]
+            self.log.writeToLog('PROJ-005', [fullName])
+#            return self.managers[fullName]
 
 
     def loadManager (self, cType, mType) :
@@ -326,7 +325,7 @@ class Project (object) :
             # Sanity check
             if not isConfSection(self.projConfig['Components'], cid) :
                 writeConfFile(self.projConfig)
-                self.log.writeToLog('COMP-030')
+                self.log.writeToLog('COMP-030', [cid])
             # Hopefully all went well with config delete, now on to the files
             compFolder = os.path.join(self.local.projComponentsFolder, cid)
             if os.path.isdir(compFolder) :
@@ -941,9 +940,13 @@ class Project (object) :
         confFile = os.path.join(self.local.projConfFolder, config + '.conf')
         confObj = ConfigObj(confFile)
         outConfObj = confObj
-        # Walk our confObj to get to the section we want
-        for s in section.split('/') :
-            confObj = confObj[s]
+        try :
+            # Walk our confObj to get to the section we want
+            for s in section.split('/') :
+                confObj = confObj[s]
+        except :
+            self.log.writeToLog('PROJ-040', [section])
+            return
 
         # Get the old value, if there is one, for reporting
         try :
