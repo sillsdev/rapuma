@@ -20,6 +20,13 @@ Todo:
         <value>utf8</value>
     </setting>
     <setting>
+        <name>Unicode Normal Form</name>
+        <key>unicodeNormalForm</key>
+        <description>The Unicode normalization form. Two are supported, NFD (Normal Form Decomposed) and NFC (Normal Form Composed). NFD is the default.</description>
+        <type>string</type>
+        <value>NFD</value>
+    </setting>
+    <setting>
         <name>Source File Name PrePart</name>
         <key>prePart</key>
         <description>A prefix that is found on the begining of a text source file name.</description>

@@ -19,13 +19,16 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, codecs, unicodedata
 from configobj import ConfigObj, Section
 
 # Load the local classes
 from tools import *
 from pt_tools import *
 from manager import Manager
+import palaso.sfm as sfm
+from palaso.sfm import usfm, style, pprint, element, text
+
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -175,7 +178,7 @@ class Text (Manager) :
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
-                if usfmCopy(source, target, projSty) :
+                if self.usfmCopy(source, target, projSty) :
                     return True
                 else :
                     self.project.log.writeToLog('TEXT-070', [source,fName(target)])
@@ -189,4 +192,47 @@ class Text (Manager) :
         if os.path.isfile(target) :
             return True
 
+
+    def usfmCopy (self, source, target, projSty = None, errLevel = sfm.level.Content) :
+        '''Use the Palaso USFM parser to bring in the text and clean it up if 
+        needed. If projSty (path + file name) is not used, the sfm parser
+        will use a default style file to drive the process which may lead to
+        undesirable results. A style file should normally be used to avoid this.
+        
+        Error level reporting is possible with the usfm.parser. The following
+        are the error it can report:
+        Note            = -1    Just give output warning, do not stop
+        Marker          =  0    Stop on any out of place marker
+        Content         =  1    Stop on mal-formed content
+        Structure       =  2    Stop on ???
+        Unrecoverable   =  100  Stop on most anything that is wrong
+        
+        The default is Content. To change this the calling function must pass
+        another level like "sfm.level.Note" or one of the other levels.'''
+
+        # Load in the source text
+        fh = codecs.open(source, 'rt', 'utf_8_sig')
+        # Create the object
+        if projSty :
+            stylesheet = usfm.default_stylesheet.copy()
+            stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+            stylesheet.update(stylesheet_extra)
+            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
+            self.project.log.writeToLog('TEXT-080', [fName(projSty)])
+        else :
+            doc = usfm.parser(fh, error_level=errLevel)
+
+        # Check/Clean up the text
+        tidy = sfm.pprint(doc)
+        self.project.log.writeToLog('TEXT-090')
+
+        # Normalize the text according to the usfm_Text config setting 
+        normal = unicodedata.normalize(self.unicodeNormalForm, tidy)
+        self.project.log.writeToLog('TEXT-100', [self.unicodeNormalForm])
+
+        # Write to the target
+        writeout = codecs.open(target, "wt", "utf_8_sig")
+        writeout.write(normal)
+        writeout.close
+        return True
 

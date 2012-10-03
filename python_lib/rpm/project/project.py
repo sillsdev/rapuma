@@ -855,7 +855,7 @@ class Project (object) :
 
                 target = os.path.join(path, cName)
                 source = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
-                if not usfmCopy(source, target, projSty) :
+                if not self.managers[cType + '_Text'].usfmCopy(source, target, projSty) :
                     self.log.writeToLog('XPRT-020', [fName(target)])
                 else :
                     fList.append(target)
@@ -869,7 +869,7 @@ class Project (object) :
 
             target = os.path.join(path, cName)
             source = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            if not usfmCopy(source, target, projSty) :
+            if not self.managers[cType + '_Text'].usfmCopy(source, target, projSty) :
                 self.log.writeToLog('XPRT-020', [fName(target)])
             else :
                 fList.append(target)
