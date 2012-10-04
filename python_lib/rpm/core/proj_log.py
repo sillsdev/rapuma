@@ -178,6 +178,8 @@ class ProjLog (object) :
             'STYL-100' : ['MSG', 'No style file setting was found for the [<<1>>] component type. Nothing has been done.'],
             'STYL-110' : ['MSG', 'Force switch was set (-f). Style file: [<<1>>] was removed from the project and references removed from the [<<2>>] settings.'],
             'STYL-120' : ['MSG', 'Style file: [<<1>>] was removed from the [<<2>>] settings.'],
+            'STYL-150' : ['MSG', 'The style file: [<<1>>] is valid.'],
+            'STYL-155' : ['ERR', 'A problem was found with style file: [<<1>>] it is not valid.'],
 
             'PREP-000' : ['MSG', 'Messages for preprocessing issues (mainly found in project.py)'],
             'PREP-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],

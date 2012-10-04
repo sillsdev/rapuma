@@ -327,7 +327,9 @@ def userArguments (args) :
         elif args['remove'] :
             aProject.managers[manager].removeStyleFile(args['force'])
         elif args['validate'] :
-            aProject.managers[manager].validateStyleFile(args['path'])
+            # In this context we want to stop if an error is found and report it
+            # Passing true to validateStyleFile will do that
+            aProject.managers[manager].validateStyleFile(args['path'], True)
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :

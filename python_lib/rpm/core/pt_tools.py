@@ -25,56 +25,13 @@ from datetime import *
 from xml.etree import ElementTree
 from configobj import ConfigObj, Section
 from tools import *
-#import palaso.sfm as sfm
-#from palaso.sfm import usfm, style, pprint, element, text
+import palaso.sfm as sfm
+from palaso.sfm import usfm, style, pprint, element, text
 
 
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
-
-
-#def usfmCopy (source, target, projSty = None, errLevel = sfm.level.Content) :
-#    '''Use the Palaso USFM parser to bring in the text and clean it up if 
-#    needed. If projSty (path + file name) is not used, the sfm parser
-#    will use a default style file to drive the process which may lead to
-#    undesirable results. A style file should normally be used to avoid this.
-#    
-#    Error level reporting is possible with the usfm.parser. The following
-#    are the error it can report:
-#    Note            = -1    Just give output warning, do not stop
-#    Marker          =  0    Stop on any out of place marker
-#    Content         =  1    Stop on mal-formed content
-#    Structure       =  2    Stop on ???
-#    Unrecoverable   =  100  Stop on most anything that is wrong
-#    
-#    The default is Content. To change this the calling function must pass
-#    another level like "sfm.level.Note" or one of the other levels.'''
-
-#    # Load in the source text
-#    fh = codecs.open(source, 'rt', 'utf_8_sig')
-#    # Create the object
-#    if projSty :
-#        stylesheet = usfm.default_stylesheet.copy()
-#        stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-#        stylesheet.update(stylesheet_extra)
-#        doc = usfm.parser(fh, stylesheet, error_level=errLevel)
-#    else :
-#        doc = usfm.parser(fh, error_level=errLevel)
-
-#    # Check/Clean up the text
-#    tidy = sfm.pprint(doc)
-
-
-
-## FIXME: Do we want to apply NFD/NFC here?
-
-
-#    # Write to the target
-#    writeout = codecs.open(target, "wt", "utf_8_sig")
-#    writeout.write(tidy)
-#    writeout.close
-#    return True
 
 
 def formPTName (projConfig, cid) :
@@ -138,16 +95,39 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     return sysSet
 
 
-def styleFileIsValid (source) :
+def styleFileIsValid (source, errStop = False) :
     '''Check to see if a style file is valid, or not.'''
 
-    try :
+
+# FIXME: Need more work on error output, need Tim to show me how
+# to store warrnings and output them all at once. This will change
+# once that is figured out.
+
+    stylesheet_extra = ''
+    if errStop :
         stylesheet = usfm.default_stylesheet.copy()
-        stylesheet_extra = style.parse(open(os.path.expanduser(source),'r'))
-        stylesheet.update(stylesheet_extra)
+        stylesheet_extra = usfm.style.parse(open(os.path.expanduser(source),'r'), usfm.style.level.Unrecoverable)
+    else :
+        try :
+            stylesheet = usfm.default_stylesheet.copy()
+            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(source),'r'), usfm.style.level.Unrecoverable)
+        except :
+            pass
+
+
+    if stylesheet_extra :
         return True
-    except :
+    else :
         return False
+
+#    with warnings.catch_warnings(record=True) as ref_parse_errors:
+#        warnings.resetwarnings()
+#        warnings.simplefilter("always", SyntaxWarning)
+#        ref_parse = list(sfm.parser(stylesheet_extra))
+#    trans_src = sfm.pprint(ref_parse).splitlines(True)
+
+#    print trans_src
+
 
 
 #def installPTCustomStyles (local, customStyleFile) :

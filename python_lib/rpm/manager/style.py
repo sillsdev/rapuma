@@ -113,7 +113,7 @@ class Style (Manager) :
         else :
             if self.project.projConfig['Managers']['usfm_Style']['mainStyleFile'] == fName(target) :
                 self.project.log.writeToLog('STYL-040', [fName(target),self.cType])
-                return
+                dieNow()
 
         # Get/make the custom style file name.
         if sFile :
@@ -224,10 +224,13 @@ class Style (Manager) :
             return True
 
 
-    def validateStyleFile (self, path) :
+    def validateStyleFile (self, path, errStop = False) :
         '''Use the USFM parser to validate a style file.'''
 
-        self.project.log.writeToLog('STYL-150')
+        if styleFileIsValid(path, errStop) :
+            self.project.log.writeToLog('STYL-150', [path])
+        else :
+            self.project.log.writeToLog('STYL-155', [path])
 
 
 
