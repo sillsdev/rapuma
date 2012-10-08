@@ -189,7 +189,7 @@ class Style (Manager) :
                                     if not shutil.copy(sFile, target) :
                                         sSet(target)
                                 else :
-                                    self.project.log.writeToLog('STYL-070', [sFile,self.cType])
+                                    self.project.log.writeToLog('STYL-075', [sFile,self.cType])
                             else : 
                                 self.project.log.writeToLog('STYL-090', [sFile])
 

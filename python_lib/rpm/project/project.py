@@ -110,6 +110,9 @@ class Project (object) :
     def addManager (self, cType, mType) :
         '''Create a manager reference in the project config that components will point to.'''
 
+
+        print 'I am here: addManager'
+
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
         # Insert the Manager section if it is not already there
@@ -565,36 +568,16 @@ class Project (object) :
                 self.log.writeToLog('PREP-105', [fName(scriptTarget)])
                 return False
 
-        def direct () :
-            if fName(scriptTarget).split('.')[1].lower() == 'py' :
-                shutil.copy(script, scriptTarget)
-            elif fName(scriptTarget).split('.')[1].lower() == 'zip' :
-                myZip = zipfile.ZipFile(script, 'r')
-                for f in myZip.namelist() :
-                    data = myZip.read(f, script)
-                    # Pretty sure zip represents directory separator char as "/" regardless of OS
-                    myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
-                    try :
-                        myFile = open(myPath, "wb")
-                        myFile.write(data)
-                        myFile.close()
-                    except :
-                        pass
-                myZip.close()
-            else :
-                self.log.writeToLog('PREP-140', [fName(scriptTarget)])
-                dieNow()
-
         # No script found, we can proceed
         if not os.path.isfile(scriptTarget) :
-            direct()
+            self.scriptInstall(script, scriptTarget)
             if not test() :
-                dieNow()
+                dieNow('Failed to install script!')
             self.log.writeToLog('PREP-110', [fName(scriptTarget)])
         elif force :
-            direct()
+            self.scriptInstall(script, scriptTarget)
             if not test() :
-                dieNow()
+                dieNow('Failed to install script!')
             self.log.writeToLog('PREP-115', [fName(scriptTarget)])
 
         # I have not found a way to preserve permissions of the files comming
@@ -632,24 +615,60 @@ class Project (object) :
         return True
 
 
+    def scriptInstall (self, source, target) :
+        '''Install a script. A script can be a collection of items in
+        a zip file or a single .py script file.'''
+
+        scriptTargetFolder = os.path.split(target)
+        if fName(target).split('.')[1].lower() == 'py' :
+            shutil.copy(source, target)
+        elif fName(target).split('.')[1].lower() == 'zip' :
+            myZip = zipfile.ZipFile(source, 'r')
+            for f in myZip.namelist() :
+                data = myZip.read(f, script)
+                # Pretty sure zip represents directory separator char as "/" regardless of OS
+                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
+                try :
+                    myFile = open(myPath, "wb")
+                    myFile.write(data)
+                    myFile.close()
+                except :
+                    pass
+            myZip.close()
+            return True
+        else :
+            dieNow('Script is an unrecognized type: ' + fName(scriptTarget) + ' Cannot continue with installation.')
+
+
 ###############################################################################
 ############################ Post Process Functions ###########################
 ###############################################################################
 
-    def runPostProcess (self, cType, cid = None) :
-        '''Run a post process on a single component file or all the files
-        of a specified type.'''
+    def runPostProcess (self, cType, script, cid) :
+        '''Run a post process on a component. If the component is a group
+        run the script on all the individual components included in the group.
+        Unlike runPreprocess(), this will not do a complete cType, only
+        specified components or a group of components.'''
+
+#        import pdb; pdb.set_trace()
+
+#        print dir(self)
+#        import pdb; pdb.set_trace()
+
+        Ctype = cType.capitalize()
 
         # First test to see that we have a valid cType specified quite if not
-        if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
+        if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
             self.log.writeToLog('POST-010', [cType])
             return False
 
-        # Create target file path and name
-        if cid :
+        # If it is a group we will run the script across each cid individually
+        # Right now this mechanizm is just basic so if a script is for collection
+        # it needs to know how to handle multiple passes and output correctly.
+        if not testForSetting(self.projConfig['Components'][cid], 'list') :
             target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
             if os.path.isfile(target) :
-                if self.postProcessComponent(target, cType, cid) :
+                if self.postProcessComponent(cType, target, script) :
                     return True
                 else :
                     return False
@@ -667,18 +686,17 @@ class Project (object) :
         return True
 
 
-    def postProcessComponent (self, target, cType, cid) :
+    def postProcessComponent (self, cType, target, script) :
         '''Run a post process on a single component file. A post process 
         will output to a different container/file. As such, we do not have
         to check to see if there is any locked components.'''
 
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'postprocessScripts') :
-            scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
-        else :
-            self.log.writeToLog('POST-055', [cType.capitalize()])
+        Ctype = cType.capitalize()
+        if script not in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
+            self.log.writeToLog('POST-055', [Ctype])
             return False
 
-        script = os.path.join(self.local.projScriptsFolder, scriptFileName)
+        script = os.path.join(self.local.projScriptsFolder, script)
         if os.path.isfile(script) :
             # subprocess will fail if permissions are not set on the
             # script we want to run. The correct permission should have
@@ -686,18 +704,14 @@ class Project (object) :
             err = subprocess.call([script, target])
             if err == 0 :
                 self.log.writeToLog('POST-050', [fName(target)])
-                # Successful completion means no more processing should
-                # be done on this component. As such, we will automatically
-                # lock it so that will not happen by accident.
-                self.lockUnlock(cid, True)
             else :
                 self.log.writeToLog('POST-060', [fName(target), str(err)])
         else :
-            self.log.writeToLog('POST-070', [fName(script), cid])
+            self.log.writeToLog('POST-070', [fName(script), fName(target)])
             self.log.writeToLog('POST-075')
 
 
-    def installPostProcess (self, cType, script = None, force = None) :
+    def installPostProcess (self, cType, script, force = None) :
         '''Install a post process script into the main components processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. Some
@@ -710,24 +724,18 @@ class Project (object) :
         zip file it is bundled in, except the extention is .py instead of
         the bundle .zip extention.'''
 
-
         # Define some internal vars
-        if not script :
-            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-postprocess.zip')
+        Ctype               = cType.capitalize()
+        oldScript           = ''
+        scriptName          = os.path.split(script)[1]
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTargetFolder  = self.local.projScriptsFolder
-        scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
-        try :
-            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
-        except :
-            oldScript       = ''
+        scriptTarget        = os.path.join(self.local.projScriptsFolder, fName(script).split('.')[0] + '.py')
+        if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
+            oldScript = scriptName
 
         # First check for prexsisting script record
         if not force :
-            if oldScript == fName(scriptTarget) :
-                self.log.writeToLog('POST-081')
-                return False
-            elif oldScript != '' :
+            if oldScript :
                 self.log.writeToLog('POST-080', [oldScript])
                 return False
 
@@ -737,8 +745,8 @@ class Project (object) :
             self.addComponentType(cType)
 
         # Make the target folder if needed
-        if not os.path.isdir(scriptTargetFolder) :
-            os.makedirs(scriptTargetFolder)
+        if not os.path.isdir(self.local.projScriptsFolder) :
+            os.makedirs(self.local.projScriptsFolder)
 
         # First check to see if there already is a script file, return if there is
         if os.path.isfile(scriptTarget) and not force :
@@ -754,31 +762,17 @@ class Project (object) :
                 self.log.writeToLog('POST-105', [fName(scriptTarget)])
                 return False
 
-        def extract() :
-            myZip = zipfile.ZipFile(script, 'r')
-            for f in myZip.namelist() :
-                data = myZip.read(f, script)
-                # Pretty sure zip represents directory separator char as "/" regardless of OS
-                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
-                try :
-                    myFile = open(myPath, "wb")
-                    myFile.write(data)
-                    myFile.close()
-                except :
-                    pass
-            myZip.close()
-
         # No script found, we can proceed
         if not os.path.isfile(scriptTarget) :
-            extract()
+            self.scriptInstall(script, scriptTarget)
             if not test() :
-                dieNow()
+                dieNow('Failed to install script!')
             self.log.writeToLog('POST-110', [fName(scriptTarget)])
         elif force :
-            extract()
+            self.scriptInstall(script, scriptTarget)
             if not test() :
-                dieNow()
-            self.log.writeToLog('PREP-115', [fName(scriptTarget)])
+                dieNow('Failed to install script!')
+            self.log.writeToLog('POST-115', [fName(scriptTarget)])
 
         # I have not found a way to preserve permissions of the files comming
         # out of a zip archive. To make sure the preprocessing script will
@@ -786,9 +780,11 @@ class Project (object) :
         # 777 may not be the best way but it will work for now.
         os.chmod(scriptTarget, int("0777", 8))
 
-        # Record the script with the cType
-        self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts'] = fName(scriptTarget)
-        writeConfFile(self.projConfig)
+        # Record the script with the cType post process scripts list
+        scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
+        if fName(scriptTarget) not in scriptList :
+            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = addToList(scriptList, fName(scriptTarget))
+            writeConfFile(self.projConfig)
 
         return True
 
@@ -801,13 +797,14 @@ class Project (object) :
         script name entry from the component type so the process cannot
         be accessed for this specific component type.'''
 
+        Ctype = cType.capitalize()
         # Get old setting
-        old = self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts']
+        old = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
         # Reset the field to ''
         if old != '' :
-            self.projConfig['CompTypes'][cType.capitalize()]['postprocessScripts'] = ''
+            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
             writeConfFile(self.projConfig)
-            self.log.writeToLog('POST-130', [old,cType.capitalize()])
+            self.log.writeToLog('POST-130', [old,Ctype])
 
         else :
             self.log.writeToLog('POST-135', [cType.capitalize()])

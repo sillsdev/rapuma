@@ -156,7 +156,7 @@ def styleFileIsValid (source, errStop = False) :
 #                    return False
 
 
-def getPTSettings (home, axSourcePath = None) :
+def getPTSettings (home, altSourcePath = None) :
     '''Look for the ParaTExt project settings file. The immediat PT project
     is the parent folder and the PT environment that the PT projet is found
     in, if any, is the grandparent folder. the .ssf (settings) file in the
@@ -164,11 +164,11 @@ def getPTSettings (home, axSourcePath = None) :
     This function will determine where the primary .ssf file is and turn the
     data into a dictionary for the system to use.'''
 
-    # If an axSourcePath is given, this is not a "real" PT project. We will
-    # substitute home with axSourcePath and use that location to look for
+    # If an altSourcePath is given, this is not a "real" PT project. We will
+    # substitute home with altSourcePath and use that location to look for
     # the settings we need.
-    if axSourcePath :
-        home = axSourcePath
+    if altSourcePath :
+        home = altSourcePath
 
     # Not sure where the PT SSF file might be or even what its name is.
     # Starting in parent, we should find the first .ssf file. That will
@@ -181,7 +181,7 @@ def getPTSettings (home, axSourcePath = None) :
     # .ssf file.
     ssfFileName = ''
     ptPath = ''
-    if axSourcePath :
+    if altSourcePath :
         parentFolder = home
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')

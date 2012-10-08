@@ -28,6 +28,13 @@ Todo:
         <value>paratext</value>
     </setting>
     <setting>
+        <name>Alternate Source Path</name>
+        <key>altSourcePath</key>
+        <description>This is an alternate path to component type specific source files. If an unknown editor is being used or if the source needs to come from outside the editing environment. This setting will override automated source path routines. Beware, this setting may be localized only and will not work on other systems.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
         <name>Preprocess Script</name>
         <key>preprocessScript</key>
         <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>
@@ -39,13 +46,6 @@ Todo:
         <key>postprocessScripts</key>
         <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>
         <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Alternate Source Path</name>
-        <key>altSourcePath</key>
-        <description>This is an alternate path to component type specific source files. If an unknown editor is being used or if the source needs to come from outside the editing environment. This setting will override automated source path routines. Beware, this setting may be localized only and will not work on other systems.</description>
-        <type>string</type>
         <value></value>
     </setting>
 </root>

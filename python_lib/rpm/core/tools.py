@@ -32,14 +32,18 @@ import pprint
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-def dieNow () :
+def dieNow (msg = '') :
     '''When something bad happens we don't want undue embarrasment by letting
     the system find its own place to crash.  We'll take it down with this
     command and will have hopefully provided the user with a useful message as
     to why this happened.'''
 
-    terminal('RPM halting now!')
-    sys.exit()
+    if msg :
+        '\n' + msg + ' RPM halting now!\n'
+    else :
+        '\nRPM halting now!\n'
+
+    sys.exit(msg)
 
 
 def isOlder (child, parent) :
@@ -85,7 +89,7 @@ def resolvePath (path) :
 
 def addToList (thisList, item) :
     '''Generic function to add an item to any list if it isn't there already.
-    If not, just return the list contents or an empty list.'''
+    If the list is empty, just do a simple append().'''
 
     if len(thisList) != 0 :
         if item not in thisList :
@@ -96,6 +100,7 @@ def addToList (thisList, item) :
         else :
             return thisList
     else :
+        thisList.append(item)
         return thisList
 
 

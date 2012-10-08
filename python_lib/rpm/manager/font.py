@@ -50,7 +50,8 @@ class Font (Manager) :
         self.fontConfig                 = ConfigObj()
         self.project                    = project
         self.manager                    = self.cType + '_Font'
-        self.rpmXmlFontConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.rpmXmlFontConfig           = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+#        self.ptDefaultFont              = ''
 
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
@@ -72,6 +73,16 @@ class Font (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+        if not self.ptDefaultFont :
+            if self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'] :
+                altSourcePath = self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath']
+                ptSet = getPTSettings(self.project.local.projHome, resolvePath(altSourcePath))
+            else :
+                ptSet = getPTSettings(self.project.local.projHome)
+
+            setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
+            self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
+            writeConfFile(self.project.projConfig)
 
 ###############################################################################
 ############################ Project Level Functions ##########################
@@ -222,11 +233,12 @@ class Font (Manager) :
             return True
 
 
+    def copyInFont (self, font, force = False) :
+        '''Copy a font into a project. The font is bundled with other 
+        necessary components in a .zip file. If the font folder is
+        already there we assume there is a font there and we do not 
+        proceed unless force is set to True.
 
-    def installFont (self, font, force = None) :
-        '''Install (copy) a font into a project. The font is bundled with
-        other necessary components in a .zip file. If the font folder is
-        already there we assume there is a font there and we do not proceed.
         If the force flag is set, then we delete any exsisting font and
         extract a new one in its place.'''
 
@@ -261,8 +273,19 @@ class Font (Manager) :
                     self.project.log.writeToLog('FONT-067', [fName(source)])
                     return True
                 else :
+
                     self.project.log.writeToLog('FONT-065', [font])
                     return False
+
+
+    def installFont (self, font, force = False) :
+        '''It is a two step process to install a font. This will both 
+        copy in a font and record a font in one call. Do not try to
+        install a substitute font.'''
+
+        if not self.checkForSubFont(font) :
+            self.copyInFont(font, force)
+            self.recordFont(self.cType, font, force)
 
 
     def removeFont (self, cType, font, force = None) :
@@ -319,6 +342,21 @@ class Font (Manager) :
         else :
             self.project.log.writeToLog('FONT-085', [font,Ctype])
             return False
+
+
+    def varifyFont (self) :
+        '''Varify a font is installed in the project.'''
+
+        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
+        if sourceEditor.lower() == 'paratext' :
+            # If this a PT project there should be something in ptDefaultFont
+            font = self.checkForSubFont(self.ptDefaultFont)
+            if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == 'font' :
+                return True
+            else :
+                return False
+        else :
+            self.project.log.writeToLog('FONT-110', [sourceEditor])
 
 
 

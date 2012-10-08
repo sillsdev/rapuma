@@ -224,27 +224,27 @@ def userArguments (args) :
     # Test project ID
     if sys.argv[1].lower() != 'project' :
         if not isProject(args['project_id']) :
-            sys.exit('Error: Project ID given is not valid! Process halted.\n')
+            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
         else :
             # Now setup the project and look for and test the component type if needed
             aProject = initProject(args['project_id'])
             if sys.argv[1].lower() != 'settings' and sys.argv[1].lower() != 'locking' :
                 if not aProject.isComponentType(args['component_type']) :
                     if not aProject.addComponentType(args['component_type']) :
-                        sys.exit()
+                        sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
 
     # Project level commands
     if sys.argv[1].lower() == 'project' :
         # Creating a new project
         if args['add'] :
             if not args['media'] :
-                sys.exit('Project media type ID is missing from command argument. Process halted!')
+                sys.exit('\nERROR: Project media type ID is missing from command argument. Process halted!\n')
             if args['path'] :
                 # If a project folder is given (other than CWD) We need to
                 # resolve it and pass it on to proj config settings (internal)
                 customLocal = resolvePath(args['path'])
                 if not os.path.isdir(customLocal) :
-                    sys.exit('Cannot resolve the given path. Process halting.')
+                    sys.exit('\nERROR: Cannot resolve the given path. Process halting.\n')
                 else :
                     projFolder = os.path.join(customLocal, args['project_id'])
             else :
@@ -265,7 +265,7 @@ def userArguments (args) :
         # Add a new component group
         if args['add'] :
             if not args['list'] :
-                sys.exit('Must use -l (--list) when adding a component group. Process halted!')
+                sys.exit('\nERROR: Must use -l (--list) when adding a component group. Process halted!\n')
             else :
                 aProject.addComponentGroup(args['component_type'], args['group_id'], args['list'], args['force'])
         # Delete a group component
@@ -307,8 +307,6 @@ def userArguments (args) :
             if args['add'] :
                 # Physically install the font files
                 aProject.managers[manager].installFont(font, args['force'])
-                # Record in the project the font meta data 
-                aProject.managers[manager].recordFont(args['component_type'], font, args['force'])
             elif args['remove'] :
                 aProject.managers[manager].removeFont(args['component_type'], font, args['force'])
             elif args['main'] :
@@ -316,7 +314,7 @@ def userArguments (args) :
             elif args['glyph_map'] :
                 aProject.managers[manager].setGlyphMap(args['component_type'], font)
         else :
-            sys.exit('Component type ID is missing from command argument. Process halted!')
+            sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
 
     # Style level commands
     elif sys.argv[1].lower() == 'style' :
@@ -345,8 +343,7 @@ def userArguments (args) :
             if args['path'] :
                 filePath = resolvePath(args['path'])
                 if not os.path.isfile(filePath) :
-                    terminal('The following path does not appear to be valid: ' + filePath)
-                    sys.exit()
+                    sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
             aProject.installPreprocess(args['component_type'], filePath, args['force'])
         # Disconnect a preprocessing script from the component type (this does not physically remove it)
         elif args['remove'] :
@@ -359,15 +356,19 @@ def userArguments (args) :
         # to be used here. If a component ID is given it will only run on that
         # component. Otherwise, all components of the specified type.
         if args['execute'] :
-            aProject.runPostProcess(args['component_type'], args['component_id'])
+            if not args['script'] :
+                sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
+            elif not args['component_id'] :
+                sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
+            else :
+                aProject.runPostProcess(args['component_type'], args['script'], args['component_id'])
         # Install a custom or a default post process script, force to overwrite what is there
         elif args['add'] :
             filePath = ''
             if args['path'] :
                 filePath = resolvePath(args['path'])
                 if not os.path.isfile(filePath) :
-                    terminal('The following path does not appear to be valid: ' + filePath)
-                    sys.exit()
+                    sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
             aProject.installPostProcess(args['component_type'], filePath, args['force'])
         # Disconnect a post process script from the component type (this does not physically remove it)
         elif args['remove'] :
@@ -380,9 +381,9 @@ def userArguments (args) :
             if (args['section'] or args['key'] or args['value']) :
                 aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
             else :
-                sys.exit('Must provide a section, key and value. Process halted!')
+                sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
-            sys.exit('Configuration name is missing from command argument. Process halted!')
+            sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
 
     # Locking commands
     elif sys.argv[1].lower() == 'locking' :
@@ -398,7 +399,9 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'export' :
         # Check further for required args
         if not args['component_id'] :
-            sys.exit('Component ID is missing from command argument. Process halted!')
+            sys.exit('\nERROR: Component ID is missing from command argument. Process halted!\n')
+        else :
+            aProject.createManager(args['component_type'], 'text')
         # Execute an export
         if args['execute'] :
             aProject.export(args['component_type'], args['component_id'], args['path'], args['script'], args['bundle'], args['force'])
@@ -499,8 +502,8 @@ styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IM
 # Add text preprocessing subprocess arguments
 preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
 preprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-preprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-preprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a preprocess into the project process folder. If you do not specify a process a default process script.')
+preprocessCommand.add_argument('component_type', help='Specify the component type. This is required for a preprocess operation.')
+preprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a preprocess into the project scripts folder. If you do not specify a process a default process script.')
 preprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a preprocess from the component type. This does not remove the actual script from the project. That needs to be done manually.')
 preprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a preprocess script to be updated, replaced or brought back to default condition for this component type.')
 preprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a preprocess script for a specific component type will be run only on that component.')
@@ -510,12 +513,13 @@ preprocessCommand.add_argument('-e', '--execute', action='store_true', help='Exe
 # Add text post processing subprocess arguments
 postprocessCommand = subparsers.add_parser('postprocess', help='General settings for handling component post processing commands.')
 postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-postprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project process folder. If you do not specify a process a default process script.')
+postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
+postprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project scripts folder. If you do not specify a process a default process script.')
 postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a post process from the component type. This does not remove the actual script from the project. That needs to be done manually.')
 postprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a post process script to be updated, replaced or brought back to default condition for this component type.')
 postprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a post process script for a specific component type will be run only on that component.')
 postprocessCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
+postprocessCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for the -e command.')
 postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a post process script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
 
 # Add settings subprocess arguments

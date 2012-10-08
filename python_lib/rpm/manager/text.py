@@ -50,12 +50,12 @@ class Text (Manager) :
         self.cType              = cType
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'axillarySourcePath') :
-            self.axSourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['axillarySourcePath']
-            if self.axSourcePath :
-                self.axSourcePath = resolvePath(self.axSourcePath)
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'altSourcePath') :
+            self.altSourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath']
+            if self.altSourcePath :
+                self.altSourcePath = resolvePath(self.altSourcePath)
         else :
-            self.axSourcePath = ''
+            self.altSourcePath = ''
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
@@ -79,7 +79,7 @@ class Text (Manager) :
         sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
         if sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = getPTSettings(self.project.local.projHome, self.axSourcePath)
+            ptSet = getPTSettings(self.project.local.projHome, self.altSourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
@@ -108,10 +108,15 @@ class Text (Manager) :
         # Check to see if settings need updating
         self.updateManagerSettings()
         # Check if there is a font installed
-        if not self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] :
-            font = self.project.managers[self.cType + '_Font'].checkForSubFont(self.ptDefaultFont)
+        
+        
+# FIXME: How do you work with ptDefaultFont when it isn't there?
+        
+#        import pdb; pdb.set_trace()
+        
+        if not self.project.managers[self.cType + '_Font'].varifyFont() :
+            font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             self.project.managers[self.cType + '_Font'].installFont(font)
-            self.project.managers[self.cType + '_Font'].recordFont(self.cType, font)
 
         thisFile = formPTName(self.project.projConfig, cid)
         # Test, no name = no success
@@ -138,16 +143,13 @@ class Text (Manager) :
         # Current assuption is that source text is located in a directory above the
         # that is the default. In case that is not the case, we can override that and
         # specify a path to the source. If that exists, then we will use that instead.
-        if self.axSourcePath :
-            source      = os.path.join(self.axSourcePath, thisFile)
+        if self.altSourcePath :
+            source      = os.path.join(self.altSourcePath, thisFile)
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
         targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
         target          = os.path.join(targetFolder, cid + '.' + self.cType)
-#        compLock        = os.path.join(targetFolder, '.lock')
-#        typeLock        = os.path.join(os.path.dirname(targetFolder), '.' + self.cType + '-lock')
-        preprocess     = os.path.join(self.project.local.projComponentsFolder, self.cType + '-preprocess.py')
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 

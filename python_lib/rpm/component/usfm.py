@@ -59,13 +59,10 @@ class Usfm (Component) :
         for mType in self.usfmManagers :
             self.project.createManager('usfm', mType)
 
-       # Update default font if needed, usfm_Font manager will figure out which
-       # font to use or it will die there.
-#        if not self.primaryFont or self.primaryFont == 'None' :
-#            self.project.managers['usfm_Font'].setPrimaryFont('Usfm', '')
-#        else :
-#            # This will double check that all the fonts are installed
-#            self.project.managers['usfm_Font'].installFont('Usfm')
+        # Update default font if needed, usfm_Font manager will figure out which
+        if not self.project.managers['usfm_Font'].varifyFont() :
+            font = self.project.projConfig['Managers']['usfm_Font']['ptDefaultFont']
+            self.project.managers['usfm_Font'].installFont(font)
 
         # To better facilitate rendering that might be happening on this run, we
         # will update source file names and other settings used in the usfm_Text
