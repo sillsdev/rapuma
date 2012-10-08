@@ -103,6 +103,18 @@ def styleFileIsValid (source, errStop = False) :
 # to store warrnings and output them all at once. This will change
 # once that is figured out.
 
+# One place to start is with this snipit of code taken from the 
+# palaso-python test_parser.py script around line 137:
+
+#        with warnings.catch_warnings(record=True) as trans_parse_errors:
+#            warnings.resetwarnings()
+#            warnings.simplefilter("always", SyntaxWarning)
+#            trans_parse = list(sfm.parser(trans_src))
+
+# This will need to be thought through more as to what level do we
+# want to run at and how much do we allow (how loose the parser will be).
+
+
     stylesheet_extra = ''
     if errStop :
         stylesheet = usfm.default_stylesheet.copy()
@@ -120,16 +132,8 @@ def styleFileIsValid (source, errStop = False) :
     else :
         return False
 
-#    with warnings.catch_warnings(record=True) as ref_parse_errors:
-#        warnings.resetwarnings()
-#        warnings.simplefilter("always", SyntaxWarning)
-#        ref_parse = list(sfm.parser(stylesheet_extra))
-#    trans_src = sfm.pprint(ref_parse).splitlines(True)
 
-#    print trans_src
-
-
-
+# FIXME: Need to install override/custom style file handling
 #def installPTCustomStyles (local, customStyleFile) :
 #    '''Look in a PT project for a custom override style file and copy it into
 #    the project if it is there.  If it is not there, go one more folder up in

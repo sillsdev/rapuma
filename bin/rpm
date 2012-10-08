@@ -141,12 +141,12 @@ def deleteProject (uc, pid = None) :
 
     # If no pid was given this fails
     if not pid :
-        terminal('Error: Project ID code not given or found. delete operation failed.')
+        terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
         return
 
     # Check if project is registered with RPM and get real path and reinit local paths
     if not testForSetting(uc.userConfig, 'Projects', pid) :
-        terminal('Error: [' + pid + '] not a valid registered project, cannot continue with delete operation.')
+        terminal('\nERROR: [' + pid + '] not a valid registered project, cannot continue with delete operation.\n')
         return
     else :
         local = ProjLocal(rpmHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
@@ -408,7 +408,7 @@ def userArguments (args) :
 
     # Totally lost
     else:
-        sys.exit('Error: Command not recognized! ')
+        sys.exit('\nERROR: Command not recognized!\n')
 
     # During a process, a number of log entries will be made and written out.
     # Over time the log file could get very large. To control the size, there

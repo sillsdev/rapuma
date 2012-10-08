@@ -72,6 +72,12 @@ def fName (fullPath) :
 def resolvePath (path) :
     '''Resolve the '~' in a path if there is one with the actual home path.'''
 
+# FIXME: Something like the following should clean this up:
+
+#   os.path.realpath(os.path.expanduser(path))
+
+# Need to follow up on this
+
     if path[0] == '~' :
         try :
             # This should be the best way

@@ -110,9 +110,6 @@ class Project (object) :
     def addManager (self, cType, mType) :
         '''Create a manager reference in the project config that components will point to.'''
 
-
-        print 'I am here: addManager'
-
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
         # Insert the Manager section if it is not already there
@@ -652,11 +649,12 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
-#        print dir(self)
-#        import pdb; pdb.set_trace()
+        def buildPath (cid) :
+            p = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
+            return os.path.realpath(os.path.expanduser(p))
 
         Ctype = cType.capitalize()
-
+        target = []
         # First test to see that we have a valid cType specified quite if not
         if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
             self.log.writeToLog('POST-010', [cType])
@@ -666,30 +664,26 @@ class Project (object) :
         # Right now this mechanizm is just basic so if a script is for collection
         # it needs to know how to handle multiple passes and output correctly.
         if not testForSetting(self.projConfig['Components'][cid], 'list') :
-            target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            if os.path.isfile(target) :
-                if self.postProcessComponent(cType, target, script) :
-                    return True
-                else :
-                    return False
+            target.append(buildPath(cid))
+            if self.postProcessComponent(cType, target, script) :
+                return True
             else :
-                self.log.writeToLog('POST-020', [target])
                 return False
+        else :
+            for c in self.projConfig['Components'][cid]['list'] :
+                target.append(buildPath(c))
 
-        # If we made it this far we can assume it is okay to preprocess
-        # everything for this component type
-        for c in self.projConfig['Components'].keys() :
-            if self.projConfig['Components'][c]['type'] == cType :
-                target = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
-                self.postProcessComponent(target, cType, c)
+            if self.postProcessComponent(cType, target, script) :
+                return True
+            else :
+                return False
 
         return True
 
 
     def postProcessComponent (self, cType, target, script) :
-        '''Run a post process on a single component file. A post process 
-        will output to a different container/file. As such, we do not have
-        to check to see if there is any locked components.'''
+        '''Run a post process on the target. The target could be a single file
+        or a group of components.'''
 
         Ctype = cType.capitalize()
         if script not in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
@@ -701,13 +695,17 @@ class Project (object) :
             # subprocess will fail if permissions are not set on the
             # script we want to run. The correct permission should have
             # been set when we did the installation.
-            err = subprocess.call([script, target])
+            commands = []
+            commands.append(script)
+            for f in target :
+                 commands.append(f)
+            err = subprocess.call(commands)
             if err == 0 :
-                self.log.writeToLog('POST-050', [fName(target)])
+                self.log.writeToLog('POST-050')
             else :
-                self.log.writeToLog('POST-060', [fName(target), str(err)])
+                self.log.writeToLog('POST-060', [str(err)])
         else :
-            self.log.writeToLog('POST-070', [fName(script), fName(target)])
+            self.log.writeToLog('POST-070', [fName(script)])
             self.log.writeToLog('POST-075')
 
 
