@@ -163,12 +163,13 @@ class Project (object) :
 
         # Check for cid in config
         if isValidCID(self.projConfig, cid) :
-            try :
-                self.createComponent(cid).render(force)
-                return True
-            except :
-                self.log.writeToLog('COMP-070', [cid])
-                return False
+            self.createComponent(cid).render(force)
+#            try :
+#                self.createComponent(cid).render(force)
+#                return True
+#            except :
+#                self.log.writeToLog('COMP-070', [cid])
+#                return False
         else :
             bad = findBadComp(self.projConfig, cid)
             if bad == cid :
@@ -932,7 +933,11 @@ class Project (object) :
         designed to work more as a single call to RPM.'''
 
         oldValue = ''
-        confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+        if config.lower() == 'rpm' :
+            confFile = os.path.join(self.local.userHome, 'rpm.conf')
+        else :
+            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+
         confObj = ConfigObj(confFile)
         outConfObj = confObj
         try :

@@ -115,6 +115,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Custom Scripts Collection Path</name>
+            <key>scripts</key>
+            <description>The full path to where scripts are kept on this system that the user would like to access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

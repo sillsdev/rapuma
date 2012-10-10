@@ -151,6 +151,7 @@ class ProjLog (object) :
             'FONT-090' : ['WRN', 'No replacement for primary font found.  - font.removeFont()'],
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
             'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
+            'FONT-120' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.copyInFont())'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-005' : ['MSG', 'LYOT-005 - Unassigned error message ID.'],

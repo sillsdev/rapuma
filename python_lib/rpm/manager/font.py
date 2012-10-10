@@ -51,7 +51,6 @@ class Font (Manager) :
         self.project                    = project
         self.manager                    = self.cType + '_Font'
         self.rpmXmlFontConfig           = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
-#        self.ptDefaultFont              = ''
 
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
@@ -242,6 +241,9 @@ class Font (Manager) :
         If the force flag is set, then we delete any exsisting font and
         extract a new one in its place.'''
 
+        # First be sure this is a font we can work with
+        font = self.checkForSubFont(font)
+
         def extract (source, confXml) :
             if zipfile.is_zipfile(source) :
                 myzip = zipfile.ZipFile(source, 'r')
@@ -250,8 +252,23 @@ class Font (Manager) :
                 if os.path.isfile(confXml) :
                     return True
 
-        source = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
+
+# FIXME: Something is wrong here, font didn't install when called by text.py
+
+#        import pdb; pdb.set_trace()
+
+        # Look in user resources first
+        userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
+        rpmSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
         confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        if os.path.isfile(userSource) :
+            source = userSource
+        elif os.path.isfile(rpmSource) :
+            source = rpmSource
+        else :
+            self.project.log.writeToLog('FONT-120', [source])
+
+        # When is force is used, delete the existing font to ensure a clean copy
         if force :
             try :
                 shutil.rmtree(os.path.join(self.project.local.projFontsFolder, font))
@@ -283,9 +300,11 @@ class Font (Manager) :
         copy in a font and record a font in one call. Do not try to
         install a substitute font.'''
 
-        if not self.checkForSubFont(font) :
-            self.copyInFont(font, force)
-            self.recordFont(self.cType, font, force)
+        font = self.checkForSubFont(font)
+        cRes = self.copyInFont(font, force)
+        rRes = self.recordFont(self.cType, font, force)
+        if cRes and rRes :
+            return True
 
 
     def removeFont (self, cType, font, force = None) :
@@ -351,7 +370,7 @@ class Font (Manager) :
         if sourceEditor.lower() == 'paratext' :
             # If this a PT project there should be something in ptDefaultFont
             font = self.checkForSubFont(self.ptDefaultFont)
-            if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == 'font' :
+            if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
                 return True
             else :
                 return False
