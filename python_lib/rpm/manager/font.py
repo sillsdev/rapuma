@@ -127,17 +127,25 @@ class Font (Manager) :
         '''Return the true name of the font to be used if the one given
         is pointing to a substitute font in the same font family.'''
 
-        # Check for the font family bundle
-        zipSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
-        if not os.path.isfile(os.path.join(zipSource)) :
-            self.project.log.writeToLog('FONT-041', [fName(zipSource)])
+        # Check for the font family bundle, look in user resources first
+        userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
+        rpmSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
+        if os.path.isfile(userSource) :
+            source = userSource
+        elif os.path.isfile(rpmSource) :
+            source = rpmSource
+        else :
+            self.project.log.writeToLog('FONT-120', [source])
+
+        if not os.path.isfile(os.path.join(source)) :
+            self.project.log.writeToLog('FONT-041', [fName(source)])
             dieNow()
 
-        if isInZip(font + '.xml', zipSource) :
+        if isInZip(font + '.xml', source) :
             xmlFile = font + '/' + font + '.xml'
             tmpFolder = os.path.join(self.project.local.projConfFolder, font)
             # Extract to a temp file/folder
-            myzip = zipfile.ZipFile(zipSource)
+            myzip = zipfile.ZipFile(source)
             myzip.extract(xmlFile, self.project.local.projConfFolder)
             metaDataSource = os.path.join(self.project.local.projConfFolder, xmlFile)
             myzip.close()
@@ -267,6 +275,8 @@ class Font (Manager) :
             source = rpmSource
         else :
             self.project.log.writeToLog('FONT-120', [source])
+
+        print source
 
         # When is force is used, delete the existing font to ensure a clean copy
         if force :

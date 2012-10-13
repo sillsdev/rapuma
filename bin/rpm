@@ -320,14 +320,18 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'style' :
         aProject.createManager(args['component_type'], 'style')
         manager = args['component_type'] + '_Style'
-        if args['add'] :
-            aProject.managers[manager].addStyleFile(args['path'], args['force'])
-        elif args['remove'] :
-            aProject.managers[manager].removeStyleFile(args['force'])
-        elif args['validate'] :
+        if args['validate'] :
             # In this context we want to stop if an error is found and report it
             # Passing true to validateStyleFile will do that
             aProject.managers[manager].validateStyleFile(args['path'], True)
+        # Be sure we have a style file type param
+        if not args['type'] or args['type'].lower() not in ['main', 'custom'] :
+            sys.exit('\nERROR: Style file type (-t) is either missing or incorrect.\n')
+        else :
+            if args['add'] :
+                aProject.managers[manager].addStyleFile(args['type'], args['path'], args['force'])
+            elif args['remove'] :
+                aProject.managers[manager].removeStyleFile(args['type'], args['force'])
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
@@ -498,6 +502,7 @@ styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a 
 styleCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific style file is required or to be auto-generated. Otherwise, a default will be used.')
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
 styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
+styleCommand.add_argument('-t', '--type', help='The type of style file this is. There are two acceptable types, \"main\" and \"custom\".')
 
 # Add text preprocessing subprocess arguments
 preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')

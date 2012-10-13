@@ -257,6 +257,15 @@ class Xetex (Manager) :
                         output = '\\input ' + quotePath(getattr(self, fileID)) + '\n'
 
                 elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
+
+
+
+
+                    print fileID, getattr(self, fileID)
+
+
+
+
                     if os.path.isfile(getattr(self, fileID)) :
                         output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
             else :
@@ -610,7 +619,9 @@ class Xetex (Manager) :
         self.setFile                = os.path.join(self.project.local.projMacrosFolder, self.setFileName)
         self.extFile                = os.path.join(self.project.local.projMacrosFolder, self.extFileName)
         self.mainStyleFile          = self.project.projConfig['Managers']['usfm_Style']['mainStyleFile']
+        self.customStyleFile        = self.project.projConfig['Managers']['usfm_Style']['customStyleFile']
         self.globSty                = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+        self.custSty                = os.path.join(self.project.local.projStylesFolder, self.customStyleFile)
 
         # Set this flag to True if it is a meta component
         self.cidMeta                = isMetaComponent(self.project.projConfig, self.cid)
