@@ -127,13 +127,16 @@ class Text (Manager) :
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
         projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-        # If for some reason the name isn't there yet, assign the default name for a USFM style file
+        if projStyName == '' :
+            self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)
+        # If for some reason the name isn't there yet, assign the default
+        # name for a USFM style file
         if not projStyName :
             projStyName = 'usfm.sty'
         projSty = os.path.join(self.project.local.projStylesFolder, projStyName)
         if not os.path.isfile(projSty) :
             # Forcing style file creation possible if -f was used for component creation
-            self.project.managers[self.cType + '_Style'].addStyleFile('', force)
+            self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)
 
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part
@@ -219,6 +222,7 @@ class Text (Manager) :
         fh = codecs.open(source, 'rt', 'utf_8_sig')
         # Create the object
         if projSty :
+            print projSty
             stylesheet = usfm.default_stylesheet.copy()
             stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
             stylesheet.update(stylesheet_extra)
