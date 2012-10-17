@@ -129,6 +129,7 @@ class Text (Manager) :
         projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         if projStyName == '' :
             self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)
+            projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         # If for some reason the name isn't there yet, assign the default
         # name for a USFM style file
         if not projStyName :
@@ -222,7 +223,6 @@ class Text (Manager) :
         fh = codecs.open(source, 'rt', 'utf_8_sig')
         # Create the object
         if projSty :
-            print projSty
             stylesheet = usfm.default_stylesheet.copy()
             stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
             stylesheet.update(stylesheet_extra)

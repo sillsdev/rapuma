@@ -276,8 +276,6 @@ class Font (Manager) :
         else :
             self.project.log.writeToLog('FONT-120', [source])
 
-        print source
-
         # When is force is used, delete the existing font to ensure a clean copy
         if force :
             try :

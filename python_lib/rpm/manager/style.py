@@ -66,6 +66,19 @@ class Style (Manager) :
 ###############################################################################
 
 
+
+
+
+
+
+
+
+
+
+
+
+# FIXME: Do we need this?
+
     def aquireStyleTarget (self, sType) :
         '''Get the style file target file name and path. If no useful project
         information can be found, create a default name according to the type.'''
@@ -88,15 +101,23 @@ class Style (Manager) :
         return target
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def addStyleFile (self, sType, sFile, force = False) :
         ''' This is a generalized function to direct a request 
         to install a style file into the project.'''
-
-
-# Working here
-
-
-        print 'cccccccccccccccccccccc', sType, sFile, force
 
         if self.cType == 'usfm' :
             # If this is a force, then remove exsiting file and meta data
@@ -189,7 +210,7 @@ class Style (Manager) :
             if os.path.isfile(sFile) :
                 if styleFileIsValid(sFile) :
                     if not shutil.copy(sFile, target) :
-                        return True
+                        return fName(target)
                 else :
                     self.project.log.writeToLog('STYL-075', [sFile,self.cType])
             else : 
