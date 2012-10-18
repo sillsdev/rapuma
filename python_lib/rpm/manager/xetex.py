@@ -624,7 +624,7 @@ class Xetex (Manager) :
         self.custSty                = os.path.join(self.project.local.projStylesFolder, self.customStyleFile)
 
         # Set this flag to True if it is a meta component
-        self.cidMeta                = isMetaComponent(self.project.projConfig, self.cid)
+        self.cidMeta                = self.project.isMetaComponent(self.project.projConfig, self.cid)
 
 #        import pdb; pdb.set_trace()
 

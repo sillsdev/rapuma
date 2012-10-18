@@ -95,71 +95,6 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     return sysSet
 
 
-def styleFileIsValid (source, errStop = False) :
-    '''Check to see if a style file is valid, or not.'''
-
-
-# FIXME: Need more work on error output, need Tim to show me how
-# to store warrnings and output them all at once. This will change
-# once that is figured out.
-
-# One place to start is with this snipit of code taken from the 
-# palaso-python test_parser.py script around line 137:
-
-#        with warnings.catch_warnings(record=True) as trans_parse_errors:
-#            warnings.resetwarnings()
-#            warnings.simplefilter("always", SyntaxWarning)
-#            trans_parse = list(sfm.parser(trans_src))
-
-# This will need to be thought through more as to what level do we
-# want to run at and how much do we allow (how loose the parser will be).
-
-
-    stylesheet_extra = ''
-    if errStop :
-        stylesheet = usfm.default_stylesheet.copy()
-        stylesheet_extra = usfm.style.parse(open(os.path.expanduser(source),'r'), usfm.style.level.Unrecoverable)
-    else :
-        try :
-            stylesheet = usfm.default_stylesheet.copy()
-            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(source),'r'), usfm.style.level.Unrecoverable)
-        except :
-            pass
-
-
-    if stylesheet_extra :
-        return True
-    else :
-        return False
-
-
-# FIXME: Need to install override/custom style file handling
-#def installPTCustomStyles (local, customStyleFile) :
-#    '''Look in a PT project for a custom override style file and copy it into
-#    the project if it is there.  If it is not there, go one more folder up in
-#    case you are located in the [My Paratext Projects] folder.  If it is not
-#    there, then return False.'''
-
-#    # There may, or may not, be a custom style file in the parent folder.
-#    # If it is not there we look in the grandparent's folder
-#    (parent, grandparent)   = ancestorsPath(local.projHome)
-#    targetCustomStyles      = os.path.join(local.projComponentsFolder, customStyleFile)
-#    ptProjectCustomStyles   = os.path.join(parent, customStyleFile)
-#    ptCustomStyles          = os.path.join(grandparent, customStyleFile)
-#    searchOrder             = [ptProjectCustomStyles, ptCustomStyles]
-#    # We will start by searching in order from the inside out and stop
-#    # as soon as we find one. If none is found, return False. If one is
-#    # found in the target folder, we will not overwrite it and return False
-#    if not os.path.isfile(targetCustomStyles) :
-#        for sFile in searchOrder :
-#            if os.path.isfile(sFile) :
-#                try :
-#                    shutil.copy(sFile, targetCustomStyles)
-#                    return True
-#                except :
-#                    return False
-
-
 def getPTSettings (home, altSourcePath = None) :
     '''Look for the ParaTExt project settings file. The immediat PT project
     is the parent folder and the PT environment that the PT projet is found
@@ -232,43 +167,6 @@ def getPTSettings (home, altSourcePath = None) :
     ssfFile = os.path.join(ptPath, ssfFileName)
     if os.path.isfile(ssfFile) :
         return xmlFileToDict(ssfFile)
-
-
-def isMetaComponent (pc, cid) :
-    '''Return True if this component has a list of component in it.'''
-
-    try :
-        l = pc['Components'][cid]['list']
-        return True
-    except :
-        return False
-
-
-def isValidCID (pc, cid) :
-    '''Try to figure out if this is a valid component.'''
-
-    if hasUsfmCidInfo(cid) :
-        return True
-    else :
-        if isMetaComponent(pc, cid) :
-            for i in pc['Components'][cid]['list'] :
-                if not hasUsfmCidInfo(i) :
-                    return False
-            # If no bad components were found it must be okay
-            return True
-
-
-def findBadComp (pc, cid) :
-    '''Much like isValidCID() but it returns the first offending
-    cid ID it finds.'''
-
-    if isMetaComponent(pc, cid) :
-        for i in pc['Components'][cid]['list'] :
-            if not hasUsfmCidInfo(i) :
-                return i
-    else :
-        if not hasUsfmCidInfo(cid) :
-            return cid
 
 
 def hasUsfmCidInfo (cid) :

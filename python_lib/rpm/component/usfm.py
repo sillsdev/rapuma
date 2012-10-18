@@ -87,12 +87,12 @@ class Usfm (Component) :
             # First see if this is a valid component. This is a little
             # redundant as this is done in project.py as well. It should
             # be caught there first but just in case we'll do it here too.
-            if not isValidCID(self.project.projConfig, cid) :
+            if not self.project.isComponent(cid) :
                 self.project.log.writeToLog('COMP-010', ['cid'])
                 return False
 
             # See if the working text is present, quite if it is not
-            if not self.project.managers['usfm_Text'].installUsfmWorkingText(cid) :
+            if not self.project.managers['usfm_Text'].isUsfmWorkingText(cid) :
                 return False
 
             # Run any illustration processes needed

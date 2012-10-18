@@ -108,12 +108,7 @@ class Text (Manager) :
         # Check to see if settings need updating
         self.updateManagerSettings()
         # Check if there is a font installed
-        
-        
-# FIXME: How do you work with ptDefaultFont when it isn't there?
-        
-#        import pdb; pdb.set_trace()
-        
+        self.project.createManager(self.cType, 'font')
         if not self.project.managers[self.cType + '_Font'].varifyFont() :
             font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             self.project.managers[self.cType + '_Font'].installFont(font)
@@ -192,10 +187,6 @@ class Text (Manager) :
                 else :
                     self.project.log.writeToLog('TEXT-070', [source,fName(target)])
                     return False
-#            else :
-#                return True
-#        else :
-#            return True
 
         # If the text is there, we should return True so do a last check to see
         if os.path.isfile(target) :
@@ -206,18 +197,12 @@ class Text (Manager) :
         '''Use the Palaso USFM parser to bring in the text and clean it up if 
         needed. If projSty (path + file name) is not used, the sfm parser
         will use a default style file to drive the process which may lead to
-        undesirable results. A style file should normally be used to avoid this.
-        
-        Error level reporting is possible with the usfm.parser. The following
-        are the error it can report:
-        Note            = -1    Just give output warning, do not stop
-        Marker          =  0    Stop on any out of place marker
-        Content         =  1    Stop on mal-formed content
-        Structure       =  2    Stop on ???
-        Unrecoverable   =  100  Stop on most anything that is wrong
-        
-        The default is Content. To change this the calling function must pass
-        another level like "sfm.level.Note" or one of the other levels.'''
+        undesirable results. A style file should normally be used to avoid this.'''
+
+        # Validate the text first thing
+        if not self.usfmTextFileIsValid(source, projSty) :
+            self.project.log.writeToLog('TEXT-155', [source])
+            return False
 
         # Load in the source text
         fh = codecs.open(source, 'rt', 'utf_8_sig')
@@ -244,4 +229,76 @@ class Text (Manager) :
         writeout.write(normal)
         writeout.close
         return True
+
+
+    def testCompTextFile (self, source, projSty = None) :
+        '''This will direct a request to the proper validater for
+        testing the source of a component text file.'''
+
+        if self.cType == 'usfm' :
+            # Note: Error level reporting is possible with the usfm.parser.
+            # The following are the errors it can report:
+            # Note            = -1    Just give output warning, do not stop
+            # Marker          =  0    Stop on any out of place marker
+            # Content         =  1    Stop on mal-formed content
+            # Structure       =  2    Stop on ???
+            # Unrecoverable   =  100  Stop on most anything that is wrong'''
+            if self.usfmTextFileIsValid(source, projSty) :
+                self.project.log.writeToLog('TEXT-150', [source])
+                return True
+            else :
+                # If it is not valid we want to report errors found
+                fh = codecs.open(source, 'rt', 'utf_8_sig')
+                stylesheet = usfm.default_stylesheet.copy()
+                if projSty :
+                    stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+                    stylesheet.update(stylesheet_extra)
+                doc = usfm.parser(fh, stylesheet, sfm.level.Content)
+
+
+
+
+
+# FIXME: Not getting any error returned
+
+
+
+
+
+                self.project.log.writeToLog('TEXT-155', [source])
+                return False
+        else :
+            self.project.log.writeToLog('TEXT-005', [self.cType])
+            dieNow()
+
+
+    def usfmTextFileIsValid (self, source, projSty) :
+        '''Use the USFM parser to validate a style file. This is meant to
+        be just a simple test so only return True or False.'''
+
+        try :
+            fh = codecs.open(source, 'rt', 'utf_8_sig')
+            stylesheet = usfm.default_stylesheet.copy()
+            if projSty :
+                stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+                stylesheet.update(stylesheet_extra)
+
+
+
+
+
+# FIXME: Something is wrong with the error level setting here
+
+
+
+
+
+#            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
+            doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
+            return True
+        except Exception as e :
+            return False
+
+
+
 

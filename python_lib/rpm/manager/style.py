@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, warnings
 
 # Load the local classes
 from tools import *
@@ -64,55 +64,6 @@ class Style (Manager) :
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Do we need this?
-
-    def aquireStyleTarget (self, sType) :
-        '''Get the style file target file name and path. If no useful project
-        information can be found, create a default name according to the type.'''
-
-        # Set a default target file name
-
-        if sType.lower() == 'main' :
-            if self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] :
-                target = os.path.join(self.project.local.projStylesFolder, self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'])
-            else :
-                target = os.path.join(self.project.local.projStylesFolder, 'usfm.sty')
-                self.project.log.writeToLog('STYL-030', [fName(target)])
-        elif sType.lower() == 'custom' :
-            if self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] :
-                target = os.path.join(self.project.local.projStylesFolder, self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'])
-            else :
-                target = os.path.join(self.project.local.projStylesFolder, 'custom.sty')
-                self.project.log.writeToLog('STYL-030', [fName(target)])
-
-        return target
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def addStyleFile (self, sType, sFile, force = False) :
@@ -164,8 +115,7 @@ class Style (Manager) :
 
         self.project.projConfig['Managers'][self.cType + '_Style'][sType + 'StyleFile'] = fileName
         writeConfFile(self.project.projConfig)
-# FIXME: What's wrong with this?
-#        self.project.log.writeToLog('STYL-010', [fileName,sType,self.cType])
+        self.project.log.writeToLog('STYL-010', [fileName,sType,self.cType])
         return True
 
 
@@ -208,7 +158,7 @@ class Style (Manager) :
         # as soon as we find one.
         for sFile in searchOrder :
             if os.path.isfile(sFile) :
-                if styleFileIsValid(sFile) :
+                if self.usfmStyleFileIsValid(sFile) :
                     if not shutil.copy(sFile, target) :
                         return fName(target)
                 else :
@@ -225,7 +175,7 @@ class Style (Manager) :
         if os.path.isfile(sFile) :
             # No news is good news
             if not shutil.copy(sFile, target) :
-                return fName(target)
+                return sFile
 
 
     def addExsitingUsfmStyFile (self, sFile, sType) :
@@ -238,7 +188,7 @@ class Style (Manager) :
         if os.path.isfile(sFile) :
             # If this is not an RPM custom style file we will validate it
             if sType.lower() == 'main' :
-                if styleFileIsValid(sFile) :
+                if self.usfmStyleFileIsValid(sFile) :
                     shutil.copy(sFile, target)
                     self.project.log.writeToLog('STYL-060', [fName(sFile)])
                     return True
@@ -290,51 +240,35 @@ class Style (Manager) :
             return True
 
 
-    def validateStyleFile (self, path, errStop = False) :
-        '''Use the USFM parser to validate a style file.'''
+    def usfmStyleFileIsValid (self, path) :
+        '''Use the USFM parser to validate a style file. This is meant to
+        be just a simple test so only return True or False.'''
 
-        if styleFileIsValid(path, errStop) :
-            self.project.log.writeToLog('STYL-150', [path])
+        try :
+            stylesheet = usfm.default_stylesheet.copy()
+            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
+            return True
+        except Exception as e :
+            return False
+
+
+    def testStyleFile (self, path) :
+        '''This is a basic validity test of a style file. If it
+        does not validate the errors will be reported in the
+        terminal for the user to examine.'''
+
+        if self.cType == 'usfm' :
+            if self.usfmStyleFileIsValid(path) :
+                self.project.log.writeToLog('STYL-150', [path])
+                return True
+            else :
+                stylesheet_extra = ''
+                stylesheet = usfm.default_stylesheet.copy()
+                stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Unrecoverable)
+                self.project.log.writeToLog('STYL-155', [path])
+                return False
         else :
-            self.project.log.writeToLog('STYL-155', [path])
-
-
-
-#    def installCompTypeOverrideStyles (self) :
-#        '''If the source is from a PT project, check to see if there is a
-#        (project-wide) custom stylesheet to install. If not, we are done.
-#        This style file is not required.'''
-
-#        target = os.path.join(self.project.local.projComponentsFolder, self.customStyleFile)
-#        if not os.path.isfile(target) :
-#            if self.sourceEditor.lower() == 'paratext' :
-#                # Build paths and names we need
-#                parent = os.path.dirname(self.project.local.projHome)
-#                gather = os.path.join(parent, 'gather')
-#                if os.path.isdir(gather) :
-#                    parent = gather
-
-#                source = os.path.join(parent, self.customStyleFile)
-#                if os.path.isfile(source) :
-#                    shutil.copy(source, target)
-#                    self.project.log.writeToLog('STYL-025', [fName(target)])
-#                else :
-#                    if not installPTCustomStyles(self.project.local, self.customStyleFile) :
-#                        self.project.log.writeToLog('STYL-020')
-#                        self.createCustomUsfmStyles()
-#            else :
-#                self.createCustomUsfmStyles()
-
-
-#    def createCompOverrideUsfmStyles (self, cid) :
-#        '''Create a component override style file for a single component.
-#        This file will override specific styles from preceeding style
-#        files loaded before it.'''
-
-#        self.project.log.writeToLog('STYL-040')
-
-
-
-
+            self.project.log.writeToLog('STYL-005', [self.cType])
+            dieNow()
 
 

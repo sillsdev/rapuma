@@ -132,21 +132,57 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def getPdfPathName (self, cid) :
-        '''This is a crude way to create a file name and path. It may not be
-        the best way.'''
 
-        cidFolder          = os.path.join(self.local.projComponentsFolder, cid)
-        cidPdf             = os.path.join(cidFolder, cid + '.pdf')
+    def hasCidFile (self, cid) :
+        '''Check to see if a file exists for a given cid.'''
 
-        return cidPdf
+        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + self.projConfig['Components'][cid]['type']))
 
 
     def isComponent (self, cid) :
-        '''Simple test to see if a component exsists. Return True if it is.'''
+        '''Simple test to see if a component exsists. Return True if it is.
+        If it is a meta component then test for the exsistance of every
+        cid in the group. Note: This assumes that because the component
+        has been installed through the system, it is a valid type ID so
+        no testin of component type ID is being done.'''
 
-        if testForSetting(self.projConfig, 'Components', cid) :
+        def testComponent(cid) :
+            if testForSetting(self.projConfig, 'Components', cid) :
+                if self.hasCidFile(cid) :
+                    return True
+                else :
+                    self.log.writeToLog('COMP-050', [cid])
+            else :
+                self.log.writeToLog('COMP-060', [cid])
+
+        # Check first to see if this is a meta component
+        if self.isMetaComponent(cid) :
+            for c in self.projConfig['Components'][cid]['list'] :
+                testComponent(c)
+        else :
+            testComponent(cid)
+
+
+    def findBadComp (self, cid) :
+        '''Much like isComponent() but it returns the first offending
+        cid ID it finds.'''
+
+        if self.isMetaComponent(cid) :
+            for i in self.projConfig['Components'][cid]['list'] :
+                if not hasUsfmCidInfo(i) :
+                    return i
+        else :
+            if not hasUsfmCidInfo(cid) :
+                return cid
+
+
+    def isMetaComponent (self, cid) :
+        '''Return True if this component has a list of component in it.'''
+
+        if testForSetting(self.projConfig['Components'][cid], 'list') :
             return True
+        else :
+            return False
 
 
     def isComponentType (self, cType) :
@@ -159,24 +195,27 @@ class Project (object) :
 
     def renderComponent (self, cid, force = False) :
         '''Render a single component. This will ensure there is a component
-        object, then render it.'''
+        object, then render it. However, just because the object exsists
+        does not mean all the parts of the componet are in place. Rendering
+        could fail if something is missing.'''
 
         # Check for cid in config
-        if isValidCID(self.projConfig, cid) :
-            self.createComponent(cid).render(force)
-#            try :
-#                self.createComponent(cid).render(force)
-#                return True
-#            except :
-#                self.log.writeToLog('COMP-070', [cid])
-#                return False
+        if self.isComponent(cid) :
+            try :
+                self.createComponent(cid).render(force)
+                return True
+            except :
+                self.log.writeToLog('COMP-070', [cid])
+                return False
         else :
-            bad = findBadComp(self.projConfig, cid)
-            if bad == cid :
-                self.log.writeToLog('COMP-011', [cid])
-            else :
-                self.log.writeToLog('COMP-012', [bad,cid])
-            return False
+            bad = self.findBadComp(cid)
+            if bad :
+                if bad == cid :
+                    self.log.writeToLog('COMP-011', [cid])
+                else :
+                    self.log.writeToLog('COMP-012', [bad,cid])
+                return False
+            return True
 
 
     def validateComponent (self, cid) :
@@ -184,6 +223,7 @@ class Project (object) :
         If not, output the errors and return False.'''
 
         self.log.writeToLog('COMP-080')
+
 
     def createComponent (self, cid) :
         '''Create a component object that can be acted on.'''
@@ -253,29 +293,35 @@ class Project (object) :
             if writeConfFile(self.projConfig) :
                 return True
 
-        if not testForSetting(self.projConfig, 'Components', cid) :
-            insertComponent()
-            self.log.writeToLog('COMP-020', [cid])
-        elif force :
+        # Force on add always means we delete the component first
+        # before we do anything else
+        if force :
             self.removeComponent(cid)
-            insertComponent()
-            self.log.writeToLog('COMP-022', [cid])
-        else :
-            self.log.writeToLog('COMP-025', [cid])
-            return False
 
         # See if the working text is present, quite if it is not
-        # FIXME: This is not good in the long-run if this is not
-        # usfm type text this cannot work
-        self.createManager(cType, 'text')
-        if not self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
-            return False
-
-        # Run any working text preprocesses on the new component text
-        if self.runPreprocess(cType, cid) :
-            self.log.writeToLog('TEXT-060', [cid])
-
-        return True
+        if cType == 'usfm' :
+            self.createManager(cType, 'text')
+            if self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
+                # Run any working text preprocesses on the new component text
+                if self.runPreprocess(cType, cid) :
+                    self.log.writeToLog('TEXT-060', [cid])
+                # Finish the install by adding to config
+                if not testForSetting(self.projConfig, 'Components', cid) :
+                    insertComponent()
+                    if force :
+                        self.log.writeToLog('COMP-022', [cid])
+                    else :
+                        self.log.writeToLog('COMP-020', [cid])
+                    return True
+                else :
+                    self.log.writeToLog('COMP-025', [cid])
+                    return False
+            else :
+                self.log.writeToLog('TEXT-160', [cid])
+                return False
+        else :
+            self.project.log.writeToLog('COMP-005', [self.cType])
+            dieNow()
 
 
     def removeGroupComponent (self, gid, force = False) :
