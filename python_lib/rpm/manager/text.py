@@ -183,14 +183,14 @@ class Text (Manager) :
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
                 if self.usfmCopy(source, target, projSty) :
-                    return True
+                    # If the text is there, we should return True so do a last check to see
+                    if os.path.isfile(target) :
+                        self.project.log.writeToLog('TEXT-060', [cid])
+                        return True
                 else :
                     self.project.log.writeToLog('TEXT-070', [source,fName(target)])
                     return False
 
-        # If the text is there, we should return True so do a last check to see
-        if os.path.isfile(target) :
-            return True
 
 
     def usfmCopy (self, source, target, projSty = None, errLevel = sfm.level.Content) :
@@ -256,13 +256,10 @@ class Text (Manager) :
                 doc = usfm.parser(fh, stylesheet, sfm.level.Content)
 
 
+# FIXME: Not getting any error returned without using sfm.pprint()
+# That gives me a stack-trace I want only the syntax errors of the sfm
 
-
-
-# FIXME: Not getting any error returned
-
-
-
+                x = sfm.pprint(doc)
 
 
                 self.project.log.writeToLog('TEXT-155', [source])
@@ -276,25 +273,25 @@ class Text (Manager) :
         '''Use the USFM parser to validate a style file. This is meant to
         be just a simple test so only return True or False.'''
 
+# FIXME: Inserted over-ride, this does not work now
+        return True
+
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()
             if projSty :
                 stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
                 stylesheet.update(stylesheet_extra)
+            doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
 
 
-
+            sfm.pprint(doc)
 
 
 # FIXME: Something is wrong with the error level setting here
+# I can only seem to get it to return True/False if I use sfm.pprint()
 
 
-
-
-
-#            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
-            doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
             return True
         except Exception as e :
             return False
