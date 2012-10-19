@@ -230,9 +230,9 @@ class ProjLog (object) :
             'POST-135' : ['MSG', 'There was no post process script for comonent type [<<1>>] found in the project configuration.'],
 
             'LOCK-000' : ['MSG', 'Messages for project and component locking.'],
-            'LOCK-010' : ['ERR', 'The [<<1>>] component is not found in this project. Process halted.'],
-            'LOCK-020' : ['MSG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
-            'LOCK-030' : ['MSG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
+            'LOCK-010' : ['LOG', 'The [<<1>>] component is not found in this project.'],
+            'LOCK-020' : ['LOG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
+            'LOCK-030' : ['LOG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
 
             'LOCK-058' : ['MSG', 'The [<<1>>] component has been locked. No further text processes can be run on it unless it is unlocked (-u).'],
             'LOCK-068' : ['MSG', 'The [<<1>>] component has been unlocked. This component can be processed.'],

@@ -105,6 +105,8 @@ class Text (Manager) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name.'''
 
+#        import pdb; pdb.set_trace()
+
         # Check to see if settings need updating
         self.updateManagerSettings()
         # Check if there is a font installed
@@ -121,6 +123,7 @@ class Text (Manager) :
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
+        self.project.createManager(self.cType, 'style')
         projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         if projStyName == '' :
             self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)

@@ -158,9 +158,11 @@ class Project (object) :
         # Check first to see if this is a meta component
         if self.isMetaComponent(cid) :
             for c in self.projConfig['Components'][cid]['list'] :
-                testComponent(c)
+                if testComponent(c) :
+                    return True
         else :
-            testComponent(cid)
+            if testComponent(cid) :
+                return True
 
 
     def findBadComp (self, cid) :
@@ -179,11 +181,13 @@ class Project (object) :
     def isMetaComponent (self, cid) :
         '''Return True if this component has a list of component in it.'''
 
-        if testForSetting(self.projConfig['Components'][cid], 'list') :
-            return True
-        else :
+        try :
+            if testForSetting(self.projConfig['Components'][cid], 'list') :
+                return True
+            else :
+                return False
+        except :
             return False
-
 
     def isComponentType (self, cType) :
         '''Simple test to see if a component type exsists. Return True if it is.'''
@@ -296,7 +300,7 @@ class Project (object) :
         # Force on add always means we delete the component first
         # before we do anything else
         if force :
-            self.removeComponent(cid)
+            self.removeComponent(cid, force)
 
         # See if the working text is present, quite if it is not
         if cType == 'usfm' :
@@ -308,6 +312,7 @@ class Project (object) :
                 # Finish the install by adding to config
                 if not testForSetting(self.projConfig, 'Components', cid) :
                     insertComponent()
+                    self.lockUnlock(cid, True)
                     if force :
                         self.log.writeToLog('COMP-022', [cid])
                     else :
@@ -367,6 +372,7 @@ class Project (object) :
 
         # We will not bother if it is not in the config file.
         # Otherwise, delete both the config and physical files
+        buildConfSection(self.projConfig, 'Components')
         if isConfSection(self.projConfig['Components'], cid) :
             del self.projConfig['Components'][cid]
             # Sanity check
@@ -423,9 +429,12 @@ class Project (object) :
         '''Test to see if a component is locked.Return True if the item is 
         locked. '''
 
-        if str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
-            return True
-        else :
+        try :
+            if str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
+                return True
+            else :
+                return False
+        except :
             return False
 
 
@@ -449,7 +458,7 @@ class Project (object) :
             # Update the projConfig
             writeConfFile(self.projConfig)
         else :
-            # Arggg, this is not good
+            # Arggg, this may not be good
             self.log.writeToLog('LOCK-010', [cid])
             return False
 
