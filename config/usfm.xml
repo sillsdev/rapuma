@@ -28,9 +28,9 @@ Todo:
         <value>paratext</value>
     </setting>
     <setting>
-        <name>Alternate Source Path</name>
-        <key>altSourcePath</key>
-        <description>This is an alternate path to component type specific source files. If an unknown editor is being used or if the source needs to come from outside the editing environment. This setting will override automated source path routines. Beware, this setting may be localized only and will not work on other systems.</description>
+        <name>Source Path</name>
+        <key>sourcePath</key>
+        <description>This is the path to component type specific source files. This is a required parameter for adding a component to a project. This is a system-specific settings and will throw an error if used on another system.</description>
         <type>string</type>
         <value></value>
     </setting>

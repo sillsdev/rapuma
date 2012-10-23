@@ -57,10 +57,10 @@ def formPTName (projConfig, cid) :
         return False
 
 
-def getPTFont (home) :
+def getPTFont (sourcePath) :
     '''Just return the name of the font used in a PT project.'''
 
-    ssf = getPTSettings(home)
+    ssf = getPTSettings(sourcePath)
     return ssf['ScriptureText']['DefaultFont']
 
 
@@ -95,19 +95,13 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     return sysSet
 
 
-def getPTSettings (home, altSourcePath = None) :
+def getPTSettings (sourcePath) :
     '''Look for the ParaTExt project settings file. The immediat PT project
     is the parent folder and the PT environment that the PT projet is found
     in, if any, is the grandparent folder. the .ssf (settings) file in the
     grandparent folder takes presidence over the one found in the parent folder.
     This function will determine where the primary .ssf file is and turn the
     data into a dictionary for the system to use.'''
-
-    # If an altSourcePath is given, this is not a "real" PT project. We will
-    # substitute home with altSourcePath and use that location to look for
-    # the settings we need.
-    if altSourcePath :
-        home = altSourcePath
 
     # Not sure where the PT SSF file might be or even what its name is.
     # Starting in parent, we should find the first .ssf file. That will
@@ -120,15 +114,10 @@ def getPTSettings (home, altSourcePath = None) :
     # .ssf file.
     ssfFileName = ''
     ptPath = ''
-    if altSourcePath :
-        parentFolder = home
-        grandparentFolder = os.path.dirname(parentFolder)
-        gatherFolder = os.path.join(parentFolder, 'gather')
-    else :
-        parentFolder = os.path.dirname(home)
-        grandparentFolder = os.path.dirname(parentFolder)
-        gatherFolder = os.path.join(parentFolder, 'gather')
-        
+    parentFolder = sourcePath
+    grandparentFolder = os.path.dirname(parentFolder)
+    gatherFolder = os.path.join(parentFolder, 'gather')
+
     # For now, we will assume that if there is a gather folder, it must have a .ssf file in it
     if os.path.isdir(gatherFolder) :
         parentFolder = gatherFolder

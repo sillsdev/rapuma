@@ -265,9 +265,13 @@ def userArguments (args) :
         # Add a new component group
         if args['add'] :
             if not args['list'] :
-                sys.exit('\nERROR: Must use -l (--list) when adding a component group. Process halted!\n')
+                sys.exit('\nERROR: Must provide -l (--list) when adding a component group. Process halted!\n')
+            elif not args['source'] :
+                sys.exit('\nERROR: Must provide -s (--source) when adding a component group. Process halted!\n')
+            elif not os.path.isdir(resolvePath(args['source'])) :
+                sys.exit('\nERROR: Must provide a valid source path when adding a component group. Process halted!\n')
             else :
-                aProject.addComponentGroup(args['component_type'], args['group_id'], args['list'], args['force'])
+                aProject.addComponentGroup(args['component_type'], args['group_id'], args['list'], resolvePath(args['source']), args['force'])
         # Delete a group component
         elif args['remove'] :
             # If -f is used, it will be passed to removeComponent() to delete 
@@ -284,7 +288,12 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'component' :
         # Add a new component
         if args['add'] :
-            aProject.addComponent(args['component_id'], args['component_type'], args['force'])
+            if not args['source'] :
+                sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
+            elif not os.path.isdir(resolvePath(args['source'])) :
+                sys.exit('\nERROR: Must provide a valid source path when adding a group. Process halted!\n')
+            else :
+                aProject.addComponent(args['component_id'], args['component_type'], resolvePath(args['source']), args['force'])
         # Delete a component
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
@@ -471,6 +480,7 @@ groupCommand.add_argument('-r', '--remove', action='store_true', help='Remove an
 groupCommand.add_argument('-l', '--list', help='A list of components to be in this group. This must be used if adding a group. It is not needed for removal. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a component group in this project.')
+groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the group\'s source files are found. (Used only for adding component groups, only one source path per component type allowed.)')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -483,6 +493,7 @@ compCommand.add_argument('-f', '--force', action='store_true', help='Force an ac
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='Validate a component file.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
+compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used only for adding components, only one source path per component type allowed.)')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

@@ -73,11 +73,8 @@ class Font (Manager) :
             setattr(self, k, v)
 
         if not self.ptDefaultFont :
-            if self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'] :
-                altSourcePath = self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath']
-                ptSet = getPTSettings(self.project.local.projHome, resolvePath(altSourcePath))
-            else :
-                ptSet = getPTSettings(self.project.local.projHome)
+            sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+            ptSet = getPTSettings(sourcePath)
 
             setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
             self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
@@ -312,6 +309,7 @@ class Font (Manager) :
         cRes = self.copyInFont(font, force)
         rRes = self.recordFont(self.cType, font, force)
         if cRes and rRes :
+            self.project.log.writeToLog('FONT-130', [font])
             return True
 
 

@@ -50,12 +50,12 @@ class Text (Manager) :
         self.cType              = cType
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'altSourcePath') :
-            self.altSourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath']
-            if self.altSourcePath :
-                self.altSourcePath = resolvePath(self.altSourcePath)
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourcePath') :
+            self.sourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+            if self.sourcePath :
+                self.sourcePath = resolvePath(self.sourcePath)
         else :
-            self.altSourcePath = ''
+            self.sourcePath = ''
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
@@ -79,7 +79,8 @@ class Text (Manager) :
         sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
         if sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = getPTSettings(self.project.local.projHome, self.altSourcePath)
+            sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+            ptSet = getPTSettings(sourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
@@ -145,8 +146,8 @@ class Text (Manager) :
         # Current assuption is that source text is located in a directory above the
         # that is the default. In case that is not the case, we can override that and
         # specify a path to the source. If that exists, then we will use that instead.
-        if self.altSourcePath :
-            source      = os.path.join(self.altSourcePath, thisFile)
+        if self.sourcePath :
+            source      = os.path.join(self.sourcePath, thisFile)
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 

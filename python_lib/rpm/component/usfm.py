@@ -80,6 +80,8 @@ class Usfm (Component) :
 
         self.cid = self.cfg['name']
 
+#        import pdb; pdb.set_trace()
+
         def preProcessComponent (cid) :
             '''This will prepare a component for rendering by checking for
             and/or creating any subcomponents it needs to render properly.'''
@@ -92,8 +94,8 @@ class Usfm (Component) :
                 return False
 
             # See if the working text is present, quite if it is not
-            if not self.project.managers['usfm_Text'].isUsfmWorkingText(cid) :
-                return False
+#            if not self.project.managers['usfm_Text'].isUsfmWorkingText(cid) :
+#                return False
 
             # Run any illustration processes needed
             

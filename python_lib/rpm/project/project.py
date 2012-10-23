@@ -249,14 +249,54 @@ class Project (object) :
         return compobj
 
 
-    def addComponentGroup (self, cType, gid, thisList, force = False) :
+    def hasSourcePath (self, cType) :
+        '''Check to see if there is a pre-exsisting path.'''
+
+        Ctype = cType.capitalize()
+        if testForSetting(self.projConfig['CompTypes'][Ctype], 'sourcePath') :
+            if self.projConfig['CompTypes'][Ctype]['sourcePath'] != '' :
+                return True
+
+
+    def sourceIsSame (self, cType, source) :
+        '''Check to see if the existing path is the same as the
+        new proposed path.'''
+
+        curPath = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+        if curPath == source :
+            return True
+
+
+    def addCompTypeSourcePath (self, cType, source) :
+        '''Add a source path for a component type if one does not
+        already exsist. If one exists, replace anyway. Last in wins!
+        The assumption is only one path per component type.'''
+
+        # Path has been resolved in RPM, we assume it should be valid
+        self.projConfig['CompTypes'][cType.capitalize()]['sourcePath'] = source
+        writeConfFile(self.projConfig)
+
+
+    def addComponentGroup (self, cType, gid, thisList, source, force = False) :
         '''Add a component group to the project. If any of the individual
         components are missing, it will try to add them to the project.'''
+
+        # Make sure the source path is there for this component type
+        if force :
+            self.addCompTypeSourcePath(cType, source)
+        else :
+            if not self.hasSourcePath(cType) :
+                self.addCompTypeSourcePath(cType, source)
+            else :
+                if not self.sourceIsSame(cType, source) :
+                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+                    self.log.writeToLog('COMP-090', [cType,current,source])
+                    dieNow()
 
         # Add/check individual components
         cidList = thisList.split()
         for cid in cidList :
-            self.addComponent(cid, cType, force)
+            self.addComponent(cid, cType, source, force)
 
         # Add the info to the components
         buildConfSection(self.projConfig, 'Components')
@@ -274,13 +314,26 @@ class Project (object) :
         return True
 
 
-    def addComponent (self, cid, cType, force = False) :
+    def addComponent (self, cid, cType, source, force = False) :
         '''This will add a component to the object we created 
         above in createComponent(). If the component is already
         listed in the project configuration it will not proceed
         unless force is set to True. Then it will remove the
         component listing, along with its files so a fresh
         copy can be added to the project.'''
+
+        # Make sure the source path is there for this component type
+        if force :
+            self.addCompTypeSourcePath(cType, source)
+        else :
+            if not self.hasSourcePath(cType) :
+                self.addCompTypeSourcePath(cType, source)
+            else :
+                if not self.sourceIsSame(cType, source) :
+                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+                    print current, source
+                    self.log.writeToLog('COMP-090', [cType,current,source])
+                    dieNow()
 
         def insertComponent () :
             buildConfSection(self.projConfig, 'Components')

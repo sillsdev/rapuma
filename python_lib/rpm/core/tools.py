@@ -41,7 +41,7 @@ def dieNow (msg = '') :
     if msg :
         '\n' + msg + ' RPM halting now!\n'
     else :
-        '\nRPM halting now!\n'
+        msg = '\nRPM halting now!\n'
 
     sys.exit(msg)
 

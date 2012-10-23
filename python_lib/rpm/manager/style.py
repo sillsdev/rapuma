@@ -70,12 +70,13 @@ class Style (Manager) :
         ''' This is a generalized function to direct a request 
         to install a style file into the project.'''
 
+#        import pdb; pdb.set_trace()
         if self.cType == 'usfm' :
             # If this is a force, then remove exsiting file and meta data
             if force :
                 self.removeUsfmStyFile(sType, force)
             if sFile :
-                if self.addExsitingUsfmStyFile(sFile, sType) :
+                if self.addExsitingUsfmStyFile(sFile, sType, force) :
                     self.recordStyleFile(sFile, sType)
                     return True
             else :
@@ -113,9 +114,9 @@ class Style (Manager) :
     def recordStyleFile (self, fileName, sType) :
         '''Record in the project conf file the style file being used.'''
 
-        self.project.projConfig['Managers'][self.cType + '_Style'][sType + 'StyleFile'] = fileName
+        self.project.projConfig['Managers'][self.cType + '_Style'][sType + 'StyleFile'] = fName(fileName)
         writeConfFile(self.project.projConfig)
-        self.project.log.writeToLog('STYL-010', [fileName,sType,self.cType])
+        self.project.log.writeToLog('STYL-010', [fName(fileName),sType,self.cType])
         return True
 
 
@@ -124,7 +125,8 @@ class Style (Manager) :
         project styles too.'''
 
         # First pick up our PT settings
-        ptConf = getPTSettings(self.project.local.projHome)
+        sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+        ptConf = getPTSettings(sourcePath)
         if not ptConf :
             return False
 
@@ -141,11 +143,11 @@ class Style (Manager) :
         # file should be found in the parent or grandparent folder. If that
         # exact file is not found in either place, a substitute will be
         # copied in from RPM and given the designated name.
-        altSourceStyle              = ''
-        altSourcePath               = ''
-        if self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'] :
-            altSourcePath           = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['altSourcePath'])
-            altSourceStyle          = os.path.join(altSourcePath, self.mainStyleFile)
+        sourceStyle              = ''
+        sourcePath               = ''
+        if self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'] :
+            sourcePath           = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'])
+            sourceStyle          = os.path.join(sourcePath, self.mainStyleFile)
         (parent, grandparent)       = ancestorsPath(self.project.local.projHome)
         # If there is a "gather" folder, assume the style file is there
         if os.path.isdir(os.path.join(parent, 'gather')) :
@@ -153,7 +155,7 @@ class Style (Manager) :
         else :
             ptProjStyle             = os.path.join(parent, self.mainStyleFile)
         ptStyle                     = os.path.join(grandparent, self.mainStyleFile)
-        searchOrder                 = [altSourceStyle, ptProjStyle, ptStyle]
+        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
         # We will start by searching in order from the inside out and stop
         # as soon as we find one.
         for sFile in searchOrder :
@@ -178,14 +180,17 @@ class Style (Manager) :
                 return sFile
 
 
-    def addExsitingUsfmStyFile (self, sFile, sType) :
+    def addExsitingUsfmStyFile (self, sFile, sType, force) :
         '''Add a specific style file that is on the local system.'''
 
         sFile = resolvePath(sFile)
         target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
 
-        # It's there? Good, we're done!
-        if os.path.isfile(sFile) :
+        if not force and os.path.isfile(target) :
+            self.project.log.writeToLog('STYL-030', [fName(sFile)])
+            return False
+        elif os.path.isfile(sFile) :
+            # It's there? Good, we're done!
             # If this is not an RPM custom style file we will validate it
             if sType.lower() == 'main' :
                 if self.usfmStyleFileIsValid(sFile) :
@@ -196,6 +201,12 @@ class Style (Manager) :
                     # We die if it does not validate
                     self.project.log.writeToLog('STYL-070', [fName(sFile)])
                     dieNow()
+            else :
+                # Assuming a custom style file we can grab most anything
+                # without validating it
+                shutil.copy(sFile, target)
+                self.project.log.writeToLog('STYL-065', [fName(sFile)])
+                return True
         else :
             # Not finding the file may not be the end of the world 
             self.project.log.writeToLog('STYL-020', [fName(sFile)])

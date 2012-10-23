@@ -1,5 +1,5 @@
 #!/bin/sh
-gnome-terminal --geometry=80x20 --tab --working-directory="ParatextProjects" &
+gnome-terminal --geometry=80x20 --tab --working-directory="Publishing" &
 gedit &
-nemo ~/ParatextProjects &
+nemo ~/Publishing &
 #libreoffice --calc ~/Projects/rpm/todo.ods

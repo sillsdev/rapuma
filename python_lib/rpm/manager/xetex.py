@@ -61,7 +61,8 @@ class Xetex (Manager) :
         self.ptSSFConf              = {}
         # Make a PT settings dictionary
         if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFConf = getPTSettings(self.project.local.projHome)
+            sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+            self.ptSSFConf = getPTSettings(sourcePath)
             if not self.ptSSFConf :
                 self.project.log.writeToLog('XTEX-005')
 
@@ -624,16 +625,12 @@ class Xetex (Manager) :
         self.custSty                = os.path.join(self.project.local.projStylesFolder, self.customStyleFile)
 
         # Set this flag to True if it is a meta component
-        self.cidMeta                = self.project.isMetaComponent(self.project.projConfig, self.cid)
+        self.cidMeta                = self.project.isMetaComponent(self.cid)
 
 #        import pdb; pdb.set_trace()
 
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
-
-        # Make sure we have a component folder in place before we do anything
-#        if not os.path.isdir(self.cidFolder) :
-#            os.makedirs(self.cidFolder)
 
         # The macro link file is named according to the type of component
         setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projMacrosFolder, self.cType + 'MacLinkFile.tex'))

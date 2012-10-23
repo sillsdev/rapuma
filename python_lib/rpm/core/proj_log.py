@@ -73,6 +73,7 @@ class ProjLog (object) :
             'COMP-065' : ['ERR', 'Adding the [<<1>>] component type to the project failed.'],
             'COMP-070' : ['ERR', 'Failed to render the [<<1>>] component. - project.renderComponent()'],
             'COMP-080' : ['ERR', 'Validate component is not implemented yet!'],
+            'COMP-090' : ['ERR', 'Component type [<<1>>] source path is [<<2>>] cannot use [<<3>>] as a replacement. Use (-f) force to override the current setting.'],
 
             'GRUP-000' : ['MSG', 'Group processing messages'],
             'GRUP-010' : ['MSG', ''],
@@ -157,6 +158,7 @@ class ProjLog (object) :
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
             'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
             'FONT-120' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.copyInFont())'],
+            'FONT-130' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-005' : ['MSG', 'LYOT-005 - Unassigned error message ID.'],
@@ -175,9 +177,11 @@ class ProjLog (object) :
             'STYL-000' : ['MSG', 'Style module messages'],
             'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],
             'STYL-007' : ['ERR', 'The [<<1>>] component type source text editor [<<2>>] is not supported by the style manager.'],
-            'STYL-010' : ['LOG', 'The style file [<<1>>] was set as the [<<2>>] style file for the [<<3>>] component type.'],
+            'STYL-010' : ['MSG', 'The style file [<<1>>] was set as the [<<2>>] style file for the [<<3>>] component type.'],
             'STYL-020' : ['ERR', 'Style file: [<<1>>] was not found. Operation failed.'],
+            'STYL-030' : ['WRN', 'Style file: [<<1>>] already exsits. Use (-f) force to replace it.'],
             'STYL-060' : ['LOG', 'The file [<<1>>] was validated and copied to the project styles folder.'],
+            'STYL-065' : ['LOG', 'The file [<<1>>] was copied to the project styles folder.'],
             'STYL-070' : ['ERR', 'Style file: [<<1>>] is not valid. Copy operation failed!'],
             'STYL-075' : ['LOG', 'Style file: [<<1>>] is not valid. Will attempt to find a valid one from another source.'],
             'STYL-090' : ['LOG', 'Style file: [<<1>>] was not found.'],
