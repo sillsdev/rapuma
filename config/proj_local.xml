@@ -191,6 +191,13 @@ Todo:
             <type>string</type>
             <value>Illustrations</value>
         </setting>
+        <setting>
+            <name>Project Source Backup</name>
+            <key>projSourceBackupFolder</key>
+            <description>The folder where project source files are backedup for archival purposes. These files are not used in any processes.</description>
+            <type>string</type>
+            <value>SourceBackup</value>
+        </setting>
     </section>
     <section>
         <name>RPM Folders</name>
