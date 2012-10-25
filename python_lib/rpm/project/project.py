@@ -1050,6 +1050,8 @@ class Project (object) :
         outConfObj = confObj
         try :
             # Walk our confObj to get to the section we want
+            print config
+            print section.split('/')
             for s in section.split('/') :
                 confObj = confObj[s]
         except :

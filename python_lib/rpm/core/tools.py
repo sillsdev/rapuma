@@ -137,22 +137,6 @@ def quotePath (path) :
 
     return '\"' + path + '\"'
 
-def ancestorsPath (homePath) :
-    '''This will start in the current folder/directory and return the paths of
-    the two directories above it.  You can't know where you are unless you know
-    where you come from.'''
-
-    parent              = os.path.dirname(homePath)
-    if not os.path.isdir(parent) :
-        parent = ''
-
-    grandparent         = os.path.dirname(parent)
-    if not os.path.isdir(grandparent) or grandparent == parent :
-        grandparent = ''
-
-    return (parent, grandparent)
-
-
 def isInZip(file, zip) :
     '''Look for a specific file in a zip file.'''
 

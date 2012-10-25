@@ -330,18 +330,18 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'style' :
         aProject.createManager(args['component_type'], 'style')
         manager = args['component_type'] + '_Style'
-        if args['validate'] :
-            # In this context we want to stop if an error is found and report it
-            # Passing true to validateStyleFile will do that
-            aProject.managers[manager].testStyleFile(args['path'])
-        # Be sure we have a style file type param
-        elif not args['type'] or args['type'].lower() not in ['main', 'custom'] :
-            sys.exit('\nERROR: Style file type (-t) is either missing or incorrect.\n')
-        else :
+        if args['style_type'] :
             if args['add'] :
-                aProject.managers[manager].addStyleFile(args['type'], args['path'], args['force'])
+                aProject.managers[manager].addStyleFile(args['style_type'], args['path'], args['force'])
             elif args['remove'] :
-                aProject.managers[manager].removeStyleFile(args['type'], args['force'])
+                aProject.managers[manager].removeStyleFile(args['Style_type'], args['force'])
+            elif args['validate'] :
+                # In this context we want to stop if an error is found and report it
+                # Passing true to validateStyleFile will do that
+                aProject.managers[manager].testStyleFile(args['path'])
+        else :
+            if args['style_type'].lower() not in ['main', 'custom'] :
+                sys.exit('\nERROR: Style file type (-t) is either missing or incorrect.\n')
 
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
@@ -509,13 +509,13 @@ fontCommand.add_argument('-g', '--glyph_map', help='[NOT IMPLEMENTED] Set a glyp
 # Add style subprocess arguments
 styleCommand = subparsers.add_parser('style', help='General style handling commands help')
 styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component.')
+styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component. (This is a required positional argument.)')
+styleCommand.add_argument('style_type', help='The type of style file this is. There are two acceptable types, \"main\" and \"custom\". (This is a required positional argument.)')
 styleCommand.add_argument('-a', '--add', action='store_true', help='Add a new style for a specific comonent type.')
 styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a style file for this component type.')
 styleCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific style file is required or to be auto-generated. Otherwise, a default will be used.')
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
 styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
-styleCommand.add_argument('-t', '--type', help='The type of style file this is. There are two acceptable types, \"main\" and \"custom\".')
 
 # Add text preprocessing subprocess arguments
 preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
@@ -543,10 +543,10 @@ postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Ex
 # Add settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
 settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-settingsCommand.add_argument('-c', '--configuration', help='The configuration set that the target setting is from.')
-settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
-settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
-settingsCommand.add_argument('-v', '--value', help='A new value to add or change to the specified key.')
+settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
+settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
+settingsCommand.add_argument('key', help='The key which has the value to be changed.')
+settingsCommand.add_argument('value', help='A new value to add or change to the specified key.')
 
 # Add Project Locking subprocess arguments
 lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')

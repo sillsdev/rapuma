@@ -125,7 +125,7 @@ class Style (Manager) :
         project styles too.'''
 
         # First pick up our PT settings
-        sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
+        sourcePath = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'])
         ptConf = getPTSettings(sourcePath)
         if not ptConf :
             return False
@@ -140,21 +140,17 @@ class Style (Manager) :
         # Set the target destination
         target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
         # As this is call is for a PT based project, it is certain the style
-        # file should be found in the parent or grandparent folder. If that
+        # file should be found in the source or parent folder. If that
         # exact file is not found in either place, a substitute will be
         # copied in from RPM and given the designated name.
-        sourceStyle              = ''
-        sourcePath               = ''
-        if self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'] :
-            sourcePath           = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'])
-            sourceStyle          = os.path.join(sourcePath, self.mainStyleFile)
-        (parent, grandparent)       = ancestorsPath(self.project.local.projHome)
+        sourceStyle             = os.path.join(sourcePath, self.mainStyleFile)
+        parent                  = os.path.dirname(sourcePath)
         # If there is a "gather" folder, assume the style file is there
-        if os.path.isdir(os.path.join(parent, 'gather')) :
-            ptProjStyle             = os.path.join(parent, 'gather', self.mainStyleFile)
+        if os.path.isdir(os.path.join(sourcePath, 'gather')) :
+            ptProjStyle             = os.path.join(sourcePath, 'gather', self.mainStyleFile)
         else :
-            ptProjStyle             = os.path.join(parent, self.mainStyleFile)
-        ptStyle                     = os.path.join(grandparent, self.mainStyleFile)
+            ptProjStyle             = os.path.join(sourcePath, self.mainStyleFile)
+        ptStyle                     = os.path.join(parent, self.mainStyleFile)
         searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
         # We will start by searching in order from the inside out and stop
         # as soon as we find one.
