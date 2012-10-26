@@ -283,6 +283,7 @@ class Xetex (Manager) :
                     getattr(self, 'make' + f[0].upper() + f[1:])()
                 except :
                     self.project.log.writeToLog('XTEX-055', [f[0].upper() + f[1:], fName(getattr(self, f))])
+                    dieNow()
 
             # Non required files are handled different we will look for
             # each one and try to make it if it is not there but will 
@@ -362,43 +363,49 @@ class Xetex (Manager) :
                         writeObject.write(line + '\n')
 
             # Add all the font def commands
-            writeObject.write('\n% Font Definitions\n')
-            fpath = ''
-            featureString = ''
-            for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
 
+            def addParams (writeObject, pList, line) :
 #                import pdb; pdb.set_trace()
+                for k,v in pList.iteritems() :
+                    if v :
+                        line = line.replace(k, v)
+                    else :
+                        line = line.replace(k, '')
+                writeObject.write(line + '\n')
 
+            writeObject.write('\n% Font Definitions\n')
+            for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
                 fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
-                useMapping = fInfo['FontInformation']['defaultMapping']
-                fontPath = os.path.join(self.project.local.projFontsFolder, f)
+                fontPath            = os.path.join(self.project.local.projFontsFolder, f)
+                useMapping          = self.project.projConfig['Managers']['usfm_Font']['useMapping']
+                if useMapping :
+                    useMapping      = os.path.join(fontPath, useMapping)
+                useRenderingSystem  = self.project.projConfig['Managers']['usfm_Font']['useRenderingSystem']
+                useLanguage         = self.project.projConfig['Managers']['usfm_Font']['useLanguage']
+                params              = {'^^mapping^^' : 'mapping=' + useMapping + ':', '^^renderer^^' : '/' + useRenderingSystem + ':', '^^language^^' : 'language=' + useLanguage + ':', '^^path^^' : fontPath}
 
                 # Create the fonts settings that will be used with TeX
                 if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
                     # Primary
                     writeObject.write('\n% These are normal use fonts for this type of component.\n')
                     for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
-                        if useMapping :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
-                        else :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
+                        addParams(writeObject, params, v)
+
                     # Secondary
                     writeObject.write('\n% These are font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        if useMapping :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
-                        else :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
+                        addParams(writeObject, params, v)
 
                 # There maybe additional fonts for this component. Their secondary settings need to be captured
+                # At this point it would be difficult to handle a full set of parms with a secondary
+                # font. For this reason, we take them all out. Only the primary font will support
+                # all font features.
+                params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
                 if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
                     # Secondary (only)
                     writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        if useMapping :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', ':mapping=' + os.path.join(fontPath, useMapping)) + '\n')
-                        else :
-                            writeObject.write(v.replace('^^path^^', fontPath).replace('^^mapping^^', '') + '\n')
+                        addParams(writeObject, params, v)
 
             # Add special custom commands (may want to parameterize these at some point)
             writeObject.write('\n% Special commands\n')

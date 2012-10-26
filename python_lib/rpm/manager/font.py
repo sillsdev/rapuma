@@ -337,11 +337,9 @@ class Font (Manager) :
                     self.project.projConfig['Managers'][self.manager]['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
-            try :
+            if testForSetting(self.fontConfig['Fonts'], font) :
                 del self.fontConfig['Fonts'][font]
                 return True
-            except :
-                return False
 
         # CompTypes need first letter capitalized to find them
         Ctype = cType.capitalize()

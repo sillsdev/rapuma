@@ -15,17 +15,24 @@ Todo:
 
 <root>
     <setting>
-        <name>Use Font Mappings</name>
-        <key>useMapping</key>
-        <description>The name of the font mapping file you wish to use.</description>
+        <name>Use Rendering System</name>
+        <key>useRenderingSystem</key>
+        <description>The font rendering system (abbreviation) that will be used, e.g. use \"GR\" for Graphite. The supplied font rendering system must be supported by the font, otherwise the field should remain empty.</description>
         <type>string</type>
         <value></value>
     </setting>
     <setting>
-        <name>Font Mapping List</name>
-        <key>installedMappings</key>
-        <description>A list of alternate TECKit font mappings installed for use with this component type.</description>
-        <type>list</type>
+        <name>Use Language</name>
+        <key>useLanguage</key>
+        <description>The language this font will be working with. Specify the language by using its three letter Ethnologue code. The language must be supported by the font, otherwise the field should remain empty.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Use Font Mappings</name>
+        <key>useMapping</key>
+        <description>The name of the font mapping file you wish to use. Only one file per component type can be used.</description>
+        <type>string</type>
         <value></value>
     </setting>
     <setting>

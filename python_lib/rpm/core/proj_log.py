@@ -95,7 +95,7 @@ class ProjLog (object) :
             'XTEX-040' : ['LOG', 'Created: <<1>>'],
             'XTEX-045' : ['TOD', 'File <<1>> is missing. Check the error log for an import error for this required file. The system cannot render without it.'],
             'XTEX-050' : ['ERR', 'USFM working text not found: <<1>>. This is required in order to render.'],
-            'XTEX-055' : ['ERR', 'make<<1>>() failed to create: <<2>>. This is a required file in order to render.'],
+            'XTEX-055' : ['ERR', 'make<<1>>() failed to properly create: <<2>>. This is a required file in order to render.'],
             'XTEX-060' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
             'XTEX-065' : ['LOG', 'File: <<1>> missing, created a new one.'],
             'XTEX-070' : ['LOG', 'Copied macro: <<1>>'],
