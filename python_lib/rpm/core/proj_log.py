@@ -53,6 +53,9 @@ class ProjLog (object) :
             'PROJ-040' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
             'PROJ-050' : ['ERR', 'Component [<<1>>] working text file was not found in the project configuration.'],
             'PROJ-060' : ['ERR', 'Component [<<1>>] was not found in the project configuration.'],
+            'PROJ-070' : ['ERR', 'Source file not found: [<<1>>].'],
+            'PROJ-080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
+            'PROJ-090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
 
             'COMP-000' : ['MSG', 'Component processing messages'],
             'COMP-005' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
