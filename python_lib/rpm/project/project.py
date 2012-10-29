@@ -205,12 +205,17 @@ class Project (object) :
 
         # Check for cid in config
         if self.isComponent(cid) :
-            try :
-                self.createComponent(cid).render(force)
-                return True
-            except :
-                self.log.writeToLog('COMP-070', [cid])
-                return False
+
+            self.createComponent(cid).render(force)
+            return True
+
+
+#            try :
+#                self.createComponent(cid).render(force)
+#                return True
+#            except :
+#                self.log.writeToLog('COMP-070', [cid])
+#                return False
         else :
             bad = self.findBadComp(cid)
             if bad :
@@ -331,7 +336,6 @@ class Project (object) :
             else :
                 if not self.sourceIsSame(cType, source) :
                     current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-                    print current, source
                     self.log.writeToLog('COMP-090', [cType,current,source])
                     dieNow()
 
@@ -1050,8 +1054,6 @@ class Project (object) :
         outConfObj = confObj
         try :
             # Walk our confObj to get to the section we want
-            print config
-            print section.split('/')
             for s in section.split('/') :
                 confObj = confObj[s]
         except :

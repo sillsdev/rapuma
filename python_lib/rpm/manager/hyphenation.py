@@ -25,7 +25,6 @@ import os
 # Load the local classes
 from tools import *
 from manager import Manager
-import hyphenation_command
 
 
 ###############################################################################
@@ -34,15 +33,31 @@ import hyphenation_command
 
 class Hyphenation (Manager) :
 
+    # Shared values
+    xmlConfFile     = 'hyphenation.xml'
+
+
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
 
 
-    def initManager (self) :
+    def __init__(self, project, cfg, cType) :
         '''Initialize the Hyphenation manager.'''
 
+        '''Do the primary initialization for this manager.'''
+
+        super(Hyphenation, self).__init__(project, cfg)
+
+
         print "Initializing Hyphenation Manager"
-        super(Hyphenation, self).initManager()
+
+
+# FIXME: 
+# Functions will need to be added that will process hyphenation data into a
+# file that can be used by the renderer to hyphenate the text it is working
+# with. Initially this will be for TeX rendering but can/should be expanded
+# to other types of renderers.
+
 
 

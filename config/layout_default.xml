@@ -266,7 +266,7 @@ Todo:
             <description>Sometimes the content should not start with the default page number of '1'. If a number is set in this field, the macro will insert a \pageno command in the control file.  Note this is for the main content section only.  Individual components in the front and back matter must have the \pageno command inserted manually into their control files.   Default = Null (which means no command output, page starts on '1')</description>
             <key>pageNumberBegin</key>
             <type>integer</type>
-            <value>None</value>
+            <value></value>
         </setting>
     </section>
     <section>

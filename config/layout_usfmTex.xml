@@ -144,7 +144,7 @@ Todo:
             <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
             <key>defineFootnoteRule</key>
             <type>string</type>
-            <value>None</value>
+            <value></value>
             <usfmTex>\def\footnoterule{[v]}</usfmTex>
         </setting>
         <setting>
@@ -166,7 +166,7 @@ Todo:
             <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
             <key>crossrefAutoCallerCharacter</key>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
     </section>
     <section>
@@ -408,14 +408,14 @@ Todo:
             <description>Pretolerance is an integer parameter that is used in TeX's line breaking algorithm as described below.  Use an integer from -1 to 10000.  If \pretolerance is -1, then TeX bypasses the first attempt at breaking a paragraph without hyphenation.  Normally it is always best to allow TeX to use its defaults first so the setting here is nothing by default.   Default = nothing</description>
             <key>pretolerance</key>
             <type>integer</type>
-            <value>None</value>
+            <value></value>
         </setting>
         <setting>
             <name>USFM TeX Final Hyphen Break Rules</name>
             <description>With some languages there may be consistent and easy places to break a word and these breaks can be applied automatically when the hyphen exceptions word list is being generated.  This is done by including a simple (or not so simple) regular expression (regex) in this field.  Example: (?u).(\u1064|\u1038)(?=\w.) This regex notation will be used in the hyphen word list generator to increase the number of breaks that can occur on words that qualify.</description>
             <key>Hyphenbreakrules</key>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
     </section>
     <section>
@@ -469,14 +469,14 @@ Todo:
             <description>If the captions file needs some preprocessing when being brought into the project, that command can put here.  If caption processing is not necessary leave this field blank.</description>
             <key>captionProcessing</key>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
         <setting>
             <name>USFM TeX PicPath</name>
             <description>The path to the project illustration files.</description>
             <key>picPath</key>
             <type>string</type>
-            <value>None</value>
+            <value></value>
             <boolDepend>Illustrations:useIllustrations</boolDepend>
             <usfmTex>\PicPath={[path:projIllustrationsFolder]}</usfmTex>
         </setting>
@@ -585,7 +585,7 @@ Todo:
             <description>Enter in the scale factor for the page boarder and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
             <key>pageBorderScale</key>
             <type>integer</type>
-            <value>None</value>
+            <value></value>
         </setting>
     </section>
     <section>

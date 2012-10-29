@@ -53,7 +53,8 @@ class Usfm (Component) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-        self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
+        self.usfmManagers = ['text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer]
+#        self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
 
         # Init the general managers
         for mType in self.usfmManagers :

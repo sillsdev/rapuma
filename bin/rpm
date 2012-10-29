@@ -321,8 +321,6 @@ def userArguments (args) :
                 aProject.managers[manager].removeFont(args['component_type'], font, args['force'])
             elif args['main'] :
                 aProject.managers[manager].setPrimaryFont(args['component_type'].capitalize(), font, args['force'])
-            elif args['glyph_map'] :
-                aProject.managers[manager].setGlyphMap(args['component_type'], font)
         else :
             sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
 
@@ -515,7 +513,6 @@ fontCommand.add_argument('-a', '--add', action='store_true', help='Add a new fon
 fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the font of a specified ID from this project.')
 fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
 fontCommand.add_argument('-m', '--main', action='store_true', help='Set, the specified (valid system) font to be the main (primary) font for this component type.')
-fontCommand.add_argument('-g', '--glyph_map', help='[NOT IMPLEMENTED] Set a glyph map to use. This is a valid glyph mapping file name found in the fonts folder used for remapping glyphs in this font.')
 
 # Add style subprocess arguments
 styleCommand = subparsers.add_parser('style', help='General style handling commands help')

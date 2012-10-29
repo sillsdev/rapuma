@@ -256,24 +256,13 @@ class Xetex (Manager) :
                 if self.files[fileID][0] == 'input' :
                     if os.path.isfile(getattr(self, fileID)) :
                         output = '\\input ' + quotePath(getattr(self, fileID)) + '\n'
-
                 elif self.files[fileID][0] in ['stylesheet', 'ptxfile'] :
-
-
-
-
-                    print fileID, getattr(self, fileID)
-
-
-
-
                     if os.path.isfile(getattr(self, fileID)) :
                         output = '\\' + self.files[fileID][0] + '{' + getattr(self, fileID) + '}\n'
             else :
                 output = '\\input ' + quotePath(getattr(self, 'cidTex')) + '\n'
 
             return output
-
 
         # Create or refresh any required files
         for f in self.primOut[typeID] :
@@ -304,6 +293,7 @@ class Xetex (Manager) :
                 writeObject.write(setLine(f))
         # If this is a global file, then put in the links to the component(s) to render
         if typeID == 'masterTex' :
+#            import pdb; pdb.set_trace()
             if self.cidMeta :
                 for c in self.project.projConfig['Components'][self.cid]['list'] :
                     # Make sure we are working with the right cid file names
@@ -619,7 +609,10 @@ class Xetex (Manager) :
         self.cid                    = cid
         self.cidMeta                = False
         self.custSty                = ''
-        self.hyphenTexFile          = os.path.join(self.project.local.projHyphenationFolder, 'hyphenation.tex')
+        if str2bool(self.project.projConfig['Managers']['usfm_Hyphenation']['useHyphenation']) :
+            self.hyphenTexFile      = os.path.join(self.project.local.projHyphenationFolder, self.project.projConfig['Managers']['usfm_Hyphenation']['hyphenTexFile'])
+        else :
+            self.hyphenTexFile      = ''
         self.layoutConfFile         = self.project.local.layoutConfFile
         self.fontConfFile           = self.project.local.fontConfFile
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
