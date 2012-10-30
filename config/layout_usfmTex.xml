@@ -296,6 +296,7 @@ Todo:
             <key>omitChapterNumber</key>
             <type>boolean</type>
             <value>False</value>
+            <boolDepend>HeaderContent:omitChapterNumber</boolDepend>
             <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
         <setting>

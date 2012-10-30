@@ -99,7 +99,7 @@ Todo:
             <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
             <key>columnGutterRule</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <boolDepend>Columns:columnGutterRule</boolDepend>
             <usfmTex>\ColumnGutterRuletrue</usfmTex>
         </setting>

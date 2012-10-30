@@ -326,6 +326,7 @@ class Xetex (Manager) :
             writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
             writeObject.write(self.texFileHeader(fName(self.setFile)))
 
+#           import pdb; pdb.set_trace()
             # Bring in the settings from the layoutConfig
             cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
             for section in cfg.keys() :
@@ -355,7 +356,6 @@ class Xetex (Manager) :
             # Add all the font def commands
 
             def addParams (writeObject, pList, line) :
-#                import pdb; pdb.set_trace()
                 for k,v in pList.iteritems() :
                     if v :
                         line = line.replace(k, v)
