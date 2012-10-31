@@ -209,7 +209,7 @@ class ProjLog (object) :
             'PREP-082' : ['ERR', 'The script file: [<<1>>] already exsists in the Scripts folder. Cannot copy over old file. Please use -f (force) to remove it if you want to install a fresh or different file.'],
             'PREP-085' : ['ERR', 'Source script not found: [<<1>>]'],
             'PREP-090' : ['LOG', 'Copied in custom preprocess file: [<<1>>] into Scripts folder.'],
-            'PREP-100' : ['MSG', 'The contents of the file [<<1>>] have been extracted into the Scripts folder.'],
+            'PREP-100' : ['LOG', 'The contents of the file [<<1>>] have been extracted into the Scripts folder.'],
             'PREP-105' : ['ERR', 'The contents of the file [<<1>>] failed to be extracted into the Scripts folder. Install custom preprocessing script failed.'],
             'PREP-110' : ['MSG', 'Preprocessing script: [<<1>>] has been installed into the Scripts folder and should be ready for use.'],
             'PREP-115' : ['MSG', 'Force switch was set (-f). Preprocessing script: [<<1>>] has been installed into the Scripts folder and should be ready for use.'],

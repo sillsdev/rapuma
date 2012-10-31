@@ -105,7 +105,7 @@ Todo:
         <description>Information for fonts used in the publication project.</description>
         <setting>
             <name>USFM TeX Font Size Unit</name>
-            <description>??? Need acurate description for this setting. ???</description>
+            <description>Using a value in points (pt), this scales the font size of all elements according to the amount of the value. 1pt is equal to 100%. Example, to decrease the size by 5%, enter the value .095pt. Default = 1pt</description>
             <key>fontSizeUnit</key>
             <type>integer</type>
             <value>1pt</value>

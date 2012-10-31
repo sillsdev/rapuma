@@ -646,29 +646,7 @@ class Project (object) :
         except :
             oldScript       = ''
 
-        # First check for prexsisting script record
-        if not force :
-            if oldScript == fName(scriptTarget) :
-                self.log.writeToLog('PREP-081')
-                return False
-            elif oldScript != '' :
-                self.log.writeToLog('PREP-080', [oldScript])
-                return False
-
-        # In case this is a new project we may need to install a component
-        # type and make a process (components) folder
-        if not self.isComponentType(cType) :
-            self.addComponentType(cType)
-
-        # Make the target folder if needed
-        if not os.path.isdir(scriptTargetFolder) :
-            os.makedirs(scriptTargetFolder)
-
-        # First check to see if there already is a script file, return if there is
-        if os.path.isfile(scriptTarget) and not force :
-            self.log.writeToLog('PREP-082', [fName(scriptTarget)])
-            return False
-
+        # Define internal functions
         def test () :
             # Test for successful extraction
             if os.path.isfile(scriptTarget) :
@@ -678,29 +656,67 @@ class Project (object) :
                 self.log.writeToLog('PREP-105', [fName(scriptTarget)])
                 return False
 
+        def record () :
+            # Record the script with the cType
+            self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(scriptTarget)
+            writeConfFile(self.projConfig)
+
+        def permissions () :
+            # I have not found a way to preserve permissions of the files comming
+            # out of a zip archive. To make sure the preprocessing script will
+            # actually work when it needs to run. Changing the permissions to
+            # 777 may not be the best way but it will work for now.
+            os.chmod(scriptTarget, int("0777", 8))
+
+        # First check for prexsisting script and record, if there is,
+        # just go a head and put a new one in and return
+        if force :
+            if os.path.isfile(scriptTarget) :
+                os.remove(scriptTarget)
+            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
+                self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = ''
+                writeConfFile(self.projConfig)
+            self.scriptInstall(script, scriptTarget)
+            # Test the install
+            if not test() :
+                dieNow('Failed to install script!')
+            else :
+                record()
+                permissions()
+                # Report and end
+                self.log.writeToLog('PREP-115', [fName(scriptTarget)])
+                return True
+
+        # If we made it this far, look for pre-existing script
+        if oldScript == fName(scriptTarget) :
+            self.log.writeToLog('PREP-081')
+            return False
+        elif oldScript != '' :
+            self.log.writeToLog('PREP-080', [oldScript])
+            return False
+        elif os.path.isfile(scriptTarget) :
+            self.log.writeToLog('PREP-082', [fName(scriptTarget)])
+            return False
+
+        # At this point we are looking at a fresh install
+        # In case this is a new project we may need to install a component
+        # type and make a process (components) folder
+        if not self.isComponentType(cType) :
+            self.addComponentType(cType)
+
+        # Make the target folder if needed
+        if not os.path.isdir(scriptTargetFolder) :
+            os.makedirs(scriptTargetFolder)
+
         # No script found, we can proceed
-        if not os.path.isfile(scriptTarget) :
-            self.scriptInstall(script, scriptTarget)
-            if not test() :
-                dieNow('Failed to install script!')
+        self.scriptInstall(script, scriptTarget)
+        if not test() :
+            dieNow('Failed to install script!')
+        else :
+            record()
+            permissions()
             self.log.writeToLog('PREP-110', [fName(scriptTarget)])
-        elif force :
-            self.scriptInstall(script, scriptTarget)
-            if not test() :
-                dieNow('Failed to install script!')
-            self.log.writeToLog('PREP-115', [fName(scriptTarget)])
-
-        # I have not found a way to preserve permissions of the files comming
-        # out of a zip archive. To make sure the preprocessing script will
-        # actually work when it needs to run. Changing the permissions to
-        # 777 may not be the best way but it will work for now.
-        os.chmod(scriptTarget, int("0777", 8))
-
-        # Record the script with the cType
-        self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(scriptTarget)
-        writeConfFile(self.projConfig)
-
-        return True
+            return True
 
 
     def removePreprocess (self, cType) :
@@ -729,13 +745,13 @@ class Project (object) :
         '''Install a script. A script can be a collection of items in
         a zip file or a single .py script file.'''
 
-        scriptTargetFolder = os.path.split(target)
-        if fName(target).split('.')[1].lower() == 'py' :
+        scriptTargetFolder, fileName = os.path.split(target)
+        if fName(source).split('.')[1].lower() == 'py' :
             shutil.copy(source, target)
-        elif fName(target).split('.')[1].lower() == 'zip' :
+        elif fName(source).split('.')[1].lower() == 'zip' :
             myZip = zipfile.ZipFile(source, 'r')
             for f in myZip.namelist() :
-                data = myZip.read(f, script)
+                data = myZip.read(f, source)
                 # Pretty sure zip represents directory separator char as "/" regardless of OS
                 myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
                 try :
