@@ -55,7 +55,9 @@ Todo:
             <description>Setting this to True will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Default = True</description>
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
+            <usfmTex>\OmitVerseNumberOnetrue</usfmTex>
+            <boolDepend>ChapterVerse:omitVerseNumberOne</boolDepend>
         </setting>
         <setting>
             <name>Chapter Verse Separator</name>
@@ -286,6 +288,27 @@ Todo:
             <key>rightToLeft</key>
             <type>boolean</type>
             <value>False</value>
+        </setting>
+    </section>
+    <section>
+        <name>TeX Behavior</name>
+        <sectionID>TeXBehavior</sectionID>
+        <description>Settings that make TeX behave better</description>
+        <setting>
+            <name>Horizontal Fuzz</name>
+            <description>Specify the amount that a horizontal box (hbox) can exceed its natrual size before TeX conciders it to be overfull. The normal Plain TeX default is 0.1pt.</description>
+            <key>hFuzz</key>
+            <type>integer</type>
+            <value>0.1pt</value>
+            <usfmTex>\hfuzz=[v]</usfmTex>
+        </setting>
+        <setting>
+            <name>Vertical Fuzz</name>
+            <description>Specify the amount that a vertical box (vbox) can exceed its natrual size before TeX conciders it to be overfull. The normal Plain TeX default is 0.1pt.</description>
+            <key>vFuzz</key>
+            <type>integer</type>
+            <value>0.1pt</value>
+            <usfmTex>\vfuzz=[v]</usfmTex>
         </setting>
     </section>
 </root>

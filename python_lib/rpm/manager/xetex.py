@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, re
 import subprocess
 
 # Load the local classes
@@ -361,6 +361,11 @@ class Xetex (Manager) :
                         line = line.replace(k, v)
                     else :
                         line = line.replace(k, '')
+                # Clean out unused placeholders
+                line = re.sub(u"\^\^[a-z]+\^\^", "", line)
+                # Remove unneeded colon from the end of the string
+                line = re.sub(u":\"", "\"", line)
+                # Write it out
                 writeObject.write(line + '\n')
 
             writeObject.write('\n% Font Definitions\n')
@@ -372,7 +377,15 @@ class Xetex (Manager) :
                     useMapping      = os.path.join(fontPath, useMapping)
                 useRenderingSystem  = self.project.projConfig['Managers']['usfm_Font']['useRenderingSystem']
                 useLanguage         = self.project.projConfig['Managers']['usfm_Font']['useLanguage']
-                params              = {'^^mapping^^' : 'mapping=' + useMapping + ':', '^^renderer^^' : '/' + useRenderingSystem + ':', '^^language^^' : 'language=' + useLanguage + ':', '^^path^^' : fontPath}
+                params              = {}
+                if useMapping :
+                    params['^^mapping^^'] = 'mapping=' + useMapping + ':'
+                if useRenderingSystem :
+                    params['^^renderer^^'] = '/' + useRenderingSystem + ':'
+                if useLanguage :
+                    params['^^language^^'] = 'language=' + useLanguage + ':'
+                if fontPath :
+                    params['^^path^^'] = fontPath
 
                 # Create the fonts settings that will be used with TeX
                 if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
@@ -397,13 +410,41 @@ class Xetex (Manager) :
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
                         addParams(writeObject, params, v)
 
-            # Add special custom commands (may want to parameterize these at some point)
+            # Add special custom commands (may want to parameterize and move 
+            # these to the config XML at some point)
             writeObject.write('\n% Special commands\n')
-            writeObject.write('\catcode`@=11\n')
-            writeObject.write('\def\makedigitsother{\m@kedigitsother}\n')
-            writeObject.write('\def\makedigitsletters{\m@kedigitsletters}\n')
-            writeObject.write('\catcode `@=12\n')
-            writeObject.write('\\vfuzz=2.3pt\n')
+
+            # This will insert a code that allows the use of numbers in the source text
+            writeObject.write(u'\\catcode`@=11\n')
+            writeObject.write(u'\\def\\makedigitsother{\\m@kedigitsother}\n')
+            writeObject.write(u'\\def\\makedigitsletters{\\m@kedigitsletters}\n')
+            writeObject.write(u'\\catcode `@=12\n')
+
+            # Special space characters
+            writeObject.write(u'\\def\\nbsp{\u00a0}\n')
+            writeObject.write(u'\\def\\zwsp{\u200b}\n')
+
+            ## Baselineskip Adjustment Hook
+            # This hook provides a means to adjust the baselineskip on a
+            # specific style. It provides a place to put the initial 
+            # setting so the hook can make the change and then go back
+            # to the initial setting when done.
+            # Usage Example:
+            #   \sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
+            #   \sethook{after}{s1}{\baselineskip=\remblskip}
+            writeObject.write(u'\\newdimen\\remblskip \\remblskip=\\baselineskip\n')
+
+
+            # WORKING TEXT LINE SPACING
+            # Take out a little space between lines in working text
+            writeObject.write(u'\\def\\suckupline{\\vskip -\\baselineskip}\n')
+            writeObject.write(u'\\def\\suckuphalfline{\\vskip -0.5\\baselineskip}\n')
+            writeObject.write(u'\\def\\suckupqline{\\vskip -0.25\\baselineskip}\n')
+
+            # Skip some space in the working text
+            writeObject.write(u'\\def\\skipline{\\vskip\\baselineskip}\n')
+            writeObject.write(u'\\def\\skiphalfline{\\vskip 0.5\\baselineskip}\n')
+            writeObject.write(u'\\def\\skipqline{\\vskip 0.25\\baselineskip}\n')
 
             # End here
             writeObject.close()

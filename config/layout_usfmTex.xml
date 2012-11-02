@@ -158,14 +158,14 @@ Todo:
             <name>USFM TeX Footnote Auto Caller Character</name>
             <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add position control as well by raising and kerning as in some of the examples.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*} By setting something in this field you will override the autoCallerStartChar setting.   Default = *</description>
             <key>footnoteAutoCallerCharacter</key>
-            <type>string</type>
+            <type>list</type>
             <value>\kern0.2em *\kern0.4em</value>
         </setting>
         <setting>
             <name>USFM TeX Crossreference Auto Caller Character</name>
             <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
             <key>crossrefAutoCallerCharacter</key>
-            <type>string</type>
+            <type>list</type>
             <value></value>
         </setting>
     </section>

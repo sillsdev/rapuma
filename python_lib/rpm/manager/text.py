@@ -222,6 +222,14 @@ class Text (Manager) :
 
         # Check/Clean up the text
         tidy = sfm.pprint(doc)
+        
+        # FIXME:
+        # Aternate that ties to a work around which keeps the \ft from
+        # being pulled from the text by the pprint() process.
+        # Right now there are a couple bugs in the USFM parser
+        # that prevent this from working right.
+#        tidy = sfm.pprint(demote_notetext(doc))
+
         self.project.log.writeToLog('TEXT-090')
 
         # Normalize the text according to the usfm_Text config setting 
@@ -300,6 +308,22 @@ class Text (Manager) :
         except Exception as e :
             return False
 
+
+# This next function is experimental and is designed to prevent
+# the \ft code from being removed from footnotes. Once it is known
+# to work, this code should be incorporated into the palaso 
+# usfm.py lib file
+def demote_notetext(doc):
+    def _g(e):
+        if isinstance(e, sfm.element):
+            e = element(e.name, e.pos, e.args, content=map(_g, e), meta=e.meta)
+            reduce(lambda _,e_: setattr(e_,'parent',e), e, None)
+            return e
+        elif e.parent.annotations.get('content-promoted'):
+            e = sfm.element('ft',e.pos, parent=e.parent, content=[e])
+            e[0].parent = e
+            return e
+    return map(_g,doc)
 
 
 
