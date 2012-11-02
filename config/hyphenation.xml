@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: hyphenation.xml
+Description:
+This is a component type description for the font manager. It contains default
+information for a font type manager and acts as a template for managers created
+in a type of publication. This information goes in the project configuration.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Use Hyphenation</name>
+        <key>useHyphenation</key>
+        <description>Turn on (or off) the use of hyphenation for this component type in this project.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
+        <name>TeX Hyphenation Definitions File</name>
+        <key>hyphenTexFile</key>
+        <description>The name of the TeX file that contains word hyphenation break points.</description>
+        <type>string</type>
+        <value>hyphenation.tex</value>
+    </setting>
+</root>
+
