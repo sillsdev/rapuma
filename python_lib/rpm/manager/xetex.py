@@ -269,9 +269,14 @@ class Xetex (Manager) :
             # This is for required files, if something fails here we should die
             if str2bool(self.files[f][1]) :
                 try :
+                    # Call a function by constructing the name on the fly
                     getattr(self, 'make' + f[0].upper() + f[1:])()
-                except :
+                except Exception as e :
                     self.project.log.writeToLog('XTEX-055', [f[0].upper() + f[1:], fName(getattr(self, f))])
+                    terminal('\nPython reported this error:\n\n\t[' + str(e) + ']\n')
+                    terminal('For debugging [' + fName(getattr(self, f)) + '] contents are:\n\n' + str(open(getattr(self, f)).read()))
+                    # No use keeping the file around if it isn't any good
+                    os.remove(getattr(self, f))
                     dieNow()
 
             # Non required files are handled different we will look for
@@ -309,166 +314,186 @@ class Xetex (Manager) :
         return True
 
 
+    def makeIt (self, sFile) :
+        '''Internal function to build the setFile.'''
+
+        # Get the default and TeX macro values and merge them into one dictionary
+        x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+        y = self.makeTexSettingsDict(self.macLayoutValFile)
+        macTexVals = dict(y.items() + x.items())
+
+        writeObject = codecs.open(sFile, "w", encoding='utf_8')
+        writeObject.write(self.texFileHeader(fName(sFile)))
+
+#        import pdb; pdb.set_trace()
+        
+        # Bring in the settings from the layoutConfig
+        cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
+        for section in cfg.keys() :
+            writeObject.write('\n% ' + section + '\n')
+
+            for k, v in cfg[section].iteritems() :
+                # This will prevent output on empty fields
+                if not v :
+                    continue
+
+                if testForSetting(macTexVals, k, 'usfmTex') :
+                    line = macTexVals[k]['usfmTex']
+                    # If there is a boolDepend then we don't need to output
+                    if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
+                        continue
+                    else :
+                        if self.hasPlaceHolder(line) :
+                            (ht, hk) = self.getPlaceHolder(line)
+                            # Insert the raw value
+                            if ht == 'v' :
+                                line = self.insertValue(line, v)
+                            # A value that needs a measurement unit attached
+                            elif ht == 'vm' :
+                                line = self.insertValue(line, self.addMeasureUnit(v))
+                            # A value that is a path
+                            elif ht == 'path' :
+                                pth = getattr(self.project.local, hk)
+                                line = self.insertValue(line, pth)
+
+                    writeObject.write(line + '\n')
+
+        # Add all the font def commands
+
+        def addParams (writeObject, pList, line) :
+            for k,v in pList.iteritems() :
+                if v :
+                    line = line.replace(k, v)
+                else :
+                    line = line.replace(k, '')
+            # Clean out unused placeholders
+            line = re.sub(u"\^\^[a-z]+\^\^", "", line)
+            # Remove unneeded colon from the end of the string
+            line = re.sub(u":\"", "\"", line)
+            # Write it out
+            writeObject.write(line + '\n')
+
+        writeObject.write('\n% Font Definitions\n')
+        for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
+            fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
+            fontPath            = os.path.join(self.project.local.projFontsFolder, f)
+            useMapping          = self.project.projConfig['Managers']['usfm_Font']['useMapping']
+            if useMapping :
+                useMapping      = os.path.join(fontPath, useMapping)
+            useRenderingSystem  = self.project.projConfig['Managers']['usfm_Font']['useRenderingSystem']
+
+            useLanguage         = self.project.projConfig['Managers']['usfm_Font']['useLanguage']
+            params              = {}
+            if useMapping :
+                params['^^mapping^^'] = 'mapping=' + useMapping + ':'
+            if useRenderingSystem :
+                params['^^renderer^^'] = '/' + useRenderingSystem + ':'
+            if useLanguage :
+                params['^^language^^'] = 'language=' + useLanguage + ':'
+            if fontPath :
+                params['^^path^^'] = fontPath
+
+            # Create the fonts settings that will be used with TeX
+            if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
+                # Primary
+                writeObject.write('\n% These are normal use fonts for this type of component.\n')
+                for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
+                    addParams(writeObject, params, v)
+
+                # Secondary
+                writeObject.write('\n% These are font settings for other custom uses.\n')
+                for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
+                    addParams(writeObject, params, v)
+
+            # There maybe additional fonts for this component. Their secondary settings need to be captured
+            # At this point it would be difficult to handle a full set of parms with a secondary
+            # font. For this reason, we take them all out. Only the primary font will support
+            # all font features.
+            params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
+            if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
+                # Secondary (only)
+                writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
+                for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
+                    addParams(writeObject, params, v)
+
+        # Add special custom commands (may want to parameterize and move 
+        # these to the config XML at some point)
+        writeObject.write('\n% Special commands\n')
+
+        # This will insert a code that allows the use of numbers in the source text
+        writeObject.write(u'\\catcode`@=11\n')
+        writeObject.write(u'\\def\\makedigitsother{\\m@kedigitsother}\n')
+        writeObject.write(u'\\def\\makedigitsletters{\\m@kedigitsletters}\n')
+        writeObject.write(u'\\catcode `@=12\n')
+
+        # Special space characters
+        writeObject.write(u'\\def\\nbsp{\u00a0}\n')
+        writeObject.write(u'\\def\\zwsp{\u200b}\n')
+
+        ## Baselineskip Adjustment Hook
+        # This hook provides a means to adjust the baselineskip on a
+        # specific style. It provides a place to put the initial 
+        # setting so the hook can make the change and then go back
+        # to the initial setting when done.
+        # Usage Example:
+        #   \sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
+        #   \sethook{after}{s1}{\baselineskip=\remblskip}
+        writeObject.write(u'\\newdimen\\remblskip \\remblskip=\\baselineskip\n')
+
+
+        # WORKING TEXT LINE SPACING
+        # Take out a little space between lines in working text
+        writeObject.write(u'\\def\\suckupline{\\vskip -\\baselineskip}\n')
+        writeObject.write(u'\\def\\suckuphalfline{\\vskip -0.5\\baselineskip}\n')
+        writeObject.write(u'\\def\\suckupqline{\\vskip -0.25\\baselineskip}\n')
+
+        # Skip some space in the working text
+        writeObject.write(u'\\def\\skipline{\\vskip\\baselineskip}\n')
+        writeObject.write(u'\\def\\skiphalfline{\\vskip 0.5\\baselineskip}\n')
+        writeObject.write(u'\\def\\skipqline{\\vskip 0.25\\baselineskip}\n')
+
+        # End here
+        writeObject.close()
+        self.project.log.writeToLog('XTEX-040', [fName(sFile)])
+        return True
+
+
     def makeSetFile (self) :
         '''Create the main settings file that XeTeX will use in cidTex to render 
         cidPdf. This is a required file so it will run every time. However, it
         may not need to be remade. We will look for its exsistance and then compare 
         it to its primary dependents to see if we actually need to do anything.'''
 
-        def makeIt () :
-            '''Internal function to build the setFile.'''
-
-            # Get the default and TeX macro values and merge them into one dictionary
-            x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
-            y = self.makeTexSettingsDict(self.macLayoutValFile)
-            macTexVals = dict(y.items() + x.items())
-
-            writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
-            writeObject.write(self.texFileHeader(fName(self.setFile)))
-
-#           import pdb; pdb.set_trace()
-            # Bring in the settings from the layoutConfig
-            cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
-            for section in cfg.keys() :
-                writeObject.write('\n% ' + section + '\n')
-                for k, v in cfg[section].iteritems() :
-                    if testForSetting(macTexVals, k, 'usfmTex') :
-                        line = macTexVals[k]['usfmTex']
-                        # If there is a boolDepend then we don't need to output
-                        if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
-                            continue
-                        else :
-                            if self.hasPlaceHolder(line) :
-                                (ht, hk) = self.getPlaceHolder(line)
-                                # Just a plan value
-                                if ht == 'v' :
-                                    line = self.insertValue(line, v)
-                                # A value that needs a measurement unit attached
-                                elif ht == 'vm' :
-                                    line = self.insertValue(line, self.addMeasureUnit(v))
-                                # A value that is a path
-                                elif ht == 'path' :
-                                    pth = getattr(self.project.local, hk)
-                                    line = self.insertValue(line, pth)
-
-                        writeObject.write(line + '\n')
-
-            # Add all the font def commands
-
-            def addParams (writeObject, pList, line) :
-                for k,v in pList.iteritems() :
-                    if v :
-                        line = line.replace(k, v)
-                    else :
-                        line = line.replace(k, '')
-                # Clean out unused placeholders
-                line = re.sub(u"\^\^[a-z]+\^\^", "", line)
-                # Remove unneeded colon from the end of the string
-                line = re.sub(u":\"", "\"", line)
-                # Write it out
-                writeObject.write(line + '\n')
-
-            writeObject.write('\n% Font Definitions\n')
-            for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
-                fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
-                fontPath            = os.path.join(self.project.local.projFontsFolder, f)
-                useMapping          = self.project.projConfig['Managers']['usfm_Font']['useMapping']
-                if useMapping :
-                    useMapping      = os.path.join(fontPath, useMapping)
-                useRenderingSystem  = self.project.projConfig['Managers']['usfm_Font']['useRenderingSystem']
-                useLanguage         = self.project.projConfig['Managers']['usfm_Font']['useLanguage']
-                params              = {}
-                if useMapping :
-                    params['^^mapping^^'] = 'mapping=' + useMapping + ':'
-                if useRenderingSystem :
-                    params['^^renderer^^'] = '/' + useRenderingSystem + ':'
-                if useLanguage :
-                    params['^^language^^'] = 'language=' + useLanguage + ':'
-                if fontPath :
-                    params['^^path^^'] = fontPath
-
-                # Create the fonts settings that will be used with TeX
-                if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
-                    # Primary
-                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
-                    for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-                    # Secondary
-                    writeObject.write('\n% These are font settings for other custom uses.\n')
-                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-                # There maybe additional fonts for this component. Their secondary settings need to be captured
-                # At this point it would be difficult to handle a full set of parms with a secondary
-                # font. For this reason, we take them all out. Only the primary font will support
-                # all font features.
-                params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
-                    # Secondary (only)
-                    writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
-                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-            # Add special custom commands (may want to parameterize and move 
-            # these to the config XML at some point)
-            writeObject.write('\n% Special commands\n')
-
-            # This will insert a code that allows the use of numbers in the source text
-            writeObject.write(u'\\catcode`@=11\n')
-            writeObject.write(u'\\def\\makedigitsother{\\m@kedigitsother}\n')
-            writeObject.write(u'\\def\\makedigitsletters{\\m@kedigitsletters}\n')
-            writeObject.write(u'\\catcode `@=12\n')
-
-            # Special space characters
-            writeObject.write(u'\\def\\nbsp{\u00a0}\n')
-            writeObject.write(u'\\def\\zwsp{\u200b}\n')
-
-            ## Baselineskip Adjustment Hook
-            # This hook provides a means to adjust the baselineskip on a
-            # specific style. It provides a place to put the initial 
-            # setting so the hook can make the change and then go back
-            # to the initial setting when done.
-            # Usage Example:
-            #   \sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
-            #   \sethook{after}{s1}{\baselineskip=\remblskip}
-            writeObject.write(u'\\newdimen\\remblskip \\remblskip=\\baselineskip\n')
-
-
-            # WORKING TEXT LINE SPACING
-            # Take out a little space between lines in working text
-            writeObject.write(u'\\def\\suckupline{\\vskip -\\baselineskip}\n')
-            writeObject.write(u'\\def\\suckuphalfline{\\vskip -0.5\\baselineskip}\n')
-            writeObject.write(u'\\def\\suckupqline{\\vskip -0.25\\baselineskip}\n')
-
-            # Skip some space in the working text
-            writeObject.write(u'\\def\\skipline{\\vskip\\baselineskip}\n')
-            writeObject.write(u'\\def\\skiphalfline{\\vskip 0.5\\baselineskip}\n')
-            writeObject.write(u'\\def\\skipqline{\\vskip 0.25\\baselineskip}\n')
-
-            # End here
-            writeObject.close()
-            self.project.log.writeToLog('XTEX-040', [fName(self.setFile)])
-
-        # Start the main part of the function here
+#        import pdb; pdb.set_trace()
 
         # Check for existance and age
         if os.path.isfile(self.setFile) :
             if isOlder(self.setFile, self.layoutConfFile) :
                 # Something changed in the layout conf file
-                makeIt()
-                self.project.log.writeToLog('XTEX-060', [fName(self.layoutConfFile),fName(self.setFile)])
+                if self.makeIt(self.setFile) :
+                    self.project.log.writeToLog('XTEX-060', [fName(self.layoutConfFile),fName(self.setFile)])
+                else :
+                    return False
+
             elif isOlder(self.setFile, self.fontConfFile) :
                 # Something changed in the font conf file
-                makeIt()
-                self.project.log.writeToLog('XTEX-060', [fName(self.fontConfFile),fName(self.setFile)])
+                if self.makeIt(self.setFile) :
+                    self.project.log.writeToLog('XTEX-060', [fName(self.fontConfFile),fName(self.setFile)])
+                else :
+                    return False
+
             elif isOlder(self.setFile, self.project.local.projConfFile) :
                 # Something changed in the proj conf file
-                makeIt()
-                self.project.log.writeToLog('XTEX-060', [fName(self.project.local.projConfFile),fName(self.setFile)])
+                if self.makeIt(self.setFile) :
+                    self.project.log.writeToLog('XTEX-060', [fName(self.project.local.projConfFile),fName(self.setFile)])
+                else :
+                    return False
+
         else :
-            makeIt()
-            self.project.log.writeToLog('XTEX-065', [fName(self.setFile)])
+            if self.makeIt(self.setFile) :
+                self.project.log.writeToLog('XTEX-065', [fName(self.setFile)])
+            else :
+                return False
 
         return True
 
@@ -586,7 +611,8 @@ class Xetex (Manager) :
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]
-        return line.replace(ph, v)
+        line = line.replace(ph, v)
+        return line
 
 
     def makeTexSettingsDict (self, xmlFile) :
@@ -668,8 +694,6 @@ class Xetex (Manager) :
         # Set this flag to True if it is a meta component
         self.cidMeta                = self.project.isMetaComponent(self.cid)
 
-#        import pdb; pdb.set_trace()
-
         # Build the initial cid names/paths
         self.buildCidFileNames(self.cid)
 
@@ -713,6 +737,8 @@ class Xetex (Manager) :
                             }
 
         # With all the new values defined start running here
+
+#        import pdb; pdb.set_trace()
 
         # Check if this is a meta component, preprocess all subcomponents
         if self.cidMeta :

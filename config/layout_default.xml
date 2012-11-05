@@ -107,73 +107,41 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>Footnotes</name>
-        <sectionID>Footnotes</sectionID>
-        <description>This section includes all textual elements that go into footnote area which included both footnotes and cross references.</description>
+        <name>Crossreferences</name>
+        <sectionID>Crossreferences</sectionID>
+        <description>This section includes all textual elements that go into the crossreferences area.</description>
         <setting>
-            <name>Use Auto Callers</name>
-            <description>If a symbol (or a csv sequence of symbols) is desired for a caller character, rather than an incremental character(s), set this to true then enter the character you want in the following fields.   Default = True</description>
-            <key>useAutoCallers</key>
+            <name>Include Crossreferences</name>
+            <description>[NOT IMPLEMENTED] Include crossreferences in the output. Defalt = True</description>
+            <key>includeCrossreferences</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Use Auto Callers (Crossrefs)</name>
+            <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
+            <key>useAutoCallerCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
         </setting>
     </section>
     <section>
-        <name>Numeric Callers (Footnotes)</name>
-        <sectionID>NumericCallers</sectionID>
-        <description>Set to true to use numeric callers on footnotes instead of alphabetic callers.   Default = FalseseNumericCallersFootnotes = false</description>
+        <name>Footnotes</name>
+        <sectionID>Footnotes</sectionID>
+        <description>This section includes all textual elements that go into the footnote.</description>
         <setting>
-            <name>Numeric Callers (Crossrefs)</name>
-            <description>Use numeric callers on cross references instead of alphabetic callers.   Default = False</description>
-            <key>useNumericCallersCrossrefs</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Page Reset Callers (Footnotes)</name>
-            <description>Restart numbering or character sequence for footnotes on each page.   Default = False</description>
-            <key>pageResetCallersFootnotes</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Page Reset Callers (Crossrefs)</name>
-            <description>Restart numbering or character sequence for cross references on each page.   Default = False</description>
-            <key>pageResetCallersCrossrefs</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Omit Caller In Footnotes</name>
-            <description>To omit caller characters from the footnotes at the bottom of the page.   Default = True</description>
-            <key>omitCallerInFootnotes</key>
+            <name>Include Footnotes</name>
+            <description>[NOT IMPLEMENTED] Include footnotes in the output. Defalt = True</description>
+            <key>includeFootnotes</key>
             <type>boolean</type>
             <value>True</value>
         </setting>
         <setting>
-            <name>Omit Caller In Crossrefs</name>
-            <description>To omit caller characters from the cross references at the bottom of the page.   Default = True</description>
-            <key>omitCallerInCrossrefs</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Paragraphed Footnotes</name>
-            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
-            <key>paragraphedFootnotes</key>
+            <name>Use Auto Callers (Footnotes)</name>
+            <description>Set to true if a symbol or a csv sequence of symbols is needed for footnotes. Default = True</description>
+            <key>useAutoCallerFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>NumericCallers:paragraphedFootnotes</boolDepend>
-            <usfmTex>\ParagraphedNotes{f}</usfmTex>
-        </setting>
-        <setting>
-            <name>Paragraphed Crossrefs</name>
-            <description>Output the crossrefs on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
-            <key>paragraphedCrossrefs</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDepend>NumericCallers:paragraphedCrossrefs</boolDepend>
-            <usfmTex>\ParagraphedNotes{x}</usfmTex>
         </setting>
     </section>
     <section>

@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile
+import codecs, os, sys, re, fileinput, zipfile, shutil
 from datetime import *
 from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
@@ -246,19 +246,35 @@ def writeConfFile (config) :
     # Build the folder path if needed
     if not os.path.exists(os.path.split(config.filename)[0]) :
         os.makedirs(os.path.split(config.filename)[0])
+        
+    # Make a backup in case something goes dreadfully wrong
+    if os.path.isfile(config.filename) :
+        shutil.copy(config.filename, config.filename + '~')
+
+    # Let's try to write it out
+    try :
+        # Try to write first
+        config.write()
+
+    except Exception as e :
+        terminal('\nERROR: Could not write to: ' + config.filename)
+        terminal('\nPython reported this error:\n\n\t[' + str(e) + ']\n')
+        # Recover now
+        if os.path.isfile(config.filename + '~') :
+            shutil.copy(config.filename + '~', config.filename)
+        # We did all we could, quite while we are ahead
+        dieNow()
 
     # To track when a conf file was saved as well as other general
     # housekeeping we will create a GeneralSettings section with
     # a last edit date key/value.
     buildConfSection(config, 'GeneralSettings')
-    try :
-        config['GeneralSettings']['lastEdit'] = tStamp()
-        config.write()
-        return True
+    # If we got past that, write a time stamp
+    config['GeneralSettings']['lastEdit'] = tStamp()
+    config.write()
 
-    except :
-        terminal('\nERROR: Could not write to: ' + config.filename)
-        return False
+    # Should be done if we made it this far
+    return True
 
 
 def xml_to_section (fname) :

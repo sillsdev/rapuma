@@ -100,6 +100,137 @@ Todo:
         </setting>
     </section>
     <section>
+        <name>Crossreferences</name>
+        <sectionID>Crossreferences</sectionID>
+        <description>This section includes all textual elements that go into the Crossreferences area.</description>
+        <setting>
+            <name>USFM TeX Crossreference Auto Caller Character</name>
+            <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
+            <key>crossrefAutoCallerCharacter</key>
+            <type>list</type>
+            <value></value>
+        </setting>
+
+        <setting>
+            <name>Auto Callers (Crossrefs)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a crossref caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <key>autoCallerListCrossrefs</key>
+            <type>string</type>
+            <value></value>
+            <boolDepend>Crossreferences:useAutoCallerCrossrefs</boolDepend>
+            <usfmTex>\AutoCallers{x}{[v]}</usfmTex>
+        </setting>
+
+        <setting>
+            <name>Numeric Callers (Crossrefs)</name>
+            <description>Use numeric callers on cross references instead of alphabetic callers.   Default = False</description>
+            <key>useNumericCallersCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Crossreferences:useNumericCallersCrossrefs</boolDepend>
+            <usfmTex>\NumericCallers{x}</usfmTex>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Crossrefs)</name>
+            <description>Restart numbering or character sequence for cross references on each page.   Default = False</description>
+            <key>pageResetCallersCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Crossreferences:pageResetCallersCrossrefs</boolDepend>
+            <usfmTex>\PageResetCallers{x}</usfmTex>
+        </setting>
+        <setting>
+            <name>Omit Caller In Crossrefs</name>
+            <description>To omit caller characters from the cross references at the bottom of the page.   Default = False</description>
+            <key>omitCallerInCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Crossreferences:omitCallerInCrossrefs</boolDepend>
+            <usfmTex>\OmitCallerInNote{x}</usfmTex>
+        </setting>
+        <setting>
+            <name>Paragraphed Crossrefs</name>
+            <description>Output the crossrefs on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <key>paragraphedCrossrefs</key>
+            <type>boolean</type>
+            <value>True</value>
+            <boolDepend>Crossreferences:paragraphedCrossrefs</boolDepend>
+            <usfmTex>\ParagraphedNotes{x}</usfmTex>
+        </setting>
+    </section>
+    <section>
+        <name>Footnotes</name>
+        <sectionID>Footnotes</sectionID>
+        <description>This section includes all textual elements that go into the footnote area.</description>
+        <setting>
+            <name>Auto Caller Start Character</name>
+            <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
+            <key>autoCallerStartCharacter</key>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Auto Callers (Footnotes)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <key>autoCallerListFootnotes</key>
+            <type>string</type>
+            <value></value>
+            <boolDepend>Footnotes:useAutoCallerFootnotes</boolDepend>
+            <usfmTex>\AutoCallers{f}{[v]}</usfmTex>
+        </setting>
+        <setting>
+            <name>Numeric Callers (Footnotes)</name>
+            <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
+            <key>useNumericCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Footnotes:useNumericCallersFootnotes</boolDepend>
+            <usfmTex>\NumericCallers{f}</usfmTex>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Footnotes)</name>
+            <description>Restart numbering or character sequence for footnotes on each page.   Default = False</description>
+            <key>pageResetCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Footnotes:pageResetCallersFootnotes</boolDepend>
+            <usfmTex>\PageResetCallers{f}</usfmTex>
+        </setting>
+        <setting>
+            <name>Omit Caller In Footnotes</name>
+            <description>To omit caller characters from the footnotes at the bottom of the page.   Default = False</description>
+            <key>omitCallerInFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>Footnotes:omitCallerInFootnotes</boolDepend>
+            <usfmTex>\OmitCallerInNote{f}</usfmTex>
+        </setting>
+        <setting>
+            <name>Paragraphed Footnotes</name>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <key>paragraphedFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+            <boolDepend>Footnotes:paragraphedFootnotes</boolDepend>
+            <usfmTex>\ParagraphedNotes{f}</usfmTex>
+        </setting>
+        <setting>
+            <name>USFM TeX Define Footnote Rule</name>
+            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
+            <key>defineFootnoteRule</key>
+            <type>string</type>
+            <value></value>
+            <usfmTex>\def\footnoterule{[v]}</usfmTex>
+        </setting>
+        <setting>
+            <name>USFM TeX Auto Caller Number Characters</name>
+            <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
+            <key>autoCallerMaxCharacterNumbers</key>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
+    <section>
         <name>Fonts</name>
         <sectionID>Fonts</sectionID>
         <description>Information for fonts used in the publication project.</description>
@@ -127,52 +258,6 @@ Todo:
             <value>1</value>
             <usfmTex>\def\VerticalSpaceFactor{[v]}</usfmTex>
         </setting>
-    </section>
-    <section>
-        <name>Footnotes</name>
-        <sectionID>Footnotes</sectionID>
-        <description>This section includes all textual elements that go into footnote area which included both footnotes and cross references.</description>
-        <setting>
-            <name>Auto Caller Start Character</name>
-            <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
-            <key>autoCallerStartCharacter</key>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>USFM TeX Define Footnote Rule</name>
-            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
-            <key>defineFootnoteRule</key>
-            <type>string</type>
-            <value></value>
-            <usfmTex>\def\footnoterule{[v]}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Auto Caller Number Characters</name>
-            <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
-            <key>autoCallerMaxCharacterNumbers</key>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>USFM TeX Footnote Auto Caller Character</name>
-            <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add position control as well by raising and kerning as in some of the examples.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*} By setting something in this field you will override the autoCallerStartChar setting.   Default = *</description>
-            <key>footnoteAutoCallerCharacter</key>
-            <type>list</type>
-            <value>\kern0.2em *\kern0.4em</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Crossreference Auto Caller Character</name>
-            <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
-            <key>crossrefAutoCallerCharacter</key>
-            <type>list</type>
-            <value></value>
-        </setting>
-    </section>
-    <section>
-        <name>Numeric Callers (Footnotes)</name>
-        <sectionID>NumericCallers</sectionID>
-        <description>Set to true to use numeric callers on footnotes instead of alphabetic callers.   Default = FalseseNumericCallersFootnotes = false</description>
     </section>
     <section>
         <name>Header and Footer</name>
