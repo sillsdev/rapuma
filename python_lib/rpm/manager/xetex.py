@@ -611,8 +611,7 @@ class Xetex (Manager) :
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]
-        line = line.replace(ph, v)
-        return line
+        return line.replace(ph, unicode(v, encoding='utf_8'))
 
 
     def makeTexSettingsDict (self, xmlFile) :
