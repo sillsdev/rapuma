@@ -26,7 +26,7 @@ from xml.etree import ElementTree
 from configobj import ConfigObj, Section
 from tools import *
 import palaso.sfm as sfm
-from palaso.sfm import usfm, style, pprint, element, text
+from palaso.sfm import usfm, style, element, text
 
 
 ###############################################################################

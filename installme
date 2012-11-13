@@ -35,14 +35,11 @@ following the install proceedure. It can be cloned from here:
 
     http://hg.palaso.org/palaso-python
 
-When you install (run the setup.py script) without special settings you will probably get
-this error:
+This needs to be installed before you can use it. To install run:
 
-    ImportError: No module named Pyrex.Distutils.extension
+    ./setup.py --nokmn build
+    sudo ./setup.py --nokmn install
 
-Rerun with this syntax:
-
-    sudo setup.py install --nokmn
 
 Suggested additional packages:
 

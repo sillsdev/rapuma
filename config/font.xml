@@ -43,6 +43,13 @@ Todo:
         <value></value>
     </setting>
     <setting>
+        <name>Footnote Caller Font</name>
+        <key>fnCallerFont</key>
+        <description>Footnote caller characters are normally taken from the default (body text) font. If an alternate (installed) font is specified here, that font will be used for the caller character(s).</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
         <name>Installed fonts</name>
         <key>installedFonts</key>
         <description>All the installed font families that this component will need to render correctly.</description>

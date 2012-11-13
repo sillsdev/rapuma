@@ -27,7 +27,7 @@ from tools import *
 from pt_tools import *
 from manager import Manager
 import palaso.sfm as sfm
-from palaso.sfm import usfm, style, pprint, element, text
+from palaso.sfm import usfm, style, element, text
 
 
 ###############################################################################
@@ -201,46 +201,47 @@ class Text (Manager) :
         '''Use the Palaso USFM parser to bring in the text and clean it up if 
         needed. If projSty (path + file name) is not used, the sfm parser
         will use a default style file to drive the process which may lead to
-        undesirable results. A style file should normally be used to avoid this.'''
+        undesirable results. A style file should normally be used to avoid this.
+        
+        The sfm.pprint() is not being used at this point because of a bug that
+        takes out \ft markers in footnotes. When this is fix, we might use this
+        function again. For now, we will just use the sfm parser to validate the
+        text that is being copied into a project.'''
+
+        # For future reference, the sfm parser will fail if TeX style
+        # comment markers "%" are used to comment text rather than "#".
+
+# FIXME: Validation does not work right now, usfmTextFileIsValid() defaults to True
 
         # Validate the text first thing
         if not self.usfmTextFileIsValid(source, projSty) :
             self.project.log.writeToLog('TEXT-155', [source])
             return False
 
-        # Load in the source text
-        fh = codecs.open(source, 'rt', 'utf_8_sig')
-        # Create the object
-        if projSty :
-            stylesheet = usfm.default_stylesheet.copy()
-            stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-            stylesheet.update(stylesheet_extra)
-            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
-            self.project.log.writeToLog('TEXT-080', [fName(projSty)])
-        else :
-            doc = usfm.parser(fh, error_level=errLevel)
-
-        # Check/Clean up the text
-        tidy = sfm.pprint(doc)
-        
-        # FIXME:
-        # Aternate that ties to a work around which keeps the \ft from
-        # being pulled from the text by the pprint() process.
-        # Right now there are a couple bugs in the USFM parser
-        # that prevent this from working right.
-#        tidy = sfm.pprint(demote_notetext(doc))
-
-        self.project.log.writeToLog('TEXT-090')
-
-        # Normalize the text according to the usfm_Text config setting 
-        normal = unicodedata.normalize(self.unicodeNormalForm, tidy)
+        # We may want to expand the validation and cleaning of incoming
+        # text but for now, we will just open the target and normalize
+        # it 
+        contents = codecs.open(source, 'rt', 'utf_8_sig')
+        lines = contents.read()
+        normal = unicodedata.normalize(self.unicodeNormalForm, lines)
         self.project.log.writeToLog('TEXT-100', [self.unicodeNormalForm])
-
-        # Write to the target
         writeout = codecs.open(target, "wt", "utf_8_sig")
         writeout.write(normal)
         writeout.close
+
         return True
+
+# FIXME: Preserve the following if we decide to use the sfm parser
+#        fh = codecs.open(source, 'rt', 'utf_8_sig')
+#        # Create the object
+#        if projSty :
+#            stylesheet = usfm.default_stylesheet.copy()
+#            stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
+#            stylesheet.update(stylesheet_extra)
+#            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
+#            self.project.log.writeToLog('TEXT-080', [fName(projSty)])
+#        else :
+#            doc = usfm.parser(fh, error_level=errLevel)
 
 
     def testCompTextFile (self, source, projSty = None) :
@@ -267,12 +268,7 @@ class Text (Manager) :
                     stylesheet.update(stylesheet_extra)
                 doc = usfm.parser(fh, stylesheet, sfm.level.Content)
 
-
-# FIXME: Not getting any error returned without using sfm.pprint()
-# That gives me a stack-trace I want only the syntax errors of the sfm
-
-                x = sfm.pprint(doc)
-
+# FIXME: This does not work yet.
 
                 self.project.log.writeToLog('TEXT-155', [source])
                 return False
@@ -296,34 +292,9 @@ class Text (Manager) :
                 stylesheet.update(stylesheet_extra)
             doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
 
-
-            sfm.pprint(doc)
-
-
-# FIXME: Something is wrong with the error level setting here
-# I can only seem to get it to return True/False if I use sfm.pprint()
-
-
             return True
         except Exception as e :
             return False
-
-
-# This next function is experimental and is designed to prevent
-# the \ft code from being removed from footnotes. Once it is known
-# to work, this code should be incorporated into the palaso 
-# usfm.py lib file
-def demote_notetext(doc):
-    def _g(e):
-        if isinstance(e, sfm.element):
-            e = element(e.name, e.pos, e.args, content=map(_g, e), meta=e.meta)
-            reduce(lambda _,e_: setattr(e_,'parent',e), e, None)
-            return e
-        elif e.parent.annotations.get('content-promoted'):
-            e = sfm.element('ft',e.pos, parent=e.parent, content=[e])
-            e[0].parent = e
-            return e
-    return map(_g,doc)
 
 
 

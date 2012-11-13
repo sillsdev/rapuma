@@ -88,12 +88,17 @@ class Style (Manager) :
                         return True
                     else :
                         # If we get this far, install fallback style file
-                        sFile = self.installUSFMFallback()
+                        if sType.lower() == 'main' :
+                            sFile = self.installUSFMFallback()
+                        elif sType.lower() == 'custom' :
+                            sFile = self.installUSFMCustom()
+
+                        # Record in the config what we did
                         if sFile :
                             self.recordStyleFile(sFile, sType)
                             return True
                         else :
-                            dieNow('RPM USFM fallback style file not found.')
+                            dieNow('RPM USFM [' + sType + '] style file not found.')
                 else :
                     self.project.log.writeToLog('STYL-007', [self.cType,self.sourceEditor])
                     dieNow()
@@ -166,9 +171,22 @@ class Style (Manager) :
 
 
     def installUSFMFallback (self) :
-        '''Install the fallback style file from the RPM system.'''
+        '''Install the fallback style file from the RPM system. This is just
+        a known good copy of the current USFM styles.'''
 
         sFile = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
+        target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
+        if os.path.isfile(sFile) :
+            # No news is good news
+            if not shutil.copy(sFile, target) :
+                return sFile
+
+
+    def installUSFMCustom (self) :
+        '''Install the custom style file from the RPM system. This contains
+        special style code to help with implementing special features'''
+
+        sFile = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'custom.sty')
         target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
         if os.path.isfile(sFile) :
             # No news is good news

@@ -500,7 +500,7 @@ compCommand.add_argument('-a', '--add', action='store_true', help='Add a new com
 compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
-compCommand.add_argument('-v', '--validate', action='store_true', help='Validate a component file.')
+compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
 compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used only for adding components, only one source path per component type allowed.)')
 

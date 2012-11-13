@@ -26,7 +26,6 @@ from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
 
 from configobj import ConfigObj, Section
-import pprint
 
 ###############################################################################
 ############################ Functions Begin Here #############################
