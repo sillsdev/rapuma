@@ -127,6 +127,7 @@ class ProjLog (object) :
             'TEXT-060' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             'TEXT-070' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
             'TEXT-080' : ['LOG', 'Validating text using the [<<1>>] style file.'],
+            'TEXT-090' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             'TEXT-100' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form..'],
             'TEXT-150' : ['MSG', 'USFM file: [<<1>>] is valid.'],
             'TEXT-155' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test.'],

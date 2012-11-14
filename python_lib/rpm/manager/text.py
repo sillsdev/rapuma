@@ -197,7 +197,7 @@ class Text (Manager) :
 
 
 
-    def usfmCopy (self, source, target, projSty = None, errLevel = sfm.level.Content) :
+    def usfmCopy (self, source, target, projSty = None) :
         '''Use the Palaso USFM parser to bring in the text and clean it up if 
         needed. If projSty (path + file name) is not used, the sfm parser
         will use a default style file to drive the process which may lead to
@@ -211,16 +211,13 @@ class Text (Manager) :
         # For future reference, the sfm parser will fail if TeX style
         # comment markers "%" are used to comment text rather than "#".
 
-# FIXME: Validation does not work right now, usfmTextFileIsValid() defaults to True
-
         # Validate the text first thing
         if not self.usfmTextFileIsValid(source, projSty) :
             self.project.log.writeToLog('TEXT-155', [source])
             return False
 
         # We may want to expand the validation and cleaning of incoming
-        # text but for now, we will just open the target and normalize
-        # it 
+        # text but for now, we will just open the target and normalize it.
         contents = codecs.open(source, 'rt', 'utf_8_sig')
         lines = contents.read()
         normal = unicodedata.normalize(self.unicodeNormalForm, lines)
@@ -231,58 +228,33 @@ class Text (Manager) :
 
         return True
 
-# FIXME: Preserve the following if we decide to use the sfm parser
-#        fh = codecs.open(source, 'rt', 'utf_8_sig')
-#        # Create the object
-#        if projSty :
-#            stylesheet = usfm.default_stylesheet.copy()
-#            stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-#            stylesheet.update(stylesheet_extra)
-#            doc = usfm.parser(fh, stylesheet, error_level=errLevel)
-#            self.project.log.writeToLog('TEXT-080', [fName(projSty)])
-#        else :
-#            doc = usfm.parser(fh, error_level=errLevel)
-
 
     def testCompTextFile (self, source, projSty = None) :
         '''This will direct a request to the proper validater for
         testing the source of a component text file.'''
 
         if self.cType == 'usfm' :
-            # Note: Error level reporting is possible with the usfm.parser.
-            # The following are the errors it can report:
-            # Note            = -1    Just give output warning, do not stop
-            # Marker          =  0    Stop on any out of place marker
-            # Content         =  1    Stop on mal-formed content
-            # Structure       =  2    Stop on ???
-            # Unrecoverable   =  100  Stop on most anything that is wrong'''
+            # If this fails it will die at the validation process
             if self.usfmTextFileIsValid(source, projSty) :
                 self.project.log.writeToLog('TEXT-150', [source])
                 return True
-            else :
-                # If it is not valid we want to report errors found
-                fh = codecs.open(source, 'rt', 'utf_8_sig')
-                stylesheet = usfm.default_stylesheet.copy()
-                if projSty :
-                    stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-                    stylesheet.update(stylesheet_extra)
-                doc = usfm.parser(fh, stylesheet, sfm.level.Content)
-
-# FIXME: This does not work yet.
-
-                self.project.log.writeToLog('TEXT-155', [source])
-                return False
         else :
             self.project.log.writeToLog('TEXT-005', [self.cType])
             dieNow()
 
 
     def usfmTextFileIsValid (self, source, projSty) :
-        '''Use the USFM parser to validate a style file. This is meant to
-        be just a simple test so only return True or False.'''
+        '''Use the USFM parser to validate a style file. For now,
+        if a file fails, we'll just quite right away, otherwise,
+        return True.'''
 
-# FIXME: Inserted over-ride, this does not work now
-        return True
+        # Note: Error level reporting is possible with the usfm.parser.
+        # The following are the errors it can report:
+        # Note            = -1    Just give output warning, do not stop
+        # Marker          =  0    Stop on any out of place marker
+        # Content         =  1    Stop on mal-formed content
+        # Structure       =  2    Stop on ???
+        # Unrecoverable   =  100  Stop on most anything that is wrong
 
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
@@ -291,10 +263,17 @@ class Text (Manager) :
                 stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
                 stylesheet.update(stylesheet_extra)
             doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
-
+            # With the doc text loaded up, we run a list across it
+            # so the parser will either pass or fail
+            testlist = list(doc)
+            # Good to go
             return True
+
         except Exception as e :
-            return False
+            # If the text is not good, I think we should die here an now.
+            # We may want to rethink this later but for now, it feels right.
+            self.project.log.writeToLog('TEXT-090', [source,str(e)])
+            dieNow()
 
 
 

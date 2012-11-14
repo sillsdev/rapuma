@@ -1,9 +1,12 @@
 Manual installation instructions for the developer version of the RPM package
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 21/06/2012
+	Last edited: 14 Nov 2012
 
+RPM (Rapid Publication Manager) is intended to be a system for managing publication data that could be used for output in a variety of media. RPM takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. RPM should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-These are instruction for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. Most of the installation commands here will be done in the terminal. If you have not opened a terminal yet, do it now.
+STATUS: Currently RPM is under heavy development (by a single, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of RPM in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
+
+These instructions are for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 REQUIRED PACKAGES
@@ -137,4 +140,5 @@ does for now.
 
 QUICK START GUIDE
 -----------------------------------------
-Write something here!
+Write something useful here! There will be an example project bundled with RPM that will create a simulated project with one command. (That's the dream anyway.)
+
