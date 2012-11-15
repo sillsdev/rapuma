@@ -57,6 +57,16 @@ def formPTName (projConfig, cid) :
         return False
 
 
+def formGenericName (projConfig, cid) :
+    '''Figure out the best way to form a valid file name given the
+    source is not coming from a PT project.'''
+
+# FIXME: This will be expanded as we find more use cases
+
+    postPart = projConfig['Managers']['usfm_Text']['postPart']
+    return cid + '.' + postPart
+
+
 def getPTFont (sourcePath) :
     '''Just return the name of the font used in a PT project.'''
 
@@ -95,13 +105,13 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     return sysSet
 
 
-def getPTSettings (sourcePath) :
+def findSsfFile (sourcePath) :
     '''Look for the ParaTExt project settings file. The immediat PT project
     is the parent folder and the PT environment that the PT projet is found
     in, if any, is the grandparent folder. the .ssf (settings) file in the
     grandparent folder takes presidence over the one found in the parent folder.
-    This function will determine where the primary .ssf file is and turn the
-    data into a dictionary for the system to use.'''
+    This function will determine where the primary .ssf file is and return the
+    .ssf path/file and the PT path. If not found, return None.'''
 
     # Not sure where the PT SSF file might be or even what its name is.
     # Starting in parent, we should find the first .ssf file. That will
@@ -152,10 +162,17 @@ def getPTSettings (sourcePath) :
                 ssfFileName = f
                 ptPath = grandparentFolder
 
+    return os.path.join(ptPath, ssfFileName)
+
+
+def getPTSettings (sourcePath) :
+    '''Return the data into a dictionary for the system to use.'''
+
     # Return the dictionary
-    ssfFile = os.path.join(ptPath, ssfFileName)
-    if os.path.isfile(ssfFile) :
-        return xmlFileToDict(ssfFile)
+    ssfFile = findSsfFile(sourcePath)
+    if ssfFile :
+        if os.path.isfile(ssfFile) :
+            return xmlFileToDict(ssfFile)
 
 
 def hasUsfmCidInfo (cid) :

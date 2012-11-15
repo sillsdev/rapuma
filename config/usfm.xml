@@ -25,7 +25,7 @@ Todo:
         <key>sourceEditor</key>
         <description>The editor the source text comes from.</description>
         <type>string</type>
-        <value>paratext</value>
+        <value></value>
     </setting>
     <setting>
         <name>Source Path</name>

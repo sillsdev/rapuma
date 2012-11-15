@@ -57,6 +57,16 @@ class Text (Manager) :
         else :
             self.sourcePath = ''
 
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+            self.sourceEditor = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        else :
+            if findSsfFile(self.sourcePath) :
+                self.sourceEditor = 'paratext'
+            else :
+                self.sourceEditor = 'generic'
+
+            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = self.sourceEditor
+
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rpmXmlTextConfig)
@@ -64,6 +74,7 @@ class Text (Manager) :
             self.project.projConfig['Managers'][manager] = newSectionSettings
 
         self.compSettings = self.project.projConfig['Managers'][manager]
+        writeConfFile(self.project.projConfig)
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -76,15 +87,17 @@ class Text (Manager) :
     def updateManagerSettings (self) :
         '''Update the settings for this manager if needed.'''
 
-        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
-        if sourceEditor.lower() == 'paratext' :
+        # If the source editor is PT, then a lot of information can be
+        # gleaned from the .ssf file. Otherwise we will go pretty much with
+        # the defaults and hope for the best.
+        if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
             sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
             ptSet = getPTSettings(sourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
-            if self.project.projConfig['Managers']['usfm_Text']['nameFormID'] :
+            if self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
                 newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet)
             else :
                 newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, True)
@@ -95,8 +108,17 @@ class Text (Manager) :
                 # Be sure to update the current session settings
                 for k, v in self.compSettings.iteritems() :
                     setattr(self, k, v)
+        # A generic editor means we really do not know where the text came
+        # from. In that case, we just do the best we can.
+        elif self.sourceEditor.lower() == 'generic' :
+            if not self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
+                self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
+            if not self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] :
+                self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
+
+            writeConfFile(self.project.projConfig)
         else :
-            self.project.log.writeToLog('TEXT-010', [sourceEditor])
+            self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
             dieNow()
 
         return True
@@ -104,19 +126,35 @@ class Text (Manager) :
 
     def installUsfmWorkingText (self, cid, force = False) :
         '''Find the USFM source text and install it into the working text
-        folder of the project with the proper name.'''
+        folder of the project with the proper name. If a USFM text file
+        is not located in a PT project folder, the editor cannot be set
+        to paratext, it must be set to generic.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Check to see if settings need updating
+        # Check to see if text manager settings need updating
         self.updateManagerSettings()
+
         # Check if there is a font installed
         self.project.createManager(self.cType, 'font')
         if not self.project.managers[self.cType + '_Font'].varifyFont() :
-            font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+            # If a PT project, use that font, otherwise, install default
+            if self.sourceEditor.lower() == 'paratext' :
+                font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+            else :
+                font = 'DefaultFont'
+
             self.project.managers[self.cType + '_Font'].installFont(font)
 
-        thisFile = formPTName(self.project.projConfig, cid)
+        # Build the file name
+        thisFile = ''
+        if self.sourceEditor.lower() == 'paratext' :
+            thisFile = formPTName(self.project.projConfig, cid)
+        elif self.sourceEditor.lower() == 'generic' :
+            thisFile = formGenericName(self.project.projConfig, cid)
+        else :
+            self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
+
         # Test, no name = no success
         if not thisFile :
             self.project.log.writeToLog('TEXT-020')

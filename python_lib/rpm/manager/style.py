@@ -99,6 +99,21 @@ class Style (Manager) :
                             return True
                         else :
                             dieNow('RPM USFM [' + sType + '] style file not found.')
+
+                elif self.sourceEditor.lower() == 'generic' :
+                        # If we get this far, install fallback style file
+                        if sType.lower() == 'main' :
+                            sFile = self.installUSFMFallback()
+                        elif sType.lower() == 'custom' :
+                            sFile = self.installUSFMCustom()
+
+                        # Record in the config what we did
+                        if sFile :
+                            self.recordStyleFile(sFile, sType)
+                            return True
+                        else :
+                            dieNow('RPM USFM [' + sType + '] style file not found.')
+
                 else :
                     self.project.log.writeToLog('STYL-007', [self.cType,self.sourceEditor])
                     dieNow()

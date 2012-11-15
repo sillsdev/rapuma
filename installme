@@ -70,7 +70,7 @@ Create the above path if it does not exist with this command in your terminal:
 
 Now you can to go to the Palaso website and clone the project code with:
 
-	hg clone http://hg.palaso.org/rpm ~/Projects/rpm
+	hg clone http://hg.palaso.org/pub-rpm ~/Projects/rpm
 
 That should put RPM where you need it. From time to time you may want to update it. To do that, from inside the RPM project folder (~/Projects/rpm), this is the command you need:
 

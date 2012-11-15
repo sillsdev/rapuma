@@ -290,8 +290,8 @@ def userArguments (args) :
         if args['add'] :
             if not args['source'] :
                 sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
-            elif not os.path.isdir(resolvePath(args['source'])) :
-                sys.exit('\nERROR: Must provide a valid source path when adding a group. Process halted!\n')
+            elif not os.path.exists(resolvePath(args['source'])) :
+                sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
             else :
                 aProject.addComponent(args['component_id'], args['component_type'], resolvePath(args['source']), args['force'])
         # Delete a component
@@ -580,6 +580,12 @@ installCommand.add_argument('project_id', help='Project ID (a positional argumen
 installCommand.add_argument('file', help='The file to be installed, relitive paths are allowed.')
 installCommand.add_argument('path', help='Specify the path to the project folder where the file goes.')
 installCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting file.')
+
+# Add Project example subprocess arguments
+exampleCommand = subparsers.add_parser('example', help='Commands for running simple project examples.')
+exampleCommand.add_argument('project_id', help=' A default project ID for the current example project.')
+exampleCommand.add_argument('-b', '--basic', action='store_true', help='A simple USFM text project.)')
+exampleCommand.add_argument('-p', '--path', help='Optional - Specify a path/file name where the custom example project script and resources are located. It expects a zip file in that location.')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))

@@ -56,6 +56,7 @@ class ProjLog (object) :
             'PROJ-070' : ['ERR', 'Source file not found: [<<1>>].'],
             'PROJ-080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
             'PROJ-090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
+            'PROJ-100' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
             'COMP-000' : ['MSG', 'Component processing messages'],
             'COMP-005' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
@@ -261,6 +262,12 @@ class ProjLog (object) :
             'XPRT-030' : ['MSG', 'Files exported to [<<1>>].'],
             'XPRT-040' : ['MSG', 'Begining export, please wait...'],
             'XPRT-050' : ['MSG', 'Unassigned error message ID.'],
+
+            'EXMP-000' : ['MSG', 'Messages for running example projects.'],
+            'EXMP-005' : ['MSG', 'Unassigned error message ID.'],
+            'EXMP-010' : ['MSG', 'Finished running basic project example.'],
+            'EXMP-030' : ['MSG', 'Finished running custom project example.'],
+            'EXMP-020' : ['MSG', 'Unassigned error message ID.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

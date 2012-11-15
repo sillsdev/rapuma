@@ -71,25 +71,25 @@ def fName (fullPath) :
 def resolvePath (path) :
     '''Resolve the '~' in a path if there is one with the actual home path.'''
 
-# FIXME: Something like the following should clean this up:
-
-#   os.path.realpath(os.path.expanduser(path))
-
-# Need to follow up on this
-
-    if path[0] == '~' :
-        try :
-            # This should be the best way
-            return os.path.expanduser(path)
-        except :
-            # Manually look for "~/" shorthand path and replace it 
-            # with the actual "home"
-            return path.replace('~', os.environ.get('HOME'))
-    elif path == '' or path == 'None' :
+    try :
+        return os.path.realpath(os.path.expanduser(path))
+    except :
         return None
-    else :
-        # Otherwise run abspath on it and send it on
-        return os.path.abspath(path)
+
+# FIXME: This code is depricated but we may need to deal with '~'
+#    if path[0] == '~' :
+#        try :
+#            # This should be the best way
+#            return os.path.expanduser(path)
+#        except :
+#            # Manually look for "~/" shorthand path and replace it 
+#            # with the actual "home"
+#            return path.replace('~', os.environ.get('HOME'))
+#    elif path == '' or path == 'None' :
+#        return None
+#    else :
+#        # Otherwise run abspath on it and send it on
+#        return os.path.abspath(path)
 
 
 def addToList (thisList, item) :

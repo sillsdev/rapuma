@@ -75,10 +75,10 @@ class Font (Manager) :
         if not self.ptDefaultFont :
             sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
             ptSet = getPTSettings(sourcePath)
-
-            setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
-            self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
-            writeConfFile(self.project.projConfig)
+            if ptSet :
+                setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
+                self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
+                writeConfFile(self.project.projConfig)
 
 ###############################################################################
 ############################ Project Level Functions ##########################

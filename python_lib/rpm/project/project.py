@@ -277,9 +277,20 @@ class Project (object) :
         already exsist. If one exists, replace anyway. Last in wins!
         The assumption is only one path per component type.'''
 
-        # Path has been resolved in RPM, we assume it should be valid
-        self.projConfig['CompTypes'][cType.capitalize()]['sourcePath'] = source
-        writeConfFile(self.projConfig)
+        Ctype = cType.capitalize()
+        # Path has been resolved in RPM, we assume it should be valid.
+        # But it could be a full file name. We need to sort that out.
+        try :
+            if os.path.isdir(source) :
+                self.projConfig['CompTypes'][Ctype]['sourcePath'] = source
+            else :
+                self.projConfig['CompTypes'][Ctype]['sourcePath'] = os.path.split(source)[0]
+
+            writeConfFile(self.projConfig)
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.project.log.writeToLog('PROJ-100', [str(e)])
+            dieNow()
 
 
     def addComponentGroup (self, cType, gid, thisList, source, force = False) :
@@ -945,7 +956,11 @@ class Project (object) :
 
 
     def export (self, cType, cid, path = None, script = None, bundle = False, force = False) :
-        '''Facilitate the exporting of project text.'''
+        '''Facilitate the exporting of project text. It is assumed that the
+        text is clean and ready to go and if any extraneous publishing info
+        has been injected into the text, it will be removed by an appropreate
+        post-process that can be applied by this function. No validation
+        will be initiated by this function.'''
         
         # FIXME - Todo: add post processing script feature
 
@@ -979,7 +994,8 @@ class Project (object) :
 
                 target = os.path.join(path, cName)
                 source = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
-                if not self.managers[cType + '_Text'].usfmCopy(source, target, projSty) :
+                # If shutil.copy() spits anything back its bad news
+                if shutil.copy(source, target) :
                     self.log.writeToLog('XPRT-020', [fName(target)])
                 else :
                     fList.append(target)
@@ -993,7 +1009,8 @@ class Project (object) :
 
             target = os.path.join(path, cName)
             source = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            if not self.managers[cType + '_Text'].usfmCopy(source, target, projSty) :
+            # If shutil.copy() spits anything back its bad news
+            if shutil.copy(source, target) :
                 self.log.writeToLog('XPRT-020', [fName(target)])
             else :
                 fList.append(target)
