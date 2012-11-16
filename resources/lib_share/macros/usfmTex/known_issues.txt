@@ -1,0 +1,22 @@
+# Some issues we have seen in usfmTex (ptx2pdf) that need to be addressed:
+
+# 1) Disapearing footnote
+#   When a footnote is at the very end of the book (file) and a new page is
+#   needed, the footnote may not be output at the bottom of the page. In this
+#   the verse starts on the previous page and goes over onto the last page.
+#   For some reason it will not output the footnote.
+
+# 2) Disapearing verse number
+#   When "\OmitVerseNumberOnetrue" is turned on, and you have a markup
+#   situation like this:
+#
+#       \v 1 abcdefg...
+#       \v 2 abcdefg...
+#       \s abcdefg
+#       \r (abcdefg)
+#       \p
+#       \v 3 abcdefg...
+#       \v 4 abcdefg...
+#
+#   It has been observed that the verse "3" number will not be output, like
+#   if it was verse 1. Further testing should be done to varify this.

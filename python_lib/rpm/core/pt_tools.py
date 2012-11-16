@@ -175,6 +175,32 @@ def getPTSettings (sourcePath) :
             return xmlFileToDict(ssfFile)
 
 
+def getSourceEditor (projConfig, sourcePath, cType) :
+    '''Return the sourceEditor if it is set. If not try to
+    figure out what it should be and return that.'''
+
+    Ctype = cType.capitalize()
+    # FIXME: This may need expanding as more use cases arrise
+    if testForSetting(projConfig['CompTypes'][Ctype], 'sourceEditor') :
+        se = projConfig['CompTypes'][Ctype]['sourceEditor']
+    else :
+        if findSsfFile(sourcePath) :
+            se = 'paratext'
+        else :
+            se = 'generic'
+
+    return se
+
+
+def getSourcePath (projConfig, Ctype) :
+    '''Return the stored source path for a component type.'''
+
+    if testForSetting(projConfig['CompTypes'][Ctype], 'sourcePath') :
+        sp = projConfig['CompTypes'][Ctype]['sourcePath']
+        if sp :
+            return resolvePath(sp)
+
+
 def hasUsfmCidInfo (cid) :
     '''Return True if this cid is in the PT USFM cid info dictionary.'''
 

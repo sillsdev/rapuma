@@ -1,13 +1,7 @@
 #!/bin/sh
 
-# This assumes we are starting in the "My Paratext Projects" folder
-
-rpm_demo test -s SPT    && cd SPT   && rpm_demo test -d PUB-MYMR-JAS
+rpm_demo test -s MBJAS && cd MBJAS   && rpm_demo test -d ENG-LATN-JAS
 cd ..
-rpm_demo test -s KYUL   && cd KYUL  && rpm_demo test -d PUB-KYUL-JAS
+rpm_demo test -s KYUM && cd KYUM   && rpm_demo test -d KYU-MYMR-MRK
 cd ..
-rpm_demo test -s ThiWB  && cd ThiWB && rpm_demo test -d PUB-ThiWB-NT
-cd ..
-rpm_demo test -s NOD    && cd NOD   && rpm_demo test -d PUB-THAI-ACT
-                                    && rpm_demo test -d PUB-LANA-ACT
 

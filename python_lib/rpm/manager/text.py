@@ -50,22 +50,9 @@ class Text (Manager) :
         self.cType              = cType
         self.Ctype              = cType.capitalize()
         self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourcePath') :
-            self.sourcePath   = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
-            if self.sourcePath :
-                self.sourcePath = resolvePath(self.sourcePath)
-        else :
-            self.sourcePath = ''
-
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
-            self.sourceEditor = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        else :
-            if findSsfFile(self.sourcePath) :
-                self.sourceEditor = 'paratext'
-            else :
-                self.sourceEditor = 'generic'
-
-            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = self.sourceEditor
+        self.sourcePath      = getSourcePath(self.project.projConfig, self.Ctype)
+        self.sourceEditor       = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
+        self.setSourceEditor(self.sourceEditor) 
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
@@ -83,6 +70,19 @@ class Text (Manager) :
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
+
+    def setSourceEditor (self, editor) :
+        '''Set the source editor for the cType. It assumes the editor is valid.
+        This cannot fail.'''
+
+        se = ''
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+            se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+
+        if se != editor :
+            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
+            writeConfFile(self.project.projConfig)
+
 
     def updateManagerSettings (self) :
         '''Update the settings for this manager if needed.'''
@@ -300,7 +300,7 @@ class Text (Manager) :
             if projSty :
                 stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
                 stylesheet.update(stylesheet_extra)
-            doc = usfm.parser(fh, stylesheet, sfm.level.Structure)
+            doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Structure)
             # With the doc text loaded up, we run a list across it
             # so the parser will either pass or fail
             testlist = list(doc)

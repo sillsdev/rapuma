@@ -40,14 +40,19 @@ class Usfm (Component) :
     '''This class contains information about a type of component 
     used in a type of project.'''
 
-    def __init__(self, project, config) :
-        super(Usfm, self).__init__(project, config)
+    def __init__(self, project, cfg) :
+        super(Usfm, self).__init__(project, cfg)
 
-        self.project = project
-        self.cid = ''
+        # Set values for this manager
+        self.project            = project
+        self.cid                = ''
+        self.cfg                = cfg
+        self.cType              = 'usfm'
+        self.Ctype              = self.cType.capitalize()
+
         # Check to see if this component type has been added to the 
         # proj config already
-        self.project.addComponentType('Usfm')
+        self.project.addComponentType(self.Ctype)
         self.compSettings = self.project.projConfig['CompTypes']['Usfm']
 
         for k, v in self.compSettings.iteritems() :
@@ -58,17 +63,31 @@ class Usfm (Component) :
 
         # Init the general managers
         for mType in self.usfmManagers :
-            self.project.createManager('usfm', mType)
+            self.project.createManager(self.cType, mType)
 
-        # Update default font if needed, usfm_Font manager will figure out which
-        if not self.project.managers['usfm_Font'].varifyFont() :
-            font = self.project.projConfig['Managers']['usfm_Font']['ptDefaultFont']
-            self.project.managers['usfm_Font'].installFont(font)
+#        # Update default font if needed, usfm_Font manager will figure out which
+#        if not self.project.managers[self.cType + '_Font'].varifyFont() :
+#            font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+#            self.project.managers[self.cType + '_Font'].installFont(font)
+
+        # Check if there is a font installed
+        self.project.createManager(self.cType, 'font')
+        if not self.project.managers[self.cType + '_Font'].varifyFont() :
+            # If a PT project, use that font, otherwise, install default
+            if self.sourceEditor.lower() == 'paratext' :
+                font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+            else :
+                font = 'DefaultFont'
+
+            self.project.managers[self.cType + '_Font'].installFont(font)
+
+
+
 
         # To better facilitate rendering that might be happening on this run, we
         # will update source file names and other settings used in the usfm_Text
         # manager (It might be better to do this elsewhere, but where?)
-        self.project.managers['usfm_Text'].updateManagerSettings()
+        self.project.managers[self.cType + '_Text'].updateManagerSettings()
 
 
 ###############################################################################

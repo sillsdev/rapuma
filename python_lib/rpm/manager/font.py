@@ -43,14 +43,15 @@ class Font (Manager) :
         super(Font, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project                    = project
-        self.cfg                        = cfg
-        self.cType                      = cType
-        self.Ctype                      = cType.capitalize()
-        self.fontConfig                 = ConfigObj()
-        self.project                    = project
-        self.manager                    = self.cType + '_Font'
-        self.rpmXmlFontConfig           = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.project                = project
+        self.cfg                    = cfg
+        self.cType                  = cType
+        self.Ctype                  = cType.capitalize()
+        self.fontConfig             = ConfigObj()
+        self.project                = project
+        self.manager                = self.cType + '_Font'
+        self.rpmXmlFontConfig       = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.sourcePath             = getSourcePath(self.project.projConfig, self.Ctype)
 
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
@@ -72,9 +73,11 @@ class Font (Manager) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+        # Get our component sourceEditor
+        self.sourceEditor = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
+
         if not self.ptDefaultFont :
-            sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
-            ptSet = getPTSettings(sourcePath)
+            ptSet = getPTSettings(self.sourcePath)
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
@@ -133,8 +136,9 @@ class Font (Manager) :
             source = rpmSource
         else :
             self.project.log.writeToLog('FONT-120', [source])
+            dieNow()
 
-        if not os.path.isfile(os.path.join(source)) :
+        if not os.path.isfile(source) :
             self.project.log.writeToLog('FONT-041', [fName(source)])
             dieNow()
 
@@ -370,16 +374,19 @@ class Font (Manager) :
     def varifyFont (self) :
         '''Varify a font is installed in the project.'''
 
-        sourceEditor = self.project.projConfig['CompTypes']['Usfm']['sourceEditor']
-        if sourceEditor.lower() == 'paratext' :
+        if self.sourceEditor.lower() == 'paratext' :
             # If this a PT project there should be something in ptDefaultFont
             font = self.checkForSubFont(self.ptDefaultFont)
-            if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
-                return True
+        elif self.sourceEditor.lower() == 'generic' :
+            if self.primaryFont :
+                font = self.primaryFont
             else :
-                return False
+                font = self.checkForSubFont('DefaultFont')
         else :
-            self.project.log.writeToLog('FONT-110', [sourceEditor])
+            self.project.log.writeToLog('FONT-110', [self.sourceEditor])
+
+        if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
+            return True
 
 
 
