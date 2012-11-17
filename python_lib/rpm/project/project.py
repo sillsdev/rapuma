@@ -205,17 +205,9 @@ class Project (object) :
 
         # Check for cid in config
         if self.isComponent(cid) :
-
             self.createComponent(cid).render(force)
             return True
 
-
-#            try :
-#                self.createComponent(cid).render(force)
-#                return True
-#            except :
-#                self.log.writeToLog('COMP-070', [cid])
-#                return False
         else :
             bad = self.findBadComp(cid)
             if bad :
@@ -630,6 +622,13 @@ class Project (object) :
             return False
 
 
+    def recordPreprocessScript (self, cType, script) :
+        '''Record a preprocess script in the project.'''
+
+        self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(script)
+        writeConfFile(self.projConfig)
+
+
     def installPreprocess (self, cType, script = None, force = None) :
         '''Install a preprocess script into the main components processing
         folder for a specified component type. This script will be run on 
@@ -657,28 +656,6 @@ class Project (object) :
         except :
             oldScript       = ''
 
-        # Define internal functions
-        def test () :
-            # Test for successful extraction
-            if os.path.isfile(scriptTarget) :
-                self.log.writeToLog('PREP-100', [fName(scriptTarget)])
-                return True
-            else :
-                self.log.writeToLog('PREP-105', [fName(scriptTarget)])
-                return False
-
-        def record () :
-            # Record the script with the cType
-            self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(scriptTarget)
-            writeConfFile(self.projConfig)
-
-        def permissions () :
-            # I have not found a way to preserve permissions of the files comming
-            # out of a zip archive. To make sure the preprocessing script will
-            # actually work when it needs to run. Changing the permissions to
-            # 777 may not be the best way but it will work for now.
-            os.chmod(scriptTarget, int("0777", 8))
-
         # First check for prexsisting script and record, if there is,
         # just go a head and put a new one in and return
         if force :
@@ -689,11 +666,10 @@ class Project (object) :
                 writeConfFile(self.projConfig)
             self.scriptInstall(script, scriptTarget)
             # Test the install
-            if not test() :
-                dieNow('Failed to install script!')
+            if not os.path.isfile(scriptTarget) :
+                dieNow('Failed to install script!: ' + fName(scriptTarget))
             else :
-                record()
-                permissions()
+                self.recordPreprocessScript(cType, scriptTarget)
                 # Report and end
                 self.log.writeToLog('PREP-115', [fName(scriptTarget)])
                 return True
@@ -721,11 +697,10 @@ class Project (object) :
 
         # No script found, we can proceed
         self.scriptInstall(script, scriptTarget)
-        if not test() :
-            dieNow('Failed to install script!')
+        if not os.path.isfile(scriptTarget) :
+            dieNow('Failed to install script!: ' + fName(scriptTarget))
         else :
-            record()
-            permissions()
+            self.recordPreprocessScript(cType, scriptTarget)
             self.log.writeToLog('PREP-110', [fName(scriptTarget)])
             return True
 
@@ -757,8 +732,9 @@ class Project (object) :
         a zip file or a single .py script file.'''
 
         scriptTargetFolder, fileName = os.path.split(target)
-        if fName(source).split('.')[1].lower() == 'py' :
+        if isExecutable(source) :
             shutil.copy(source, target)
+            makeExecutable(target)
         elif fName(source).split('.')[1].lower() == 'zip' :
             myZip = zipfile.ZipFile(source, 'r')
             for f in myZip.namelist() :
@@ -891,32 +867,17 @@ class Project (object) :
             self.log.writeToLog('POST-082', [fName(scriptTarget)])
             return False
 
-        def test () :
-            # Test for successful extraction
-            if os.path.isfile(scriptTarget) :
-                self.log.writeToLog('POST-100', [fName(scriptTarget)])
-                return True
-            else :
-                self.log.writeToLog('POST-105', [fName(scriptTarget)])
-                return False
-
         # No script found, we can proceed
         if not os.path.isfile(scriptTarget) :
             self.scriptInstall(script, scriptTarget)
-            if not test() :
-                dieNow('Failed to install script!')
+            if not os.path.isfile(scriptTarget) :
+                dieNow('Failed to install script!: ' + fName(scriptTarget))
             self.log.writeToLog('POST-110', [fName(scriptTarget)])
         elif force :
             self.scriptInstall(script, scriptTarget)
-            if not test() :
-                dieNow('Failed to install script!')
+            if not tos.path.isfile(scriptTarget) :
+                dieNow('Failed to install script!: ' + fName(scriptTarget))
             self.log.writeToLog('POST-115', [fName(scriptTarget)])
-
-        # I have not found a way to preserve permissions of the files comming
-        # out of a zip archive. To make sure the preprocessing script will
-        # actually work when it needs to run. Changing the permissions to
-        # 777 may not be the best way but it will work for now.
-        os.chmod(scriptTarget, int("0777", 8))
 
         # Record the script with the cType post process scripts list
         scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']

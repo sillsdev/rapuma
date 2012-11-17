@@ -91,12 +91,21 @@ def getExampleSourceProject (exampID) :
     example_lib folder in the RPM system. This is for system testing
     and nifty canned demos.'''
 
-    exampleFile = os.path.join(local.rpmExamplesFolder, exampID + '.zip')
-    demoFile = os.path.join(local.projHome, exampID, exampID + '.rpmDemo')
-    thisZipFile = zipfile.ZipFile(exampleFile, 'r')
+    exampleFile     = os.path.join(local.rpmExamplesFolder, exampID + '.zip')
+    demoPath        = os.path.join(local.projHome, exampID)
+    demoFile        = os.path.join(demoPath, exampID + '.rpmDemo')
+    thisZipFile     = zipfile.ZipFile(exampleFile, 'r')
     if os.path.isfile(exampleFile) :
         thisZipFile.extractall()
+        # Set execute permission on scripts
+        for r,d,f in os.walk(demoPath):
+            for fn in f:
+                if not fName(fn)[-1] == '~' :
+                    if isExecutable(os.path.join(r, fn)) :
+                        makeExecutable(os.path.join(r, fn))
+
         terminal('Extracted the [' + exampID + '] ParaTExt example project.')
+
 
 def runExamplePubDemoProject (demoID) :
     '''Run an example demo file to test/demonstrate a project.'''

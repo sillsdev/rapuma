@@ -61,6 +61,30 @@ def isOlder (child, parent) :
         return False
 
 
+def isExecutable (fn) :
+    '''Use the file exention to determine if a file is an executable script 
+    or not. This may need to be expanded as use cases arrise. Simple is
+    good for now. This will test for exsistance and extention type.'''
+
+    try :
+        if os.path.isfile(fn) :
+            if fName(fn).split('.')[1] in ['sh', 'py', 'rpmDemo'] :
+                return True
+    except Exception as e :
+        # If we don't succeed, we should probably quite here
+        dieNow('Little problem with tools.isExecutable(): ' + str(e) + '  File: ' + fn)
+
+
+def makeExecutable (fileName) :
+    '''Assuming fileName is a script, give the file executable permission.
+    This is necessary primarily because I have not found a way to preserve
+    permissions of the files comming out of a zip archive. To make sure the
+    processing script will actually work when it needs to run. Changing the
+    permissions to 777 may not be the best way but it will work for now. '''
+
+    os.chmod(fileName, int("0777", 8))
+
+
 def fName (fullPath) :
     '''Lazy way to extract the file name from a full path 
     using os.path.split().'''
