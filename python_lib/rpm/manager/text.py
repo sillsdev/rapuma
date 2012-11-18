@@ -132,6 +132,12 @@ class Text (Manager) :
 
 #        import pdb; pdb.set_trace()
 
+        # Before anything is done, we check to see if this component is locked
+        # Quite here if it is
+        if self.project.isLocked(cid) :
+            self.project.log.writeToLog('TEXT-040', [cid])
+            dieNow()
+
         # Check to see if text manager settings need updating
         self.updateManagerSettings()
 
@@ -191,6 +197,7 @@ class Text (Manager) :
 
         targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
         target          = os.path.join(targetFolder, cid + '.' + self.cType)
+        targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 
@@ -198,28 +205,18 @@ class Text (Manager) :
         # do not want to loose the work. However, if it is older that would
         # indicate the source has been updated so unless the folder is locked
         # we will want to update the target.
-        
 
-# FIXME: The locking needs to be reimplemented
-#        # First check for a general lock on all components of this type.
-#        if os.path.isfile(typeLock) :
-#            self.project.log.writeToLog('TEXT-040', [self.cType])
-#            return False
-
-#        # Now look for a lock on this specific component
-#        if os.path.isfile(compLock) :
-#            self.project.log.writeToLog('TEXT-045', [cid])
-#            return False
-
-#        import pdb; pdb.set_trace()
         # Look for the source now
         if not os.path.isfile(source) :
             self.project.log.writeToLog('TEXT-035', [source])
-            return False
+            dieNow()
 
         # Make target folder if needed
         if not os.path.isdir(targetFolder) :
             os.makedirs(targetFolder)
+
+        # Always save an untouched copy of the source
+        shutil.copy(source, targetSource)
 
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :

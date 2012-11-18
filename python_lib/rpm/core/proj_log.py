@@ -121,8 +121,7 @@ class ProjLog (object) :
             'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing or incorrect. Double check to see which editor created the source text.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            'TEXT-040' : ['WRN', 'The [<<1>>] component type is locked and cannot have any text modifications done to any files of this type at this time.'],
-            'TEXT-045' : ['WRN', 'The [<<1>>] component is locked and cannot have any text modifications done to it at this time.'],
+            'TEXT-040' : ['WRN', 'The [<<1>>] component is locked. Please unlock it before any text modifications are done to it.'],
             'TEXT-050' : ['LOG', 'Working text file for [<<1>>] has been completed.'],
             'TEXT-055' : ['ERR', 'TEXT-055 - Unassigned error message ID.'],
             'TEXT-060' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
@@ -237,11 +236,8 @@ class ProjLog (object) :
 
             'LOCK-000' : ['MSG', 'Messages for project and component locking.'],
             'LOCK-010' : ['LOG', 'The [<<1>>] component is not found in this project.'],
-            'LOCK-020' : ['LOG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
-            'LOCK-030' : ['LOG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
-
-            'LOCK-058' : ['MSG', 'The [<<1>>] component has been locked. No further text processes can be run on it unless it is unlocked (-u).'],
-            'LOCK-068' : ['MSG', 'The [<<1>>] component has been unlocked. This component can be processed.'],
+            'LOCK-020' : ['MSG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
+            'LOCK-030' : ['MSG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
 
             'SETG-000' : ['MSG', 'Messages for setting issues (probably only in project.py)'],
             'SETG-005' : ['MSG', 'SETG-005 - Unassigned error message ID.'],

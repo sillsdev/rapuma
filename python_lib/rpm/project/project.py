@@ -330,6 +330,13 @@ class Project (object) :
         component listing, along with its files so a fresh
         copy can be added to the project.'''
 
+        # Current thinking is that a locked component cannot be touched,
+        # not even by force (-f) Check here to see if that is the case
+        # and quite if it is.
+        if self.isLocked(cid) :
+            self.log.writeToLog('TEXT-040', [cid])
+            dieNow()
+
         # Make sure the source path is there for this component type
         if force :
             self.addCompTypeSourcePath(cType, source)
@@ -486,7 +493,7 @@ class Project (object) :
 ###############################################################################
 
     def isLocked (self, item) :
-        '''Test to see if a component is locked.Return True if the item is 
+        '''Test to see if a component is locked. Return True if the item is 
         locked. '''
 
         try :
