@@ -73,7 +73,7 @@ class UserConfig (object) :
         '''Initialize a user config file on a new install or system re-init.'''
 
         # Create home folders
-        if not os.path.isdir() :
+        if not os.path.isdir(self.local.userHome) :
             os.mkdir(self.local.userHome)
 
         # Make the default global rpm.conf for custom environment settings
