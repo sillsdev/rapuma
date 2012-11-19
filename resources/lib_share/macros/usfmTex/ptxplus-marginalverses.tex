@@ -3,7 +3,7 @@
 
 
 \catcode`\@=11
-\let\myoldv=\v
+%\let\myoldv=\v
 %\newif\multipleverses
 \newtoks\myeverypar
 \newdimen\mybaseline
@@ -37,7 +37,7 @@
     \ifnum\spacefactor=\n@wchaptersf \kern0sp %
      \ifOmitVerseNumberOne \c@ncelfirstversetrue \fi\fi
     \bgroup\m@kedigitsother\marginverse} % ensure we are in horizontal mode to build paragraph
-\def\initmyverse{\let\v=\myv}
+\def\initmyverse{\let\myoldv=\v \let\v=\myv}
 \addtoinithooks{\initmyverse}%
 \def\printv@rse{\AdornVerseNumber{\v@rsefrom}\ifx\v@rsefrom\v@rseto
 %                \else\setbox0\hbox{-} -\kern-\wd0\kern\wd0\penalty\hyphenpenalty \AdornVerseNumber{\v@rseto}\fi}
