@@ -19,7 +19,7 @@ Todo:
         <key>useIllustrations</key>
         <description>Turn on (or off) the use of illustrations in this project.</description>
         <type>boolean</type>
-        <value>True</value>
+        <value>False</value>
     </setting>
 </root>
 

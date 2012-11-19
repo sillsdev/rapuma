@@ -35,13 +35,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Backup Source</name>
-        <key>backupSource</key>
-        <description>Backup the component source text into the project. The system will overwrite any pre-exsiting copies of source files.</description>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
-    <setting>
         <name>Preprocess Script</name>
         <key>preprocessScript</key>
         <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>
