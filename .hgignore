@@ -1,2 +1,4 @@
 relre:.pyc
 relre:~
+syntax: glob
+build/*

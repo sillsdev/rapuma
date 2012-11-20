@@ -24,6 +24,18 @@
 
 import os, sys
 
+
+# FIXME: Bunch of work to do here to get the paths right
+
+# Search for valid paths in this order:
+
+# $RAPUMA_BASE
+# ~/.local/share/rapuma  (probably not used)
+# /usr/local/share/rapuma  (misc. resources)
+# /usr/share/rapuma  (packaged code)
+
+
+
 # Set the Rapuma base program path
 rapumaHome = os.environ.get('RAPUMA_BASE')
 if not rapumaHome :
