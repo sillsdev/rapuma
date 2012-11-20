@@ -34,17 +34,17 @@ class UserConfig (object) :
         self.local  = local
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
-        rpmXMLDefaults = os.path.join(self.local.rpmHome, 'config', 'rpm.xml')
-        if os.path.exists(rpmXMLDefaults) :
-            sysXmlConfig = xml_to_section(rpmXMLDefaults)
+        rapumaXMLDefaults = os.path.join(self.local.rapumaHome, 'config', 'rapuma.xml')
+        if os.path.exists(rapumaXMLDefaults) :
+            sysXmlConfig = xml_to_section(rapumaXMLDefaults)
         else :
-            raise IOError, "Can't open " + rpmXMLDefaults
+            raise IOError, "Can't open " + rapumaXMLDefaults
 
-        # Now make the users local rpm.conf file if it isn't there
+        # Now make the users local rapuma.conf file if it isn't there
         if not os.path.exists(self.local.userConfFile) :
             self.initUserHome()
 
-        # Load the RPM conf file into an object
+        # Load the Rapuma conf file into an object
         self.userConfig = ConfigObj(self.local.userConfFile)
 
         # Look for any projects that might be registered and copy the data out
@@ -76,7 +76,7 @@ class UserConfig (object) :
         if not os.path.isdir(self.local.userHome) :
             os.mkdir(self.local.userHome)
 
-        # Make the default global rpm.conf for custom environment settings
+        # Make the default global rapuma.conf for custom environment settings
         if not os.path.isfile(self.local.userConfFile) :
             self.userConfig = ConfigObj()
             self.userConfig.filename = self.local.userConfFile
@@ -97,7 +97,7 @@ class UserConfig (object) :
 
     def registerProject (self, pid, pname, pmid, projHome) :
         '''If it is already not there, add information about this project to the
-        user's rpm.conf located in the user's config folder.'''
+        user's rapuma.conf located in the user's config folder.'''
 
         if not self.isRegisteredProject(pid) :
 

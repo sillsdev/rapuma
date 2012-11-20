@@ -1,17 +1,17 @@
-Manual installation instructions for the developer version of the RPM package
+Manual installation instructions for the developer version of the Rapuma package
 	By Dennis Drescher (dennis_drescher@sil.org)
 	Last edited: 14 Nov 2012
 
-RPM (Rapid Publication Manager) is intended to be a system for managing publication data that could be used for output in a variety of media. RPM takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. RPM should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
+Rapuma (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-STATUS: Currently RPM is under heavy development (by a single, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of RPM in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
+STATUS: Currently Rapuma is under heavy development (by a single, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
 
-These instructions are for manually installing the developer version of the RPM publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want RPM to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
+These instructions are for manually installing the developer version of the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 REQUIRED PACKAGES
 -----------------------------------------
-There are a number of packages that need to be installed for RPM to work. Some are more critical than others but all of them are needed. Some of the packages are located in other repositories that you will need to add to your system repository source list. Fastest way is to open the sources.list file for editing with this command in your terminal:
+There are a number of packages that need to be installed for Rapuma to work. Some are more critical than others but all of them are needed. Some of the packages are located in other repositories that you will need to add to your system repository source list. Fastest way is to open the sources.list file for editing with this command in your terminal:
 
 	sudo gedit /etc/apt/sources.list
 
@@ -26,13 +26,13 @@ Again, in the terminal, update your package list and update your system with the
 	sudo apt-get update
 	sudo apt-get upgrade
 
-Next, in the terminal, you need to install all the necessary packages to run the RPM publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
+Next, in the terminal, you need to install all the necessary packages to run the Rapuma publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
 
 Required:
 
 	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte python-argparse pdftk mercurial meld
 
-Another required package is the Palaso Python library. RPM depends on a couple parts of that.
+Another required package is the Palaso Python library. Rapuma depends on a couple parts of that.
 At this time, that package needs to be added to your system by cloning the project, then
 following the install proceedure. It can be cloned from here:
 
@@ -56,11 +56,11 @@ sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
 
 Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
 
-With all the above packages installed, we are ready to move on to installing RPM publishing package.
+With all the above packages installed, we are ready to move on to installing Rapuma publishing package.
 
-GETTING RPM
+GETTING Rapuma
 -----------------------------------------
-To obtain the RPM, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the RPM package will go in this location:
+To obtain Rapuma, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in this location:
 
 	~/Projects
 
@@ -70,85 +70,34 @@ Create the above path if it does not exist with this command in your terminal:
 
 Now you can to go to the Palaso website and clone the project code with:
 
-	hg clone http://hg.palaso.org/pub-rpm ~/Projects/rpm
+	hg clone http://hg.palaso.org/pub-rpm ~/Projects/rapuma
 
-That should put RPM where you need it. From time to time you may want to update it. To do that, from inside the RPM project folder (~/Projects/rpm), this is the command you need:
+That should put Rapuma where you need it. From time to time you may want to update it. To do that, from inside the Rapuma project folder (~/Projects/rapuma), this is the command you need:
 
 	hg pull --update
 
 
 SYSTEM INSTALLATION AND SETUP
 -----------------------------------------
-For easier operation it is necessary to get RPM properly located in your system. The first thing that needs to be done is to link rpm.conf file (that will be in your user folder) to /etc folder. That is done with:
 
-	sudo ln -sf ~/.config/rpm/rpm.conf /etc/rpm.conf
+Give setup instructions here...
 
-Note that if you go look at /etc/rpm.conf you will see that it is a broken link. That is because ~/.config/rpm/rpm.conf does not yet exsist, but it will after you run RPM for the first time, then every thing will be happy.
-
-Now we will get RPM in your path by editing the ~/.profile file. To do that use this command:
-
-	sudo gedit ~/.profile
-
-Add this to the end of the file you just opened on its own line:
-
-    # Export the RPM user and system paths
-    export RPM_BASE="$HOME/Projects/rpm"
-    export RPM_USER="$HOME/.config/rpm"
-
-Save the file and close it. Next time you reboot or login, the new path settings will be there.
-
-If you don't want to reboot right now and you just want to get it working on the current login (terminal) use:
-
-	source ~/.profile
-
-That will enable you to test in the current terminal but if you want it to take effect system-wide then you will need to log off then log back in.
-
-Test to see if the system recognizes the additional path with:
-
-	echo $RPM_BASE
-	echo $RPM_USER
-
-After running this command you should see a path that leads to RPM.
-
-Next we need link RPM (main program) to /usr/local/bin so it can be started from any location like a real program would. First, varify that you have a bin folder. If you do not, create it in your terminal with this command:
-
-	mkdir ~/bin
-
-Now, you will need to link a couple utilities that are good to run globally out of the ~/bin folder and some links that will enable you to right-click from the Nautilus file browser. To make these links, run each of these commands in order:
-
-	sudo ln -s ~/Projects/rpm/bin/rpm /usr/local/bin/rpm
-	sudo ln -s ~/Projects/rpm/bin/rpm_demo /usr/local/bin/rpm_demo
-	ln -s ~/Projects/rpm/bin/sh/multi-txtconv.sh ~/bin/multi-txtconv.sh
-	ln -s ~/Projects/rpm/bin/python/lib_extras/get-clip ~/bin/get-clip
-	ln -s ~/Projects/rpm/bin/sh/rpm ~/.gnome2/nautilus-scripts/RPM
-	ln -s ~/Projects/rpm/bin/sh/Open\ Terminal ~/.gnome2/nautilus-scripts/Open\ Terminal
-
-This should complete the manual installation of rpm. Now you should be able to start the program from your terminal at any location with:
-
-	rpm -h
-
-If you are doing development work on RPM, you can access a simple development environment by creating a custom launcher with this command:
-
-	gnome-desktop-item-edit ~/Desktop/ --create-new
-
-For the command use: ~/Projects/rpm/rpm_dev.sh
-
-Go a head, give it a try. What you should see is an RPM help screen. That's about all it
+Go a head, give it a try. What you should see is a Rapuma help screen. That's about all it
 does for now.
 
 
 
 QUICK START GUIDE
 -----------------------------------------
-RPM comes with a couple demonstration projects that are used to demonstrate what it can do and also test the system when revisions are made. There is a module named "rpm_demo" that can be called on to do this but to make it easier for normal users, some short-cut scripts have been included to simplify running the test projects.
+Rapuma comes with a couple demonstration projects that are used to demonstrate what it can do and also test the system when revisions are made. There is a module named "rapuma_demo" that can be called on to do this but to make it easier for normal users, some short-cut scripts have been included to simplify running the test projects.
 
-Once RPM is setup, and you want to test it, open a terminal and navigate to someplace on your drive where you can let RPM install the test projects. Once you are there, use this command:
+Once Rapuma is setup, and you want to test it, open a terminal and navigate to someplace on your drive where you can let Rapuma install the test projects. Once you are there, use this command:
 
-    testRPM.sh
+    test_rapuma.sh
 
 Three things should result from doing this. First, your PDF viewer should be displaying freshly rendered PDF of the Book of James. This came from the ENG-LATN-JAS project located in the MBJAS folder. In that folder you will find all project data it took to do that. That was the second thing the test script did. The third result is a project folder work area named KYUM. This project contains a lot more data and specifcally, the KYU-MYMR-MRK project, which is a far more complex project than ENG-LATN-JAS.
 
-What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that are in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explorer in some exercizes that will put RPM through its paces.]
+What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that are in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explorer in some exercizes that will put Rapuma through its paces.]
 
 
 

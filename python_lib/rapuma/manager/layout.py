@@ -48,7 +48,7 @@ class Layout (Manager) :
 
         # Create a new default layout config file if needed
         if not os.path.isfile(self.project.local.layoutConfFile) :
-            self.layoutConfig  = ConfigObj(getXMLSettings(self.project.local.rpmLayoutDefaultFile))
+            self.layoutConfig  = ConfigObj(getXMLSettings(self.project.local.rapumaLayoutDefaultFile))
             self.layoutConfig.filename = self.project.local.layoutConfFile
             writeConfFile(self.layoutConfig)
             self.project.log.writeToLog('LYOT-010')

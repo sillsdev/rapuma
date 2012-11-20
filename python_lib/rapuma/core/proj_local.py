@@ -28,32 +28,32 @@ from tools import *
 
 class ProjLocal (object) :
 
-    def __init__(self, rpmHome, userHome, projHome) :
+    def __init__(self, rapumaHome, userHome, projHome) :
         '''Intitate the whole class and create the object.'''
 
-        self.rpmHome = rpmHome
+        self.rapumaHome = rapumaHome
         self.userHome = userHome
         self.projHome = projHome
 
-        # Bring in all the RPM default project location settings
-        rpmXMLDefaults = os.path.join(self.rpmHome, 'config', 'proj_local.xml')
-        if os.path.exists(rpmXMLDefaults) :
-            lc = xml_to_section(rpmXMLDefaults)
+        # Bring in all the Rapuma default project location settings
+        rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
+        if os.path.exists(rapumaXMLDefaults) :
+            lc = xml_to_section(rapumaXMLDefaults)
         else :
-            raise IOError, "Can't open " + rpmXMLDefaults
+            raise IOError, "Can't open " + rapumaXMLDefaults
             
         # Create a list of project folders for later processing
         self.projFolders = lc['ProjFolders'].keys()
 
         # Do a loopy thingy and pull out all the known settings
-        localTypes = ['ProjFolders', 'UserFolders', 'RpmFolders', 'ProjFiles', 'UserFiles', 'RpmFiles']
+        localTypes = ['ProjFolders', 'UserFolders', 'rapumaFolders', 'ProjFiles', 'UserFiles', 'rapumaFiles']
         for t in localTypes :
             if t[:3].lower() == 'pro' :
                 home = getattr(self, 'projHome')
             elif t[:3].lower() == 'use' :
                 home = getattr(self, 'userHome')
-            elif t[:3].lower() == 'rpm' :
-                home = getattr(self, 'rpmHome')
+            elif t[:3].lower() == 'rapuma' :
+                home = getattr(self, 'rapumaHome')
 
             for key in lc[t] :
                 # For extra credit, if we are looking at files, set the name here
@@ -74,7 +74,7 @@ class ProjLocal (object) :
 #                print key + ' = ', getattr(self, key)
 
         # Extract just the file names from these
-        localTypes = ['ProjFiles', 'UserFiles', 'RpmFiles']
+        localTypes = ['ProjFiles', 'UserFiles', 'RapumaFiles']
 
         # Add some additional necessary params
         self.lockExt = '.lock'

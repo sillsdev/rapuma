@@ -52,7 +52,7 @@ class Xetex (Manager) :
         self.usePdfViewer           = self.project.projConfig['Managers'][self.manager]['usePdfViewer']
         self.pdfViewer              = self.project.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.macroPackage           = self.project.projConfig['Managers'][self.manager]['macroPackage']
-        self.macLayoutValFile       = os.path.join(self.project.local.rpmConfigFolder, 'layout_' + self.macroPackage + '.xml')
+        self.macLayoutValFile       = os.path.join(self.project.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.projMacPackFolder      = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
         self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
@@ -163,15 +163,15 @@ class Xetex (Manager) :
     def makeExtFile (self) :
         '''Create/copy a TeX extentions file that has custom code for this project.'''
 
-        rpmExtFile = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage, self.extFileName)
+        rapumaExtFile = os.path.join(self.project.local.rapumaMacrosFolder, self.macroPackage, self.extFileName)
         userExtFile = os.path.join(self.project.userConfig['Resources']['macros'], self.extFileName)
         # First look for a user file, if not, then one 
-        # from RPM, worse case, make a blank one
+        # from Rapuma, worse case, make a blank one
         if not os.path.isfile(self.extFile) :
             if os.path.isfile(userExtFile) :
                 shutil.copy(userExtFile, self.extFile)
-            elif os.path.isfile(rpmExtFile) :
-                shutil.copy(rpmExtFile, self.extFile)
+            elif os.path.isfile(rapumaExtFile) :
+                shutil.copy(rapumaExtFile, self.extFile)
             else :
                 # Create a blank file
                 writeObject = codecs.open(extFile, "w", encoding='utf_8')
@@ -318,7 +318,7 @@ class Xetex (Manager) :
         '''Internal function to build the setFile.'''
 
         # Get the default and TeX macro values and merge them into one dictionary
-        x = self.makeTexSettingsDict(self.project.local.rpmLayoutDefaultFile)
+        x = self.makeTexSettingsDict(self.project.local.rapumaLayoutDefaultFile)
         y = self.makeTexSettingsDict(self.macLayoutValFile)
         macTexVals = dict(y.items() + x.items())
 
@@ -523,7 +523,7 @@ class Xetex (Manager) :
         '''Copy in the marginalverse macro package.'''
 
         macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-        macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+        macrosSource    = os.path.join(self.project.local.rapumaMacrosFolder, self.macroPackage)
 
         # Copy in to the process folder the macro package for this component
         if not os.path.isdir(macrosTarget) :
@@ -548,7 +548,7 @@ class Xetex (Manager) :
 
         if cType.lower() == 'usfm' :
             macrosTarget    = os.path.join(self.project.local.projMacrosFolder, self.macroPackage)
-            macrosSource    = os.path.join(self.project.local.rpmMacrosFolder, self.macroPackage)
+            macrosSource    = os.path.join(self.project.local.rapumaMacrosFolder, self.macroPackage)
             copyExempt      = [fName(self.extFile), fName(self.ptxMargVerseFile)]
 
             # Copy in to the process folder the macro package for this component

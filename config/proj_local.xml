@@ -4,7 +4,7 @@
 <!--
 File: proj_local.xml
 Description:
-This contains all the default file and folder names for RPM.
+This contains all the default file and folder names for Rapuma.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -22,7 +22,7 @@ Todo:
             <key>userConfFile</key>
             <description>The user configuration file.</description>
             <type>string</type>
-            <value>rpm.conf</value>
+            <value>rapuma.conf</value>
         </setting>
     </section>
     <section>
@@ -69,7 +69,7 @@ Todo:
             <key>projLogFile</key>
             <description>The general project log file.</description>
             <type>string</type>
-            <value>rpm.log</value>
+            <value>rapuma.log</value>
         </setting>
         <setting>
             <name>Project Error Log File</name>
@@ -80,20 +80,20 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>RPM Files</name>
-        <sectionID>RpmFiles</sectionID>
+        <name>Rapuma Files</name>
+        <sectionID>RapumaFiles</sectionID>
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>RPM Layout Default File</name>
-            <key>rpmLayoutDefaultFile</key>
+            <name>Rapuma Layout Default File</name>
+            <key>rapumaLayoutDefaultFile</key>
             <description>The name of the default layout file.</description>
             <type>list</type>
             <value>config,layout_default.xml</value>
         </setting>
         <setting>
-            <name>RPM Help Index File</name>
-            <key>rpmHelpIndexFile</key>
-            <description>The name of the HTML index file for the RPM basic help system.</description>
+            <name>Rapuma Help Index File</name>
+            <key>rapumaHelpIndexFile</key>
+            <description>The name of the HTML index file for the Rapuma basic help system.</description>
             <type>list</type>
             <value>resources,lib_docs,index.html</value>
         </setting>
@@ -193,69 +193,69 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>RPM Folders</name>
-        <sectionID>RpmFolders</sectionID>
+        <name>Rapuma Folders</name>
+        <sectionID>RapumaFolders</sectionID>
         <description>Any folder name that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>RPM Configuration Folder</name>
-            <key>rpmConfigFolder</key>
-            <description>The rpm configuration folder where all the XML default configuration files are kept.</description>
+            <name>Rapuma Configuration Folder</name>
+            <key>rapumaConfigFolder</key>
+            <description>The Rapuma configuration folder where all the XML default configuration files are kept.</description>
             <type>string</type>
             <value>config</value>
         </setting>
         <setting>
-            <name>RPM Resource Folder</name>
-            <key>rpmResourceFolder</key>
-            <description>The rpm resource folder where various RPM system resources are kept.</description>
+            <name>Rapuma Resource Folder</name>
+            <key>rapumaResourceFolder</key>
+            <description>The rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>string</type>
             <value>resources</value>
         </setting>
         <setting>
-            <name>RPM Component Type Folder</name>
-            <key>rpmCompTypeFolder</key>
-            <description>The rpm component type folder where component resources are kept.</description>
+            <name>Rapuma Component Type Folder</name>
+            <key>rapumaCompTypeFolder</key>
+            <description>The Rapuma component type folder where component resources are kept.</description>
             <type>list</type>
             <value>resources,lib_compTypes</value>
         </setting>
         <setting>
-            <name>RPM Documentation Folder</name>
-            <key>rpmDocumentFolder</key>
-            <description>The rpm document folder where RPM documentation is kept.</description>
+            <name>Rapuma Documentation Folder</name>
+            <key>rapumaDocumentFolder</key>
+            <description>The Rapuma document folder where Rapuma documentation is kept.</description>
             <type>list</type>
             <value>resources,lib_docs</value>
         </setting>
         <setting>
-            <name>RPM Examples Folder</name>
-            <key>rpmExamplesFolder</key>
-            <description>The rpm examples folder where various test projects are kept.</description>
+            <name>Rapuma Examples Folder</name>
+            <key>rapumaExamplesFolder</key>
+            <description>The Rapuma examples folder where various test projects are kept.</description>
             <type>list</type>
             <value>resources,lib_examples</value>
         </setting>
         <setting>
-            <name>RPM Libray Share Folder</name>
-            <key>rpmLibShareFolder</key>
-            <description>The rpm resource folder where various RPM system resources are kept.</description>
+            <name>Rapuma Libray Share Folder</name>
+            <key>rapumaLibShareFolder</key>
+            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,lib_share</value>
         </setting>
         <setting>
-            <name>RPM Fonts Folder</name>
-            <key>rpmFontsFolder</key>
-            <description>The rpm resource folder where various RPM system resources are kept.</description>
+            <name>Rapuma Fonts Folder</name>
+            <key>rapumaFontsFolder</key>
+            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,lib_share,fonts</value>
         </setting>
         <setting>
-            <name>RPM Macros Folder</name>
-            <key>rpmMacrosFolder</key>
-            <description>The rpm resource folder where various RPM system resources are kept.</description>
+            <name>Rapuma Macros Folder</name>
+            <key>rapumaMacrosFolder</key>
+            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,lib_share,macros</value>
         </setting>
         <setting>
-            <name>RPM Illustrations Folder</name>
-            <key>rpmIllustrationsFolder</key>
-            <description>The rpm resource folder where various RPM system resources are kept.</description>
+            <name>Rapuma Illustrations Folder</name>
+            <key>rapumaIllustrationsFolder</key>
+            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,lib_share,illustrations</value>
         </setting>

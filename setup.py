@@ -12,12 +12,12 @@ for (dp, dn, fn) in os.walk('resources') :
 setup(name = 'rapuma',
         version = '0.1.0',
         description = "Rapid Publication Manager",
-        long_description = "This will do everything you ever wanted and more.",
+        long_description = "Rapuma is a publication management application.",
         maintainer = "Dennis Drescher",
         maintainer_email = "dennis_drescher@sil.org",
         package_dir = {'':'python_lib'},
-        packages = map(lambda x: x[11:], glob('python_lib/rpm/*')),
-        scripts = glob("bin/rpm*"),
+        packages = map(lambda x: x[11:], glob('python_lib/rapuma/*')),
+        scripts = glob("bin/rapuma*"),
         license = 'LGPL',
         data_files = datafiles
      )

@@ -37,7 +37,7 @@ class Manager(object) :
 
 
 #        if self.xmlInitFile :
-#            self.initInfo = getXMLSettings(os.path.join(project.rpmConfigFolder, self.xmlInitFile))
+#            self.initInfo = getXMLSettings(os.path.join(project.rapumaConfigFolder, self.xmlInitFile))
 
 
 #    def initManager(self) :
@@ -81,7 +81,7 @@ class Manager(object) :
 #            thisFile = os.path.join(folderPath, fileName)
 
 #            # Create source file name
-#            sourceFile = os.path.join(self.project.rpmHome, 'resources', 'Files', fileName)
+#            sourceFile = os.path.join(self.project.rapumaHome, 'resources', 'Files', fileName)
 #            # Make the file if it is not already there
 #            if not os.path.isfile(thisFile) :
 #                if os.path.isfile(sourceFile) :

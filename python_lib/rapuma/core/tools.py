@@ -38,9 +38,9 @@ def dieNow (msg = '') :
     to why this happened.'''
 
     if msg :
-        '\n' + msg + ' RPM halting now!\n'
+        '\n' + msg + ' Rapuma halting now!\n'
     else :
-        msg = '\nRPM halting now!\n'
+        msg = '\nRapuma halting now!\n'
 
     sys.exit(msg)
 
@@ -68,7 +68,7 @@ def isExecutable (fn) :
 
     try :
         if os.path.isfile(fn) :
-            if fName(fn).split('.')[1] in ['sh', 'py', 'rpmDemo'] :
+            if fName(fn).split('.')[1] in ['sh', 'py', 'rapumaDemo'] :
                 return True
     except Exception as e :
         # If we don't succeed, we should probably quite here
@@ -385,7 +385,7 @@ def xmlToDict (element) :
     '''This will turn a normal XML file into a standard Python dictionary.
     I picked up this clever pice of code from here:
         http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
-    A guy named josch submitted it. I have modified it a little to work in RPM.'''
+    A guy named josch submitted it. I have modified it a little to work in Rapuma.'''
 
     # FIXME: print 'Fix isinstance() problem in tools.xmlToDict()'
 #    if not isinstance(element, ElementTree.Element):

@@ -16,7 +16,7 @@ Todo:
     <setting>
         <name>Component Renderer</name>
         <key>renderer</key>
-        <description>The render for this kind of component. The value must correspond with a RPM method written for this specific renderer.</description>
+        <description>The render for this kind of component. The value must correspond with a Rapuma method written for this specific renderer.</description>
         <type>string</type>
         <value>xetex</value>
     </setting>

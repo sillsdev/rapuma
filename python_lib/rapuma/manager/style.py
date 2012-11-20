@@ -46,13 +46,13 @@ class Style (Manager) :
         self.cfg                = cfg
         self.cType              = cType
         self.Ctype              = cType.capitalize()
-        self.rpmXmlStyleConfig  = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.rapumaXmlStyleConfig  = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.renderer           = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor       = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rpmXmlStyleConfig)
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rapumaXmlStyleConfig)
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings
 
@@ -98,7 +98,7 @@ class Style (Manager) :
                             self.recordStyleFile(sFile, sType)
                             return True
                         else :
-                            dieNow('RPM USFM [' + sType + '] style file not found.')
+                            dieNow('Rapuma USFM [' + sType + '] style file not found.')
 
                 elif self.sourceEditor.lower() == 'generic' :
                         # If we get this far, install fallback style file
@@ -112,7 +112,7 @@ class Style (Manager) :
                             self.recordStyleFile(sFile, sType)
                             return True
                         else :
-                            dieNow('RPM USFM [' + sType + '] style file not found.')
+                            dieNow('Rapuma USFM [' + sType + '] style file not found.')
 
                 else :
                     self.project.log.writeToLog('STYL-007', [self.cType,self.sourceEditor])
@@ -162,7 +162,7 @@ class Style (Manager) :
         # As this is call is for a PT based project, it is certain the style
         # file should be found in the source or parent folder. If that
         # exact file is not found in either place, a substitute will be
-        # copied in from RPM and given the designated name.
+        # copied in from Rapuma and given the designated name.
         sourceStyle             = os.path.join(sourcePath, self.mainStyleFile)
         parent                  = os.path.dirname(sourcePath)
         # If there is a "gather" folder, assume the style file is there
@@ -186,10 +186,10 @@ class Style (Manager) :
 
 
     def installUSFMFallback (self) :
-        '''Install the fallback style file from the RPM system. This is just
+        '''Install the fallback style file from the Rapuma system. This is just
         a known good copy of the current USFM styles.'''
 
-        sFile = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'usfm.sty')
+        sFile = os.path.join(self.project.local.rapumaCompTypeFolder, 'usfm', 'usfm.sty')
         target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
         if os.path.isfile(sFile) :
             # No news is good news
@@ -198,10 +198,10 @@ class Style (Manager) :
 
 
     def installUSFMCustom (self) :
-        '''Install the custom style file from the RPM system. This contains
+        '''Install the custom style file from the Rapuma system. This contains
         special style code to help with implementing special features'''
 
-        sFile = os.path.join(self.project.local.rpmCompTypeFolder, 'usfm', 'custom.sty')
+        sFile = os.path.join(self.project.local.rapumaCompTypeFolder, 'usfm', 'custom.sty')
         target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
         if os.path.isfile(sFile) :
             # No news is good news
@@ -220,7 +220,7 @@ class Style (Manager) :
             return False
         elif os.path.isfile(sFile) :
             # It's there? Good, we're done!
-            # If this is not an RPM custom style file we will validate it
+            # If this is not an Rapuma custom style file we will validate it
             if sType.lower() == 'main' :
                 if self.usfmStyleFileIsValid(sFile) :
                     shutil.copy(sFile, target)

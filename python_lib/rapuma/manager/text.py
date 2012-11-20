@@ -49,14 +49,14 @@ class Text (Manager) :
         self.cfg                = cfg
         self.cType              = cType
         self.Ctype              = cType.capitalize()
-        self.rpmXmlTextConfig   = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.rapumaXmlTextConfig   = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath      = getSourcePath(self.project.projConfig, self.Ctype)
         self.sourceEditor       = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
         self.setSourceEditor(self.sourceEditor) 
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rpmXmlTextConfig)
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rapumaXmlTextConfig)
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings
 

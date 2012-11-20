@@ -10,7 +10,7 @@
 # This class will handle project infrastructure tasks.
 
 # History:
-# 20110823 - djd - Started with intial file from RPM project
+# 20110823 - djd - Started with intial file from Rapuma project
 # 20111203 - djd - Begin changing over to new manager model
 
 
@@ -63,7 +63,7 @@ class Project (object) :
 
         # Update the existing config file with the project type XML file
         # if needed
-        newXmlDefaults = os.path.join(self.local.rpmConfigFolder, self.projectMediaIDCode + '.xml')
+        newXmlDefaults = os.path.join(self.local.rapumaConfigFolder, self.projectMediaIDCode + '.xml')
         xmlConfig = getXMLSettings(newXmlDefaults)
         newConf = ConfigObj(xmlConfig.dict()).override(self.projConfig)
         for s,v in self.projConfig.items() :
@@ -116,7 +116,7 @@ class Project (object) :
         buildConfSection(self.projConfig, 'Managers')
         if not testForSetting(self.projConfig['Managers'], fullName) :
             buildConfSection(self.projConfig['Managers'], fullName)
-            managerDefaults = getXMLSettings(os.path.join(self.local.rpmConfigFolder, mType + '.xml'))
+            managerDefaults = getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
             for k, v, in managerDefaults.iteritems() :
                 # Do not overwrite if a value is already there
                 if not testForSetting(self.projConfig['Managers'][fullName], k) :
@@ -270,7 +270,7 @@ class Project (object) :
         The assumption is only one path per component type.'''
 
         Ctype = cType.capitalize()
-        # Path has been resolved in RPM, we assume it should be valid.
+        # Path has been resolved in Rapuma, we assume it should be valid.
         # But it could be a full file name. We need to sort that out.
         try :
             if os.path.isdir(source) :
@@ -470,7 +470,7 @@ class Project (object) :
             buildConfSection(self.projConfig['CompTypes'], Ctype)
 
             # Get persistant values from the config if there are any
-            newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rpmConfigFolder, cType + '.xml'))
+            newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
             if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
                 self.projConfig['CompTypes'][Ctype] = newSectionSettings
                 # Save the setting rightaway
@@ -651,7 +651,7 @@ class Project (object) :
 
         # Define some internal vars
         if not script :
-            script          = os.path.join(self.local.rpmCompTypeFolder, cType, cType + '-preprocess.zip')
+            script          = os.path.join(self.local.rapumaCompTypeFolder, cType, cType + '-preprocess.zip')
         else :
             script          = resolvePath(script)
 
@@ -1029,7 +1029,7 @@ class Project (object) :
 
     def isProject (self, pid) :
         '''Look up in the user config to see if a project is registered. This
-        is a duplicate of the function in the main rpm file.'''
+        is a duplicate of the function in the main rapuma file.'''
 
         try :
             if pid in self.userConfig['Projects'] :
@@ -1043,11 +1043,11 @@ class Project (object) :
         write out changes immediately. If this is called internally, the
         calling function will need to reload to the config for the
         changes to take place in the current session. This is currently
-        designed to work more as a single call to RPM.'''
+        designed to work more as a single call to Rapuma.'''
 
         oldValue = ''
-        if config.lower() == 'rpm' :
-            confFile = os.path.join(self.local.userHome, 'rpm.conf')
+        if config.lower() == 'rapuma' :
+            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
         else :
             confFile = os.path.join(self.local.projConfFolder, config + '.conf')
 

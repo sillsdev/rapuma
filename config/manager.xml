@@ -3,7 +3,7 @@
 <!--
 File: manager.xml
 Description:
-This is a project or Document type description for RPM publication managers.
+This is a project or Document type description for Rapuma publication managers.
 
 Todo:
 1) Need to connect to an external DTD, schema, whatever for validation.
@@ -15,7 +15,7 @@ Todo:
     <section>
         <name>Project Information</name>
         <sectionID>Managers</sectionID>
-        <description>This section contains information about managers used in the RPM system.</description>
+        <description>This section contains information about managers used in the Rapuma system.</description>
 
 #FIXME: Describe some managers here in sub sections.
 

@@ -80,7 +80,7 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     what is in the PT SSF. If force is True, replace any exsisting
     settings.'''
 
-    # A PT to RPM text mapping dictionary
+    # A PT to Rapuma text mapping dictionary
     mapping   = {
                 'FileNameBookNameForm'      : 'nameFormID',
                 'FileNamePrePart'           : 'prePart',

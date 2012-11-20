@@ -65,7 +65,7 @@ class ProjLog (object) :
             'COMP-012' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] found in the meta component list: [<<2>>], it may not be a valid ID.'],
             'COMP-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'COMP-022' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
-            'COMP-025' : ['WRN', 'The [<<1>>] component is already listed in the RPM project configuration and is locked. Please unlock or use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
+            'COMP-025' : ['WRN', 'The [<<1>>] component is already listed in the Rapuma project configuration and is locked. Please unlock or use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
             'COMP-030' : ['LOG', 'The [<<1>>] component section has been deleted from the project configuration file.'],
             'COMP-031' : ['LOG', 'The [<<1>>] component folder has been deleted from your hard drive.'],
             'COMP-032' : ['LOG', 'There is no folder found for the [<<1>>] component. No files have been deleted by this operation.'],
@@ -95,7 +95,7 @@ class ProjLog (object) :
             'XTEX-020' : ['LOG', 'Wrote out new layout configuration file.'],
             'XTEX-025' : ['MSG', 'Rendering of [<<1>>] successful.'],
             'XTEX-030' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
-            'XTEX-035' : ['ERR', 'XeTeX error code [<<1>>] not understood by RPM.'],
+            'XTEX-035' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
             'XTEX-040' : ['LOG', 'Created: <<1>>'],
             'XTEX-045' : ['TOD', 'File <<1>> is missing. Check the error log for an import error for this required file. The system cannot render without it.'],
             'XTEX-050' : ['ERR', 'USFM working text not found: <<1>>. This is required in order to render.'],
@@ -203,7 +203,7 @@ class ProjLog (object) :
             'PREP-055' : ['LOG', 'No preprocesses registered for this component type [<<1>>].'],
             'PREP-060' : ['ERR', 'Preprocesses did not completed successfully on: [<<1>>], This is the error reported: [<<2>>]. If there is a log for this process script, check it for details.'],
             'PREP-070' : ['ERR', 'Preprocesses script: [<<1>>] was called on the component: [<<2>>] but the script was not found in the project.'],
-            'PREP-075' : ['TDO', 'Use the command: [rpm process <project ID> <component type> -a ] to install a default starter scritp. Use the -s <script name> option to import a custom preprocessing script.'],
+            'PREP-075' : ['TDO', 'Use the command: [rapuma process <project ID> <component type> -a ] to install a default starter scritp. Use the -s <script name> option to import a custom preprocessing script.'],
             'PREP-080' : ['ERR', 'A file named [<<1>>] is already registered as the preprocess script for this component type. Please use -f (force) to remove it if you want to install a fresh or different script.'],
             'PREP-081' : ['ERR', 'This script is already registered as the preprocess script for this component type. Please use -f (force) to reinstall a fresh or different script.'],
             'PREP-082' : ['ERR', 'The script file: [<<1>>] already exsists in the Scripts folder. Cannot copy over old file. Please use -f (force) to remove it if you want to install a fresh or different file.'],
@@ -223,7 +223,7 @@ class ProjLog (object) :
             'POST-055' : ['MSG', 'No post processes registered for this component type [<<1>>].'],
             'POST-060' : ['ERR', 'Post processes did not completed successfully. This is the error reported: [<<1>>]. If there is a log for this process script, please check it for details.'],
             'POST-070' : ['ERR', 'Post processes script: [<<1>>] was called but the script was not found in the project.'],
-            'POST-075' : ['TDO', 'Use the command: [rpm process <project ID> <component type> -a ] to install a default starter scritp. Use the -s <script name> option to import a custom post processing script.'],
+            'POST-075' : ['TDO', 'Use the command: [rapuma process <project ID> <component type> -a ] to install a default starter scritp. Use the -s <script name> option to import a custom post processing script.'],
             'POST-080' : ['ERR', 'A file named [<<1>>] is already registered as the post process script for this component type. Please use -f (force) to install a fresh copy.'],
             'POST-082' : ['ERR', 'The script file: [<<1>>] already exsists in the Scripts folder. Cannot copy over old file. Please use -f (force) to remove it if you want to install a fresh copy.'],
             'POST-085' : ['ERR', 'Source script not found: [<<1>>]'],
@@ -317,7 +317,7 @@ class ProjLog (object) :
             msg = self.errorCodes[errCode][1]
             code = self.errorCodes[errCode][0]
         else :
-            terminal('\nThe code: [' + errCode + '] is not recognized by the RPM system.')
+            terminal('\nThe code: [' + errCode + '] is not recognized by the Rapuma system.')
             dieNow()
 
         # If args were given, do s/r on them and add 
@@ -350,7 +350,7 @@ class ProjLog (object) :
             try :
                 if not os.path.isfile(self.local.projLogFile) or os.path.getsize(self.local.projLogFile) == 0 :
                     writeObject = codecs.open(self.local.projLogFile, "w", encoding='utf_8')
-                    writeObject.write('RPM event log file created: ' + tStamp() + '\n')
+                    writeObject.write('Rapuma event log file created: ' + tStamp() + '\n')
                     writeObject.close()
 
                 # Now log the event to the top of the log file using preAppend().

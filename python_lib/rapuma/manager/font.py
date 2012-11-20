@@ -50,7 +50,7 @@ class Font (Manager) :
         self.fontConfig             = ConfigObj()
         self.project                = project
         self.manager                = self.cType + '_Font'
-        self.rpmXmlFontConfig       = os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile)
+        self.rapumaXmlFontConfig       = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getSourcePath(self.project.projConfig, self.Ctype)
 
         # Create an empty default font config file if needed
@@ -62,7 +62,7 @@ class Font (Manager) :
             self.fontConfig = ConfigObj(self.project.local.fontConfFile)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rpmConfigFolder, self.xmlConfFile))
+        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
             # Save the setting rightaway
@@ -129,11 +129,11 @@ class Font (Manager) :
 
         # Check for the font family bundle, look in user resources first
         userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
-        rpmSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
+        rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         if os.path.isfile(userSource) :
             source = userSource
-        elif os.path.isfile(rpmSource) :
-            source = rpmSource
+        elif os.path.isfile(rapumaSource) :
+            source = rapumaSource
         else :
             self.project.log.writeToLog('FONT-120', [source])
             dieNow()
@@ -268,12 +268,12 @@ class Font (Manager) :
 
         # Look in user resources first
         userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
-        rpmSource = os.path.join(self.project.local.rpmFontsFolder, font + '.zip')
+        rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
         if os.path.isfile(userSource) :
             source = userSource
-        elif os.path.isfile(rpmSource) :
-            source = rpmSource
+        elif os.path.isfile(rapumaSource) :
+            source = rapumaSource
         else :
             self.project.log.writeToLog('FONT-120', [source])
 
