@@ -1,0 +1,36 @@
+% USFM custom style controls, use, modify, add or delete as necessary
+
+%%%%% Custom footnote caller font (special characters)
+% This enables a custom font to be used for footnote/crossref
+% caller characters. Normally, by default, the font that is
+% used is the same as the body text. For situations where a
+% different character or style of character is needed, you
+% can specify another font. This is a group of styles that
+% include \Marker fncaller, \Marker f and \Marker x.
+
+% Define a special caller style and add a hook to tie it
+% to a font (\callerfont) that is defined elsewhere in
+% the TeX system by RPM.
+\Marker fncaller
+\OccursUnder id
+\StyleType Character
+\FontSize 12
+\sethook{start}{fncaller}{\callerfont}
+\Superscript
+
+% Modify the footnote marker (\f) to recognize the newly
+% defined caller style.
+\Marker f
+\NoteCallerStyle fncaller
+\CallerStyle fncaller
+\StyleType Note
+\FontSize 9
+
+% The same here as with \f above.
+\Marker x
+\NoteCallerStyle fncaller
+\CallerStyle fncaller
+\StyleType Note
+\FontSize 9
+
+
