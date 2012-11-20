@@ -46,7 +46,7 @@ class ProjLocal (object) :
         self.projFolders = lc['ProjFolders'].keys()
 
         # Do a loopy thingy and pull out all the known settings
-        localTypes = ['ProjFolders', 'UserFolders', 'rapumaFolders', 'ProjFiles', 'UserFiles', 'rapumaFiles']
+        localTypes = ['ProjFolders', 'UserFolders', 'RapumaFolders', 'ProjFiles', 'UserFiles', 'RapumaFiles']
         for t in localTypes :
             if t[:3].lower() == 'pro' :
                 home = getattr(self, 'projHome')

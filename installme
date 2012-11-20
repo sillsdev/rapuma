@@ -77,7 +77,7 @@ That should put Rapuma where you need it. From time to time you may want to upda
 	hg pull --update
 
 
-SYSTEM INSTALLATION AND SETUP
+PACKAGE INSTALLATION AND SETUP
 -----------------------------------------
 
 Give setup instructions here...
@@ -85,6 +85,41 @@ Give setup instructions here...
 Go a head, give it a try. What you should see is a Rapuma help screen. That's about all it
 does for now.
 
+
+RUNNING THE REPOSITORY VERSION
+-----------------------------------------
+To start we will get rapuma in your path by editing the ~/.profile file. To do that use this command:
+
+    sudo gedit ~/.profile
+
+Add this to the end of the file you just opened on its own line:
+
+    # Export the Rapuma path    
+    export RAPUMA_BASE="$HOME/Projects/rapuma"
+    export RAPUMA_USER="$HOME/.config/rapuma"
+    
+Save the file and close it. Next time you reboot or login, the new path settings will be there.
+
+If you don't want to reboot right now and you just want to get it working on the current login (terminal) use:
+
+    source ~/.profile
+
+That will enable you to test in the current terminal but if you want it to take effect system-wide then you will need to log off then log back in.
+
+Test to see if the system recognizes the additional path with:
+
+    echo $RAPUMA_BASE
+
+After running this command you should see a path that leads to ptxplus.
+
+Next we need link ptxplus (main program) to /usr/local/bin so it can be started from any location like a real program would. First, verify that you have a bin folder. If you do not, create it in your terminal with this command:
+
+    mkdir ~/bin
+
+Now, you will need to link Rapuma to run globally out of the ~/bin folder, run each of these commands:
+
+    sudo ln -sf ~/Projects/rapuma/bin/rapuma ~/bin
+    sudo ln -sf ~/Projects/rapuma/bin/rapuma_demo ~/bin
 
 
 QUICK START GUIDE
