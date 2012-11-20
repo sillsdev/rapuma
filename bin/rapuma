@@ -42,6 +42,12 @@ if not rapumaHome :
     rapumaHome = os.path.join('usr', 'share', 'rapuma')
     os.environ['RAPUMA_BASE'] = rapumaHome
 
+# Set the Rapuma program resources path
+rapumaResources = os.environ.get('RAPUMA_RESOURCES')
+if not rapumaResources :
+    rapumaResources = os.path.join('usr', 'local', 'share', 'rapuma')
+    os.environ['RAPUMA_RESOURCES'] = rapumaResources
+
 # Set the user environment path
 userHome = os.environ.get('RAPUMA_USER')
 if not userHome :
@@ -57,6 +63,8 @@ sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'core'))
 sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'manager'))
 sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'project'))
 sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'component'))
+sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'component'))
+sys.path.insert(0, os.path.join(rapumaHome, 'resources'))
 
 # Load standard Python modules
 import codecs, shutil, operator, argparse, subprocess, tarfile
@@ -73,7 +81,7 @@ from proj_config import ProjConfig
 from project import Project
 
 # Instantiate User classes
-local           = ProjLocal(rapumaHome, userHome, projHome)
+local           = ProjLocal(rapumaHome, rapumaResources, userHome, projHome)
 uc              = UserConfig(local)
 log             = ProjLog(local, uc)
 
