@@ -22,9 +22,9 @@
 import os
 
 # Load the local classes
-from tools import *
-from pt_tools import *
-from component import Component
+from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
+from rapuma.component.component import Component
 
 
 ###############################################################################

@@ -23,7 +23,7 @@ import os, codecs
 
 
 # Load the local classes
-from tools import *
+from rapuma.core.tools import *
 
 
 ###############################################################################

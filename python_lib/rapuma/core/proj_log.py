@@ -22,7 +22,7 @@
 import codecs, os
 
 # Load the local classes
-from tools import *
+from rapuma.core.tools import *
 
 
 class ProjLog (object) :

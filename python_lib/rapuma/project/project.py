@@ -25,11 +25,11 @@ import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO
 
 
 # Load the local classes
-from tools import *
-from pt_tools import *
-import manager as mngr
-import component as cmpt
-import user_config as userConfig
+from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
+import rapuma.project.manager as mngr
+import rapuma.component.component as cmpt
+import rapuma.core.user_config as userConfig
 
 ###############################################################################
 ################################## Begin Class ################################

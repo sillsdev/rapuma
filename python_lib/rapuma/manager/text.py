@@ -23,9 +23,9 @@ import os, shutil, codecs, unicodedata
 from configobj import ConfigObj, Section
 
 # Load the local classes
-from tools import *
-from pt_tools import *
-from manager import Manager
+from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
+from rapuma.project.manager import Manager
 import palaso.sfm as sfm
 from palaso.sfm import usfm, style, element, text
 

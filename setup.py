@@ -6,8 +6,9 @@ import os
 
 datafiles = []
 dataprefix = "share/rapuma"
-for (dp, dn, fn) in os.walk('resources') :
-    datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
+for subdir in ('resources', 'config') :
+    for (dp, dn, fn) in os.walk(subdir) :
+        datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
 
 setup(name = 'rapuma',
         version = '0.1.0',
@@ -16,7 +17,7 @@ setup(name = 'rapuma',
         maintainer = "Dennis Drescher",
         maintainer_email = "dennis_drescher@sil.org",
         package_dir = {'':'python_lib'},
-        packages = map(lambda x: x[11:], glob('python_lib/rapuma/*')),
+        packages = ["rapuma", 'rapuma.core', 'rapuma.project', 'rapuma.component', 'rapuma.manager'],
         scripts = glob("bin/rapuma*"),
         license = 'LGPL',
         data_files = datafiles

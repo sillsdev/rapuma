@@ -22,9 +22,9 @@
 import os, shutil, warnings
 
 # Load the local classes
-from tools import *
-from pt_tools import *
-from manager import Manager
+from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
+from rapuma.project.manager import Manager
 
 
 ###############################################################################

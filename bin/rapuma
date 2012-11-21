@@ -24,61 +24,44 @@
 
 import os, sys
 
-
-# FIXME: Bunch of work to do here to get the paths right
-
-# Search for valid paths in this order:
-
-# $RAPUMA_BASE
-# ~/.local/share/rapuma  (probably not used)
-# /usr/local/share/rapuma  (misc. resources)
-# /usr/share/rapuma  (packaged code)
-
-
-
-# Set the Rapuma base program path
+# Set the Rapuma base program paths
 rapumaHome = os.environ.get('RAPUMA_BASE')
+sysHome = os.environ.get('HOME')
 if not rapumaHome :
-    rapumaHome = os.path.join('usr', 'share', 'rapuma')
-    os.environ['RAPUMA_BASE'] = rapumaHome
+    for t in (os.path.join(sysHome, '.local'), '/usr/local', '/usr') :
+        rapumaHome = os.path.join(t, 'share', 'rapuma')
+        if os.path.exists(os.path.join(rapumaHome, 'resources')) :
+            os.environ['RAPUMA_BASE'] = rapumaHome
+            break
+print rapumaHome
 
 # Set the Rapuma program resources path
 rapumaResources = os.environ.get('RAPUMA_RESOURCES')
 if not rapumaResources :
-    rapumaResources = os.path.join('usr', 'local', 'share', 'rapuma')
+    rapumaResources = os.path.join(rapumaHome, 'resources')
     os.environ['RAPUMA_RESOURCES'] = rapumaResources
 
 # Set the user environment path
 userHome = os.environ.get('RAPUMA_USER')
 if not userHome :
-    sysHome = os.environ.get('HOME')
     userHome = os.path.join(sysHome, '.config', 'rapuma')
     os.environ['RAPUMA_USER'] = userHome
 
 # Set the (potential) project home
 projHome = os.getcwd()
 
-# Set our paths to application resources
-sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'core'))
-sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'manager'))
-sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'project'))
-sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'component'))
-sys.path.insert(0, os.path.join(rapumaHome, 'python_lib', 'rapuma', 'component'))
-sys.path.insert(0, os.path.join(rapumaHome, 'resources'))
-
 # Load standard Python modules
-import codecs, shutil, operator, argparse, subprocess, tarfile
+import codecs, shutil, operator, argparse, subprocess
 from datetime import *
 from configobj import ConfigObj
 
-
 # Load the local classes
-from proj_local import ProjLocal
-from proj_log import ProjLog
-from tools import *
-from user_config import UserConfig
-from proj_config import ProjConfig
-from project import Project
+from rapuma.core.proj_local import ProjLocal
+from rapuma.core.proj_log import ProjLog
+from rapuma.core.tools import *
+from rapuma.core.user_config import UserConfig
+from rapuma.core.proj_config import ProjConfig
+from rapuma.project.project import Project
 
 # Instantiate User classes
 local           = ProjLocal(rapumaHome, rapumaResources, userHome, projHome)

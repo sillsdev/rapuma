@@ -23,7 +23,7 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from tools import *
+from rapuma.core.tools import *
 
 
 class UserConfig (object) :

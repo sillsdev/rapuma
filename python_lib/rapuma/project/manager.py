@@ -22,7 +22,7 @@
 import os, shutil
 
 # Load the local classes
-from tools import *
+from rapuma.core.tools import *
 
 
 class Manager(object) :
