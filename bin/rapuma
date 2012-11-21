@@ -33,7 +33,8 @@ if not rapumaHome :
         if os.path.exists(os.path.join(rapumaHome, 'resources')) :
             os.environ['RAPUMA_BASE'] = rapumaHome
             break
-print rapumaHome
+
+print 'Haaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 # Set the Rapuma program resources path
 rapumaResources = os.environ.get('RAPUMA_RESOURCES')

@@ -2,7 +2,7 @@ Manual installation instructions for the developer version of the Rapuma package
 	By Dennis Drescher (dennis_drescher@sil.org)
 	Last edited: 14 Nov 2012
 
-Rapuma (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
+RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
 STATUS: Currently Rapuma is under heavy development (by a single, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
 
@@ -13,24 +13,26 @@ REQUIRED PACKAGES
 -----------------------------------------
 There are a number of packages that need to be installed for Rapuma to work. Some are more critical than others but all of them are needed. Some of the packages are located in other repositories that you will need to add to your system repository source list. Fastest way is to open the sources.list file for editing with this command in your terminal:
 
-	sudo gedit /etc/apt/sources.list
+    sudo gedit /etc/apt/sources.list
 
 Next, in gedit in the file you just opened, go to the bottom of the file and add this line if it does not already exist in the file:
 
-	deb http://packages.sil.org/ubuntu oneiric main
+    deb http://packages.sil.org/ubuntu precise main
 
 Save the file and close it.
 
 Again, in the terminal, update your package list and update your system with the folling command and answer yes to the "install without verification" question:
 
-	sudo apt-get update
-	sudo apt-get upgrade
+    sudo apt-get update
+    sudo apt-get upgrade
 
 Next, in the terminal, you need to install all the necessary packages to run the Rapuma publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
 
 Required:
 
-	sudo apt-get install texlive texlive-xetex python-htmlgen python-configobj python-mako evince inkscape zim python-gtk2 python-vte python-argparse pdftk mercurial meld
+    sudo apt-get install texlive texlive-xetex python-configobj evince python-argparse pdftk mercurial meld
+
+(Note to me: Do we still need these?: python-vte python-mako python-htmlgen)
 
 Another required package is the Palaso Python library. Rapuma depends on a couple parts of that.
 At this time, that package needs to be added to your system by cloning the project, then
@@ -44,9 +46,9 @@ This needs to be installed before you can use it. To install run:
     sudo ./setup.py --nokmn install
 
 
-Suggested additional packages:
+Some suggested additional packages to make your Linux DTP system complete:
 
-    sudo apt-get install libgtk2-spell-perl tortoisehg
+    sudo apt-get install inkscape libgtk2-spell-perl tortoisehg
 
 Suggested SIL Packages:
 
@@ -60,9 +62,7 @@ With all the above packages installed, we are ready to move on to installing Rap
 
 GETTING Rapuma
 -----------------------------------------
-To obtain Rapuma, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in this location:
-
-	~/Projects
+To obtain Rapuma, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in a folder called "~/Projects" but you are welcomed to put it wherever you want.
 
 Create the above path if it does not exist with this command in your terminal:
 
@@ -79,48 +79,29 @@ That should put Rapuma where you need it. From time to time you may want to upda
 
 PACKAGE INSTALLATION AND SETUP
 -----------------------------------------
+Like the palaso.python setup you will use the setup.py script. With a terminal in the root of the rapuma repository on your local machine, run:
 
-Give setup instructions here...
+    ./setup.py build
+    sudo setup.py install
 
-Go a head, give it a try. What you should see is a Rapuma help screen. That's about all it
-does for now.
+To test the instalation, type:
+
+    rapuma -h
+
+What you should get is a Rapuma help screen. To get started using it, read the quickstart file that is in the rapuma repo directory.
 
 
-RUNNING THE REPOSITORY VERSION
------------------------------------------
-To start we will get rapuma in your path by editing the ~/.profile file. To do that use this command:
+RUNNING THE REPOSITORY VERSION FOR DEVELOPMENT
+----------------------------------------------
+If you are doing Rapuma development work and production side-by-side, you will want to keep as much seperation between the two worlds. To do this, open a terminal in the root of the rapuma repository. Then run this script:
 
-    sudo gedit ~/.profile
+    . ./dev_setup.sh
 
-Add this to the end of the file you just opened on its own line:
+In the same terminal session, create this link to your ~/bin folder (create it if it is not there):
 
-    # Export the Rapuma path    
-    export RAPUMA_BASE="$HOME/Projects/rapuma"
-    export RAPUMA_USER="$HOME/.config/rapuma"
-    
-Save the file and close it. Next time you reboot or login, the new path settings will be there.
+    ln -s ~/Projects/rapuma/bin/rapuma ~/bin/rpm
 
-If you don't want to reboot right now and you just want to get it working on the current login (terminal) use:
-
-    source ~/.profile
-
-That will enable you to test in the current terminal but if you want it to take effect system-wide then you will need to log off then log back in.
-
-Test to see if the system recognizes the additional path with:
-
-    echo $RAPUMA_BASE
-
-After running this command you should see a path that leads to ptxplus.
-
-Next we need link ptxplus (main program) to /usr/local/bin so it can be started from any location like a real program would. First, verify that you have a bin folder. If you do not, create it in your terminal with this command:
-
-    mkdir ~/bin
-
-Now, you will need to link Rapuma to run globally out of the ~/bin folder, run each of these commands:
-
-    sudo ln -sf ~/Projects/rapuma/bin/rapuma ~/bin
-    sudo ln -sf ~/Projects/rapuma/bin/rapuma_demo ~/bin
-
+This will create a link from the source code area that has a slightly different name than the installed production version. For production you will use "rapuma" and for development, in the terminal session where you ran the dev_setup.sh, run the command "rpm" to run off of development source code.
 
 QUICK START GUIDE
 -----------------------------------------
@@ -132,7 +113,7 @@ Once Rapuma is setup, and you want to test it, open a terminal and navigate to s
 
 Three things should result from doing this. First, your PDF viewer should be displaying freshly rendered PDF of the Book of James. This came from the ENG-LATN-JAS project located in the MBJAS folder. In that folder you will find all project data it took to do that. That was the second thing the test script did. The third result is a project folder work area named KYUM. This project contains a lot more data and specifcally, the KYU-MYMR-MRK project, which is a far more complex project than ENG-LATN-JAS.
 
-What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that are in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explorer in some exercizes that will put Rapuma through its paces.]
+What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that will be in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explore in some exercizes that will put Rapuma through its paces.]
 
 
 
