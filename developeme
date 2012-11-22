@@ -1,0 +1,20 @@
+RUNNING THE REPOSITORY VERSION FOR DEVELOPMENT
+----------------------------------------------
+If you are doing Rapuma development work and production side-by-side, you will want to keep as much seperation between these two worlds. To do this, open a terminal in the root of the rapuma repository on your local machine. Then run this script:
+
+    . ./dev_setup.sh
+
+(Note the "." just before "./", that is not a typo.)
+
+In the same terminal session, create this link to your ~/bin folder (if you have not done this already):
+
+    ln -s ~/Projects/rapuma/bin/rapuma ~/bin/rpm
+    ln -s ~/Projects/rapuma/bin/rapuma_demo ~/bin/rpm_demo
+
+(By the way, if you are running the Red Hat Package manager on your system you may want to use another name other than "rpm")
+
+This will create a link from the source code area that has a slightly different name than the installed production version. For production you will use "rapuma" and for development, in the terminal session where you ran the dev_setup.sh, run the command "rpm" to run off of development source code.
+
+Please note that you will need to stay in that terminal session to use Rapuma in developer mode. The modified settings are only for that session and will go away as soon as you close the terminal. If you open a new window, and run rpm, it will actually be running the system-wide version, leaving you very confused, at least it did me. :)
+
+

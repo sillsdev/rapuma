@@ -23,8 +23,8 @@ import os
 
 
 # Load the local classes
-from tools import *
-from project import Project
+from rapuma.core.tools import *
+from rapuma.project.project import Project
 
 
 ###############################################################################

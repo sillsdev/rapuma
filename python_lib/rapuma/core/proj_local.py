@@ -28,23 +28,20 @@ from rapuma.core.tools import *
 
 class ProjLocal (object) :
 
-    def __init__(self, rapumaHome, rapumaResources, userHome, projHome) :
+    def __init__(self, rapumaHome, userHome, projHome) :
         '''Intitate the whole class and create the object.'''
 
         self.rapumaHome         = rapumaHome
-        self.rapumaResources    = rapumaResources
         self.userHome           = userHome
         self.projHome           = projHome
 
 # FIXME: Get back to this ASAP, need to write in what rapumaResources connects to
-
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
         if os.path.exists(rapumaXMLDefaults) :
             lc = xml_to_section(rapumaXMLDefaults)
         else :
-            print 'zzzzzzzzzzzzzz', rapumaHome
             raise IOError, "Can't open " + rapumaXMLDefaults
             
         # Create a list of project folders for later processing
@@ -57,7 +54,7 @@ class ProjLocal (object) :
                 home = getattr(self, 'projHome')
             elif t[:3].lower() == 'use' :
                 home = getattr(self, 'userHome')
-            elif t[:3].lower() == 'rapuma' :
+            elif t[:3].lower() == 'rap' :
                 home = getattr(self, 'rapumaHome')
 
             for key in lc[t] :

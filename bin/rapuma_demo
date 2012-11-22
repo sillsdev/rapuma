@@ -27,16 +27,15 @@ import os, sys
 
 # Set the Rapuma base program path
 rapumaHome = os.environ.get('RAPUMA_BASE')
-print rapumaHome
 if not rapumaHome :
     rapumaHome = os.path.join('usr', 'share', 'rapuma')
     os.environ['RAPUMA_BASE'] = rapumaHome
 
 # Set the Rapuma program resources path
-rapumaResources = os.environ.get('RAPUMA_RESOURCES')
-if not rapumaResources :
-    rapumaResources = os.path.join('usr', 'local', 'share', 'rapuma')
-    os.environ['RAPUMA_RESOURCES'] = rapumaResources
+#rapumaResources = os.environ.get('RAPUMA_RESOURCES')
+#if not rapumaResources :
+#    rapumaResources = os.path.join('usr', 'local', 'share', 'rapuma')
+#    os.environ['RAPUMA_RESOURCES'] = rapumaResources
 
 # Set the user environment path
 userHome = os.environ.get('RAPUMA_USER')
@@ -63,7 +62,7 @@ from rapuma.core.proj_config import ProjConfig
 from rapuma.project.project import Project
 
 # Instantiate User classes
-local           = ProjLocal(rapumaHome, rapumaResources, userHome, projHome)
+local           = ProjLocal(rapumaHome, userHome, projHome)
 uc              = UserConfig(local)
 log             = ProjLog(local, uc)
 

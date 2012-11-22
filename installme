@@ -1,10 +1,10 @@
-Manual installation instructions for the developer version of the Rapuma package
+Installation instructions for Rapuma
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 14 Nov 2012
+	Last edited: 22 Nov 2012
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-STATUS: Currently Rapuma is under heavy development (by a single, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
+STATUS: Currently Rapuma is under heavy development (by a single, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
 
 These instructions are for manually installing the developer version of the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
@@ -50,9 +50,9 @@ Some suggested additional packages to make your Linux DTP system complete:
 
     sudo apt-get install inkscape libgtk2-spell-perl tortoisehg
 
-Suggested SIL Packages:
+Some suggested SIL Packages would be:
 
-sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
+    sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
 
 (Note: On newer versions of Ubuntu, the SIL repo may not be up to date so some of the above may not be available.)
 
@@ -66,15 +66,15 @@ To obtain Rapuma, you need to check it out from the Mercurial repository it resi
 
 Create the above path if it does not exist with this command in your terminal:
 
-	mkdir ~/Projects
+    mkdir ~/Projects
 
 Now you can to go to the Palaso website and clone the project code with:
 
-	hg clone http://hg.palaso.org/pub-rpm ~/Projects/rapuma
+    hg clone http://hg.palaso.org/pub-rpm ~/Projects/rapuma
 
 That should put Rapuma where you need it. From time to time you may want to update it. To do that, from inside the Rapuma project folder (~/Projects/rapuma), this is the command you need:
 
-	hg pull --update
+    hg pull --update
 
 
 PACKAGE INSTALLATION AND SETUP
@@ -89,31 +89,5 @@ To test the instalation, type:
     rapuma -h
 
 What you should get is a Rapuma help screen. To get started using it, read the quickstart file that is in the rapuma repo directory.
-
-
-RUNNING THE REPOSITORY VERSION FOR DEVELOPMENT
-----------------------------------------------
-If you are doing Rapuma development work and production side-by-side, you will want to keep as much seperation between the two worlds. To do this, open a terminal in the root of the rapuma repository. Then run this script:
-
-    . ./dev_setup.sh
-
-In the same terminal session, create this link to your ~/bin folder (create it if it is not there):
-
-    ln -s ~/Projects/rapuma/bin/rapuma ~/bin/rpm
-
-This will create a link from the source code area that has a slightly different name than the installed production version. For production you will use "rapuma" and for development, in the terminal session where you ran the dev_setup.sh, run the command "rpm" to run off of development source code.
-
-QUICK START GUIDE
------------------------------------------
-Rapuma comes with a couple demonstration projects that are used to demonstrate what it can do and also test the system when revisions are made. There is a module named "rapuma_demo" that can be called on to do this but to make it easier for normal users, some short-cut scripts have been included to simplify running the test projects.
-
-Once Rapuma is setup, and you want to test it, open a terminal and navigate to someplace on your drive where you can let Rapuma install the test projects. Once you are there, use this command:
-
-    test_rapuma.sh
-
-Three things should result from doing this. First, your PDF viewer should be displaying freshly rendered PDF of the Book of James. This came from the ENG-LATN-JAS project located in the MBJAS folder. In that folder you will find all project data it took to do that. That was the second thing the test script did. The third result is a project folder work area named KYUM. This project contains a lot more data and specifcally, the KYU-MYMR-MRK project, which is a far more complex project than ENG-LATN-JAS.
-
-What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that will be in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explore in some exercizes that will put Rapuma through its paces.]
-
 
 

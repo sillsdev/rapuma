@@ -30,6 +30,7 @@ from rapuma.core.pt_tools import *
 import rapuma.project.manager as mngr
 import rapuma.component.component as cmpt
 import rapuma.core.user_config as userConfig
+from importlib import import_module
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -58,7 +59,11 @@ class Project (object) :
             pass
 
         # Initialize the project type
-        m = __import__(self.projectMediaIDCode)
+        # FIXME: some additional work needs to be done to simplify this
+        # This will have to do for now.
+        m = import_module('rapuma.project.' + self.projectMediaIDCode)
+#       or you could use:
+#        m = import_module('..' + self.projectMediaIDCode, mngr.__name__)
         self.__class__ = getattr(m, self.projectMediaIDCode[0].upper() + self.projectMediaIDCode[1:])
 
         # Update the existing config file with the project type XML file
@@ -102,7 +107,8 @@ class Project (object) :
 
         fullName = cType + '_' + mType.capitalize()
         cfg = self.projConfig['Managers'][fullName]
-        module = __import__(mType)
+        module = import_module('rapuma.manager.' + mType)
+#        module = __import__(mType)
         manobj = getattr(module, mType.capitalize())(self, cfg, cType)
         self.managers[fullName] = manobj
 
@@ -236,7 +242,8 @@ class Project (object) :
         if testForSetting(self.projConfig, 'Components', cid) :
             cfg = self.projConfig['Components'][cid]
             cType = cfg['type']
-            module = __import__(cType)
+            module = import_module('rapuma.component.' + cType)
+#            module = __import__(cType)
             compobj = getattr(module, cType.capitalize())(self, cfg)
             self.components[cid] = compobj
         else :
@@ -357,7 +364,8 @@ class Project (object) :
             # This will load the component type manager and put
             # a lot of different settings into the proj config
             cfg = self.projConfig['Components'][cid]
-            module = __import__(cType)
+            module = import_module('rapuma.component.' + cType)
+#            module = __import__(cType)
             compobj = getattr(module, cType.capitalize())(self, cfg)
             self.components[cid] = compobj
             # Save our config settings
