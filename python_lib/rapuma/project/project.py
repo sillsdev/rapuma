@@ -108,13 +108,14 @@ class Project (object) :
         fullName = cType + '_' + mType.capitalize()
         cfg = self.projConfig['Managers'][fullName]
         module = import_module('rapuma.manager.' + mType)
-#        module = __import__(mType)
-        manobj = getattr(module, mType.capitalize())(self, cfg, cType)
+        ManagerClass = getattr(module, mType.capitalize())
+        manobj = ManagerClass(self, cfg, cType)
         self.managers[fullName] = manobj
 
 
     def addManager (self, cType, mType) :
         '''Create a manager reference in the project config that components will point to.'''
+#        import pdb; pdb.set_trace()
 
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
@@ -209,6 +210,8 @@ class Project (object) :
         does not mean all the parts of the componet are in place. Rendering
         could fail if something is missing.'''
 
+#        import pdb; pdb.set_trace()
+
         # Check for cid in config
         if self.isComponent(cid) :
             self.createComponent(cid).render(force)
@@ -238,13 +241,15 @@ class Project (object) :
         # If the object already exists just return it
         if cid in self.components : return self.components[cid]
 
+#        import pdb; pdb.set_trace()
+
         # Otherwise, create a new one and return it
         if testForSetting(self.projConfig, 'Components', cid) :
             cfg = self.projConfig['Components'][cid]
             cType = cfg['type']
             module = import_module('rapuma.component.' + cType)
-#            module = __import__(cType)
-            compobj = getattr(module, cType.capitalize())(self, cfg)
+            ManagerClass = getattr(module, cType.capitalize())
+            compobj = ManagerClass(self, cfg)
             self.components[cid] = compobj
         else :
             self.log.writeToLog('COMP-040', [cid])
@@ -365,8 +370,8 @@ class Project (object) :
             # a lot of different settings into the proj config
             cfg = self.projConfig['Components'][cid]
             module = import_module('rapuma.component.' + cType)
-#            module = __import__(cType)
-            compobj = getattr(module, cType.capitalize())(self, cfg)
+            ManagerClass = getattr(module, cType.capitalize())
+            compobj = ManagerClass(self, cfg)
             self.components[cid] = compobj
             # Save our config settings
             if writeConfFile(self.projConfig) :

@@ -266,6 +266,8 @@ def overrideSettings (settings, overrideXML) :
 def writeConfFile (config) :
     '''Generic routin to write out to, or create a config file.'''
 
+#    dieNow()
+
     # Build the folder path if needed
     if not os.path.exists(os.path.split(config.filename)[0]) :
         os.makedirs(os.path.split(config.filename)[0])

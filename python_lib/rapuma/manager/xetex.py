@@ -466,29 +466,17 @@ class Xetex (Manager) :
 
 #        import pdb; pdb.set_trace()
 
+        dep = [self.layoutConfFile, self.fontConfFile, self.project.local.projConfFile]
+
         # Check for existance and age
         if os.path.isfile(self.setFile) :
-            if isOlder(self.setFile, self.layoutConfFile) :
-                # Something changed in the layout conf file
-                if self.makeIt(self.setFile) :
-                    self.project.log.writeToLog('XTEX-060', [fName(self.layoutConfFile),fName(self.setFile)])
-                else :
-                    return False
-
-            elif isOlder(self.setFile, self.fontConfFile) :
-                # Something changed in the font conf file
-                if self.makeIt(self.setFile) :
-                    self.project.log.writeToLog('XTEX-060', [fName(self.fontConfFile),fName(self.setFile)])
-                else :
-                    return False
-
-            elif isOlder(self.setFile, self.project.local.projConfFile) :
-                # Something changed in the proj conf file
-                if self.makeIt(self.setFile) :
-                    self.project.log.writeToLog('XTEX-060', [fName(self.project.local.projConfFile),fName(self.setFile)])
-                else :
-                    return False
-
+            for f in dep :
+                if isOlder(self.setFile, f) :
+                    # Something changed in the layout conf file
+                    if self.makeIt(self.setFile) :
+                        self.project.log.writeToLog('XTEX-060', [fName(f),fName(self.setFile)])
+                    else :
+                        return False
         else :
             if self.makeIt(self.setFile) :
                 self.project.log.writeToLog('XTEX-065', [fName(self.setFile)])

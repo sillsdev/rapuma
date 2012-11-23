@@ -59,9 +59,9 @@ class Text (Manager) :
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], self.rapumaXmlTextConfig)
         if newSectionSettings != self.project.projConfig['Managers'][manager] :
             self.project.projConfig['Managers'][manager] = newSectionSettings
+            writeConfFile(self.project.projConfig)
 
         self.compSettings = self.project.projConfig['Managers'][manager]
-        writeConfFile(self.project.projConfig)
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
