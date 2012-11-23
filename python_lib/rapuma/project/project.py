@@ -890,7 +890,7 @@ class Project (object) :
             self.log.writeToLog('POST-110', [fName(scriptTarget)])
         elif force :
             self.scriptInstall(script, scriptTarget)
-            if not tos.path.isfile(scriptTarget) :
+            if not os.path.isfile(scriptTarget) :
                 dieNow('Failed to install script!: ' + fName(scriptTarget))
             self.log.writeToLog('POST-115', [fName(scriptTarget)])
 
