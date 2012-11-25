@@ -171,6 +171,13 @@ Todo:
             <value>Macros</value>
         </setting>
         <setting>
+            <name>Project User Macros Folder</name>
+            <key>projUserMacrosFolder</key>
+            <description>The folder where all the user custom Rapuma macros are kept.</description>
+            <type>list</type>
+            <value>Macros,User</value>
+        </setting>
+        <setting>
             <name>Project Fonts Folder</name>
             <key>projFontsFolder</key>
             <description>The folder where all the fonts for a project are kept.</description>

@@ -231,7 +231,8 @@ def userArguments (args) :
         else :
             # Now setup the project and look for and test the component type if needed
             aProject = initProject(args['project_id'])
-            if sys.argv[1].lower() != 'settings' and sys.argv[1].lower() != 'locking' and sys.argv[1].lower() != 'install' :
+            exclude = ['settings', 'locking', 'install', 'macro']
+            if not sys.argv[1].lower() in exclude :
                 if not aProject.isComponentType(args['component_type']) :
                     if not aProject.addComponentType(args['component_type']) :
                         sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
@@ -432,6 +433,19 @@ def userArguments (args) :
             # Install the file
             aProject.installFile(args['file'], args['path'], args['force'])
 
+    # User Macro commands
+    elif sys.argv[1].lower() == 'macro' :
+        # Check further for required args
+        if not args['name'] :
+            sys.exit('\nERROR: Macro was not specified in the command argument. Process halted!\n')
+        if args['add'] :
+            aProject.addMacro(args['command'], args['path'], args['force'])
+        elif args['execute'] :
+            aProject.runMacro(args['name'])
+        else :
+            # Install the file
+            aProject.installFile(args['file'], args['path'], args['force'])
+
     # Totally lost
     else:
         sys.exit('\nERROR: Command not recognized!\n')
@@ -583,6 +597,16 @@ installCommand.add_argument('project_id', help='Project ID (a positional argumen
 installCommand.add_argument('file', help='The file to be installed, relitive paths are allowed.')
 installCommand.add_argument('path', help='Specify the path to the project folder where the file goes.')
 installCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting file.')
+
+# Add Macro subprocess arguments
+macroCommand = subparsers.add_parser('macro', help='Commands for creating user macros and installing the files into a project for a variety of purposes.')
+macroCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+macroCommand.add_argument('name', help='The name of the macro to create or call.')
+macroCommand.add_argument('-a', '--add', action='store_true', help='Add/install the specified macro into the Macros/user folder.')
+macroCommand.add_argument('-e', '--execute', action='store_true', help='Execute an installed macro.')
+macroCommand.add_argument('-c', '--command', help='Add a list (\'[rapuma 1, rapuma 2, etc.]\') of Rapuma commands to a macro file. This would be used along with the -a command.')
+macroCommand.add_argument('-p', '--path', help='If the macro you are adding already exsists, specify the path to it and include the name of the file. This would be used with the -a command and instead of -c command.')
+macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
 
 # Add Project example subprocess arguments
 exampleCommand = subparsers.add_parser('example', help='Commands for running simple project examples.')

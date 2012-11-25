@@ -194,6 +194,10 @@ class ProjLog (object) :
             'STYL-150' : ['MSG', 'Style file: [<<1>>] is valid.'],
             'STYL-155' : ['ERR', 'Style file: [<<1>>] did NOT pass the validation test.'],
 
+            'MCRO-000' : ['MSG', 'Messages for user macro issues (mainly found in project.py)'],
+            'MCRO-010' : ['ERR', 'This macro [<<1>>] is already registered for this project. Use force -f to overwrite it.'],
+            'MCRO-020' : ['ERR', 'The macro file [<<1>>] already exsists in this project. Use force -f to overwrite it.'],
+
             'PREP-000' : ['MSG', 'Messages for preprocessing issues (mainly found in project.py)'],
             'PREP-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
             'PREP-020' : ['ERR', 'Could not run preprocess, file not found: [<<1>>].'],

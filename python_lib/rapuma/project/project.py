@@ -1113,4 +1113,64 @@ class Project (object) :
                 self.log.writeToLog('PROJ-080', [source,target])
 
 
+    def addMacro (self, name, cmd = None, path = None, force = False) :
+        '''Install a user defined macro.'''
+
+        # Define some internal vars
+        oldMacro            = ''
+        sourceMacro         = ''
+        if os.path.isfile(os.path.join(resolvePath(path))) :
+            sourceMacro     = os.path.join(resolvePath(path))
+        macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)
+        if name in self.projConfig['GeneralSettings']['userMacros'] :
+            oldMacro = name
+
+        # First check for prexsisting macro record
+        if not force :
+            if oldMacro :
+                self.log.writeToLog('MCRO-010', [oldMacro])
+                dieNow()
+
+        # Make the target folder if needed (should be there already, though)
+        if not os.path.isdir(self.local.projUserMacrosFolder) :
+            os.makedirs(self.local.projUserMacrosFolder)
+
+        # First check to see if there already is a macro file, die if there is
+        if os.path.isfile(macroTarget) and not force :
+            self.log.writeToLog('MCRO-020', [fName(macroTarget)])
+            dieNow()
+            
+        # If force, then get rid of the file before going on
+        if force :
+            if os.path.isfile(macroTarget) :
+                os.remove(macroTarget)
+
+        # No script found, we can proceed
+        if os.path.isfile(sourceMacro) :
+            shutil.copy(sourceMacro, macroTarget)
+        else :
+            # Create a new user macro file
+
+# FIXME: Start here by adding a file write
+
+        # Be sure that it is executable
+        makeExecutable(macroTarget)
+
+        # Record the macro with project
+        macroList = self.projConfig['GeneralSettings']['userMacros']
+        if fName(macroTarget) not in macroList :
+            self.projConfig['GeneralSettings']['userMacros'] = addToList(macroList, fName(macroTarget))
+            writeConfFile(self.projConfig)
+
+        return True
+
+
+
+    def runMacro (self, name) :
+        '''Run an installed, user defined macro.'''
+    
+        pass
+    
+
+
 
