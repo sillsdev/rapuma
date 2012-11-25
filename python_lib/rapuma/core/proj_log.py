@@ -101,7 +101,7 @@ class ProjLog (object) :
             'XTEX-050' : ['ERR', 'USFM working text not found: <<1>>. This is required in order to render.'],
             'XTEX-055' : ['ERR', 'make<<1>>() failed to properly create: <<2>>. This is a required file in order to render.'],
             'XTEX-060' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
-            'XTEX-065' : ['LOG', 'File: <<1>> missing, created a new one.'],
+            'XTEX-065' : ['LOG', 'File: [<<1>>] missing, created a new one.'],
             'XTEX-070' : ['LOG', 'Copied macro: <<1>>'],
             'XTEX-075' : ['ERR', 'No macro package for : <<1>>'],
             'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],

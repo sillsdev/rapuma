@@ -186,30 +186,42 @@ class Xetex (Manager) :
         function is hard coded for this macro package. A more generalized
         way may be needed.'''
 
-        # Copy in the standard package
-        self.copyInMacros(self.cType)
-
-        mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
-
-        # Make the macLinkFile file that will link the project with
-        # the macro package. Customize it as needed.
-
+        # Set some file names
         macLinkFile = getattr(self, self.cType + 'MacLinkFile')
-        writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
-        writeObject.write(self.texFileHeader(fName(macLinkFile)))
-        writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
+        # FIXME: This is a problem, how do we know what the file name is in the
+        # macro package?
+        mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+        # Check to see if our macros are there
+        if not os.path.isdir(self.projMacPackFolder) :
+            self.copyInMacros(self.cType)
 
-        # If we are using marginal verses then we will need this
-        if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
-            self.copyInMargVerse()
-            writeObject.write('\\input ' + quotePath(self.ptxMargVerseFile) + '\n')
+        def writeLinkFile () :
+            writeObject = codecs.open(macLinkFile, "w", encoding='utf_8')
+            writeObject.write(self.texFileHeader(fName(macLinkFile)))
+            writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
+
+            # If we are using marginal verses then we will need this
+            if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
+                self.copyInMargVerse()
+                writeObject.write('\\input ' + quotePath(self.ptxMargVerseFile) + '\n')
+            else :
+                self.removeMargVerse()
+
+            writeObject.close()
+
+        # Check for existance and age. List any files in this next list that
+        # could require the rebuilding of the link file
+        dep = [mainMacroFile, self.fontConfFile, self.project.local.projConfFile]
+        if not os.path.isfile(macLinkFile) :
+            writeLinkFile()
+            self.project.log.writeToLog('XTEX-065', [fName(macLinkFile)])
+            return True
         else :
-            self.removeMargVerse()
-
-        writeObject.close()
-        self.project.log.writeToLog('XTEX-040', [fName(macLinkFile)])
-
-        return True
+            for f in dep :
+                if isOlder(macLinkFile, f) :
+                    writeLinkFile()
+                    self.project.log.writeToLog('XTEX-060', [fName(f),fName(macLinkFile)])
+                    return True
 
 
     def makeGlobSty (self) :
@@ -263,6 +275,8 @@ class Xetex (Manager) :
                 output = '\\input ' + quotePath(getattr(self, 'cidTex')) + '\n'
 
             return output
+
+#        import pdb; pdb.set_trace()
 
         # Create or refresh any required files
         for f in self.primOut[typeID] :
@@ -326,7 +340,7 @@ class Xetex (Manager) :
         writeObject.write(self.texFileHeader(fName(sFile)))
 
 #        import pdb; pdb.set_trace()
-        
+
         # Bring in the settings from the layoutConfig
         cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
         for section in cfg.keys() :
@@ -337,8 +351,8 @@ class Xetex (Manager) :
                 if not v :
                     continue
 
-                if testForSetting(macTexVals, k, 'usfmTex') :
-                    line = macTexVals[k]['usfmTex']
+                if testForSetting(macTexVals, k, self.macPack) :
+                    line = macTexVals[k][self.macPack]
                     # If there is a boolDepend then we don't need to output
                     if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
                         continue
@@ -377,12 +391,12 @@ class Xetex (Manager) :
         for f in self.project.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
             fInfo = self.project.managers['usfm_Font'].fontConfig['Fonts'][f]
             fontPath            = os.path.join(self.project.local.projFontsFolder, f)
-            useMapping          = self.project.projConfig['Managers']['usfm_Font']['useMapping']
+            useMapping          = self.project.projConfig['Managers'][self.cType + '_Font']['useMapping']
             if useMapping :
                 useMapping      = os.path.join(fontPath, useMapping)
-            useRenderingSystem  = self.project.projConfig['Managers']['usfm_Font']['useRenderingSystem']
+            useRenderingSystem  = self.project.projConfig['Managers'][self.cType + '_Font']['useRenderingSystem']
 
-            useLanguage         = self.project.projConfig['Managers']['usfm_Font']['useLanguage']
+            useLanguage         = self.project.projConfig['Managers'][self.cType + '_Font']['useLanguage']
             params              = {}
             if useMapping :
                 params['^^mapping^^'] = 'mapping=' + useMapping + ':'
@@ -393,6 +407,7 @@ class Xetex (Manager) :
             if fontPath :
                 params['^^path^^'] = fontPath
 
+#            import pdb; pdb.set_trace()
             # Create the fonts settings that will be used with TeX
             if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
                 # Primary
@@ -615,13 +630,13 @@ class Xetex (Manager) :
             for event, elem in ElementTree.iterparse(xmlFile):
                 if elem.tag == 'setting' :
                     if thisTex or thisBoolDep :
-                        data[thisSection] = {'usfmTex' : thisTex, 'boolDepend' : thisBoolDep}
+                        data[thisSection] = {self.macPack : thisTex, 'boolDepend' : thisBoolDep}
                     thisSection = ''
                     thisTex = ''
                     thisBoolDep = ''
                 if elem.tag == 'key' :
                     thisSection = elem.text
-                elif elem.tag == 'usfmTex' :
+                elif elem.tag == self.macPack :
                     thisTex = elem.text
                 elif elem.tag == 'boolDepend' :
                     thisBoolDep = elem.text
@@ -663,7 +678,8 @@ class Xetex (Manager) :
         self.cid                    = cid
         self.cidMeta                = False
         self.custSty                = ''
-        if str2bool(self.project.projConfig['Managers']['usfm_Hyphenation']['useHyphenation']) :
+        self.macPack                = self.project.projConfig['Managers'][self.cType + '_Xetex']['macroPackage']
+        if str2bool(self.project.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation']) :
             self.hyphenTexFile      = os.path.join(self.project.local.projHyphenationFolder, self.project.projConfig['Managers']['usfm_Hyphenation']['hyphenTexFile'])
         else :
             self.hyphenTexFile      = ''
@@ -671,10 +687,10 @@ class Xetex (Manager) :
         self.fontConfFile           = self.project.local.fontConfFile
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        self.setFile                = os.path.join(self.project.local.projMacrosFolder, self.setFileName)
-        self.extFile                = os.path.join(self.project.local.projMacrosFolder, self.extFileName)
-        self.mainStyleFile          = self.project.projConfig['Managers']['usfm_Style']['mainStyleFile']
-        self.customStyleFile        = self.project.projConfig['Managers']['usfm_Style']['customStyleFile']
+        self.setFile                = os.path.join(self.project.local.projMacrosFolder, self.macPack, self.setFileName)
+        self.extFile                = os.path.join(self.project.local.projMacrosFolder, self.macPack, self.extFileName)
+        self.mainStyleFile          = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
+        self.customStyleFile        = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
         self.globSty                = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
         self.custSty                = os.path.join(self.project.local.projStylesFolder, self.customStyleFile)
 
@@ -685,7 +701,7 @@ class Xetex (Manager) :
         self.buildCidFileNames(self.cid)
 
         # The macro link file is named according to the type of component
-        setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projMacrosFolder, self.cType + 'MacLinkFile.tex'))
+        setattr(self, self.cType + 'MacLinkFile', os.path.join(self.project.local.projMacrosFolder, self.macPack, self.cType + 'MacLinkFile.tex'))
         macLinkFile = self.cType + 'MacLinkFile'
 
         # Process file information
@@ -722,6 +738,7 @@ class Xetex (Manager) :
             'cidTex'        : ['cidExt', 'cidSty', 'cidUsfm'],
             'cidPdf'        : ['cidAdj', 'cidPics', 'cidSty', 'custSty', 'globSty', 'cidExt', 'extFile', 'setFile', 'hyphenTexFile']
                             }
+
 
         # With all the new values defined start running here
 
