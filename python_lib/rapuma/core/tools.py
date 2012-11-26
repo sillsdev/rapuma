@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat
 from datetime import *
 from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
@@ -83,6 +83,18 @@ def makeExecutable (fileName) :
     permissions to 777 may not be the best way but it will work for now. '''
 
     os.chmod(fileName, int("0777", 8))
+
+
+def makeReadOnly (fileName) :
+    '''Set the permissions on a file to read only.'''
+
+    os.chmod(fileName, stat.S_IREAD)
+
+
+def makeWriteable (fileName) :
+    '''Set the permissions on a file to writeable.'''
+
+    os.chmod(fileName, stat.S_IWRITE)
 
 
 def fName (fullPath) :

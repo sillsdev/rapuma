@@ -777,6 +777,12 @@ class Project (object) :
 ############################ Post Process Functions ###########################
 ###############################################################################
 
+    def buildPath (self, cid, cType) :
+        '''Build a valid path for a component of a specific type.'''
+        p = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
+        return os.path.realpath(os.path.expanduser(p))
+
+
     def runPostProcess (self, cType, script, cid) :
         '''Run a post process on a component. If the component is a group
         run the script on all the individual components included in the group.
@@ -785,35 +791,30 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
-        def buildPath (cid) :
-            p = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            return os.path.realpath(os.path.expanduser(p))
-
         Ctype = cType.capitalize()
         target = []
-        # First test to see that we have a valid cType specified quite if not
+        # First test to see that we have a valid cType specified, quite if not
         if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
             self.log.writeToLog('POST-010', [cType])
-            return False
+            dieNow()
 
         # If it is a group we will run the script across each cid individually
         # Right now this mechanizm is just basic so if a script is for collection
         # it needs to know how to handle multiple passes and output correctly.
         if not testForSetting(self.projConfig['Components'][cid], 'list') :
-            target.append(buildPath(cid))
-            if self.postProcessComponent(cType, target, script) :
-                return True
-            else :
-                return False
+            target.append(self.buildPath(cid, cType))
+            if not self.postProcessComponent(cType, target, script) :
+                self.log.writeToLog('POST-040', [script,target])
+                dieNow()
         else :
             for c in self.projConfig['Components'][cid]['list'] :
-                target.append(buildPath(c))
+                target = []
+                target.append(self.buildPath(c, cType))
+                if not self.postProcessComponent(cType, target, script) :
+                    self.log.writeToLog('POST-040', [script,target])
+                    dieNow()
 
-            if self.postProcessComponent(cType, target, script) :
-                return True
-            else :
-                return False
-
+        # At this point all must have ended well
         return True
 
 
@@ -823,8 +824,8 @@ class Project (object) :
 
         Ctype = cType.capitalize()
         if script not in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
-            self.log.writeToLog('POST-055', [Ctype])
-            return False
+            self.log.writeToLog('POST-055', [script,Ctype])
+            dieNow()
 
         script = os.path.join(self.local.projScriptsFolder, script)
         if os.path.isfile(script) :
@@ -837,12 +838,15 @@ class Project (object) :
                  commands.append(f)
             err = subprocess.call(commands)
             if err == 0 :
-                self.log.writeToLog('POST-050')
+                self.log.writeToLog('POST-050', [fName(f)])
+                return True
             else :
                 self.log.writeToLog('POST-060', [str(err)])
+                dieNow()
         else :
             self.log.writeToLog('POST-070', [fName(script)])
             self.log.writeToLog('POST-075')
+            dieNow()
 
 
     def installPostProcess (self, cType, script, force = None) :
@@ -1150,6 +1154,7 @@ class Project (object) :
             shutil.copy(sourceMacro, macroTarget)
         else :
             # Create a new user macro file
+            pass
 
 # FIXME: Start here by adding a file write
 

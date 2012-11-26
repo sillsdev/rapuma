@@ -223,8 +223,9 @@ class ProjLog (object) :
 
             'POST-000' : ['MSG', 'Messages for post processing issues (mainly found in project.py)'],
             'POST-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
-            'POST-050' : ['MSG', 'Post processes completed successfully.'],
-            'POST-055' : ['MSG', 'No post processes registered for this component type [<<1>>].'],
+            'POST-040' : ['ERR', 'Post processes script [<<1>>] did not completed successfully on the file [<<2>>].'],
+            'POST-050' : ['MSG', 'Post processes completed successfully on [<<1>>].'],
+            'POST-055' : ['ERR', 'Post process script [<<1>>] is not registered for the [<<2>>] component type.'],
             'POST-060' : ['ERR', 'Post processes did not completed successfully. This is the error reported: [<<1>>]. If there is a log for this process script, please check it for details.'],
             'POST-070' : ['ERR', 'Post processes script: [<<1>>] was called but the script was not found in the project.'],
             'POST-075' : ['TDO', 'Use the command: [rapuma process <project ID> <component type> -a ] to install a default starter scritp. Use the -s <script name> option to import a custom post processing script.'],
@@ -258,7 +259,7 @@ class ProjLog (object) :
             'XPRT-010' : ['ERR', 'Export file name could not be formed with available configuration information.'],
             'XPRT-020' : ['ERR', 'Unable to export: [<<1>>].'],
             'XPRT-030' : ['MSG', 'Files exported to [<<1>>].'],
-            'XPRT-040' : ['MSG', 'Begining export, please wait...'],
+            'XPRT-040' : ['MSG', 'Beginning export, please wait...'],
             'XPRT-050' : ['MSG', 'Unassigned error message ID.'],
 
             'EXMP-000' : ['MSG', 'Messages for running example projects.'],
@@ -380,7 +381,7 @@ class ProjLog (object) :
         '''In a perfect world there would be no errors, but alas there are and
         we need to put them in a special file that can be accessed after the
         process is run.  The error file from the previous session is deleted at
-        the begining of each new run.'''
+        the beginning of each new run.'''
 
         try :
             # Because we want to read errors from top to bottom, we don't pre append
@@ -401,7 +402,7 @@ class ProjLog (object) :
 
     def preAppend (self, line, file_name) :
         '''Got the following code out of a Python forum.  This will pre-append a
-        line to the begining of a file.'''
+        line to the beginning of a file.'''
 
         fobj = fileinput.FileInput(file_name, inplace=1)
         first_line = fobj.readline()

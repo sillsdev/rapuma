@@ -215,8 +215,15 @@ class Text (Manager) :
         if not os.path.isdir(targetFolder) :
             os.makedirs(targetFolder)
 
-        # Always save an untouched copy of the source
-        shutil.copy(source, targetSource)
+        # Always save an untouched copy of the source and set to read only
+        if os.path.isfile(targetSource) :
+            # Reset permissions to overwrite
+            makeWriteable(targetSource)
+            shutil.copy(source, targetSource)
+            makeReadOnly(targetSource)
+        else :
+            shutil.copy(source, targetSource)
+            makeReadOnly(targetSource)
 
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :

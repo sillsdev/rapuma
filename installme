@@ -21,10 +21,12 @@ Next, in gedit in the file you just opened, go to the bottom of the file and add
 
 Save the file and close it.
 
-Again, in the terminal, update your package list and update your system with the folling command and answer yes to the "install without verification" question:
+Again, in the terminal, update your package list and update your system with the following command:
 
     sudo apt-get update
     sudo apt-get upgrade
+
+Note the upgrade could take some time. Also, if it asks, answer yes to the "install without verification" question.
 
 Next, in the terminal, you need to install all the necessary packages to run the Rapuma publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
 
@@ -38,13 +40,14 @@ Another required package is the Palaso Python library. Rapuma depends on a coupl
 At this time, that package needs to be added to your system by cloning the project, then
 following the install proceedure. It can be cloned from here:
 
-    http://hg.palaso.org/palaso-python
+    hg clone http://hg.palaso.org/palaso-python ~/Projects/palaso-python
 
 This needs to be installed before you can use it. To install run:
 
     ./setup.py --nokmn build
     sudo ./setup.py --nokmn install
 
+(Note: need to add simple test for install of palaso-python)
 
 Some suggested additional packages to make your Linux DTP system complete:
 
@@ -82,7 +85,7 @@ PACKAGE INSTALLATION AND SETUP
 Like the palaso.python setup you will use the setup.py script. With a terminal in the root of the rapuma repository on your local machine, run:
 
     ./setup.py build
-    sudo setup.py install
+    sudo ./setup.py install
 
 To test the instalation, type:
 
