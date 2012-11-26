@@ -439,12 +439,12 @@ def userArguments (args) :
         if not args['name'] :
             sys.exit('\nERROR: Macro was not specified in the command argument. Process halted!\n')
         if args['add'] :
-            aProject.addMacro(args['command'], args['path'], args['force'])
+            aProject.addMacro(args['name'], args['command'], args['path'], args['force'])
         elif args['execute'] :
             aProject.runMacro(args['name'])
         else :
-            # Install the file
-            aProject.installFile(args['file'], args['path'], args['force'])
+            # Bad command
+            sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
     # Totally lost
     else:
