@@ -1189,17 +1189,30 @@ class Project (object) :
         # make the call out.
         macroFile = os.path.join(self.local.projUserMacrosFolder, name)
         if os.path.isfile(macroFile) :
+            if self.macroRunner(macroFile) :
+                return True
+        else :
+            self.log.writeToLog('MCRO-060', [fName(macroFile)])
+
+
+    def macroRunner (self, macroFile) :
+        '''Run a macro. This assumes the macroFile includes a full path.'''
+
+        try :
             macro = codecs.open(macroFile, "r", encoding='utf_8')
             for line in macro :
                 # Clean the line, may be a BOM to remove
                 line = line.replace(u'\ufeff', '').strip()
                 if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
                     self.log.writeToLog('MCRO-050', [line])
+                    # FIXME: Could this be done better with subprocess()?
                     os.system(line)
             return True
-        else :
-            self.log.writeToLog('MCRO-060', [fName(macroFile)])
 
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            terminal('Macro failed with the following error: ' + str(e))
+            dieNow()
 
 
 

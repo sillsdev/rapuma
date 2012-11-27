@@ -143,9 +143,11 @@ def findSsfFile (sourcePath) :
     # mind would ever use mixed case on an extention. That would be stupid!)
     for f in parentFileList :
         if os.path.isfile(os.path.join(parentFolder, f)) :
-            if f.split('.')[1] == 'ssf' or f.split('.')[1] == 'SSF' :
-                ssfFileName = f
-                ptPath = parentFolder
+            # Not every file we test has an extention, look first
+            if len(f.split('.')) > 1 :
+                if f.split('.')[1] == 'ssf' or f.split('.')[1] == 'SSF' :
+                    ssfFileName = f
+                    ptPath = parentFolder
 
     # At this point we need a sanity test. If no ssfFileName is present
     # then there probably isn't one and we should just return False now
@@ -177,8 +179,11 @@ def getPTSettings (sourcePath) :
 
 def getSourceEditor (projConfig, sourcePath, cType) :
     '''Return the sourceEditor if it is set. If not try to
-    figure out what it should be and return that.'''
+    figure out what it should be and return that. Unless we
+    find we are in a PT project, we'll call it generic.'''
 
+#    import pdb; pdb.set_trace()
+    se = 'generic'
     Ctype = cType.capitalize()
     # FIXME: This may need expanding as more use cases arrise
     if testForSetting(projConfig['CompTypes'][Ctype], 'sourceEditor') :
@@ -186,8 +191,6 @@ def getSourceEditor (projConfig, sourcePath, cType) :
     else :
         if findSsfFile(sourcePath) :
             se = 'paratext'
-        else :
-            se = 'generic'
 
     return se
 

@@ -202,7 +202,41 @@ def accessHtmlHelp () :
 
 
 ###############################################################################
-############################# Rapuma Command Center ##############################
+############################ Rapuma Demo Functions ############################
+###############################################################################
+
+
+def runExamplePubDemoProject (demoID, force = None) :
+    '''Run an example demo file to test/demonstrate Rapuma. Any demos have to
+    be a part of Rapuma and have been tested for demo purposes.'''
+
+#    import pdb; pdb.set_trace()
+
+    exampleFile     = os.path.join(local.rapumaExamplesFolder, demoID + '.zip')
+    demoPath        = os.path.join(local.projHome, demoID)
+    demoFile        = os.path.join(demoPath, 'rapumaDemo')
+    thisZipFile     = zipfile.ZipFile(exampleFile, 'r')
+    if os.path.isfile(exampleFile) :
+        thisZipFile.extractall()
+        # Set execute permission on scripts
+        for r,d,f in os.walk(demoPath):
+            for fn in f:
+                if not fName(fn)[-1] == '~' :
+                    if isExecutable(os.path.join(r, fn)) :
+                        makeExecutable(os.path.join(r, fn))
+
+        terminal('Extracted the [' + demoID + '] Rapuma example project.')
+
+    if os.path.isfile(demoFile) :
+        os.chdir(demoPath)
+        if macroRunner(demoFile) :
+            return True
+    else :
+        terminal('File not found: ' + fName(demoFile))
+
+
+###############################################################################
+########################### Rapuma Command Center #############################
 ###############################################################################
 
 # All command options must contain a project ID (-i). That is required. If one
@@ -224,14 +258,16 @@ def userArguments (args) :
             accessHtmlHelp()
             return
 
-    # Test project ID
+    # Test project ID, intercept if it is an example demo
     if sys.argv[1].lower() != 'project' :
-        if not isProject(args['project_id']) :
+        if sys.argv[1].lower() == 'example' :
+            runExamplePubDemoProject(args['project_id'], args['force'])
+        elif not isProject(args['project_id']) :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
         else :
             # Now setup the project and look for and test the component type if needed
             aProject = initProject(args['project_id'])
-            exclude = ['settings', 'locking', 'install', 'macro']
+            exclude = ['settings', 'locking', 'install', 'macro', 'example']
             if not sys.argv[1].lower() in exclude :
                 if not aProject.isComponentType(args['component_type']) :
                     if not aProject.addComponentType(args['component_type']) :
@@ -446,6 +482,12 @@ def userArguments (args) :
             # Bad command
             sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
+    # Commands for running Rapuma examples (canned demos)
+#    elif sys.argv[1].lower() == 'example' :
+#        aProject = initProject(args['project_id'])
+#        aProject.runExamplePubDemoProject(args['project_id'], args['force'])
+
+
     # Totally lost
     else:
         sys.exit('\nERROR: Command not recognized!\n')
@@ -615,9 +657,8 @@ macroCommand.add_argument('-f', '--force', action='store_true', help='Force over
 
 # Add Project example subprocess arguments
 exampleCommand = subparsers.add_parser('example', help='Commands for running simple project examples.')
-exampleCommand.add_argument('project_id', help=' A default project ID for the current example project.')
-exampleCommand.add_argument('-b', '--basic', action='store_true', help='A simple USFM text project.)')
-exampleCommand.add_argument('-p', '--path', help='Optional - Specify a path/file name where the custom example project script and resources are located. It expects a zip file in that location.')
+exampleCommand.add_argument('project_id', help=' A project/demo ID for the example you wish to run. This is for canned demos so they must exsist. You cannot just make something up.')
+exampleCommand.add_argument('-f', '--force', action='store_true', help='Use this to overwrite the demo if it already exsits.')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))

@@ -45,13 +45,13 @@ class Text (Manager) :
         super(Text, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project            = project
-        self.cfg                = cfg
-        self.cType              = cType
-        self.Ctype              = cType.capitalize()
-        self.rapumaXmlTextConfig   = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath      = getSourcePath(self.project.projConfig, self.Ctype)
-        self.sourceEditor       = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
+        self.project                = project
+        self.cfg                    = cfg
+        self.cType                  = cType
+        self.Ctype                  = cType.capitalize()
+        self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.sourcePath             = getSourcePath(self.project.projConfig, self.Ctype)
+        self.sourceEditor           = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
         self.setSourceEditor(self.sourceEditor) 
 
         # Get persistant values from the config if there are any

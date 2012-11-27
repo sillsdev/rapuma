@@ -68,7 +68,7 @@ def isExecutable (fn) :
 
     try :
         if os.path.isfile(fn) :
-            if fName(fn).split('.')[1] in ['sh', 'py', 'rapumaDemo'] :
+            if fName(fn) == 'rapumaDemo' or fName(fn).split('.')[1] in ['sh', 'py'] :
                 return True
     except Exception as e :
         # If we don't succeed, we should probably quite here
@@ -112,20 +112,24 @@ def resolvePath (path) :
     except :
         return None
 
-# FIXME: This code is depricated but we may need to deal with '~'
-#    if path[0] == '~' :
-#        try :
-#            # This should be the best way
-#            return os.path.expanduser(path)
-#        except :
-#            # Manually look for "~/" shorthand path and replace it 
-#            # with the actual "home"
-#            return path.replace('~', os.environ.get('HOME'))
-#    elif path == '' or path == 'None' :
-#        return None
-#    else :
-#        # Otherwise run abspath on it and send it on
-#        return os.path.abspath(path)
+
+def macroRunner (macroFile) :
+    '''Run a macro. This assumes the macroFile includes a full path.'''
+
+    try :
+        macro = codecs.open(macroFile, "r", encoding='utf_8')
+        for line in macro :
+            # Clean the line, may be a BOM to remove
+            line = line.replace(u'\ufeff', '').strip()
+            if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
+                terminal('Macro line: ' + line)
+                # FIXME: Could this be done better with subprocess()?
+                os.system(line)
+        return True
+
+    except Exception as e :
+        # If we don't succeed, we should probably quite here
+        dieNow('Macro failed with the following error: ' + str(e))
 
 
 def addToList (thisList, item) :
