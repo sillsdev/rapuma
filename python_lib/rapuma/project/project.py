@@ -1123,7 +1123,6 @@ class Project (object) :
         # Define some internal vars
         oldMacro            = ''
         sourceMacro         = ''
-        print name
         if path and os.path.isfile(os.path.join(resolvePath(path))) :
             sourceMacro     = os.path.join(resolvePath(path))
         macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)
@@ -1176,15 +1175,31 @@ class Project (object) :
                 self.projConfig['GeneralSettings']['userMacros'] = [fName(macroTarget)]
                 writeConfFile(self.projConfig)
 
+        self.log.writeToLog('MCRO-030', [fName(macroTarget)])
         return True
 
 
 
     def runMacro (self, name) :
         '''Run an installed, user defined macro.'''
-    
-        pass
-    
+
+        # In most cases we use subprocess.call() to do a process call.  However,
+        # in this case it takes too much fiddling to get a these more complex Rapuma
+        # calls to run from within Rapuma.  To make it easy, we use os.system() to
+        # make the call out.
+        macroFile = os.path.join(self.local.projUserMacrosFolder, name)
+        if os.path.isfile(macroFile) :
+            macro = codecs.open(macroFile, "r", encoding='utf_8')
+            for line in macro :
+                # Clean the line, may be a BOM to remove
+                line = line.replace(u'\ufeff', '').strip()
+                if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
+                    self.log.writeToLog('MCRO-050', [line])
+                    os.system(line)
+            return True
+        else :
+            self.log.writeToLog('MCRO-060', [fName(macroFile)])
+
 
 
 

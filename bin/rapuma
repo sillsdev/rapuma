@@ -456,11 +456,16 @@ def userArguments (args) :
     # the log file. The default is 1000 but it can be adjusted if needed. The
     # following call here will trim the log file to its specified limit. This
     # is done here as there should be no further operations done at this point.
-    
     # Note: This will not work with "project" commands (aProject is not declaired)
     if not sys.argv[1].lower() == 'project' :
         if os.path.isfile(aProject.local.projLogFile) :
             trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+
+    # Look for an error log file and notify the user if one is found that there
+    # were errors in the process
+    if not sys.argv[1].lower() == 'project' :
+        if os.path.isfile(aProject.local.projErrorLogFile) :
+            terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
 
 
 ###############################################################################
@@ -622,8 +627,17 @@ userArguments(vars(parser.parse_args()))
 ########################### Close out the session #############################
 ###############################################################################
 
-
 # In case there are any Canadians using this, politely say good bye
 terminal('\n\t\tThank you, please come again!\n')
+
+
+
+
+
+
+
+
+
+
 
 

@@ -197,6 +197,9 @@ class ProjLog (object) :
             'MCRO-000' : ['MSG', 'Messages for user macro issues (mainly found in project.py)'],
             'MCRO-010' : ['ERR', 'This macro [<<1>>] is already registered for this project. Use force -f to overwrite it.'],
             'MCRO-020' : ['ERR', 'The macro file [<<1>>] already exsists in this project. Use force -f to overwrite it.'],
+            'MCRO-030' : ['MSG', 'The macro file [<<1>>] has been installed into this project.'],
+            'MCRO-050' : ['MSG', 'Running macro command: [<<1>>]'],
+            'MCRO-060' : ['ERR', 'Macro file not found: [<<1>>]'],
 
             'PREP-000' : ['MSG', 'Messages for preprocessing issues (mainly found in project.py)'],
             'PREP-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
