@@ -244,7 +244,44 @@ def archiveProject (pid, path = None) :
     archive folder. If none is specified, put the archive in cwd. If a valid
     path is specified, send it to that location.'''
 
-    terminal('The archive function have not been completed yet')
+    # Make a private project object just for archiving
+    aProject = initProject(pid)
+    # Set some paths and file names
+    archName = aProject.projectIDCode + '.rapuma'
+    userArchives = uc.userConfig['Resources']['archives']
+    archTarget = ''
+    if path :
+        path = resolvePath(path)
+        if os.path.isdir(path) :
+            archTarget = os.path.join(path, archName)
+        else :
+            terminal('\nError: The path given is not valid: [' + path + ']\n')
+            dieNow()
+    elif os.path.isdir(userArchives) :
+        archTarget = os.path.join(userArchives, archName)
+    elif os.path.isdir(os.path.dirname(aProject.local.projHome)) :
+        # Default to the dir just above the project
+        archTarget = os.path.dirname(aProject.local.projHome)
+    else :
+        terminal('\nError: Cannot resolve a path to create the archive file!\n')
+        dieNow()
+
+    # Do the zip magic here
+    root_len = len(aProject.local.projHome)
+    with zipfile.ZipFile(archTarget, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
+        for root, dirs, files in os.walk(aProject.local.projHome):
+            # Chop off the part of the path we do not need to store
+            archive_root = os.path.abspath(root)[root_len:]
+            for f in files:
+                # FIXME: Something should be done to keep out useless files
+                fullpath = os.path.join(root, f)
+                archive_name = os.path.join(archive_root, f)
+                myzip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
+
+    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
+
+# FIXME: Something should be done about disabling the old project
+# FIXME: Project needs to be removed from system registery
 
 
 def restoreArchive (pid, path = None) :
@@ -256,13 +293,16 @@ def restoreArchive (pid, path = None) :
     archName = pid + '.rapuma'
     userArchives = uc.userConfig['Resources']['archives']
     archSource = ''
+    archTarget = ''
     if path :
         path = resolvePath(path)
         if not os.path.isdir(path) :
             terminal('\nError: The path given is not valid: [' + path + ']\n')
             dieNow()
+        else :
+            archTarget = os.path.join(path, pid)
     else :
-        path = local.projHome
+        archTarget = os.path.join(local.projHome, pid)
 
     archSource = os.path.join(userArchives, archName)
     if not os.path.isfile(archSource) :
@@ -270,12 +310,12 @@ def restoreArchive (pid, path = None) :
         dieNow()
 
     if archSource :
-        myzip = zipfile.ZipFile(archSource, 'r')
-        myzip.extractall(path)
-        myzip.close()
+        with zipfile.ZipFile(archSource, 'r') as myzip :
+            myzip.extractall(archTarget)
 
+    terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
-    terminal('\nSorry, the archive restore function has not been completed yet!\n')
+# FIXME: Need to register the restored project in rapuma.conf
 
 
 ###############################################################################
