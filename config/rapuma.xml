@@ -122,6 +122,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Archived Projects Path</name>
+            <key>archives</key>
+            <description>The full path to where archives are kept on this system that the user will need access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

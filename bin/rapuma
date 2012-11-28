@@ -50,7 +50,7 @@ if not userHome :
 projHome = os.getcwd()
 
 # Load standard Python modules
-import codecs, shutil, operator, argparse, subprocess
+import codecs, shutil, operator, argparse, subprocess, zipfile
 from datetime import *
 from configobj import ConfigObj
 
@@ -206,7 +206,7 @@ def accessHtmlHelp () :
 ###############################################################################
 
 
-def runExamplePubDemoProject (demoID, force = None) :
+def runExamplePubDemoProject (demoID) :
     '''Run an example demo file to test/demonstrate Rapuma. Any demos have to
     be a part of Rapuma and have been tested for demo purposes.'''
 
@@ -236,6 +236,49 @@ def runExamplePubDemoProject (demoID, force = None) :
 
 
 ###############################################################################
+########################## Archive Project Functions ##########################
+###############################################################################
+
+def archiveProject (pid, path = None) :
+    '''Archive a project. Send the compressed archive file to the user-specified
+    archive folder. If none is specified, put the archive in cwd. If a valid
+    path is specified, send it to that location.'''
+
+    terminal('The archive function have not been completed yet')
+
+
+def restoreArchive (pid, path = None) :
+    '''Restore a project from the user specified archive storage area. If that
+    is not set, it will look for the archive (pid.zip) in cwd. Use path to
+    specify where the project will be restored. Rapuma will register the project
+    there. Otherwise, it will restore to cwd and register it there.'''
+
+    archName = pid + '.rapuma'
+    userArchives = uc.userConfig['Resources']['archives']
+    archSource = ''
+    if path :
+        path = resolvePath(path)
+        if not os.path.isdir(path) :
+            terminal('\nError: The path given is not valid: [' + path + ']\n')
+            dieNow()
+    else :
+        path = local.projHome
+
+    archSource = os.path.join(userArchives, archName)
+    if not os.path.isfile(archSource) :
+        terminal('\nError: Not a valid path or ID: [' + archSource + ']\n')
+        dieNow()
+
+    if archSource :
+        myzip = zipfile.ZipFile(archSource, 'r')
+        myzip.extractall(path)
+        myzip.close()
+
+
+    terminal('\nSorry, the archive restore function has not been completed yet!\n')
+
+
+###############################################################################
 ########################### Rapuma Command Center #############################
 ###############################################################################
 
@@ -261,13 +304,13 @@ def userArguments (args) :
     # Test project ID, intercept if it is an example demo
     if sys.argv[1].lower() != 'project' :
         if sys.argv[1].lower() == 'example' :
-            runExamplePubDemoProject(args['project_id'], args['force'])
+            runExamplePubDemoProject(args['demo_id'])
         elif not isProject(args['project_id']) :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
         else :
             # Now setup the project and look for and test the component type if needed
             aProject = initProject(args['project_id'])
-            exclude = ['settings', 'locking', 'install', 'macro', 'example']
+            exclude = ['settings', 'locking', 'install', 'macro', 'archive']
             if not sys.argv[1].lower() in exclude :
                 if not aProject.isComponentType(args['component_type']) :
                     if not aProject.addComponentType(args['component_type']) :
@@ -482,10 +525,17 @@ def userArguments (args) :
             # Bad command
             sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
-    # Commands for running Rapuma examples (canned demos)
-#    elif sys.argv[1].lower() == 'example' :
-#        aProject = initProject(args['project_id'])
-#        aProject.runExamplePubDemoProject(args['project_id'], args['force'])
+    # The demo commands were intercepted at the begining
+
+    # Commands to archive a project
+    elif sys.argv[1].lower() == 'archive' :
+        if args['archive'] :
+            archiveProject(args['project_id'], args['path'])
+        elif args['restore'] :
+            restoreArchive(args['project_id'], args['path'])
+        else :
+            # Bad command
+            sys.exit('\nERROR: Must provide -a or -r (-p optional) Process halted!\n')
 
 
     # Totally lost
@@ -657,8 +707,14 @@ macroCommand.add_argument('-f', '--force', action='store_true', help='Force over
 
 # Add Project example subprocess arguments
 exampleCommand = subparsers.add_parser('example', help='Commands for running simple project examples.')
-exampleCommand.add_argument('project_id', help=' A project/demo ID for the example you wish to run. This is for canned demos so they must exsist. You cannot just make something up.')
-exampleCommand.add_argument('-f', '--force', action='store_true', help='Use this to overwrite the demo if it already exsits.')
+exampleCommand.add_argument('demo_id', help=' A project/demo ID for the example you wish to run. This is for canned demos so they must exsist. You cannot just make something up.')
+
+# Add Project archive subprocess arguments
+archiveCommand = subparsers.add_parser('archive', help='Commands for archiving a project.')
+archiveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive. This must be a currently operational project.')
+archiveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration. If nothing is specified, the default is the directory where the project is found.')
+archiveCommand.add_argument('-r', '--restore', action='store_true', help='Restore the specified project from the archive storage area specified in the user configuration to the current working directory, unless a path (-p) is specified.')
+archiveCommand.add_argument('-p', '--path', help='Specify the path to where you wish add the archive to, or restore from. If no path is given, the default is the current working directory for both sides of the operation (from -> to).')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))
