@@ -438,7 +438,7 @@ def userArguments (args) :
             elif not os.path.exists(resolvePath(args['source'])) :
                 sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
             else :
-                aProject.addComponent(args['component_id'], args['component_type'], resolvePath(args['source']), args['force'])
+                aProject.addComponent(args['component_id'], args['component_type'], resolvePath(args['source']), args['list'], args['force'])
         # Delete a component
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
@@ -685,6 +685,7 @@ compCommand.add_argument('component_type', help='The component type is needed fo
 compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
 compCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
 compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
+compCommand.add_argument('-l', '--list', help='Use this if this is a group component. This is a list of components to be in this group. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')

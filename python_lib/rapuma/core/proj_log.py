@@ -63,6 +63,7 @@ class ProjLog (object) :
             'COMP-010' : ['ERR', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
             'COMP-011' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] it may not be a valid ID.'],
             'COMP-012' : ['ERR', 'There seems to be a problem with component ID: [<<1>>] found in the meta component list: [<<2>>], it may not be a valid ID.'],
+            'COMP-015' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             'COMP-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
             'COMP-022' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             'COMP-025' : ['WRN', 'The [<<1>>] component is already listed in the Rapuma project configuration and is locked. Please unlock or use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
@@ -79,6 +80,8 @@ class ProjLog (object) :
             'COMP-080' : ['ERR', 'Validate component is not implemented yet!'],
             'COMP-090' : ['ERR', 'Component type [<<1>>] source path is [<<2>>] cannot use [<<3>>] as a replacement. Use (-f) force to override the current setting.'],
             'COMP-100' : ['ERR', 'Failed to insert the component type [<<1>>] into the project configuration.'],
+            'COMP-110' : ['ERR', 'The component [<<1>>] is locked. Process halted! Please unlock it before continuing.'],
+            'COMP-120' : ['LOG', 'Config settings successfully written out for the deletion of the component group [<<1>>] - project.removeGroupComponent()'],
 
             'GRUP-000' : ['MSG', 'Group processing messages'],
             'GRUP-010' : ['MSG', ''],
@@ -119,7 +122,7 @@ class ProjLog (object) :
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
             'TEXT-010' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             'TEXT-015' : ['MSG', 'TEXT-015 - Unassigned error message ID.'],
-            'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID is missing or incorrect. Double check to see which editor created the source text.'],
+            'TEXT-020' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
             'TEXT-030' : ['LOG', 'Copied [<<1>>] to [<<2>>] in project.'],
             'TEXT-035' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
             'TEXT-040' : ['WRN', 'The [<<1>>] component is locked. Please unlock it before any text modifications are done to it.'],
@@ -245,7 +248,7 @@ class ProjLog (object) :
 
             'LOCK-000' : ['MSG', 'Messages for project and component locking.'],
             'LOCK-010' : ['ERR', 'The [<<1>>] component is not found in this project. Component lock/unlock failed!'],
-            'LOCK-020' : ['MSG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
+            'LOCK-020' : ['MSG', 'The lock settings for all the components in the [<<1>>] component group has been set to [<<2>>].'],
             'LOCK-030' : ['MSG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
 
             'SETG-000' : ['MSG', 'Messages for setting issues (probably only in project.py)'],

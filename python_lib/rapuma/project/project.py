@@ -301,9 +301,8 @@ class Project (object) :
             dieNow()
 
 
-    def addComponentGroup (self, cType, gid, thisList, source, force = False) :
-        '''Add a component group to the project. If any of the individual
-        components are missing, it will try to add them to the project.'''
+    def addComponent (self, cid, cType, source, cList = None, force = False) :
+        '''This handels adding a component or a group of components.'''
 
         # Make sure the source path is there for this component type
         if force :
@@ -317,47 +316,27 @@ class Project (object) :
                     self.log.writeToLog('COMP-090', [cType,current,source])
                     dieNow()
 
-        # Add/check individual components
-        cidList = thisList.split()
-        for cid in cidList :
-            self.addComponent(cid, cType, source, force)
-
-        # Add the info to the components
-        buildConfSection(self.projConfig, 'Components')
-        buildConfSection(self.projConfig['Components'], gid)
-        self.projConfig['Components'][gid]['name'] = gid
-        self.projConfig['Components'][gid]['type'] = cType
-        self.projConfig['Components'][gid]['list'] = cidList
-
-        # Save our config settings
-        if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-015', [gid])
-
-        # We should be done at this point. Preprocesses should have
-        # been run on any of the individual components added above
-        return True
-
-
-    def insertComponent (self, cid, cType) :
-        '''Insert a component into the project.conf and create a manager.'''
-
-        buildConfSection(self.projConfig, 'Components')
-        buildConfSection(self.projConfig['Components'], cid)
-        self.projConfig['Components'][cid]['name'] = cid
-        self.projConfig['Components'][cid]['type'] = cType
-        # This will load the component type manager and put
-        # a lot of different settings into the proj config
-        cfg = self.projConfig['Components'][cid]
-        module = import_module('rapuma.component.' + cType)
-        ManagerClass = getattr(module, cType.capitalize())
-        compobj = ManagerClass(self, cfg)
-        self.components[cid] = compobj
-        # Save our config settings
-        if writeConfFile(self.projConfig) :
-            return True
+        # if a list exsists we create the group and add all the individual
+        # components if necessary. No list, just a single comp to be added
+        if cList :
+            cidList = cList.split()
+            for c in cidList :
+                if not self.installComponent(c, cType, source, force) :
+                    dieNow()
+            # Add the info to the components
+            buildConfSection(self.projConfig, 'Components')
+            buildConfSection(self.projConfig['Components'], cid)
+            self.projConfig['Components'][cid]['name'] = cid
+            self.projConfig['Components'][cid]['type'] = cType
+            self.projConfig['Components'][cid]['list'] = cidList
+            # Save our config settings
+            if writeConfFile(self.projConfig) :
+                self.log.writeToLog('COMP-015', [cid])
+        else :
+            self.installComponent(cid, cType, source, force)
 
 
-    def addComponent (self, cid, cType, source, force = False) :
+    def installComponent (self, cid, cType, source, force = False) :
         '''This will add a component to the object we created 
         above in createComponent(). If the component is already
         listed in the project configuration it will not proceed
@@ -371,18 +350,6 @@ class Project (object) :
         if self.isLocked(cid) :
             self.log.writeToLog('TEXT-040', [cid])
             dieNow()
-
-        # Make sure the source path is there for this component type
-        if force :
-            self.addCompTypeSourcePath(cType, source)
-        else :
-            if not self.hasSourcePath(cType) :
-                self.addCompTypeSourcePath(cType, source)
-            else :
-                if not self.sourceIsSame(cType, source) :
-                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-                    self.log.writeToLog('COMP-090', [cType,current,source])
-                    dieNow()
 
         # Force on add always means we delete the component first
         # before we do anything else
@@ -423,6 +390,25 @@ class Project (object) :
         return True
 
 
+    def insertComponent (self, cid, cType) :
+        '''Insert a component into the project.conf and create a manager.'''
+
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], cid)
+        self.projConfig['Components'][cid]['name'] = cid
+        self.projConfig['Components'][cid]['type'] = cType
+        # This will load the component type manager and put
+        # a lot of different settings into the proj config
+        cfg = self.projConfig['Components'][cid]
+        module = import_module('rapuma.component.' + cType)
+        ManagerClass = getattr(module, cType.capitalize())
+        compobj = ManagerClass(self, cfg)
+        self.components[cid] = compobj
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            return True
+
+
     def removeGroupComponent (self, gid, force = False) :
         '''This will remove a component group from a project 
         If force is set to True, the configuration entries
@@ -432,7 +418,7 @@ class Project (object) :
         be done.'''
 
         # Test for group lock
-        if isLocked() :
+        if self.isLocked() :
             self.log.writeToLog('GRUP-070', [gid])
             return False
 
@@ -459,10 +445,34 @@ class Project (object) :
 
 
     def removeComponent (self, cid, force = False) :
+        '''Handler to remove a component or a group of components.'''
+
+        # if a list exsists we will remove all the individual components
+        # of the group. No list, just a single comp will be removed
+        if self.isMetaComponent(cid) :
+
+# FIXME: Start here
+
+            for c in self.projConfig['Components'][cid]['list'] :
+                if not self.uninstallComponent(c, force) :
+                    dieNow()
+            del self.projConfig['Components'][cid]
+            # Write and report
+            if writeConfFile(self.projConfig) :
+                self.log.writeToLog('COMP-120')
+                return True
+
+
+    def uninstallComponent (self, cid, force = False) :
         '''This will remove a specific component from a project
         configuration. However, if force is set to True both the
         configuration entry and the physical files will be removed.
         If the component is locked, the function will abort.'''
+
+        # First test for lock
+        if self.isLocked(cid) :
+            self.log.writeToLog('COMP-110', [cid])
+            dieNow()
 
         # We will not bother if it is not in the config file.
         # Otherwise, delete both the config and physical files

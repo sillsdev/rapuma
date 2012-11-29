@@ -163,7 +163,7 @@ class Text (Manager) :
 
         # Test, no name = no success
         if not thisFile :
-            self.project.log.writeToLog('TEXT-020')
+            self.project.log.writeToLog('TEXT-020', [cid])
             dieNow()
 
         # Will need the stylesheet for copy if that has not been added
