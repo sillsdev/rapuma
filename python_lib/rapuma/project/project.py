@@ -50,6 +50,7 @@ class Project (object) :
         self.managers               = {}
         self.projectMediaIDCode     = self.projConfig['ProjectInfo']['projectMediaIDCode']
         self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
+        self.projectName            = self.projConfig['ProjectInfo']['projectName']
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :

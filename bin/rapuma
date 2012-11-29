@@ -63,7 +63,6 @@ from rapuma.core.proj_config import ProjConfig
 from rapuma.project.project import Project
 
 # Instantiate User classes
-#local           = ProjLocal(rapumaHome, rapumaResources, userHome, projHome)
 local           = ProjLocal(rapumaHome, userHome, projHome)
 uc              = UserConfig(local)
 log             = ProjLog(local, uc)
@@ -278,10 +277,17 @@ def archiveProject (pid, path = None) :
                 archive_name = os.path.join(archive_root, f)
                 myzip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
 
-    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
+    # Rename the source dir to indicate it was archived
+    os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
 
-# FIXME: Something should be done about disabling the old project
-# FIXME: Project needs to be removed from system registery
+    # Remove references from user rapuma.conf
+    if uc.unregisterProject(pid) :
+        terminal('Removed [' + pid + '] from user configuration.')
+    else :
+        terminal('Error: Failed to remove [' + pid + '] from user configuration.')
+
+    # Finish here
+    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
 
 
 def restoreArchive (pid, path = None) :
@@ -313,9 +319,17 @@ def restoreArchive (pid, path = None) :
         with zipfile.ZipFile(archSource, 'r') as myzip :
             myzip.extractall(archTarget)
 
-    terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
+    # Add project to local Rapuma project registry
+    # To do this we need to open up the restored project config file
+    # and pull out some settings.
+    local       = ProjLocal(rapumaHome, userHome, archTarget)
+    pc          = ProjConfig(local)
+    log         = ProjLog(local, uc)
+    aProject    = Project(uc.userConfig, pc.projConfig, local, log)
+    uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
-# FIXME: Need to register the restored project in rapuma.conf
+    # Finish here
+    terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
 
 ###############################################################################
@@ -345,6 +359,8 @@ def userArguments (args) :
     if sys.argv[1].lower() != 'project' :
         if sys.argv[1].lower() == 'example' :
             runExamplePubDemoProject(args['demo_id'])
+        elif sys.argv[1].lower() == 'archive' and args['restore'] :
+            restoreArchive(args['project_id'], args['path'])
         elif not isProject(args['project_id']) :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
         else :
@@ -571,6 +587,7 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'archive' :
         if args['archive'] :
             archiveProject(args['project_id'], args['path'])
+        # This should have been caught first thing but we'll keep it here just in case.
         elif args['restore'] :
             restoreArchive(args['project_id'], args['path'])
         else :
@@ -590,14 +607,22 @@ def userArguments (args) :
     # is done here as there should be no further operations done at this point.
     # Note: This will not work with "project" commands (aProject is not declaired)
     if not sys.argv[1].lower() == 'project' :
-        if os.path.isfile(aProject.local.projLogFile) :
-            trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+        try :
+            if os.path.isfile(aProject.local.projLogFile) :
+                trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
+        except Exception as e :
+            # If we don't succeed, we should probably say something
+            terminal('Error: Trimlog() failed with: ' + str(e) + '\n')
 
     # Look for an error log file and notify the user if one is found that there
     # were errors in the process
     if not sys.argv[1].lower() == 'project' :
-        if os.path.isfile(aProject.local.projErrorLogFile) :
-            terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+        try :
+            if os.path.isfile(aProject.local.projErrorLogFile) :
+                terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+        except Exception as e :
+            # If we don't succeed, we should probably say something
+            terminal('Error: Ironially we failed to report there were errors because of: ' + str(e) + '\n')
 
 
 ###############################################################################

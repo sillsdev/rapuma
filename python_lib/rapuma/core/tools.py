@@ -378,21 +378,6 @@ def override_section (self, aSection) :
     return self
 
 
-#def override_section (self, aSection) :
-#    '''Overrides settings by using the XML defaults and then merging those with
-#    items in the configobj that match.'''
-
-#    # Look for the key and value in object of items created from itself
-#    for k, v in self.items() :
-#        if k in aSection :
-#            if isinstance(v, dict) and isinstance(aSection[k], dict) :
-#                v.override(aSection[k])
-#            elif not isinstance(v, dict) and not isinstance(aSection[k], dict) :
-#                self[k] = aSection[k]
-#    # Return the overridden object
-#    return self
-
-
 def xmlFileToDict (fileName) :
     tree =  ElementTree.parse(fileName)
     root = tree.getroot()
