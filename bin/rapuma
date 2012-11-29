@@ -266,16 +266,22 @@ def archiveProject (pid, path = None) :
         dieNow()
 
     # Do the zip magic here
+    # First list some types we don't want to include in our archive
+    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
+    # Now list the full file names of any excptions to the above type exclusions
+    excludeException = ['rapuma.log']
     root_len = len(aProject.local.projHome)
     with zipfile.ZipFile(archTarget, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
         for root, dirs, files in os.walk(aProject.local.projHome):
             # Chop off the part of the path we do not need to store
             archive_root = os.path.abspath(root)[root_len:]
             for f in files:
-                # FIXME: Something should be done to keep out useless files
-                fullpath = os.path.join(root, f)
-                archive_name = os.path.join(archive_root, f)
-                myzip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
+                if not f[-1] == '~' :
+                    fn, fx = os.path.splitext(f)
+                    if not fx in excludeType or f in excludeException :
+                        fullpath = os.path.join(root, f)
+                        archive_name = os.path.join(archive_root, f)
+                        myzip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
 
     # Rename the source dir to indicate it was archived
     os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
