@@ -78,6 +78,7 @@ class ProjLog (object) :
             'COMP-070' : ['ERR', 'Failed to render the [<<1>>] component. - project.renderComponent()'],
             'COMP-080' : ['ERR', 'Validate component is not implemented yet!'],
             'COMP-090' : ['ERR', 'Component type [<<1>>] source path is [<<2>>] cannot use [<<3>>] as a replacement. Use (-f) force to override the current setting.'],
+            'COMP-100' : ['ERR', 'Failed to insert the component type [<<1>>] into the project configuration.'],
 
             'GRUP-000' : ['MSG', 'Group processing messages'],
             'GRUP-010' : ['MSG', ''],
@@ -243,7 +244,7 @@ class ProjLog (object) :
             'POST-135' : ['MSG', 'There was no post process script for comonent type [<<1>>] found in the project configuration.'],
 
             'LOCK-000' : ['MSG', 'Messages for project and component locking.'],
-            'LOCK-010' : ['LOG', 'The [<<1>>] component is not found in this project.'],
+            'LOCK-010' : ['ERR', 'The [<<1>>] component is not found in this project. Component lock/unlock failed!'],
             'LOCK-020' : ['MSG', 'The lock setting on the [<<1>>] component group has been set to [<<2>>]. Each of the individual components in the group are set to [<<2>>] as well.'],
             'LOCK-030' : ['MSG', 'The lock setting on the [<<1>>] component has been set to [<<2>>].'],
 

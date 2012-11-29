@@ -147,6 +147,15 @@ class Project (object) :
         return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + self.projConfig['Components'][cid]['type']))
 
 
+    def testComponent (self, cid) :
+        '''Return True if this exists in the project config and has
+        a file in the project.'''
+
+        if testForSetting(self.projConfig, 'Components', cid) :
+            if self.hasCidFile(cid) :
+                return True
+
+
     def isComponent (self, cid) :
         '''Simple test to see if a component exsists. Return True if it is.
         If it is a meta component then test for the exsistance of every
@@ -154,22 +163,16 @@ class Project (object) :
         has been installed through the system, it is a valid type ID so
         no testin of component type ID is being done.'''
 
-        def testComponent(cid) :
-            if testForSetting(self.projConfig, 'Components', cid) :
-                if self.hasCidFile(cid) :
-                    return True
-                else :
-                    self.log.writeToLog('COMP-050', [cid])
-            else :
-                self.log.writeToLog('COMP-060', [cid])
-
         # Check first to see if this is a meta component
         if self.isMetaComponent(cid) :
             for c in self.projConfig['Components'][cid]['list'] :
-                if testComponent(c) :
-                    return True
+                if not self.testComponent(c) :
+                    # Might as well quite if we fail here
+                    self.log.writeToLog('COMP-012', [c,cid])
+                    dieNow()
+            return True
         else :
-            if testComponent(cid) :
+            if self.testComponent(cid) :
                 return True
 
 
@@ -335,6 +338,25 @@ class Project (object) :
         return True
 
 
+    def insertComponent (self, cid, cType) :
+        '''Insert a component into the project.conf and create a manager.'''
+
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], cid)
+        self.projConfig['Components'][cid]['name'] = cid
+        self.projConfig['Components'][cid]['type'] = cType
+        # This will load the component type manager and put
+        # a lot of different settings into the proj config
+        cfg = self.projConfig['Components'][cid]
+        module = import_module('rapuma.component.' + cType)
+        ManagerClass = getattr(module, cType.capitalize())
+        compobj = ManagerClass(self, cfg)
+        self.components[cid] = compobj
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            return True
+
+
     def addComponent (self, cid, cType, source, force = False) :
         '''This will add a component to the object we created 
         above in createComponent(). If the component is already
@@ -362,26 +384,12 @@ class Project (object) :
                     self.log.writeToLog('COMP-090', [cType,current,source])
                     dieNow()
 
-        def insertComponent () :
-            buildConfSection(self.projConfig, 'Components')
-            buildConfSection(self.projConfig['Components'], cid)
-            self.projConfig['Components'][cid]['name'] = cid
-            self.projConfig['Components'][cid]['type'] = cType
-            # This will load the component type manager and put
-            # a lot of different settings into the proj config
-            cfg = self.projConfig['Components'][cid]
-            module = import_module('rapuma.component.' + cType)
-            ManagerClass = getattr(module, cType.capitalize())
-            compobj = ManagerClass(self, cfg)
-            self.components[cid] = compobj
-            # Save our config settings
-            if writeConfFile(self.projConfig) :
-                return True
-
         # Force on add always means we delete the component first
         # before we do anything else
         if force :
             self.removeComponent(cid, force)
+
+#        import pdb; pdb.set_trace()
 
         # See if the working text is present, quite if it is not
         if cType == 'usfm' :
@@ -390,24 +398,29 @@ class Project (object) :
                 # Run any working text preprocesses on the new component text
                 if self.runPreprocess(cType, cid) :
                     self.log.writeToLog('TEXT-060', [cid])
+
                 # Finish the install by adding to config
-                if not testForSetting(self.projConfig, 'Components', cid) :
-                    insertComponent()
-                    self.lockUnlock(cid, True)
-                    if force :
-                        self.log.writeToLog('COMP-022', [cid])
-                    else :
-                        self.log.writeToLog('COMP-020', [cid])
-                    return True
+                if not self.insertComponent(cid, cType) :
+                    self.log.writeToLog('COMP-100', [cid])
+                    dieNow()
                 else :
-                    self.log.writeToLog('COMP-025', [cid])
-                    return False
+                    self.lockUnlock(cid, True)
+
+                # Report in context to force use or not
+                if force :
+                    self.log.writeToLog('COMP-022', [cid])
+                else :
+                    self.log.writeToLog('COMP-020', [cid])
+
             else :
                 self.log.writeToLog('TEXT-160', [cid])
                 return False
         else :
             self.project.log.writeToLog('COMP-005', [self.cType])
             dieNow()
+
+        # If we got this far it must be okay to leave
+        return True
 
 
     def removeGroupComponent (self, gid, force = False) :
@@ -523,25 +536,25 @@ class Project (object) :
         '''Lock or unlock to enable or disable a cid. If the cid is a group
         then all the components will be locked/unlocked in that group as well.'''
 
+        # First be sure this is a valid component
+        if not self.isComponent(cid) :
+            self.log.writeToLog('LOCK-010', [cid])
+            dieNow()
+
         # Check if the component is locked
         cList = False
-        if self.isComponent(cid) :
-            # Lists are treated different we will lock or unlock all
-            # components in a list
-            if testForSetting(self.projConfig['Components'][cid], 'list') :
-                cList = True
-                for c in self.projConfig['Components'][cid]['list'] :
-                    self.projConfig['Components'][c]['isLocked'] = lock
-            
-            else :
-                self.projConfig['Components'][cid]['isLocked'] = lock
-                
-            # Update the projConfig
-            writeConfFile(self.projConfig)
+        # Lists are treated different we will lock or unlock all
+        # components in a list
+        if testForSetting(self.projConfig['Components'][cid], 'list') :
+            cList = True
+            for c in self.projConfig['Components'][cid]['list'] :
+                self.projConfig['Components'][c]['isLocked'] = lock
+        
         else :
-            # Arggg, this may not be good
-            self.log.writeToLog('LOCK-010', [cid])
-            return False
+            self.projConfig['Components'][cid]['isLocked'] = lock
+            
+        # Update the projConfig
+        writeConfFile(self.projConfig)
 
         # Report back
         if cList :
@@ -574,6 +587,8 @@ class Project (object) :
         if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
             self.log.writeToLog('PREP-010', [cType])
             return False
+
+#        import pdb; pdb.set_trace()
 
         # Create target file path and name
         if cid :
@@ -629,10 +644,6 @@ class Project (object) :
                 err = subprocess.call([script, target])
                 if err == 0 :
                     self.log.writeToLog('PREP-050', [fName(target)])
-                    # Successful completion means no more processing should
-                    # be done on this component. As such, we will automatically
-                    # lock it so that will not happen by accident.
-                    self.lockUnlock(cid, True)
                 else :
                     self.log.writeToLog('PREP-060', [fName(target), str(err)])
             else :
@@ -1124,6 +1135,7 @@ class Project (object) :
         # Define some internal vars
         oldMacro            = ''
         sourceMacro         = ''
+        # FIXME: This needs to support a file extention such as .sh
         if path and os.path.isfile(os.path.join(resolvePath(path))) :
             sourceMacro     = os.path.join(resolvePath(path))
         macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)

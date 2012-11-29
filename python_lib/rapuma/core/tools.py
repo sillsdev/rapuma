@@ -64,7 +64,8 @@ def isOlder (child, parent) :
 def isExecutable (fn) :
     '''Use the file exention to determine if a file is an executable script 
     or not. This may need to be expanded as use cases arrise. Simple is
-    good for now. This will test for exsistance and extention type.'''
+    good for now. This will test for exsistance and extention type. This
+    function will fail if the file does not have an extention.'''
 
     try :
         if os.path.isfile(fn) :
@@ -72,7 +73,7 @@ def isExecutable (fn) :
                 return True
     except Exception as e :
         # If we don't succeed, we should probably quite here
-        dieNow('Little problem with tools.isExecutable(): ' + str(e) + '  File: ' + fn)
+        dieNow('Error: Little problem with tools.isExecutable(): ' + str(e) + '  File: ' + fn)
 
 
 def makeExecutable (fileName) :

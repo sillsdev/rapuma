@@ -1,15 +1,26 @@
 
 RAPUMA QUICK START GUIDE
 -----------------------------------------
-Rapuma comes with a couple demonstration projects that are used to demonstrate what it can do and also test the system when revisions are made. There is a module named "rapuma_demo" that can be called on to do this but to make it easier for normal users, some short-cut scripts have been included to simplify running the test projects.
+Rapuma comes with a couple example projects that are used to demonstrate what it can do and also test the system when revisions are made. Currently, there are two example projects. The first demonstrates Rapuma's most basic project configuration with a simple small Scripture book, the book of James in English. To run this example, with your terminal open in a directory where you don't mind a project being created, type the following:
 
-Once Rapuma is setup, and you want to test it, open a terminal and navigate to someplace on your drive where you can let Rapuma install the test projects. Once you are there, use this command:
+    rapuma example MBJAS
 
-    test_rapuma.sh
+If everything was installed correctly, what you should end up with is the Gnome Document Previewer displaying a PDF of the Book of James that Rapuma just rendered using XeTeX. You will also see that there is a folder in your current directory named KYUM. In that folder is another one named ENG-LATN-JAS. That is the folder where the actual publishing project resides. Use your file explorer to look around and see what happened. I'm not going to tell here what just happened, otherwise it wouldn't be a "Quick Start" would it.
 
-Three things should result from doing this. First, your PDF viewer should be displaying freshly rendered PDF of the Book of James. This came from the ENG-LATN-JAS project located in the MBJAS folder. In that folder you will find all project data it took to do that. That was the second thing the test script did. The third result is a project folder work area named KYUM. This project contains a lot more data and specifcally, the KYU-MYMR-MRK project, which is a far more complex project than ENG-LATN-JAS.
+The second example, which is vastly more complex, can be run in the same way by typing this:
 
-What happened to produce these three outcomes goes beyond the scope of this quick start guide. [NOTE: Soon I hope to have a pointer here to readme files that will be in each of the two projects. These files will go into much greater detail as to what has been done and what can be done. They will guide the user/explore in some exercizes that will put Rapuma through its paces.]
+    rapuma example KYUM
 
+With this, you will get similar results as the last time. However, this is the Book of Mark in the Kayah language, set in the Burmese script. What it took to do that was much more than the English book of James, however, Rapuma is able to do both.
 
+If you would like to try a command, you could render the Book of Mark with this:
 
+    rapuma component KYU-MYMR-MRK usfm mrk -e
+
+No doubt you will notice that not much happened in the terminal. This is because Rapuma is just calling up the already existing PDF file that was created when the book was rendered the first time. There are times when this is useful. However, to make Rapuma re-render this book component you will need to add one extra command such as follows:
+
+    rapuma component KYU-MYMR-MRK usfm mrk -e -f
+
+This time you will see more activity on the screen. However, unless you actually edited the file or made a change to one of the format settings, the PDF will be identical to the first one.
+
+This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.
