@@ -128,15 +128,13 @@ class Text (Manager) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name. If a USFM text file
         is not located in a PT project folder, the editor cannot be set
-        to paratext, it must be set to generic.'''
+        to paratext, it must be set to generic. This assumes lock checking
+        was done previous to the call.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Before anything is done, we check to see if this component is locked
-        # Quite here if it is
-        if self.project.isLocked(cid) :
-            self.project.log.writeToLog('TEXT-040', [cid])
-            dieNow()
+        # Get the real component name, this assumes the cid is valid
+        cName = getUsfmCidInfo(cid)[0]
 
         # Check to see if text manager settings need updating
         self.updateManagerSettings()
@@ -195,7 +193,7 @@ class Text (Manager) :
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
-        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
+        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cName)
         target          = os.path.join(targetFolder, cid + '.' + self.cType)
         targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
@@ -215,27 +213,30 @@ class Text (Manager) :
         if not os.path.isdir(targetFolder) :
             os.makedirs(targetFolder)
 
-        # Always save an untouched copy of the source and set to read only
-        if os.path.isfile(targetSource) :
-            # Reset permissions to overwrite
-            makeWriteable(targetSource)
-            shutil.copy(source, targetSource)
-            makeReadOnly(targetSource)
-        else :
-            shutil.copy(source, targetSource)
-            makeReadOnly(targetSource)
-
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
                 if self.usfmCopy(source, target, projSty) :
+                    # Always save an untouched copy of the source and set to read only
+                    if os.path.isfile(targetSource) :
+                        # Reset permissions to overwrite
+                        makeWriteable(targetSource)
+                        shutil.copy(source, targetSource)
+                        makeReadOnly(targetSource)
+                    else :
+                        shutil.copy(source, targetSource)
+                        makeReadOnly(targetSource)
                     # If the text is there, we should return True so do a last check to see
                     if os.path.isfile(target) :
-                        self.project.log.writeToLog('TEXT-060', [cid])
+                        self.project.log.writeToLog('TEXT-060', [cName])
                         return True
                 else :
                     self.project.log.writeToLog('TEXT-070', [source,fName(target)])
                     return False
+            else :
+                return True
+        else :
+            return True
 
 
 

@@ -405,50 +405,30 @@ def userArguments (args) :
         elif args['remove'] :
             deleteProject(uc, args['project_id'])
 
-    # Group level commands
-    elif sys.argv[1].lower() == 'group' :
-        # Add a new component group
-        if args['add'] :
-            if not args['list'] :
-                sys.exit('\nERROR: Must provide -l (--list) when adding a component group. Process halted!\n')
-            elif not args['source'] :
-                sys.exit('\nERROR: Must provide -s (--source) when adding a component group. Process halted!\n')
-            elif not os.path.isdir(resolvePath(args['source'])) :
-                sys.exit('\nERROR: Must provide a valid source path when adding a component group. Process halted!\n')
-            else :
-                aProject.addComponentGroup(args['component_type'], args['group_id'], args['list'], resolvePath(args['source']), args['force'])
-        # Delete a group component
-        elif args['remove'] :
-            # If -f is used, it will be passed to removeComponent() to delete 
-            # every file in the group
-            aProject.removeGroupComponent(args['group_id'], args['force'])
-        # Render vs. view command is just a matter of forcing the component
-        # to be rendered if render is selected by the user. Otherwise, if
-        # only view is requested, force is set to False and the component
-        # will not be rerendered if it already exsists.
-        elif args['execute'] :
-            aProject.renderGroup(args['group_id'], args['force'])
-
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
+        if not args['component_name'] :
+            sys.exit('\nERROR: Must provide a component name when adding a new component. Process halted!\n')
         # Add a new component
         if args['add'] :
             if not args['source'] :
                 sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
             elif not os.path.exists(resolvePath(args['source'])) :
                 sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
+            elif not args['id_list'] :
+                sys.exit('\nERROR: Must provide a list of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
             else :
-                aProject.addComponent(args['component_id'], args['component_type'], resolvePath(args['source']), args['list'], args['force'])
+                aProject.addComponent(args['component_type'], args['component_name'], resolvePath(args['source']), args['id_list'], args['force'])
         # Delete a component
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
-            aProject.removeComponent(args['component_id'], args['force'])
+            aProject.removeComponent(args['component_name'], args['force'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
         elif args['execute'] :
-            aProject.renderComponent(args['component_id'], args['force'])
+            aProject.renderComponent(args['component_name'], args['force'])
         elif args['validate'] :
             aProject.createManager(args['component_type'], 'text')
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
@@ -490,10 +470,11 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'preprocess' :
         # Run a preprocess command on a component or component type
         # Because we can lock at all levels, there is no need for (-f --force)
-        # to be used here. If a component ID is given it will only run on that
-        # component. Otherwise, all components of the specified type.
+        # to be used here. If a component name is given it will only run on that
+        # component which includes all listed sub-components. Otherwise, all 
+        # components of the specified type will be acted on by the preprocess.
         if args['execute'] :
-            aProject.runPreprocess(args['component_type'], args['component_id'])
+            aProject.runPreprocess(args['component_type'], args['component_name'])
         # Install a custom or a default preprocess script, force to overwrite what is there
         elif args['add'] :
             filePath = ''
@@ -510,15 +491,16 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'postprocess' :
         # Run a post process command on a component or component type
         # Because we can lock at all levels, there is no need for (-f --force)
-        # to be used here. If a component ID is given it will only run on that
-        # component. Otherwise, all components of the specified type.
+        # to be used here. If a component name is given it will only run on that
+        # component which includes all listed sub-components. Otherwise, all 
+        # components of the specified type will be acted on by the postprocess.
         if args['execute'] :
             if not args['script'] :
                 sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
-            elif not args['component_id'] :
+            elif not args['component_name'] :
                 sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
             else :
-                aProject.runPostProcess(args['component_type'], args['script'], args['component_id'])
+                aProject.runPostProcess(args['component_type'], args['script'], args['component_name'])
         # Install a custom or a default post process script, force to overwrite what is there
         elif args['add'] :
             filePath = ''
@@ -547,21 +529,21 @@ def userArguments (args) :
         aProject = initProject(args['project_id'])
         # Lock component
         if args['lock'] :
-            aProject.lockUnlock(args['component_id'], True)
+            aProject.lockUnlock(args['component_name'], True, args['force'])
         # Unlock component
         elif args['unlock'] :
-            aProject.lockUnlock(args['component_id'], False)
+            aProject.lockUnlock(args['component_name'], False, args['force'])
 
     # Exporting commands
     elif sys.argv[1].lower() == 'export' :
         # Check further for required args
-        if not args['component_id'] :
+        if not args['component_name'] :
             sys.exit('\nERROR: Component ID is missing from command argument. Process halted!\n')
         else :
             aProject.createManager(args['component_type'], 'text')
         # Execute an export
         if args['execute'] :
-            aProject.export(args['component_type'], args['component_id'], args['path'], args['script'], args['bundle'], args['force'])
+            aProject.export(args['component_type'], args['component_name'], args['path'], args['script'], args['bundle'], args['force'])
 
     # Install file commands
     elif sys.argv[1].lower() == 'install' :
@@ -666,31 +648,19 @@ projCommand.add_argument('-m', '--media', help='If creating a new project, give 
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-b', '--bundle', help='[NOT IMPLEMENTED] Create a bundle (archive) of the entire project.')
 
-# Add group subprocess arguments
-groupCommand = subparsers.add_parser('group', help='General project component group management commands help')
-groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-groupCommand.add_argument('component_type', help='The component type is needed for creating a new component group.')
-groupCommand.add_argument('group_id', help='A specific group ID required for creating a new component group.')
-groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
-groupCommand.add_argument('-r', '--remove', action='store_true', help='Remove an existing component from this project.')
-groupCommand.add_argument('-l', '--list', help='A list of components to be in this group. This must be used if adding a group. It is not needed for removal. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
-groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a component group in this project.')
-groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the group\'s source files are found. (Used only for adding component groups, only one source path per component type allowed.)')
-
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('component_type', help='The component type is needed for creating a new component.')
-compCommand.add_argument('component_id', help='A specific component ID required for creating a new component.')
+compCommand.add_argument('component_name', help='The component name, required for creating a new component or any actions to be done to it.')
 compCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
 compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
-compCommand.add_argument('-l', '--list', help='Use this if this is a group component. This is a list of components to be in this group. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used only for adding components, only one source path per component type allowed.)')
+compCommand.add_argument('-i', '--id_list', help='Use this if this is a group component. This is a list of components to be in this group. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
-compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used only for adding components, only one source path per component type allowed.)')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
@@ -720,7 +690,7 @@ preprocessCommand.add_argument('component_type', help='Specify the component typ
 preprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a preprocess into the project scripts folder. If you do not specify a process a default process script.')
 preprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a preprocess from the component type. This does not remove the actual script from the project. That needs to be done manually.')
 preprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a preprocess script to be updated, replaced or brought back to default condition for this component type.')
-preprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a preprocess script for a specific component type will be run only on that component.')
+preprocessCommand.add_argument('-c', '--component_name', help='Give a (registered) component name to execute a preprocess script on all valid sub-components associated with that component.')
 preprocessCommand.add_argument('-p', '--path', help='A valid path and file name of a specific preprocess script to be installed.')
 preprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a preprocess script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
 
@@ -731,7 +701,7 @@ postprocessCommand.add_argument('component_type', help='Specify the component ty
 postprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project scripts folder. If you do not specify a process a default process script.')
 postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a post process from the component type. This does not remove the actual script from the project. That needs to be done manually.')
 postprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a post process script to be updated, replaced or brought back to default condition for this component type.')
-postprocessCommand.add_argument('-c', '--component_id', help='When a valid component ID is given, a post process script for a specific component type will be run only on that component.')
+postprocessCommand.add_argument('-c', '--component_name', help='Give a (registered) component name to execute a post process script on all valid sub-components associated with that component.')
 postprocessCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
 postprocessCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for the -e command.')
 postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a post process script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
@@ -747,15 +717,16 @@ settingsCommand.add_argument('value', help='A new value to add or change to the 
 # Add Project Locking subprocess arguments
 lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
 lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-lockCommand.add_argument('component_id', help='A specific component ID required for locking or unlocking.')
+lockCommand.add_argument('component_name', help='A specific component name required for locking or unlocking.')
 lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
-lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hyarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
+lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hierarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
+lockCommand.add_argument('-f', '--force', action='store_true', help='Force lock/unlock of any subcomponents that belong to the specified component.')
 
 # Add Project exporting subprocess arguments
 exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')
 exportCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 exportCommand.add_argument('component_type', help='Component ID (a positional argument required for all actions with this subprocess)')
-exportCommand.add_argument('component_id', help='Specify a valid component ID to be exported. Exporting works only with components or component groups.')
+exportCommand.add_argument('component_name', help='Specify a valid component name to be exported. The sub-components associated with that name will be exported.')
 exportCommand.add_argument('-p', '--path', help='Optional - This will specify a path/folder where the exported data is output to. Default is to create an export folder in the source folder and output to that.')
 exportCommand.add_argument('-s', '--script', help='Optional - The name of an installed post process script to be used in the export process. Default will just blind copy the working text to the export folder.')
 exportCommand.add_argument('-e', '--execute', action='store_true', help='Execute an export operation.')

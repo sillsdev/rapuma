@@ -141,64 +141,51 @@ class Project (object) :
 ###############################################################################
 
 
-    def hasCidFile (self, cid) :
-        '''Check to see if a file exists for a given cid.'''
+    def hasCidFile (self, cName, cid, cType) :
+        '''Return True or False depending on if a working file exists 
+        for a given cName.'''
 
-        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + self.projConfig['Components'][cid]['type']))
-
-
-    def testComponent (self, cid) :
-        '''Return True if this exists in the project config and has
-        a file in the project.'''
-
-        if testForSetting(self.projConfig, 'Components', cid) :
-            if self.hasCidFile(cid) :
-                return True
+        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType))
 
 
-    def isComponent (self, cid) :
-        '''Simple test to see if a component exsists. Return True if it is.
-        If it is a meta component then test for the exsistance of every
-        cid in the group. Note: This assumes that because the component
-        has been installed through the system, it is a valid type ID so
-        no testin of component type ID is being done.'''
+    def isComponent (self, cName) :
+        '''A two-part test to see if a component has a config entry and a file.'''
 
-        # Check first to see if this is a meta component
-        if self.isMetaComponent(cid) :
-            for c in self.projConfig['Components'][cid]['list'] :
-                if not self.testComponent(c) :
-                    # Might as well quite if we fail here
-                    self.log.writeToLog('COMP-012', [c,cid])
-                    dieNow()
-            return True
+        buildConfSection(self.projConfig, 'Components')
+        if testForSetting(self.projConfig['Components'], cName) :
+            for cid in self.projConfig['Components'][cName]['cidList'] :
+                cidName = getUsfmCidInfo(cid)[0]
+                cType = self.projConfig['Components'][cName]['type']
+                # For subcomponents look for working text
+                if self.hasCidFile(cidName, cid, cType) :
+                    return True
         else :
-            if self.testComponent(cid) :
-                return True
-
-
-    def findBadComp (self, cid) :
-        '''Much like isComponent() but it returns the first offending
-        cid ID it finds.'''
-
-        if self.isMetaComponent(cid) :
-            for i in self.projConfig['Components'][cid]['list'] :
-                if not hasUsfmCidInfo(i) :
-                    return i
-        else :
-            if not hasUsfmCidInfo(cid) :
-                return cid
-
-
-    def isMetaComponent (self, cid) :
-        '''Return True if this component has a list of component in it.'''
-
-        try :
-            if testForSetting(self.projConfig['Components'][cid], 'list') :
-                return True
-            else :
-                return False
-        except :
             return False
+
+
+#    def findBadComp (self, cid) :
+#        '''Much like isComponent() but it returns the first offending
+#        cid ID it finds.'''
+
+#        if self.isMetaComponent(cid) :
+#            for i in self.projConfig['Components'][cid]['list'] :
+#                if not hasUsfmCidInfo(i) :
+#                    return i
+#        else :
+#            if not hasUsfmCidInfo(cid) :
+#                return cid
+
+
+#    def isMetaComponent (self, cid) :
+#        '''Return True if this component has a list of component in it.'''
+
+#        try :
+#            if testForSetting(self.projConfig['Components'][cid], 'list') :
+#                return True
+#            else :
+#                return False
+#        except :
+#            return False
 
     def isComponentType (self, cType) :
         '''Simple test to see if a component type exsists. Return True if it is.'''
@@ -301,8 +288,8 @@ class Project (object) :
             dieNow()
 
 
-    def addComponent (self, cid, cType, source, cList = None, force = False) :
-        '''This handels adding a component or a group of components.'''
+    def addComponent (self, cType, cName, source, cList, force = False) :
+        '''This handels adding a component which can contain one or more sub-components.'''
 
         # Make sure the source path is there for this component type
         if force :
@@ -311,189 +298,203 @@ class Project (object) :
             if not self.hasSourcePath(cType) :
                 self.addCompTypeSourcePath(cType, source)
             else :
+                # FIXME: This dose not address the problem of if an archive or backup
+                # from another machine is being worked with. The source path, which is
+                # hard-coded will undoubtly be wrong. That needs to be dealt with at some pont.
                 if not self.sourceIsSame(cType, source) :
                     current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
                     self.log.writeToLog('COMP-090', [cType,current,source])
                     dieNow()
 
-        # if a list exsists we create the group and add all the individual
-        # components if necessary. No list, just a single comp to be added
-        if cList :
-            cidList = cList.split()
-            for c in cidList :
-                if not self.installComponent(c, cType, source, force) :
+        # The cList can be one or more valid component IDs
+        # It is expected that the data for this list is in
+        # this format: "id1 id2 id3 ect"
+        cidList = cList.split()
+
+#        import pdb; pdb.set_trace()
+
+        # Add the info to the components
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], cName)
+        self.projConfig['Components'][cName]['type'] = cType
+        self.projConfig['Components'][cName]['cidList'] = cidList
+        self.projConfig['Components'][cName]['isLocked'] = True
+
+        # Add subcomponents
+        for cid in cidList :
+            if not self.installComponent(cType, cid, source, force) :
+                if not self.isComponent(getUsfmCidInfo(cid)[0]) :
                     dieNow()
-            # Add the info to the components
-            buildConfSection(self.projConfig, 'Components')
-            buildConfSection(self.projConfig['Components'], cid)
-            self.projConfig['Components'][cid]['name'] = cid
-            self.projConfig['Components'][cid]['type'] = cType
-            self.projConfig['Components'][cid]['list'] = cidList
-            # Save our config settings
-            if writeConfFile(self.projConfig) :
-                self.log.writeToLog('COMP-015', [cid])
-        else :
-            self.installComponent(cid, cType, source, force)
+
+        # If there was more than one subcomponent, this is a group
+        # thus we should make a folder for it.
+        if len(cidList) > 1 :
+            if not os.path.isdir(os.path.join(self.local.projComponentsFolder, cName)) :
+                os.mkdir(os.path.join(self.local.projComponentsFolder, cName))
+
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            self.log.writeToLog('COMP-015', [cName])
 
 
-    def installComponent (self, cid, cType, source, force = False) :
-        '''This will add a component to the object we created 
-        above in createComponent(). If the component is already
-        listed in the project configuration it will not proceed
-        unless force is set to True. Then it will remove the
-        component listing, along with its files so a fresh
-        copy can be added to the project.'''
-
-        # Current thinking is that a locked component cannot be touched,
-        # not even by force (-f) Check here to see if that is the case
-        # and quite if it is.
-        if self.isLocked(cid) :
-            self.log.writeToLog('TEXT-040', [cid])
-            dieNow()
-
-        # Force on add always means we delete the component first
-        # before we do anything else
-        if force :
-            self.removeComponent(cid, force)
+    def installComponent (self, cType, cid, source, force = False) :
+        '''This will add a component to the object we created above in createComponent().
+        If the component is already listed in the project configuration it will not proceed
+        unless force is set to True. Then it will remove the component listing, along with 
+        its files so a fresh copy can be added to the project. This works at the single
+        component level. The cid must be validated against its type.'''
 
 #        import pdb; pdb.set_trace()
 
         # See if the working text is present, quite if it is not
         if cType == 'usfm' :
+            # To maintain the distinction between comp name and comp ID, we will
+            # auto-create a name for this component that is taken from its valid
+            # name in the component dictionary. We will also validate the ID too.
+            if hasUsfmCidInfo(cid) :
+               cName = getUsfmCidInfo(cid)[0]
+            else :
+                self.log.writeToLog('COMP-010', [cid])
+                dieNow()
+
+            # Current thinking is that a locked component cannot be touched,
+            # not even by force (-f) Check here to see if that is the case.
+            # Give a warning if it is and return False
+            if self.isLocked(cName) :
+                self.log.writeToLog('COMP-115', [cName])
+                return False
+
+            # Force on add always means we delete the component first
+            # before we do anything else
+            if force :
+                if not self.removeComponent(cName, force) :
+                    self.log.writeToLog('COMP-140', [cName])
+                    dieNow()
+
+            # Put the (refreshed) settings back in the project config
+            if not self.insertComponent(cType, cName, cid) :
+                self.log.writeToLog('COMP-100', [cName])
+                dieNow()
+
+            # Install our working text files
             self.createManager(cType, 'text')
             if self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
                 # Run any working text preprocesses on the new component text
-                if self.runPreprocess(cType, cid) :
-                    self.log.writeToLog('TEXT-060', [cid])
+                scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
+                preProScript = os.path.join(self.local.projScriptsFolder, scriptFileName)
+                if os.path.isfile(preProScript) :
+                    if not self.runProcessScript(cName, preProScript) :
+                        self.log.writeToLog('COMP-130', [cName])
 
-                # Finish the install by adding to config
-                if not self.insertComponent(cid, cType) :
-                    self.log.writeToLog('COMP-100', [cid])
-                    dieNow()
-                else :
-                    self.lockUnlock(cid, True)
+                # Finish the install by locking
+                self.lockUnlock(cName, True)
 
                 # Report in context to force use or not
                 if force :
-                    self.log.writeToLog('COMP-022', [cid])
+                    self.log.writeToLog('COMP-022', [cName])
                 else :
-                    self.log.writeToLog('COMP-020', [cid])
+                    self.log.writeToLog('COMP-020', [cName])
 
             else :
-                self.log.writeToLog('TEXT-160', [cid])
+                self.log.writeToLog('TEXT-160', [cName])
                 return False
         else :
-            self.project.log.writeToLog('COMP-005', [self.cType])
+            self.log.writeToLog('COMP-005', [cType])
             dieNow()
 
         # If we got this far it must be okay to leave
         return True
 
 
-    def insertComponent (self, cid, cType) :
-        '''Insert a component into the project.conf and create a manager.'''
+    def insertComponent (self, cType, cName, cid) :
+        '''Insert a single component into the project.conf and create a component manager.'''
 
         buildConfSection(self.projConfig, 'Components')
-        buildConfSection(self.projConfig['Components'], cid)
-        self.projConfig['Components'][cid]['name'] = cid
-        self.projConfig['Components'][cid]['type'] = cType
+        buildConfSection(self.projConfig['Components'], cName)
+        self.projConfig['Components'][cName]['type'] = cType
+        self.projConfig['Components'][cName]['cidList'] = [cid]
+        self.projConfig['Components'][cName]['isLocked'] = False
         # This will load the component type manager and put
         # a lot of different settings into the proj config
-        cfg = self.projConfig['Components'][cid]
+        cfg = self.projConfig['Components'][cName]
         module = import_module('rapuma.component.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         compobj = ManagerClass(self, cfg)
-        self.components[cid] = compobj
+        self.components[cName] = compobj
         # Save our config settings
         if writeConfFile(self.projConfig) :
             return True
 
 
-    def removeGroupComponent (self, gid, force = False) :
-        '''This will remove a component group from a project 
-        If force is set to True, the configuration entries
-        as well as the physical files will be removed. Otherwise
-        only the group configuration will be removed. The
-        group component must be unlocked before this can
-        be done.'''
+    def removeComponent (self, cName, force = False) :
+        '''Handler to remove a component or a group of components.
+        If it is not found return True anyway.'''
 
-        # Test for group lock
-        if self.isLocked() :
-            self.log.writeToLog('GRUP-070', [gid])
-            return False
+        # First test for lock
+        if self.isLocked(cName) :
+            self.log.writeToLog('COMP-110', [cName])
+            dieNow()
 
-        # Check for force flag
-        if force :
-            if testForSetting(self.projConfig['Components'][gid], 'list') :
-                cidList = self.projConfig['Components'][gid]['list']
-            else :
-                self.log.writeToLog('GRUP-071', [gid])
-                return False
-            for cid in cidList :
-                self.removeComponent(cid, force)
-            del self.projConfig['Components'][gid]
-            self.log.writeToLog('GRUP-073', [gid])
-        # Just a normal setting delete
-        else :
-            del self.projConfig['Components'][gid]
-            self.log.writeToLog('GRUP-075', [gid])
-
-        # Write and report
-        if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-077')
+        # Remove subcomponents from the target if there are any
+        if self.isComponent(cName) :
+            # FIXME: What may be needed here is a way to look for conflicts
+            # between components that share the same subcomponents.
+            for cid in self.projConfig['Components'][cName]['cidList'] :
+                cidName = getUsfmCidInfo(cid)[0]
+                if self.isComponent(cidName) :
+                    self.uninstallComponent(cidName, force)
+        # Remove the target component
+        self.uninstallComponent(cName, force)
+        # Test for success
+        if not self.isComponent(cName) :
+            self.log.writeToLog('COMP-120', [cName])
             return True
+            
+#            if testForSetting(self.projConfig['Components'], cName) :
+#                del self.projConfig['Components'][cName]
+#                # Write and report
+#                if writeConfFile(self.projConfig) :
+#                    self.log.writeToLog('COMP-120' [cName])
+#                    return True
+#            else :
+#                return True
+#        else :
+#            return True
 
 
-    def removeComponent (self, cid, force = False) :
-        '''Handler to remove a component or a group of components.'''
-
-        # if a list exsists we will remove all the individual components
-        # of the group. No list, just a single comp will be removed
-        if self.isMetaComponent(cid) :
-
-# FIXME: Start here
-
-            for c in self.projConfig['Components'][cid]['list'] :
-                if not self.uninstallComponent(c, force) :
-                    dieNow()
-            del self.projConfig['Components'][cid]
-            # Write and report
-            if writeConfFile(self.projConfig) :
-                self.log.writeToLog('COMP-120')
-                return True
-
-
-    def uninstallComponent (self, cid, force = False) :
+    def uninstallComponent (self, cName, force = False) :
         '''This will remove a specific component from a project
         configuration. However, if force is set to True both the
         configuration entry and the physical files will be removed.
-        If the component is locked, the function will abort.'''
+        If the component is locked, the function will abort.
+        This does not return anything. We trust it worked.'''
 
         # First test for lock
-        if self.isLocked(cid) :
-            self.log.writeToLog('COMP-110', [cid])
+        if self.isLocked(cName) :
+            self.log.writeToLog('COMP-110', [cName])
             dieNow()
 
         # We will not bother if it is not in the config file.
         # Otherwise, delete both the config and physical files
         buildConfSection(self.projConfig, 'Components')
-        if isConfSection(self.projConfig['Components'], cid) :
-            del self.projConfig['Components'][cid]
+        if isConfSection(self.projConfig['Components'], cName) :
+            del self.projConfig['Components'][cName]
             # Sanity check
-            if not isConfSection(self.projConfig['Components'], cid) :
+            if not isConfSection(self.projConfig['Components'], cName) :
                 writeConfFile(self.projConfig)
-                self.log.writeToLog('COMP-030', [cid])
+                self.log.writeToLog('COMP-030', [cName])
             # Hopefully all went well with config delete, now on to the files
-            compFolder = os.path.join(self.local.projComponentsFolder, cid)
-            if os.path.isdir(compFolder) :
-                shutil.rmtree(compFolder)
-                self.log.writeToLog('COMP-031', [cid])
-            else :
-                self.log.writeToLog('COMP-032', [cid])
+            if force :
+                compFolder = os.path.join(self.local.projComponentsFolder, cName)
+                if os.path.isdir(compFolder) :
+                    shutil.rmtree(compFolder)
+                    self.log.writeToLog('COMP-031', [cName])
+                else :
+                    self.log.writeToLog('COMP-032', [cName])
 
-            self.log.writeToLog('COMP-033', [cid])
-        else :
-            self.log.writeToLog('COMP-035', [cid])
+                self.log.writeToLog('COMP-033', [cName])
+
+            self.log.writeToLog('COMP-035', [cName])
 
 
     def addComponentType (self, cType) :
@@ -542,36 +543,38 @@ class Project (object) :
             return False
 
 
-    def lockUnlock (self, cid, lock = True) :
-        '''Lock or unlock to enable or disable a cid. If the cid is a group
-        then all the components will be locked/unlocked in that group as well.'''
+    def lockUnlock (self, cName, lock = True, force = False) :
+        '''Lock or unlock to enable or disable actions to be taken on a component.'''
 
         # First be sure this is a valid component
-        if not self.isComponent(cid) :
-            self.log.writeToLog('LOCK-010', [cid])
+        if not self.isComponent(cName) :
+            self.log.writeToLog('LOCK-010', [cName])
             dieNow()
 
-        # Check if the component is locked
-        cList = False
-        # Lists are treated different we will lock or unlock all
-        # components in a list
-        if testForSetting(self.projConfig['Components'][cid], 'list') :
-            cList = True
-            for c in self.projConfig['Components'][cid]['list'] :
-                self.projConfig['Components'][c]['isLocked'] = lock
-        
-        else :
-            self.projConfig['Components'][cid]['isLocked'] = lock
-            
-        # Update the projConfig
-        writeConfFile(self.projConfig)
+        # If force is set, set locks on subcomponents
+        if force :
+            for cid in self.projConfig['Components'][cName]['cidList'] :
+                cidName = getUsfmCidInfo(cid)[0]
+                self.setLock(cidName, lock)
 
-        # Report back
-        if cList :
-            self.log.writeToLog('LOCK-020', [cid,str(lock)])
+        # Set lock on this specific component
+        if self.setLock(cName, lock) :
+            return True
+
+
+    def setLock (self, cName, lock) :
+        '''Set a lock to True or False.'''
+
+        if testForSetting(self.projConfig['Components'], cName) :
+            self.projConfig['Components'][cName]['isLocked'] = lock
+            # Update the projConfig
+            if writeConfFile(self.projConfig) :
+                # Report back
+                self.log.writeToLog('LOCK-020', [cName, str(lock)])
+                return True
         else :
-            self.log.writeToLog('LOCK-030', [cid,str(lock)])
-        return True
+            self.log.writeToLog('LOCK-030', [cName, str(lock)])
+            return False
 
 
 ###############################################################################
@@ -588,6 +591,33 @@ class Project (object) :
 
 # At some point both types of scripts may need to be combined for unified
 # management. But for now, they will stay seperate.
+
+    def runProcessScript (self, cName, script) :
+        '''Run a text processing script on a component (including subcomponents). This assumes
+        the component and the script are valid and the group lock is turned off. However, it
+        will look for a lock at the subcomponent level.'''
+
+        for cid in self.projConfig['Components'][cName]['cidList'] :
+            cidName = getUsfmCidInfo(cid)[0]
+            if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
+                cType = self.projConfig['Components'][cidName]['type']
+                target = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+                if os.path.isfile(script) :
+                    # subprocess will fail if permissions are not set on the
+                    # script we want to run. The correct permission should have
+                    # been set when we did the installation.
+                    err = subprocess.call([script, target])
+                    if err == 0 :
+                        self.log.writeToLog('PROC-010', [fName(target), fName(script)])
+                        return True
+                    else :
+                        self.log.writeToLog('PROC-020', [fName(target), fName(script), str(err)])
+                else :
+                    self.log.writeToLog('PROC-030', [fName(target), fName(script)])
+            else :
+                self.log.writeToLog('PROC-050', [cName, fName(script)])
+
+
 
     def runPreprocess (self, cType, cid = None) :
         '''Run a preprocess on a single component file or all the files
