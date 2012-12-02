@@ -220,6 +220,22 @@ def getUsfmCidInfo (cid) :
         return False
 
 
+def getUsfmCName (cid) :
+    '''Look up and return the actual name for a valid cid.'''
+
+    if hasUsfmCidInfo(cid) :
+        return getUsfmCidInfo(cid)[0]
+
+
+def getUsfmCid (cName) :
+    '''Find the cid by using the cName to look.'''
+
+    info = usfmCidInfo()
+    for k, v in info.iteritems() :
+        if info[k][0] == cName :
+            return k
+
+
 def usfmCidInfo () :
     '''Return a dictionary of all valid information about USFMs used in PT.'''
 

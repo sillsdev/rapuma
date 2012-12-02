@@ -45,7 +45,7 @@ class Usfm (Component) :
 
         # Set values for this manager
         self.project            = project
-        self.cid                = ''
+        self.cName              = ''
         self.cfg                = cfg
         self.cType              = 'usfm'
         self.Ctype              = self.cType.capitalize()
@@ -64,11 +64,6 @@ class Usfm (Component) :
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager(self.cType, mType)
-
-#        # Update default font if needed, usfm_Font manager will figure out which
-#        if not self.project.managers[self.cType + '_Font'].varifyFont() :
-#            font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
-#            self.project.managers[self.cType + '_Font'].installFont(font)
 
         # Check if there is a font installed
         self.project.createManager(self.cType, 'font')
@@ -98,44 +93,46 @@ class Usfm (Component) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
 
-        self.cid = self.cfg['name']
+
+        self.cidList = self.cfg['cidList']
 
 #        import pdb; pdb.set_trace()
 
-        def preProcessComponent (cid) :
-            '''This will prepare a component for rendering by checking for
-            and/or creating any subcomponents it needs to render properly.'''
-
-            # First see if this is a valid component. This is a little
-            # redundant as this is done in project.py as well. It should
-            # be caught there first but just in case we'll do it here too.
-            if not self.project.isComponent(cid) :
-                self.project.log.writeToLog('COMP-010', ['cid'])
-                return False
-
-            # See if the working text is present, quite if it is not
-#            if not self.project.managers['usfm_Text'].isUsfmWorkingText(cid) :
-#                return False
-
-            # Run any illustration processes needed
-            
-            # Run any hyphenation or word break routines
-
-            return True
-
-        # If this is a meta component, preprocess all subcomponents
+        # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
-        if testForSetting(self.cfg, 'list') :
-            for c in self.cfg['list'] :
-                if not preProcessComponent(c) :
-                    return False
-        else :
-            if not preProcessComponent(self.cid) :
+        for cid in self.cidList :
+            cName = getUsfmCName(cid)
+            if not self.preProcessComponent(cName) :
                 return False
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.cid, force)
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(force)
+#        self.project.managers['usfm_' + self.renderer.capitalize()].run(self.project.cName, force)
+
+        return True
+
+
+    def preProcessComponent (self, cName) :
+        '''This will prepare a component for rendering by checking for
+        and/or creating any subcomponents it needs to render properly.'''
+
+        # First see if this is a valid component. This is a little
+        # redundant as this is done in project.py as well. It should
+        # be caught there first but just in case we'll do it here too.
+        if not self.project.isComponent(cName) :
+            self.project.log.writeToLog('COMP-010', [cName])
+            return False
+
+        # See if the working text is present, quite if it is not
+#            if not self.project.managers['usfm_Text'].isUsfmWorkingText(cName) :
+#                return False
+
+        # Run any illustration processes needed
+
+        # Run any hyphenation or word break routines
+
+        # Any more stuff to run?
 
         return True
 

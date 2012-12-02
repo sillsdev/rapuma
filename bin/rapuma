@@ -428,7 +428,7 @@ def userArguments (args) :
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
         elif args['execute'] :
-            aProject.renderComponent(args['component_name'], args['force'])
+            aProject.renderComponent(args['component_type'], args['component_name'], args['force'])
         elif args['validate'] :
             aProject.createManager(args['component_type'], 'text')
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])

@@ -154,7 +154,7 @@ class Project (object) :
         buildConfSection(self.projConfig, 'Components')
         if testForSetting(self.projConfig['Components'], cName) :
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCidInfo(cid)[0]
+                cidName = getUsfmCName(cid)
                 cType = self.projConfig['Components'][cName]['type']
                 # For subcomponents look for working text
                 if self.hasCidFile(cidName, cid, cType) :
@@ -162,30 +162,6 @@ class Project (object) :
         else :
             return False
 
-
-#    def findBadComp (self, cid) :
-#        '''Much like isComponent() but it returns the first offending
-#        cid ID it finds.'''
-
-#        if self.isMetaComponent(cid) :
-#            for i in self.projConfig['Components'][cid]['list'] :
-#                if not hasUsfmCidInfo(i) :
-#                    return i
-#        else :
-#            if not hasUsfmCidInfo(cid) :
-#                return cid
-
-
-#    def isMetaComponent (self, cid) :
-#        '''Return True if this component has a list of component in it.'''
-
-#        try :
-#            if testForSetting(self.projConfig['Components'][cid], 'list') :
-#                return True
-#            else :
-#                return False
-#        except :
-#            return False
 
     def isComponentType (self, cType) :
         '''Simple test to see if a component type exsists. Return True if it is.'''
@@ -195,27 +171,42 @@ class Project (object) :
             return True
 
 
-    def renderComponent (self, cid, force = False) :
-        '''Render a single component. This will ensure there is a component
-        object, then render it. However, just because the object exsists
-        does not mean all the parts of the componet are in place. Rendering
-        could fail if something is missing.'''
+    def renderComponent (self, cType, cName, force = False) :
+        '''Render a component which includes any subcomponents. If a cid
+        is passed it will first try to find out the real component name,
+        then render that. A valid cType must be passed to it to work.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Check for cid in config
-        if self.isComponent(cid) :
-            self.createComponent(cid).render(force)
-            return True
+        # Initialize some vars
+        validCName = ''
+        testCid = ''
 
-        else :
-            bad = self.findBadComp(cid)
-            if bad :
-                if bad == cid :
-                    self.log.writeToLog('COMP-011', [cid])
+        # Render by types
+        if cType == 'usfm' :
+            # It may be that a valid ID was used and needs to be
+            # translated to a valid component name. Before giving up
+            # try to do that first. This would be for cases where a
+            # single (atomic) component is being rendered and the
+            # user only gave its cid. Do a look up to find the
+            # actual component name.
+            if self.isComponent(cName) :
+                validCName = cName
+            else :
+                cName = getUsfmCName(cName)
+                if self.isComponent(cName) :
+                    validCName = cName
                 else :
-                    self.log.writeToLog('COMP-012', [bad,cid])
-                return False
+                    # Well, we did try
+                    self.log.writeToLog('COMP-010', [cName])
+                    return False
+        else :
+            self.log.writeToLog('COMP-005', [self.cType])
+            return False
+
+        # If we made it this far, try rendering
+        if validCName :
+            self.createComponent(validCName).render(validCName)
             return True
 
 
@@ -226,24 +217,28 @@ class Project (object) :
         self.log.writeToLog('COMP-080')
 
 
-    def createComponent (self, cid) :
-        '''Create a component object that can be acted on.'''
+    def createComponent (self, cName) :
+        '''Create a component object that can be acted on. It is assumed
+        this only happens for one component per session. This component
+        may contain subcomponents that support this one.'''
 
         # If the object already exists just return it
-        if cid in self.components : return self.components[cid]
+        if cName in self.components : return self.components[cName]
 
 #        import pdb; pdb.set_trace()
 
         # Otherwise, create a new one and return it
-        if testForSetting(self.projConfig, 'Components', cid) :
-            cfg = self.projConfig['Components'][cid]
+        if testForSetting(self.projConfig, 'Components', cName) :
+            # Set the primary component name
+            self.cName = cName
+            cfg = self.projConfig['Components'][cName]
             cType = cfg['type']
             module = import_module('rapuma.component.' + cType)
             ManagerClass = getattr(module, cType.capitalize())
             compobj = ManagerClass(self, cfg)
-            self.components[cid] = compobj
+            self.components[cName] = compobj
         else :
-            self.log.writeToLog('COMP-040', [cid])
+            self.log.writeToLog('COMP-040', [cName])
             return False
 
         return compobj
@@ -323,7 +318,7 @@ class Project (object) :
         # Add subcomponents
         for cid in cidList :
             if not self.installComponent(cType, cid, source, force) :
-                if not self.isComponent(getUsfmCidInfo(cid)[0]) :
+                if not self.isComponent(getUsfmCName(cid)) :
                     dieNow()
 
         # If there was more than one subcomponent, this is a group
@@ -352,7 +347,7 @@ class Project (object) :
             # auto-create a name for this component that is taken from its valid
             # name in the component dictionary. We will also validate the ID too.
             if hasUsfmCidInfo(cid) :
-               cName = getUsfmCidInfo(cid)[0]
+                cName = getUsfmCName(cid)
             else :
                 self.log.writeToLog('COMP-010', [cid])
                 dieNow()
@@ -440,7 +435,7 @@ class Project (object) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCidInfo(cid)[0]
+                cidName = getUsfmCName(cid)
                 if self.isComponent(cidName) :
                     self.uninstallComponent(cidName, force)
         # Remove the target component
@@ -554,7 +549,7 @@ class Project (object) :
         # If force is set, set locks on subcomponents
         if force :
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCidInfo(cid)[0]
+                cidName = getUsfmCName(cid)
                 self.setLock(cidName, lock)
 
         # Set lock on this specific component
@@ -598,7 +593,7 @@ class Project (object) :
         will look for a lock at the subcomponent level.'''
 
         for cid in self.projConfig['Components'][cName]['cidList'] :
-            cidName = getUsfmCidInfo(cid)[0]
+            cidName = getUsfmCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
                 cType = self.projConfig['Components'][cidName]['type']
                 target = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
