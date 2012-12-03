@@ -45,6 +45,7 @@ class Project (object) :
         self.userConfig             = userConfig
         self.projConfig             = projConfig
         self.log                    = log
+        self.cName                  = ''
         self.components             = {}
         self.componentType          = {}
         self.managers               = {}
@@ -286,6 +287,11 @@ class Project (object) :
     def addComponent (self, cType, cName, source, cList, force = False) :
         '''This handels adding a component which can contain one or more sub-components.'''
 
+        # Check for cName setting
+        # FIXME: Something is wrong about doing this here
+        if not self.cName :
+            self.cName = cName
+
         # Make sure the source path is there for this component type
         if force :
             self.addCompTypeSourcePath(cType, source)
@@ -317,6 +323,10 @@ class Project (object) :
 
         # Add subcomponents
         for cid in cidList :
+            # If cName for the cid is the same as the main component cName
+            # we have to unlock it to avoid a problem in this step.
+            if getUsfmCName(cid) == cName :
+                self.projConfig['Components'][cName]['isLocked'] = False
             if not self.installComponent(cType, cid, source, force) :
                 if not self.isComponent(getUsfmCName(cid)) :
                     dieNow()
@@ -987,7 +997,7 @@ class Project (object) :
 ###############################################################################
 
 
-    def export (self, cType, cid, path = None, script = None, bundle = False, force = False) :
+    def export (self, cType, cName, path = None, script = None, bundle = False, force = False) :
         '''Facilitate the exporting of project text. It is assumed that the
         text is clean and ready to go and if any extraneous publishing info
         has been injected into the text, it will be removed by an appropreate
@@ -1013,19 +1023,20 @@ class Project (object) :
         # Will need the stylesheet for copy
         projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
         projSty = os.path.join(self.local.projStylesFolder, projSty)
-        if testForSetting(self.projConfig['Components'][cid], 'list') :
+        if testForSetting(self.projConfig['Components'][cName], 'cidList') :
             # Process as list of components
 
             self.log.writeToLog('XPRT-040')
-            for c in self.projConfig['Components'][cid]['list'] :
-                cName = formPTName(self.projConfig, c)
+            for cid in self.projConfig['Components'][cName]['cidList'] :
+                cidCName = getUsfmCName(cid)
+                ptName = formPTName(self.projConfig, cid)
                 # Test, no name = no success
-                if not cName :
+                if not ptName :
                     self.log.writeToLog('XPRT-010')
                     dieNow()
 
-                target = os.path.join(path, cName)
-                source = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
+                target = os.path.join(path, ptName)
+                source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
                 # If shutil.copy() spits anything back its bad news
                 if shutil.copy(source, target) :
                     self.log.writeToLog('XPRT-020', [fName(target)])
@@ -1033,14 +1044,15 @@ class Project (object) :
                     fList.append(target)
         else :
             # Process an individual component
-            cName = formPTName(self.projConfig, cid)
+            cid = getUsfmCid(cName)
+            ptName = formPTName(self.projConfig, cName)
             # Test, no name = no success
-            if not cName :
+            if not ptName :
                 self.log.writeToLog('XPRT-010')
                 dieNow()
 
-            target = os.path.join(path, cName)
-            source = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
+            target = os.path.join(path, ptName)
+            source = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
             # If shutil.copy() spits anything back its bad news
             if shutil.copy(source, target) :
                 self.log.writeToLog('XPRT-020', [fName(target)])
@@ -1049,12 +1061,12 @@ class Project (object) :
 
         # Start the main process here
         if bundle :
-            archFile = os.path.join(path, cid + '_' + ymd() + '.zip')
+            archFile = os.path.join(path, cName + '_' + ymd() + '.zip')
             # Hopefully, this is a one time operation but if force is not True,
             # we will expand the file name so nothing is lost.
             if not force :
                 if os.path.isfile(archFile) :
-                    archFile = os.path.join(path, cid + '_' + fullFileTimeStamp() + '.zip')
+                    archFile = os.path.join(path, cName + '_' + fullFileTimeStamp() + '.zip')
 
             myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
             for f in fList :

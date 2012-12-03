@@ -83,6 +83,7 @@ def mapPTTextSettings (sysSet, ptSet, force=False) :
     # A PT to Rapuma text mapping dictionary
     mapping   = {
                 'FileNameBookNameForm'      : 'nameFormID',
+                'FileNameForm'              : 'nameFormID',
                 'FileNamePrePart'           : 'prePart',
                 'FileNamePostPart'          : 'postPart',
                 'DefaultFont'               : 'ptDefaultFont'

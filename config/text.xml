@@ -13,9 +13,23 @@ Todo:
 
 <root>
     <setting>
+        <name>Validate Source Text</name>
+        <key>validateUsfm</key>
+        <description>Run a basic USFM validation check on the incoming source text.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
         <name>Working File Character Encoding</name>
         <key>workEncode</key>
-        <description>Character encoding for working files.</description>
+        <description>Character encoding for working files. The default encoding is utf8 (UTF-8).</description>
+        <type>string</type>
+        <value>utf8</value>
+    </setting>
+    <setting>
+        <name>Source File Character Encoding</name>
+        <key>sourceEncode</key>
+        <description>Character encoding for source files. Change this to the correct encoding of the source files if encoding conversion is needed. Internal default file encoding is UTF-8 for all working text.</description>
         <type>string</type>
         <value>utf8</value>
     </setting>

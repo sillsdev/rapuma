@@ -45,6 +45,8 @@ class Xetex (Manager) :
         self.project                = project
         self.local                  = project.local
         self.projConfig             = project.projConfig
+        self.layoutConfFile         = self.local.layoutConfFile
+        self.fontConfFile           = self.local.fontConfFile
         self.managers               = project.managers
         self.cfg                    = cfg
         self.cType                  = cType
@@ -121,16 +123,84 @@ class Xetex (Manager) :
 ############################ Manager Level Functions ##########################
 ###############################################################################
 
+    def texFileHeader (self, fName) :
+        '''Create a generic file header for a non-editable .tex file.'''
+
+        return '% ' + fName + ' created: ' + tStamp() + '\n' \
+            + '% This file is auto-generated, do not bother editing it\n\n'
+
+
+    def copyInMargVerse (self) :
+        '''Copy in the marginalverse macro package.'''
+
+        macrosTarget    = os.path.join(self.local.projMacrosFolder, self.macroPackage)
+        macrosSource    = os.path.join(self.local.rapumaMacrosFolder, self.macroPackage)
+
+        # Copy in to the process folder the macro package for this component
+        if not os.path.isdir(macrosTarget) :
+            os.makedirs(macrosTarget)
+
+        if not os.path.isfile(self.ptxMargVerseFile) :
+            shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            self.project.log.writeToLog('XTEX-070', [fName(self.ptxMargVerseFile)])
+            return True
+
+
+    def removeMargVerse (self) :
+        '''Remove the marginal verse macro package from the project.'''
+
+        if os.path.isfile(self.ptxMargVerseFile) :
+            os.remove(self.ptxMargVerseFile)
+            return True
+
 
 ###############################################################################
 ############################# DEPENDENCY FUNCTIONS ############################
 ###############################################################################
 
-    def makeDepMacLink (self, thisFile) :
+    def makeDepMacLink (self, macLink) :
         '''Check for the exsistance of or the age of the macLink dependent file.
         Create or refresh if needed. If there are any problems, report and die.'''
 
-        return True
+        # Set some file names
+        if self.macroPackage == 'usfmTex' :
+            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+        elif self.macroPackage == 'usfmTex-auto' :
+            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+        else :
+            self.project.log.writeToLog('XTEX-115', [self.macroPackage])
+
+        # Check to see if our macros are there
+        if not os.path.isdir(self.projMacPackFolder) :
+            self.copyInMacros(self.cType)
+
+        def writeLinkFile () :
+            writeObject = codecs.open(macLink, "w", encoding='utf_8')
+            writeObject.write(self.texFileHeader(fName(macLink)))
+            writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
+
+            # If we are using marginal verses then we will need this
+            if str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses']) :
+                self.copyInMargVerse()
+                writeObject.write('\\input ' + quotePath(self.ptxMargVerseFile) + '\n')
+            else :
+                self.removeMargVerse()
+
+            writeObject.close()
+
+        # Check for existance and age. List any files in this next list that
+        # could require the rebuilding of the link file
+        dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.project.local.projConfFile]
+        if not os.path.isfile(macLink) :
+            writeLinkFile()
+            self.project.log.writeToLog('XTEX-065', [fName(macLink)])
+            return True
+        else :
+            for f in dep :
+                if isOlder(macLink, f) :
+                    writeLinkFile()
+                    self.project.log.writeToLog('XTEX-060', [fName(f),fName(macLink)])
+                    return True
 
 
     def makeDepSetFile (self, thisFile) :
@@ -175,8 +245,6 @@ class Xetex (Manager) :
             hyphenTexFile      = os.path.join(self.local.projHyphenationFolder, self.projConfig['Managers']['usfm_Hyphenation']['hyphenTexFile'])
         else :
             hyphenTexFile      = ''
-        layoutConfFile         = self.local.layoutConfFile
-        fontConfFile           = self.local.fontConfFile
         setFileName            = 'xetex_settings_' + self.cType + '.tex'
         extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         setFile                = os.path.join(self.projMacrosFolder, macPack, setFileName)
@@ -197,20 +265,15 @@ class Xetex (Manager) :
             cidFolder = os.path.join(self.projComponentsFolder, cidCName)
             cidTex = os.path.join(cidFolder, cid + '.tex')
             cidUsfm = os.path.join(cidFolder, cid + '.usfm')
-            # User sty and macro extentions are optional at the cid level
-            cidSty = ''
-            if os.path.isfile(os.path.join(cidFolder, cid + '.sty')) :
-                cidSty = os.path.join(cidFolder, cid + '.sty')
-            cidExt = ''
-            if os.path.isfile(os.path.join(cidFolder, cid + '-ext.tex')) :
-                cidExt = os.path.join(cidFolder, cid + '-ext.tex')
             # Write out the cidTex file
             with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
-                cidTexObject.write('% ' + fName(cidTex) + ' is auto-generated. Do not bother editing it.\n\n')
-                if cidExt :
-                    cNameTexObject.write('\\stylesheet{' + cidExt + '}\n')
-                if cidSty :
-                    cNameTexObject.write('\\stylesheet{' + cidSty + '}\n')
+                cidTexObject.write(self.texFileHeader(fName(cidTex)))
+                # User sty and macro extentions are optional at the cid level
+                if os.path.isfile(os.path.join(cidFolder, cid + '-ext.tex')) :
+                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '-ext.tex') + '}\n')
+                if os.path.isfile(os.path.join(cidFolder, cid + '.sty')) :
+                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '.sty') + '}\n')
+                # The cid is not optional!
                 if self.makeDepCidUsfm(cidUsfm) :
                     cidTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
 
@@ -220,7 +283,7 @@ class Xetex (Manager) :
         # Start writing out the cName.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(cNameTex, "w", encoding='utf_8') as cNameTexObject :
-            cNameTexObject.write('% ' + fName(cNameTex) + ' is auto-generated. Do not bother editing it.\n\n')
+            cNameTexObject.write(self.texFileHeader(fName(cNameTex)))
             if self.makeDepMacLink(macLink) :
                 cNameTexObject.write('\\input \"' + macLink + '\"\n')
             if self.makeDepSetFile(setFile) :

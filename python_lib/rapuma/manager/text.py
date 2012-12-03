@@ -150,6 +150,7 @@ class Text (Manager) :
 
             self.project.managers[self.cType + '_Font'].installFont(font)
 
+
         # Build the file name
         thisFile = ''
         if self.sourceEditor.lower() == 'paratext' :
@@ -239,35 +240,34 @@ class Text (Manager) :
             return True
 
 
-
     def usfmCopy (self, source, target, projSty = None) :
-        '''Use the Palaso USFM parser to bring in the text and clean it up if 
-        needed. If projSty (path + file name) is not used, the sfm parser
-        will use a default style file to drive the process which may lead to
-        undesirable results. A style file should normally be used to avoid this.
-        
-        The sfm.pprint() is not being used at this point because of a bug that
-        takes out \ft markers in footnotes. When this is fix, we might use this
-        function again. For now, we will just use the sfm parser to validate the
-        text that is being copied into a project.'''
+        '''Copy USFM text from source to target. Decode if necessary, then
+        normalize. With the text in place, validate unless that is False.'''
 
-        # For future reference, the sfm parser will fail if TeX style
-        # comment markers "%" are used to comment text rather than "#".
+        # Bring in our source text
+        if self.sourceEncode == self.workEncode :
+            contents = codecs.open(source, 'rt', 'utf_8_sig')
+            lines = contents.read()
+        else :
+            # Lets try to change the encoding.
+            lines = self.decodeText(source)
 
-        # Validate the text first thing
-        if not self.usfmTextFileIsValid(source, projSty) :
-            self.project.log.writeToLog('TEXT-155', [source])
-            return False
-
-        # We may want to expand the validation and cleaning of incoming
-        # text but for now, we will just open the target and normalize it.
-        contents = codecs.open(source, 'rt', 'utf_8_sig')
-        lines = contents.read()
+        # Normalize the text
         normal = unicodedata.normalize(self.unicodeNormalForm, lines)
         self.project.log.writeToLog('TEXT-100', [self.unicodeNormalForm])
+
+        # Write out the text to the target
         writeout = codecs.open(target, "wt", "utf_8_sig")
         writeout.write(normal)
         writeout.close
+
+        # Validate the target USFM text (Defalt is True)
+        if str2bool(self.validateUsfm) :
+            if not self.usfmTextFileIsValid(target, projSty) :
+                self.project.log.writeToLog('TEXT-155', [source,fName(target)])
+                return False
+        else :
+            self.project.log.writeToLog('TEXT-157', [fName(target)])
 
         return True
 
@@ -286,6 +286,25 @@ class Text (Manager) :
             dieNow()
 
 
+    def decodeText (self, fileName) :
+        '''In case an encoding conversion is needed. This function will try
+        to do that and if it fails, it should return a meaningful error msg.'''
+
+        # First, test so see if we can even read the file
+        try:
+            fileObj = open(fileName, 'r').read()
+        except Exception as e :
+            terminal('decodeText() failed with the following error: ' + str(e))
+            dieNow()
+        # Now try to run the decode() function
+        try:
+            return fileObj.decode(self.sourceEncode)
+
+        except Exception:
+            terminal('decodeText() could not decode: [' + fileName + ']\n')
+            dieNow()
+
+
     def usfmTextFileIsValid (self, source, projSty) :
         '''Use the USFM parser to validate a style file. For now,
         if a file fails, we'll just quite right away, otherwise,
@@ -298,6 +317,8 @@ class Text (Manager) :
         # Content         =  1    Stop on mal-formed content
         # Structure       =  2    Stop on ???
         # Unrecoverable   =  100  Stop on most anything that is wrong
+        # For future reference, the sfm parser will fail if TeX style
+        # comment markers "%" are used to comment text rather than "#".
 
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
@@ -316,7 +337,7 @@ class Text (Manager) :
             # If the text is not good, I think we should die here an now.
             # We may want to rethink this later but for now, it feels right.
             self.project.log.writeToLog('TEXT-090', [source,str(e)])
-            dieNow()
+            return False
 
 
 

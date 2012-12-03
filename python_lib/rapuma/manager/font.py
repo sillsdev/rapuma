@@ -135,7 +135,7 @@ class Font (Manager) :
         elif os.path.isfile(rapumaSource) :
             source = rapumaSource
         else :
-            self.project.log.writeToLog('FONT-120', [source])
+            self.project.log.writeToLog('FONT-120', [font + '.zip'])
             dieNow()
 
         if not os.path.isfile(source) :

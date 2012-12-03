@@ -108,7 +108,7 @@ class ProjLog (object) :
             'XTEX-100' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             'XTEX-105' : ['ERR', 'PDF viewer failed with error code number: <<1>>'],
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
-            'XTEX-115' : ['MSG', 'XTEX-115 - Unassigned error message ID.'],
+            'XTEX-115' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
             'XTEX-120' : ['MSG', 'XTEX-120 - Unassigned error message ID.'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
@@ -127,7 +127,8 @@ class ProjLog (object) :
             'TEXT-090' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             'TEXT-100' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form..'],
             'TEXT-150' : ['MSG', 'USFM file: [<<1>>] is valid.'],
-            'TEXT-155' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test.'],
+            'TEXT-155' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
+            'TEXT-157' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
             'TEXT-160' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
 
             'FONT-000' : ['MSG', 'Font module messages'],
@@ -157,7 +158,7 @@ class ProjLog (object) :
             'FONT-090' : ['WRN', 'No replacement for primary font found.  - font.removeFont()'],
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
             'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
-            'FONT-120' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.copyInFont())'],
+            'FONT-120' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
             'FONT-130' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
