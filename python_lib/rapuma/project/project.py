@@ -204,10 +204,13 @@ class Project (object) :
         else :
             self.log.writeToLog('COMP-005', [self.cType])
             return False
+        
+        # Reset the session cName
+        self.cName = validCName
 
         # If we made it this far, try rendering
         if validCName :
-            self.createComponent(validCName).render(validCName)
+            self.createComponent(validCName).render(force)
             return True
 
 
