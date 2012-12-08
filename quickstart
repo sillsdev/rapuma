@@ -23,4 +23,8 @@ No doubt you will notice that not much happened in the terminal. This is because
 
 This time you will see more activity on the screen. However, unless you actually edited the file or made a change to one of the format settings, the PDF will be identical to the first one.
 
+The third example is much like the MBJAS example, except with this one, multiple components are processed. Like before, use a command like this to run the example.
+
+    rapuma example KJV
+
 This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.
