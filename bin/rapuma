@@ -238,13 +238,13 @@ def runExamplePubDemoProject (demoID) :
 ########################## Archive Project Functions ##########################
 ###############################################################################
 
-def archiveProject (pid, path = None) :
+def archiveProject (aid, path = None) :
     '''Archive a project. Send the compressed archive file to the user-specified
     archive folder. If none is specified, put the archive in cwd. If a valid
     path is specified, send it to that location.'''
 
     # Make a private project object just for archiving
-    aProject = initProject(pid)
+    aProject = initProject(aid)
     # Set some paths and file names
     archName = aProject.projectIDCode + '.rapuma'
     userArchives = uc.userConfig['Resources']['archives']
@@ -287,43 +287,64 @@ def archiveProject (pid, path = None) :
     os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
 
     # Remove references from user rapuma.conf
-    if uc.unregisterProject(pid) :
-        terminal('Removed [' + pid + '] from user configuration.')
+    if uc.unregisterProject(aid) :
+        terminal('Removed [' + aid + '] from user configuration.')
     else :
-        terminal('Error: Failed to remove [' + pid + '] from user configuration.')
+        terminal('Error: Failed to remove [' + aid + '] from user configuration.')
 
     # Finish here
-    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
+    terminal('Archive for [' + aid + '] created and saved to: ' + archTarget)
 
 
-def restoreArchive (pid, path = None) :
+def restoreArchive (aid, path = None) :
     '''Restore a project from the user specified archive storage area. If that
-    is not set, it will look for the archive (pid.zip) in cwd. Use path to
+    is not set, it will look for the archive (aid.zip) in cwd. Use path to
     specify where the project will be restored. Rapuma will register the project
     there. Otherwise, it will restore to cwd and register it there.'''
 
-    archName = pid + '.rapuma'
-    userArchives = uc.userConfig['Resources']['archives']
+    # Check to see if the user included the extention
+    try :
+        aid.split('.')[1] == 'rapuma'
+        archName = aid
+    except :
+        archName = aid + '.rapuma'
+
     archSource = ''
     archTarget = ''
+    userArchives = ''
+
+    # First look for the archive that is to be restored
+    # If that can't be found we need to end here
+    # We will look in the user archives first, if not
+    # found or that isn't set, then cwd. Fail if not in
+    # either of those places.
+    try :
+        if os.path.isdir(uc.userConfig['Resources']['archives']) :
+            userArchives = uc.userConfig['Resources']['archives']
+            archUser = os.path.join(userArchives, archName)
+            archCwd = os.path.join(projHome, archName)
+            if os.path.isfile(archUser) :
+                archSource = archUser
+            elif os.path.isfile(os.path.join(archCwd)) :
+                archSource = archCwd
+    except :
+        terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
+        dieNow()
+
+    # Now set the target params
     if path :
         path = resolvePath(path)
         if not os.path.isdir(path) :
             terminal('\nError: The path given is not valid: [' + path + ']\n')
             dieNow()
         else :
-            archTarget = os.path.join(path, pid)
+            archTarget = os.path.join(path, aid)
     else :
-        archTarget = os.path.join(projHome, pid)
+        archTarget = os.path.join(projHome, aid)
 
-    archSource = os.path.join(userArchives, archName)
-    if not os.path.isfile(archSource) :
-        terminal('\nError: Not a valid path or ID: [' + archSource + ']\n')
-        dieNow()
-
-    if archSource :
-        with zipfile.ZipFile(archSource, 'r') as myzip :
-            myzip.extractall(archTarget)
+    # If we made it this far, extract the archive
+    with zipfile.ZipFile(archSource, 'r') as myzip :
+        myzip.extractall(archTarget)
 
     # Add project to local Rapuma project registry
     # To do this we need to open up the restored project config file
@@ -335,7 +356,7 @@ def restoreArchive (pid, path = None) :
     uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
     # Finish here
-    terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
+    terminal('\nRapuma archive [' + aid + '] has been restored to: ' + archTarget + '\n')
 
 
 ###############################################################################

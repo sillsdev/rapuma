@@ -58,10 +58,6 @@ class Xetex (Manager) :
         if 'usfm_Font' not in self.managers :
             self.project.createManager(self.cType, 'font')
         self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
-        # Booleans
-        self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
-        self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         # Config Settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
@@ -87,19 +83,6 @@ class Xetex (Manager) :
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        # Files with full path
-        self.macLink                = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFile)
-        self.setFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.setFileName)
-        self.extFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.extFileName)
-        self.globSty                = os.path.join(self.projStylesFolder, self.mainStyleFile)
-        if os.path.isfile(os.path.join(self.projStylesFolder, self.customStyleFile)) :
-            self.custSty            = os.path.join(self.projStylesFolder, self.customStyleFile)
-        else :
-            self.custSty            = ''
-        if self.useHyphenation :
-            self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenTexFile)
-        else :
-            self.hyphenTex          = ''
         # Init some Dicts
         self.ptSSFConf              = {}
 
@@ -131,8 +114,8 @@ class Xetex (Manager) :
             layoutCopy.merge(macVals)
             self.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
             self.layoutConfig = layoutCopy
-#            if writeConfFile(self.managers[self.cType + '_Layout'].layoutConfig) :
-#                self.project.log.writeToLog('XTEX-020')
+            if writeConfFile(self.managers[self.cType + '_Layout'].layoutConfig) :
+                self.project.log.writeToLog('XTEX-020')
 
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
@@ -142,6 +125,25 @@ class Xetex (Manager) :
             else :
                 setattr(self, k, v)
         
+        # Set some Booleans (this comes after persistant values are set)
+        self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
+        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
+
+        # Set file names with full path (this after booleans are set)
+        self.macLink                = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFile)
+        self.setFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.setFileName)
+        self.extFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.extFileName)
+        self.globSty                = os.path.join(self.projStylesFolder, self.mainStyleFile)
+        if os.path.isfile(os.path.join(self.projStylesFolder, self.customStyleFile)) :
+            self.custSty            = os.path.join(self.projStylesFolder, self.customStyleFile)
+        else :
+            self.custSty            = ''
+        if self.useHyphenation :
+            self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenTexFile)
+        else :
+            self.hyphenTex          = ''
+
         # Make any dependent folders if needed
         if not os.path.isdir(self.cNameFolder) :
             os.mkdir(self.cNameFolder)
@@ -591,8 +593,8 @@ class Xetex (Manager) :
         # This is the file we will make. If force is set, delete the old one.
         cNamePdf = os.path.join(self.cNameFolder, self.cName + '.pdf')
         if force :
-            os.remove(cNamePdf)
-
+            if os.path.isfile(cNamePdf) :
+                os.remove(cNamePdf)
 
         # Create the cid.tex file(s) that the cName.tex will use to get at the source
         # We will create this first so if something goes wrong we die sooner than later
@@ -656,12 +658,20 @@ class Xetex (Manager) :
                     break
 
 
+
+
+
         # FIXME: Need to have dependencies for dependent subcomponents and their dependencies too
         # Things like .adj and .piclist need to be in the dep list
         # Create a dependency list
         dep = [cNameTex]
         for d in dep :
-            print force
+
+
+
+
+
+
             if isOlder(cNamePdf, d) or not os.path.isfile(cNamePdf) :
 
                 # Create the environment that XeTeX will use. This will be temporarily set
