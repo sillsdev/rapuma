@@ -78,7 +78,6 @@ class Xetex (Manager) :
         self.layoutConfFile         = self.local.layoutConfFile
         self.fontConfFile           = self.local.fontConfFile
         self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
-#        self.macPackFile            = os.path.join(self.projMacPackFolder, self.macroPackage + '.tex')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
@@ -572,8 +571,8 @@ class Xetex (Manager) :
 
 
     def checkDepCidUsfm (self, cidUsfm) :
-        '''Check for the exsistance of or the age of the cidUsfm dependent file.
-        Create or refresh if needed. If there are any problems, report and die.'''
+        '''Check for the exsistance of the cidUsfm dependent file. Return
+        True if it is there or report and die if it is not.'''
 
         if not os.path.isfile(cidUsfm) :
             self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
@@ -657,21 +656,21 @@ class Xetex (Manager) :
                     # we only need to do this once
                     break
 
-
-
-
-
-        # FIXME: Need to have dependencies for dependent subcomponents and their dependencies too
-        # Things like .adj and .piclist need to be in the dep list
         # Create a dependency list
         dep = [cNameTex]
+        for cid in self.projConfig['Components'][self.cName]['cidList'] :
+            cidCName = getUsfmCName(cid)
+            cType = self.projConfig['Components'][self.cName]['type']
+            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
+            cidAdj = self.managers[cType + '_Text'].getCompWorkingTextAdjPath(cid)
+            cidIlls = self.managers[cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+            dep.append(cidUsfm)
+            if os.path.isfile(cidAdj) :
+                dep.append(cidAdj)
+            if os.path.isfile(cidIlls) :
+                dep.append(cidIlls)
+
         for d in dep :
-
-
-
-
-
-
             if isOlder(cNamePdf, d) or not os.path.isfile(cNamePdf) :
 
                 # Create the environment that XeTeX will use. This will be temporarily set

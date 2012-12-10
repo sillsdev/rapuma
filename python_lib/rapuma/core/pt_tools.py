@@ -172,10 +172,11 @@ def getPTSettings (sourcePath) :
     '''Return the data into a dictionary for the system to use.'''
 
     # Return the dictionary
-    ssfFile = findSsfFile(sourcePath)
-    if ssfFile :
-        if os.path.isfile(ssfFile) :
-            return xmlFileToDict(ssfFile)
+    if os.path.isdir(sourcePath) :
+        ssfFile = findSsfFile(sourcePath)
+        if ssfFile :
+            if os.path.isfile(ssfFile) :
+                return xmlFileToDict(ssfFile)
 
 
 def getSourceEditor (projConfig, sourcePath, cType) :

@@ -149,19 +149,27 @@ class Project (object) :
         return os.path.isfile(os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType))
 
 
-    def isComponent (self, cName) :
-        '''A two-part test to see if a component has a config entry and a file.'''
-
+    def hasCNameEntry (self, cName) :
+        '''Check for a config component entry.'''
         buildConfSection(self.projConfig, 'Components')
         if testForSetting(self.projConfig['Components'], cName) :
+            return True
+
+
+    def isCompleteComponent (self, cName) :
+        '''A two-part test to see if a component has a config entry and a file.'''
+
+        if self.hasCNameEntry(cName) :
             for cid in self.projConfig['Components'][cName]['cidList'] :
                 cidName = getUsfmCName(cid)
                 cType = self.projConfig['Components'][cName]['type']
                 # For subcomponents look for working text
-                if self.hasCidFile(cidName, cid, cType) :
-                    return True
+                if not self.hasCidFile(cidName, cid, cType) :
+                    return False
         else :
             return False
+
+        return True
 
 
     def isComponentType (self, cType) :
@@ -191,11 +199,11 @@ class Project (object) :
             # single (atomic) component is being rendered and the
             # user only gave its cid. Do a look up to find the
             # actual component name.
-            if self.isComponent(cName) :
+            if self.isCompleteComponent(cName) :
                 validCName = cName
             else :
                 cName = getUsfmCName(cName)
-                if self.isComponent(cName) :
+                if self.hasCNameEntry(cName) :
                     validCName = cName
                 else :
                     # Well, we did try
@@ -1278,4 +1286,48 @@ class Project (object) :
             dieNow()
 
 
+# FIXME: Still lots to do on this next function
+
+    def edit (self, comp = None, glob = False, sys = False) :
+        '''Call editing application to edit various project and system files.'''
+
+        editDocs = ['gedit']
+        cid = ''
+        cName = ''
+        if hasUsfmCidInfo(comp) :
+            cName = getUsfmCName(comp)
+            cid = comp
+        else :
+            cName = comp
+            cid = getUsfmCid(comp)
+            
+        cType = self.projConfig['Components'][cName]['type']
+
+        # If a subcomponent is called, pull it up and its dependencies
+        # This will not work with components that have more than one
+        # subcomponent.
+        if comp :
+            self.createManager(cType, 'text')
+            compWorkText = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
+            if os.path.isfile(compWorkText) :
+                editDocs.append(compWorkText)
+                compTextAdj = self.managers[cType + '_Text'].getCompWorkingTextAdjPath(cid)
+                compTextIlls = self.managers[cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+                dep = [compTextAdj, compTextIlls]
+                for d in dep :
+                    if os.path.isfile(d) :
+                        editDocs.append(d)
+            else :
+                print 'error', compWorkText
+
+        # Pull up our docs in the editor
+        if len(editDocs) > 1 :
+            subprocess.call(editDocs)
+        else :
+            print 'error: no docs found'
+            
+            
+            
+        
+        
 

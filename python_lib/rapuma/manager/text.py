@@ -71,6 +71,34 @@ class Text (Manager) :
 ############################ Project Level Functions ##########################
 ###############################################################################
 
+
+    def getCompWorkingTextPath (self, cid) :
+        '''Return the full path of the cName working text file. This assumes
+        the cName is valid.'''
+
+        cName = getUsfmCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
+
+
+    def getCompWorkingTextAdjPath (self, cid) :
+        '''Return the full path of the cName working text adjustments file. 
+        This assumes the cName is valid.'''
+
+        cName = getUsfmCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType + '.adj')
+
+
+    def getCompWorkingTextPiclistPath (self, cid) :
+        '''Return the full path of the cName working text illustrations file. 
+        This assumes the cName is valid.'''
+
+        cName = getUsfmCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType + '.piclist')
+
+
     def setSourceEditor (self, editor) :
         '''Set the source editor for the cType. It assumes the editor is valid.
         This cannot fail.'''
@@ -185,7 +213,7 @@ class Text (Manager) :
         # Note the file name for the preprocess is hard coded. This will become a part
         # of the total system and this file will be copied in when the user requests to
         # preprocessing.
-        
+
         # Current assuption is that source text is located in a directory above the
         # that is the default. In case that is not the case, we can override that and
         # specify a path to the source. If that exists, then we will use that instead.
@@ -205,10 +233,14 @@ class Text (Manager) :
         # indicate the source has been updated so unless the folder is locked
         # we will want to update the target.
 
-        # Look for the source now
+        # Look for the source now, if not found, fallback on the targetSource
+        # backup file. But if that isn't there die.
         if not os.path.isfile(source) :
-            self.project.log.writeToLog('TEXT-035', [source])
-            dieNow()
+            if os.path.isfile(targetSource) :
+                source = targetSource
+            else :
+                self.project.log.writeToLog('TEXT-035', [source])
+                dieNow()
 
         # Make target folder if needed
         if not os.path.isdir(targetFolder) :
@@ -218,12 +250,15 @@ class Text (Manager) :
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
                 if self.usfmCopy(source, target, projSty) :
-                    # Always save an untouched copy of the source and set to read only
+                    # Always save an untouched copy of the source and set to
+                    # read only. We may need this to restore/reset later.
                     if os.path.isfile(targetSource) :
-                        # Reset permissions to overwrite
-                        makeWriteable(targetSource)
-                        shutil.copy(source, targetSource)
-                        makeReadOnly(targetSource)
+                        # Don't bother if we copied from it in the first place
+                        if targetSource != source :
+                            # Reset permissions to overwrite
+                            makeWriteable(targetSource)
+                            shutil.copy(source, targetSource)
+                            makeReadOnly(targetSource)
                     else :
                         shutil.copy(source, targetSource)
                         makeReadOnly(targetSource)
