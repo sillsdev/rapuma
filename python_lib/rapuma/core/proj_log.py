@@ -84,6 +84,7 @@ class ProjLog (object) :
             'COMP-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             'COMP-140' : ['ERR', 'Failed to remove old component for [<<1>>] on force install.'],
             'COMP-150' : ['ERR', 'Component [<<1>>] not found. Cannot remove.'],
+            'COMP-160' : ['ERR', 'Component source path given [<<1>>] not found. Process halted!'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -275,6 +276,12 @@ class ProjLog (object) :
             'EXMP-010' : ['MSG', 'Finished running basic project example.'],
             'EXMP-030' : ['MSG', 'Finished running custom project example.'],
             'EXMP-020' : ['MSG', 'Unassigned error message ID.'],
+
+            'EDIT-000' : ['MSG', 'Messages for editing project and setting files.'],
+            'EDIT-005' : ['MSG', 'Unassigned error message ID.'],
+            'EDIT-010' : ['ERR', 'The component [<<1>>] has multiple subcomponents and cannot be opened for editing. Please work with the individual subcomponents.'],
+            'EDIT-020' : ['ERR', 'Working text file [<<1>>] not found.'],
+            'EDIT-030' : ['ERR', 'No files found to edit with the commands supplied.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

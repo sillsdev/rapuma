@@ -140,23 +140,23 @@ class Usfm (Component) :
         return True
 
 
-    def addDependents (self, cName) :
+    def addDependents (self, cid) :
         '''Add dependent files for a working text, like .adj file for example.
         However, do not overwrite existing files.'''
-    
-            # Check for a .adj file
-        adjFile = self.project.managers['usfm_Text'].getCompWorkingTextAdjPath(cName)
+
+        # Check for a .adj file
+        adjFile = self.project.managers['usfm_Text'].getCompWorkingTextAdjPath(cid)
         if not os.path.isfile(adjFile) :
             with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write('% Text adjustments file for: ' + cName + '\n\n')
-                writeObject.write('%MAT 1.1 +1 \n')
+                writeObject.write('% Text adjustments file for: ' + cid + '\n\n')
+                writeObject.write('%' + cid.upper() + ' 1.1 +1 \n')
         # Check for a .piclist file
         if str2bool(self.project.projConfig['Managers']['usfm_Illustration']['useIllustrations']) == True :
-            piclistFile = self.project.managers['usfm_Text'].getCompWorkingTextPiclistPath(cName)
+            piclistFile = self.project.managers['usfm_Text'].getCompWorkingTextPiclistPath(cid)
             if not os.path.isfile(piclistFile) :
                 with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write('% Illustration placement file for: ' + cName + '\n\n')
-                    writeObject.write('% MAT 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
+                    writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
+                    writeObject.write('%' + cid.upper() + ' 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
 
         return True
 

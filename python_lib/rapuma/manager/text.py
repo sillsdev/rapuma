@@ -87,7 +87,7 @@ class Text (Manager) :
 
         cName = getUsfmCName(cid)
         cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType + '.adj')
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
 
 
     def getCompWorkingTextPiclistPath (self, cid) :
@@ -96,7 +96,7 @@ class Text (Manager) :
 
         cName = getUsfmCName(cid)
         cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType + '.piclist')
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
 
 
     def setSourceEditor (self, editor) :

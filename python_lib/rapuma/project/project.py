@@ -303,20 +303,37 @@ class Project (object) :
         if not self.cName :
             self.cName = cName
 
-        # Make sure the source path is there for this component type
-        if force :
-            self.addCompTypeSourcePath(cType, source)
-        else :
-            if not self.hasSourcePath(cType) :
-                self.addCompTypeSourcePath(cType, source)
-            else :
-                # FIXME: This dose not address the problem of if an archive or backup
-                # from another machine is being worked with. The source path, which is
-                # hard-coded will undoubtly be wrong. That needs to be dealt with at some pont.
-                if not self.sourceIsSame(cType, source) :
-                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-                    self.log.writeToLog('COMP-090', [cType,current,source])
+        # Record source path is not done already
+        if not self.hasSourcePath(cType) :
+            if source :
+                cleanPath = resolvePath(source)
+                if os.path.isdir(cleanPath) :
+                    self.addCompTypeSourcePath(cType, cleanPath)
+                    source = cleanPath
+                else :
+                    self.log.writeToLog('COMP-160', [source])
                     dieNow()
+
+        # Adjust the path if the process is forced
+        if force :
+            if not self.sourceIsSame(cType, source) :
+                self.addCompTypeSourcePath(cType, source)
+
+
+
+
+#        else :
+#            if not self.hasSourcePath(cType) :
+#                self.addCompTypeSourcePath(cType, source)
+#            else :
+#                # FIXME: This dose not address the problem of if an archive or backup
+#                # from another machine is being worked with. The source path, which is
+#                # hard-coded will undoubtly be wrong. That needs to be dealt with at some pont.
+#                if not self.sourceIsSame(cType, source) :
+#                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+#                    print cType, current, source
+#                    self.log.writeToLog('COMP-090', [cType,current,source])
+#                    dieNow()
 
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
@@ -339,7 +356,7 @@ class Project (object) :
             if getUsfmCName(cid) == cName :
                 self.projConfig['Components'][cName]['isLocked'] = False
             if not self.installComponent(cType, cid, source, force) :
-                if not self.isComponent(getUsfmCName(cid)) :
+                if not self.isCompleteComponent(getUsfmCName(cid)) :
                     dieNow()
 
         # If there was more than one subcomponent, this is a group
@@ -452,17 +469,17 @@ class Project (object) :
             dieNow()
 
         # Remove subcomponents from the target if there are any
-        if self.isComponent(cName) :
+        if self.isCompleteComponent(cName) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
             for cid in self.projConfig['Components'][cName]['cidList'] :
                 cidName = getUsfmCName(cid)
-                if self.isComponent(cidName) :
+                if self.isCompleteComponent(cidName) :
                     self.uninstallComponent(cidName, force)
         # Remove the target component
         self.uninstallComponent(cName, force)
         # Test for success
-        if not self.isComponent(cName) :
+        if not self.isCompleteComponent(cName) :
             self.log.writeToLog('COMP-120', [cName])
             return True
             
@@ -563,7 +580,7 @@ class Project (object) :
         '''Lock or unlock to enable or disable actions to be taken on a component.'''
 
         # First be sure this is a valid component
-        if not self.isComponent(cName) :
+        if not self.isCompleteComponent(cName) :
             self.log.writeToLog('LOCK-010', [cName])
             dieNow()
 
@@ -1292,21 +1309,25 @@ class Project (object) :
         '''Call editing application to edit various project and system files.'''
 
         editDocs = ['gedit']
-        cid = ''
-        cName = ''
-        if hasUsfmCidInfo(comp) :
-            cName = getUsfmCName(comp)
-            cid = comp
-        else :
-            cName = comp
-            cid = getUsfmCid(comp)
-            
-        cType = self.projConfig['Components'][cName]['type']
-
         # If a subcomponent is called, pull it up and its dependencies
         # This will not work with components that have more than one
         # subcomponent.
         if comp :
+            cid = ''
+            cName = ''
+            if hasUsfmCidInfo(comp) :
+                cName = getUsfmCName(comp)
+                cid = comp
+            else :
+                cName = comp
+                cid = getUsfmCid(comp)
+
+            cType = self.projConfig['Components'][cName]['type']
+            cidList = self.projConfig['Components'][cName]['cidList']
+            if len(cidList) > 1 :
+                self.log.writeToLog('EDIT-010', [cName])
+                dieNow()
+
             self.createManager(cType, 'text')
             compWorkText = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
             if os.path.isfile(compWorkText) :
@@ -1318,16 +1339,25 @@ class Project (object) :
                     if os.path.isfile(d) :
                         editDocs.append(d)
             else :
-                print 'error', compWorkText
+                self.log.writeToLog('EDIT-020', [fName(compWorkText)])
+                dieNow()
+
+        # Look at project global settings
+        if glob :
+            for files in os.listdir(self.local.projConfFolder):
+                if files.endswith(".conf"):
+                    editDocs.append(os.path.join(self.local.projConfFolder, files))
+
+        # Look at system setting files
+        if sys :
+            editDocs.append(self.local.userConfFile)
 
         # Pull up our docs in the editor
         if len(editDocs) > 1 :
             subprocess.call(editDocs)
         else :
-            print 'error: no docs found'
-            
-            
-            
-        
-        
+            self.log.writeToLog('EDIT-030')
+
+
+
 

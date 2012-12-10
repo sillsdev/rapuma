@@ -432,12 +432,12 @@ def userArguments (args) :
             sys.exit('\nERROR: Must provide a component name when adding a new component. Process halted!\n')
         # Add a new component
         if args['add'] :
-            if not args['source'] :
-                sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
-            elif not os.path.exists(resolvePath(args['source'])) :
-                sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
-            elif not args['id_list'] :
-                sys.exit('\nERROR: Must provide a list of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
+            if not args['id_list'] :
+                sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
+#            elif not args['source'] :
+#                sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
+#            elif not os.path.exists(resolvePath(args['source'])) :
+#                sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
             else :
                 aProject.addComponent(args['component_type'], args['component_name'], resolvePath(args['source']), args['id_list'], args['force'])
         # Delete a component
