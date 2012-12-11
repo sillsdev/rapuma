@@ -651,80 +651,34 @@ class Project (object) :
                 self.log.writeToLog('PROC-050', [cName, fName(script)])
 
 
+    def runPreprocess (self, cName) :
+        '''Run a preprocess on a component and all its subcomponents. This is
+        system call, meaning it can only be called internally, not through the
+        user API.'''
 
-    def runPreprocess (self, cType, cid = None) :
-        '''Run a preprocess on a single component file or all the files
-        of a specified type.'''
-
-        # First test to see that we have a valid cType specified quite if not
-        if not testForSetting(self.projConfig, 'CompTypes', cType.capitalize()) :
+        # First test to see if we can run, quite if not
+        if isCompleteComponent(cName) :
+            cType = self.projConfig['Components'][cName]['type']
+        else :
             self.log.writeToLog('PREP-010', [cType])
-            return False
-
-#        import pdb; pdb.set_trace()
-
-        # Create target file path and name
-        if cid :
-            target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-            if os.path.isfile(target) :
-                if self.preprocessComponent(target, cType, cid) :
-                    return True
-                else :
-                    return False
-            else :
-                self.log.writeToLog('PREP-020', [target])
-                return False
-
-        # No CID means we want to do the entire set of components check for lock
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'isLocked') :
-            if str2bool(self.projConfig['CompTypes'][cType.capitalize()]['isLocked']) == True :
-                self.log.writeToLog('PREP-030', [cType])
-                return False
-
-        # If we made it this far we can assume it is okay to preprocess
-        # everything for this component type
-        for c in self.projConfig['Components'].keys() :
-            if self.projConfig['Components'][c]['type'] == cType :
-                target = os.path.join(self.local.projComponentsFolder, c, c + '.' + cType)
-                self.preprocessComponent(target, cType, c)
-
-        return True
-
-
-    def preprocessComponent (self, target, cType, cid) :
-        '''Run a preprocess on a single component file, in place.'''
-
-        scriptFileName = ''
-
-        # First check to see if this specific component is locked
-        if self.isLocked(cid) :
-            self.log.writeToLog('PREP-040', [cid])
-            return False
+            dieNow()
 
         if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
             if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
                 scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-        else :
-            self.log.writeToLog('PREP-055', [cType.capitalize()])
-            return False
+                script = os.path.join(self.local.projScriptsFolder, scriptFileName)
+                if not os.path.isfile(script) :
+                    self.log.writeToLog('PREP-020', [cType])
+                    return False
+        elif testForSetting(self.projConfig['Components'][cName], 'isLocked') :
+            if str2bool(self.projConfig['Components'][cName]['isLocked']) == True :
+                self.log.writeToLog('PREP-030', [cType])
+                return False
 
-        if scriptFileName :
-            script = os.path.join(self.local.projScriptsFolder, scriptFileName)
-            if os.path.isfile(script) :
-                # subprocess will fail if permissions are not set on the
-                # script we want to run. The correct permission should have
-                # been set when we did the installation.
-                err = subprocess.call([script, target])
-                if err == 0 :
-                    self.log.writeToLog('PREP-050', [fName(target)])
-                else :
-                    self.log.writeToLog('PREP-060', [fName(target), str(err)])
-            else :
-                self.log.writeToLog('PREP-070', [fName(script), cid])
-                self.log.writeToLog('PREP-075')
-        else :
-            # No scriptFileName means no preprocess installed quite quietly
-            return False
+        # If we made it this far, we can try running it
+        self.runProcessScript(cName, script)
+
+        return True
 
 
     def recordPreprocessScript (self, cType, script) :
@@ -734,7 +688,28 @@ class Project (object) :
         writeConfFile(self.projConfig)
 
 
+
+
+
+
+
+
+
+
+
     def installPreprocess (self, cType, script = None, force = None) :
+    
+    
+    
+    
+# FIXME: script permissions must be set to execute
+# Check other parts as well for function against the current model
+    
+    
+    
+    
+    
+    
         '''Install a preprocess script into the main components processing
         folder for a specified component type. This script will be run on 
         every file of that type that is imported into the project. 
@@ -868,11 +843,20 @@ class Project (object) :
         return os.path.realpath(os.path.expanduser(p))
 
 
+
+
+
+# FIXME: Need to rework postprocessing
+
+
+
+
+
+
+
+
     def runPostProcess (self, cType, script, cid) :
-        '''Run a post process on a component. If the component is a group
-        run the script on all the individual components included in the group.
-        Unlike runPreprocess(), this will not do a complete cType, only
-        specified components or a group of components.'''
+        '''Run a post process on the subcomponents of a component.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -932,6 +916,20 @@ class Project (object) :
             self.log.writeToLog('POST-070', [fName(script)])
             self.log.writeToLog('POST-075')
             dieNow()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def installPostProcess (self, cType, script, force = None) :
