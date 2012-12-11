@@ -86,7 +86,7 @@ def makeExecutable (fileName) :
     permissions of the files comming out of a zip archive. To make sure the
     processing script will actually work when it needs to run. Changing the
     permissions to 777 may not be the best way but it will work for now. '''
-
+    print 'zzzzzzzzzzzzzzzzzzzz'
     os.chmod(fileName, int("0777", 8))
 
 

@@ -178,7 +178,6 @@ class Text (Manager) :
 
             self.project.managers[self.cType + '_Font'].installFont(font)
 
-
         # Build the file name
         thisFile = ''
         if self.sourceEditor.lower() == 'paratext' :

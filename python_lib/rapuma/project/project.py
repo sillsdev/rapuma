@@ -319,22 +319,6 @@ class Project (object) :
             if not self.sourceIsSame(cType, source) :
                 self.addCompTypeSourcePath(cType, source)
 
-
-
-
-#        else :
-#            if not self.hasSourcePath(cType) :
-#                self.addCompTypeSourcePath(cType, source)
-#            else :
-#                # FIXME: This dose not address the problem of if an archive or backup
-#                # from another machine is being worked with. The source path, which is
-#                # hard-coded will undoubtly be wrong. That needs to be dealt with at some pont.
-#                if not self.sourceIsSame(cType, source) :
-#                    current = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-#                    print cType, current, source
-#                    self.log.writeToLog('COMP-090', [cType,current,source])
-#                    dieNow()
-
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
         # this format: "id1 id2 id3 ect"
@@ -482,17 +466,6 @@ class Project (object) :
         if not self.isCompleteComponent(cName) :
             self.log.writeToLog('COMP-120', [cName])
             return True
-            
-#            if testForSetting(self.projConfig['Components'], cName) :
-#                del self.projConfig['Components'][cName]
-#                # Write and report
-#                if writeConfFile(self.projConfig) :
-#                    self.log.writeToLog('COMP-120' [cName])
-#                    return True
-#            else :
-#                return True
-#        else :
-#            return True
 
 
     def uninstallComponent (self, cName, force = False) :
@@ -611,30 +584,51 @@ class Project (object) :
 
 
 ###############################################################################
-############################# Preprocess Functions ############################
+########################## Text Processing Functions ##########################
 ###############################################################################
 
-# Pre and Post processes are virtually the same. The difference is that a
-# preprocess will be used to prepare text for rendering. A post process will
-# be used for other extra activities like round-tripping the text and creating
-# associated outputs for the project. Another difference is that there can only
-# be one preprocessing script associated with the project and it is run only
-# on importing text. Whereas with post processing there can be a number of
-# scripts associated with a project.
+    def runProcessScript (self, cName, scriptFileName = None) :
+        '''Run a text processing script on a component (including subcomponents).
+        This assumes the component and the script are valid and the component 
+        lock is turned off. However, it will look for a lock at the subcomponent 
+        level too.'''
 
-# At some point both types of scripts may need to be combined for unified
-# management. But for now, they will stay seperate.
+        # First test to see if we can run, quite if not
+        if self.isCompleteComponent(cName) :
+            cType = self.projConfig['Components'][cName]['type']
+        else :
+            self.log.writeToLog('PREP-010', [cType])
+            dieNow()
 
-    def runProcessScript (self, cName, script) :
-        '''Run a text processing script on a component (including subcomponents). This assumes
-        the component and the script are valid and the group lock is turned off. However, it
-        will look for a lock at the subcomponent level.'''
+        # Find the script we will use. It is assumed that if there is
+        # no scriptFileName given, we are working with a pre, not
+        # post process.
+        if scriptFileName :
+            script = os.path.join(self.local.projScriptsFolder, scriptFileName)
+            if not os.path.isfile(script) :
+                self.log.writeToLog('PREP-020', [cType])
+                return False
+        else :
+            if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
+                if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
+                    scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
+                    script = os.path.join(self.local.projScriptsFolder, scriptFileName)
+                    if not os.path.isfile(script) :
+                        self.log.writeToLog('PREP-020', [cType])
+                        return False
 
+        # Check to see if the component is locked
+        if testForSetting(self.projConfig['Components'][cName], 'isLocked') :
+            if str2bool(self.projConfig['Components'][cName]['isLocked']) == True :
+                self.log.writeToLog('PREP-030', [cType])
+                return False
+
+        # If we made it this far, we can try running it
         for cid in self.projConfig['Components'][cName]['cidList'] :
             cidName = getUsfmCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
                 cType = self.projConfig['Components'][cidName]['type']
-                target = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+                target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
                 if os.path.isfile(script) :
                     # subprocess will fail if permissions are not set on the
                     # script we want to run. The correct permission should have
@@ -642,41 +636,15 @@ class Project (object) :
                     err = subprocess.call([script, target])
                     if err == 0 :
                         self.log.writeToLog('PROC-010', [fName(target), fName(script)])
-                        return True
                     else :
                         self.log.writeToLog('PROC-020', [fName(target), fName(script), str(err)])
+                        return False
                 else :
                     self.log.writeToLog('PROC-030', [fName(target), fName(script)])
+                    return False
             else :
                 self.log.writeToLog('PROC-050', [cName, fName(script)])
-
-
-    def runPreprocess (self, cName) :
-        '''Run a preprocess on a component and all its subcomponents. This is
-        system call, meaning it can only be called internally, not through the
-        user API.'''
-
-        # First test to see if we can run, quite if not
-        if isCompleteComponent(cName) :
-            cType = self.projConfig['Components'][cName]['type']
-        else :
-            self.log.writeToLog('PREP-010', [cType])
-            dieNow()
-
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
-            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
-                scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-                script = os.path.join(self.local.projScriptsFolder, scriptFileName)
-                if not os.path.isfile(script) :
-                    self.log.writeToLog('PREP-020', [cType])
-                    return False
-        elif testForSetting(self.projConfig['Components'][cName], 'isLocked') :
-            if str2bool(self.projConfig['Components'][cName]['isLocked']) == True :
-                self.log.writeToLog('PREP-030', [cType])
                 return False
-
-        # If we made it this far, we can try running it
-        self.runProcessScript(cName, script)
 
         return True
 
@@ -688,82 +656,34 @@ class Project (object) :
         writeConfFile(self.projConfig)
 
 
-
-
-
-
-
-
-
-
-
-    def installPreprocess (self, cType, script = None, force = None) :
-    
-    
-    
-    
-# FIXME: script permissions must be set to execute
-# Check other parts as well for function against the current model
-    
-    
-    
-    
-    
-    
+    def installPreprocess (self, cType, force = None) :
         '''Install a preprocess script into the main components processing
-        folder for a specified component type. This script will be run on 
-        every file of that type that is imported into the project. 
+        folder for a specified component type. If installed This script 
+        will be run on every file of that type that is imported into the 
+        project. 
         
-        Some projects will have their own specially developed preprocess
-        script. Use the "script" var to point to a script or script bundle.
-        If "script" is not specified we will copy in a default script that 
-        the user can modify. This is currently limited to Python scripts 
-        only which do in-place processes on the target files. The script 
-        needs to have the same name as the zip file it is bundled in, except 
-        the extention is .py instead of the bundle .zip extention.'''
+        This is a fairly open process. a default script will be installed
+        then the user will need to modify it.'''
 
         # Define some internal vars
-        if not script :
-            script          = os.path.join(self.local.rapumaCompTypeFolder, cType, cType + '-preprocess.zip')
-        else :
-            script          = resolvePath(script)
+        # Hard-coded preprocess file name (might there be another way?)
+        scriptFileName = cType + '-preprocess.py'
+        scriptSource = os.path.join(self.local.rapumaCompTypeFolder, cType, scriptFileName)
 
-        scriptSourceFolder  = os.path.split(script)[0]
         scriptTargetFolder  = self.local.projScriptsFolder
-        scriptTarget        = os.path.join(scriptTargetFolder, fName(script).split('.')[0] + '.py')
-        try :
-            oldScript       = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-        except :
-            oldScript       = ''
+        scriptTarget        = os.path.join(scriptTargetFolder, scriptFileName)
 
         # First check for prexsisting script and record, if there is,
         # just go a head and put a new one in and return
         if force :
             if os.path.isfile(scriptTarget) :
                 os.remove(scriptTarget)
-            if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
-                self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = ''
-                writeConfFile(self.projConfig)
-            self.scriptInstall(script, scriptTarget)
-            # Test the install
-            if not os.path.isfile(scriptTarget) :
-                dieNow('Failed to install script!: ' + fName(scriptTarget))
-            else :
-                self.recordPreprocessScript(cType, scriptTarget)
-                # Report and end
-                self.log.writeToLog('PREP-115', [fName(scriptTarget)])
-                return True
 
-        # If we made it this far, look for pre-existing script
-        if oldScript == fName(scriptTarget) :
-            self.log.writeToLog('PREP-081')
-            return False
-        elif oldScript != '' :
-            self.log.writeToLog('PREP-080', [oldScript])
-            return False
-        elif os.path.isfile(scriptTarget) :
-            self.log.writeToLog('PREP-082', [fName(scriptTarget)])
-            return False
+        # Look for an exsiting script and warn if found
+        if os.path.isfile(scriptTarget) :
+            self.log.writeToLog('PREP-085', [scriptFileName])
+            self.recordPreprocessScript(cType, scriptTarget)
+            return True
 
         # At this point we are looking at a fresh install
         # In case this is a new project we may need to install a component
@@ -776,7 +696,7 @@ class Project (object) :
             os.makedirs(scriptTargetFolder)
 
         # No script found, we can proceed
-        self.scriptInstall(script, scriptTarget)
+        self.scriptInstall(scriptSource, scriptTarget)
         if not os.path.isfile(scriptTarget) :
             dieNow('Failed to install script!: ' + fName(scriptTarget))
         else :
@@ -785,24 +705,27 @@ class Project (object) :
             return True
 
 
-    def removePreprocess (self, cType) :
+    def removePreprocess (self, cType, force = False) :
         '''Remove (actually disconnect) a preprocess script from a
-
         component type. This will not actually remove the script. That
         would need to be done manually. Rather, this will remove the
         script name entry from the component type so the process cannot
         be accessed for this specific component type.'''
 
-        # Get old setting
-        old = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-        # Reset the field to ''
-        if old != '' :
-            self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = ''
-            writeConfFile(self.projConfig)
-            self.log.writeToLog('PREP-130', [old,cType.capitalize()])
+        Ctype = cType.capitalize()
+        # Hard-coded preprocess file name (might there be another way?)
+        scriptFileName = cType + '-preprocess.py'
+        # Remove the old file if force is used
+        if force :
+            preProScript = os.path.join(self.local.projScriptsFolder, scriptFileName)
+            if os.path.isfile(preProScript) :
+                os.remove(preProScript)
+                self.log.writeToLog('PREP-140', [scriptFileName,Ctype])
 
-        else :
-            self.log.writeToLog('PREP-135', [cType.capitalize()])
+        # Moving on, reset the field to ''
+        self.projConfig['CompTypes'][Ctype]['preprocessScript'] = ''
+        writeConfFile(self.projConfig)
+        self.log.writeToLog('PREP-130', [scriptFileName,Ctype])
 
         return True
 
@@ -830,106 +753,7 @@ class Project (object) :
             myZip.close()
             return True
         else :
-            dieNow('Script is an unrecognized type: ' + fName(scriptTarget) + ' Cannot continue with installation.')
-
-
-###############################################################################
-############################ Post Process Functions ###########################
-###############################################################################
-
-    def buildPath (self, cid, cType) :
-        '''Build a valid path for a component of a specific type.'''
-        p = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
-        return os.path.realpath(os.path.expanduser(p))
-
-
-
-
-
-# FIXME: Need to rework postprocessing
-
-
-
-
-
-
-
-
-    def runPostProcess (self, cType, script, cid) :
-        '''Run a post process on the subcomponents of a component.'''
-
-#        import pdb; pdb.set_trace()
-
-        Ctype = cType.capitalize()
-        target = []
-        # First test to see that we have a valid cType specified, quite if not
-        if not testForSetting(self.projConfig, 'CompTypes', Ctype) :
-            self.log.writeToLog('POST-010', [cType])
-            dieNow()
-
-        # If it is a group we will run the script across each cid individually
-        # Right now this mechanizm is just basic so if a script is for collection
-        # it needs to know how to handle multiple passes and output correctly.
-        if not testForSetting(self.projConfig['Components'][cid], 'list') :
-            target.append(self.buildPath(cid, cType))
-            if not self.postProcessComponent(cType, target, script) :
-                self.log.writeToLog('POST-040', [script,target])
-                dieNow()
-        else :
-            for c in self.projConfig['Components'][cid]['list'] :
-                target = []
-                target.append(self.buildPath(c, cType))
-                if not self.postProcessComponent(cType, target, script) :
-                    self.log.writeToLog('POST-040', [script,target])
-                    dieNow()
-
-        # At this point all must have ended well
-        return True
-
-
-    def postProcessComponent (self, cType, target, script) :
-        '''Run a post process on the target. The target could be a single file
-        or a group of components.'''
-
-        Ctype = cType.capitalize()
-        if script not in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
-            self.log.writeToLog('POST-055', [script,Ctype])
-            dieNow()
-
-        script = os.path.join(self.local.projScriptsFolder, script)
-        if os.path.isfile(script) :
-            # subprocess will fail if permissions are not set on the
-            # script we want to run. The correct permission should have
-            # been set when we did the installation.
-            commands = []
-            commands.append(script)
-            for f in target :
-                 commands.append(f)
-            err = subprocess.call(commands)
-            if err == 0 :
-                self.log.writeToLog('POST-050', [fName(f)])
-                return True
-            else :
-                self.log.writeToLog('POST-060', [str(err)])
-                dieNow()
-        else :
-            self.log.writeToLog('POST-070', [fName(script)])
-            self.log.writeToLog('POST-075')
-            dieNow()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            dieNow('Script is an unrecognized type: ' + fName(source) + ' Cannot continue with installation.')
 
 
     def installPostProcess (self, cType, script, force = None) :

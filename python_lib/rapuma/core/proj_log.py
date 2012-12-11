@@ -213,8 +213,7 @@ class ProjLog (object) :
             'PREP-030' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
             'PREP-080' : ['ERR', 'A file named [<<1>>] is already registered as the preprocess script for this component type. Please use -f (force) to remove it if you want to install a fresh or different script.'],
             'PREP-081' : ['ERR', 'This script is already registered as the preprocess script for this component type. Please use -f (force) to reinstall a fresh or different script.'],
-            'PREP-082' : ['ERR', 'The script file: [<<1>>] already exsists in the Scripts folder. Cannot copy over old file. Please use -f (force) to remove it if you want to install a fresh or different file.'],
-            'PREP-085' : ['ERR', 'Source script not found: [<<1>>]'],
+            'PREP-085' : ['WRN', 'The script file: [<<1>>] already exsists in the Scripts folder. Cannot copy over old file. Please use -f (force) to copy a fresh default preprocess script into the project. But remember if you do that, any work in the old script will be lost.'],
             'PREP-090' : ['LOG', 'Copied in custom preprocess file: [<<1>>] into Scripts folder.'],
             'PREP-100' : ['LOG', 'The contents of the file [<<1>>] have been extracted into the Scripts folder.'],
             'PREP-105' : ['ERR', 'The contents of the file [<<1>>] failed to be extracted into the Scripts folder. Install custom preprocessing script failed.'],
@@ -223,6 +222,7 @@ class ProjLog (object) :
             'PREP-120' : ['MSG', 'Copied in default preprocess file: [<<1>>] into Scripts folder from source: [<<2>>].'],
             'PREP-130' : ['MSG', 'Removed [<<1>>] script reference from the [<<2>>] component type.'],
             'PREP-135' : ['MSG', 'There was no preprocess script for comonent type [<<1>>] found in the project configuration.'],
+            'PREP-140' : ['MSG', 'Force (-f) was used. Removed [<<1>>] script from the project.'],
 
             'POST-000' : ['MSG', 'Messages for post processing issues (mainly found in project.py)'],
             'POST-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],

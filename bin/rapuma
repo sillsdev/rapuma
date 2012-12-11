@@ -516,7 +516,7 @@ def userArguments (args) :
             elif not args['component_name'] :
                 sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
             else :
-                aProject.runPostProcess(args['script'], args['component_name'])
+                aProject.runProcessScript(args['component_name'], args['script'])
         # Install a custom or a default post process script, force to overwrite what is there
         elif args['add'] :
             filePath = ''
