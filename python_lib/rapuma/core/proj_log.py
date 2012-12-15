@@ -111,7 +111,7 @@ class ProjLog (object) :
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
             'XTEX-115' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
-            'XTEX-130' : ['ERR', 'Hyphenation TeX file [<<1>>] is missing! As hyphenation is requested, this is a required file that should have been installed previously. We have to stop here, sorry about that.'],
+            'XTEX-130' : ['LOG', 'Hyphenation TeX file [<<1>>] has been recreated.'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],

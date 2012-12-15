@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <saved-sessions>
+<session name="Basic">
+  <file path="file:///home/dennis/Projects/rapuma/dev_setup.sh"/>
+  <file path="file:///home/dennis/Projects/rapuma/bin/rapuma"/>
+  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/project/project.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/core/proj_log.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/core/tools.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/core/pt_tools.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/component/usfm.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/manager/xetex.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/manager/text.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/manager/style.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/python_lib/rapuma/manager/font.py"/>
+</session>
 <session name="ChangeSetting">
   <file path="file:///home/dennis/Projects/rapuma/rapuma_dev.sh"/>
   <file path="file:///home/dennis/Projects/rapuma/test_rapuma.sh"/>

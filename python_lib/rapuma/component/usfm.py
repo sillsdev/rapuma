@@ -98,7 +98,7 @@ class Usfm (Component) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in self.cidList :
-            cName = getUsfmCName(cid)
+            cName = getRapumaCName(cid)
             if not self.preProcessComponent(cName) :
                 return False
 
@@ -123,7 +123,7 @@ class Usfm (Component) :
             # See if the working text is present for each subcomponent in the
             # component and try to install it if it is not
             for cid in self.project.projConfig['Components'][cName]['cidList'] :
-                cidCName = getUsfmCName(cid)
+                cidCName = getRapumaCName(cid)
                 cType = self.project.projConfig['Components'][cidCName]['type']
                 cidUsfm = self.project.managers[cType + '_Text'].getCompWorkingTextPath(cid)
 

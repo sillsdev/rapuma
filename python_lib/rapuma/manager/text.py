@@ -76,7 +76,7 @@ class Text (Manager) :
         '''Return the full path of the cName working text file. This assumes
         the cName is valid.'''
 
-        cName = getUsfmCName(cid)
+        cName = getRapumaCName(cid)
         cType = self.project.projConfig['Components'][cName]['type']
         return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
 
@@ -85,7 +85,7 @@ class Text (Manager) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        cName = getUsfmCName(cid)
+        cName = getRapumaCName(cid)
         cType = self.project.projConfig['Components'][cName]['type']
         return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
 
@@ -94,7 +94,7 @@ class Text (Manager) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
-        cName = getUsfmCName(cid)
+        cName = getRapumaCName(cid)
         cType = self.project.projConfig['Components'][cName]['type']
         return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
 
@@ -161,8 +161,8 @@ class Text (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        # Get the real component name, this assumes the cid is valid
-        cName = getUsfmCidInfo(cid)[0]
+        # Get the rapuma component name, this assumes the cid is valid
+        cName = getUsfmCidInfo(cid)[1]
 
         # Check to see if text manager settings need updating
         self.updateManagerSettings()
@@ -249,6 +249,19 @@ class Text (Manager) :
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
                 if self.usfmCopy(source, target, projSty) :
+
+                    # Run any working text preprocesses on the new component text
+                    scriptFileName = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
+                    preProScript = os.path.join(self.project.local.projScriptsFolder, scriptFileName)
+                    if os.path.isfile(preProScript) :
+#                        import pdb; pdb.set_trace()
+                        if self.project.isLocked(cName) :
+                            self.project.lockUnlock(cName, False, True)
+                        if not self.project.runProcessScript(cName, preProScript) :
+                            self.project.log.writeToLog('COMP-130', [cName])
+                        if not self.project.isLocked(cName) :
+                            self.project.lockUnlock(cName, True, True)
+
                     # Always save an untouched copy of the source and set to
                     # read only. We may need this to restore/reset later.
                     if os.path.isfile(targetSource) :

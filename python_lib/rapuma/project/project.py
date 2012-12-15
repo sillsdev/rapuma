@@ -152,6 +152,9 @@ class Project (object) :
     def hasCNameEntry (self, cName) :
         '''Check for a config component entry.'''
         buildConfSection(self.projConfig, 'Components')
+        
+#        import pdb; pdb.set_trace()
+
         if testForSetting(self.projConfig['Components'], cName) :
             return True
 
@@ -161,7 +164,7 @@ class Project (object) :
 
         if self.hasCNameEntry(cName) :
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCName(cid)
+                cidName = getRapumaCName(cid)
                 cType = self.projConfig['Components'][cName]['type']
                 # For subcomponents look for working text
                 if not self.hasCidFile(cidName, cid, cType) :
@@ -202,7 +205,7 @@ class Project (object) :
             if self.isCompleteComponent(cName) :
                 validCName = cName
             else :
-                cName = getUsfmCName(cName)
+                cName = getRapumaCName(cName)
                 if self.hasCNameEntry(cName) :
                     validCName = cName
                 else :
@@ -337,10 +340,10 @@ class Project (object) :
         for cid in cidList :
             # If cName for the cid is the same as the main component cName
             # we have to unlock it to avoid a problem in this step.
-            if getUsfmCName(cid) == cName :
+            if getRapumaCName(cid) == cName :
                 self.projConfig['Components'][cName]['isLocked'] = False
             if not self.installComponent(cType, cid, source, force) :
-                if not self.isCompleteComponent(getUsfmCName(cid)) :
+                if not self.isCompleteComponent(getRapumaCName(cid)) :
                     dieNow()
 
         # If there was more than one subcomponent, this is a group
@@ -369,7 +372,7 @@ class Project (object) :
             # auto-create a name for this component that is taken from its valid
             # name in the component dictionary. We will also validate the ID too.
             if hasUsfmCidInfo(cid) :
-                cName = getUsfmCName(cid)
+                cName = getRapumaCName(cid)
             else :
                 self.log.writeToLog('COMP-010', [cid])
                 dieNow()
@@ -396,12 +399,6 @@ class Project (object) :
             # Install our working text files
             self.createManager(cType, 'text')
             if self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
-                # Run any working text preprocesses on the new component text
-                scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-                preProScript = os.path.join(self.local.projScriptsFolder, scriptFileName)
-                if os.path.isfile(preProScript) :
-                    if not self.runProcessScript(cName, preProScript) :
-                        self.log.writeToLog('COMP-130', [cName])
 
                 # Finish the install by locking
                 self.lockUnlock(cName, True)
@@ -457,7 +454,7 @@ class Project (object) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCName(cid)
+                cidName = getRapumaCName(cid)
                 if self.isCompleteComponent(cidName) :
                     self.uninstallComponent(cidName, force)
         # Remove the target component
@@ -560,7 +557,7 @@ class Project (object) :
         # If force is set, set locks on subcomponents
         if force :
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidName = getUsfmCName(cid)
+                cidName = getRapumaCName(cid)
                 self.setLock(cidName, lock)
 
         # Set lock on this specific component
@@ -625,7 +622,7 @@ class Project (object) :
 
         # If we made it this far, we can try running it
         for cid in self.projConfig['Components'][cName]['cidList'] :
-            cidName = getUsfmCName(cid)
+            cidName = getRapumaCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
                 cType = self.projConfig['Components'][cidName]['type']
                 target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
@@ -878,7 +875,7 @@ class Project (object) :
 
             self.log.writeToLog('XPRT-040')
             for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidCName = getUsfmCName(cid)
+                cidCName = getRapumaCName(cid)
                 ptName = formPTName(self.projConfig, cid)
                 # Test, no name = no success
                 if not ptName :
@@ -1138,7 +1135,7 @@ class Project (object) :
             cid = ''
             cName = ''
             if hasUsfmCidInfo(comp) :
-                cName = getUsfmCName(comp)
+                cName = getRapumaCName(comp)
                 cid = comp
             else :
                 cName = comp

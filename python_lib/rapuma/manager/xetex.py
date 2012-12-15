@@ -307,6 +307,16 @@ class Xetex (Manager) :
                 return True
 
 
+    def makeHyphenationTexFile (self) :
+        '''Create a TeX hyphenation file.'''
+
+        with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
+            hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
+            hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
+            hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
+            hyphenTexObject.write('\hyphenation{\n\n}\n')
+
+
 ###############################################################################
 ############################# DEPENDENCY FUNCTIONS ############################
 ###############################################################################
@@ -352,7 +362,6 @@ class Xetex (Manager) :
                     self.removeMargVerse()
 
         return True
-
 
 
     def makeDepSetFile (self) :
@@ -524,7 +533,7 @@ class Xetex (Manager) :
 
 
 
-    def makeDepExtFile (self) :
+    def makeDepSetExtFile (self) :
         '''Create/copy a TeX extentions file that has custom code for this project.'''
 
         rapumaExtFile = os.path.join(self.rapumaMacrosFolder, self.macroPackage, self.extFileName)
@@ -546,11 +555,81 @@ class Xetex (Manager) :
         return True
 
 
+    def makeCidTexFile (self) :
+        '''Create the TeX control files for all a component's subcomponents.'''
+
+        for cid in self.projConfig['Components'][self.cName]['cidList'] :
+            cidCName = getRapumaCName(cid)
+            cidFolder = os.path.join(self.projComponentsFolder, cidCName)
+            cidTex = os.path.join(cidFolder, cid + '.tex')
+            cidUsfm = os.path.join(cidFolder, cid + '.usfm')
+            # Write out the cidTex file
+            with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
+                cidTexObject.write(self.texFileHeader(fName(cidTex)))
+                # User sty and macro extentions are optional at the cid level
+                if os.path.isfile(os.path.join(cidFolder, cid + '-ext.tex')) :
+                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '-ext.tex') + '}\n')
+                if os.path.isfile(os.path.join(cidFolder, cid + '.sty')) :
+                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '.sty') + '}\n')
+                # The cid is not optional!
+                if self.checkDepCidUsfm(cidUsfm) :
+                    cidTexObject.write('\\ptxfile{' + quotePath(cidUsfm) + '}\n')
+
+        return True
+
+
+    def makeCNameTexFile (self, cNameTex) :
+        '''Create the main cName TeX control file.'''
+
+        # We don't need to write this out every time so a dependency will be made to test against
+        # No changes, nothing gets written out
+        dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile, self.globSty, self.custSty, self.hyphenTex]
+        for f in dep :
+            # Weed out unused files
+            if f == '' :
+                continue
+
+            if isOlder(cNameTex, f) or not os.path.isfile(cNameTex) :
+                # Start writing out the cName.tex file. Check/make dependencies as we go.
+                # If we fail to make a dependency it will die and report during that process.
+                with codecs.open(cNameTex, "w", encoding='utf_8') as cNameTexObject :
+                    cNameTexObject.write(self.texFileHeader(fName(cNameTex)))
+                    if self.makeDepMacLink() :
+                        cNameTexObject.write('\\input \"' + self.macLink + '\"\n')
+                    if self.makeDepSetFile() :
+                        cNameTexObject.write('\\input \"' + self.setFile + '\"\n')
+                    if self.makeDepSetExtFile() :
+                        cNameTexObject.write('\\input \"' + self.extFile + '\"\n')
+                    if self.checkDepGlobStyFile() :
+                        cNameTexObject.write('\\stylesheet{' + self.globSty + '}\n')
+                    # Custom sty file at the global level is optional as is hyphenation
+                    if self.customStyleFile :
+                        cNameTexObject.write('\\stylesheet{' + self.custSty + '}\n')
+                    if self.checkDepHyphenFile() :
+                        cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
+                    # Create the cidUsfm list which is one or more cid components
+                    for cid in self.projConfig['Components'][self.cName]['cidList'] :
+                        cidCName = getRapumaCName(cid)
+                        cidUsfm = os.path.join(self.projComponentsFolder, cidCName, cid + '.usfm')
+                        if self.checkDepCidUsfm(cidUsfm) :
+                            cNameTexObject.write('\\ptxfile{' + quotePath(cidUsfm) + '}\n')
+                    # This can only hapen once in the whole process, this marks the end
+                    cNameTexObject.write('\\bye\n')
+
+                    # In case more than one dependency has changed,
+                    # we only need to do this once
+                    break
+
+        return True
+
+
     def checkDepGlobStyFile (self) :
         '''Check for the exsistance of the Global Sty file. We need to die if 
         it is not found. This should have been installed when the components
         were brought in. To late to recover now if it is not there.'''
 
+# FIXME: This needs to link to exsisting functions to install/create a
+# global style file.
         if not os.path.isfile(self.globSty) :
             self.project.log.writeToLog('XTEX-120', [fName(self.globSty)])
             dieNow()
@@ -559,13 +638,16 @@ class Xetex (Manager) :
 
 
     def checkDepHyphenFile (self) :
-        '''Check for the exsistance of the TeX Hyphenation file. We need to die if 
-        it is not found. This should have been done previous to rendering. If it
-        is gone, there may be a bigger problem.'''
+        '''If hyphenation is used, check for the exsistance of the TeX Hyphenation 
+        file. If one is not found, create a default file. At some point, this will
+        need to expanded to accomodate hyphenation rules and words. This will return
+        True if the following are true: file exsists, or, no hyphenation is required.'''
 
-        if not os.path.isfile(self.hyphenTex) :
-            self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
-            dieNow()
+        if self.useHyphenation :
+            if not os.path.isfile(self.hyphenTex) :
+                self.makeHyphenationTexFile()
+                self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+                return True
         else :
             return True
 
@@ -595,71 +677,23 @@ class Xetex (Manager) :
             if os.path.isfile(cNamePdf) :
                 os.remove(cNamePdf)
 
-        # Create the cid.tex file(s) that the cName.tex will use to get at the source
-        # We will create this first so if something goes wrong we die sooner than later
-        for cid in self.projConfig['Components'][self.cName]['cidList'] :
-            cidCName = getUsfmCName(cid)
-            cidFolder = os.path.join(self.projComponentsFolder, cidCName)
-            cidTex = os.path.join(cidFolder, cid + '.tex')
-            cidUsfm = os.path.join(cidFolder, cid + '.usfm')
-            # Write out the cidTex file
-            with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
-                cidTexObject.write(self.texFileHeader(fName(cidTex)))
-                # User sty and macro extentions are optional at the cid level
-                if os.path.isfile(os.path.join(cidFolder, cid + '-ext.tex')) :
-                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '-ext.tex') + '}\n')
-                if os.path.isfile(os.path.join(cidFolder, cid + '.sty')) :
-                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '.sty') + '}\n')
-                # The cid is not optional!
-                if self.checkDepCidUsfm(cidUsfm) :
-                    cidTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
+        # Make our subcomponent's control files first
+        self.makeCidTexFile()
 
-        # Create the cName.tex file
-        cNameTex            = os.path.join(self.cNameFolder, self.cName + '.tex')
-        # We don't need to write this out every time so a dependency will be made to test against
-        # No changes, nothing gets written out
-        dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile, self.globSty, self.custSty, self.hyphenTex]
-        for f in dep :
-            # Weed out unused files
-            if f == '' :
-                continue
+        # Create, if necessary, the cName.tex file
+        cNameTex = os.path.join(self.cNameFolder, self.cName + '.tex')
+        # First, go through and make/update any dependency files
+        self.makeDepMacLink()
+        self.makeDepSetFile()
+        self.makeDepSetExtFile()
+        self.checkDepHyphenFile()
+        # Now make the cName main setting file
+        self.makeCNameTexFile(cNameTex)
 
-            if isOlder(cNameTex, f) or not os.path.isfile(cNameTex) :
-                # Start writing out the cName.tex file. Check/make dependencies as we go.
-                # If we fail to make a dependency it will die and report during that process.
-                with codecs.open(cNameTex, "w", encoding='utf_8') as cNameTexObject :
-                    cNameTexObject.write(self.texFileHeader(fName(cNameTex)))
-                    if self.makeDepMacLink() :
-                        cNameTexObject.write('\\input \"' + self.macLink + '\"\n')
-                    if self.makeDepSetFile() :
-                        cNameTexObject.write('\\input \"' + self.setFile + '\"\n')
-                    if self.makeDepExtFile() :
-                        cNameTexObject.write('\\input \"' + self.extFile + '\"\n')
-                    if self.checkDepGlobStyFile() :
-                        cNameTexObject.write('\\stylesheet{' + self.globSty + '}\n')
-                    # Custom sty file at the global level is optional as is hyphenation
-                    if self.customStyleFile :
-                        cNameTexObject.write('\\stylesheet{' + self.custSty + '}\n')
-                    if self.useHyphenation :
-                        if self.checkDepHyphenFile() :
-                            cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
-                    # Create the cidUsfm list which is one or more cid components
-                    for cid in self.projConfig['Components'][self.cName]['cidList'] :
-                        cidCName = getUsfmCName(cid)
-                        cidUsfm = os.path.join(self.projComponentsFolder, cidCName, cid + '.usfm')
-                        if self.checkDepCidUsfm(cidUsfm) :
-                            cNameTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
-                    # This can only hapen once in the whole process, this marks the end
-                    cNameTexObject.write('\\bye\n')
-
-                    # In case more than one dependency has changed,
-                    # we only need to do this once
-                    break
-
-        # Create a dependency list
+        # Dynamically create a dependency list for the render process
         dep = [cNameTex]
         for cid in self.projConfig['Components'][self.cName]['cidList'] :
-            cidCName = getUsfmCName(cid)
+            cidCName = getRapumaCName(cid)
             cType = self.projConfig['Components'][self.cName]['type']
             cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
             cidAdj = self.managers[cType + '_Text'].getCompWorkingTextAdjPath(cid)
@@ -670,6 +704,7 @@ class Xetex (Manager) :
             if os.path.isfile(cidIlls) :
                 dep.append(cidIlls)
 
+        # Render if cNamePdf is older or is missing
         for d in dep :
             if isOlder(cNamePdf, d) or not os.path.isfile(cNamePdf) :
 
