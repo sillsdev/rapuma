@@ -359,6 +359,41 @@ def restoreArchive (aid, path = None) :
     terminal('\nRapuma archive [' + aid + '] has been restored to: ' + archTarget + '\n')
 
 
+def makeProjectScripts (uc, pid) :
+    '''Create helper scripts for a project to help with repetitive tasks.
+    If any scripts are present with the same name they will be overwritten.
+    Note: This is only for temporary use due to the lack of an interface at
+    this time (20121217). It assumes the cType is usfm which, at some point
+    may not be the case.'''
+
+    projHome = uc.userConfig['Projects'][pid]['projectPath']
+    local       = ProjLocal(rapumaHome, userHome, projHome)
+    cType = 'usfm'
+    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update'] :
+        fullFile = os.path.join(local.projScriptsFolder, script)
+        with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write('# Rapuma automation script: ' + script + '\n\n')
+            if script == 'view' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
+            elif script == 'render' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
+            elif script == 'edit' :
+                writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
+            elif script == 'addOT' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"\n\n')
+            elif script == 'addNT' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
+            elif script == 'addBible' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
+            elif script == 'update' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
+
+        # Make the script executable
+        makeExecutable(fullFile)
+
+    terminal('\nCompleted creating/recreating helper scripts.\n')
+
+
 ###############################################################################
 ########################### Rapuma Command Center #############################
 ###############################################################################
@@ -421,10 +456,16 @@ def userArguments (args) :
             local   = ProjLocal(rapumaHome, userHome, projFolder)
             pc      = ProjConfig(local)
             newProject(uc, pc, args['project_id'], args['media'].lower(), args['name'])
+            # Create helper scripts if desired
+            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                makeProjectScripts(uc, args['project_id'])
 
         # Remove an exsisting project
         elif args['remove'] :
             deleteProject(uc, args['project_id'])
+        # Create/recreate helper scripts
+        elif args['scripts'] :
+            makeProjectScripts(uc, args['project_id'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -441,6 +482,10 @@ def userArguments (args) :
             else :
                 aProject.addComponent(args['component_type'], args['component_name'], resolvePath(args['source']), args['id_list'], args['force'])
         # Delete a component
+        elif args['update'] :
+            # Update a component, --source is optional but if given it will
+            # overwrite the current setting.
+            aProject.updateComponent(args['component_name'], args['source'])
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
             aProject.removeComponent(args['component_name'], args['force'])
@@ -667,7 +712,7 @@ projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a p
 projCommand.add_argument('-p', '--path', help='Path to the project home folder if the current working directory is not the actual target. This can be used when adding a project.')
 projCommand.add_argument('-m', '--media', help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
-projCommand.add_argument('-b', '--bundle', help='[NOT IMPLEMENTED] Create a bundle (archive) of the entire project.')
+projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -676,12 +721,13 @@ compCommand.add_argument('component_type', help='The component type is needed fo
 compCommand.add_argument('component_name', help='The component name, required for creating a new component or any actions to be done to it.')
 compCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
 compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
-compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used only for adding components, only one source path per component type allowed.)')
+compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used for adding/updating components, one source path per component type allowed.)')
 compCommand.add_argument('-i', '--id_list', help='Use this if this is a group component. This is a list of components to be in this group. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
+compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

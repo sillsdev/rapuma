@@ -141,6 +141,19 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def getComponentType (self, cName) :
+        '''Return the cType for a component.'''
+
+        cName = getRapumaCName(cName)
+        return self.projConfig['Components'][cName]['type']
+
+
+    def getSubcomponentList (self, cName) :
+        '''Return the list of subcomponents for a cName.'''
+
+        cName = getRapumaCName(cName)
+        return self.projConfig['Components'][cName]['cidList']
+
 
     def hasCidFile (self, cName, cid, cType) :
         '''Return True or False depending on if a working file exists 
@@ -163,9 +176,9 @@ class Project (object) :
         '''A two-part test to see if a component has a config entry and a file.'''
 
         if self.hasCNameEntry(cName) :
-            for cid in self.projConfig['Components'][cName]['cidList'] :
+            for cid in self.getSubcomponentList(cName) :
                 cidName = getRapumaCName(cid)
-                cType = self.projConfig['Components'][cName]['type']
+                cType = self.getComponentType(cName)
                 # For subcomponents look for working text
                 if not self.hasCidFile(cidName, cid, cType) :
                     return False
@@ -294,11 +307,11 @@ class Project (object) :
             writeConfFile(self.projConfig)
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.project.log.writeToLog('PROJ-100', [str(e)])
+            self.log.writeToLog('PROJ-100', [str(e)])
             dieNow()
 
 
-    def addComponent (self, cType, cName, source, cList, force = False) :
+    def addComponent (self, cType, cName, source, cidList, force = False) :
         '''This handels adding a component which can contain one or more sub-components.'''
 
         # Check for cName setting
@@ -324,8 +337,11 @@ class Project (object) :
 
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
-        # this format: "id1 id2 id3 ect"
-        cidList = cList.split()
+        # this format: "id1 id2 id3 ect", unless it is coming
+        # internally which means it might alread be a proper
+        # list. We'll check first.
+        if type(cidList) != list :
+            cidList = cidList.split()
 
 #        import pdb; pdb.set_trace()
 
@@ -453,7 +469,7 @@ class Project (object) :
         if self.isCompleteComponent(cName) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
-            for cid in self.projConfig['Components'][cName]['cidList'] :
+            for cid in self.getSubcomponentList(cName) :
                 cidName = getRapumaCName(cid)
                 if self.isCompleteComponent(cidName) :
                     self.uninstallComponent(cidName, force)
@@ -529,6 +545,28 @@ class Project (object) :
             return False
 
 
+    def updateComponent (self, cName, source = None) :
+        '''Update a component, --source is optional but if given it will
+        overwrite the current setting. The use of this function implies
+        that this is forced so no force setting is used.'''
+
+        force = True
+        
+        # Check to be sure we are working with the real cName
+        getRapumaCName(cName)
+
+        # Be sure the component (and subcomponents) is unlocked
+        if self.isLocked(cName) :
+            self.lockUnlock(cName, False, force)
+
+        # Here we essentially re-add the component
+        cType = self.getComponentType(cName)
+        cidList = self.getSubcomponentList(cName)
+        if not source :
+            source = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+        self.addComponent(cType, cName, source, cidList, force)
+
+
 ###############################################################################
 ############################### Locking Functions #############################
 ###############################################################################
@@ -556,7 +594,7 @@ class Project (object) :
 
         # If force is set, set locks on subcomponents
         if force :
-            for cid in self.projConfig['Components'][cName]['cidList'] :
+            for cid in self.getSubcomponentList(cName) :
                 cidName = getRapumaCName(cid)
                 self.setLock(cidName, lock)
 
@@ -592,7 +630,7 @@ class Project (object) :
 
         # First test to see if we can run, quite if not
         if self.isCompleteComponent(cName) :
-            cType = self.projConfig['Components'][cName]['type']
+            cType = self.getComponentType(cName)
         else :
             self.log.writeToLog('PREP-010', [cType])
             dieNow()
@@ -621,10 +659,10 @@ class Project (object) :
                 return False
 
         # If we made it this far, we can try running it
-        for cid in self.projConfig['Components'][cName]['cidList'] :
+        for cid in self.getSubcomponentList(cName) :
             cidName = getRapumaCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
-                cType = self.projConfig['Components'][cidName]['type']
+                cType = self.getComponentType(cidCName)
                 target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
                 if os.path.isfile(script) :
                     # subprocess will fail if permissions are not set on the
@@ -870,36 +908,19 @@ class Project (object) :
         # Will need the stylesheet for copy
         projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
         projSty = os.path.join(self.local.projStylesFolder, projSty)
-        if testForSetting(self.projConfig['Components'][cName], 'cidList') :
-            # Process as list of components
+        # Process as list of components
 
-            self.log.writeToLog('XPRT-040')
-            for cid in self.projConfig['Components'][cName]['cidList'] :
-                cidCName = getRapumaCName(cid)
-                ptName = formPTName(self.projConfig, cid)
-                # Test, no name = no success
-                if not ptName :
-                    self.log.writeToLog('XPRT-010')
-                    dieNow()
-
-                target = os.path.join(path, ptName)
-                source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
-                # If shutil.copy() spits anything back its bad news
-                if shutil.copy(source, target) :
-                    self.log.writeToLog('XPRT-020', [fName(target)])
-                else :
-                    fList.append(target)
-        else :
-            # Process an individual component
-            cid = getUsfmCid(cName)
-            ptName = formPTName(self.projConfig, cName)
+        self.log.writeToLog('XPRT-040')
+        for cid in self.getSubcomponentList(cName) :
+            cidCName = getRapumaCName(cid)
+            ptName = formPTName(self.projConfig, cid)
             # Test, no name = no success
             if not ptName :
                 self.log.writeToLog('XPRT-010')
                 dieNow()
 
             target = os.path.join(path, ptName)
-            source = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+            source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
             # If shutil.copy() spits anything back its bad news
             if shutil.copy(source, target) :
                 self.log.writeToLog('XPRT-020', [fName(target)])
@@ -1141,8 +1162,8 @@ class Project (object) :
                 cName = comp
                 cid = getUsfmCid(comp)
 
-            cType = self.projConfig['Components'][cName]['type']
-            cidList = self.projConfig['Components'][cName]['cidList']
+            cType = self.getComponentType(cName)
+            cidList = self.getSubcomponentList(cName)
             if len(cidList) > 1 :
                 self.log.writeToLog('EDIT-010', [cName])
                 dieNow()

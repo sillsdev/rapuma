@@ -230,17 +230,14 @@ def getUsfmName (cid) :
 
 
 def getRapumaCName (cid) :
-    '''Look up and return the Rapuma component name for a valid cid.'''
+    '''Look up and return the Rapuma component name for a valid cid.
+    But if the cid happens to be a cName already, that will be returned.'''
 
     if hasUsfmCidInfo(cid) :
         return getUsfmCidInfo(cid)[1]
-
-
-#def getUsfmCName (cid) :
-#    '''Look up and return the actual name for a valid cid.'''
-
-#    if hasUsfmCidInfo(cid) :
-#        return getUsfmCidInfo(cid)[0]
+    else :
+        # FIXME: This seems a little weak. What if the cid is an invalid cName?
+        return cid
 
 
 def getUsfmCid (cName) :
