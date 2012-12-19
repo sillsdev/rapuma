@@ -85,6 +85,7 @@ class ProjLog (object) :
             'COMP-140' : ['ERR', 'Failed to remove old component for [<<1>>] on force install.'],
             'COMP-150' : ['ERR', 'Component [<<1>>] not found. Cannot remove.'],
             'COMP-160' : ['ERR', 'Component source path given [<<1>>] not found. Process halted!'],
+            'COMP-170' : ['ERR', 'Component source path not found. Use -s (source) to indicate where source files are to be found. Process halted!'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

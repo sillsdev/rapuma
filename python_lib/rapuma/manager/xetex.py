@@ -691,7 +691,7 @@ class Xetex (Manager) :
         self.makeCNameTexFile(cNameTex)
 
         # Dynamically create a dependency list for the render process
-        dep = [cNameTex]
+        dep = [cNameTex, self.extFileName]
         for cid in self.projConfig['Components'][self.cName]['cidList'] :
             cidCName = getRapumaCName(cid)
             cType = self.projConfig['Components'][self.cName]['type']

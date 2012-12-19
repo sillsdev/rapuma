@@ -238,13 +238,46 @@ def runExamplePubDemoProject (demoID) :
 ########################## Archive Project Functions ##########################
 ###############################################################################
 
-def archiveProject (aid, path = None) :
+def backupProject (pid) :
+    '''Backup a project. Send the compressed backup file to the user-specified
+    backup folder. If none is specified, put the archive in cwd. If a valid
+    path is specified, send it to that location. This is a very simplified
+    backup so it will only keep one copy in any given location. If another
+    copy exists, it will overwrite it.'''
+
+    # Check to see if the pid is valid in the system (it has to be)
+    if isProject(pid) :
+        projHome = uc.userConfig['Projects'][pid]['projectPath']
+    else :
+        terminal('\nError: The project ID given is not valid: [' + pid + ']\n')
+        dieNow()
+
+    # Set some paths and file names
+    backupName = pid + '.zip'
+    userBackups = uc.userConfig['Resources']['backups']
+    backupTarget = ''
+    if os.path.isdir(userBackups) :
+        backupTarget = os.path.join(userBackups, backupName)
+    else :
+        terminal('\nError: User backup storage path not yet configured!\n')
+        dieNow()
+
+    zipUpProject(projHome, backupTarget)
+
+    # Finish here
+    terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget)
+
+
+def archiveProject (pid, path = None) :
     '''Archive a project. Send the compressed archive file to the user-specified
     archive folder. If none is specified, put the archive in cwd. If a valid
-    path is specified, send it to that location.'''
+    path is specified, send it to that location. Like backup, this too will
+    overwrite any existing file of the same name. The difference is that this
+    will also disable the project so it cannot be accesses by Rapuma. When a
+    project is archived, all work should cease on the project.'''
 
     # Make a private project object just for archiving
-    aProject = initProject(aid)
+    aProject = initProject(pid)
     # Set some paths and file names
     archName = aProject.projectIDCode + '.rapuma'
     userArchives = uc.userConfig['Resources']['archives']
@@ -265,49 +298,56 @@ def archiveProject (aid, path = None) :
         terminal('\nError: Cannot resolve a path to create the archive file!\n')
         dieNow()
 
-    # Do the zip magic here
-    # First list some types we don't want to include in our archive
-    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
-    # Now list the full file names of any excptions to the above type exclusions
-    excludeException = ['rapuma.log']
-    root_len = len(aProject.local.projHome)
-    with zipfile.ZipFile(archTarget, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
-        for root, dirs, files in os.walk(aProject.local.projHome):
-            # Chop off the part of the path we do not need to store
-            archive_root = os.path.abspath(root)[root_len:]
-            for f in files:
-                if not f[-1] == '~' :
-                    fn, fx = os.path.splitext(f)
-                    if not fx in excludeType or f in excludeException :
-                        fullpath = os.path.join(root, f)
-                        archive_name = os.path.join(archive_root, f)
-                        myzip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
+    zipUpProject(aProject.local.projHome, archTarget)
 
     # Rename the source dir to indicate it was archived
     os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
 
     # Remove references from user rapuma.conf
-    if uc.unregisterProject(aid) :
-        terminal('Removed [' + aid + '] from user configuration.')
+    if uc.unregisterProject(pid) :
+        terminal('Removed [' + pid + '] from user configuration.')
     else :
-        terminal('Error: Failed to remove [' + aid + '] from user configuration.')
+        terminal('Error: Failed to remove [' + pid + '] from user configuration.')
 
     # Finish here
-    terminal('Archive for [' + aid + '] created and saved to: ' + archTarget)
+    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
 
 
-def restoreArchive (aid, path = None) :
-    '''Restore a project from the user specified archive storage area. If that
-    is not set, it will look for the archive (aid.zip) in cwd. Use path to
+def zipUpProject (source, target = None) :
+    '''Zip up a project and deposit it to target location.'''
+
+    # Do the zip magic here
+    # First list some types we don't want to include in our archive
+    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
+    # Now list the full file names of any excptions to the above type exclusions
+    excludeException = ['rapuma.log']
+    root_len = len(source)
+    with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
+        for root, dirs, files in os.walk(source):
+            # Chop off the part of the path we do not need to store
+            zip_root = os.path.abspath(root)[root_len:]
+            for f in files:
+                if not f[-1] == '~' :
+                    fn, fx = os.path.splitext(f)
+                    if not fx in excludeType or f in excludeException :
+                        fullpath = os.path.join(root, f)
+                        zip_name = os.path.join(zip_root, f)
+                        myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
+
+
+def restoreArchive (pid, path = None) :
+    '''Restore a project from the user specified storage area. If that
+    is not set, it will look for the archive (pid.rapuma) in cwd. Use path to
     specify where the project will be restored. Rapuma will register the project
     there. Otherwise, it will restore to cwd and register it there.'''
 
     # Check to see if the user included the extention
     try :
-        aid.split('.')[1] == 'rapuma'
-        archName = aid
+        pid.split('.')[1] == 'rapuma'
+        archName = pid
+        pid = pid.split('.')[0]
     except :
-        archName = aid + '.rapuma'
+        archName = pid + '.rapuma'
 
     archSource = ''
     archTarget = ''
@@ -338,13 +378,17 @@ def restoreArchive (aid, path = None) :
             terminal('\nError: The path given is not valid: [' + path + ']\n')
             dieNow()
         else :
-            archTarget = os.path.join(path, aid)
+            archTarget = os.path.join(path, pid)
     else :
-        archTarget = os.path.join(projHome, aid)
+        archTarget = os.path.join(projHome, pid)
 
     # If we made it this far, extract the archive
     with zipfile.ZipFile(archSource, 'r') as myzip :
         myzip.extractall(archTarget)
+
+    # Permission for executables is lost in the zip, fix it here
+    for folder in ['Scripts', os.path.join('Macros', 'User')] :
+        fixExecutables(os.path.join(archTarget, folder))
 
     # Add project to local Rapuma project registry
     # To do this we need to open up the restored project config file
@@ -356,7 +400,56 @@ def restoreArchive (aid, path = None) :
     uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
     # Finish here
-    terminal('\nRapuma archive [' + aid + '] has been restored to: ' + archTarget + '\n')
+    terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
+
+
+def restoreBackup (pid) :
+    '''Restore a project from the user specified storage area. If that
+    is not set, it will look for the backup (pid.zip) in cwd. Use path to
+    specify where the project will be restored. Rapuma will register the project
+    there. Otherwise, it will restore to cwd and register it there.'''
+
+    # Check to see if the user included the extention
+    try :
+        pid.split('.')[1] == 'zip'
+        backName = pid
+        pid = pid.split('.')[0]
+    except :
+        backName = pid + '.zip'
+
+    # Check to see if the pid is valid in the system (it has to be)
+    if isProject(pid) :
+        projHome = uc.userConfig['Projects'][pid]['projectPath']
+    else :
+        terminal('\nError: The project ID given is not valid: [' + pid + ']\n')
+        dieNow()
+
+    # Check to see if the archive exsists
+    try :
+        if os.path.isdir(uc.userConfig['Resources']['backups']) :
+            backup = os.path.join(uc.userConfig['Resources']['backups'], backName)
+    except :
+        terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
+        dieNow()
+
+    # Make the exsiting project a temp backup in case something goes wrong
+    if os.path.isdir(projHome) :
+        # Remove old backup-backup
+        if os.path.isdir(projHome + '.bak') :
+            shutil.rmtree(projHome + '.bak')
+        # Make a fresh copy of the backup-backup
+        shutil.copytree(projHome, projHome + '.bak')
+
+    # If we made it this far, extract the archive
+    with zipfile.ZipFile(backup, 'r') as myzip :
+        myzip.extractall(projHome)
+
+    # Permission for executables is lost in the zip, fix it here
+    for folder in ['Scripts', os.path.join('Macros', 'User')] :
+        fixExecutables(os.path.join(projHome, folder))
+
+    # Finish here (We will leave the backup-backup in place)
+    terminal('\nRapuma backup [' + pid + '] has been restored to: ' + projHome + '\n')
 
 
 def makeProjectScripts (uc, pid) :
@@ -369,9 +462,10 @@ def makeProjectScripts (uc, pid) :
     projHome = uc.userConfig['Projects'][pid]['projectPath']
     local       = ProjLocal(rapumaHome, userHome, projHome)
     cType = 'usfm'
-    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update'] :
+    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update', 'archive'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write('#!/bin/sh\n\n')
             writeObject.write('# Rapuma automation script: ' + script + '\n\n')
             if script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
@@ -387,6 +481,8 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
             elif script == 'update' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
+            elif script == 'archive' :
+                writeObject.write('rapuma archive ' + pid + ' -a \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)
@@ -422,7 +518,8 @@ def userArguments (args) :
         if sys.argv[1].lower() == 'example' :
             runExamplePubDemoProject(args['demo_id'])
         elif sys.argv[1].lower() == 'archive' and args['restore'] :
-            restoreArchive(args['project_id'], args['path'])
+            pass
+#            restoreArchive(args['project_id'], args['path'])
         elif not isProject(args['project_id']) :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
         else :
@@ -475,12 +572,8 @@ def userArguments (args) :
         if args['add'] :
             if not args['id_list'] :
                 sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
-#            elif not args['source'] :
-#                sys.exit('\nERROR: Must provide -s (--source) when adding a component. Process halted!\n')
-#            elif not os.path.exists(resolvePath(args['source'])) :
-#                sys.exit('\nERROR: Must provide a valid source path when adding a component. Process halted!\n')
             else :
-                aProject.addComponent(args['component_type'], args['component_name'], resolvePath(args['source']), args['id_list'], args['force'])
+                aProject.addComponent(args['component_type'], args['component_name'], args['id_list'], args['source'], args['force'])
         # Delete a component
         elif args['update'] :
             # Update a component, --source is optional but if given it will
@@ -635,14 +728,17 @@ def userArguments (args) :
 
     # Commands to archive a project
     elif sys.argv[1].lower() == 'archive' :
-        if args['archive'] :
-            archiveProject(args['project_id'], args['path'])
-        # This should have been caught first thing but we'll keep it here just in case.
-        elif args['restore'] :
+        if args['archive'] and args['restore'] :
             restoreArchive(args['project_id'], args['path'])
+        elif args['backup'] and args['restore'] :
+            restoreBackup(args['project_id'])
+        elif args['archive'] :
+            archiveProject(args['project_id'], args['path'])
+        elif args['backup'] :
+            backupProject(args['project_id'])
         else :
             # Bad command
-            sys.exit('\nERROR: Must provide -a or -r (-p optional) Process halted!\n')
+            sys.exit('\nERROR: Must provide -a or -b with -c or -r with optional -p. Process halted!\n')
 
     # Commands for editing project files
     elif sys.argv[1].lower() == 'edit' :
@@ -822,7 +918,8 @@ exampleCommand.add_argument('demo_id', help=' A project/demo ID for the example 
 archiveCommand = subparsers.add_parser('archive', help='Commands for archiving a project.')
 archiveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive. This must be a currently operational project.')
 archiveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration. If nothing is specified, the default is the directory where the project is found.')
-archiveCommand.add_argument('-r', '--restore', action='store_true', help='Restore the specified project from the archive storage area specified in the user configuration to the current working directory, unless a path (-p) is specified.')
+archiveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration. If nothing is specified, the default is the directory where the project is found.')
+archiveCommand.add_argument('-r', '--restore', action='store_true', help='Restore the specified project from the archive or backup storage area specified in the user configuration to the current working directory, unless a path (-p) is specified.')
 archiveCommand.add_argument('-p', '--path', help='Specify the path to where you wish add the archive to, or restore from. If no path is given, the default is the current working directory for both sides of the operation (from -> to).')
 
 # Add Project edit subprocess arguments

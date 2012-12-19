@@ -66,18 +66,14 @@ def isOlder (child, parent) :
 
 
 def isExecutable (fn) :
-    '''Use the file exention to determine if a file is an executable script 
-    or not. This may need to be expanded as use cases arrise. Simple is
-    good for now. This will test for exsistance and extention type. This
-    function will fail if the file does not have an extention.'''
+    '''All executable scripts should have a she-bang line that
+    starts with '#!' this will look for that and return True
+    if it finds it.'''
 
-    try :
-        if os.path.isfile(fn) :
-            if fName(fn) == 'rapumaDemo' or fName(fn).split('.')[1] in ['sh', 'py'] :
-                return True
-    except Exception as e :
-        # If we don't succeed, we should probably quite here
-        dieNow('Error: Little problem with tools.isExecutable(): ' + str(e) + '  File: ' + fn)
+    fh = open(fn, 'r')
+    for l in fh :
+        if l[:2] == '#!' :
+            return True
 
 
 def makeExecutable (fileName) :
@@ -88,6 +84,19 @@ def makeExecutable (fileName) :
     permissions to 777 may not be the best way but it will work for now. '''
 
     os.chmod(fileName, int("0777", 8))
+
+
+def fixExecutables (scriptDir) :
+    '''Go through a folder and set permission on executables.'''
+
+    try :
+        for subdir, dirs, files in os.walk(scriptDir):
+            for f in files:
+                if isExecutable(os.path.join(subdir, f)) :
+                    makeExecutable(os.path.join(subdir, f))
+    except Exception as e :
+        # If this doesn't work, we should probably quite here
+        dieNow('Error: fixExecutables() failed with this error: ' + str(e))
 
 
 def makeReadOnly (fileName) :

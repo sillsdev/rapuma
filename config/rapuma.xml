@@ -136,6 +136,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Backup Projects Path</name>
+            <key>backups</key>
+            <description>The full path to where backups are kept on this system that the user will need access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

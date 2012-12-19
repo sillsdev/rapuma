@@ -311,7 +311,7 @@ class Project (object) :
             dieNow()
 
 
-    def addComponent (self, cType, cName, source, cidList, force = False) :
+    def addComponent (self, cType, cName, cidList, newSource = None, force = False) :
         '''This handels adding a component which can contain one or more sub-components.'''
 
         # Check for cName setting
@@ -319,21 +319,29 @@ class Project (object) :
         if not self.cName :
             self.cName = cName
 
-        # Record source path is not done already
-        if not self.hasSourcePath(cType) :
-            if source :
-                cleanPath = resolvePath(source)
-                if os.path.isdir(cleanPath) :
-                    self.addCompTypeSourcePath(cType, cleanPath)
-                    source = cleanPath
-                else :
-                    self.log.writeToLog('COMP-160', [source])
-                    dieNow()
+        # Work out the source path
+        oldSource = ''
+        if newSource :
+            newSource = resolvePath(newSource)
+            if not os.path.isdir(newSource) :
+                self.log.writeToLog('COMP-160', [source])
+                dieNow()
+
+        if self.hasSourcePath(cType) :
+            if os.path.isdir(self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']) :
+                oldSource = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+
+        if newSource :
+            source = newSource
+        elif oldSource :
+            source = oldSource
+        else :
+                self.log.writeToLog('COMP-170')
+                dieNow()
 
         # Adjust the path if the process is forced
         if force :
-            if not self.sourceIsSame(cType, source) :
-                self.addCompTypeSourcePath(cType, source)
+            self.addCompTypeSourcePath(cType, source)
 
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
@@ -564,7 +572,7 @@ class Project (object) :
         cidList = self.getSubcomponentList(cName)
         if not source :
             source = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-        self.addComponent(cType, cName, source, cidList, force)
+        self.addComponent(cType, cName, cidList, source, force)
 
 
 ###############################################################################
@@ -662,7 +670,7 @@ class Project (object) :
         for cid in self.getSubcomponentList(cName) :
             cidName = getRapumaCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
-                cType = self.getComponentType(cidCName)
+                cType = self.getComponentType(cidName)
                 target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
                 if os.path.isfile(script) :
                     # subprocess will fail if permissions are not set on the
@@ -1107,7 +1115,6 @@ class Project (object) :
         return True
 
 
-
     def runMacro (self, name) :
         '''Run an installed, user defined macro.'''
 
@@ -1187,6 +1194,18 @@ class Project (object) :
             for files in os.listdir(self.local.projConfFolder):
                 if files.endswith(".conf"):
                     editDocs.append(os.path.join(self.local.projConfFolder, files))
+
+            globSty = os.path.join(self.local.projStylesFolder, self.projConfig['Managers']['usfm_Style']['mainStyleFile'])
+            custSty = os.path.join(self.local.projStylesFolder, self.projConfig['Managers']['usfm_Style']['customStyleFile'])
+            if os.path.isfile(globSty) :
+                editDocs.append(globSty)
+            if os.path.isfile(custSty) :
+                editDocs.append(custSty)
+
+            # FIXME: This next part is hard-wired, be nice to do better
+            fileName = 'xetex_settings_usfm-ext.tex'
+            macExt = os.path.join(self.local.projMacrosFolder, 'usfmTex', fileName)
+            editDocs.append(macExt)
 
         # Look at system setting files
         if sys :
