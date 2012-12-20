@@ -8,11 +8,6 @@
 % your publication throws you a curve, perhaps one of these
 % work-arounds might help you do what you want to do.
 
-% Instead of putting the raw characters in the working text we will use
-% special markup so that they are easily identified.
-\def\nbsp{ }
-\def\zwsp{​}
-
 % Process \b 
 % This is often frowned upon but if you want to add extra
 % spaces around poetry, uncomment this next line.
@@ -28,17 +23,6 @@
 % Baselineskip Adjustment Hook Example
 %\sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
 %\sethook{after}{s1}{\baselineskip=\remblskip}
-
-%%%%% WORKING TEXT LINE SPACING
-%%%%% Take out a little space between lines in working text
-\def\suckupline{\vskip -\baselineskip}
-\def\suckuphalfline{\vskip -0.5\baselineskip}
-\def\suckupqline{\vskip -0.25\baselineskip}
-
-%%%%% Skip some space in the working text
-\def\skipline{\vskip\baselineskip}
-\def\skiphalfline{\vskip 0.5\baselineskip}
-\def\skipqline{\vskip 0.25\baselineskip}
 
 %%%%% Additional Marginal Verse Settings
 % For marginal verse output we need to insert this right here.
@@ -204,15 +188,6 @@
   \leaders\hbox to \leaderspace{\hss\tocbn \myleader\tocbn*\hss}\hfil
   \enskip\tocpg #3\tocpg*\par}%
 
-\catcode `@=12
-
-
-%%%%%%%%%%%%%%%%%%%%% Map Handling %%%%%%%%%%%%%%%%%%%%%
-
-%%%%% Place The Map PDF File
-% This will place a PDF map file on the typeset page
-\catcode`@=11
-\def\domap#1{\vbox to \the\textheight{\vfil\noindent\hfil\XeTeXpdffile #1 width \the\textwidth \hfil\par\vfil}\eject}%
 \catcode `@=12
 
 
