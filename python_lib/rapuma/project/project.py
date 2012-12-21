@@ -331,13 +331,19 @@ class Project (object) :
             if os.path.isdir(self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']) :
                 oldSource = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
 
+        # If the new source is valid, we will add that to the config now
+        # so that processes to follow will have that setting available.
         if newSource :
             source = newSource
+            self.projConfig['CompTypes'][cType.capitalize()]['sourcePath'] = newSource
+            writeConfFile(self.projConfig)
+        # If there is no newSource, then the status quo will work okay
         elif oldSource :
             source = oldSource
+        # No new or old source means we are hossed
         else :
-                self.log.writeToLog('COMP-170')
-                dieNow()
+            self.log.writeToLog('COMP-170')
+            dieNow()
 
         # Adjust the path if the process is forced
         if force :

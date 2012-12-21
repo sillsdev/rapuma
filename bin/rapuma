@@ -459,10 +459,12 @@ def makeProjectScripts (uc, pid) :
     this time (20121217). It assumes the cType is usfm which, at some point
     may not be the case.'''
 
-    projHome = uc.userConfig['Projects'][pid]['projectPath']
-    local       = ProjLocal(rapumaHome, userHome, projHome)
+    projHome            = uc.userConfig['Projects'][pid]['projectPath']
+    local               = ProjLocal(rapumaHome, userHome, projHome)
     cType = 'usfm'
-    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update', 'archive'] :
+    if not os.path.isdir(local.projScriptsFolder) :
+        os.mkdir(local.projScriptsFolder)
+    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update', 'archive', 'backup'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -483,6 +485,8 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
             elif script == 'archive' :
                 writeObject.write('rapuma archive ' + pid + ' -a \n\n')
+            elif script == 'backup' :
+                writeObject.write('rapuma archive ' + pid + ' -b \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)

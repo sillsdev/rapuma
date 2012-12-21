@@ -555,25 +555,33 @@ class Xetex (Manager) :
         return True
 
 
-    def makeCidTexFile (self) :
-        '''Create the TeX control files for all a component's subcomponents.'''
+    def makeCidTexFile (self, cid) :
+        '''Create the TeX control file for a subcomponent. The component control
+        file will call this to process the working text.'''
 
-        for cid in self.projConfig['Components'][self.cName]['cidList'] :
-            cidCName = getRapumaCName(cid)
-            cidFolder = os.path.join(self.projComponentsFolder, cidCName)
-            cidTex = os.path.join(cidFolder, cid + '.tex')
-            cidUsfm = os.path.join(cidFolder, cid + '.usfm')
-            # Write out the cidTex file
-            with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
-                cidTexObject.write(self.texFileHeader(fName(cidTex)))
-                # User sty and macro extentions are optional at the cid level
-                if os.path.isfile(os.path.join(cidFolder, cid + '-ext.tex')) :
-                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '-ext.tex') + '}\n')
-                if os.path.isfile(os.path.join(cidFolder, cid + '.sty')) :
-                    cNameTexObject.write('\\stylesheet{' + os.path.join(cidFolder, cid + '.sty') + '}\n')
-                # The cid is not optional!
-                if self.checkDepCidUsfm(cidUsfm) :
-                    cidTexObject.write('\\ptxfile{' + quotePath(cidUsfm) + '}\n')
+        # Build necessary file names
+        cidCName    = getRapumaCName(cid)
+        cidFolder   = os.path.join(self.projComponentsFolder, cidCName)
+        cidTex      = os.path.join(cidFolder, cid + '.tex')
+        cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
+        cidTexExt   = os.path.join(cidFolder, cid + '-ext.tex')
+        cidSty      = os.path.join(cidFolder, cid + '.sty')
+
+
+        # Write out the cidTex file
+        with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
+            cidTexObject.write(self.texFileHeader(fName(cidTex)))
+            # User sty and macro extentions are optional at the cid level
+            if os.path.isfile(os.path.join(cidTexExt)) :
+                cNameTexObject.write('\\input \"' + cidTexExt + '\"\n')
+            if os.path.isfile(os.path.join(cidSty)) :
+                cNameTexObject.write('\\stylesheet{' + cidSty + '}\n')
+            # The cid is not optional!
+            if self.checkDepCidUsfm(cidUsfm) :
+                cidTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
+            else :
+                self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
+                dieNow()
 
         return True
 
@@ -603,16 +611,17 @@ class Xetex (Manager) :
                     if self.checkDepGlobStyFile() :
                         cNameTexObject.write('\\stylesheet{' + self.globSty + '}\n')
                     # Custom sty file at the global level is optional as is hyphenation
-                    if self.customStyleFile :
+                    if self.custSty :
                         cNameTexObject.write('\\stylesheet{' + self.custSty + '}\n')
                     if self.checkDepHyphenFile() :
                         cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
-                    # Create the cidUsfm list which is one or more cid components
+                    # Create the cidTex list which is one or more cid components
                     for cid in self.projConfig['Components'][self.cName]['cidList'] :
                         cidCName = getRapumaCName(cid)
-                        cidUsfm = os.path.join(self.projComponentsFolder, cidCName, cid + '.usfm')
-                        if self.checkDepCidUsfm(cidUsfm) :
-                            cNameTexObject.write('\\ptxfile{' + quotePath(cidUsfm) + '}\n')
+                        cidTex = os.path.join(self.projComponentsFolder, cidCName, cid + '.tex')
+                        if self.checkDepCidTex(cid) :
+                            print 'checking: ', cidTex
+                            cNameTexObject.write('\\input \"' + cidTex + '\"\n')
                     # This can only hapen once in the whole process, this marks the end
                     cNameTexObject.write('\\bye\n')
 
@@ -649,11 +658,49 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
                 return True
         else :
+            return False
+
+
+    def checkDepCidTex (self, cid) :
+        '''Check for the exsistance of the cidTex dependent file. Request one to
+        be made if it is not there and Return True.'''
+
+        # Build necessary file names
+        cidCName    = getRapumaCName(cid)
+        cidFolder   = os.path.join(self.projComponentsFolder, cidCName)
+        cidTex      = os.path.join(cidFolder, cid + '.tex')
+        cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
+        cidTexExt   = os.path.join(cidFolder, cid + '-ext.tex')
+        cidSty      = os.path.join(cidFolder, cid + '.sty')
+
+        # Must be a cidUsfm file to continue
+        if not os.path.isfile(cidUsfm) :
+            self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
+            dieNow()
+
+        # Just make it if it is not there
+        if not os.path.isfile(cidTex) :
+            if self.makeCidTexFile(cid) :
+                self.project.log.writeToLog('XTEX-065', [fName(cidTex)])
+                return True
+        else :
+            # Do not (re)make it unless a dependent has changed
+            dep = [cidTexExt, cidSty, cidUsfm]
+            for f in dep :
+                # Weed out unused files
+                if not os.path.isfile(f) :
+                    continue
+
+                if isOlder(cidTex, f) :
+                    if self.makeCidTexFile(cid) :
+                        self.project.log.writeToLog('XTEX-065', [fName(cidTex)])
+            # Not sure if returning True here is good or not
             return True
 
 
     def checkDepCidUsfm (self, cidUsfm) :
         '''Check for the exsistance of the cidUsfm dependent file. Return
+
         True if it is there or report and die if it is not.'''
 
         if not os.path.isfile(cidUsfm) :
@@ -677,9 +724,6 @@ class Xetex (Manager) :
             if os.path.isfile(cNamePdf) :
                 os.remove(cNamePdf)
 
-        # Make our subcomponent's control files first
-        self.makeCidTexFile()
-
         # Create, if necessary, the cName.tex file
         cNameTex = os.path.join(self.cNameFolder, self.cName + '.tex')
         # First, go through and make/update any dependency files
@@ -691,7 +735,7 @@ class Xetex (Manager) :
         self.makeCNameTexFile(cNameTex)
 
         # Dynamically create a dependency list for the render process
-        dep = [cNameTex, self.extFileName]
+        dep = [cNameTex, self.extFile]
         for cid in self.projConfig['Components'][self.cName]['cidList'] :
             cidCName = getRapumaCName(cid)
             cType = self.projConfig['Components'][self.cName]['type']
@@ -707,7 +751,6 @@ class Xetex (Manager) :
         # Render if cNamePdf is older or is missing
         for d in dep :
             if isOlder(cNamePdf, d) or not os.path.isfile(cNamePdf) :
-
                 # Create the environment that XeTeX will use. This will be temporarily set
                 # by subprocess.call() just before XeTeX is run.
                 texInputsLine = self.project.local.projHome + ':' \
