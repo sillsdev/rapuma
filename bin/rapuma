@@ -577,31 +577,34 @@ def makeProjectScripts (uc, pid) :
     cType = 'usfm'
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
-    for script in ['view', 'render', 'edit', 'addOT', 'addNT', 'addBible', 'update', 'archive', 'backup'] :
+    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'edit', 'export', \
+                    'render', 'template', 'update', 'view'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
             writeObject.write('# Rapuma automation script: ' + script + '\n\n')
-            if script == 'view' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
-            elif script == 'render' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
-            elif script == 'edit' :
-                writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
-            elif script == 'addOT' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"\n\n')
+            if script == 'addBible' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
             elif script == 'addNT' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
-            elif script == 'addBible' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
-            elif script == 'update' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
+            elif script == 'addOT' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"\n\n')
             elif script == 'archive' :
                 writeObject.write('rapuma preserve ' + pid + ' -a \n\n')
             elif script == 'backup' :
                 writeObject.write('rapuma preserve ' + pid + ' -b \n\n')
+            elif script == 'edit' :
+                writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
+            elif script == 'export' :
+                writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
+            elif script == 'render' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
             elif script == 'template' :
-                writeObject.write('rapuma preserve ' + pid + ' -t \n\n')
+                writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
+            elif script == 'update' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
+            elif script == 'view' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)
