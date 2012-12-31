@@ -143,6 +143,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Project Templates Path</name>
+            <key>templates</key>
+            <description>The full path to where templates are kept on this system that the user will need access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

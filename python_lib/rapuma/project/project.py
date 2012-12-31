@@ -99,7 +99,6 @@ class Project (object) :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
             self.log.writeToLog('PROJ-005', [fullName])
-#            return self.managers[fullName]
 
 
     def loadManager (self, cType, mType) :
@@ -116,7 +115,8 @@ class Project (object) :
 
 
     def addManager (self, cType, mType) :
-        '''Create a manager reference in the project config that components will point to.'''
+        '''Create a manager reference in the project config that components
+        will point to.'''
 #        import pdb; pdb.set_trace()
 
         fullName = cType + '_' + mType.capitalize()

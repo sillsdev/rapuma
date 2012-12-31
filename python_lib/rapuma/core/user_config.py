@@ -96,8 +96,8 @@ class UserConfig (object) :
 
 
     def registerProject (self, pid, pname, pmid, projHome) :
-        '''If it is already not there, add information about this project to the
-        user's rapuma.conf located in the user's config folder.'''
+        '''If it is not there, create an entry in the user's
+        rapuma.conf located in the user's config folder.'''
 
         if not self.isRegisteredProject(pid) :
 

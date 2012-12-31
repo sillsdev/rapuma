@@ -66,14 +66,23 @@ def isOlder (child, parent) :
 
 
 def isExecutable (fn) :
-    '''All executable scripts should have a she-bang line that
-    starts with '#!' this will look for that and return True
-    if it finds it.'''
+    '''Return True if the file is an executable.'''
 
-    fh = open(fn, 'r')
-    for l in fh :
-        if l[:2] == '#!' :
+    # Define some executable types
+    executableTypes = ['py', 'sh', 'exe', 'bat', 'pl']
+
+    # Look at file extention first
+    f = fName(fn)
+    if not f.rfind('.') != -1 :
+        if f[f.rfind('.')+1:] in includeType :
             return True
+    else :
+        # If no extention, look inside to find out
+        # Most scripts have a she-bang in them
+        fh = open(fn, 'r')
+        for l in fh :
+            if l[:2] == '#!' :
+                return True
 
 
 def makeExecutable (fileName) :
@@ -167,7 +176,7 @@ def removeFromList (thisList, item) :
     '''Generic function to remove an item to any list if it is there.
     If not, just return the list contents or an empty list.'''
 
-    pass
+    terminal('\nError: This function is not implemented yet!\n')
 
 
 def str2bool (str) :
