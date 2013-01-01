@@ -577,8 +577,8 @@ def makeProjectScripts (uc, pid) :
     cType = 'usfm'
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
-    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'edit', 'export', \
-                    'render', 'template', 'update', 'view'] :
+    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'edit', \
+                     'export', 'render', 'template', 'update', 'view'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -593,6 +593,8 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma preserve ' + pid + ' -a \n\n')
             elif script == 'backup' :
                 writeObject.write('rapuma preserve ' + pid + ' -b \n\n')
+            elif script == 'compare' :
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c \n\n')
             elif script == 'edit' :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
@@ -602,7 +604,7 @@ def makeProjectScripts (uc, pid) :
             elif script == 'template' :
                 writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
             elif script == 'update' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u \n\n')
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
 
@@ -710,6 +712,8 @@ def userArguments (args) :
         elif args['validate'] :
             aProject.createManager(args['component_type'], 'text')
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
+        elif args['compare'] :
+            aProject.compareComponent(args['component_name'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -954,6 +958,7 @@ compCommand.add_argument('-i', '--id_list', help='Use this if this is a group co
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
+compCommand.add_argument('-c', '--compare', action='store_true', help='[NOT WORKING!] Compare a component with its source.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
 compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
 

@@ -162,16 +162,6 @@ class Project (object) :
         return os.path.isfile(os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType))
 
 
-    def hasCNameEntry (self, cName) :
-        '''Check for a config component entry.'''
-        buildConfSection(self.projConfig, 'Components')
-        
-#        import pdb; pdb.set_trace()
-
-        if testForSetting(self.projConfig['Components'], cName) :
-            return True
-
-
     def isCompleteComponent (self, cName) :
         '''A two-part test to see if a component has a config entry and a file.'''
 
@@ -243,6 +233,57 @@ class Project (object) :
         If not, output the errors and return False.'''
 
         self.log.writeToLog('COMP-080')
+        dieNow()
+
+
+    def hasCNameEntry (self, cName) :
+        '''Check for a config component entry.'''
+
+        buildConfSection(self.projConfig, 'Components')
+        
+#        import pdb; pdb.set_trace()
+
+        if testForSetting(self.projConfig['Components'], cName) :
+            return True
+
+
+    def compareComponent (self, cName) :
+        '''Compare a component with its source which was copied into the project
+        when the component was created. This will pull up the user's differential
+        viewer and compare the two files.'''
+
+        # First check to see if it is a valid component and get the cid
+        if self.hasCNameEntry(cName) :
+            if getUsfmCid(cName) :
+                cid = getUsfmCid(cName)
+            else :
+                self.log.writeToLog('COMP-185', [cName])
+                dieNow()
+        else :
+            # Might the cName be a cid?
+            cid = cName
+            if getRapumaCName(cid) :
+                cName = getRapumaCName(cid)
+            else :
+                self.log.writeToLog('COMP-185', [cName])
+                dieNow()
+
+        # Get the working and source file names
+        cType = self.projConfig['Components'][cName]['type']
+        working = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+        for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
+            if files.find('.source') :
+                source = os.path.join(self.local.projComponentsFolder, cName, files)
+                break
+
+        # Get diff viewer
+        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
+        try :
+            subprocess.call([diffViewer, working, source])
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('COMP-180', [str(e)])
+            dieNow()
 
 
     def createComponent (self, cName) :

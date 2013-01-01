@@ -245,7 +245,7 @@ def getUsfmCid (cName) :
 
     info = usfmCidInfo()
     for k, v in info.iteritems() :
-        if info[k][0] == cName :
+        if info[k][1] == cName :
             return k
 
 

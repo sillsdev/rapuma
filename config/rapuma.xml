@@ -90,6 +90,13 @@ Todo:
             <value>w3m</value>
         </setting>
         <setting>
+            <name>Text Differential Viewer Command</name>
+            <key>textDifferentialViewerCommand</key>
+            <description>The command needed to view a comparison between the current working file and its source.</description>
+            <type>string</type>
+            <value>meld</value>
+        </setting>
+        <setting>
             <name>Recognized Component Types</name>
             <key>recognizedComponentTypes</key>
             <description>A list of valid component types that are recognized by the Rapuma system.</description>
