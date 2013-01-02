@@ -578,7 +578,7 @@ def makeProjectScripts (uc, pid) :
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'edit', \
-                     'export', 'render', 'template', 'update', 'view'] :
+                     'export', 'render', 'template', 'update', 'view', 'watermarkOff', 'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -607,6 +607,10 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
+            elif script == 'watermarkOff' :
+                writeObject.write('rapuma settings ' + pid + ' project Managers/usfm_Illustration useWatermark False \n\n')
+            elif script == 'watermarkOn' :
+                writeObject.write('rapuma settings ' + pid + ' project Managers/usfm_Illustration useWatermark True \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)

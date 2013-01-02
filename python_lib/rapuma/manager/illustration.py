@@ -51,6 +51,7 @@ class Illustration (Manager) :
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType
+        self.Ctype                      = cType.capitalize()
         self.illustrationConfig         = ConfigObj()
         self.project                    = project
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
@@ -88,12 +89,8 @@ class Illustration (Manager) :
         watermarkFile = os.path.join(path, fileName)
         if os.path.isfile(watermarkFile) :
             if self.installIllustrationFile(fileName, path, force) :
-            
-            
-            
-# FIXME: Working here
-                print '\n\nSuccessful, now we need to register watermark file'
-
+                self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = fileName
+                writeConfFile(self.project.projConfig)
 
 
     def installIllustrationFile (self, fileName, path = None, force = False) :
@@ -133,7 +130,18 @@ class Illustration (Manager) :
     def removeIllustrationFile (self, fileName) :
         '''Remove an Illustration file from the project and conf file.'''
 
+        # Remove the file
+        projIll = os.path.join(self.projIllustrationsFolder, fileName)
+        if os.path.isfile(projIll) :
+            os.remove(projIll)
+            self.project.log.writeToLog('ILUS-050', [fileName])
 
+        # Check to see if this is a watermark file, if it is, remove config setting
+        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
+            org = self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
+            if org == fileName :
+                self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
+                writeConfFile(self.project.projConfig)
 
 
 

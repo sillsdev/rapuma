@@ -174,12 +174,11 @@ class ProjLog (object) :
             'LYOT-025' : ['MSG', 'LYOT-025 - Unassigned error message ID.'],
 
             'ILUS-000' : ['MSG', 'Illustration module messages'],
-            'ILUS-005' : ['MSG', 'ILUS-005 - Unassigned error message ID.'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
-            'ILUS-015' : ['MSG', 'ILUS-015 - Unassigned error message ID.'],
-            'ILUS-020' : ['MSG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
+            'ILUS-020' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
             'ILUS-030' : ['WRN', 'Could not copy [<<1>>] into the project illustrations folder. The file already exsists. Use Force (-f) if you need to overwrite the exsiting copy.'],
             'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
+            'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
 
             'STYL-000' : ['MSG', 'Style module messages'],
             'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],

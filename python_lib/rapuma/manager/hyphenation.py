@@ -49,8 +49,10 @@ class Hyphenation (Manager) :
 
         super(Hyphenation, self).__init__(project, cfg)
 
-
-        print "Initializing Hyphenation Manager"
+        # Set values for this manager
+        self.project                    = project
+        self.cfg                        = cfg
+        self.cType                      = cType
 
 
 # FIXME: 
