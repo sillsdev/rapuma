@@ -21,5 +21,12 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
+    <setting>
+        <name>Use Watermark</name>
+        <key>useWatermark</key>
+        <description>Turn on (or off) the use of a page watermark in this project.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
 </root>
 

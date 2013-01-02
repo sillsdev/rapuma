@@ -48,5 +48,12 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
+    <setting>
+        <name>Page Watermark File</name>
+        <key>pageWatermarkFile</key>
+        <description>The name of the file that is used for placing a watermark on the page. This file must be located in the project illustrations folder or the user illustrations resource folder. If none is specified, a default watermark file will be used if the useWatermark is set to True.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 
