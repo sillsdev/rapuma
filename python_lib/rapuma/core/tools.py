@@ -245,8 +245,8 @@ def getPersistantSettings (confSection, defaultSettingsFile) :
 # FIXME: Not sure if this next part is good or not. This will look for
 # a "None" type to be passed to it then it will replace it with an empty
 # string to outupt to the config object. This may not be the best way. 
-#                if not v :
-#                    v = ''
+                if not v :
+                    v = ''
                 newConf[k] = v
             else :
                 newConf[k] = confSection[k]

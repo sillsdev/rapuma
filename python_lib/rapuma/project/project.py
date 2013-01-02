@@ -117,7 +117,6 @@ class Project (object) :
     def addManager (self, cType, mType) :
         '''Create a manager reference in the project config that components
         will point to.'''
-#        import pdb; pdb.set_trace()
 
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
@@ -125,12 +124,20 @@ class Project (object) :
         buildConfSection(self.projConfig, 'Managers')
         if not testForSetting(self.projConfig['Managers'], fullName) :
             buildConfSection(self.projConfig['Managers'], fullName)
-            managerDefaults = getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
-            for k, v, in managerDefaults.iteritems() :
-                # Do not overwrite if a value is already there
-                if not testForSetting(self.projConfig['Managers'][fullName], k) :
-                    self.projConfig['Managers'][fullName][k] = v
 
+        # Update settings if needed
+        update = False
+        managerDefaults = getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
+        for k, v, in managerDefaults.iteritems() :
+            # Do not overwrite if a value is already there
+            if not testForSetting(self.projConfig['Managers'][fullName], k) :
+                self.projConfig['Managers'][fullName][k] = v
+                # If we are dealing with an empty string, don't bother writing out
+                # Trying to avoid needless conf updating here
+                if v != '' :
+                    update = True
+        # Update the conf if one or more settings were changed
+        if update :
             if writeConfFile(self.projConfig) :
                 self.log.writeToLog('PROJ-010',[fullName])
             else :
@@ -272,7 +279,7 @@ class Project (object) :
         cType = self.projConfig['Components'][cName]['type']
         working = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
         for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
-            if files.find('.source') :
+            if files.find('.source') > 0 :
                 source = os.path.join(self.local.projComponentsFolder, cName, files)
                 break
 

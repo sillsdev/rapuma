@@ -133,9 +133,25 @@ class Usfm (Component) :
                 else :
                     self.addDependents(cid)
 
-        # Run any hyphenation or word break routines
+            # Run any hyphenation or word break routines
 
-        # Any more stuff to run?
+            # Illustration settings
+            useIllustrations = self.project.managers[cType + '_Illustration'].useIllustrations
+            
+            # Be sure there is a watermark file listed in the conf and
+            # installed if watermark is turned on (True). Fallback on the
+            # the default if needed.
+            useWatermark = self.project.managers[cType + '_Illustration'].useWatermark
+            if useWatermark :
+                if testForSetting(self.compSettings, 'pageWatermarkFile') :
+                    # Just install a default watermark page
+                    if not self.compSettings['pageWatermarkFile'] :
+                        self.project.managers[cType + '_Illustration'].installWatermarkFile('watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+                else :
+                    # Fallback if the setting was not there to begin with
+                    self.project.managers[cType + '_Illustration'].installWatermarkFile('watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+
+            # Any more stuff to run?
 
         return True
 

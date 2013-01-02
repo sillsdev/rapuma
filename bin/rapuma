@@ -748,6 +748,17 @@ def userArguments (args) :
             if args['style_type'].lower() not in ['main', 'custom'] :
                 sys.exit('\nERROR: Style file type (-t) is either missing or incorrect.\n')
 
+    # Illustration level commands
+    elif sys.argv[1].lower() == 'illustration' :
+        aProject.createManager(args['component_type'], 'illustration')
+        manager = args['component_type'] + '_Illustration'
+        if args['add'] :
+            aProject.managers[manager].installIllustrationFile(args['add'], args['path'], args['force'])
+        elif args['watermark'] :
+            aProject.managers[manager].installWatermarkFile(args['watermark'], args['path'], args['force'])
+        elif args['remove'] :
+            aProject.managers[manager].removeIllustrationFile(args['remove'])
+
     # Preprocessing commands
     elif sys.argv[1].lower() == 'preprocess' :
         # Manage preprocess scripts for a component type. This is an automated 
@@ -973,7 +984,7 @@ fontCommand.add_argument('-f', '--force', action='store_true', help='Force the a
 fontCommand.add_argument('-m', '--main', action='store_true', help='Set, the specified (valid system) font to be the main (primary) font for this component type.')
 
 # Add style subprocess arguments
-styleCommand = subparsers.add_parser('style', help='General style handling commands help')
+styleCommand = subparsers.add_parser('style', help='General component style handling commands help')
 styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component. (This is a required positional argument.)')
 styleCommand.add_argument('style_type', help='The type of style file this is. There are two acceptable types, \"main\" and \"custom\". (This is a required positional argument.)')
@@ -982,6 +993,16 @@ styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a 
 styleCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific style file is required or to be auto-generated. Otherwise, a default will be used.')
 styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
 styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
+
+# Add illustration subprocess arguments
+illustrationCommand = subparsers.add_parser('illustration', help='General project illustration handling commands help')
+illustrationCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+illustrationCommand.add_argument('component_type', help='The component type is needed when adding an illustration to a project. (This is a required positional argument.)')
+illustrationCommand.add_argument('-a', '--add', help='Provide a file name for the illustration you wish to add to the project.')
+illustrationCommand.add_argument('-w', '--watermark', help='Provide a file name for an illustration, normally a PDF file, you wish to add to the project for use as a page watermark.')
+illustrationCommand.add_argument('-r', '--remove', help='Provide a file name for an illustration you wish to remove from the project.')
+illustrationCommand.add_argument('-p', '--path', help='If the illustration is in a unknown location, provide a valid path to where the illustration that is specified with -a.')
+illustrationCommand.add_argument('-f', '--force', action='store_true', help='Force (overwrite) an illustration of the same name in the specified project.')
 
 # Add text preprocessing subprocess arguments
 preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
