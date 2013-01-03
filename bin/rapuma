@@ -79,6 +79,12 @@ terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 ############################## Rapuma Functions ##############################
 ###########################################################################
 
+def setSystemSettings (cmdType, value) :
+    '''Function to make system settings.'''
+
+    print 'System setting not done yet'
+
+
 def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
     '''Create a new publishing project.'''
 
@@ -578,7 +584,8 @@ def makeProjectScripts (uc, pid) :
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'edit', \
-                     'export', 'render', 'template', 'update', 'view', 'watermarkOff', 'watermarkOn'] :
+                     'export', 'render', 'template', 'update', 'view', 'watermarkOff', \
+                        'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -641,8 +648,14 @@ def userArguments (args) :
             accessHtmlHelp()
             return
 
+    # System level commands
+    if sys.argv[1].lower() == 'system' :
+        if args['user_name'] :
+            setSystemSettings('userName', args['user_name'])
+# FIXME: More commands go here
+
     # Test project ID, intercept if it is an example demo
-    if sys.argv[1].lower() != 'project' :
+    elif sys.argv[1].lower() != 'project' :
         if sys.argv[1].lower() == 'example' :
             runExamplePubDemoProject(args['demo_id'])
         elif sys.argv[1].lower() == 'preserve' :
@@ -894,6 +907,10 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'edit' :
             aProject.edit(args['component'], args['global'], args['system'])
 
+    # Dummy place holder for 'system' which as processed above
+    elif sys.argv[1].lower() == 'system' :
+        pass
+
     # Dummy place holder for 'example' which as processed above
     elif sys.argv[1].lower() == 'example' :
         pass
@@ -949,6 +966,12 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
 parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
+
+# Add project subprocess arguments
+sysCommand = subparsers.add_parser('system', help='General system management commands help')
+sysCommand.add_argument('-u', '--user_name', help='Proved a name of the user who will be using this system.')
+sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
+sysCommand.add_argument('-p', '--projects', help='Proved a valid path to where the user projects will be located. (This is for a default location.)')
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
