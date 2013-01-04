@@ -124,3 +124,40 @@ class UserConfig (object) :
             return True
 
 
+    def setSystemSettings (self, cmdType, value) :
+        '''Function to make system settings.'''
+
+        if cmdType == 'userName' :
+            oldName = self.userConfig['System']['userName']
+            if oldName != value :
+                self.userConfig['System']['userName'] = value
+                # Write out the results
+                self.userConfig.write()
+                terminal('\nRapuma user name setting changed from [' + oldName + '] to [' + value + '].\n\n')
+            else :
+                terminal('\nSame name given, nothing to changed.\n\n')
+
+        elif cmdType == 'resources' :
+            # Before starting, check the path
+            path = resolvePath(value)
+            if not os.path.isdir(path) :
+                sys.exit('\nERROR: Invalid path: '  + path + '\n\nProcess halted.\n')
+
+            # Make a list of sub-folders to make in the Rapuma resources folder
+            resources = ['archives', 'backups', 'fonts', 'examples', 'illustrations', 'macros', \
+                            'scripts', 'templates']
+            for r in resources :
+                thisPath = os.path.join(path, 'Rapuma', r)
+                # Create the folder if needed
+                if not os.path.isdir(thisPath) :
+                    os.makedirs(thisPath)
+                # Record the path
+                self.userConfig['Resources'][r] = thisPath
+
+            # Write out the results
+            self.userConfig.write()
+            terminal('\nRapuma resource folder setting created/updated.\n\n')
+
+
+
+

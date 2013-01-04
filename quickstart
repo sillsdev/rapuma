@@ -1,6 +1,26 @@
 
 RAPUMA QUICK START GUIDE
 -----------------------------------------
+This will help you setup a new Rapuma installation and show you a couple, hopefully useful, exercises.
+
+
+RAPUMA SETUP
+-----------------------------------------
+Once Rapuma is installed, there really is not much setup to do. The first thing you will want to do is set the user name. To do that, use this command:
+
+    rapuma system -u "<Your Name>"
+
+Rapuma manages a number of resources. It is often nice to put those in the folder where your publishing projects are, but that is not strictly necessary. To create the group of folders where the Rapuma resources will be kept, use this command:
+
+    rapuma system -r "<valid path>"
+
+Rapuma will create a folder named "Rapuma" following the path you gave it. Inside that folder will be a number of other folders for things such as backups, archives, templates, etc.
+
+This completes the basic setup routine for Rapuma. Now you can try the examples.
+
+
+RAPUMA EXAMPLES
+-----------------------------------------
 Rapuma comes with a couple example projects that are used to demonstrate what it can do and also test the system when revisions are made. Currently, there are two example projects. The first demonstrates Rapuma's most basic project configuration with a simple small Scripture book, the book of James in English. To run this example, with your terminal open in a directory where you don't mind a project being created, type the following:
 
     rapuma example MBJAS

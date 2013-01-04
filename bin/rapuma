@@ -79,11 +79,6 @@ terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
 ############################## Rapuma Functions ##############################
 ###########################################################################
 
-def setSystemSettings (cmdType, value) :
-    '''Function to make system settings.'''
-
-    print 'System setting not done yet'
-
 
 def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
     '''Create a new publishing project.'''
@@ -651,8 +646,9 @@ def userArguments (args) :
     # System level commands
     if sys.argv[1].lower() == 'system' :
         if args['user_name'] :
-            setSystemSettings('userName', args['user_name'])
-# FIXME: More commands go here
+            uc.setSystemSettings('userName', args['user_name'])
+        elif args['resources'] :
+            uc.setSystemSettings('resources', args['resources'])
 
     # Test project ID, intercept if it is an example demo
     elif sys.argv[1].lower() != 'project' :
@@ -971,7 +967,6 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma h
 sysCommand = subparsers.add_parser('system', help='General system management commands help')
 sysCommand.add_argument('-u', '--user_name', help='Proved a name of the user who will be using this system.')
 sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
-sysCommand.add_argument('-p', '--projects', help='Proved a valid path to where the user projects will be located. (This is for a default location.)')
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
