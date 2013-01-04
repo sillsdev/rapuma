@@ -128,12 +128,10 @@ def fName (fullPath) :
 
 
 def tempName (fileName) :
-    '''Return the file name, which might include the whole path
-    with -temp added just before the final file extention. This
-    is used for creating quick on-the-fly temp file names that
-    will be deleted.'''
+    '''Return a file name with an extra .tmp extention.'''
     
-    print '\n\ntempName() not done yet!\n\n'
+    return fileName + '.tmp'
+
 
 def resolvePath (path) :
     '''Resolve the '~' in a path if there is one with the actual home path.'''

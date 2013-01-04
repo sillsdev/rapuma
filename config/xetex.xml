@@ -40,5 +40,12 @@ Todo:
         <type>list</type>
         <value>evince,-w</value>
     </setting>
+        <setting>
+            <name>PDF Utility Command</name>
+            <key>pdfUtilityCommand</key>
+            <description>The primary command needed to do PDF file manipulations. Subsequent commands need to be added at the function level.</description>
+            <type>string</type>
+            <value>pdftk</value>
+        </setting>
 </root>
 

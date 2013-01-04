@@ -110,7 +110,7 @@ class ProjLog (object) :
             'XTEX-090' : ['LOG', 'No changes to dependent files found, [<<1>>] does not need to be rerendered at this time.'],
             'XTEX-095' : ['MSG', 'Routing <<1>> to PDF viewer.'],
             'XTEX-100' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
-            'XTEX-105' : ['ERR', 'PDF viewer failed with error code number: <<1>>'],
+            'XTEX-105' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
             'XTEX-115' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],

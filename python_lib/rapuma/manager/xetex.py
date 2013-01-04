@@ -60,13 +60,14 @@ class Xetex (Manager) :
         self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
         # Config Settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
+        self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
         self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
         self.useWatermark           = self.projConfig['Managers'][self.cType + '_Illustration']['useWatermark']
-        self.pageWatermarkFile       = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
+        self.pageWatermarkFile      = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
@@ -302,13 +303,12 @@ class Xetex (Manager) :
             # Build the viewer command
             self.pdfViewer.append(pdfFile)
             # Run the XeTeX and collect the return code for analysis
-            rCode = subprocess.call(self.pdfViewer)
-
-            # Analyse the return code
-            if not rCode == int(0) :
-                self.project.log.writeToLog('XTEX-105', [rCode])
-            else :
+            try :
+                subprocess.Popen(self.pdfViewer)
                 return True
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
+                self.log.writeToLog('XTEX-105', [str(e)])
 
 
     def makeHyphenationTexFile (self) :
@@ -782,51 +782,17 @@ class Xetex (Manager) :
                     
                 break
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         # Add a watermark if required
-        print 'watermark = ', self.useWatermark
         if str2bool(self.useWatermark) :
-            
-            print 'adding water mark here'
-            cmd = ['pdftk', 'background', self.watermarkFile, 'output', cNamePdf]
-            print 'pdftk', cNamePdf, 'background ' + self.watermarkFile, 'output ' + cNamePdf
-
-            rCode = subprocess.call('pdftk', cNamePdf, 'background ' + self.watermarkFile, 'output ' + tempName(cNamePdf))
-
-# FIXME: Need to write tempName() in tools
-
-            # Analyse the return code
-            if not rCode == int(0) :
-                self.project.log.writeToLog('XTEX-140', [rCode])
-            else :
+            cmd = [self.pdfUtilityCommand, cNamePdf, 'background', self.watermarkFile, 'output', tempName(cNamePdf)]
+            try :
+                subprocess.call(cmd)
                 shutil.copy(tempName(cNamePdf), cNamePdf)
                 os.remove(tempName(cNamePdf))
-                self.project.log.writeToLog('XTEX-145', [rCode])
-
-
-
-
-
-
-
-
-
-
-
-
-
+                self.project.log.writeToLog('XTEX-145')
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
+                self.project.log.writeToLog('XTEX-140', [str(e)])
 
         # Review the results if desired
         if os.path.isfile(cNamePdf) :

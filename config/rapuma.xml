@@ -103,13 +103,6 @@ Todo:
             <type>list</type>
             <value>usfm,test</value>
         </setting>
-        <setting>
-            <name>Default Project Folder</name>
-            <key>defaultProjectFolder</key>
-            <description>The path to the default project folder. Projects created with out a specified path will go here.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
     </section>
     <section>
         <name>Resources</name>
