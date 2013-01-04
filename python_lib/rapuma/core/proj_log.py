@@ -115,6 +115,8 @@ class ProjLog (object) :
             'XTEX-115' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
             'XTEX-130' : ['LOG', 'Hyphenation TeX file [<<1>>] has been recreated.'],
+            'XTEX-140' : ['ERR', 'Failed to add watermark to [<<1>>].'],
+            'XTEX-145' : ['LOG', 'Successfully added watermark to [<<1>>].'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],

@@ -64,7 +64,9 @@ class Xetex (Manager) :
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-        self.hyphenTexFile          = self.projConfig['Managers']['usfm_Hyphenation']['hyphenTexFile']
+        self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
+        self.useWatermark           = self.projConfig['Managers'][self.cType + '_Illustration']['useWatermark']
+        self.pageWatermarkFile       = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
@@ -82,6 +84,8 @@ class Xetex (Manager) :
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
+        if self.useWatermark :
+            self.watermarkFile      = os.path.join(self.local.projIllustrationsFolder, self.pageWatermarkFile)
         # Init some Dicts
         self.ptSSFConf              = {}
 
@@ -620,7 +624,6 @@ class Xetex (Manager) :
                         cidCName = getRapumaCName(cid)
                         cidTex = os.path.join(self.projComponentsFolder, cidCName, cid + '.tex')
                         if self.checkDepCidTex(cid) :
-                            print 'checking: ', cidTex
                             cNameTexObject.write('\\input \"' + cidTex + '\"\n')
                     # This can only hapen once in the whole process, this marks the end
                     cNameTexObject.write('\\bye\n')
@@ -778,6 +781,52 @@ class Xetex (Manager) :
                     self.project.log.writeToLog('XTEX-035', [str(rCode)])
                     
                 break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # Add a watermark if required
+        print 'watermark = ', self.useWatermark
+        if str2bool(self.useWatermark) :
+            
+            print 'adding water mark here'
+            cmd = ['pdftk', 'background', self.watermarkFile, 'output', cNamePdf]
+            print 'pdftk', cNamePdf, 'background ' + self.watermarkFile, 'output ' + cNamePdf
+
+            rCode = subprocess.call('pdftk', cNamePdf, 'background ' + self.watermarkFile, 'output ' + tempName(cNamePdf))
+
+# FIXME: Need to write tempName() in tools
+
+            # Analyse the return code
+            if not rCode == int(0) :
+                self.project.log.writeToLog('XTEX-140', [rCode])
+            else :
+                shutil.copy(tempName(cNamePdf), cNamePdf)
+                os.remove(tempName(cNamePdf))
+                self.project.log.writeToLog('XTEX-145', [rCode])
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         # Review the results if desired
         if os.path.isfile(cNamePdf) :
