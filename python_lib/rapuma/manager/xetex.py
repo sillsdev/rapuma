@@ -779,7 +779,7 @@ class Xetex (Manager) :
                     self.project.log.writeToLog('XTEX-030', [fName(cNameTex), self.xetexErrorCodes[rCode], str(rCode)])
                 else :
                     self.project.log.writeToLog('XTEX-035', [str(rCode)])
-                    
+
                 break
 
         # Add a watermark if required
@@ -800,7 +800,7 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-095', [fName(cNamePdf)])
             else :
                 self.project.log.writeToLog('XTEX-100', [fName(cNamePdf)])
-        
-        
-        
+
+
+
 

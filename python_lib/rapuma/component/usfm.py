@@ -40,20 +40,29 @@ class Usfm (Component) :
     '''This class contains information about a type of component 
     used in a type of project.'''
 
+    # Shared values
+    xmlConfFile     = 'usfm.xml'
+
     def __init__(self, project, cfg) :
         super(Usfm, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project            = project
-        self.cName              = ''
-        self.cfg                = cfg
-        self.cType              = 'usfm'
-        self.Ctype              = self.cType.capitalize()
+        self.project                = project
+        self.cName                  = ''
+        self.cfg                    = cfg
+        self.cType                  = 'usfm'
+        self.Ctype                  = self.cType.capitalize()
+        self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
 
         # Check to see if this component type has been added to the 
         # proj config already
         self.project.addComponentType(self.Ctype)
-        self.compSettings = self.project.projConfig['CompTypes']['Usfm']
+        self.compSettings = self.project.projConfig['CompTypes'][self.Ctype]
+
+        # Get persistant values from the config if there are any
+        newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        if newSectionSettings != self.project.projConfig['CompTypes'][self.Ctype] :
+            self.project.projConfig['CompTypes'][self.Ctype] = newSectionSettings
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -86,6 +95,24 @@ class Usfm (Component) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+    def getCompWorkingTextAdjPath (self, cid) :
+        '''Return the full path of the cName working text adjustments file. 
+        This assumes the cName is valid.'''
+
+        cName = getRapumaCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
+
+
+    def getCidPiclistPath (self, cid) :
+        '''Return the full path of the cName working text illustrations file. 
+        This assumes the cName is valid.'''
+
+        cName = getRapumaCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
+
+
     def render(self, force) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
@@ -113,6 +140,10 @@ class Usfm (Component) :
         '''This will prepare a component for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
+        # Get some relevant settings
+        useIllustrations        = str2bool(self.project.managers[self.cType + '_Illustration'].useIllustrations)
+        useManualAdjustments    = str2bool(self.project.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
+
         # First see if this is a valid component. This is a little
         # redundant as this is done in project.py as well. It should
         # be caught there first but just in case we'll do it here too.
@@ -128,16 +159,17 @@ class Usfm (Component) :
                 cidUsfm = self.project.managers[cType + '_Text'].getCompWorkingTextPath(cid)
 
                 if not os.path.isfile(cidUsfm) :
-                    self.project.managers['usfm_Text'].installUsfmWorkingText(cid)
-                    self.addDependents(cid)
-                else :
-                    self.addDependents(cid)
+                    self.project.managers[self.cType + '_Text'].installUsfmWorkingText(cid)
+
+                # Add the dependent files for this cid
+                if useManualAdjustments :
+                    self.createAjustmentFile(cid)
+                if useIllustrations :
+                    self.project.managers[cType + '_Illustration'].createPiclistFile(cid)
 
             # Run any hyphenation or word break routines
 
-            # Illustration settings
-            useIllustrations = self.project.managers[cType + '_Illustration'].useIllustrations
-            
+
             # Be sure there is a watermark file listed in the conf and
             # installed if watermark is turned on (True). Fallback on the
             # the default if needed.
@@ -156,24 +188,20 @@ class Usfm (Component) :
         return True
 
 
-    def addDependents (self, cid) :
-        '''Add dependent files for a working text, like .adj file for example.
-        However, do not overwrite existing files.'''
+    def createAjustmentFile (self, cid) :
+        '''Create a manual adjustment file for this cid.'''
 
         # Check for a .adj file
-        adjFile = self.project.managers['usfm_Text'].getCompWorkingTextAdjPath(cid)
+        adjFile = self.getCompWorkingTextAdjPath(cid)
         if not os.path.isfile(adjFile) :
             with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% Text adjustments file for: ' + cid + '\n\n')
                 writeObject.write('%' + cid.upper() + ' 1.1 +1 \n')
-        # Check for a .piclist file
-        if str2bool(self.project.projConfig['Managers']['usfm_Illustration']['useIllustrations']) == True :
-            piclistFile = self.project.managers['usfm_Text'].getCompWorkingTextPiclistPath(cid)
-            if not os.path.isfile(piclistFile) :
-                with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
-                    writeObject.write('%' + cid.upper() + ' 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
 
-        return True
+
+
+
+
+
 
 

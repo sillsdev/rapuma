@@ -88,6 +88,7 @@ class ProjLog (object) :
             'COMP-170' : ['ERR', 'Component source path not found. Use -s (source) to indicate where source files are to be found. Process halted!'],
             'COMP-180' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             'COMP-185' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
+            'COMP-200' : ['ERR', 'Process failed with error: [<<1>>]'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

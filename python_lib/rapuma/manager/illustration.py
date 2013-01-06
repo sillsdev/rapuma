@@ -146,3 +146,28 @@ class Illustration (Manager) :
 
 
 
+
+
+# FIXME: Do we want this moved to the usfm module?
+
+
+
+
+    def createPiclistFile (self, cid) :
+        '''Look in the cid for \fig data. Extract it from the cid and
+        use it to create a piclist file for this specific cid. If
+        there is no \fig data no piclist file will be made.'''
+
+        # Check for a .piclist file
+        print dir(self)
+# FIXME: How do I call on usfm module to get the piclist path?
+        
+        piclistFile = self.project.managers[self.cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+        if not os.path.isfile(piclistFile) :
+            with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
+                writeObject.write('%' + cid.upper() + ' 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
+
+
+
+

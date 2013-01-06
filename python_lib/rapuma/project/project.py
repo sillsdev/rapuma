@@ -152,14 +152,28 @@ class Project (object) :
         '''Return the cType for a component.'''
 
         cName = getRapumaCName(cName)
-        return self.projConfig['Components'][cName]['type']
+        try :
+            cType = self.projConfig['Components'][cName]['type']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
+            dieNow()
+
+        return cType
 
 
     def getSubcomponentList (self, cName) :
         '''Return the list of subcomponents for a cName.'''
 
         cName = getRapumaCName(cName)
-        return self.projConfig['Components'][cName]['cidList']
+        try :
+            cidList = self.projConfig['Components'][cName]['cidList']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
+            dieNow()
+
+        return cidList
 
 
     def hasCidFile (self, cName, cid, cType) :

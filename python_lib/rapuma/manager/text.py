@@ -81,22 +81,23 @@ class Text (Manager) :
         return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
 
 
-    def getCompWorkingTextAdjPath (self, cid) :
-        '''Return the full path of the cName working text adjustments file. 
-        This assumes the cName is valid.'''
+# REM: Changed getCompWorkingTextAdjPath() -> usfm.getCidAdjPath()
+#    def getCompWorkingTextAdjPath (self, cid) :
+#        '''Return the full path of the cName working text adjustments file. 
+#        This assumes the cName is valid.'''
 
-        cName = getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
+#        cName = getRapumaCName(cid)
+#        cType = self.project.projConfig['Components'][cName]['type']
+#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
 
+# REM: Changed getCompWorkingTextPiclistPath() -> usfm.getCidPiclistPath()
+#    def  (self, cid) :
+#        '''Return the full path of the cName working text illustrations file. 
+#        This assumes the cName is valid.'''
 
-    def getCompWorkingTextPiclistPath (self, cid) :
-        '''Return the full path of the cName working text illustrations file. 
-        This assumes the cName is valid.'''
-
-        cName = getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
+#        cName = getRapumaCName(cid)
+#        cType = self.project.projConfig['Components'][cName]['type']
+#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
 
 
     def setSourceEditor (self, editor) :

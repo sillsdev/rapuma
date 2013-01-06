@@ -42,13 +42,13 @@ class Style (Manager) :
         super(Style, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.project            = project
-        self.cfg                = cfg
-        self.cType              = cType
-        self.Ctype              = cType.capitalize()
-        self.rapumaXmlStyleConfig  = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.renderer           = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.sourceEditor       = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.project                = project
+        self.cfg                    = cfg
+        self.cType                  = cType
+        self.Ctype                  = cType.capitalize()
+        self.rapumaXmlStyleConfig   = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
+        self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
