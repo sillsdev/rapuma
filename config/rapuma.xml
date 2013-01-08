@@ -31,7 +31,7 @@ Todo:
             <key>systemVersion</key>
             <description>The version of this system/application.</description>
             <type>string</type>
-            <value>0.0.1</value>
+            <value>0.1.445</value>
         </setting>
         <setting>
             <name>System About</name>

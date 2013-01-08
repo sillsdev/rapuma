@@ -673,9 +673,6 @@ def userArguments (args) :
         # Remove an exsisting project
         if args['remove'] :
             deleteProject(uc, args['project_id'])
-        # Create/recreate helper scripts
-        elif args['scripts'] :
-            makeProjectScripts(uc, args['project_id'])
         # Creating a new project
         elif args['add'] :
             if args['path'] :
@@ -697,6 +694,9 @@ def userArguments (args) :
             # Create helper scripts if desired
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
                 makeProjectScripts(uc, args['project_id'])
+        # Create/recreate helper scripts
+        elif args['scripts'] :
+            makeProjectScripts(uc, args['project_id'])
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :

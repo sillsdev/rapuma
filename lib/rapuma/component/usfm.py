@@ -95,7 +95,16 @@ class Usfm (Component) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-    def getCompWorkingTextAdjPath (self, cid) :
+    def getCidPath (self, cid) :
+        '''Return the full path of the cName working text file. This assumes
+        the cName is valid.'''
+
+        cName = getRapumaCName(cid)
+        cType = self.project.projConfig['Components'][cName]['type']
+        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
+
+
+    def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
@@ -156,7 +165,7 @@ class Usfm (Component) :
             for cid in self.project.projConfig['Components'][cName]['cidList'] :
                 cidCName = getRapumaCName(cid)
                 cType = self.project.projConfig['Components'][cidCName]['type']
-                cidUsfm = self.project.managers[cType + '_Text'].getCompWorkingTextPath(cid)
+                cidUsfm = self.getCidPath(cid)
 
                 if not os.path.isfile(cidUsfm) :
                     self.project.managers[self.cType + '_Text'].installUsfmWorkingText(cid)
@@ -192,7 +201,7 @@ class Usfm (Component) :
         '''Create a manual adjustment file for this cid.'''
 
         # Check for a .adj file
-        adjFile = self.getCompWorkingTextAdjPath(cid)
+        adjFile = self.getCidAdjPath(cid)
         if not os.path.isfile(adjFile) :
             with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% Text adjustments file for: ' + cid + '\n\n')

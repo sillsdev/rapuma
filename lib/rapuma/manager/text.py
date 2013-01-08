@@ -72,13 +72,14 @@ class Text (Manager) :
 ###############################################################################
 
 
-    def getCompWorkingTextPath (self, cid) :
-        '''Return the full path of the cName working text file. This assumes
-        the cName is valid.'''
+# REM: Changed getCompWorkingTextPath() -> usfm.getCidPath()
+#    def getCompWorkingTextPath (self, cid) :
+#        '''Return the full path of the cName working text file. This assumes
+#        the cName is valid.'''
 
-        cName = getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
+#        cName = getRapumaCName(cid)
+#        cType = self.project.projConfig['Components'][cName]['type']
+#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
 
 
 # REM: Changed getCompWorkingTextAdjPath() -> usfm.getCidAdjPath()

@@ -95,7 +95,7 @@ Todo:
             <key>rapumaHelpIndexFile</key>
             <description>The name of the HTML index file for the Rapuma basic help system.</description>
             <type>list</type>
-            <value>resources,lib_docs,index.html</value>
+            <value>docs,index.html</value>
         </setting>
     </section>
     <section>
@@ -222,49 +222,35 @@ Todo:
             <key>rapumaCompTypeFolder</key>
             <description>The Rapuma component type folder where component resources are kept.</description>
             <type>list</type>
-            <value>resources,lib_compTypes</value>
+            <value>resources,compTypes</value>
         </setting>
         <setting>
             <name>Rapuma Documentation Folder</name>
             <key>rapumaDocumentFolder</key>
             <description>The Rapuma document folder where Rapuma documentation is kept.</description>
             <type>list</type>
-            <value>resources,lib_docs</value>
-        </setting>
-        <setting>
-            <name>Rapuma Examples Folder</name>
-            <key>rapumaExamplesFolder</key>
-            <description>The Rapuma examples folder where various test projects are kept.</description>
-            <type>list</type>
-            <value>resources,lib_examples</value>
-        </setting>
-        <setting>
-            <name>Rapuma Libray Share Folder</name>
-            <key>rapumaLibShareFolder</key>
-            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
-            <type>list</type>
-            <value>resources,lib_share</value>
+            <value>docs</value>
         </setting>
         <setting>
             <name>Rapuma Fonts Folder</name>
             <key>rapumaFontsFolder</key>
             <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,lib_share,fonts</value>
+            <value>resources,fonts</value>
         </setting>
         <setting>
             <name>Rapuma Macros Folder</name>
             <key>rapumaMacrosFolder</key>
             <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,lib_share,macros</value>
+            <value>resources,macros</value>
         </setting>
         <setting>
             <name>Rapuma Illustrations Folder</name>
             <key>rapumaIllustrationsFolder</key>
             <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,lib_share,illustrations</value>
+            <value>resources,illustrations</value>
         </setting>
     </section>
 </root>

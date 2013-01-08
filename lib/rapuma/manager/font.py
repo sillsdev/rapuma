@@ -130,6 +130,8 @@ class Font (Manager) :
         # Check for the font family bundle, look in user resources first
         userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
         rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
+        source = ''
+        print 'mmmmmmm', userSource, rapumaSource
         if os.path.isfile(userSource) :
             source = userSource
         elif os.path.isfile(rapumaSource) :

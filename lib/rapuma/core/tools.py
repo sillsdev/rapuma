@@ -74,7 +74,7 @@ def isExecutable (fn) :
     # Look at file extention first
     f = fName(fn)
     if not f.rfind('.') != -1 :
-        if f[f.rfind('.')+1:] in includeType :
+        if f[f.rfind('.')+1:] in executableTypes :
             return True
     else :
         # If no extention, look inside to find out

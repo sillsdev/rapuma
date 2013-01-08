@@ -84,7 +84,7 @@ class ProjLog (object) :
             'COMP-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             'COMP-140' : ['ERR', 'Failed to remove old component for [<<1>>] on force install.'],
             'COMP-150' : ['ERR', 'Component [<<1>>] not found. Cannot remove.'],
-            'COMP-160' : ['ERR', 'Component source path given [<<1>>] not found. Process halted!'],
+            'COMP-160' : ['ERR', 'Component source path given [<<1>>] not found!'],
             'COMP-170' : ['ERR', 'Component source path not found. Use -s (source) to indicate where source files are to be found. Process halted!'],
             'COMP-180' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             'COMP-185' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],

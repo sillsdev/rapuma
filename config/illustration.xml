@@ -26,6 +26,13 @@ Todo:
         <key>useWatermark</key>
         <description>Turn on (or off) the use of a page watermark in this project.</description>
         <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
+        <name>Use Lines</name>
+        <key>useLines</key>
+        <description>Turn on (or off) the use of lines in the background of the page in this project. This is to help with composition work.</description>
+        <type>boolean</type>
         <value>False</value>
     </setting>
 </root>

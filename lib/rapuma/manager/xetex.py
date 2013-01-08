@@ -742,9 +742,10 @@ class Xetex (Manager) :
         for cid in self.projConfig['Components'][self.cName]['cidList'] :
             cidCName = getRapumaCName(cid)
             cType = self.projConfig['Components'][self.cName]['type']
-            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
-            cidAdj = self.managers[cType + '_Text'].getCompWorkingTextAdjPath(cid)
-            cidIlls = self.managers[cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+#            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
+            cidUsfm = self.project.components[self.cName].getCidPath(cid)
+            cidAdj = self.project.components[self.cName].getCidAdjPath(cid)
+            cidIlls = self.project.components[self.cName].getCidPiclistPath(cid)
             dep.append(cidUsfm)
             if os.path.isfile(cidAdj) :
                 dep.append(cidAdj)

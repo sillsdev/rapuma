@@ -386,7 +386,7 @@ class Project (object) :
         if newSource :
             newSource = resolvePath(newSource)
             if not os.path.isdir(newSource) :
-                self.log.writeToLog('COMP-160', [source])
+                self.log.writeToLog('COMP-160', [newSource])
                 dieNow()
 
         if self.hasSourcePath(cType) :
