@@ -42,6 +42,15 @@ class ProjConfig (object) :
             self.projConfig.filename = self.local.projConfFile
 
 
+
+
+
+
+# FIXME: Add system version for creator of project so that can be tracked
+
+
+
+
     def makeNewProjConf (self, local, pid, pmid, pname) :
         '''Create a new project configuration file for a new project.'''
 
@@ -53,5 +62,10 @@ class ProjConfig (object) :
         self.projConfig['ProjectInfo']['projectIDCode']             = pid
         self.projConfig.filename                                    = local.projConfFile
         self.projConfig.write()
+
+
+
+
+
 
 

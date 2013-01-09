@@ -20,27 +20,6 @@ Todo:
         <sectionID>System</sectionID>
         <description>These are configurable system settings. Change them only if you know what you are doing!</description>
         <setting>
-            <name>System Name</name>
-            <key>systemName</key>
-            <description>The official name of this system/application.</description>
-            <type>string</type>
-            <value>Rapid Publication Manager (Rapuma)</value>
-        </setting>
-        <setting>
-            <name>System Version</name>
-            <key>systemVersion</key>
-            <description>The version of this system/application.</description>
-            <type>string</type>
-            <value>0.1.445</value>
-        </setting>
-        <setting>
-            <name>System About</name>
-            <key>systemAbout</key>
-            <description>Text about this system/application.</description>
-            <type>string</type>
-            <value>Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.</value>
-        </setting>
-        <setting>
             <name>Debugging</name>
             <key>debugging</key>
             <description>If set to true, reporting will be verbose and all events will be recorded to the log file for the purpose of debugging errors.</description>

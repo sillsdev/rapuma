@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# version: 20110823
 # By Dennis Drescher (dennis_drescher at sil.org
 
 
@@ -8,12 +7,9 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# One script to rule them all.  This is the mother script of the whole system.
+# One script to rule them all.  This is the main Rapuma engine script.
 # This script will drive all processes and keep track of what happens in the
 # project log in each respective project.
-
-# History:
-# 20111202 - djd - Start over with manager-centric model
 
 
 ###############################################################################
@@ -67,13 +63,14 @@ local           = ProjLocal(rapumaHome, userHome, projHome)
 uc              = UserConfig(local)
 log             = ProjLog(local, uc)
 
-# Pull some info from the user config
-systemName      = uc.userConfig['System']['systemName']
-systemVersion   = uc.userConfig['System']['systemVersion']
-systemAbout     = uc.userConfig['System']['systemAbout']
+# Set some global vars
+systemName      = 'Rapuma (Rapid Publication Manager)'
+systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
+systemVersion   = '0.1.20130109085026'
 
 # Give a welcome message
-terminal('\n\t\tWelcome to ' + systemName + '  ' + systemVersion + '\n')
+terminal('\n\t\tWelcome to ' + systemName)
+terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 
 ###########################################################################
 ############################## Rapuma Functions ##############################
@@ -176,7 +173,6 @@ def templateToProject (uc, path, pid, tid, pname) :
     uc.registerProject(pid, pname, projectMediaIDCode, projHome)
 
 
-
 def deleteProject (uc, pid = None) :
     '''Delete a project fromthe Rapuma system registry and from the hard drive.'''
 
@@ -250,40 +246,6 @@ def accessHtmlHelp () :
     cmds.append(local.rapumaHelpIndexFile)
     # Run the viewer command
     rCode = subprocess.call(cmds)
-
-
-###############################################################################
-############################ Rapuma Demo Functions ############################
-###############################################################################
-
-
-def runExamplePubDemoProject (demoID) :
-    '''Run an example demo file to test/demonstrate Rapuma. Any demos have to
-    be a part of Rapuma and have been tested for demo purposes.'''
-
-#    import pdb; pdb.set_trace()
-
-    exampleFile     = os.path.join(local.rapumaExamplesFolder, demoID + '.zip')
-    demoPath        = os.path.join(local.projHome, demoID)
-    demoFile        = os.path.join(demoPath, 'rapumaDemo')
-    thisZipFile     = zipfile.ZipFile(exampleFile, 'r')
-    if os.path.isfile(exampleFile) :
-        thisZipFile.extractall()
-        # Set execute permission on scripts
-        for r,d,f in os.walk(demoPath):
-            for fn in f:
-                if not fName(fn)[-1] == '~' :
-                    if isExecutable(os.path.join(r, fn)) :
-                        makeExecutable(os.path.join(r, fn))
-
-        terminal('Extracted the [' + demoID + '] Rapuma example project.')
-
-    if os.path.isfile(demoFile) :
-        os.chdir(demoPath)
-        if macroRunner(demoFile) :
-            return True
-    else :
-        terminal('File not found: ' + fName(demoFile))
 
 
 ###############################################################################
@@ -633,7 +595,7 @@ def makeProjectScripts (uc, pid) :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
-    # Extra help access
+    # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
         if args['about'] :
             terminal('\n' + systemName + ' version ' + systemVersion + '\n')
@@ -643,7 +605,7 @@ def userArguments (args) :
             accessHtmlHelp()
             return
 
-    # System level commands
+    # Pre-command process: System level commands
     if sys.argv[1].lower() == 'system' :
         if args['user_name'] :
             uc.setSystemSettings('userName', args['user_name'])
@@ -652,9 +614,7 @@ def userArguments (args) :
 
     # Test project ID, intercept if it is an example demo
     elif sys.argv[1].lower() != 'project' :
-        if sys.argv[1].lower() == 'example' :
-            runExamplePubDemoProject(args['demo_id'])
-        elif sys.argv[1].lower() == 'preserve' :
+        if sys.argv[1].lower() == 'preserve' :
             pass
 #            restoreArchive(args['project_id'], args['path'])
         elif not isProject(args['project_id']) :
@@ -668,8 +628,8 @@ def userArguments (args) :
                     if not aProject.addComponentType(args['component_type']) :
                         sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
 
-    # Project level commands
-    if sys.argv[1].lower() == 'project' :
+    # Command processing
+    elif sys.argv[1].lower() == 'project' :
         # Remove an exsisting project
         if args['remove'] :
             deleteProject(uc, args['project_id'])
@@ -699,6 +659,10 @@ def userArguments (args) :
             makeProjectScripts(uc, args['project_id'])
 
     # Component level commands
+    # Dummy place holder for 'system' which as actually processed above
+    if sys.argv[1].lower() == 'system' :
+        pass
+
     elif sys.argv[1].lower() == 'component' :
         if not args['component_name'] :
             sys.exit('\nERROR: Must provide a component name when adding a new component. Process halted!\n')
@@ -903,14 +867,6 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'edit' :
             aProject.edit(args['component'], args['global'], args['system'])
 
-    # Dummy place holder for 'system' which as processed above
-    elif sys.argv[1].lower() == 'system' :
-        pass
-
-    # Dummy place holder for 'example' which as processed above
-    elif sys.argv[1].lower() == 'example' :
-        pass
-
     # Totally lost
     else:
         sys.exit('\nERROR: Command not recognized: [' + sys.argv[1] + ']\n')
@@ -1089,10 +1045,6 @@ macroCommand.add_argument('-e', '--execute', action='store_true', help='Execute 
 macroCommand.add_argument('-c', '--command', help='Add a list (\'[rapuma 1, rapuma 2, etc.]\') of Rapuma commands to a macro file. This would be used along with the -a command.')
 macroCommand.add_argument('-p', '--path', help='If the macro you are adding already exsists, specify the path to it and include the name of the file. This would be used with the -a command and instead of -c command.')
 macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
-
-# Add Project example subprocess arguments
-exampleCommand = subparsers.add_parser('example', help='Commands for running simple project examples.')
-exampleCommand.add_argument('demo_id', help=' A project/demo ID for the example you wish to run. This is for canned demos so they must exsist. You cannot just make something up.')
 
 # Add Project archive subprocess arguments
 archiveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
