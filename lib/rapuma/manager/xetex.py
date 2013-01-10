@@ -152,6 +152,13 @@ class Xetex (Manager) :
         if not os.path.isdir(self.cNameFolder) :
             os.mkdir(self.cNameFolder)
 
+        # Check to see if the PDF viewer is ready to go
+        if not self.pdfViewer :
+            defaultViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
+            self.pdfViewer = defaultViewer
+            self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = defaultViewer
+            writeConfFile(self.projConfig)
+
         # Record some error codes
         # FIXME: much more needs to be done with this
         self.xetexErrorCodes =  {

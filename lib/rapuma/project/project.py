@@ -79,6 +79,8 @@ class Project (object) :
             if s not in newConf :
                 newConf[s] = v
 
+        # Replace with new conf if new is different from old
+        # Rem new conf doesn't have a filename, give it one
         if self.projConfig != newConf :
             self.projConfig = newConf
             self.projConfig.filename = self.local.projConfFile
@@ -380,9 +382,14 @@ class Project (object) :
         '''This handels adding a component which can contain one or more sub-components.'''
 
         # Check for cName setting
-        # FIXME: Something is wrong about doing this here
+        # FIXME: There is something is wrong about doing this here
         if not self.cName :
             self.cName = cName
+
+        # Do not want to add this component, non-force, if it already exsists.
+        if self.isCompleteComponent and force == False :
+            self.log.writeToLog('COMP-115', [cName])
+            dieNow()
 
         # Work out the source path
         oldSource = ''

@@ -44,6 +44,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Rapuma Creator Version</name>
+            <key>projectCreaterVersion</key>
+            <description>The version of Rapuma that last worked with this project.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

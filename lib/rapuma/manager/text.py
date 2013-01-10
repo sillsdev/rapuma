@@ -141,12 +141,12 @@ class Text (Manager) :
         # A generic editor means we really do not know where the text came
         # from. In that case, we just do the best we can.
         elif self.sourceEditor.lower() == 'generic' :
-            if not self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
+            if not self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
+                not self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] :
                 self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
-            if not self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] :
                 self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
 
-            writeConfFile(self.project.projConfig)
+                writeConfFile(self.project.projConfig)
         else :
             self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
             dieNow()
