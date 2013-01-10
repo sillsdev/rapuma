@@ -246,6 +246,13 @@ Todo:
             <value>resources,macros</value>
         </setting>
         <setting>
+            <name>Rapuma Examples Folder</name>
+            <key>rapumaExamplesFolder</key>
+            <description>The Rapuma resource folder where various Rapuma project examples are kept.</description>
+            <type>list</type>
+            <value>resources,examples</value>
+        </setting>
+        <setting>
             <name>Rapuma Illustrations Folder</name>
             <key>rapumaIllustrationsFolder</key>
             <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>

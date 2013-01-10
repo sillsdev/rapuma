@@ -41,6 +41,8 @@ class Project (object) :
     def __init__(self, userConfig, projConfig, local, log) :
         '''Instantiate this class.'''
 
+#        import pdb; pdb.set_trace()
+
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
@@ -79,6 +81,7 @@ class Project (object) :
 
         if self.projConfig != newConf :
             self.projConfig = newConf
+            self.projConfig.filename = self.local.projConfFile
 
         # If this is a valid project we might as well put in the folders
         for folder in self.local.projFolders :
@@ -607,8 +610,9 @@ class Project (object) :
             if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
                 self.projConfig['CompTypes'][Ctype] = newSectionSettings
                 # Save the setting rightaway
+#                import pdb; pdb.set_trace()
                 writeConfFile(self.projConfig)
-            
+
             # Sanity check
             if self.isComponentType(cType) :
                 self.log.writeToLog('COMP-060', [cType])
@@ -627,7 +631,7 @@ class Project (object) :
         that this is forced so no force setting is used.'''
 
         force = True
-        
+
         # Check to be sure we are working with the real cName
         getRapumaCName(cName)
 

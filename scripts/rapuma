@@ -130,7 +130,7 @@ def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
         templateToProject(uc, pc.local.projHome, pid, tid, pname)
     else :
         # If not from a template, just create a new version of the project config file
-        pc.makeNewProjConf(pc.local, pid, pmid, pname)
+        pc.makeNewProjConf(pc.local, pid, pmid, pname, systemVersion)
 
     # Add project to local Rapuma project registry
     uc.registerProject(pid, pname, pmid, pc.local.projHome)
@@ -629,6 +629,10 @@ def userArguments (args) :
                         sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
 
     # Command processing
+    # Dummy place holder for 'system' which as actually processed above
+    if sys.argv[1].lower() == 'system' :
+        pass
+
     elif sys.argv[1].lower() == 'project' :
         # Remove an exsisting project
         if args['remove'] :
@@ -657,11 +661,6 @@ def userArguments (args) :
         # Create/recreate helper scripts
         elif args['scripts'] :
             makeProjectScripts(uc, args['project_id'])
-
-    # Component level commands
-    # Dummy place holder for 'system' which as actually processed above
-    if sys.argv[1].lower() == 'system' :
-        pass
 
     elif sys.argv[1].lower() == 'component' :
         if not args['component_name'] :

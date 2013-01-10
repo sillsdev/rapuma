@@ -151,6 +151,17 @@ class UserConfig (object) :
                 # Create the folder if needed
                 if not os.path.isdir(thisPath) :
                     os.makedirs(thisPath)
+
+                # Copy in the Rapuma example zip files
+                if r == 'examples' :
+                    exampleFiles = os.listdir(self.local.rapumaExamplesFolder)
+                    for f in exampleFiles :
+                        try :
+                            if f.split('.')[1].lower() == 'zip' :
+                                shutil.copy(os.path.join(self.local.rapumaExamplesFolder, f), thisPath)
+                        except :
+                            pass
+                    
                 # Record the path
                 self.userConfig['Resources'][r] = thisPath
 

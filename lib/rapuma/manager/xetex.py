@@ -308,7 +308,7 @@ class Xetex (Manager) :
                 return True
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.log.writeToLog('XTEX-105', [str(e)])
+                self.project.log.writeToLog('XTEX-105', [str(e)])
 
 
     def makeHyphenationTexFile (self) :

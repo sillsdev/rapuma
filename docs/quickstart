@@ -21,52 +21,6 @@ This completes the basic setup routine for Rapuma. Now you can try the examples.
 
 RAPUMA EXAMPLES
 -----------------------------------------
-Rapuma comes with a couple example projects that are used to demonstrate what it can do and also test the system when revisions are made. Currently, there are two example projects. The first demonstrates Rapuma's most basic project configuration with a simple small Scripture book, the book of James in English. To run this example, with your terminal open in a directory where you don't mind a project being created, type the following commands to create the example project:
-
-First, copy the example project file with this command:
-
-    sudo cp /usr/local/share/rapuma/resources/examples/MBJAS.zip .
-
-Next extract with this command:
-
-    unzip MBJAS.zip
-
-Now create the actual project with this:
-
-    rapuma project ENG-LATN-JAS -m book -a -n "Basic simple Rapuma test project"
-
-With this command, add a single component to the project for the book of James:
-
-    rapuma component ENG-LATN-JAS usfm james -a -i jas -s '<path to MBJAS>'
-
-Now you can render the new component with this command:
-
-    rapuma component ENG-LATN-JAS usfm james -e
-
-If everything was installed correctly, what you should end up with is the Gnome Document Previewer displaying a PDF of the Book of James that Rapuma just rendered using XeTeX. Take a look at the project folder and see the files that Rapuma has created and manages. Then, after you are done working with this example, you can remove the project with this command.
-
-    rapuma project ENG-LATN-JAS -r
-
-Keep in mind this is a very powerful command and you should not use normally as the entire project will be erased off your system.
-
-The second example, which is vastly more complex, can be run in the same way by typing this:
-
-    rapuma example KYUM
-
-With this, you will get similar results as the last time. However, this is the Book of Mark in the Kayah language, set in the Burmese script. What it took to do that was much more than the English book of James, however, Rapuma is able to do both.
-
-If you would like to try a command, you could render the Book of Mark with this:
-
-    rapuma component KYU-MYMR-MRK usfm mrk -e
-
-No doubt you will notice that not much happened in the terminal. This is because Rapuma is just calling up the already existing PDF file that was created when the book was rendered the first time. There are times when this is useful. However, to make Rapuma re-render this book component you will need to add one extra command such as follows:
-
-    rapuma component KYU-MYMR-MRK usfm mrk -e -f
-
-This time you will see more activity on the screen. However, unless you actually edited the file or made a change to one of the format settings, the PDF will be identical to the first one.
-
-The third example is much like the MBJAS example, except with this one, multiple components are processed. Like before, use a command like this to run the example.
-
-    rapuma example KJV
+Rapuma comes with a couple example projects that help demonstrate what it can do and also test the system when revisions are made. If you ran the resources setup as noted above you will find several ZIP files in your Rapuma examples folder. Copy those compressed files to a folder where you can extract each of them. Then follow the readme file directions that are included with each example file.
 
 This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.

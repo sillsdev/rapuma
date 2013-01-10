@@ -42,22 +42,14 @@ class ProjConfig (object) :
             self.projConfig.filename = self.local.projConfFile
 
 
-
-
-
-
-# FIXME: Add system version for creator of project so that can be tracked
-
-
-
-
-    def makeNewProjConf (self, local, pid, pmid, pname) :
+    def makeNewProjConf (self, local, pid, pmid, pname, cVersion) :
         '''Create a new project configuration file for a new project.'''
 
         self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')))
         # Insert intitial project settings
         self.projConfig['ProjectInfo']['projectMediaIDCode']        = pmid
         self.projConfig['ProjectInfo']['projectName']               = pname
+        self.projConfig['ProjectInfo']['projectCreaterVersion']     = cVersion
         self.projConfig['ProjectInfo']['projectCreateDate']         = tStamp()
         self.projConfig['ProjectInfo']['projectIDCode']             = pid
         self.projConfig.filename                                    = local.projConfFile

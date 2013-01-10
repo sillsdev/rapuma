@@ -8,8 +8,7 @@ If you are doing Rapuma development work and production side-by-side, you will w
 
 In the same terminal session, create this link to your ~/bin folder (if you have not done this already):
 
-    ln -s ~/Projects/rapuma/bin/rapuma ~/bin/rpm
-    ln -s ~/Projects/rapuma/bin/rapuma_demo ~/bin/rpm_demo
+    ln -s ~/Projects/rapuma/scripts/rapuma ~/bin/rpm
 
 (By the way, if you are running the Red Hat Package manager on your system you may want to use another name other than "rpm")
 
