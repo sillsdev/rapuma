@@ -544,8 +544,8 @@ def makeProjectScripts (uc, pid) :
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'edit', \
-                     'export', 'render', 'template', 'update', 'view', 'watermarkOff', \
-                        'watermarkOn'] :
+                     'export', 'postprocess', 'render', 'restore', 'template', 'update', \
+                        'view', 'watermarkOff', 'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -566,11 +566,17 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
                 writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
+            elif script == 'postprocess' :
+                writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
+                writeObject.write('rapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 \n\n')
             elif script == 'render' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
+            elif script == 'restore' :
+                writeObject.write('rapuma preserve ' + pid + ' -b -r \n\n')
             elif script == 'template' :
                 writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
             elif script == 'update' :
+                writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')

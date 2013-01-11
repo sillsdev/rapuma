@@ -387,7 +387,7 @@ class Project (object) :
             self.cName = cName
 
         # Do not want to add this component, non-force, if it already exsists.
-        if self.isCompleteComponent and force == False :
+        if self.isCompleteComponent(cName) and not force and self.isLocked(cName) :
             self.log.writeToLog('COMP-115', [cName])
             dieNow()
 
