@@ -264,6 +264,23 @@ class Text (Manager) :
                         if not self.project.isLocked(cName) :
                             self.project.lockUnlock(cName, True, True)
 
+                    # Remove any \fig markers, record in illustration.conf
+                    def figRemoval (figConts) :
+                        '''Catalog figConts into illustration.conf. The removal part comes
+                        when we return nothing but True if it succeeds and False if it fails.'''
+                        
+                        print '\nRemoving fig marker (FYI, this is not done yet!)\n'
+                        print figConts.group(1), '\n'
+
+                    tempFile = target + '.tmp'
+                    contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', figRemoval, contents)
+                    codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
+                    # Finish by copying the tempFile to the source
+                    if not shutil.copy(tempFile, target) :
+                        # Take out the trash
+                        os.remove(tempFile)
+
                     # Always save an untouched copy of the source and set to
                     # read only. We may need this to restore/reset later.
                     if os.path.isfile(targetSource) :
@@ -287,6 +304,8 @@ class Text (Manager) :
                 return True
         else :
             return True
+
+
 
 
     def usfmCopy (self, source, target, projSty = None) :
