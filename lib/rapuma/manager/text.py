@@ -243,14 +243,30 @@ class Text (Manager) :
                 self.project.log.writeToLog('TEXT-035', [source])
                 dieNow()
 
-        # Make target folder if needed
-        if not os.path.isdir(targetFolder) :
-            os.makedirs(targetFolder)
-
         # Now do the age checks and copy if source is newer than target
         if not isOlder(target, source) or force :
             if not os.path.isfile(target) or force :
-                if self.usfmCopy(source, target, projSty) :
+
+                # Make target folder if needed
+                if not os.path.isdir(targetFolder) :
+                    os.makedirs(targetFolder)
+
+                # Always save an untouched copy of the source and set to
+                # read only. We may need this to restore/reset later.
+                if os.path.isfile(targetSource) :
+                    # Don't bother if we copied from it in the first place
+                    if targetSource != source :
+                        # Reset permissions to overwrite
+                        makeWriteable(targetSource)
+                        shutil.copy(source, targetSource)
+                        makeReadOnly(targetSource)
+                else :
+                    shutil.copy(source, targetSource)
+                    makeReadOnly(targetSource)
+
+                # To be sure nothing happens, copy from our project source
+                # backup file.
+                if self.usfmCopy(targetSource, target, projSty) :
 
                     # Run any working text preprocesses on the new component text
                     scriptFileName = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
@@ -264,35 +280,32 @@ class Text (Manager) :
                         if not self.project.isLocked(cName) :
                             self.project.lockUnlock(cName, True, True)
 
-                    # Remove any \fig markers, record in illustration.conf
-                    def figRemoval (figConts) :
-                        '''Catalog figConts into illustration.conf. The removal part comes
-                        when we return nothing but True if it succeeds and False if it fails.'''
-                        
-                        print '\nRemoving fig marker (FYI, this is not done yet!)\n'
-                        print figConts.group(1), '\n'
 
-                    tempFile = target + '.tmp'
-                    contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', figRemoval, contents)
-                    codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
-                    # Finish by copying the tempFile to the source
-                    if not shutil.copy(tempFile, target) :
-                        # Take out the trash
-                        os.remove(tempFile)
 
-                    # Always save an untouched copy of the source and set to
-                    # read only. We may need this to restore/reset later.
-                    if os.path.isfile(targetSource) :
-                        # Don't bother if we copied from it in the first place
-                        if targetSource != source :
-                            # Reset permissions to overwrite
-                            makeWriteable(targetSource)
-                            shutil.copy(source, targetSource)
-                            makeReadOnly(targetSource)
-                    else :
-                        shutil.copy(source, targetSource)
-                        makeReadOnly(targetSource)
+
+# FIXME: Working here
+
+
+
+
+
+                    # If this is a USFM component type we need to remove any \fig markers,
+                    # and record in the illustration.conf file
+                    if self.cType == 'usfm' :
+
+                        print '\nRemoving fig marker (FYI, this function is not done yet!!!!!!!!!)\n'
+
+                        tempFile = target + '.tmp'
+                        contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+                        # This logs the fig data and strips it from the working text
+                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', self.logFigure, contents)
+                        codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
+                        # Finish by copying the tempFile to the source
+                        if not shutil.copy(tempFile, target) :
+                            # Take out the trash
+                            os.remove(tempFile)
+
+
                     # If the text is there, we should return True so do a last check to see
                     if os.path.isfile(target) :
                         self.project.log.writeToLog('TEXT-060', [cName])
@@ -304,6 +317,35 @@ class Text (Manager) :
                 return True
         else :
             return True
+
+
+
+
+
+
+
+
+    def logFigure (self, figConts) :
+        '''Log the figure data in the illustration.conf.'''
+        
+        fig = figConts.group(1).split('|')
+        confKeys = ['description', 'fileName', 'position', 'refRange', 'copyright', 'caption', 'location']
+        
+        # FIXME: Need to put info into a dict and then parse the fileName for the illustration ID
+        # and then parse the location to separate the cv. How do we get the bid? Also, should
+        # this get moved to the illustration.py module?
+        
+        # Make a list of the fig contents. For now we assume the order is
+        # right and will process positionally.
+        c = 0
+        for k in confKeys :
+            print k + ' = ' + fig[c]
+            c +=1
+
+
+
+
+
 
 
 

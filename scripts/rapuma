@@ -648,18 +648,17 @@ def userArguments (args) :
             deleteProject(uc, args['project_id'])
         # Creating a new project
         elif args['add'] :
-            if args['path'] :
-                # If a project folder is given (other than CWD) We need to
-                # resolve it and pass it on to proj config settings (internal)
+            if not args['path'] :
+                # A path must be given
+                sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
+            else :
+                # If a project folder is given we need to resolve it and pass
+                # it on to proj config settings (internal)
                 customLocal = resolvePath(args['path'])
                 if not os.path.isdir(customLocal) :
                     sys.exit('\nERROR: Cannot resolve the given path. Process halting.\n')
                 else :
                     projFolder = os.path.join(customLocal, args['project_id'])
-            else :
-                # With no different project location given we will make sure
-                # we use the default projHome set when the script started.
-                projFolder = os.path.join(projHome, args['project_id'])
             # Create the project
             local   = ProjLocal(rapumaHome, userHome, projFolder)
             pc      = ProjConfig(local)
