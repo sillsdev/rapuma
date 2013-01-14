@@ -38,7 +38,7 @@ from importlib import import_module
 
 class Project (object) :
 
-    def __init__(self, userConfig, projConfig, local, log) :
+    def __init__(self, userConfig, projConfig, local, log, systemVersion) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
@@ -47,6 +47,7 @@ class Project (object) :
         self.userConfig             = userConfig
         self.projConfig             = projConfig
         self.log                    = log
+        self.systemVersion          = systemVersion
         self.cName                  = ''
         self.components             = {}
         self.componentType          = {}
@@ -84,6 +85,15 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
             self.projConfig.filename = self.local.projConfFile
+
+        # Up the creatorVersion on the project if needed
+        if not testForSetting(self.projConfig, 'ProjectInfo', 'projectCreatorVersion') :
+            self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
+            writeConfFile(self.projConfig)
+        else :
+            if self.projConfig['ProjectInfo']['projectCreatorVersion'] != self.systemVersion :
+                self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
+                writeConfFile(self.projConfig)
 
         # If this is a valid project we might as well put in the folders
         for folder in self.local.projFolders :

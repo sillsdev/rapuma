@@ -46,8 +46,8 @@ Todo:
         </setting>
         <setting>
             <name>Rapuma Creator Version</name>
-            <key>projectCreaterVersion</key>
-            <description>The version of Rapuma that last worked with this project.</description>
+            <key>projectCreatorVersion</key>
+            <description>The version of Rapuma that last worked with, or created this project.</description>
             <type>string</type>
             <value></value>
         </setting>
