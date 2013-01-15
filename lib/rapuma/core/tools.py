@@ -328,7 +328,7 @@ def writeConfFile (config) :
 
     except Exception as e :
         terminal('\nERROR: Could not write to: ' + config.filename)
-        terminal('\nPython reported this error:\n\n\t[' + str(e) + ']\n')
+        terminal('\nPython reported this error:\n\n\t[' + str(e) + ']' + str(config) + '\n')
         # Recover now
         if os.path.isfile(config.filename + '~') :
             shutil.copy(config.filename + '~', config.filename)

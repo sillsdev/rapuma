@@ -50,8 +50,8 @@ class Font (Manager) :
         self.fontConfig             = ConfigObj()
         self.project                = project
         self.manager                = self.cType + '_Font'
-        self.rapumaXmlFontConfig       = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getSourcePath(self.project.projConfig, self.Ctype)
+        self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
 
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :

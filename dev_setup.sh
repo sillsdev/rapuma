@@ -6,3 +6,8 @@ export PYTHONPATH=`pwd`/lib:$PYTHONPATH
 export RAPUMA_CMD=`pwd`/scrips/rapuma
 export RAPUMA_BASE=`pwd`
 
+export PYTHONPATH=`pwd`/lib:$PYTHONPATH
+
+echo
+echo "Rapuma development environment is now set up."
+echo

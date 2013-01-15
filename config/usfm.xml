@@ -28,13 +28,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Source Path</name>
-        <key>sourcePath</key>
-        <description>This is the path to component type specific source files. This is a required parameter for adding a component to a project. This is a system-specific settings and will throw an error if used on another system.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
         <name>Preprocess Script</name>
         <key>preprocessScript</key>
         <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>

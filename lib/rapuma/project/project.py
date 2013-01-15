@@ -349,12 +349,23 @@ class Project (object) :
         return compobj
 
 
+
+
+
+
+
+
+
+
+
+
+
     def hasSourcePath (self, cType) :
         '''Check to see if there is a pre-exsisting path.'''
 
         Ctype = cType.capitalize()
-        if testForSetting(self.projConfig['CompTypes'][Ctype], 'sourcePath') :
-            if self.projConfig['CompTypes'][Ctype]['sourcePath'] != '' :
+        if testForSetting(self.userConfig['Projects'][self.projectIDCode], cType + '_sourcePath') :
+            if self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] != '' :
                 return True
 
 
@@ -362,7 +373,7 @@ class Project (object) :
         '''Check to see if the existing path is the same as the
         new proposed path.'''
 
-        curPath = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+        curPath = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
         if curPath == source :
             return True
 
@@ -373,19 +384,37 @@ class Project (object) :
         The assumption is only one path per component type.'''
 
         Ctype = cType.capitalize()
+        # This can be depricated soon
+        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'sourcePath') :
+            self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+            del self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+            writeConfFile(self.projConfig)
+
         # Path has been resolved in Rapuma, we assume it should be valid.
         # But it could be a full file name. We need to sort that out.
         try :
             if os.path.isdir(source) :
-                self.projConfig['CompTypes'][Ctype]['sourcePath'] = source
+                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = source
             else :
-                self.projConfig['CompTypes'][Ctype]['sourcePath'] = os.path.split(source)[0]
+                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = os.path.split(source)[0]
 
-            writeConfFile(self.projConfig)
+            writeConfFile(self.userConfig)
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('PROJ-100', [str(e)])
             dieNow()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def addComponent (self, cType, cName, cidList, newSource = None, force = False) :
@@ -410,14 +439,14 @@ class Project (object) :
                 dieNow()
 
         if self.hasSourcePath(cType) :
-            if os.path.isdir(self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']) :
-                oldSource = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+            if os.path.isdir(self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']) :
+                oldSource = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
 
         # If the new source is valid, we will add that to the config now
         # so that processes to follow will have that setting available.
         if newSource :
             source = newSource
-            self.projConfig['CompTypes'][cType.capitalize()]['sourcePath'] = newSource
+            self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = newSource
             writeConfFile(self.projConfig)
         # If there is no newSource, then the status quo will work okay
         elif oldSource :
@@ -660,7 +689,7 @@ class Project (object) :
         cType = self.getComponentType(cName)
         cidList = self.getSubcomponentList(cName)
         if not source :
-            source = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
+            source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
         self.addComponent(cType, cName, cidList, source, force)
 
 

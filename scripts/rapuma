@@ -54,6 +54,7 @@ from configobj import ConfigObj
 from rapuma.core.proj_local import ProjLocal
 from rapuma.core.proj_log import ProjLog
 from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
 from rapuma.core.user_config import UserConfig
 from rapuma.core.proj_config import ProjConfig
 from rapuma.project.project import Project
@@ -66,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130114102645'
+systemVersion   = '0.1.20130115195125'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -252,6 +253,32 @@ def accessHtmlHelp () :
 ########################## Archive Project Functions ##########################
 ###############################################################################
 
+def makeExcludeFileList (aProject) :
+    '''Return a list of files that are not necessary to be included in a backup
+    template or an archive. These will be all auto-generated files that containe system-
+    specific paths, etc.'''
+
+    # Work out from the component type what the settings file names are
+    excludeFiles = []
+    for cType in aProject.projConfig['CompTypes'].keys() :
+        rndr = aProject.projConfig['CompTypes'][cType]['renderer']
+        aProject.createManager(cType.lower(), rndr)
+        excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].macLinkFile)
+        excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].setFileName)
+
+    # Now add to the list all the .tex files that are associated with components
+    for cName in aProject.projConfig['Components'].keys() :
+        if getUsfmCid(cName) :
+            cidTexFile = os.path.join(aProject.local.projComponentsFolder, cName, getUsfmCid(cName) + '.tex')
+            if os.path.isfile(cidTexFile) :
+                excludeFiles.append(getUsfmCid(cName) + '.tex')
+        cNameTexFile = os.path.join(aProject.local.projComponentsFolder, cName, cName + '.tex')
+        if os.path.isfile(cNameTexFile) :
+            excludeFiles.append(cName + '.tex')
+
+    return excludeFiles
+
+
 def backupProject (pid) :
     '''Backup a project. Send the compressed backup file to the user-specified
     backup folder. If none is specified, put the archive in cwd. If a valid
@@ -262,6 +289,7 @@ def backupProject (pid) :
     # Check to see if the pid is valid in the system (it has to be)
     if isProject(pid) :
         projHome = uc.userConfig['Projects'][pid]['projectPath']
+        aProject = initProject(pid)
     else :
         terminal('\nError: The project ID given is not valid: [' + pid + ']\n')
         dieNow()
@@ -276,7 +304,10 @@ def backupProject (pid) :
         terminal('\nError: User backup storage path not yet configured!\n')
         dieNow()
 
-    zipUpProject(projHome, backupTarget)
+    # Get a list of files we don't want
+    excludeFiles = makeExcludeFileList(aProject)
+
+    zipUpProject(projHome, backupTarget, excludeFiles)
 
     # Finish here
     terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget)
@@ -312,7 +343,10 @@ def archiveProject (pid, path = None) :
         terminal('\nError: Cannot resolve a path to create the archive file!\n')
         dieNow()
 
-    zipUpProject(aProject.local.projHome, archTarget)
+    # Get a list of files we don't want
+    excludeFiles = makeExcludeFileList(aProject)
+
+    zipUpProject(aProject.local.projHome, archTarget, excludeFiles)
 
     # Rename the source dir to indicate it was archived
     os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
@@ -327,11 +361,15 @@ def archiveProject (pid, path = None) :
     terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
 
 
-def zipUpProject (source, target = None) :
-    '''Zip up a project and deposit it to target location.'''
+def zipUpProject (source, target = None, excludeFiles = None) :
+    '''Zip up a project and deposit it to target location. Be sure to strip
+    out all all auto-created, user-specific files that could mess up a
+    transfer to another system. This goes for archives and backups'''
 
     # Do the zip magic here
     # First list some types we don't want to include in our archive
+    if not excludeFiles :
+        excludeFiles = []
     excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
     # Now list the full file names of any excptions to the above type exclusions
     excludeException = ['rapuma.log']
@@ -341,6 +379,8 @@ def zipUpProject (source, target = None) :
             # Chop off the part of the path we do not need to store
             zip_root = os.path.abspath(root)[root_len:]
             for f in files:
+                if f in excludeFiles :
+                    continue
                 if not f[-1] == '~' :
                     fn, fx = os.path.splitext(f)
                     if not fx in excludeType or f in excludeException :
@@ -487,25 +527,19 @@ def projectToTemplate (pid, tid) :
     pc['ProjectInfo']['projectName']                = ''
     pc['ProjectInfo']['projectIDCode']              = ''
     pc['ProjectInfo']['projectCreateDate']          = ''
-    for s in pc['CompTypes'].keys() :
-        pc['CompTypes'][s]['sourcePath']            = ''
     pc['ProjectInfo']['projectCreateDate']          = ''
     for c in pc['Components'].keys() :
+        compDir = os.path.join(targetDir, 'Components', c)
+        if os.path.isdir(compDir) :
+            shutil.rmtree(compDir)
         del pc['Components'][c]
     pc.filename                                     = os.path.join(targetDir, 'Config', 'project.conf')
     pc.write()
+    # Kill the log file
+    os.remove(os.path.join(targetDir, 'rapuma.log'))
 
     # Exclude files
-    # Work out from the component type what the settings file names are
-    excludeFiles = []
-    for cType in pc['CompTypes'].keys() :
-        rndr = pc['CompTypes'][cType]['renderer']
-        aProject.createManager(cType.lower(), rndr)
-        excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].macLinkFile)
-        excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].setFileName)
-
-    # Include file types
-    includeType = ['sty', 'ttf', 'conf', 'xml', 'tec', 'tex']
+    excludeFiles = makeExcludeFileList(aProject)
 
     # Zip it up using the above params
     root_len = len(targetDir)
@@ -518,7 +552,7 @@ def projectToTemplate (pid, tid) :
                     continue
                 elif f in excludeFiles :
                     continue
-                elif f.rfind('.') != -1 and f[f.rfind('.')+1:] in includeType :
+                elif f.rfind('.') != -1 :
                     fullpath = os.path.join(root, f)
                     zip_name = os.path.join(zip_root, f)
                     myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)

@@ -21,6 +21,7 @@
 
 import os, shutil, codecs, unicodedata
 from configobj import ConfigObj, Section
+from functools import partial
 
 # Load the local classes
 from rapuma.core.tools import *
@@ -49,8 +50,10 @@ class Text (Manager) :
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
+        self.manager                = self.cType + '_Text'
+        self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getSourcePath(self.project.projConfig, self.Ctype)
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         self.sourceEditor           = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
         self.setSourceEditor(self.sourceEditor) 
 
@@ -122,8 +125,7 @@ class Text (Manager) :
         # the defaults and hope for the best.
         if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            sourcePath = self.project.projConfig['CompTypes'][self.Ctype]['sourcePath']
-            ptSet = getPTSettings(sourcePath)
+            ptSet = getPTSettings(self.sourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
@@ -280,31 +282,20 @@ class Text (Manager) :
                         if not self.project.isLocked(cName) :
                             self.project.lockUnlock(cName, True, True)
 
-
-
-
-# FIXME: Working here
-
-
-
-
-
                     # If this is a USFM component type we need to remove any \fig markers,
                     # and record in the illustration.conf file
                     if self.cType == 'usfm' :
-
-                        print '\nRemoving fig marker (FYI, this function is not done yet!!!!!!!!!)\n'
-
                         tempFile = target + '.tmp'
                         contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                        # This logs the fig data and strips it from the working text
-                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', self.logFigure, contents)
+                        # logFigure() logs the fig data and strips it from the working text
+                        # Note: Using partial() to allows the passing of the cid param 
+                        # into logFigure()
+                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logFigure, cid), contents)
                         codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                         # Finish by copying the tempFile to the source
                         if not shutil.copy(tempFile, target) :
                             # Take out the trash
                             os.remove(tempFile)
-
 
                     # If the text is there, we should return True so do a last check to see
                     if os.path.isfile(target) :
@@ -319,35 +310,45 @@ class Text (Manager) :
             return True
 
 
-
-
-
-
-
-
-    def logFigure (self, figConts) :
+    def logFigure (self, cid, figConts) :
         '''Log the figure data in the illustration.conf.'''
         
         fig = figConts.group(1).split('|')
-        confKeys = ['description', 'fileName', 'position', 'refRange', 'copyright', 'caption', 'location']
-        
-        # FIXME: Need to put info into a dict and then parse the fileName for the illustration ID
-        # and then parse the location to separate the cv. How do we get the bid? Also, should
-        # this get moved to the illustration.py module?
-        
-        # Make a list of the fig contents. For now we assume the order is
-        # right and will process positionally.
+        figKeys = ['description', 'fileName', 'position', 'refRange', 'copyright', 'caption', 'location']
+        figDict = {}
+
+        # Add all the figure info to the dictionary
         c = 0
-        for k in confKeys :
-            print k + ' = ' + fig[c]
+        for v in fig :
+            figDict[figKeys[c]] = v
             c +=1
 
+        # Add additional information, get rid of stuff we don't need
+        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
+        figDict['bid'] = cid.upper()
+        figDict['chapter'] = figDict['location'].split(':')[0]
+        figDict['verse'] = figDict['location'].split(':')[1]
+
+        del figDict['location']
+
+        illustrationConfig = self.managers[self.cType + '_Illustration'].illustrationConfig
+        # Put the dictionary info into the illustration conf file
+        if not testForSetting(illustrationConfig, figDict['illustrationID'].upper()) :
+            buildConfSection(illustrationConfig, figDict['illustrationID'].upper())
+        for k in figDict.keys() :
+#            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
 
 
+# FIXME: Working here can't store Unicode, it would seem the captions
+# in the KYU-LATN-NTCATP give it problems
 
+#            if k in ['description', 'copyright', 'caption'] :
+            if k in ['caption'] :
+                illustrationConfig[figDict['illustrationID'].upper()][k] = ''
+            else :
+                illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
 
-
-
+        writeConfFile(illustrationConfig)
 
 
     def usfmCopy (self, source, target, projSty = None) :

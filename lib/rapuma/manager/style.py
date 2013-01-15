@@ -49,6 +49,7 @@ class Style (Manager) :
         self.rapumaXmlStyleConfig   = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
@@ -145,8 +146,7 @@ class Style (Manager) :
         project styles too.'''
 
         # First pick up our PT settings
-        sourcePath = resolvePath(self.project.projConfig['CompTypes'][self.Ctype]['sourcePath'])
-        ptConf = getPTSettings(sourcePath)
+        ptConf = getPTSettings(self.sourcePath)
         if not ptConf :
             return False
 
@@ -163,13 +163,13 @@ class Style (Manager) :
         # file should be found in the source or parent folder. If that
         # exact file is not found in either place, a substitute will be
         # copied in from Rapuma and given the designated name.
-        sourceStyle             = os.path.join(sourcePath, self.mainStyleFile)
-        parent                  = os.path.dirname(sourcePath)
+        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
+        parent                  = os.path.dirname(self.sourcePath)
         # If there is a "gather" folder, assume the style file is there
-        if os.path.isdir(os.path.join(sourcePath, 'gather')) :
-            ptProjStyle             = os.path.join(sourcePath, 'gather', self.mainStyleFile)
+        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
+            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
         else :
-            ptProjStyle             = os.path.join(sourcePath, self.mainStyleFile)
+            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
         ptStyle                     = os.path.join(parent, self.mainStyleFile)
         searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
         # We will start by searching in order from the inside out and stop

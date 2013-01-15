@@ -76,6 +76,7 @@ class Xetex (Manager) :
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.cNameFolder            = os.path.join(self.projComponentsFolder, self.cName)
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         # File names
         self.projConfFile           = self.local.projConfFile
         self.layoutConfFile         = self.local.layoutConfFile
@@ -92,8 +93,7 @@ class Xetex (Manager) :
 
         # Make a PT settings dictionary
         if self.sourceEditor.lower() == 'paratext' :
-            sourcePath = self.projConfig['CompTypes'][self.Ctype]['sourcePath']
-            self.ptSSFConf = getPTSettings(sourcePath)
+            self.ptSSFConf = getPTSettings(self.sourcePath)
             if not self.ptSSFConf :
                 self.project.log.writeToLog('XTEX-005')
 

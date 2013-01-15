@@ -24,6 +24,7 @@ import os, shutil
 
 # Load the local classes
 from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
 from rapuma.project.manager import Manager
 
 
@@ -43,6 +44,7 @@ class Layout (Manager) :
         self.manager                        = self.cType + '_Layout'
         self.layoutConfig                   = ConfigObj()
         self.project                        = project
+        self.sourcePath                     = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         # Overrides
         self.project.local.layoutConfFile   = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
 

@@ -24,6 +24,7 @@ import os, shutil
 
 # Load the local classes
 from rapuma.core.tools import *
+from rapuma.core.pt_tools import *
 from rapuma.project.manager import Manager
 
 ###############################################################################
@@ -56,6 +57,7 @@ class Illustration (Manager) :
         self.project                    = project
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
+        self.sourcePath                 = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
 
         # Create an empty default Illustration config file if needed
         if not os.path.isfile(self.project.local.illustrationConfFile) :
@@ -63,7 +65,7 @@ class Illustration (Manager) :
             writeConfFile(self.illustrationConfig)
             self.project.log.writeToLog('ILUS-010')
         else :
-            self.fontConfig = ConfigObj(self.project.local.illustrationConfFile)
+            self.illustrationConfig = ConfigObj(self.project.local.illustrationConfFile)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Illustration'
@@ -158,15 +160,16 @@ class Illustration (Manager) :
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
+        print dir(self.project)
+
         # Check for a .piclist file
-        print dir(self)
-# FIXME: How do I call on usfm module to get the piclist path?
-        
-        piclistFile = self.project.managers[self.cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+        piclistFile = self.project.managers[self.cType + '_Text'].getCidPiclistPath(cid)
         if not os.path.isfile(piclistFile) :
             with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
                 writeObject.write('%' + cid.upper() + ' 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
+                for i in self.illustrationConfig.keys() :
+                    print i
 
 
 

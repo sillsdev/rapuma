@@ -197,11 +197,11 @@ def getSourceEditor (projConfig, sourcePath, cType) :
     return se
 
 
-def getSourcePath (projConfig, Ctype) :
+def getSourcePath (userConfig, pid, cType) :
     '''Return the stored source path for a component type.'''
 
-    if testForSetting(projConfig['CompTypes'][Ctype], 'sourcePath') :
-        sp = projConfig['CompTypes'][Ctype]['sourcePath']
+    if testForSetting(userConfig['Projects'][pid], cType + '_sourcePath') :
+        sp = userConfig['Projects'][pid][cType + '_sourcePath']
         if sp :
             return resolvePath(sp)
 

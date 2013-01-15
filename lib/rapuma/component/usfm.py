@@ -53,6 +53,7 @@ class Usfm (Component) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
 
         # Check to see if this component type has been added to the 
         # proj config already
