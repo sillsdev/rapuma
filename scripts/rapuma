@@ -260,6 +260,7 @@ def makeExcludeFileList (aProject) :
 
     # Work out from the component type what the settings file names are
     excludeFiles = []
+    excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex']
     for cType in aProject.projConfig['CompTypes'].keys() :
         rndr = aProject.projConfig['CompTypes'][cType]['renderer']
         aProject.createManager(cType.lower(), rndr)
@@ -268,14 +269,19 @@ def makeExcludeFileList (aProject) :
 
     # Now add to the list all the .tex files that are associated with components
     for cName in aProject.projConfig['Components'].keys() :
+        # Sort out cid types
         if getUsfmCid(cName) :
-            cidTexFile = os.path.join(aProject.local.projComponentsFolder, cName, getUsfmCid(cName) + '.tex')
-            if os.path.isfile(cidTexFile) :
-                excludeFiles.append(getUsfmCid(cName) + '.tex')
-        cNameTexFile = os.path.join(aProject.local.projComponentsFolder, cName, cName + '.tex')
-        if os.path.isfile(cNameTexFile) :
-            excludeFiles.append(cName + '.tex')
+            for t in excludeTypes :
+                cidFile = os.path.join(aProject.local.projComponentsFolder, cName, getUsfmCid(cName) + t)
+                if os.path.isfile(cidFile) :
+                    excludeFiles.append(getUsfmCid(cName) + t)
+        # Sort out cName types
+        for t in excludeTypes :
+            cNameFile = os.path.join(aProject.local.projComponentsFolder, cName, cName + t)
+            if os.path.isfile(cNameFile) :
+                excludeFiles.append(cName + t)
 
+    print excludeFiles
     return excludeFiles
 
 
@@ -370,9 +376,9 @@ def zipUpProject (source, target = None, excludeFiles = None) :
     # First list some types we don't want to include in our archive
     if not excludeFiles :
         excludeFiles = []
-    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
-    # Now list the full file names of any excptions to the above type exclusions
-    excludeException = ['rapuma.log']
+#    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
+#    # Now list the full file names of any excptions to the above type exclusions
+#    excludeException = ['rapuma.log']
     root_len = len(source)
     with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
         for root, dirs, files in os.walk(source):
@@ -383,10 +389,10 @@ def zipUpProject (source, target = None, excludeFiles = None) :
                     continue
                 if not f[-1] == '~' :
                     fn, fx = os.path.splitext(f)
-                    if not fx in excludeType or f in excludeException :
-                        fullpath = os.path.join(root, f)
-                        zip_name = os.path.join(zip_root, f)
-                        myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
+#                    if not fx in excludeType or f in excludeException :
+                    fullpath = os.path.join(root, f)
+                    zip_name = os.path.join(zip_root, f)
+                    myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
 
 
 def restoreArchive (pid, path = None) :
