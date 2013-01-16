@@ -339,15 +339,20 @@ class Text (Manager) :
 #            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
 
 
-# FIXME: Had a problem with this, does not always seem to store in Unicode, then fails
-            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
 
-            # For testing
-#            if k in ['description', 'copyright', 'caption'] :
-#            if k in ['caption'] :
-#                illustrationConfig[figDict['illustrationID'].upper()][k] = ''
-#            else :
-#                illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
+
+
+
+
+
+# FIXME: Had a problem with this, does not always seem to store in Unicode, then fails
+#            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
+
+            # For testing ['description', 'copyright', 'caption']
+            if k in ['caption'] :
+                illustrationConfig[figDict['illustrationID'].upper()][k] = ''
+            else :
+                illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
 
         writeConfFile(illustrationConfig)
 

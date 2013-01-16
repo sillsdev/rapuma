@@ -160,10 +160,8 @@ class Illustration (Manager) :
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
-        print dir(self.project)
-
         # Check for a .piclist file
-        piclistFile = self.project.managers[self.cType + '_Text'].getCidPiclistPath(cid)
+        piclistFile = self.project.components[cid].getCidPiclistPath(cid)
         if not os.path.isfile(piclistFile) :
             with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
