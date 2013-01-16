@@ -258,9 +258,10 @@ def makeExcludeFileList (aProject) :
     template or an archive. These will be all auto-generated files that containe system-
     specific paths, etc.'''
 
-    # Work out from the component type what the settings file names are
     excludeFiles = []
     excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex']
+
+    # Work out from the component type what the settings file names are
     for cType in aProject.projConfig['CompTypes'].keys() :
         rndr = aProject.projConfig['CompTypes'][cType]['renderer']
         aProject.createManager(cType.lower(), rndr)
@@ -281,7 +282,6 @@ def makeExcludeFileList (aProject) :
             if os.path.isfile(cNameFile) :
                 excludeFiles.append(cName + t)
 
-    print excludeFiles
     return excludeFiles
 
 
