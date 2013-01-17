@@ -172,7 +172,7 @@ class ProjLog (object) :
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
-            'LYOT-020' : ['MSG', 'Updated exsisting layout configuration file. (layout.__init__())'],
+            'LYOT-020' : ['LOG', 'Loaded exsisting layout configuration file. (layout.__init__())'],
 
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],

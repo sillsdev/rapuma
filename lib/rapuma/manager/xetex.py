@@ -48,15 +48,38 @@ class Xetex (Manager) :
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
         self.cName                  = project.cName
-        self.manager                = self.cType + '_Xetex'
+        self.renderer               = 'xetex'
+        self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         # ConfigObjs
         self.projConfig             = project.projConfig
+        self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
+        self.layoutConfig           = ConfigObj(encoding='utf-8')
+        self.fontConfig             = ConfigObj(encoding='utf-8')
+        self.layoutMacroXmlConfFileName     = 'layout_' + self.macroPackage + '.xml'
+        self.layoutMacroXmlConfFile = os.path.join(self.project.local.rapumaConfigFolder, self.layoutMacroXmlConfFileName)
         # Load supported config objs
         if cType in self.project.userConfig['System']['recognizedComponentTypes'] :
-            if 'usfm_Layout' not in self.managers :
-                self.project.createManager(self.cType, 'layout')
-            self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+
+
+# FIXME: Need to diff the layoutConfig to avoid writing it out all the time, or something like that.
+
+
+
+
+#            if 'usfm_Layout' not in self.managers :
+            self.project.createManager(self.cType, 'layout')
+            orgLayoutConfig     = self.managers[self.cType + '_Layout'].layoutConfig
+            orgFileName         = orgLayoutConfig.filename
+            # Now we need to check against the macroPackage default settings and
+            # Now merge them together here (NOTE: This cannot be done in layout.py)
+            layoutMacro         = ConfigObj(getXMLSettings(self.layoutMacroXmlConfFile), encoding='utf-8')
+            layoutMacro.merge(orgLayoutConfig)
+#            import pdb; pdb.set_trace()
+            self.layoutConfig = layoutMacro
+            self.layoutConfig.filename = orgFileName
+            writeConfFile(self.layoutConfig)
+
             if 'usfm_Font' not in self.managers :
                 self.project.createManager(self.cType, 'font')
             self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
@@ -65,6 +88,7 @@ class Xetex (Manager) :
             dieNow()
 
         # Config Settings
+        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']

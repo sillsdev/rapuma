@@ -378,18 +378,20 @@ class Project (object) :
             return True
 
 
+
+
+
+
+
+# FIXME: Not sure about this yet, may need work
+
+
     def addCompTypeSourcePath (self, cType, source) :
         '''Add a source path for a component type if one does not
         already exsist. If one exists, replace anyway. Last in wins!
         The assumption is only one path per component type.'''
 
         Ctype = cType.capitalize()
-        # This can be depricated soon
-        if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'sourcePath') :
-            self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-            del self.projConfig['CompTypes'][cType.capitalize()]['sourcePath']
-            writeConfFile(self.projConfig)
-
         # Path has been resolved in Rapuma, we assume it should be valid.
         # But it could be a full file name. We need to sort that out.
         try :
@@ -403,11 +405,6 @@ class Project (object) :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('PROJ-100', [str(e)])
             dieNow()
-
-
-
-
-
 
 
 
@@ -446,8 +443,7 @@ class Project (object) :
         # so that processes to follow will have that setting available.
         if newSource :
             source = newSource
-            self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = newSource
-            writeConfFile(self.projConfig)
+            self.addCompTypeSourcePath(cType, source)
         # If there is no newSource, then the status quo will work okay
         elif oldSource :
             source = oldSource
