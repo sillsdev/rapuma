@@ -596,11 +596,28 @@ Todo:
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
+            <name>USFM TeX Page Height</name>
+            <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
+            <key>pageHeight</key>
+            <type>integer</type>
+            <value>210</value>
+            <usfmTex>\PaperHeight=[vm]</usfmTex>
+        </setting>
+        <setting>
+            <name>USFM TeX Page Width</name>
+            <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
+            <key>pageWidth</key>
+            <type>integer</type>
+            <value>148</value>
+            <usfmTex>\PaperWidth=[vm]</usfmTex>
+        </setting>
+        <setting>
             <name>USFM TeX Cropmarks</name>
             <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
             <key>cropmarks</key>
             <type>boolean</type>
             <value>True</value>
+            <usfmTex>\CropMarkstrue</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Page Border</name>
@@ -608,6 +625,7 @@ Todo:
             <key>usePageBorder</key>
             <type>boolean</type>
             <value>False</value>
+            <usfmTex></usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Page Border File</name>
@@ -622,6 +640,7 @@ Todo:
             <key>EndBookNoEject</key>
             <type>boolean</type>
             <value>False</value>
+            <usfmTex></usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Page Border Scale</name>
@@ -629,6 +648,7 @@ Todo:
             <key>pageBorderScale</key>
             <type>integer</type>
             <value></value>
+            <usfmTex></usfmTex>
         </setting>
     </section>
     <section>

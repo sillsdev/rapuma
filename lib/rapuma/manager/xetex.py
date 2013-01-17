@@ -52,12 +52,18 @@ class Xetex (Manager) :
         self.managers               = project.managers
         # ConfigObjs
         self.projConfig             = project.projConfig
-        if 'usfm_Layout' not in self.managers :
-            self.project.createManager(self.cType, 'layout')
-        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
-        if 'usfm_Font' not in self.managers :
-            self.project.createManager(self.cType, 'font')
-        self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
+        # Load supported config objs
+        if cType in self.project.userConfig['System']['recognizedComponentTypes'] :
+            if 'usfm_Layout' not in self.managers :
+                self.project.createManager(self.cType, 'layout')
+            self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+            if 'usfm_Font' not in self.managers :
+                self.project.createManager(self.cType, 'font')
+            self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
+        else :
+            self.project.log.writeToLog('XTEX-150', [cType])
+            dieNow()
+
         # Config Settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
@@ -66,12 +72,12 @@ class Xetex (Manager) :
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
         self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
-        print self.layoutConfig['PageLayout']
         self.useLines               = self.layoutConfig['PageLayout']['useLines']
         self.useWatermark           = self.layoutConfig['PageLayout']['useWatermark']
-        self.useIllustrations       = self.layoutConfig['PageLayout']['useIllustrations']
+        self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
+        self.projConfFolder         = self.local.projConfFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
         self.projFontsFolder        = self.local.projFontsFolder
         self.projStylesFolder       = self.local.projStylesFolder
@@ -100,30 +106,6 @@ class Xetex (Manager) :
             if not self.ptSSFConf :
                 self.project.log.writeToLog('XTEX-005')
 
-        # Get persistant values from the config if there are any
-        # We assume at this point that if the merge has already taken place,
-        # we do not need to do it again. We will check for a version number 
-        # under the General Settings section to tell if it has been merged
-        # already. FIXME: This may not be the best way to do this but we cannot
-        # be writing this file out every time as it causes the PDF to get
-        # rendered every time, which is not helpful.
-        try :
-            version = self.layoutConfig['GeneralSettings']['usfmTexVersion']
-            self.project.log.writeToLog('XTEX-010', [version])
-        except :
-            # No version number means we need to merge the default and usfmTex layout settings
-            newSectionSettings = getPersistantSettings(self.layoutConfig, self.macLayoutValFile)
-            if newSectionSettings != self.layoutConfig :
-                self.managers[self.cType + '_Layout'].layoutConfig = newSectionSettings
-
-            macVals = ConfigObj(getXMLSettings(self.macLayoutValFile), encoding='utf-8')
-            layoutCopy = ConfigObj(self.layoutConfFile, encoding='utf-8')
-            layoutCopy.merge(macVals)
-            self.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
-            self.layoutConfig = layoutCopy
-            if writeConfFile(self.managers[self.cType + '_Layout'].layoutConfig) :
-                self.project.log.writeToLog('XTEX-020')
-
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
         for k, v in self.managerSettings.iteritems() :
@@ -138,6 +120,10 @@ class Xetex (Manager) :
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
 
         # Set file names with full path (this after booleans are set)
+        self.layoutConfFile         = os.path.join(self.projConfFolder, cType + '_Layout.conf')
+        self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
+        self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
+        self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
         self.macLink                = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFile)
         self.setFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.setFileName)
         self.extFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.extFileName)
@@ -786,7 +772,7 @@ class Xetex (Manager) :
 
 
                 # Run the XeTeX and collect the return code for analysis
-                dieNow()
+#                dieNow()
                 rCode = subprocess.call(cmds, env = envDict)
 
 

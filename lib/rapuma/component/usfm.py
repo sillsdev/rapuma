@@ -151,7 +151,10 @@ class Usfm (Component) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        useIllustrations        = str2bool(self.project.managers[self.cType + '_Illustration'].useIllustrations)
+        useWatermark            = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useWatermark'])
+        useLines                = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useLines'])
+        usePageBorder           = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['usePageBorder'])
+        useIllustrations        = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['Illustrations']['useIllustrations'])
         useManualAdjustments    = str2bool(self.project.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
 
         # First see if this is a valid component. This is a little
@@ -188,7 +191,6 @@ class Usfm (Component) :
             # Be sure there is a watermark file listed in the conf and
             # installed if watermark is turned on (True). Fallback on the
             # the default if needed.
-            useWatermark = self.project.managers[cType + '_Illustration'].useWatermark
             if useWatermark :
                 if testForSetting(self.compSettings, 'pageWatermarkFile') :
                     # Just install a default watermark page

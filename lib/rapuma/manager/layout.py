@@ -35,7 +35,7 @@ from rapuma.project.manager import Manager
 class Layout (Manager) :
 
     # Shared values
-    xmlConfDefaultFile     = 'layout_default.xml'
+    xmlConfFile     = 'layout_default.xml'
 
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
@@ -44,45 +44,84 @@ class Layout (Manager) :
 
         # List the renderers this manager supports
         self.cType                          = cType
+        self.Ctype                          = cType.capitalize()
         self.manager                        = self.cType + '_Layout'
-        self.layoutConfig                   = ConfigObj(encoding='utf-8')
         self.project                        = project
+        self.managers                       = project.managers
+        self.projConfig                     = self.project.projConfig
+
+
+
+
+
+
+# FIXME: The problem here is that we can't load the renderer manager without
+# loading the layout manager. We need to move the macroPackage related settings
+# over to the renderer to be added in there, that is where it is needed anyway.
+
+        self.renderer                       = self.projConfig['CompTypes'][self.Ctype]['renderer']
+        self.rendererManager                = cType + '_' + self.renderer.capitalize()
         self.sourcePath                     = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
-        # Overrides
-        self.project.local.layoutConfFile   = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
-
-# FIXME: we need to be able to run persistant values on both the default and the cType configs
-# This is very different from the other managers, do it with something like this:
-
-
-#        # Get persistant values from the config if there are any
-#        manager = self.cType + '_Illustration'
-#        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
-#        if newSectionSettings != self.project.projConfig['Managers'][manager] :
-#            self.project.projConfig['Managers'][manager] = newSectionSettings
-
-#        self.compSettings = self.project.projConfig['Managers'][manager]
-
-#        for k, v in self.compSettings.iteritems() :
-#            setattr(self, k, v)
-
-# It might be the best way will be to split the current conf back out to the 2 source forms
-# check and update each one, then merge them back together. A copy will need to be taken
-# first before the process is started so the results can be compared with the orginal. If
-# there is no difference, nothing will be written out.
+        self.macroPackage                   = self.projConfig['Managers'][self.rendererManager]['macroPackage']
 
 
 
-# This needs to be reworked:
+        # File names
+        
+# FIXME: Will this work right?
+#        self.layoutDefaultXmlConfFileName   = 'layout_default.xml'
+        self.layoutDefaultXmlConfFileName   = xmlConfFile
+        
+        
+        self.layoutMacroXmlConfFileName     = 'layout_' + self.macroPackage + '.xml'
+        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
+        # Set local var and override in project object (if needed)
+        self.project.local.layoutConfFile   = self.layoutConfFile
+        self.layoutDefaultXmlConfFile       = os.path.join(self.project.local.rapumaConfigFolder, self.layoutDefaultXmlConfFileName)
+        self.layoutMacroXmlConfFile         = os.path.join(self.project.local.rapumaConfigFolder, self.layoutMacroXmlConfFileName)
+        # Grab the projConfig settings for this manager
+        self.compSettings = self.project.projConfig['Managers'][self.manager]
+        for k, v in self.compSettings.iteritems() :
+            setattr(self, k, v)
+
+
+
+
+# FIXME: This part will be moved out
+
+        # Load up the layout config file which is dependent on 2 different
+        # config source files, a default and a cType specific one
+        # First, load up the default settings
+        layoutMerged            = ConfigObj(encoding='utf-8')
+        layoutDefault           = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
+        layoutMacro             = ConfigObj(getXMLSettings(self.layoutMacroXmlConfFile), encoding='utf-8')
+        layoutMacro.merge(layoutDefault)
+        layoutMerged            = layoutMacro
+        layoutMerged.filename   = self.layoutConfFile
+
+
+
+
+
+# FIXME: This part will be simplified, only one defaul will be used
 
         # Create a new default layout config file if needed
-        if not os.path.isfile(self.project.local.layoutConfFile) :
-            self.layoutConfig  = ConfigObj(getXMLSettings(self.project.local.rapumaLayoutDefaultFile), encoding='utf-8')
-            self.layoutConfig.filename = self.project.local.layoutConfFile
+        # Otherwise check if anything new is in the default
+        # settings that need to be added to the project version
+        if not os.path.isfile(self.layoutConfFile) :
+            self.layoutConfig   = ConfigObj(encoding='utf-8')
+            self.layoutConfig   = layoutMerged
+            self.layoutConfig.filename = self.layoutConfFile
             writeConfFile(self.layoutConfig)
             self.project.log.writeToLog('LYOT-010')
         else :
-            self.layoutConfig = ConfigObj(self.project.local.layoutConfFile, encoding='utf-8')
+            self.layoutConfig = ConfigObj(self.layoutConfFile, encoding='utf-8')
+            self.layoutConfig.filename = self.layoutConfFile
+            layoutMerged.merge(self.layoutConfig)
+            if layoutMerged != self.layoutConfig :
+                self.layoutConfig = layoutMerged
+                writeConfFile(self.layoutConfig)
+                self.project.log.writeToLog('LYOT-020')
 
 
 ###############################################################################
@@ -90,6 +129,7 @@ class Layout (Manager) :
 ###############################################################################
 
 
-
+# FIXME: We may want to move to this manager some more general functions
+# from other managers
 
 

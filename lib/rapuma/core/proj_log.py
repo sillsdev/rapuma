@@ -118,6 +118,7 @@ class ProjLog (object) :
             'XTEX-130' : ['LOG', 'Hyphenation TeX file [<<1>>] has been recreated.'],
             'XTEX-140' : ['ERR', 'Failed to add watermark to [<<1>>].'],
             'XTEX-145' : ['LOG', 'Successfully added watermark to [<<1>>].'],
+            'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
@@ -170,11 +171,8 @@ class ProjLog (object) :
             'FONT-130' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
-            'LYOT-005' : ['MSG', 'LYOT-005 - Unassigned error message ID.'],
             'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
-            'LYOT-015' : ['MSG', 'LYOT-015 - Unassigned error message ID.'],
-            'LYOT-020' : ['MSG', 'LYOT-020 - Unassigned error message ID.'],
-            'LYOT-025' : ['MSG', 'LYOT-025 - Unassigned error message ID.'],
+            'LYOT-020' : ['MSG', 'Updated exsisting layout configuration file. (layout.__init__())'],
 
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],

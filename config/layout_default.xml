@@ -201,29 +201,13 @@ Todo:
             <description>Illustrations - If set to true this will allow the system to put in place all the files necessary to have illustrations used in this publication.  One warning, however, if you choose to set this to false after once using illustrations, it will delete all the illustration related files with the exception of the captions.csv file.  This is to prevent errors from occurring during the typesetting process.  Default = False</description>
             <key>useIllustrations</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
     </section>
     <section>
         <name>Page Layout</name>
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
-        <setting>
-            <name>Page Height</name>
-            <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
-            <key>pageHeight</key>
-            <type>integer</type>
-            <value>210</value>
-            <usfmTex>\PaperHeight=[vm]</usfmTex>
-        </setting>
-        <setting>
-            <name>Page Width</name>
-            <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
-            <key>pageWidth</key>
-            <type>integer</type>
-            <value>148</value>
-            <usfmTex>\PaperWidth=[vm]</usfmTex>
-        </setting>
         <setting>
             <name>Page Size ID Code</name>
             <description>If you are using a common page size please enter the standard code.  If a custom size is being used just enter "custom". Default = A5</description>
@@ -237,13 +221,6 @@ Todo:
             <key>pageNumberBegin</key>
             <type>integer</type>
             <value></value>
-        </setting>
-        <setting>
-            <name>Use Illustrations</name>
-            <key>useIllustrations</key>
-            <description>Turn on (or off) the use of illustrations in this project.</description>
-            <type>boolean</type>
-            <value>False</value>
         </setting>
         <setting>
             <name>Use Watermark</name>

@@ -199,7 +199,8 @@ class Illustration (Manager) :
         there is no \fig data no piclist file will be made.'''
 
         # Check for a .piclist file
-        piclistFile = self.project.components[cid].getCidPiclistPath(cid)
+        cName = getRapumaCName(cid)
+        piclistFile = self.project.components[cName].getCidPiclistPath(cid)
         if not os.path.isfile(piclistFile) :
             try :
                 with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
