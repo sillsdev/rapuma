@@ -62,6 +62,9 @@ class Xetex (Manager) :
         if cType in self.project.userConfig['System']['recognizedComponentTypes'] :
 
 
+
+
+
 # FIXME: Need to diff the layoutConfig to avoid writing it out all the time, or something like that.
 
 
@@ -79,6 +82,13 @@ class Xetex (Manager) :
             self.layoutConfig = layoutMacro
             self.layoutConfig.filename = orgFileName
             writeConfFile(self.layoutConfig)
+
+
+
+
+
+
+
 
             if 'usfm_Font' not in self.managers :
                 self.project.createManager(self.cType, 'font')
