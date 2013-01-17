@@ -53,7 +53,7 @@ class Illustration (Manager) :
         self.cfg                        = cfg
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
-        self.illustrationConfig         = ConfigObj()
+        self.illustrationConfig         = ConfigObj(encoding='utf-8')
         self.project                    = project
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
@@ -65,7 +65,7 @@ class Illustration (Manager) :
             writeConfFile(self.illustrationConfig)
             self.project.log.writeToLog('ILUS-010')
         else :
-            self.illustrationConfig = ConfigObj(self.project.local.illustrationConfFile)
+            self.illustrationConfig = ConfigObj(self.project.local.illustrationConfFile, encoding='utf-8')
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Illustration'
@@ -150,7 +150,45 @@ class Illustration (Manager) :
 
 
 
-# FIXME: Do we want this moved to the usfm module?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def getPics (self, cid) :
+        '''Figure out what pics/illustrations we need for a give book
+        and install them. It is assumed that this was called because
+        the user wants illustrations. Therefore, this will kill the
+        current session if it fails.'''
+
+        print 'Getting illustrations for ' + cid + '\n'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -163,12 +201,19 @@ class Illustration (Manager) :
         # Check for a .piclist file
         piclistFile = self.project.components[cid].getCidPiclistPath(cid)
         if not os.path.isfile(piclistFile) :
-            with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write('% Illustration placement file for: ' + cid + '\n\n')
-                writeObject.write('%' + cid.upper() + ' 3.1 |<file name>|col|tl|1.0|Copyright info|Vernacular caption| \n')
-                for i in self.illustrationConfig.keys() :
-                    print i
-
-
+            try :
+                with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
+                    for i in self.illustrationConfig['Illustrations'].keys() :
+                        if self.illustrationConfig['Illustrations'][i]['bid'] == cid.upper() :
+                            obj = self.illustrationConfig['Illustrations'][i]
+                            writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
+                                ' |' + obj['fileName'] + '|' + obj['span'] + '|' + obj['position'] + \
+                                    '|' + obj['scale'] + '|' + obj['copyright'] + '|' + obj['caption'] + '| \n')
+                self.project.log.writeToLog('ILUS-065', [cid])
+            except Exception as e :
+                # If this doesn't work, we should probably quite here
+                dieNow('Error: Create piclist file failed with this error: ' + str(e))
+        else :
+            self.project.log.writeToLog('ILUS-060', [cid])
 
 

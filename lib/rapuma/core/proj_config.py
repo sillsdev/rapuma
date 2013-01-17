@@ -32,12 +32,12 @@ class ProjConfig (object) :
         '''Intitate the whole class and create the object.'''
 
         self.local          = local
-        self.projConfig     = ConfigObj()
+        self.projConfig     = ConfigObj(encoding='utf-8')
 #        self.projHome       = ''
 
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :
-            self.projConfig = ConfigObj(self.local.projConfFile)
+            self.projConfig = ConfigObj(self.local.projConfFile, encoding='utf-8')
             self.projectMediaIDCode = self.projConfig['ProjectInfo']['projectMediaIDCode']
             self.projConfig.filename = self.local.projConfFile
 
@@ -45,7 +45,7 @@ class ProjConfig (object) :
     def makeNewProjConf (self, local, pid, pmid, pname, cVersion) :
         '''Create a new project configuration file for a new project.'''
 
-        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')))
+        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
         # Insert intitial project settings
         self.projConfig['ProjectInfo']['projectMediaIDCode']        = pmid
         self.projConfig['ProjectInfo']['projectName']               = pname

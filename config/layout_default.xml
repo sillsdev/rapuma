@@ -238,6 +238,41 @@ Todo:
             <type>integer</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Use Illustrations</name>
+            <key>useIllustrations</key>
+            <description>Turn on (or off) the use of illustrations in this project.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Use Watermark</name>
+            <key>useWatermark</key>
+            <description>Turn on (or off) the use of a page watermark in this project.</description>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Watermark File</name>
+            <description>Watermark default file name. Change this name to indicate what watermark you want put on the page, if you choose to use a watermark.</description>
+            <key>watermarkFile</key>
+            <type>string</type>
+            <value>watermark-draft.pdf</value>
+        </setting>
+        <setting>
+            <name>Use Lines</name>
+            <key>useLines</key>
+            <description>Turn on (or off) the use of lines in the background of the page in this project. This is to help with composition work.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Lines Background File</name>
+            <description>The default background file used to display lines behind the text, if that feature is selected.</description>
+            <key>linesFile</key>
+            <type>string</type>
+            <value>lines-background.pdf</value>
+        </setting>
     </section>
     <section>
         <name>Text Elements</name>

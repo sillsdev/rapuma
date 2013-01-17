@@ -175,6 +175,11 @@ class Usfm (Component) :
                 if useManualAdjustments :
                     self.createAjustmentFile(cid)
                 if useIllustrations :
+                    # First check if we have the illustrations we think we need
+                    # and get them if we do not.
+                    self.project.managers[cType + '_Illustration'].getPics(cid)
+
+                    # If that all went well, create the piclist files we need.
                     self.project.managers[cType + '_Illustration'].createPiclistFile(cid)
 
             # Run any hyphenation or word break routines

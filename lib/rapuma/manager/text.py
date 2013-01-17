@@ -20,7 +20,7 @@
 # this process
 
 import os, shutil, codecs, unicodedata
-from configobj import ConfigObj, Section
+#from configobj import ConfigObj, Section
 from functools import partial
 
 # Load the local classes
@@ -283,7 +283,7 @@ class Text (Manager) :
                             self.project.lockUnlock(cName, True, True)
 
                     # If this is a USFM component type we need to remove any \fig markers,
-                    # and record in the illustration.conf file
+                    # and record them in the illustration.conf file for later use
                     if self.cType == 'usfm' :
                         tempFile = target + '.tmp'
                         contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
@@ -314,7 +314,7 @@ class Text (Manager) :
         '''Log the figure data in the illustration.conf.'''
         
         fig = figConts.group(1).split('|')
-        figKeys = ['description', 'fileName', 'position', 'refRange', 'copyright', 'caption', 'location']
+        figKeys = ['description', 'fileName', 'span', 'refRange', 'copyright', 'caption', 'location']
         figDict = {}
 
         # Add all the figure info to the dictionary
@@ -328,31 +328,22 @@ class Text (Manager) :
         figDict['bid'] = cid.upper()
         figDict['chapter'] = figDict['location'].split(':')[0]
         figDict['verse'] = figDict['location'].split(':')[1]
+        figDict['scale'] = '1.0'
+        if figDict['span'] == 'col' :
+            figDict['position'] = 'tl'
+        else :
+            figDict['position'] = 't'
 
         del figDict['location']
 
         illustrationConfig = self.managers[self.cType + '_Illustration'].illustrationConfig
+        if not testForSetting(illustrationConfig, 'Illustrations') :
+            buildConfSection(illustrationConfig, 'Illustrations')
         # Put the dictionary info into the illustration conf file
-        if not testForSetting(illustrationConfig, figDict['illustrationID'].upper()) :
-            buildConfSection(illustrationConfig, figDict['illustrationID'].upper())
+        if not testForSetting(illustrationConfig['Illustrations'], figDict['illustrationID'].upper()) :
+            buildConfSection(illustrationConfig['Illustrations'], figDict['illustrationID'].upper())
         for k in figDict.keys() :
-#            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
-
-
-
-
-
-
-
-
-# FIXME: Had a problem with this, does not always seem to store in Unicode, then fails
-#            illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
-
-            # For testing ['description', 'copyright', 'caption']
-            if k in ['caption'] :
-                illustrationConfig[figDict['illustrationID'].upper()][k] = ''
-            else :
-                illustrationConfig[figDict['illustrationID'].upper()][k] = figDict[k].encode('utf-8')
+            illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
 
         writeConfFile(illustrationConfig)
 

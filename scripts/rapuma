@@ -159,7 +159,7 @@ def templateToProject (uc, path, pid, tid, pname) :
         myzip.extractall(projHome)
 
     # Peek into the project
-    pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'))
+    pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
 
     pc['ProjectInfo']['projectName']               = pname
     pc['ProjectInfo']['projectCreateDate']         = tStamp()
@@ -528,7 +528,7 @@ def projectToTemplate (pid, tid) :
     shutil.copytree(source, targetDir)
 
     # Now make the config files generic for use with any project
-    pc = ConfigObj(os.path.join(targetDir, 'Config', 'project.conf'))
+    pc = ConfigObj(os.path.join(targetDir, 'Config', 'project.conf'), encoding='utf-8')
     aProject = initProject(pc['ProjectInfo']['projectIDCode'])
     pc['ProjectInfo']['projectName']                = ''
     pc['ProjectInfo']['projectIDCode']              = ''

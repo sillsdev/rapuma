@@ -516,27 +516,6 @@ Todo:
             <value>True</value>
         </setting>
         <setting>
-            <name>USFM TeX Span Or Colum</name>
-            <description>The default position the illustration will conform to.  There are two possibilities, span and col.  Span indicates the illustration will span columns.  Col indicates that the illustration will fit inside a column.   Default = col</description>
-            <key>Size</key>
-            <type>string</type>
-            <value>col</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Default Position</name>
-            <description>The default position the illustration will take on the page.  There are six possiblities depending on if you use columns or not.  With no columns you can use 't' (top) or 'b' (bottom).  If you have two columns you can use 'tl' (top-left), 'tr' (top-right), 'bl' (bottom-left), 'br' (bottom-right).   Default = tl</description>
-            <key>position</key>
-            <type>string</type>
-            <value>tl</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Picture Scale</name>
-            <description>The default scale of the picture.  It works on percentage, e.g. '1.0' = 100%, '0.9' = 90%.   Default = 1.0</description>
-            <key>scale</key>
-            <type>string</type>
-            <value>1.0</value>
-        </setting>
-        <setting>
             <name>USFM TeX Chapter Verse Seperator</name>
             <description>A reference can be included with the illustrations and the seperator can be changed with this setting.  The default is ":"</description>
             <key>chapterVerseSeperator</key>
@@ -549,13 +528,6 @@ Todo:
             <key>captionReference</key>
             <type>boolean</type>
             <value>True</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Caption Processing</name>
-            <description>If the captions file needs some preprocessing when being brought into the project, that command can put here.  If caption processing is not necessary leave this field blank.</description>
-            <key>captionProcessing</key>
-            <type>string</type>
-            <value></value>
         </setting>
         <setting>
             <name>USFM TeX PicPath</name>
@@ -623,21 +595,6 @@ Todo:
         <name>Page Layout</name>
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
-        <setting>
-            <name>USFM TeX Use Watermark</name>
-            <description>If set to true a watermark will be output on the page. Default = True</description>
-            <key>useWatermark</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Watermark File</name>
-            <description>Watermark default file name.  Change this name to indicate what watermark you want put on the page, if you choose to use a watermark.  The file name must either be a watermark file known to the system or a file that has been manually installed in the Source/Illustrations folder. Some valid system watermark files are:   watermark-draft.pdf   watermark-proof.pdf   watermark-final.pdf   Default = watermark.pdf</description>
-            <key>watermarkFile</key>
-            <type>string</type>
-            <value>watermark-draft.pdf</value>
-            <usfmTex></usfmTex>
-        </setting>
         <setting>
             <name>USFM TeX Cropmarks</name>
             <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>

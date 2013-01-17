@@ -23,7 +23,7 @@
 import codecs, os, sys, shutil, dircache
 from datetime import *
 from xml.etree import ElementTree
-from configobj import ConfigObj, Section
+#from configobj import ConfigObj, Section
 from rapuma.core.tools import *
 import palaso.sfm as sfm
 from palaso.sfm import usfm, style, element, text

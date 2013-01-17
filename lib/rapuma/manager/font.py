@@ -47,7 +47,7 @@ class Font (Manager) :
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
-        self.fontConfig             = ConfigObj()
+        self.fontConfig             = ConfigObj(encoding='utf-8')
         self.project                = project
         self.manager                = self.cType + '_Font'
         self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
@@ -59,7 +59,7 @@ class Font (Manager) :
             writeConfFile(self.fontConfig)
             self.project.log.writeToLog('FONT-010')
         else :
-            self.fontConfig = ConfigObj(self.project.local.fontConfFile)
+            self.fontConfig = ConfigObj(self.project.local.fontConfFile, encoding='utf-8')
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))

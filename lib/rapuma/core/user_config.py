@@ -45,7 +45,7 @@ class UserConfig (object) :
             self.initUserHome()
 
         # Load the Rapuma conf file into an object
-        self.userConfig = ConfigObj(self.local.userConfFile)
+        self.userConfig = ConfigObj(self.local.userConfFile, encoding='utf-8')
 
         # Look for any projects that might be registered and copy the data out
         try :
@@ -55,7 +55,7 @@ class UserConfig (object) :
 
         # Create a new conf object based on all the XML default settings
         # Then override them with any exsiting user settings.
-        newConfig = ConfigObj(sysXmlConfig.dict()).override(self.userConfig)
+        newConfig = ConfigObj(sysXmlConfig.dict(), encoding='utf-8').override(self.userConfig)
 
         # Put back the copied data of any project information that we might have
         # lost from the XML/conf file merging.
@@ -78,7 +78,7 @@ class UserConfig (object) :
 
         # Make the default global rapuma.conf for custom environment settings
         if not os.path.isfile(self.local.userConfFile) :
-            self.userConfig = ConfigObj()
+            self.userConfig = ConfigObj(encoding='utf-8')
             self.userConfig.filename = self.local.userConfFile
             self.userConfig['System'] = {}
             self.userConfig['System']['userName'] = 'Default User'

@@ -66,8 +66,10 @@ class Xetex (Manager) :
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
         self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
-        self.useWatermark           = self.projConfig['Managers'][self.cType + '_Illustration']['useWatermark']
-        self.pageWatermarkFile      = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
+        print self.layoutConfig['PageLayout']
+        self.useLines               = self.layoutConfig['PageLayout']['useLines']
+        self.useWatermark           = self.layoutConfig['PageLayout']['useWatermark']
+        self.useIllustrations       = self.layoutConfig['PageLayout']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
@@ -78,16 +80,17 @@ class Xetex (Manager) :
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         # File names
-        self.projConfFile           = self.local.projConfFile
-        self.layoutConfFile         = self.local.layoutConfFile
-        self.fontConfFile           = self.local.fontConfFile
+        self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
+        self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
         self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
         if self.useWatermark :
-            self.watermarkFile      = os.path.join(self.local.projIllustrationsFolder, self.pageWatermarkFile)
+            self.watermarkFile      = os.path.join(self.local.projIllustrationsFolder, self.watermarkFileName)
+        if self.useLines :
+            self.linesFile          = os.path.join(self.local.projIllustrationsFolder, self.linesFileName)
         # Init some Dicts
         self.ptSSFConf              = {}
 
@@ -113,8 +116,8 @@ class Xetex (Manager) :
             if newSectionSettings != self.layoutConfig :
                 self.managers[self.cType + '_Layout'].layoutConfig = newSectionSettings
 
-            macVals = ConfigObj(getXMLSettings(self.macLayoutValFile))
-            layoutCopy = ConfigObj(self.layoutConfFile)
+            macVals = ConfigObj(getXMLSettings(self.macLayoutValFile), encoding='utf-8')
+            layoutCopy = ConfigObj(self.layoutConfFile, encoding='utf-8')
             layoutCopy.merge(macVals)
             self.managers[self.cType + '_Layout'].layoutConfig = layoutCopy
             self.layoutConfig = layoutCopy
@@ -212,7 +215,8 @@ class Xetex (Manager) :
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]
-        return line.replace(ph, unicode(v, encoding='utf_8'))
+#        return line.replace(ph, unicode(v, encoding='utf_8'))
+        return line.replace(ph, v)
 
 
     def texFileHeader (self, fName) :
@@ -777,8 +781,17 @@ class Xetex (Manager) :
                 # will run with
                 cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
 
+
+# FIXME
+
+
                 # Run the XeTeX and collect the return code for analysis
+                dieNow()
                 rCode = subprocess.call(cmds, env = envDict)
+
+
+# FIXME
+
 
                 # Analyse the return code
                 if rCode == int(0) :

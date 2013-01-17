@@ -231,8 +231,8 @@ def confObjCompare (objA, objB, path) :
     objA.write()
     objB.filename = os.path.join(path, '.confB')
     objB.write()
-    reObjA = ConfigObj(os.path.join(path, '.confA'))
-    reObjB = ConfigObj(os.path.join(path, '.confB'))
+    reObjA = ConfigObj(os.path.join(path, '.confA'), encoding='utf-8')
+    reObjB = ConfigObj(os.path.join(path, '.confB'), encoding='utf-8')
     return reObjA.__eq__(reObjB)
 
 
@@ -327,8 +327,8 @@ def writeConfFile (config) :
         config.write()
 
     except Exception as e :
-        terminal('\nERROR: Could not write to: ' + config.filename)
-        terminal('\nPython reported this error:\n\n\t[' + str(e) + ']' + str(config) + '\n')
+        terminal(u'\nERROR: Could not write to: ' + config.filename)
+        terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
         # Recover now
         if os.path.isfile(config.filename + '~') :
             shutil.copy(config.filename + '~', config.filename)
@@ -357,7 +357,7 @@ def xml_to_section (fname) :
     # Extract the section/key/value data
     xml_add_section(data, doc)
     # Convert the extracted data to a configobj and return
-    return ConfigObj(data)
+    return ConfigObj(data, encoding='utf-8')
 
 
 def xml_add_section (data, doc) :

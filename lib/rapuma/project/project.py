@@ -75,7 +75,7 @@ class Project (object) :
         # if needed
         newXmlDefaults = os.path.join(self.local.rapumaConfigFolder, self.projectMediaIDCode + '.xml')
         xmlConfig = getXMLSettings(newXmlDefaults)
-        newConf = ConfigObj(xmlConfig.dict()).override(self.projConfig)
+        newConf = ConfigObj(xmlConfig.dict(), encoding='utf-8').override(self.projConfig)
         for s,v in self.projConfig.items() :
             if s not in newConf :
                 newConf[s] = v
@@ -1121,7 +1121,7 @@ class Project (object) :
         else :
             confFile = os.path.join(self.local.projConfFolder, config + '.conf')
 
-        confObj = ConfigObj(confFile)
+        confObj = ConfigObj(confFile, encoding='utf-8')
         outConfObj = confObj
         try :
             # Walk our confObj to get to the section we want
