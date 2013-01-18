@@ -667,19 +667,24 @@ class Project (object) :
             return False
 
 
-    def updateComponent (self, cName, source = None) :
+    def updateComponent (self, cName, source = None, force = False) :
         '''Update a component, --source is optional but if given it will
         overwrite the current setting. The use of this function implies
         that this is forced so no force setting is used.'''
 
-        force = True
+        # Check to be sure the component exsits
+        if not self.isCompleteComponent(cName) :
+            self.log.writeToLog('COMP-210', [cName])
+            dieNow()
 
-        # Check to be sure we are working with the real cName
-        getRapumaCName(cName)
-
-        # Be sure the component (and subcomponents) is unlocked
-        if self.isLocked(cName) :
+        # If force is used, just unlock by default
+        if force :
             self.lockUnlock(cName, False, force)
+
+        # Be sure the component (and subcomponents) are unlocked
+        if self.isLocked(cName) :
+            self.log.writeToLog('COMP-110', [cName])
+            dieNow()
 
         # Here we essentially re-add the component
         cType = self.getComponentType(cName)

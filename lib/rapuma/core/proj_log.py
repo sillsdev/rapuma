@@ -89,6 +89,7 @@ class ProjLog (object) :
             'COMP-180' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             'COMP-185' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
             'COMP-200' : ['ERR', 'Process failed with error: [<<1>>]'],
+            'COMP-210' : ['ERR', 'Component [<<1>>] not found.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -175,6 +176,7 @@ class ProjLog (object) :
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
             'LYOT-020' : ['LOG', 'Loaded exsisting layout configuration file. (layout.__init__())'],
+            'LYOT-030' : ['LOG', 'Changes found in the default layout config model. These were merged into the exsisting layout configuration file. (layout.__init__())'],
 
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],

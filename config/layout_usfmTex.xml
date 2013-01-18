@@ -614,11 +614,11 @@ Todo:
         <setting>
             <name>USFM TeX Cropmarks</name>
             <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
-            <key>cropmarks</key>
+            <key>useCropmarks</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <usfmTex>\CropMarkstrue</usfmTex>
-            <boolDepend>PageLayout:cropmarks</boolDepend>
+            <boolDepend>PageLayout:useCropmarks</boolDepend>
         </setting>
         <setting>
             <name>USFM TeX Page Border</name>

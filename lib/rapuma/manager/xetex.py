@@ -98,8 +98,6 @@ class Xetex (Manager) :
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
         self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
-        self.useLines               = self.layoutConfig['PageLayout']['useLines']
-        self.useWatermark           = self.layoutConfig['PageLayout']['useWatermark']
         self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
@@ -112,14 +110,11 @@ class Xetex (Manager) :
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         # File names
-        self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
         self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        if self.useLines :
-            self.linesFile          = os.path.join(self.local.projIllustrationsFolder, self.linesFileName)
         # Init some Dicts
         self.ptSSFConf              = {}
 
@@ -804,7 +799,7 @@ class Xetex (Manager) :
                 break
 
         # Add lines background for composition work
-        if str2bool(self.useLines) :
+        if str2bool(self.layoutConfig['PageLayout']['useLines']) :
             linesFileName       = self.layoutConfig['PageLayout']['linesFile']
             linesFile           = os.path.join(self.local.projIllustrationsFolder, linesFileName)
             cmd = [self.pdfUtilityCommand, cNamePdf, 'background', linesFile, 'output', tempName(cNamePdf)]
@@ -819,7 +814,7 @@ class Xetex (Manager) :
                 dieNow()
 
         # Add a watermark if required
-        if str2bool(self.useWatermark) :
+        if str2bool(self.layoutConfig['PageLayout']['useWatermark']) :
             watermarkFileName   = self.layoutConfig['PageLayout']['watermarkFile']
             watermarkFile       = os.path.join(self.local.projIllustrationsFolder, watermarkFileName)
             cmd = [self.pdfUtilityCommand, cNamePdf, 'background', watermarkFile, 'output', tempName(cNamePdf)]

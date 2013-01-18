@@ -61,15 +61,31 @@ class Layout (Manager) :
             setattr(self, k, v)
 
         # Load the layoutConfFile
+        # At this point, on a new project, only default settings will be
+        # in the layoutConfFile. The renderer manager my have more settings
+        # to add when it gets there
         if not os.path.isfile(self.layoutConfFile) :
             self.layoutConfig           = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
             self.layoutConfig.filename  = self.layoutConfFile
             writeConfFile(self.layoutConfig)
             self.project.log.writeToLog('LYOT-010')
         else :
-            self.layoutConfig           = ConfigObj(self.layoutConfFile, encoding='utf-8')
-            self.layoutConfig.filename  = self.layoutConfFile
-            self.project.log.writeToLog('LYOT-020')
+            # But check against the default for possible new settings
+            self.layoutConfig           = ConfigObj(encoding='utf-8')
+            orgLayoutConfig             = ConfigObj(self.layoutConfFile, encoding='utf-8')
+            orgFileName                 = orgLayoutConfig.filename
+            layoutDefault               = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
+            layoutDefault.merge(orgLayoutConfig)
+            # Only write out if there are differences detected
+            if orgLayoutConfig == layoutDefault :
+                self.layoutConfig = orgLayoutConfig
+                self.layoutConfig.filename = orgFileName
+                self.project.log.writeToLog('LYOT-030')
+            else :
+                self.layoutConfig = layoutDefault
+                self.layoutConfig.filename = orgFileName
+                writeConfFile(self.layoutConfig)
+                self.project.log.writeToLog('LYOT-020')
 
 
 ###############################################################################

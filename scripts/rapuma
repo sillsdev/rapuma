@@ -67,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130115195125'
+systemVersion   = '0.1.20130118143237'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -622,7 +622,6 @@ def makeProjectScripts (uc, pid) :
             elif script == 'template' :
                 writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
             elif script == 'update' :
-                writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
@@ -728,8 +727,9 @@ def userArguments (args) :
         # Delete a component
         elif args['update'] :
             # Update a component, --source is optional but if given it will
-            # overwrite the current setting.
-            aProject.updateComponent(args['component_name'], args['source'])
+            # overwrite the current setting. The --force setting will be needed
+            # to unlock the component
+            aProject.updateComponent(args['component_name'], args['source'], args['force'])
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
             aProject.removeComponent(args['component_name'], args['force'])
