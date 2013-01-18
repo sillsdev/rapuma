@@ -187,21 +187,30 @@ class Illustration (Manager) :
 
 
 
-
-
-
-
-
+# FIXME: Working here but need to fix xetex.py first
 
 
 
     def getPics (self, cid) :
-        '''Figure out what pics/illustrations we need for a give book
-        and install them. It is assumed that this was called because
-        the user wants illustrations. Therefore, this will kill the
-        current session if it fails.'''
+        '''Figure out what pics/illustrations we need for a given
+        component and install them. It is assumed that this was 
+        called because the user wants illustrations. Therefore, 
+        this will kill the current session if it fails.'''
 
-        print 'Getting illustrations for ' + cid + '\n'
+
+# FIXME: SourceDir should come from the picPath setting in usfm_Layout/Illustrations
+        sourceDir = resolvePath('~/Publishing/Rapuma/illustrations/Knowles-600')
+        targetDir = self.project.local.projIllustrationsFolder
+
+        for i in self.illustrationConfig['Illustrations'].keys() :
+            if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
+                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
+                source = os.path.join(sourceDir, fileName)
+                target = os.path.join(targetDir, fileName)
+                print source, target
+                if os.path.isfile(source) :
+                    shutil.copy(source, target)
+                    print 'copied:', target
 
 
 
@@ -235,7 +244,7 @@ class Illustration (Manager) :
             try :
                 with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
                     for i in self.illustrationConfig['Illustrations'].keys() :
-                        if self.illustrationConfig['Illustrations'][i]['bid'] == cid.upper() :
+                        if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
                             obj = self.illustrationConfig['Illustrations'][i]
                             writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
                                 ' |' + obj['fileName'] + '|' + obj['span'] + '|' + obj['position'] + \

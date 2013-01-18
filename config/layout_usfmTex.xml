@@ -627,6 +627,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <usfmTex></usfmTex>
+            <boolDepend></boolDepend>
         </setting>
         <setting>
             <name>USFM TeX Page Border File</name>
@@ -638,10 +639,11 @@ Todo:
         <setting>
             <name>USFM TeX End Book No Eject</name>
             <description>To save space on long publications the next book can start on the same page of the previous one.   Default = False</description>
-            <key>EndBookNoEject</key>
+            <key>useEndBookNoEject</key>
             <type>boolean</type>
             <value>False</value>
             <usfmTex></usfmTex>
+            <boolDepend></boolDepend>
         </setting>
         <setting>
             <name>USFM TeX Page Border Scale</name>

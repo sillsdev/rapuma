@@ -325,7 +325,7 @@ class Text (Manager) :
 
         # Add additional information, get rid of stuff we don't need
         figDict['illustrationID'] = figDict['fileName'].split('.')[0]
-        figDict['bid'] = cid.upper()
+        figDict['bid'] = cid.lower()
         figDict['chapter'] = figDict['location'].split(':')[0]
         figDict['verse'] = figDict['location'].split(':')[1]
         figDict['scale'] = '1.0'

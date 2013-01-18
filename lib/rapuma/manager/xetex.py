@@ -389,13 +389,13 @@ class Xetex (Manager) :
         may not need to be remade. We will look for its exsistance and then compare 
         it to its primary dependents to see if we actually need to do anything.'''
 
-#        import pdb; pdb.set_trace()
 
         # Set vals
         dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile]
         makeIt = False
 
         # Check for existance and age
+#        import pdb; pdb.set_trace()
         if os.path.isfile(self.setFile) :
             for f in dep :
                 if isOlder(self.setFile, f) :
@@ -436,6 +436,18 @@ class Xetex (Manager) :
                         if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
                             continue
                         else :
+
+
+
+
+# FIXME: Trying to get the picPath to get stuffed into the settings file, not working right now
+
+
+
+
+
+
+
                             if self.hasPlaceHolder(line) :
                                 (ht, hk) = self.getPlaceHolder(line)
                                 # Insert the raw value
@@ -445,6 +457,9 @@ class Xetex (Manager) :
                                 elif ht == 'vm' :
                                     line = self.insertValue(line, self.addMeasureUnit(v))
                                 # A value that is a path
+
+# FIXME: Something here is not working as expected
+
                                 elif ht == 'path' :
                                     pth = getattr(self.project.local, hk)
                                     line = self.insertValue(line, pth)
@@ -785,8 +800,21 @@ class Xetex (Manager) :
                 # will run with
                 cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
 
+
+
+
+
+
+
                 # Run the XeTeX and collect the return code for analysis
+#                dieNow()
                 rCode = subprocess.call(cmds, env = envDict)
+
+
+
+
+
+
 
                 # Analyse the return code
                 if rCode == int(0) :
@@ -795,8 +823,7 @@ class Xetex (Manager) :
                     self.project.log.writeToLog('XTEX-030', [fName(cNameTex), self.xetexErrorCodes[rCode], str(rCode)])
                 else :
                     self.project.log.writeToLog('XTEX-035', [str(rCode)])
-
-                break
+                    dieNow()
 
         # Add lines background for composition work
         if str2bool(self.layoutConfig['PageLayout']['useLines']) :

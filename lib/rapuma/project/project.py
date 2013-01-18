@@ -204,7 +204,7 @@ class Project (object) :
         if self.hasCNameEntry(cName) :
             for cid in self.getSubcomponentList(cName) :
                 cidName = getRapumaCName(cid)
-                cType = self.getComponentType(cName)
+                cType = self.getComponentType(cidName)
                 # For subcomponents look for working text
                 if not self.hasCidFile(cidName, cid, cType) :
                     return False
