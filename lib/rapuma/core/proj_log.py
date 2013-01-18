@@ -119,6 +119,8 @@ class ProjLog (object) :
             'XTEX-140' : ['ERR', 'Failed to add watermark to [<<1>>].'],
             'XTEX-145' : ['LOG', 'Successfully added watermark to [<<1>>].'],
             'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
+            'XTEX-160' : ['ERR', 'Failed to add lines background to [<<1>>].'],
+            'XTEX-165' : ['LOG', 'Successfully added lines background to [<<1>>].'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
@@ -168,7 +170,7 @@ class ProjLog (object) :
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
             'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
             'FONT-120' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
-            'FONT-130' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+            'FONT-130' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
 
             'LYOT-000' : ['MSG', 'Layout module messages'],
             'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
@@ -182,6 +184,10 @@ class ProjLog (object) :
             'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
             'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
             'ILUS-065' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+            'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustrations folder. Will try to revert to default watermark.'],
+            'ILUS-080' : ['LOG', 'Installed watermark file [<<1>>] into the project.'],
+            'ILUS-090' : ['LOG', 'Changed watermark config file name to [<<1>>].'],
+            'ILUS-100' : ['ERR', 'Unknown background file type: [<<1>>]'],
 
             'STYL-000' : ['MSG', 'Style module messages'],
             'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],

@@ -58,6 +58,8 @@ class Illustration (Manager) :
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
         self.sourcePath                 = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
+        self.backgroundTypes            = ['watermark', 'lines']
 
         # Create an empty default Illustration config file if needed
         if not os.path.isfile(self.project.local.illustrationConfFile) :
@@ -79,20 +81,48 @@ class Illustration (Manager) :
             setattr(self, k, v)
 
 
-    def installWatermarkFile (self, fileName, path = None, force = False) :
-        '''Install into the project the specified watermark file.
+###############################################################################
+############################ Manager Level Functions ##########################
+###############################################################################
+
+    def hasBackgroundFile (self, bType) :
+        '''Return True if this project has a valid background file installed.'''
+
+        if bType in self.backgroundTypes :
+            if testForSetting(self.layoutConfig['PageLayout'], bType + 'File') :
+                if self.layoutConfig['PageLayout'][bType + 'File'] != '' :
+                    backgroundFileName = self.layoutConfig['PageLayout'][bType + 'File']
+                    backgroundFile = os.path.join(self.project.local.projIllustrationsFolder, backgroundFileName)
+                    if os.path.isfile(backgroundFile) :
+                        return True
+        else :
+            self.project.log.writeToLog('ILUS-100', [bType])
+            dieNow()
+
+
+    def installBackgroundFile (self, bType, fileName, path = None, force = False) :
+        '''Install into the project the specified background file.
         It will use installIllustrationFile() to do the heavy lifting.
-        Then it will register the file with the conf as the watermark file.'''
+        Then it will register the file with the conf as the appropreate
+        type of background file.'''
 
-        # Resolve path
-        if not path :
-            path = self.rapumaIllustrationsFolder
+        if bType in self.backgroundTypes :
+            # Resolve path
+            if not path :
+                path = self.rapumaIllustrationsFolder
 
-        watermarkFile = os.path.join(path, fileName)
-        if os.path.isfile(watermarkFile) :
-            if self.installIllustrationFile(fileName, path, force) :
-                self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = fileName
-                writeConfFile(self.project.projConfig)
+            backgroundFile = os.path.join(path, fileName)
+            if os.path.isfile(backgroundFile) :
+                if not self.installIllustrationFile(fileName, path, force) :
+                    self.project.log.writeToLog('ILUS-080', [fileName])
+
+            if fileName != self.layoutConfig['PageLayout'][bType + 'File'] :
+                self.layoutConfig['PageLayout'][bType + 'File'] = fileName
+                writeConfFile(self.layoutConfig)
+                self.project.log.writeToLog('ILUS-090', [fileName])
+        else :
+            self.project.log.writeToLog('ILUS-100', [bType])
+            dieNow()
 
 
     def installIllustrationFile (self, fileName, path = None, force = False) :

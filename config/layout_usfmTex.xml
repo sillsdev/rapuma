@@ -618,6 +618,7 @@ Todo:
             <type>boolean</type>
             <value>True</value>
             <usfmTex>\CropMarkstrue</usfmTex>
+            <boolDepend>PageLayout:cropmarks</boolDepend>
         </setting>
         <setting>
             <name>USFM TeX Page Border</name>

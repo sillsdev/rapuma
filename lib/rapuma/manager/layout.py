@@ -69,7 +69,6 @@ class Layout (Manager) :
         else :
             self.layoutConfig           = ConfigObj(self.layoutConfFile, encoding='utf-8')
             self.layoutConfig.filename  = self.layoutConfFile
-            writeConfFile(self.layoutConfig)
             self.project.log.writeToLog('LYOT-020')
 
 

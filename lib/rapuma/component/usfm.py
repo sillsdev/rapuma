@@ -127,7 +127,6 @@ class Usfm (Component) :
         '''Does USFM specific rendering of a USFM component'''
             # useful variables: self.project, self.cfg
 
-
         self.cidList = self.cfg['cidList']
 
 #        import pdb; pdb.set_trace()
@@ -192,13 +191,13 @@ class Usfm (Component) :
             # installed if watermark is turned on (True). Fallback on the
             # the default if needed.
             if useWatermark :
-                if testForSetting(self.compSettings, 'pageWatermarkFile') :
-                    # Just install a default watermark page
-                    if not self.compSettings['pageWatermarkFile'] :
-                        self.project.managers[cType + '_Illustration'].installWatermarkFile('watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
-                else :
-                    # Fallback if the setting was not there to begin with
-                    self.project.managers[cType + '_Illustration'].installWatermarkFile('watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+                if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('watermark') :
+                    self.project.managers[cType + '_Illustration'].installBackgroundFile('watermark', 'watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+
+            # Same for lines background file used for composition
+            if useLines :
+                if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('lines') :
+                    self.project.managers[cType + '_Illustration'].installBackgroundFile('lines', 'lines_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
 
             # Any more stuff to run?
 

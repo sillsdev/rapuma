@@ -60,36 +60,28 @@ class Xetex (Manager) :
         self.layoutMacroXmlConfFile = os.path.join(self.project.local.rapumaConfigFolder, self.layoutMacroXmlConfFileName)
         # Load supported config objs
         if cType in self.project.userConfig['System']['recognizedComponentTypes'] :
+#            import pdb; pdb.set_trace()
 
-
-
-
-
-# FIXME: Need to diff the layoutConfig to avoid writing it out all the time, or something like that.
-
-
-
-
-#            if 'usfm_Layout' not in self.managers :
-            self.project.createManager(self.cType, 'layout')
+            # Layout config
+            if 'usfm_Layout' not in self.managers :
+                self.project.createManager(self.cType, 'layout')
+            # Grab the exsiting config
             orgLayoutConfig     = self.managers[self.cType + '_Layout'].layoutConfig
             orgFileName         = orgLayoutConfig.filename
             # Now we need to check against the macroPackage default settings and
             # Now merge them together here (NOTE: This cannot be done in layout.py)
             layoutMacro         = ConfigObj(getXMLSettings(self.layoutMacroXmlConfFile), encoding='utf-8')
             layoutMacro.merge(orgLayoutConfig)
-#            import pdb; pdb.set_trace()
-            self.layoutConfig = layoutMacro
-            self.layoutConfig.filename = orgFileName
-            writeConfFile(self.layoutConfig)
+            # Only write out if there are differences detected
+            if orgLayoutConfig == layoutMacro :
+                self.layoutConfig = orgLayoutConfig
+                self.layoutConfig.filename = orgFileName
+            else :
+                self.layoutConfig = layoutMacro
+                self.layoutConfig.filename = orgFileName
+                writeConfFile(self.layoutConfig)
 
-
-
-
-
-
-
-
+            # Font config
             if 'usfm_Font' not in self.managers :
                 self.project.createManager(self.cType, 'font')
             self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
@@ -120,15 +112,12 @@ class Xetex (Manager) :
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         # File names
-        self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
         self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
         self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        if self.useWatermark :
-            self.watermarkFile      = os.path.join(self.local.projIllustrationsFolder, self.watermarkFileName)
         if self.useLines :
             self.linesFile          = os.path.join(self.local.projIllustrationsFolder, self.linesFileName)
         # Init some Dicts
@@ -147,7 +136,7 @@ class Xetex (Manager) :
                 setattr(self, k, str2bool(v))
             else :
                 setattr(self, k, v)
-        
+
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
@@ -801,17 +790,8 @@ class Xetex (Manager) :
                 # will run with
                 cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
 
-
-# FIXME
-
-
                 # Run the XeTeX and collect the return code for analysis
-#                dieNow()
                 rCode = subprocess.call(cmds, env = envDict)
-
-
-# FIXME
-
 
                 # Analyse the return code
                 if rCode == int(0) :
@@ -823,9 +803,26 @@ class Xetex (Manager) :
 
                 break
 
+        # Add lines background for composition work
+        if str2bool(self.useLines) :
+            linesFileName       = self.layoutConfig['PageLayout']['linesFile']
+            linesFile           = os.path.join(self.local.projIllustrationsFolder, linesFileName)
+            cmd = [self.pdfUtilityCommand, cNamePdf, 'background', linesFile, 'output', tempName(cNamePdf)]
+            try :
+                subprocess.call(cmd)
+                shutil.copy(tempName(cNamePdf), cNamePdf)
+                os.remove(tempName(cNamePdf))
+                self.project.log.writeToLog('XTEX-165')
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
+                self.project.log.writeToLog('XTEX-160', [str(e)])
+                dieNow()
+
         # Add a watermark if required
         if str2bool(self.useWatermark) :
-            cmd = [self.pdfUtilityCommand, cNamePdf, 'background', self.watermarkFile, 'output', tempName(cNamePdf)]
+            watermarkFileName   = self.layoutConfig['PageLayout']['watermarkFile']
+            watermarkFile       = os.path.join(self.local.projIllustrationsFolder, watermarkFileName)
+            cmd = [self.pdfUtilityCommand, cNamePdf, 'background', watermarkFile, 'output', tempName(cNamePdf)]
             try :
                 subprocess.call(cmd)
                 shutil.copy(tempName(cNamePdf), cNamePdf)
@@ -834,6 +831,7 @@ class Xetex (Manager) :
             except Exception as e :
                 # If we don't succeed, we should probably quite here
                 self.project.log.writeToLog('XTEX-140', [str(e)])
+                dieNow()
 
         # Review the results if desired
         if os.path.isfile(cNamePdf) :

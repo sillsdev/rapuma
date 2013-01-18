@@ -234,7 +234,7 @@ Todo:
             <description>Watermark default file name. Change this name to indicate what watermark you want put on the page, if you choose to use a watermark.</description>
             <key>watermarkFile</key>
             <type>string</type>
-            <value>watermark-draft.pdf</value>
+            <value>watermark_draft.pdf</value>
         </setting>
         <setting>
             <name>Use Lines</name>
@@ -248,7 +248,7 @@ Todo:
             <description>The default background file used to display lines behind the text, if that feature is selected.</description>
             <key>linesFile</key>
             <type>string</type>
-            <value>lines-background.pdf</value>
+            <value>lines_background.pdf</value>
         </setting>
     </section>
     <section>

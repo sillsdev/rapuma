@@ -580,9 +580,10 @@ def makeProjectScripts (uc, pid) :
     cType = 'usfm'
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
-    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'edit', \
-                     'export', 'postprocess', 'render', 'restore', 'template', 'update', \
-                        'view', 'watermarkOff', 'watermarkOn'] :
+    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff',
+                     'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'postprocess', \
+                       'render', 'restore', 'template', 'update', 'view', 'watermarkOff', \
+                         'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -599,10 +600,18 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma preserve ' + pid + ' -b \n\n')
             elif script == 'compare' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c \n\n')
+            elif script == 'cropmarksOff' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout cropmarks False \n\n')
+            elif script == 'cropmarksOn' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout cropmarks True \n\n')
             elif script == 'edit' :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
                 writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
+            elif script == 'linesOff' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
+            elif script == 'linesOn' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines True \n\n')
             elif script == 'postprocess' :
                 writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
                 writeObject.write('rapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 \n\n')
@@ -618,9 +627,9 @@ def makeProjectScripts (uc, pid) :
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
             elif script == 'watermarkOff' :
-                writeObject.write('rapuma settings ' + pid + ' project Managers/usfm_Illustration useWatermark False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useWatermark False \n\n')
             elif script == 'watermarkOn' :
-                writeObject.write('rapuma settings ' + pid + ' project Managers/usfm_Illustration useWatermark True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useWatermark True \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)
