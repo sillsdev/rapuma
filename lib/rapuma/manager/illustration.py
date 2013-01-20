@@ -56,6 +56,8 @@ class Illustration (Manager) :
         self.illustrationConfig         = ConfigObj(encoding='utf-8')
         self.project                    = project
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
+        self.illustrationsLib           = self.project.projConfig['Managers'][cType + '_Illustration']['illustrationsLib']
+        self.illustrationsLibFolder     = self.project.userConfig['Resources']['illustrations']
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
         self.sourcePath                 = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
@@ -134,29 +136,43 @@ class Illustration (Manager) :
         specified it will look there first and use that file.'''
 
         # Set some file names/paths
-        pathIll = os.path.join(path, fileName)
-        projIll = os.path.join(self.projIllustrationsFolder, fileName)
-        userIll = os.path.join(self.project.local.libIllustrations, fileName)
-        places = [pathIll, projIll, userIll]
+        places = []
+        if path :
+            places.append(os.path.join(path, fileName))
+        places.append(os.path.join(self.illustrationsLibFolder, self.illustrationsLib, fileName))
+        target = os.path.join(self.projIllustrationsFolder, fileName)
         # See if the file is there or not
         for p in places :
             if os.path.isfile(p) :
                 if force :
-                    if not shutil.copy(p, self.projIllustrationsFolder) :
+                    if not shutil.copy(p, target) :
                         self.project.log.writeToLog('ILUS-020', [fName(p),'True'])
                     else :
                         self.project.log.writeToLog('ILUS-040', [fName(p)])
                 else :
-                    if not os.path.isfile(projIll) :
-                        if not shutil.copy(p, self.projIllustrationsFolder) :
+                    if not os.path.isfile(target) :
+                        if not shutil.copy(p, target) :
                             self.project.log.writeToLog('ILUS-020', [fName(p),'False'])
                         else :
                             self.project.log.writeToLog('ILUS-040', [fName(p)])
                     else :
                         self.project.log.writeToLog('ILUS-030', [fName(p)])
                         return True
-            break
+                break
         return True
+
+
+    def getPics (self, cid) :
+        '''Figure out what pics/illustrations we need for a given
+        component and install them. It is assumed that this was 
+        called because the user wants illustrations. Therefore, 
+        this will kill the current session if it fails.'''
+
+        for i in self.illustrationConfig['Illustrations'].keys() :
+            if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
+                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
+                if not self.installIllustrationFile (fileName, '', False) :
+                    dieNow()
 
 
     def removeIllustrationFile (self, fileName) :
@@ -174,62 +190,6 @@ class Illustration (Manager) :
             if org == fileName :
                 self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
                 writeConfFile(self.project.projConfig)
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Working here but need to fix xetex.py first
-
-
-
-    def getPics (self, cid) :
-        '''Figure out what pics/illustrations we need for a given
-        component and install them. It is assumed that this was 
-        called because the user wants illustrations. Therefore, 
-        this will kill the current session if it fails.'''
-
-
-# FIXME: SourceDir should come from the picPath setting in usfm_Layout/Illustrations
-        sourceDir = resolvePath('~/Publishing/Rapuma/illustrations/Knowles-600')
-        targetDir = self.project.local.projIllustrationsFolder
-
-        for i in self.illustrationConfig['Illustrations'].keys() :
-            if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
-                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
-                source = os.path.join(sourceDir, fileName)
-                target = os.path.join(targetDir, fileName)
-                print source, target
-                if os.path.isfile(source) :
-                    shutil.copy(source, target)
-                    print 'copied:', target
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def createPiclistFile (self, cid) :

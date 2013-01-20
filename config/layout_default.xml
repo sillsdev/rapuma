@@ -196,13 +196,6 @@ Todo:
         <name>Illustrations</name>
         <sectionID>Illustrations</sectionID>
         <description>Illustration resources</description>
-        <setting>
-            <name>Use Illustrations</name>
-            <description>Illustrations - If set to true this will allow the system to put in place all the files necessary to have illustrations used in this publication.  One warning, however, if you choose to set this to false after once using illustrations, it will delete all the illustration related files with the exception of the captions.csv file.  This is to prevent errors from occurring during the typesetting process.  Default = False</description>
-            <key>useIllustrations</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
     </section>
     <section>
         <name>Page Layout</name>

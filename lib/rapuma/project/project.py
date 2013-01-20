@@ -565,16 +565,29 @@ class Project (object) :
         self.projConfig['Components'][cName]['type'] = cType
         self.projConfig['Components'][cName]['cidList'] = [cid]
         self.projConfig['Components'][cName]['isLocked'] = False
+        self.buildComponentObject(cType)
         # This will load the component type manager and put
         # a lot of different settings into the proj config
+#        cfg = self.projConfig['Components'][cName]
+#        module = import_module('rapuma.component.' + cType)
+#        ManagerClass = getattr(module, cType.capitalize())
+#        compobj = ManagerClass(self, cfg)
+#        self.components[cName] = compobj
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            return True
+
+
+    def buildComponentObject (self, cType, cName) :
+        '''This will load the component type manager object.'''
+
         cfg = self.projConfig['Components'][cName]
         module = import_module('rapuma.component.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         compobj = ManagerClass(self, cfg)
         self.components[cName] = compobj
-        # Save our config settings
-        if writeConfFile(self.projConfig) :
-            return True
+
+
 
 
     def removeComponent (self, cName, force = False) :

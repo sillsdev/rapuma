@@ -287,10 +287,10 @@ class Text (Manager) :
                     if self.cType == 'usfm' :
                         tempFile = target + '.tmp'
                         contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                        # logFigure() logs the fig data and strips it from the working text
+                        # logUsfmFigure() logs the fig data and strips it from the working text
                         # Note: Using partial() to allows the passing of the cid param 
-                        # into logFigure()
-                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logFigure, cid), contents)
+                        # into logUsfmFigure()
+                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logUsfmFigure, cid), contents)
                         codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                         # Finish by copying the tempFile to the source
                         if not shutil.copy(tempFile, target) :
@@ -310,7 +310,7 @@ class Text (Manager) :
             return True
 
 
-    def logFigure (self, cid, figConts) :
+    def logUsfmFigure (self, cid, figConts) :
         '''Log the figure data in the illustration.conf.'''
         
         fig = figConts.group(1).split('|')

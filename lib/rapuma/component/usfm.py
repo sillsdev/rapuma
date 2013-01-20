@@ -54,6 +54,8 @@ class Usfm (Component) :
         self.Ctype                  = self.cType.capitalize()
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
+        self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
 
         # Check to see if this component type has been added to the 
         # proj config already
@@ -169,20 +171,48 @@ class Usfm (Component) :
                 cidCName = getRapumaCName(cid)
                 cType = self.project.projConfig['Components'][cidCName]['type']
                 cidUsfm = self.getCidPath(cid)
+                # Build a component object for this cid (cidCName)
+                self.project.buildComponentObject(self.cType, cidCName)
 
                 if not os.path.isfile(cidUsfm) :
                     self.project.managers[self.cType + '_Text'].installUsfmWorkingText(cid)
 
-                # Add the dependent files for this cid
-                if useManualAdjustments :
-                    self.createAjustmentFile(cid)
-                if useIllustrations :
-                    # First check if we have the illustrations we think we need
-                    # and get them if we do not.
-                    self.project.managers[cType + '_Illustration'].getPics(cid)
+                # Add/manage the dependent files for this cid
+                if self.macroPackage == 'usfmTex' :
+                    # Component adjustment file
+                    cidAdj = self.getCidAdjPath(cid)
+                    if useManualAdjustments :
+                        if os.path.isfile(cidAdj + '.bak') :
+                            os.rename(cidAdj + '.bak', cidAdj)
+                        else :
+                            self.createAjustmentFile(cid)
+                    else :
+                        # If we are not using manual adjustments check to see if there is a
+                        # adjustment file and if there is, rename it so usfmTex (if we are
+                        # using it) will not pick it up
+                        if os.path.isfile(cidAdj) :
+                            os.rename(cidAdj, cidAdj + '.bak')
+                    # Component piclist file
+                    self.project.buildComponentObject(self.cType, cidCName)
+                    cidPiclist = self.project.components[cidCName].getCidPiclistPath(cid)
+                    if useIllustrations :
+                        # First check if we have the illustrations we think we need
+                        # and get them if we do not.
+                        self.project.managers[cType + '_Illustration'].getPics(cid)
 
-                    # If that all went well, create the piclist files we need.
-                    self.project.managers[cType + '_Illustration'].createPiclistFile(cid)
+                        # If that all went well, create the piclist file if needed
+                        if os.path.isfile(cidPiclist + '.bak') :
+                            os.rename(cidPiclist + '.bak', cidPiclist)
+                        else :
+                            self.project.managers[cType + '_Illustration'].createPiclistFile(cid)
+                    else :
+                        # If we are not using illustrations check to see if there is a
+                        # piclist file and if there is, rename it so usfmTex (if we are
+                        # using it) will not pick it up
+                        if os.path.isfile(cidPiclist) :
+                            os.rename(cidPiclist, cidPiclist + '.bak')
+                else :
+                    self.project.log.writeToLog('COMP-220', [self.macroPackage])
 
             # Run any hyphenation or word break routines
 

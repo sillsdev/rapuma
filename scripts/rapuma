@@ -580,10 +580,10 @@ def makeProjectScripts (uc, pid) :
     cType = 'usfm'
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
-    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff',
-                     'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'postprocess', \
-                       'render', 'restore', 'template', 'update', 'view', 'watermarkOff', \
-                         'watermarkOn'] :
+    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
+                     'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'placeholdersOff', \
+                       'placeholdersOn', 'postprocess', 'render', 'restore', 'template', 'update', \
+                         'view', 'watermarkOff', 'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -601,9 +601,9 @@ def makeProjectScripts (uc, pid) :
             elif script == 'compare' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c \n\n')
             elif script == 'cropmarksOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout cropmarks False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks False \n\n')
             elif script == 'cropmarksOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout cropmarks True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks True \n\n')
             elif script == 'edit' :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
@@ -612,6 +612,10 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
             elif script == 'linesOn' :
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines True \n\n')
+            elif script == 'placeholdersOff' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout Illustrations useFigurePlaceHolders False \n\n')
+            elif script == 'placeholdersOn' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout Illustrations useFigurePlaceHolders True \n\n')
             elif script == 'postprocess' :
                 writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
                 writeObject.write('rapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 \n\n')

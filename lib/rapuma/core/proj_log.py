@@ -90,6 +90,7 @@ class ProjLog (object) :
             'COMP-185' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
             'COMP-200' : ['ERR', 'Process failed with error: [<<1>>]'],
             'COMP-210' : ['ERR', 'Component [<<1>>] not found.'],
+            'COMP-220' : ['ERR', 'Component macro package [<<1>>] not supported.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
@@ -181,7 +182,7 @@ class ProjLog (object) :
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
             'ILUS-020' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
-            'ILUS-030' : ['WRN', 'Could not copy [<<1>>] into the project illustrations folder. The file already exsists. Use Force (-f) if you need to overwrite the exsiting copy.'],
+            'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder.'],
             'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
             'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
             'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],

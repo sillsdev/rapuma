@@ -436,18 +436,6 @@ class Xetex (Manager) :
                         if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
                             continue
                         else :
-
-
-
-
-# FIXME: Trying to get the picPath to get stuffed into the settings file, not working right now
-
-
-
-
-
-
-
                             if self.hasPlaceHolder(line) :
                                 (ht, hk) = self.getPlaceHolder(line)
                                 # Insert the raw value
@@ -457,9 +445,6 @@ class Xetex (Manager) :
                                 elif ht == 'vm' :
                                     line = self.insertValue(line, self.addMeasureUnit(v))
                                 # A value that is a path
-
-# FIXME: Something here is not working as expected
-
                                 elif ht == 'path' :
                                     pth = getattr(self.project.local, hk)
                                     line = self.insertValue(line, pth)

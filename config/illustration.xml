@@ -15,11 +15,11 @@ Todo:
 
 <root>
     <setting>
-        <name>Manager Type</name>
-        <key>type</key>
-        <description>The manager model (type) this manager is associated with.</description>
+        <name>Illustrations Library</name>
+        <key>illustrationsLib</key>
+        <description>The library of illustrations this component type will draw from. The library must be found in a folder of the same name installed in the user illustrations library.</description>
         <type>string</type>
-        <value>layout</value>
+        <value></value>
     </setting>
 </root>
 

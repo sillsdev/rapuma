@@ -514,6 +514,8 @@ Todo:
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
+            <boolDepend>Illustrations:useFigurePlaceHolders</boolDepend>
+            <usfmTex>\FigurePlaceholderstrue</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Chapter Verse Seperator</name>
@@ -528,15 +530,17 @@ Todo:
             <key>captionReference</key>
             <type>boolean</type>
             <value>True</value>
+            <note>Pretty sure this is not implemented yet.</note>
         </setting>
         <setting>
-            <name>USFM TeX PicPath</name>
-            <description>The path to the project illustration files.</description>
-            <key>picPath</key>
-            <type>string</type>
-            <value></value>
+            <name>Use Illustrations</name>
+            <description>If set to true this will allow the system to put in place all the files necessary to have illustrations used in this publication. However, the original illustration files must be present in the user's illustration library and that library must be declared to the system. Please note that the system expects all installed illustration files to be only in the project's Illustration folder. Default = False</description>
+            <key>useIllustrations</key>
+            <type>boolean</type>
+            <value>False</value>
             <boolDepend>Illustrations:useIllustrations</boolDepend>
-            <usfmTex>\PicPath={[path:projIllustrationsFolder]}</usfmTex>
+            <usfmTex>\PicPath={[path:projIllustrationsFolder]/}</usfmTex>
+            <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
     <section>
