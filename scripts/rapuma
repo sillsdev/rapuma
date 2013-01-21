@@ -583,7 +583,7 @@ def makeProjectScripts (uc, pid) :
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
                      'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'placeholdersOff', \
                        'placeholdersOn', 'postprocess', 'render', 'restore', 'template', 'update', \
-                         'view', 'watermarkOff', 'watermarkOn'] :
+                         'updateScripts', 'view', 'watermarkOff', 'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -627,6 +627,8 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
             elif script == 'update' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
+            elif script == 'updateScripts' :
+                writeObject.write('rapuma project ' + pid + ' -s \n\n')
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
             elif script == 'watermarkOff' :

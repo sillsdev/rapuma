@@ -374,6 +374,8 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
+            <boolDepend>HeaderContent:showVerseReferences</boolDepend>
+            <usfmTex>\VerseRefstrue</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Omit Chapter Number (Running Header)</name>
