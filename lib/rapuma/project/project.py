@@ -565,7 +565,7 @@ class Project (object) :
         self.projConfig['Components'][cName]['type'] = cType
         self.projConfig['Components'][cName]['cidList'] = [cid]
         self.projConfig['Components'][cName]['isLocked'] = False
-        self.buildComponentObject(cType)
+        self.buildComponentObject(cType, cName)
         # This will load the component type manager and put
         # a lot of different settings into the proj config
 #        cfg = self.projConfig['Components'][cName]
@@ -1302,17 +1302,18 @@ class Project (object) :
                 cid = getUsfmCid(comp)
 
             cType = self.getComponentType(cName)
+            self.buildComponentObject(cType, cName)
             cidList = self.getSubcomponentList(cName)
             if len(cidList) > 1 :
                 self.log.writeToLog('EDIT-010', [cName])
                 dieNow()
 
             self.createManager(cType, 'text')
-            compWorkText = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
+            compWorkText = self.components[cName].getCidPath(cid)
             if os.path.isfile(compWorkText) :
                 editDocs.append(compWorkText)
-                compTextAdj = self.managers[cType + '_Text'].getCompWorkingTextAdjPath(cid)
-                compTextIlls = self.managers[cType + '_Text'].getCompWorkingTextPiclistPath(cid)
+                compTextAdj = self.components[cName].getCidAdjPath(cid)
+                compTextIlls = self.components[cName].getCidPiclistPath(cid)
                 dep = [compTextAdj, compTextIlls]
                 for d in dep :
                     if os.path.isfile(d) :
@@ -1346,6 +1347,7 @@ class Project (object) :
         # Pull up our docs in the editor
         if len(editDocs) > 1 :
             subprocess.call(editDocs)
+            self.log.writeToLog('EDIT-040', [cName])
         else :
             self.log.writeToLog('EDIT-030')
 

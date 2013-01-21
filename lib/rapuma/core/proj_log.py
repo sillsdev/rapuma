@@ -291,6 +291,7 @@ class ProjLog (object) :
             'EDIT-010' : ['ERR', 'The component [<<1>>] has multiple subcomponents and cannot be opened for editing. Please work with the individual subcomponents.'],
             'EDIT-020' : ['ERR', 'Working text file [<<1>>] not found.'],
             'EDIT-030' : ['ERR', 'No files found to edit with the commands supplied.'],
+            'EDIT-040' : ['MSG', 'Component files for [<<1>>] have been opened in your file editor.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

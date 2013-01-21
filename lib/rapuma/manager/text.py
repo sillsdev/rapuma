@@ -311,7 +311,9 @@ class Text (Manager) :
 
 
     def logUsfmFigure (self, cid, figConts) :
-        '''Log the figure data in the illustration.conf.'''
+        '''Log the figure data in the illustration.conf. If nothing is returned, the
+        existing \fig markers with their contents will be removed. That is the default
+        behavior.'''
         
         fig = figConts.group(1).split('|')
         figKeys = ['description', 'fileName', 'span', 'refRange', 'copyright', 'caption', 'location']
@@ -345,7 +347,15 @@ class Text (Manager) :
         for k in figDict.keys() :
             illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
 
+        # Write out the conf file to preserve the data found
         writeConfFile(illustrationConfig)
+
+        # Just incase we need to keep the fig markers intact this will
+        # allow for that. However, default behavior is to strip them
+        # because usfmTex does not handle \fig markers. By returning
+        # them here, they will not be removed from the working text.
+        if str2bool(self.project.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+            return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
     def usfmCopy (self, source, target, projSty = None) :

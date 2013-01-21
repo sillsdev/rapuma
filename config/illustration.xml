@@ -21,5 +21,12 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
+    <setting>
+        <name>Preserve USFM FIG Data</name>
+        <key>preserveUsfmFigData</key>
+        <description>By default, \fig marker data is logged in the project illustration configuration file and removed from the working text. If set to True, this action will be overridden.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
 </root>
 
