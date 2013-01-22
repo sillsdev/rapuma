@@ -67,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130121094436'
+systemVersion   = '0.1.20130122081323'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -211,10 +211,14 @@ def deleteProject (uc, pid = None) :
 
 
 def isProject (pid) :
-    '''Look up in the user config to see if a project is registered.'''
+    '''Look up in the user config to see if a project is registered.
+    If it is not, stop the process.'''
 
-    if pid in uc.userConfig['Projects'] :
-        return True
+        try :
+            if pid in self.userConfig['Projects'] :
+                pass
+        except :
+            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
 
 
 def isTemplate (tid) :
@@ -293,12 +297,9 @@ def backupProject (pid) :
     copy exists, it will overwrite it.'''
 
     # Check to see if the pid is valid in the system (it has to be)
-    if isProject(pid) :
-        projHome = uc.userConfig['Projects'][pid]['projectPath']
-        aProject = initProject(pid)
-    else :
-        terminal('\nError: The project ID given is not valid: [' + pid + ']\n')
-        dieNow()
+    isProject(pid)
+    projHome = uc.userConfig['Projects'][pid]['projectPath']
+    aProject = initProject(pid)
 
     # Set some paths and file names
     backupName = pid + '.zip'
@@ -478,11 +479,8 @@ def restoreBackup (pid) :
         backName = pid + '.zip'
 
     # Check to see if the pid is valid in the system (it has to be)
-    if isProject(pid) :
-        projHome = uc.userConfig['Projects'][pid]['projectPath']
-    else :
-        terminal('\nError: The project ID given is not valid: [' + pid + ']\n')
-        dieNow()
+    isProject(pid)
+    projHome = uc.userConfig['Projects'][pid]['projectPath']
 
     # Check to see if the archive exsists
     try :
@@ -674,19 +672,14 @@ def userArguments (args) :
 
     # Test project ID, intercept if it is an example demo
     elif sys.argv[1].lower() != 'project' :
-        if sys.argv[1].lower() == 'preserve' :
-            pass
-#            restoreArchive(args['project_id'], args['path'])
-        elif not isProject(args['project_id']) :
-            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
-        else :
-            # Now setup the project and look for and test the component type if needed
-            aProject = initProject(args['project_id'])
-            exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
-            if not sys.argv[1].lower() in exclude :
-                if not aProject.isComponentType(args['component_type']) :
-                    if not aProject.addComponentType(args['component_type']) :
-                        sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
+        isProject(args['project_id'])
+        # Now setup the project and look for and test the component type if needed
+        aProject = initProject(args['project_id'])
+        exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
+        if not sys.argv[1].lower() in exclude :
+            if not aProject.isComponentType(args['component_type']) :
+                if not aProject.addComponentType(args['component_type']) :
+                    sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -901,20 +894,18 @@ def userArguments (args) :
         if args['archive'] and args['restore'] :
             restoreArchive(args['project_id'], args['path'])
         elif args['backup'] and args['restore'] :
-            if not isProject(args['project_id']) :
-                sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
+            isProject(args['project_id'])
             restoreBackup(args['project_id'])
+        elif args['template'] and args['restore'] :
+            sys.exit('\nERROR: Restore command is not valid with templates. Use Project-New to base a new project on a template.\n')
         elif args['archive'] :
-            if not isProject(args['project_id']) :
-                sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
+            isProject(args['project_id'])
             archiveProject(args['project_id'], args['path'])
         elif args['backup'] :
-            if not isProject(args['project_id']) :
-                sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
+            isProject(args['project_id'])
             backupProject(args['project_id'])
         elif args['template'] :
-            if not isProject(args['project_id']) :
-                sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
+            isProject(args['project_id'])
             if isTemplate(args['template']) :
                 sys.exit('\nError: This template [' + args['template'] + '] already exsists. Process halted.\n')
             projectToTemplate(args['project_id'], args['template'])

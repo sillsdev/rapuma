@@ -55,7 +55,6 @@ class Usfm (Component) :
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
 
         # Check to see if this component type has been added to the 
         # proj config already
@@ -76,6 +75,9 @@ class Usfm (Component) :
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager(self.cType, mType)
+
+        # Pick up some init settings that come after the managers have been installed
+        self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
 
         # Check if there is a font installed
         self.project.createManager(self.cType, 'font')

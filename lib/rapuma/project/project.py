@@ -1117,9 +1117,9 @@ class Project (object) :
 
         try :
             if pid in self.userConfig['Projects'] :
-                return True
+                pass
         except :
-            return False
+            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
 
 
     def changeConfigSetting (self, config, section, key, newValue) :
