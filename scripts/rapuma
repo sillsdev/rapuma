@@ -214,11 +214,11 @@ def isProject (pid) :
     '''Look up in the user config to see if a project is registered.
     If it is not, stop the process.'''
 
-        try :
-            if pid in self.userConfig['Projects'] :
-                pass
-        except :
-            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
+    try :
+        if pid in self.userConfig['Projects'] :
+            pass
+    except :
+        sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
 
 
 def isTemplate (tid) :
