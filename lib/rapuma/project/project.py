@@ -1116,7 +1116,7 @@ class Project (object) :
         is a duplicate of the function in the main rapuma file.'''
 
         try :
-            if pid in self.userConfig['Projects'] :
+            if pid in self.userConfig['Projects'].keys() :
                 pass
         except :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
