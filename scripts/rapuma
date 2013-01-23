@@ -214,8 +214,6 @@ def isProject (pid) :
     '''Look up in the user config to see if a project is registered.
     If it is not, stop the process.'''
 
-    print uc.userConfig['Projects'].keys()
-
     try :
         if pid in uc.userConfig['Projects'].keys() :
             pass
