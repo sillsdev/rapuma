@@ -2,3 +2,4 @@ relre:.pyc
 relre:~
 syntax: glob
 build/*
+interface/Rapuma-USFM-build*
