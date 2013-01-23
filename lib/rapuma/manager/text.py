@@ -156,7 +156,7 @@ class Text (Manager) :
         return True
 
 
-    def installUsfmWorkingText (self, cid, force = False) :
+    def installUsfmWorkingText (self, cName, cid, force = False) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name. If a USFM text file
         is not located in a PT project folder, the editor cannot be set
@@ -166,7 +166,7 @@ class Text (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Get the rapuma component name, this assumes the cid is valid
-        cName = getUsfmCidInfo(cid)[1]
+        cName = self.project.components[cName].getUsfmCidInfo(cid)[1]
 
         # Check to see if text manager settings need updating
         self.updateManagerSettings()
@@ -185,9 +185,9 @@ class Text (Manager) :
         # Build the file name
         thisFile = ''
         if self.sourceEditor.lower() == 'paratext' :
-            thisFile = formPTName(self.project.projConfig, cid)
+            thisFile = formPTName(self.project, cName, cid)
         elif self.sourceEditor.lower() == 'generic' :
-            thisFile = formGenericName(self.project.projConfig, cid)
+            thisFile = formGenericName(self.project, cid)
         else :
             self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
 

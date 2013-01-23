@@ -34,7 +34,7 @@ from palaso.sfm import usfm, style, element, text
 ###############################################################################
 
 
-def formPTName (projConfig, cid) :
+def formPTName (project, cName, cid) :
     '''Using valid PT project settings from the project configuration, form
     a valid PT file name that can be used for a number of operations.'''
 
@@ -42,12 +42,12 @@ def formPTName (projConfig, cid) :
     #           number of use cases.
 
     try :
-        nameFormID = projConfig['Managers']['usfm_Text']['nameFormID']
-        postPart = projConfig['Managers']['usfm_Text']['postPart']
-        prePart = projConfig['Managers']['usfm_Text']['prePart']
+        nameFormID = project.projConfig['Managers']['usfm_Text']['nameFormID']
+        postPart = project.projConfig['Managers']['usfm_Text']['postPart']
+        prePart = project.projConfig['Managers']['usfm_Text']['prePart']
 
         if nameFormID == '41MAT' :
-            mainName = getUsfmCidInfo(cid)[2] + cid.upper()
+            mainName = project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
             if prePart and prePart != 'None' :
                 thisFile = prePart + mainName + postPart
             else :
@@ -57,13 +57,13 @@ def formPTName (projConfig, cid) :
         return False
 
 
-def formGenericName (projConfig, cid) :
+def formGenericName (project, cid) :
     '''Figure out the best way to form a valid file name given the
     source is not coming from a PT project.'''
 
 # FIXME: This will be expanded as we find more use cases
 
-    postPart = projConfig['Managers']['usfm_Text']['postPart']
+    postPart = project.projConfig['Managers']['usfm_Text']['postPart']
     return cid + '.' + postPart
 
 
@@ -196,187 +196,6 @@ def getSourceEditor (projConfig, sourcePath, cType) :
 
     return se
 
-
-def getSourcePath (userConfig, pid, cType) :
-    '''Return the stored source path for a component type.'''
-
-    if testForSetting(userConfig['Projects'][pid], cType + '_sourcePath') :
-        sp = userConfig['Projects'][pid][cType + '_sourcePath']
-        if sp :
-            return resolvePath(sp)
-
-
-def hasUsfmCidInfo (cid) :
-    '''Return True if this cid is in the PT USFM cid info dictionary.'''
-
-    if cid in usfmCidInfo().keys() :
-        return True
-
-
-def getUsfmCidInfo (cid) :
-    '''Return a list of info about a specific cid used in the PT context.'''
-
-    try :
-        return usfmCidInfo()[cid]
-    except :
-        return False
-
-
-def getUsfmName (cid) :
-    '''Look up and return the actual name for a valid cid.'''
-
-    if hasUsfmCidInfo(cid) :
-        return getUsfmCidInfo(cid)[0]
-
-
-def getRapumaCName (cid) :
-    '''Look up and return the Rapuma component name for a valid cid.
-    But if the cid happens to be a cName already, that will be returned.'''
-
-    if hasUsfmCidInfo(cid) :
-        return getUsfmCidInfo(cid)[1]
-    else :
-        # FIXME: This seems a little weak. What if the cid is an invalid cName?
-        return cid
-
-
-def getUsfmCid (cName) :
-    '''Find the cid by using the cName to look.'''
-
-    info = usfmCidInfo()
-    for k, v in info.iteritems() :
-        if info[k][1] == cName :
-            return k
-
-
-def usfmCidInfo () :
-    '''Return a dictionary of all valid information about USFMs used in PT.'''
-
-#            ID     Comp Name                               Comp ID                         PT ID
-    return {
-            'gen' : ['Genesis',                             'genesis',                      '01'],
-            'exo' : ['Exodus',                              'exodus',                       '02'], 
-            'lev' : ['Leviticus',                           'leviticus',                    '03'], 
-            'num' : ['Numbers',                             'numbers',                      '04'], 
-            'deu' : ['Deuteronomy',                         'deuteronomy',                  '05'], 
-            'jos' : ['Joshua',                              'joshua',                       '06'], 
-            'jdg' : ['Judges',                              'judges',                       '07'], 
-            'rut' : ['Ruth',                                'ruth',                         '08'], 
-            '1sa' : ['1 Samuel',                            '1_samuel',                     '09'], 
-            '2sa' : ['2 Samuel',                            '2_samuel',                     '10'], 
-            '1ki' : ['1 Kings',                             '1_kings',                      '11'], 
-            '2ki' : ['2 Kings',                             '2_kings',                      '12'], 
-            '1ch' : ['1 Chronicles',                        '1_chronicles',                 '13'], 
-            '2ch' : ['2 Chronicles',                        '2_chronicles',                 '14'], 
-            'ezr' : ['Ezra',                                'ezra',                         '15'], 
-            'neh' : ['Nehemiah',                            'nehemiah',                     '16'], 
-            'est' : ['Esther',                              'esther',                       '17'], 
-            'job' : ['Job',                                 'job',                          '18'], 
-            'psa' : ['Psalms',                              'psalms',                       '19'], 
-            'pro' : ['Proverbs',                            'proverbs',                     '20'], 
-            'ecc' : ['Ecclesiastes',                        'ecclesiastes',                 '21'], 
-            'sng' : ['Song of Songs',                       'song_of_songs',                '22'], 
-            'isa' : ['Isaiah',                              'isaiah',                       '23'], 
-            'jer' : ['Jeremiah',                            'jeremiah',                     '24'], 
-            'lam' : ['Lamentations',                        'lamentations',                 '25'], 
-            'ezk' : ['Ezekiel',                             'ezekiel',                      '26'], 
-            'dan' : ['Daniel',                              'daniel',                       '27'], 
-            'hos' : ['Hosea',                               'hosea',                        '28'], 
-            'jol' : ['Joel',                                'joel',                         '29'], 
-            'amo' : ['Amos',                                'amos',                         '30'], 
-            'oba' : ['Obadiah',                             'obadiah',                      '31'], 
-            'jon' : ['Jonah',                               'jonah',                        '32'], 
-            'mic' : ['Micah',                               'micah',                        '33'], 
-            'nam' : ['Nahum',                               'nahum',                        '34'], 
-            'hab' : ['Habakkuk',                            'habakkuk',                     '35'], 
-            'zep' : ['Zephaniah',                           'zephaniah',                    '36'], 
-            'hag' : ['Haggai',                              'haggai',                       '37'], 
-            'zec' : ['Zechariah',                           'zechariah',                    '38'], 
-            'mal' : ['Malachi',                             'malachi',                      '39'],
-            'mat' : ['Matthew',                             'matthew',                      '41'], 
-            'mrk' : ['Mark',                                'mark',                         '42'], 
-            'luk' : ['Luke',                                'luke',                         '43'], 
-            'jhn' : ['John',                                'john',                         '44'], 
-            'act' : ['Acts',                                'acts',                         '45'], 
-            'rom' : ['Romans',                              'romans',                       '46'], 
-            '1co' : ['1 Corinthians',                       '1_corinthians',                '47'], 
-            '2co' : ['2 Corinthians',                       '2_corinthians',                '48'], 
-            'gal' : ['Galatians',                           'galatians',                    '49'], 
-            'eph' : ['Ephesians',                           'ephesians',                    '50'], 
-            'php' : ['Philippians',                         'philippians',                  '51'], 
-            'col' : ['Colossians',                          'colossians',                   '52'], 
-            '1th' : ['1 Thessalonians',                     '1_thessalonians',              '53'], 
-            '2th' : ['2 Thessalonians',                     '2_thessalonians',              '54'], 
-            '1ti' : ['1 Timothy',                           '1_timothy',                    '55'], 
-            '2ti' : ['2 Timothy',                           '2_timothy',                    '56'], 
-            'tit' : ['Titus',                               'titus',                        '57'], 
-            'phm' : ['Philemon',                            'philemon',                     '58'], 
-            'heb' : ['Hebrews',                             'hebrews',                      '59'], 
-            'jas' : ['James',                               'james',                        '60'], 
-            '1pe' : ['1 Peter',                             '1_peter',                      '61'], 
-            '2pe' : ['2 Peter',                             '2_peter',                      '62'], 
-            '1jn' : ['1 John',                              '1_john',                       '63'], 
-            '2jn' : ['2 John',                              '2_john',                       '64'], 
-            '3jn' : ['3 John',                              '3_john',                       '65'], 
-            'jud' : ['Jude',                                'jude',                         '66'], 
-            'rev' : ['Revelation',                          'revelation',                   '67'], 
-            'tob' : ['Tobit',                               'tobit',                        '68'], 
-            'jdt' : ['Judith',                              'judith',                       '69'], 
-            'esg' : ['Esther',                              'esther',                       '70'], 
-            'wis' : ['Wisdom of Solomon',                   'wisdom_of_solomon',            '71'], 
-            'sir' : ['Sirach',                              'sirach',                       '72'], 
-            'bar' : ['Baruch',                              'baruch',                       '73'], 
-            'lje' : ['Letter of Jeremiah',                  'letter_of_jeremiah',           '74'], 
-            's3y' : ['Song of the Three Children',          'song_3_children',              '75'], 
-            'sus' : ['Susanna',                             'susanna',                      '76'], 
-            'bel' : ['Bel and the Dragon',                  'bel_dragon',                   '77'], 
-            '1ma' : ['1 Maccabees',                         '1_maccabees',                  '78'], 
-            '2ma' : ['2 Maccabees',                         '2_maccabees',                  '79'], 
-            '3ma' : ['3 Maccabees',                         '3_maccabees',                  '80'], 
-            '4ma' : ['4 Maccabees',                         '4_maccabees',                  '81'], 
-            '1es' : ['1 Esdras',                            '1_esdras',                     '82'], 
-            '2es' : ['2 Esdras',                            '2_esdras',                     '83'], 
-            'man' : ['Prayer of Manasses',                  'prayer_of_manasses',           '84'], 
-            'ps2' : ['Psalms 151',                          'psalms_151',                   '85'], 
-            'oda' : ['Odae',                                'odae',                         '86'], 
-            'pss' : ['Psalms of Solomon',                   'psalms_of_solomon',            '87'], 
-            'jsa' : ['Joshua A',                            'joshua_a',                     '88'], 
-            'jdb' : ['Joshua B',                            'joshua_b',                     '89'], 
-            'tbs' : ['Tobit S',                             'tobit_s',                      '90'], 
-            'sst' : ['Susannah (Theodotion)',               'susannah_t',                   '91'], 
-            'dnt' : ['Daniel (Theodotion)',                 'daniel_t',                     '92'], 
-            'blt' : ['Bel and the Dragon (Theodotion)',     'bel_dragon_t',                 '93'], 
-            'frt' : ['Front Matter',                        'front_matter',                 'A0'], 
-            'int' : ['Introductions',                       'introductions',                'A7'], 
-            'bak' : ['Back Matter',                         'back_matter',                  'A1'], 
-            'cnc' : ['Concordance',                         'concordance',                  'A8'], 
-            'glo' : ['Glossary',                            'glossary',                     'A9'], 
-            'tdx' : ['Topical Index',                       'topical_index',                'B0'], 
-            'ndx' : ['Names Index',                         'names_index',                  'B1'], 
-            'xxa' : ['Extra A',                             'extra_a',                      '94'], 
-            'xxb' : ['Extra B',                             'extra_b',                      '95'], 
-            'xxc' : ['Extra C',                             'extra_c',                      '96'], 
-            'xxd' : ['Extra D',                             'extra_d',                      '97'],
-            'xxe' : ['Extra E',                             'extra_e',                      '98'], 
-            'xxf' : ['Extra F',                             'extra_f',                      '99'], 
-            'xxg' : ['Extra G',                             'extra_g',                      '100'], 
-            'oth' : ['Other',                               'other',                        'A2'], 
-            'eza' : ['Apocalypse of Ezra',                  'apocalypse_of_ezra',           'A4'], 
-            '5ez' : ['5 Ezra',                              '5_ezra_lp',                    'A5'], 
-            '6ez' : ['6 Ezra (Latin Epilogue)',             '6_ezra_lp',                    'A6'], 
-            'dag' : ['Daniel Greek',                        'daniel_greek',                 'B2'], 
-            'ps3' : ['Psalms 152-155',                      'psalms_152-155',               'B3'], 
-            '2ba' : ['2 Baruch (Apocalypse)',               '2_baruch_apocalypse',          'B4'], 
-            'lba' : ['Letter of Baruch',                    'letter_of_baruch',             'B5'], 
-            'jub' : ['Jubilees',                            'jubilees',                     'B6'], 
-            'eno' : ['Enoch',                               'enoch',                        'B7'], 
-            '1mq' : ['1 Meqabyan',                          '1_meqabyan',                   'B8'], 
-            '2mq' : ['2 Meqabyan',                          '2_meqabyan',                   'B9'], 
-            '3mq' : ['3 Meqabyan',                          '3_meqabyan',                   'C0'], 
-            'rep' : ['Reproof (Proverbs 25-31)',            'reproof_proverbs_25-31',       'C1'], 
-            '4ba' : ['4 Baruch (Rest of Baruch)',           '4_baruch',                     'C2'], 
-            'lao' : ['Laodiceans',                          'laodiceans',                   'C3'] 
-           }
 
 
 

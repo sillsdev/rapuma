@@ -579,7 +579,7 @@ class Xetex (Manager) :
         file will call this to process the working text.'''
 
         # Build necessary file names
-        cidCName    = getRapumaCName(cid)
+        cidCName    = self.project.components[self.cName].getRapumaCName(cid)
         cidFolder   = os.path.join(self.projComponentsFolder, cidCName)
         cidTex      = os.path.join(cidFolder, cid + '.tex')
         cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
@@ -636,7 +636,7 @@ class Xetex (Manager) :
                         cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
                     # Create the cidTex list which is one or more cid components
                     for cid in self.projConfig['Components'][self.cName]['cidList'] :
-                        cidCName = getRapumaCName(cid)
+                        cidCName = self.project.components[self.cName].getRapumaCName(cid)
                         cidTex = os.path.join(self.projComponentsFolder, cidCName, cid + '.tex')
                         if self.checkDepCidTex(cid) :
                             cNameTexObject.write('\\input \"' + cidTex + '\"\n')
@@ -684,7 +684,7 @@ class Xetex (Manager) :
         be made if it is not there and Return True.'''
 
         # Build necessary file names
-        cidCName    = getRapumaCName(cid)
+        cidCName    = self.project.components[self.cName].getRapumaCName(cid)
         cidFolder   = os.path.join(self.projComponentsFolder, cidCName)
         cidTex      = os.path.join(cidFolder, cid + '.tex')
         cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
@@ -755,7 +755,7 @@ class Xetex (Manager) :
         # Dynamically create a dependency list for the render process
         dep = [cNameTex, self.extFile]
         for cid in self.projConfig['Components'][self.cName]['cidList'] :
-            cidCName = getRapumaCName(cid)
+            cidCName = self.project.components[self.cName].getRapumaCName(cid)
             cType = self.projConfig['Components'][self.cName]['type']
 #            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
             cidUsfm = self.project.components[self.cName].getCidPath(cid)

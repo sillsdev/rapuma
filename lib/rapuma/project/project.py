@@ -163,63 +163,12 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def getComponentType (self, cName) :
-        '''Return the cType for a component.'''
+#    def isComponentType (self, cType) :
+#        '''Simple test to see if a component type exsists. Return True if it is.'''
 
-        cName = getRapumaCName(cName)
-        try :
-            cType = self.projConfig['Components'][cName]['type']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
-            dieNow()
-
-        return cType
-
-
-    def getSubcomponentList (self, cName) :
-        '''Return the list of subcomponents for a cName.'''
-
-        cName = getRapumaCName(cName)
-        try :
-            cidList = self.projConfig['Components'][cName]['cidList']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
-            dieNow()
-
-        return cidList
-
-
-    def hasCidFile (self, cName, cid, cType) :
-        '''Return True or False depending on if a working file exists 
-        for a given cName.'''
-
-        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType))
-
-
-    def isCompleteComponent (self, cName) :
-        '''A two-part test to see if a component has a config entry and a file.'''
-
-        if self.hasCNameEntry(cName) :
-            for cid in self.getSubcomponentList(cName) :
-                cidName = getRapumaCName(cid)
-                cType = self.getComponentType(cidName)
-                # For subcomponents look for working text
-                if not self.hasCidFile(cidName, cid, cType) :
-                    return False
-        else :
-            return False
-
-        return True
-
-
-    def isComponentType (self, cType) :
-        '''Simple test to see if a component type exsists. Return True if it is.'''
-
-        Ctype = cType.capitalize()
-        if testForSetting(self.projConfig, 'CompTypes', Ctype) :
-            return True
+#        Ctype = cType.capitalize()
+#        if testForSetting(self.projConfig, 'CompTypes', Ctype) :
+#            return True
 
 
     def renderComponent (self, cType, cName, force = False) :
@@ -228,6 +177,9 @@ class Project (object) :
         then render that. A valid cType must be passed to it to work.'''
 
 #        import pdb; pdb.set_trace()
+
+        # Create the component object now
+        self.createComponent(cName)
 
         # Initialize some vars
         validCName = ''
@@ -241,7 +193,7 @@ class Project (object) :
             # single (atomic) component is being rendered and the
             # user only gave its cid. Do a look up to find the
             # actual component name.
-            if self.isCompleteComponent(cName) :
+            if self.components[cName].isCompleteComponent(cName) :
                 validCName = cName
             else :
                 cName = getRapumaCName(cName)
@@ -261,25 +213,6 @@ class Project (object) :
         # If we made it this far, try rendering
         if validCName :
             self.createComponent(validCName).render(force)
-            return True
-
-
-    def validateComponent (self, cid) :
-        '''Validate a component (cannot be a group) return True if it is good.
-        If not, output the errors and return False.'''
-
-        self.log.writeToLog('COMP-080')
-        dieNow()
-
-
-    def hasCNameEntry (self, cName) :
-        '''Check for a config component entry.'''
-
-        buildConfSection(self.projConfig, 'Components')
-        
-#        import pdb; pdb.set_trace()
-
-        if testForSetting(self.projConfig['Components'], cName) :
             return True
 
 
@@ -349,17 +282,6 @@ class Project (object) :
         return compobj
 
 
-
-
-
-
-
-
-
-
-
-
-
     def hasSourcePath (self, cType) :
         '''Check to see if there is a pre-exsisting path.'''
 
@@ -376,14 +298,6 @@ class Project (object) :
         curPath = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
         if curPath == source :
             return True
-
-
-
-
-
-
-
-# FIXME: Not sure about this yet, may need work
 
 
     def addCompTypeSourcePath (self, cType, source) :
@@ -407,13 +321,6 @@ class Project (object) :
             dieNow()
 
 
-
-
-
-
-
-
-
     def addComponent (self, cType, cName, cidList, newSource = None, force = False) :
         '''This handels adding a component which can contain one or more sub-components.'''
 
@@ -423,7 +330,7 @@ class Project (object) :
             self.cName = cName
 
         # Do not want to add this component, non-force, if it already exsists.
-        if self.isCompleteComponent(cName) and not force and self.isLocked(cName) :
+        if self.components[cName].isCompleteComponent(cName) and not force and self.isLocked(cName) :
             self.log.writeToLog('COMP-115', [cName])
             dieNow()
 
@@ -477,10 +384,10 @@ class Project (object) :
         for cid in cidList :
             # If cName for the cid is the same as the main component cName
             # we have to unlock it to avoid a problem in this step.
-            if getRapumaCName(cid) == cName :
+            if self.components[cName].getRapumaCName(cid) == cName :
                 self.projConfig['Components'][cName]['isLocked'] = False
-            if not self.installComponent(cType, cid, source, force) :
-                if not self.isCompleteComponent(getRapumaCName(cid)) :
+            if not self.installComponent(cType, cName, cid, source, force) :
+                if not self.components[cName].isCompleteComponent(self.components[cName].getRapumaCName(cid)) :
                     dieNow()
 
         # If there was more than one subcomponent, this is a group
@@ -494,7 +401,7 @@ class Project (object) :
             self.log.writeToLog('COMP-015', [cName])
 
 
-    def installComponent (self, cType, cid, source, force = False) :
+    def installComponent (self, cType, cName, cid, source, force = False) :
         '''This will add a component to the object we created above in createComponent().
         If the component is already listed in the project configuration it will not proceed
         unless force is set to True. Then it will remove the component listing, along with 
@@ -508,8 +415,8 @@ class Project (object) :
             # To maintain the distinction between comp name and comp ID, we will
             # auto-create a name for this component that is taken from its valid
             # name in the component dictionary. We will also validate the ID too.
-            if hasUsfmCidInfo(cid) :
-                cName = getRapumaCName(cid)
+            if self.components[cName].hasUsfmCidInfo(cid) :
+                cName = self.components[cName].getRapumaCName(cid)
             else :
                 self.log.writeToLog('COMP-010', [cid])
                 dieNow()
@@ -535,7 +442,7 @@ class Project (object) :
 
             # Install our working text files
             self.createManager(cType, 'text')
-            if self.managers[cType + '_Text'].installUsfmWorkingText(cid, force) :
+            if self.managers[cType + '_Text'].installUsfmWorkingText(cName, cid, force) :
 
                 # Finish the install by locking
                 self.lockUnlock(cName, True)
@@ -594,23 +501,26 @@ class Project (object) :
         '''Handler to remove a component or a group of components.
         If it is not found return True anyway.'''
 
+        # Create the component object now
+        self.createComponent(cName)
+
         # First test for lock
         if self.isLocked(cName) :
             self.log.writeToLog('COMP-110', [cName])
             dieNow()
 
         # Remove subcomponents from the target if there are any
-        if self.isCompleteComponent(cName) :
+        if self.components[cName].isCompleteComponent(cName) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
-            for cid in self.getSubcomponentList(cName) :
-                cidName = getRapumaCName(cid)
-                if self.isCompleteComponent(cidName) :
+            for cid in self.components[cName].getSubcomponentList(cName) :
+                cidName = self.components[cName].getRapumaCName(cid)
+                if self.components[cName].isCompleteComponent(cidName) :
                     self.uninstallComponent(cidName, force)
         # Remove the target component
         self.uninstallComponent(cName, force)
         # Test for success
-        if not self.isCompleteComponent(cName) :
+        if not self.components[cName].isCompleteComponent(cName) :
             self.log.writeToLog('COMP-120', [cName])
             return True
 
@@ -655,7 +565,7 @@ class Project (object) :
         is not there already.'''
 
         Ctype = cType.capitalize()
-        if not self.isComponentType(cType) :
+        if not self.components[cType] :
             # Build the comp type config section
             buildConfSection(self.projConfig, 'CompTypes')
             buildConfSection(self.projConfig['CompTypes'], Ctype)
@@ -669,7 +579,7 @@ class Project (object) :
                 writeConfFile(self.projConfig)
 
             # Sanity check
-            if self.isComponentType(cType) :
+            if self.components[cType] :
                 self.log.writeToLog('COMP-060', [cType])
                 return True
             else :
@@ -685,8 +595,13 @@ class Project (object) :
         overwrite the current setting. The use of this function implies
         that this is forced so no force setting is used.'''
 
+        # Create the component object now
+        self.createComponent(cName)
+
         # Check to be sure the component exsits
-        if not self.isCompleteComponent(cName) :
+#        if not self.components[cName].isCompleteComponent(cName) :
+        print self.components[cName]
+        if not self.components[cName] :
             self.log.writeToLog('COMP-210', [cName])
             dieNow()
 
@@ -700,8 +615,8 @@ class Project (object) :
             dieNow()
 
         # Here we essentially re-add the component
-        cType = self.getComponentType(cName)
-        cidList = self.getSubcomponentList(cName)
+        cType = self.components[cName].getComponentType(cName)
+        cidList = self.components[cName].getSubcomponentList(cName)
         if not source :
             source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
         self.addComponent(cType, cName, cidList, source, force)
@@ -728,14 +643,15 @@ class Project (object) :
         '''Lock or unlock to enable or disable actions to be taken on a component.'''
 
         # First be sure this is a valid component
-        if not self.isCompleteComponent(cName) :
+#        if not self.components[cName].isCompleteComponent(cName) :
+        if not self.components[cName] :
             self.log.writeToLog('LOCK-010', [cName])
             dieNow()
 
         # If force is set, set locks on subcomponents
         if force :
-            for cid in self.getSubcomponentList(cName) :
-                cidName = getRapumaCName(cid)
+            for cid in self.components[cName].getSubcomponentList(cName) :
+                cidName = self.components[cName].getRapumaCName(cid)
                 self.setLock(cidName, lock)
 
         # Set lock on this specific component
@@ -769,8 +685,8 @@ class Project (object) :
         level too.'''
 
         # First test to see if we can run, quite if not
-        if self.isCompleteComponent(cName) :
-            cType = self.getComponentType(cName)
+        if self.components[cName].isCompleteComponent(cName) :
+            cType = self.components[cName].getComponentType(cName)
         else :
             self.log.writeToLog('PREP-010', [cType])
             dieNow()
@@ -799,10 +715,10 @@ class Project (object) :
                 return False
 
         # If we made it this far, we can try running it
-        for cid in self.getSubcomponentList(cName) :
-            cidName = getRapumaCName(cid)
+        for cid in self.components[cName].getSubcomponentList(cName) :
+            cidName = self.components[cName].getRapumaCName(cid)
             if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
-                cType = self.getComponentType(cidName)
+                cType = self.components[cName].getComponentType(cidName)
                 target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
                 if os.path.isfile(script) :
                     # subprocess will fail if permissions are not set on the
@@ -863,7 +779,7 @@ class Project (object) :
         # At this point we are looking at a fresh install
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
-        if not self.isComponentType(cType) :
+        if not self.components[cType] :
             self.addComponentType(cType)
 
         # Make the target folder if needed
@@ -961,7 +877,7 @@ class Project (object) :
 
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
-        if not self.isComponentType(cType) :
+        if not self.components[cType] :
             self.addComponentType(cType)
 
         # Make the target folder if needed

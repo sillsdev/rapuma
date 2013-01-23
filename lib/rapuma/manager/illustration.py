@@ -192,13 +192,12 @@ class Illustration (Manager) :
                 writeConfFile(self.project.projConfig)
 
 
-    def createPiclistFile (self, cid) :
+    def createPiclistFile (self, cName, cid) :
         '''Look in the cid for \fig data. Extract it from the cid and
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
         # Check for a .piclist file
-        cName = getRapumaCName(cid)
         piclistFile = self.project.components[cName].getCidPiclistPath(cid)
         if not os.path.isfile(piclistFile) :
             try :

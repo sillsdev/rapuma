@@ -677,7 +677,7 @@ def userArguments (args) :
         aProject = initProject(args['project_id'])
         exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
         if not sys.argv[1].lower() in exclude :
-            if not aProject.isComponentType(args['component_type']) :
+            if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
                 if not aProject.addComponentType(args['component_type']) :
                     sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
 

@@ -217,11 +217,22 @@ def isInZip(file, zip) :
         except :
             return False
 
+###############################################################################
+########################## General Component Functions ########################
+###############################################################################
+
+def getSourcePath (userConfig, pid, cType) :
+    '''Return the stored source path for a component type.'''
+
+    if testForSetting(userConfig['Projects'][pid], cType + '_sourcePath') :
+        sp = userConfig['Projects'][pid][cType + '_sourcePath']
+        if sp :
+            return resolvePath(sp)
+
 
 ###############################################################################
 ########################## Config/Dictionary routines #########################
 ###############################################################################
-
 
 def confObjCompare (objA, objB, path) :
     '''Do a simple compare on two ConfigObj objects.'''
