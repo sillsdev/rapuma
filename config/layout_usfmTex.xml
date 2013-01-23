@@ -277,6 +277,8 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
+            <boolDepend>HeaderFooter:useRunningHeaderRule</boolDepend>
+            <usfmTex>\RHruleposition=[vm]</usfmTex>
         </setting>
         <setting>
             <name>USFM TeX Footer Position</name>
