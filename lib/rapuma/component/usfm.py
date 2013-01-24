@@ -7,10 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
-
-# History:
-# 20111222 - djd - Started with intial file
+# This class handles USFM component type tasks for book projects.
 
 
 ###############################################################################
@@ -23,7 +20,7 @@ import os
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.core.pt_tools import *
+#from rapuma.core.pt_tools import * # (do not seem to need this)
 from rapuma.component.component import Component
 
 
@@ -480,6 +477,189 @@ class Usfm (Component) :
                 'lao' : ['Laodiceans',                          'laodiceans',                   'C3'] 
                }
 
+
+
+
+
+
+
+
+###############################################################################
+###############################################################################
+########################## ParaTExt Class Functions ###########################
+###############################################################################
+###############################################################################
+
+# FIXME: Right now the following code is not hooked up and everything refers
+# to the function module, pt_tools.py. How do we wire this class up to work
+# instead of that module?
+
+
+class PT_Tools (Component) :
+    '''This class contains functions for working with USFM data in ParaTExt.'''
+
+
+    def formPTName (self, project, cName, cid) :
+        '''Using valid PT project settings from the project configuration, form
+        a valid PT file name that can be used for a number of operations.'''
+
+        # FIXME: Currently very simplistic, will need to be more refined for
+        #           number of use cases.
+
+        try :
+            nameFormID = project.projConfig['Managers']['usfm_Text']['nameFormID']
+            postPart = project.projConfig['Managers']['usfm_Text']['postPart']
+            prePart = project.projConfig['Managers']['usfm_Text']['prePart']
+
+            if nameFormID == '41MAT' :
+                mainName = project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
+                if prePart and prePart != 'None' :
+                    thisFile = prePart + mainName + postPart
+                else :
+                    thisFile = mainName + postPart
+            return thisFile
+        except :
+            return False
+
+
+    def formGenericName (self, project, cid) :
+        '''Figure out the best way to form a valid file name given the
+        source is not coming from a PT project.'''
+
+    # FIXME: This will be expanded as we find more use cases
+
+        postPart = project.projConfig['Managers']['usfm_Text']['postPart']
+        return cid + '.' + postPart
+
+
+    def getPTFont (self, sourcePath) :
+        '''Just return the name of the font used in a PT project.'''
+
+        ssf = self.getPTSettings(sourcePath)
+        return ssf['ScriptureText']['DefaultFont']
+
+
+    def mapPTTextSettings (self, sysSet, ptSet, force=False) :
+        '''Map the text settings from a PT project SSF file into the text
+        manager's settings. If no setting is present in the config, add
+        what is in the PT SSF. If force is True, replace any exsisting
+        settings.'''
+
+        # A PT to Rapuma text mapping dictionary
+        mapping   = {
+                    'FileNameBookNameForm'      : 'nameFormID',
+                    'FileNameForm'              : 'nameFormID',
+                    'FileNamePrePart'           : 'prePart',
+                    'FileNamePostPart'          : 'postPart',
+                    'DefaultFont'               : 'ptDefaultFont'
+                    }
+
+        # Loop through all the PT settings and check against the mapping
+        for k in mapping.keys() :
+            try :
+                if sysSet[mapping[k]] == '' or sysSet[mapping[k]] == 'None' :
+                    # This is for getting rid of "None" settings in the config
+                    if not ptSet['ScriptureText'][k] :
+                        sysSet[mapping[k]] = ''
+                    else :
+                        sysSet[mapping[k]] = ptSet['ScriptureText'][k]
+                elif force :
+                    sysSet[mapping[k]] = ptSet['ScriptureText'][k]
+            except :
+                pass
+
+        return sysSet
+
+
+    def findSsfFile (self, sourcePath) :
+        '''Look for the ParaTExt project settings file. The immediat PT project
+        is the parent folder and the PT environment that the PT projet is found
+        in, if any, is the grandparent folder. the .ssf (settings) file in the
+        grandparent folder takes presidence over the one found in the parent folder.
+        This function will determine where the primary .ssf file is and return the
+        .ssf path/file and the PT path. If not found, return None.'''
+
+        # Not sure where the PT SSF file might be or even what its name is.
+        # Starting in parent, we should find the first .ssf file. That will
+        # give us the name of the file. Then we will look in the grandparent
+        # folder and if we find the same named file there, that will be
+        # harvested for the settings. Otherwise, the settings will be taken
+        # from the parent folder.
+        # Note: Starting with PT 7 the "gather" folder was introduced to
+        # projects. We will need to look in that folder as well for the 
+        # .ssf file.
+        ssfFileName = ''
+        ptPath = ''
+        parentFolder = sourcePath
+        grandparentFolder = os.path.dirname(parentFolder)
+        gatherFolder = os.path.join(parentFolder, 'gather')
+
+        # For now, we will assume that if there is a gather folder, it must have a .ssf file in it
+        if os.path.isdir(gatherFolder) :
+            parentFolder = gatherFolder
+        # Get a file list from the parent folder and look for a .ssf/.SSF file
+        # This assumes there is (has to be) only one ssf/SSF file in the folder.
+        # The main problem at this point is we don't really know the name of
+        # the file, only the extention.
+        parentFileList = dircache.listdir(parentFolder)
+        grandparentFileList = dircache.listdir(grandparentFolder)
+
+        # Parent first to find the actual settings file name. Right now, there
+        # can only be 2 possibilities, either ssf or SSF. (No one in their right
+        # mind would ever use mixed case on an extention. That would be stupid!)
+        for f in parentFileList :
+            if os.path.isfile(os.path.join(parentFolder, f)) :
+                # Not every file we test has an extention, look first
+                if len(f.split('.')) > 1 :
+                    if f.split('.')[1] == 'ssf' or f.split('.')[1] == 'SSF' :
+                        ssfFileName = f
+                        ptPath = parentFolder
+
+        # At this point we need a sanity test. If no ssfFileName is present
+        # then there probably isn't one and we should just return False now
+        if not ssfFileName :
+            return False
+
+        # Now now look in the grandparent folder and change to override settings
+        # file if there is one
+        for f in grandparentFileList :
+            if os.path.isfile(os.path.join(grandparentFolder, f)) :
+                ucn = ssfFileName.split('.')[0] + '.' + ssfFileName.split('.')[1].upper()
+                lcn = ssfFileName.split('.')[0] + '.' + ssfFileName.split('.')[1].lower()
+                if f == (ucn or lcn) :
+                    ssfFileName = f
+                    ptPath = grandparentFolder
+
+        return os.path.join(ptPath, ssfFileName)
+
+
+    def getPTSettings (self, sourcePath) :
+        '''Return the data into a dictionary for the system to use.'''
+
+        # Return the dictionary
+        if os.path.isdir(sourcePath) :
+            ssfFile = self.findSsfFile(sourcePath)
+            if ssfFile :
+                if os.path.isfile(ssfFile) :
+                    return xmlFileToDict(ssfFile)
+
+
+    def getSourceEditor (self, projConfig, sourcePath, cType) :
+        '''Return the sourceEditor if it is set. If not try to
+        figure out what it should be and return that. Unless we
+        find we are in a PT project, we'll call it generic.'''
+
+    #    import pdb; pdb.set_trace()
+        se = 'generic'
+        Ctype = cType.capitalize()
+        # FIXME: This may need expanding as more use cases arrise
+        if testForSetting(projConfig['CompTypes'][Ctype], 'sourceEditor') :
+            se = projConfig['CompTypes'][Ctype]['sourceEditor']
+        else :
+            if self.findSsfFile(sourcePath) :
+                se = 'paratext'
+
+        return se
 
 
 

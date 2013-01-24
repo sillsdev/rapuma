@@ -477,12 +477,18 @@ class Xetex (Manager) :
 
                 useLanguage         = self.projConfig['Managers'][self.cType + '_Font']['useLanguage']
                 params              = {}
+#                if useMapping :
+#                    params['^^mapping^^'] = 'mapping=' + useMapping + ':'
+#                if useRenderingSystem :
+#                    params['^^renderer^^'] = '/' + useRenderingSystem + ':'
+#                if useLanguage :
+#                    params['^^language^^'] = 'language=' + useLanguage + ':'
                 if useMapping :
-                    params['^^mapping^^'] = 'mapping=' + useMapping + ':'
+                    params['^^mapping^^'] = ':mapping=' + useMapping
                 if useRenderingSystem :
-                    params['^^renderer^^'] = '/' + useRenderingSystem + ':'
+                    params['^^renderer^^'] = ':/' + useRenderingSystem
                 if useLanguage :
-                    params['^^language^^'] = 'language=' + useLanguage + ':'
+                    params['^^language^^'] = ':language=' + useLanguage
                 if fontPath :
                     params['^^path^^'] = fontPath
 

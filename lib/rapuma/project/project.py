@@ -947,6 +947,9 @@ class Project (object) :
         
         # FIXME - Todo: add post processing script feature
 
+        # Probably need to create the component object now
+        self.createComponent(cName)
+
         # Figure out target path
         if path :
             path = resolvePath(path)
@@ -967,9 +970,9 @@ class Project (object) :
         # Process as list of components
 
         self.log.writeToLog('XPRT-040')
-        for cid in self.getSubcomponentList(cName) :
-            cidCName = getRapumaCName(cid)
-            ptName = formPTName(self.projConfig, cid)
+        for cid in self.components[cName].getSubcomponentList(cName) :
+            cidCName = self.components[cName].getRapumaCName(cid)
+            ptName = formPTName(self, cName, cid)
             # Test, no name = no success
             if not ptName :
                 self.log.writeToLog('XPRT-010')
@@ -1200,26 +1203,22 @@ class Project (object) :
 
 # FIXME: Still lots to do on this next function
 
-    def edit (self, comp = None, glob = False, sys = False) :
+    def edit (self, cName = None, glob = False, sys = False) :
         '''Call editing application to edit various project and system files.'''
 
         editDocs = ['gedit']
         # If a subcomponent is called, pull it up and its dependencies
         # This will not work with components that have more than one
         # subcomponent.
-        if comp :
-            cid = ''
-            cName = ''
-            if hasUsfmCidInfo(comp) :
-                cName = getRapumaCName(comp)
-                cid = comp
-            else :
-                cName = comp
-                cid = getUsfmCid(comp)
+        if cName :
+            # Probably need to create the component object now
+            self.createComponent(cName)
 
-            cType = self.getComponentType(cName)
+            cid = self.components[cName].getUsfmCid(cName)
+
+            cType = self.components[cName].getComponentType(cName)
             self.buildComponentObject(cType, cName)
-            cidList = self.getSubcomponentList(cName)
+            cidList = self.components[cName].getSubcomponentList(cName)
             if len(cidList) > 1 :
                 self.log.writeToLog('EDIT-010', [cName])
                 dieNow()

@@ -141,13 +141,13 @@ def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
     return True
 
 
-def templateToProject (uc, path, pid, tid, pname) :
+def templateToProject (uc, projHome, pid, tid, pname, source = None) :
     '''Create a new project based on the provided template ID. This
     function is called from newProject() so all preliminary checks
     have been done. It should be good to go.'''
 
-    projHome            = path
-    source              = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
+    if not source :
+        source = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
 
     # Validate template
     if not os.path.isfile(source) :
@@ -274,12 +274,14 @@ def makeExcludeFileList (aProject) :
 
     # Now add to the list all the .tex files that are associated with components
     for cName in aProject.projConfig['Components'].keys() :
+        # Need to create component obj. (Is there a better way?)
+        aProject.createComponent(cName)
         # Sort out cid types
-        if getUsfmCid(cName) :
+        if aProject.components[cName].getUsfmCid(cName) :
             for t in excludeTypes :
-                cidFile = os.path.join(aProject.local.projComponentsFolder, cName, getUsfmCid(cName) + t)
+                cidFile = os.path.join(aProject.local.projComponentsFolder, cName, aProject.components[cName].getUsfmCid(cName) + t)
                 if os.path.isfile(cidFile) :
-                    excludeFiles.append(getUsfmCid(cName) + t)
+                    excludeFiles.append(aProject.components[cName].getUsfmCid(cName) + t)
         # Sort out cName types
         for t in excludeTypes :
             cNameFile = os.path.join(aProject.local.projComponentsFolder, cName, cName + t)
@@ -675,11 +677,20 @@ def userArguments (args) :
         isProject(args['project_id'])
         # Now setup the project and look for and test the component type if needed
         aProject = initProject(args['project_id'])
-        exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
-        if not sys.argv[1].lower() in exclude :
-            if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
-                if not aProject.addComponentType(args['component_type']) :
-                    sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
+        # Do a quick test for valid cName, if one is needed to be used
+        if 'component_name' in args :
+            if not args['component_name'] in aProject.projConfig['Components'].keys() :
+                sys.exit('\nERROR: Component: ' + args['component_name'] + ' is not found in the project configuration. Process halted!\n')
+        # Test component type if used
+        if 'component_type' in args :
+            exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
+            if not sys.argv[1].lower() in exclude :
+                if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
+                    if args['component_type'] in uc.userConfig['System']['recognizedComponentTypes'] :
+                        if not aProject.addComponentType(args['component_type']) :
+                            sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
+                    else :
+                        sys.exit('\nERROR: Component type given: ' + args['component_type'] + ' Is not valid in Rapuma. Process halted!\n')
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -687,32 +698,67 @@ def userArguments (args) :
         pass
 
     elif sys.argv[1].lower() == 'project' :
+        pid = args['project_id']
         # Remove an exsisting project
         if args['remove'] :
-            deleteProject(uc, args['project_id'])
-        # Creating a new project
-        elif args['add'] :
-            if not args['path'] :
+            deleteProject(uc, pid)
+        # Restore (or revert to) the last backup
+        elif args['revert'] :
+            restoreBackup(pid)
+        # Create/refresh helper scripts
+        elif args['scripts'] :
+            makeProjectScripts(uc, pid)
+        # Creating a new project from a template, archive, or scratch
+        else :
+            # First test for some necessary params
+            if not 'targetPath' in args :
                 # A path must be given
                 sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
             else :
-                # If a project folder is given we need to resolve it and pass
-                # it on to proj config settings (internal)
-                customLocal = resolvePath(args['path'])
-                if not os.path.isdir(customLocal) :
-                    sys.exit('\nERROR: Cannot resolve the given path. Process halting.\n')
+                # If a targetPath is given we need to resolve it
+                targetPath = resolvePath(args['targetPath'])
+                if not os.path.isdir(targetPath) :
+                    sys.exit('\nERROR: Cannot resolve the given path [' + targetPath + ']. Process halting.\n')
                 else :
-                    projFolder = os.path.join(customLocal, args['project_id'])
-            # Create the project
-            local   = ProjLocal(rapumaHome, userHome, projFolder)
-            pc      = ProjConfig(local)
-            newProject(uc, pc, args['project_id'], args['name'], args['template'], args['media'])
-            # Create helper scripts if desired
-            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                makeProjectScripts(uc, args['project_id'])
-        # Create/recreate helper scripts
-        elif args['scripts'] :
-            makeProjectScripts(uc, args['project_id'])
+                    projFolder = os.path.join(targetPath, pid)
+            # New project from template
+            if args['template'] :
+                tid = args['template']
+                templateSource = ''
+                if 'sourcePath' in args :
+                    sourcePath = resolvePath(args['sourcePath'])
+                    templateSource = os.path.join(sourcePath, tid + '.zip')
+                templateToProject(uc, targetPath, pid, tid, pname, templateSource)
+
+
+
+
+
+
+
+
+# FIXME: Working here!
+
+
+            # New (to current system) project from archive
+            elif args['archive'] :
+            
+            
+            # Just creating from scratch
+            else :
+                # Create a new project
+                local   = ProjLocal(rapumaHome, userHome, projFolder)
+                pc      = ProjConfig(local)
+                newProject(uc, pc, args['project_id'], args['name'], args['template'], args['media'])
+                # Create helper scripts if desired
+                if str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                    makeProjectScripts(uc, args['project_id'])
+
+
+
+
+
+
 
     elif sys.argv[1].lower() == 'component' :
         if not args['component_name'] :
@@ -891,16 +937,9 @@ def userArguments (args) :
 
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
-        if args['archive'] and args['restore'] :
-            restoreArchive(args['project_id'], args['path'])
-        elif args['backup'] and args['restore'] :
+        if args['archive'] :
             isProject(args['project_id'])
-            restoreBackup(args['project_id'])
-        elif args['template'] and args['restore'] :
-            sys.exit('\nERROR: Restore command is not valid with templates. Use Project-New to base a new project on a template.\n')
-        elif args['archive'] :
-            isProject(args['project_id'])
-            archiveProject(args['project_id'], args['path'])
+            archiveProject(args['project_id'])
         elif args['backup'] :
             isProject(args['project_id'])
             backupProject(args['project_id'])
@@ -979,11 +1018,14 @@ projCommand = subparsers.add_parser('project', help='General project management 
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
 projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
-projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
-projCommand.add_argument('-p', '--path', help='Path to the project home folder if the current working directory is not the actual target. This can be used when adding a project.')
+projCommand.add_argument('-o', '--sourcePath', help='An alternate path to a resouce to be used to start a new project.')
+projCommand.add_argument('-g', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project.')
 projCommand.add_argument('-m', '--media', help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
+projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
+projCommand.add_argument('-v', '--revert', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
+projCommand.add_argument('-c', '--archive', help='Specify an archive ID to install as a new project in the system. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -p (path) to specify where the project archive file can be found.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -1099,11 +1141,9 @@ macroCommand.add_argument('-f', '--force', action='store_true', help='Force over
 # Add Project archive subprocess arguments
 archiveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
 archiveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-archiveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration. If nothing is specified, the default is the directory where the project is found.')
-archiveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration. If nothing is specified, the default is the directory where the project is found.')
+archiveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
+archiveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
 archiveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
-archiveCommand.add_argument('-r', '--restore', action='store_true', help='Restore the specified project from the archive or backup storage area specified in the user configuration to the current working directory, unless a path (-p) is specified.')
-archiveCommand.add_argument('-p', '--path', help='Specify the path to where you wish add the archive to, or restore from. If no path is given, the default is the current working directory for both sides of the operation (from -> to).')
 
 # Add Project edit subprocess arguments
 editCommand = subparsers.add_parser('edit', help='Commands for editing project files.')
