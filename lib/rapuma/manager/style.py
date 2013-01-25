@@ -49,7 +49,7 @@ class Style (Manager) :
         self.rapumaXmlStyleConfig   = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'

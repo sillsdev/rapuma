@@ -3,3 +3,4 @@ relre:~
 syntax: glob
 build/*
 interface/Rapuma-USFM-build*
+resources/examples/KYUM

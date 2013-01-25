@@ -90,7 +90,6 @@ class Xetex (Manager) :
             dieNow()
 
         # Config Settings
-        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
@@ -108,21 +107,13 @@ class Xetex (Manager) :
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.cNameFolder            = os.path.join(self.projComponentsFolder, self.cName)
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
-        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         # File names
         self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
         self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
-        # Init some Dicts
-        self.ptSSFConf              = {}
-
-        # Make a PT settings dictionary
-        if self.sourceEditor.lower() == 'paratext' :
-            self.ptSSFConf = getPTSettings(self.sourcePath)
-            if not self.ptSSFConf :
-                self.project.log.writeToLog('XTEX-005')
 
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
@@ -389,7 +380,6 @@ class Xetex (Manager) :
         may not need to be remade. We will look for its exsistance and then compare 
         it to its primary dependents to see if we actually need to do anything.'''
 
-
         # Set vals
         dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile]
         makeIt = False
@@ -477,12 +467,6 @@ class Xetex (Manager) :
 
                 useLanguage         = self.projConfig['Managers'][self.cType + '_Font']['useLanguage']
                 params              = {}
-#                if useMapping :
-#                    params['^^mapping^^'] = 'mapping=' + useMapping + ':'
-#                if useRenderingSystem :
-#                    params['^^renderer^^'] = '/' + useRenderingSystem + ':'
-#                if useLanguage :
-#                    params['^^language^^'] = 'language=' + useLanguage + ':'
                 if useMapping :
                     params['^^mapping^^'] = ':mapping=' + useMapping
                 if useRenderingSystem :
@@ -791,21 +775,9 @@ class Xetex (Manager) :
                 # will run with
                 cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
 
-
-
-
-
-
-
                 # Run the XeTeX and collect the return code for analysis
 #                dieNow()
                 rCode = subprocess.call(cmds, env = envDict)
-
-
-
-
-
-
 
                 # Analyse the return code
                 if rCode == int(0) :

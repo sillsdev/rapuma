@@ -56,6 +56,19 @@ class Project (object) :
         self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
         self.projectName            = self.projConfig['ProjectInfo']['projectName']
 
+        # Get component source path(s)
+        for cType in self.userConfig['System']['recognizedComponentTypes'] :
+            sourcePath = ''
+            try :
+                sourcePath = userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
+                terminal('No source path found for: [' + str(e) + ']')
+                terminal('Please add a source path for this component type.')
+#                dieNow()
+            if sourcePath :
+                setattr(self, cType + '_sourcePath', sourcePath)
+
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
             if os.path.isfile(self.local.projErrorLogFile) :
@@ -85,6 +98,10 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
             self.projConfig.filename = self.local.projConfFile
+
+        # Look for Components section make one if it is not there
+        if not testForSetting(self.projConfig, 'Components') :
+            buildConfSection(self.projConfig, 'Components')
 
         # Up the creatorVersion on the project if needed
         if not testForSetting(self.projConfig, 'ProjectInfo', 'projectCreatorVersion') :
@@ -162,14 +179,6 @@ class Project (object) :
 ###############################################################################
 ########################## Component Level Functions ##########################
 ###############################################################################
-
-#    def isComponentType (self, cType) :
-#        '''Simple test to see if a component type exsists. Return True if it is.'''
-
-#        Ctype = cType.capitalize()
-#        if testForSetting(self.projConfig, 'CompTypes', Ctype) :
-#            return True
-
 
     def renderComponent (self, cType, cName, force = False) :
         '''Render a component which includes any subcomponents. If a cid
@@ -330,7 +339,7 @@ class Project (object) :
             self.cName = cName
 
         # Do not want to add this component, non-force, if it already exsists.
-        if self.components[cName].isCompleteComponent(cName) and not force and self.isLocked(cName) :
+        if cName in self.projConfig['Components'].keys() and not force and self.isLocked(cName) :
             self.log.writeToLog('COMP-115', [cName])
             dieNow()
 
@@ -351,6 +360,7 @@ class Project (object) :
         if newSource :
             source = newSource
             self.addCompTypeSourcePath(cType, source)
+            setattr(self, cType + '_sourcePath', source)
         # If there is no newSource, then the status quo will work okay
         elif oldSource :
             source = oldSource
@@ -358,10 +368,6 @@ class Project (object) :
         else :
             self.log.writeToLog('COMP-170')
             dieNow()
-
-        # Adjust the path if the process is forced
-        if force :
-            self.addCompTypeSourcePath(cType, source)
 
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
@@ -379,6 +385,9 @@ class Project (object) :
         self.projConfig['Components'][cName]['type'] = cType
         self.projConfig['Components'][cName]['cidList'] = cidList
         self.projConfig['Components'][cName]['isLocked'] = True
+
+        # Create the component object now that we have an entry in the config
+        self.createComponent(cName)
 
         # Add subcomponents
         for cid in cidList :
@@ -473,13 +482,6 @@ class Project (object) :
         self.projConfig['Components'][cName]['cidList'] = [cid]
         self.projConfig['Components'][cName]['isLocked'] = False
         self.buildComponentObject(cType, cName)
-        # This will load the component type manager and put
-        # a lot of different settings into the proj config
-#        cfg = self.projConfig['Components'][cName]
-#        module = import_module('rapuma.component.' + cType)
-#        ManagerClass = getattr(module, cType.capitalize())
-#        compobj = ManagerClass(self, cfg)
-#        self.components[cName] = compobj
         # Save our config settings
         if writeConfFile(self.projConfig) :
             return True
@@ -493,8 +495,6 @@ class Project (object) :
         ManagerClass = getattr(module, cType.capitalize())
         compobj = ManagerClass(self, cfg)
         self.components[cName] = compobj
-
-
 
 
     def removeComponent (self, cName, force = False) :
@@ -565,7 +565,7 @@ class Project (object) :
         is not there already.'''
 
         Ctype = cType.capitalize()
-        if not self.components[cType] :
+        if cType not in self.components :
             # Build the comp type config section
             buildConfSection(self.projConfig, 'CompTypes')
             buildConfSection(self.projConfig['CompTypes'], Ctype)
@@ -579,7 +579,7 @@ class Project (object) :
                 writeConfFile(self.projConfig)
 
             # Sanity check
-            if self.components[cType] :
+            if cType not in self.components :
                 self.log.writeToLog('COMP-060', [cType])
                 return True
             else :
@@ -599,8 +599,6 @@ class Project (object) :
         self.createComponent(cName)
 
         # Check to be sure the component exsits
-#        if not self.components[cName].isCompleteComponent(cName) :
-        print self.components[cName]
         if not self.components[cName] :
             self.log.writeToLog('COMP-210', [cName])
             dieNow()
@@ -643,7 +641,6 @@ class Project (object) :
         '''Lock or unlock to enable or disable actions to be taken on a component.'''
 
         # First be sure this is a valid component
-#        if not self.components[cName].isCompleteComponent(cName) :
         if not self.components[cName] :
             self.log.writeToLog('LOCK-010', [cName])
             dieNow()

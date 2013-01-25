@@ -301,6 +301,7 @@
     </property>
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
+    <addaction name="actionRestore"/>
     <addaction name="separator"/>
     <addaction name="actionArchive"/>
     <addaction name="actionBackup"/>
@@ -444,6 +445,11 @@
   <action name="actionRun">
    <property name="text">
     <string>Run</string>
+   </property>
+  </action>
+  <action name="actionRestore">
+   <property name="text">
+    <string>Restore</string>
    </property>
   </action>
  </widget>

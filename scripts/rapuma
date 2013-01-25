@@ -67,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130122081323'
+systemVersion   = '0.1.20130125135722'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -358,7 +358,14 @@ def archiveProject (pid, path = None) :
     zipUpProject(aProject.local.projHome, archTarget, excludeFiles)
 
     # Rename the source dir to indicate it was archived
-    os.rename(aProject.local.projHome, aProject.local.projHome + '(archived)')
+    bakArchProjDir = aProject.local.projHome + '(archived)'
+    if os.path.isdir(bakArchProjDir) :
+        terminal('\nError: Cannot complete archival process!\n')
+        terminal('\nAnother archived version of this project exsits with the folder name of: ' + fName(bakArchProjDir) + '\n')
+        terminal('\nPlease remove or rename it and then repete the process.\n')
+        dieNow()
+    else :
+        os.rename(aProject.local.projHome, bakArchProjDir)
 
     # Remove references from user rapuma.conf
     if uc.unregisterProject(pid) :
@@ -398,11 +405,10 @@ def zipUpProject (source, target = None, excludeFiles = None) :
                     myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
 
 
-def restoreArchive (pid, path = None) :
-    '''Restore a project from the user specified storage area. If that
-    is not set, it will look for the archive (pid.rapuma) in cwd. Use path to
-    specify where the project will be restored. Rapuma will register the project
-    there. Otherwise, it will restore to cwd and register it there.'''
+def restoreArchive (pid, targetPath, sourcePath = None) :
+    '''Restore a project from the user specified storage area or sourcePath if 
+    specified. Use targetPath to specify where the project will be restored.
+    Rapuma will register the project there.'''
 
     # Check to see if the user included the extention
     try :
@@ -417,33 +423,23 @@ def restoreArchive (pid, path = None) :
     userArchives = ''
 
     # First look for the archive that is to be restored
-    # If that can't be found we need to end here
-    # We will look in the user archives first, if not
-    # found or that isn't set, then cwd. Fail if not in
-    # either of those places.
-    try :
-        if os.path.isdir(uc.userConfig['Resources']['archives']) :
-            userArchives = uc.userConfig['Resources']['archives']
-            archUser = os.path.join(userArchives, archName)
-            archCwd = os.path.join(projHome, archName)
-            if os.path.isfile(archUser) :
-                archSource = archUser
-            elif os.path.isfile(os.path.join(archCwd)) :
-                archSource = archCwd
-    except :
+    if sourcePath :
+        if os.path.isdir(sourcePath) :
+            archSource = os.path.join(sourcePath, archName)
+    elif os.path.isdir(uc.userConfig['Resources']['archives']) :
+        userArchives = uc.userConfig['Resources']['archives']
+        archSource = os.path.join(userArchives, archName)
+    else :
         terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
         dieNow()
 
     # Now set the target params
-    if path :
-        path = resolvePath(path)
-        if not os.path.isdir(path) :
-            terminal('\nError: The path given is not valid: [' + path + ']\n')
+    if targetPath :
+        if not os.path.isdir(targetPath) :
+            terminal('\nError: The path given is not valid: [' + targetPath + ']\n')
             dieNow()
         else :
-            archTarget = os.path.join(path, pid)
-    else :
-        archTarget = os.path.join(projHome, pid)
+            archTarget = os.path.join(targetPath, pid)
 
     # If we made it this far, extract the archive
     with zipfile.ZipFile(archSource, 'r') as myzip :
@@ -677,10 +673,6 @@ def userArguments (args) :
         isProject(args['project_id'])
         # Now setup the project and look for and test the component type if needed
         aProject = initProject(args['project_id'])
-        # Do a quick test for valid cName, if one is needed to be used
-        if 'component_name' in args :
-            if not args['component_name'] in aProject.projConfig['Components'].keys() :
-                sys.exit('\nERROR: Component: ' + args['component_name'] + ' is not found in the project configuration. Process halted!\n')
         # Test component type if used
         if 'component_type' in args :
             exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
@@ -711,7 +703,7 @@ def userArguments (args) :
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
-            if not 'targetPath' in args :
+            if not args['targetPath'] :
                 # A path must be given
                 sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
             else :
@@ -721,29 +713,19 @@ def userArguments (args) :
                     sys.exit('\nERROR: Cannot resolve the given path [' + targetPath + ']. Process halting.\n')
                 else :
                     projFolder = os.path.join(targetPath, pid)
+            # Source path is optional but if given, resolve it
+            if 'sourcePath' in args :
+                    sourcePath = resolvePath(args['sourcePath'])
             # New project from template
             if args['template'] :
                 tid = args['template']
                 templateSource = ''
-                if 'sourcePath' in args :
-                    sourcePath = resolvePath(args['sourcePath'])
+                if 'sourcePath' :
                     templateSource = os.path.join(sourcePath, tid + '.zip')
                 templateToProject(uc, targetPath, pid, tid, pname, templateSource)
-
-
-
-
-
-
-
-
-# FIXME: Working here!
-
-
             # New (to current system) project from archive
             elif args['archive'] :
-            
-            
+                restoreArchive(pid, targetPath, sourcePath)
             # Just creating from scratch
             else :
                 # Create a new project
@@ -753,12 +735,6 @@ def userArguments (args) :
                 # Create helper scripts if desired
                 if str2bool(uc.userConfig['System']['autoHelperScripts']) :
                     makeProjectScripts(uc, args['project_id'])
-
-
-
-
-
-
 
     elif sys.argv[1].lower() == 'component' :
         if not args['component_name'] :
@@ -1025,7 +1001,7 @@ projCommand.add_argument('-n', '--name', help='If creating a new project, give a
 projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
 projCommand.add_argument('-v', '--revert', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
-projCommand.add_argument('-c', '--archive', help='Specify an archive ID to install as a new project in the system. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -p (path) to specify where the project archive file can be found.')
+projCommand.add_argument('-c', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -1139,11 +1115,11 @@ macroCommand.add_argument('-p', '--path', help='If the macro you are adding alre
 macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
 
 # Add Project archive subprocess arguments
-archiveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
-archiveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-archiveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
-archiveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
-archiveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
+preserveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
+preserveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
+preserveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
+preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
+preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
 
 # Add Project edit subprocess arguments
 editCommand = subparsers.add_parser('edit', help='Commands for editing project files.')

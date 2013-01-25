@@ -73,7 +73,7 @@ def isExecutable (fn) :
 
     # Look at file extention first
     f = fName(fn)
-    if not f.rfind('.') != -1 :
+    if f.rfind('.') != -1 :
         if f[f.rfind('.')+1:] in executableTypes :
             return True
     else :
@@ -216,18 +216,6 @@ def isInZip(file, zip) :
                 return True
         except :
             return False
-
-###############################################################################
-########################## General Component Functions ########################
-###############################################################################
-
-def getSourcePath (userConfig, pid, cType) :
-    '''Return the stored source path for a component type.'''
-
-    if testForSetting(userConfig['Projects'][pid], cType + '_sourcePath') :
-        sp = userConfig['Projects'][pid][cType + '_sourcePath']
-        if sp :
-            return resolvePath(sp)
 
 
 ###############################################################################

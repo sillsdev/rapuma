@@ -59,7 +59,7 @@ class Illustration (Manager) :
         self.illustrationsLib           = self.project.projConfig['Managers'][cType + '_Illustration']['illustrationsLib']
         self.illustrationsLibFolder     = self.project.userConfig['Resources']['illustrations']
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
-        self.sourcePath                 = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.sourcePath                 = getattr(self.project, self.cType + '_sourcePath')
         self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
         self.backgroundTypes            = ['watermark', 'lines']
 

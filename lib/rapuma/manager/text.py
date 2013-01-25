@@ -53,7 +53,7 @@ class Text (Manager) :
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         self.sourceEditor           = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
         self.setSourceEditor(self.sourceEditor) 
 

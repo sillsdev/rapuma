@@ -50,7 +50,7 @@ class Usfm (Component) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getSourcePath(self.project.userConfig, self.project.projectIDCode, self.cType)
+        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
 
         # Get the comp settings
