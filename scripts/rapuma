@@ -141,39 +141,6 @@ def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
     return True
 
 
-def templateToProject (uc, projHome, pid, tid, pname, source = None) :
-    '''Create a new project based on the provided template ID. This
-    function is called from newProject() so all preliminary checks
-    have been done. It should be good to go.'''
-
-    if not source :
-        source = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
-
-    # Validate template
-    if not os.path.isfile(source) :
-        terminal('\nError: Template not found: ' + source)
-        dieNow()
-
-    # Unzip the template in place to start the new project
-    with zipfile.ZipFile(source, 'r') as myzip :
-        myzip.extractall(projHome)
-
-    # Peek into the project
-    pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
-
-    pc['ProjectInfo']['projectName']               = pname
-    pc['ProjectInfo']['projectCreateDate']         = tStamp()
-    pc['ProjectInfo']['projectIDCode']             = pid
-    pc.filename                                    = os.path.join(projHome, 'Config', 'project.conf')
-    pc.write()
-
-    # Get the media type from the newly placed project for registration
-    projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
-
-    # Register the new project
-    uc.registerProject(pid, pname, projectMediaIDCode, projHome)
-
-
 def deleteProject (uc, pid = None) :
     '''Delete a project fromthe Rapuma system registry and from the hard drive.'''
 
@@ -564,6 +531,47 @@ def projectToTemplate (pid, tid) :
     terminal('\nCompleted creating template: ' + fName(target) + '\n')
 
 
+def templateToProject (uc, projHome, pid, tid, pname, source = None) :
+    '''Create a new project based on the provided template ID. This
+    function is called from newProject() so all preliminary checks
+    have been done. It should be good to go.'''
+
+    # Test to see if the project is already there
+    if os.path.isdir(projHome) :
+        terminal('\nError: Project [' + pid + '] already exsits.')
+        dieNow()
+
+    if not source :
+        source = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
+
+    # Validate template
+    if not os.path.isfile(source) :
+        terminal('\nError: Template not found: ' + source)
+        dieNow()
+
+    # Unzip the template in place to start the new project
+    with zipfile.ZipFile(source, 'r') as myzip :
+        myzip.extractall(projHome)
+
+    # Peek into the project
+    pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
+
+    pc['ProjectInfo']['projectName']               = pname
+    pc['ProjectInfo']['projectCreateDate']         = tStamp()
+    pc['ProjectInfo']['projectIDCode']             = pid
+    pc.filename                                    = os.path.join(projHome, 'Config', 'project.conf')
+    pc.write()
+
+    # Get the media type from the newly placed project for registration
+    projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
+
+    # Register the new project
+    uc.registerProject(pid, pname, projectMediaIDCode, projHome)
+    
+    # Report what happened
+    terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
+
+
 def makeProjectScripts (uc, pid) :
     '''Create helper scripts for a project to help with repetitive tasks.
     If any scripts are present with the same name they will be overwritten.
@@ -720,9 +728,9 @@ def userArguments (args) :
             if args['template'] :
                 tid = args['template']
                 templateSource = ''
-                if 'sourcePath' :
+                if sourcePath :
                     templateSource = os.path.join(sourcePath, tid + '.zip')
-                templateToProject(uc, targetPath, pid, tid, pname, templateSource)
+                templateToProject(uc, projFolder, pid, tid, args['name'], templateSource)
             # New (to current system) project from archive
             elif args['archive'] :
                 restoreArchive(pid, targetPath, sourcePath)
@@ -992,7 +1000,7 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
+#projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
 projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-o', '--sourcePath', help='An alternate path to a resouce to be used to start a new project.')
 projCommand.add_argument('-g', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project.')
