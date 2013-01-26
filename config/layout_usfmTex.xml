@@ -110,7 +110,6 @@ Todo:
             <type>list</type>
             <value></value>
         </setting>
-
         <setting>
             <name>Auto Callers (Crossrefs)</name>
             <description>Provide a symbol (or a csv sequence of symbols) is desired for a crossref caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
@@ -120,7 +119,6 @@ Todo:
             <boolDepend>Crossreferences:useAutoCallerCrossrefs</boolDepend>
             <usfmTex>\AutoCallers{x}{[v]}</usfmTex>
         </setting>
-
         <setting>
             <name>Numeric Callers (Crossrefs)</name>
             <description>Use numeric callers on cross references instead of alphabetic callers.   Default = False</description>
@@ -531,10 +529,9 @@ Todo:
         <setting>
             <name>USFM TeX Caption Reference</name>
             <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
-            <key>captionReference</key>
+            <key>useCaptionReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <note>Pretty sure this is not implemented yet.</note>
         </setting>
         <setting>
             <name>Use Illustrations</name>

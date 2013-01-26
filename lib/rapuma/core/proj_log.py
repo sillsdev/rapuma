@@ -185,6 +185,7 @@ class ProjLog (object) :
             'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder.'],
             'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
             'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
+            'ILUS-055' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] component folder.'],
             'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
             'ILUS-065' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
             'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustrations folder. Will try to revert to default watermark.'],

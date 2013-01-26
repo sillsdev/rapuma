@@ -171,10 +171,9 @@ class Usfm (Component) :
                 cidUsfm = self.getCidPath(cid)
                 # Build a component object for this cid (cidCName)
                 self.project.buildComponentObject(self.cType, cidCName)
-
+                # Create the working text
                 if not os.path.isfile(cidUsfm) :
                     self.project.managers[self.cType + '_Text'].installUsfmWorkingText(cName, cid)
-
                 # Add/manage the dependent files for this cid
                 if self.macroPackage == 'usfmTex' :
                     # Component adjustment file
@@ -194,23 +193,27 @@ class Usfm (Component) :
                     self.project.buildComponentObject(self.cType, cidCName)
                     cidPiclist = self.project.components[cidCName].getCidPiclistPath(cid)
                     if useIllustrations :
-                        # First check if we have the illustrations we think we need
-                        # and get them if we do not.
-                        self.project.managers[cType + '_Illustration'].getPics(cid)
-
-                        # If that all went well, create the piclist file if needed
-                        if os.path.isfile(cidPiclist + '.bak') :
-                            os.rename(cidPiclist + '.bak', cidPiclist)
-                        else :
+                        if not os.path.isfile(cidPiclist) :
+                            # First check if we have the illustrations we think we need
+                            # and get them if we do not.
+                            self.project.managers[cType + '_Illustration'].getPics(cid)
+                            # Now make a fresh version of the piclist file
                             self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                            self.project.log.writeToLog('ILUS-065', [cid])
+                        else :
+                            for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
+                                if isOlder(cidPiclist, f) :
+                                    # Remake the piclist file
+                                    self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                                    self.project.log.writeToLog('ILUS-065', [cid])
                     else :
-                        # If we are not using illustrations check to see if there is a
-                        # piclist file and if there is, rename it so usfmTex (if we are
-                        # using it) will not pick it up
+                        # If we are not using illustrations then any existing piclist file will be removed
                         if os.path.isfile(cidPiclist) :
-                            os.rename(cidPiclist, cidPiclist + '.bak')
+                            os.remove(cidPiclist)
+                            self.project.log.writeToLog('ILUS-055', [cName])
                 else :
                     self.project.log.writeToLog('COMP-220', [self.macroPackage])
+
 
             # Run any hyphenation or word break routines
 
