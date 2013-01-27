@@ -310,6 +310,9 @@ class Text (Manager) :
             return True
 
 
+# FIXME: This needs to be moved to the USFM module
+
+
     def logUsfmFigure (self, cid, figConts) :
         '''Log the figure data in the illustration.conf. If nothing is returned, the
         existing \fig markers with their contents will be removed. That is the default
@@ -327,6 +330,7 @@ class Text (Manager) :
 
         # Add additional information, get rid of stuff we don't need
         figDict['illustrationID'] = figDict['fileName'].split('.')[0]
+        figDict['useIllustration'] = True
         figDict['bid'] = cid.lower()
         figDict['chapter'] = figDict['location'].split(':')[0]
         figDict['verse'] = figDict['location'].split(':')[1]
