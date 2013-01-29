@@ -171,6 +171,8 @@ def findSsfFile (sourcePath) :
 def getPTSettings (sourcePath) :
     '''Return the data into a dictionary for the system to use.'''
 
+#    import pdb; pdb.set_trace()
+
     # Return the dictionary
     if os.path.isdir(sourcePath) :
         ssfFile = findSsfFile(sourcePath)

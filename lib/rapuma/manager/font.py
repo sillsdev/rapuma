@@ -375,6 +375,8 @@ class Font (Manager) :
     def varifyFont (self) :
         '''Varify a font is installed in the project.'''
 
+#        import pdb; pdb.set_trace()
+
         if self.sourceEditor.lower() == 'paratext' :
             # If this a PT project there should be something in ptDefaultFont
             font = self.checkForSubFont(self.ptDefaultFont)

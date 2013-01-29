@@ -607,6 +607,7 @@ def makeProjectScripts (uc, pid) :
             elif script == 'cropmarksOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks False \n\n')
             elif script == 'cropmarksOn' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks True \n\n')
             elif script == 'edit' :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
@@ -615,6 +616,7 @@ def makeProjectScripts (uc, pid) :
             elif script == 'linesOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
             elif script == 'linesOn' :
+                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks False \n\n')
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines True \n\n')
             elif script == 'placeholdersOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout Illustrations useFigurePlaceHolders False \n\n')

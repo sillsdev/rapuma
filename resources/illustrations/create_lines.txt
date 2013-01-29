@@ -1,0 +1,40 @@
+
+How To Create a Lines Watermark Document
+
+By Flip Wester (flip_wester@sil.org)
+
+Here are the instructions to generate the lines watermark in 17 steps:
+
+================================================================
+CREATING watermark-lines.pdf USING THE RULER EFFECT IN INKSCAPE
+================================================================
+
+1.     Render a book with Rapuma.
+2.     Find a full page without footnotes or illustrations and open that page in Inkscape.
+3.     Draw a vertical line from the baseline of the first line of text to just under the last line of text and move the vertical line into the left margin. Select the newly drawn line by clicking the arrow in the tool bar
+4.     Click Fill and Stroke - tab Stroke Style and change the width of the line to 0.2 px
+5.     Click on Path - PathEffectEditor... In the Apply new effect box choose Ruler and click the Add button
+6.     Fill in the following values:
+            Unit                    px
+            Mark distance    12
+            Major length      400
+            Minor length       leave at default
+            Major steps        1
+            Shift marks by    leave at default
+            Offset                 leave at default
+            Mark direction    Right
+            Border marks     Start
+7.     Enlarge the screen to 300% and scroll to the top line.
+8.     Go to first line of text and adjust the position of the the ruler to touch the baseline with the Y arrows in the tools control bar.
+9.     Adjust the line distance in two steps:
+     a) in 0.1px increments with the arrows in Mark distance box of the PathEffectEditor window until  the second ruler-line touches the baseline of the second line of text;
+     b) in 0.01px increments, by scrolling to to the last line of text and increase/decrease second digit of the Marker distance manually until the last5 ruler-line to touches the baseline.
+10.     Click number 5 return to 100% zoom.
+11.     Adjust the Major length so that the right side of the ruler boundary box is in the right margin and close the PathEffectEditor.
+13.     Open Object-Transform... enter 500 in the Move Horizontal box and click Apply.
+14.     Delete the text and watermark on the page.
+15.     Select the ruler again and enter -500 in the Move Horizontal box of the Transform window, click Apply, this will move the ruler back to the original position on the page.
+16.     Optionally click Fill and Stroke - Stroke paint - Flat color and change the line color to a light color such as R=255 G=200 and B 0.
+17.     Save as watermark-lines.pdf and watermark-lines.svg in the project's Illustrations folder and close Inkscape.
+
+
