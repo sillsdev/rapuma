@@ -389,15 +389,8 @@ class Xetex (Manager) :
                     if not v :
                         continue
 
-                    if k == 'omitBookReference' :
-                        print k,v,testForSetting(macTexVals, k, 'boolDepend')
-
-                    if k == 'omitVerseNumberOne' :
-                        print k,v,testForSetting(macTexVals, k, 'boolDepend')
-
                     if testForSetting(macTexVals, k, self.macroPackage) :
                         line = macTexVals[k][self.macroPackage]
-#                        print line
                         # If there is a boolDepend then we don't need to output
                         if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
                             continue

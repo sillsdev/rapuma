@@ -67,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130125135722'
+systemVersion   = '0.1.20130130205911'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -423,19 +423,7 @@ def restoreArchive (pid, targetPath, sourcePath = None) :
     pc          = ProjConfig(local)
     log         = ProjLog(local, uc)
     aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
-
-
-
-
-# FIXME: Need to add at least a placeholder for the component source path
-
-# This will be done by sending a dictionary with a list of sources by cType
-
-    sources = {}
-
-# Fill the dic here
-
-    uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome, sources)
+    uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
     # Finish here
     terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
