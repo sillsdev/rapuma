@@ -53,43 +53,14 @@ class Xetex (Manager) :
         self.managers               = project.managers
         # ConfigObjs
         self.projConfig             = project.projConfig
-        self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
-        self.layoutConfig           = ConfigObj(encoding='utf-8')
-        self.fontConfig             = ConfigObj(encoding='utf-8')
-        self.layoutMacroXmlConfFileName     = 'layout_' + self.macroPackage + '.xml'
-        self.layoutMacroXmlConfFile = os.path.join(self.project.local.rapumaConfigFolder, self.layoutMacroXmlConfFileName)
-        # Load supported config objs
-        if cType in self.project.userConfig['System']['recognizedComponentTypes'] :
-#            import pdb; pdb.set_trace()
-
-            # Layout config
-            if 'usfm_Layout' not in self.managers :
-                self.project.createManager(self.cType, 'layout')
-            # Grab the exsiting config
-            orgLayoutConfig     = self.managers[self.cType + '_Layout'].layoutConfig
-            orgFileName         = orgLayoutConfig.filename
-            # Now we need to check against the macroPackage default settings and
-            # Now merge them together here (NOTE: This cannot be done in layout.py)
-            layoutMacro         = ConfigObj(getXMLSettings(self.layoutMacroXmlConfFile), encoding='utf-8')
-            layoutMacro.merge(orgLayoutConfig)
-            # Only write out if there are differences detected
-            if orgLayoutConfig == layoutMacro :
-                self.layoutConfig = orgLayoutConfig
-                self.layoutConfig.filename = orgFileName
-            else :
-                self.layoutConfig = layoutMacro
-                self.layoutConfig.filename = orgFileName
-                writeConfFile(self.layoutConfig)
-
-            # Font config
-            if 'usfm_Font' not in self.managers :
-                self.project.createManager(self.cType, 'font')
-            self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
-        else :
-            self.project.log.writeToLog('XTEX-150', [cType])
-            dieNow()
-
+        if self.cType + '_Layout' not in self.managers :
+            self.project.createManager(self.cType, 'layout')
+        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+        if self.cType + '_Font' not in self.managers :
+            self.project.createManager(self.cType, 'font')
+        self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
         # Config Settings
+        self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
@@ -100,6 +71,7 @@ class Xetex (Manager) :
         self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
+        self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
         self.projFontsFolder        = self.local.projFontsFolder
@@ -109,7 +81,6 @@ class Xetex (Manager) :
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         # File names
-        self.macLayoutValFile       = os.path.join(self.local.rapumaConfigFolder, 'layout_' + self.macroPackage + '.xml')
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
         self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
@@ -129,7 +100,8 @@ class Xetex (Manager) :
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
 
         # Set file names with full path (this after booleans are set)
-        self.layoutConfFile         = os.path.join(self.projConfFolder, cType + '_Layout.conf')
+        self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
+        self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
         self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
@@ -400,10 +372,7 @@ class Xetex (Manager) :
             return True
         else :
             # Otherwise make/remake the file
-            # Get the default and TeX macro values and merge them into one dictionary
-            x = self.makeTexSettingsDict(self.project.local.rapumaLayoutDefaultFile)
-            y = self.makeTexSettingsDict(self.macLayoutValFile)
-            macTexVals = dict(y.items() + x.items())
+            macTexVals = dict(self.makeTexSettingsDict(self.layoutXmlFile))
 
             writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
             writeObject.write(self.texFileHeader(fName(self.setFile)))
@@ -420,8 +389,15 @@ class Xetex (Manager) :
                     if not v :
                         continue
 
+                    if k == 'omitBookReference' :
+                        print k,v,testForSetting(macTexVals, k, 'boolDepend')
+
+                    if k == 'omitVerseNumberOne' :
+                        print k,v,testForSetting(macTexVals, k, 'boolDepend')
+
                     if testForSetting(macTexVals, k, self.macroPackage) :
                         line = macTexVals[k][self.macroPackage]
+#                        print line
                         # If there is a boolDepend then we don't need to output
                         if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
                             continue

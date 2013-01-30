@@ -37,20 +37,6 @@ Todo:
         <sectionID>ChapterVerse</sectionID>
         <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
         <setting>
-            <name>Short Book Chapter Omit</name>
-            <key>shortBookChapterOmit</key>
-            <description>If a book consists of a single chapter it is often desirable to not have a chapter number marking the beginning of the book.  If set True, this will insert a command in the control file to prevent inserting the chapter number in a single chapter book.  Default = True</description>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>Omit All Chapter Numbers</name>
-            <description>Omit all the chapter numbers in the book. (Actually this is what is done for one-chapter books.)  If set to true, this will override the Short Book Chapter Omit setting that is normally used in one chapter books and will take all the chapter numbers out of all books.  Default = False</description>
-            <key>omitAllChapterNumbers</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
             <name>Omit Verse Number One</name>
             <description>Setting this to True will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Default = True</description>
             <key>omitVerseNumberOne</key>
@@ -58,6 +44,15 @@ Todo:
             <value>True</value>
             <boolDepend>ChapterVerse:omitVerseNumberOne</boolDepend>
             <usfmTex>\OmitVerseNumberOnetrue</usfmTex>
+        </setting>
+        <setting>
+            <name>Omit All Chapter Numbers</name>
+            <description>Omit all the chapter numbers in the book. (Often this is used for one-chapter books.) Default = False</description>
+            <key>omitAllChapterNumbers</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>ChapterVerse:omitAllChapterNumbers</boolDepend>
+            <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
         <setting>
             <name>Chapter Verse Separator</name>
@@ -95,8 +90,9 @@ Todo:
             <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
             <key>adornVerseSetting</key>
             <type>string</type>
-            <value></value>
-            <usfmTex></usfmTex>
+            <value>(#1)</value>
+            <usfmTex>\def\AdornVerseNumber#1{[v]}</usfmTex>
+            <note>Not fully tested yet and it may only be implemented in ptx2pdf. More work needs to be done.</note>
         </setting>
     </section>
     <section>
@@ -498,20 +494,23 @@ Todo:
             <usfmTex>\VerseRefstrue</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Omit Chapter Number (Running Header)</name>
-            <description>Omit the chapter numbers in the running header (RH). Default = False</description>
-            <key>omitChapterNumber</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDepend>HeaderContent:omitChapterNumber</boolDepend>
-            <usfmTex>\OmitChapterNumbertrue</usfmTex>
-        </setting>
-        <setting>
             <name>USFM TeX Omit Book Reference (Running Header)</name>
-            <description>Omit the book name in the running header (RH).   Default = False</description>
+            <description>Omit the book name in the running header (RH). Default = False</description>
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
+            <boolDepend>HeaderContent:omitBookReference</boolDepend>
+            <usfmTex>\OmitBookReftrue</usfmTex>
+        </setting>
+        <setting>
+            <name>USFM TeX Omit Chapter Number (Running Header)</name>
+            <description>Omit the chapter numbers in the running header (RH). Default = False</description>
+            <key>omitChapterNumberRH</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend>HeaderContent:omitChapterNumberRH</boolDepend>
+            <usfmTex>\OmitChapterNumberRHtrue</usfmTex>
+            <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
         <setting>
             <name>USFM TeX Running Header Title (Left Side)</name>

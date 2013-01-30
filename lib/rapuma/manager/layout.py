@@ -49,9 +49,13 @@ class Layout (Manager) :
         self.project                        = project
         self.managers                       = project.managers
         self.projConfig                     = self.project.projConfig
+        self.projMediaType                  = self.project.projectMediaIDCode
         # File names
-        self.layoutDefaultXmlConfFileName   = 'layout_default.xml'
-        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
+        self.layoutDefaultXmlConfFileName   = self.project.projectMediaIDCode + '_layout.xml'
+        self.layoutDefaultConfFileName   = self.project.projectMediaIDCode + '_layout.conf'
+#        self.layoutDefaultXmlConfFileName   = 'layout_default.xml'
+#        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
+        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.layoutDefaultConfFileName)
         # Set local var and override in project object (if needed)
         self.project.local.layoutConfFile   = self.layoutConfFile
         self.layoutDefaultXmlConfFile       = os.path.join(self.project.local.rapumaConfigFolder, self.layoutDefaultXmlConfFileName)

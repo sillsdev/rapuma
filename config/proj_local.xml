@@ -84,13 +84,6 @@ Todo:
         <sectionID>RapumaFiles</sectionID>
         <description>Any file name and path that is, or could be, shared between system modules needs to be stored here.</description>
         <setting>
-            <name>Rapuma Layout Default File</name>
-            <key>rapumaLayoutDefaultFile</key>
-            <description>The name of the default layout file.</description>
-            <type>list</type>
-            <value>config,layout_default.xml</value>
-        </setting>
-        <setting>
             <name>Rapuma Help Index File</name>
             <key>rapumaHelpIndexFile</key>
             <description>The name of the HTML index file for the Rapuma basic help system.</description>

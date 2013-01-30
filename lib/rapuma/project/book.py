@@ -19,11 +19,11 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+#import os
 
 
 # Load the local classes
-from rapuma.core.tools import *
+#from rapuma.core.tools import *
 from rapuma.project.project import Project
 
 
@@ -32,8 +32,10 @@ from rapuma.project.project import Project
 ###############################################################################
 
 class Book (Project) :
-    '''This contains basic information about a type of project.'''
+    '''This contains basic information and functions for a type of project media.'''
+
 
     configFile = "book.xml"
+
 
 

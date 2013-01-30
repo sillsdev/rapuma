@@ -80,7 +80,6 @@ class Illustration (Manager) :
         self.compSettings = self.project.projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
-            print k,v
             setattr(self, k, v)
 
 

@@ -572,6 +572,20 @@ def templateToProject (uc, projHome, pid, tid, pname, source = None) :
     terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
+def synchronize_pull (pid) :
+    '''Synchronize the local project with the cloud by pulling new
+    data from the cloud into the local project.'''
+
+    sys.exit('synchronize_pull() is not working yet!')
+
+
+def synchronize_push (pid) :
+    '''Synchronize project data stored in the cloud by pushing
+    the local data to the cloud.'''
+
+    sys.exit('synchronize_push() is not working yet!')
+
+
 def makeProjectScripts (uc, pid) :
     '''Create helper scripts for a project to help with repetitive tasks.
     If any scripts are present with the same name they will be overwritten.
@@ -605,23 +619,23 @@ def makeProjectScripts (uc, pid) :
             elif script == 'compare' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c \n\n')
             elif script == 'cropmarksOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\n')
             elif script == 'cropmarksOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks True \n\n')
             elif script == 'edit' :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
                 writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
             elif script == 'linesOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
             elif script == 'linesOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useCropmarks False \n\n')
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useLines True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True \n\n')
             elif script == 'placeholdersOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout Illustrations useFigurePlaceHolders False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False \n\n')
             elif script == 'placeholdersOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout Illustrations useFigurePlaceHolders True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True \n\n')
             elif script == 'postprocess' :
                 writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
                 writeObject.write('rapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 \n\n')
@@ -638,9 +652,9 @@ def makeProjectScripts (uc, pid) :
             elif script == 'view' :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
             elif script == 'watermarkOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useWatermark False \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark False \n\n')
             elif script == 'watermarkOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + cType + '_Layout PageLayout useWatermark True \n\n')
+                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark True \n\n')
 
         # Make the script executable
         makeExecutable(fullFile)
@@ -923,20 +937,22 @@ def userArguments (args) :
 
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
+        isProject(args['project_id'])
         if args['archive'] :
-            isProject(args['project_id'])
             archiveProject(args['project_id'])
         elif args['backup'] :
-            isProject(args['project_id'])
             backupProject(args['project_id'])
         elif args['template'] :
-            isProject(args['project_id'])
             if isTemplate(args['template']) :
                 sys.exit('\nError: This template [' + args['template'] + '] already exsists. Process halted.\n')
             projectToTemplate(args['project_id'], args['template'])
+        elif args['synchronize_pull'] :
+            synchronize_pull(args['project_id'])
+        elif args['synchronize_push'] :
+            synchronize_push(args['project_id'])
         else :
             # Bad command
-            sys.exit('\nERROR: Must provide -a or -b with -c or -r with optional -p. Process halted!\n')
+            sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -p (synchronize_pull), or -u (synchronize_push). Process halted!\n')
 
     # Commands for editing project files
     elif sys.argv[1].lower() == 'edit' :
@@ -1130,6 +1146,8 @@ preserveCommand.add_argument('project_id', help=' A project ID for the project y
 preserveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
 preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
 preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
+preserveCommand.add_argument('-p', '--synchronize_pull', action='store_true', help='[NOT WORKING!] Synchronize the local project with the cloud project by pulling new data from the cloud.')
+preserveCommand.add_argument('-u', '--synchronize_push', action='store_true', help='[NOT WORKING!] Synchronize the cloud project with the local project by pushing new data to the cloud.')
 
 # Add Project edit subprocess arguments
 editCommand = subparsers.add_parser('edit', help='Commands for editing project files.')

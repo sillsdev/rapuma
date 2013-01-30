@@ -79,6 +79,9 @@ class Project (object) :
         # Initialize the project type
         # FIXME: some additional work needs to be done to simplify this
         # This will have to do for now.
+        
+#        import pdb; pdb.set_trace()
+
         m = import_module('rapuma.project.' + self.projectMediaIDCode)
 #       or you could use:
 #        m = import_module('..' + self.projectMediaIDCode, mngr.__name__)
