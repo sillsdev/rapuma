@@ -90,9 +90,9 @@ Todo:
             <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
             <key>adornVerseSetting</key>
             <type>string</type>
-            <value>(#1)</value>
+            <value></value>
             <usfmTex>\def\AdornVerseNumber#1{[v]}</usfmTex>
-            <note>Not fully tested yet and it may only be implemented in ptx2pdf. More work needs to be done.</note>
+            <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>
     </section>
     <section>

@@ -446,7 +446,7 @@ class Xetex (Manager) :
                 if useMapping :
                     params['^^mapping^^'] = ':mapping=' + useMapping
                 if useRenderingSystem :
-                    params['^^renderer^^'] = ':/' + useRenderingSystem
+                    params['^^renderer^^'] = '/' + useRenderingSystem
                 if useLanguage :
                     params['^^language^^'] = ':language=' + useLanguage
                 if fontPath :

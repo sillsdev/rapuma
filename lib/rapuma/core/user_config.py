@@ -95,7 +95,7 @@ class UserConfig (object) :
             pass
 
 
-    def registerProject (self, pid, pname, pmid, projHome) :
+    def registerProject (self, pid, pname, pmid, projHome, sources = None) :
         '''If it is not there, create an entry in the user's
         rapuma.conf located in the user's config folder.'''
 
@@ -109,6 +109,10 @@ class UserConfig (object) :
             self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
             self.userConfig['Projects'][pid]['projectPath']         = projHome
             self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
+            if sources :
+                for k, v in sources :
+                    self.userConfig['Projects'][pid][k] = v
+
             self.userConfig.write()
             return True
 

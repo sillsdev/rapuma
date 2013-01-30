@@ -423,7 +423,19 @@ def restoreArchive (pid, targetPath, sourcePath = None) :
     pc          = ProjConfig(local)
     log         = ProjLog(local, uc)
     aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
-    uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
+
+
+
+
+# FIXME: Need to add at least a placeholder for the component source path
+
+# This will be done by sending a dictionary with a list of sources by cType
+
+    sources = {}
+
+# Fill the dic here
+
+    uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome, sources)
 
     # Finish here
     terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
@@ -593,6 +605,7 @@ def makeProjectScripts (uc, pid) :
     this time (20121217). It assumes the cType is usfm which, at some point
     may not be the case.'''
 
+    aProject = initProject(pid)
     projHome            = uc.userConfig['Projects'][pid]['projectPath']
     local               = ProjLocal(rapumaHome, userHome, projHome)
     cType = 'usfm'
