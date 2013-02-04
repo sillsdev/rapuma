@@ -170,7 +170,7 @@ class Illustration (Manager) :
 
         for i in self.illustrationConfig['Illustrations'].keys() :
             if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
-                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
+                fileName = self.illustrationConfig['Illustrations'][i]['file']
                 if not self.installIllustrationFile (fileName, '', False) :
                     dieNow()
 
@@ -200,24 +200,34 @@ class Illustration (Manager) :
         # Check for a .piclist file
         piclistFile = self.project.components[cName].getCidPiclistPath(cid)
         thisRef = ''
+        obj = {}
         try :
             with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
                 writeObject.write('% Do not bother editing this file.\n\n')
                 for i in self.illustrationConfig['Illustrations'].keys() :
+                    obj = self.illustrationConfig['Illustrations'][i]
+                    thisRef = ''
+                    # Filter out if needed with this
+                    if not str2bool(obj['useThisIllustration']) :
+                        continue
+
                     if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
-                        obj = self.illustrationConfig['Illustrations'][i]
-                        if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) :
-                            thisRef = obj['chapter'] + ':' + obj['verse']
+                        if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
+                            and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaptionRef']) :
+                            if obj['location'] :
+                                thisRef = obj['location']
+                            else :
+                                thisRef = obj['chapter'] + ':' + obj['verse']
+                        # If we made it this far we can output the line
                         writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
-                            ' |' + obj['fileName'] + '|' + obj['span'] + '|' + obj['position'] + \
+                            ' |' + obj['file'] + '|' + obj['width'] + '|' + obj['position'] + \
                                 '|' + obj['scale'] + '|' + obj['copyright'] + '|' + obj['caption'] + '|' + thisRef + ' \n')
+            # Report to log
             self.project.log.writeToLog('ILUS-065', [cid])
         except Exception as e :
             # If this doesn't work, we should probably quite here
             dieNow('Error: Create piclist file failed with this error: ' + str(e))
-
-
 
 
 

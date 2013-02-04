@@ -377,6 +377,8 @@ def restoreArchive (pid, targetPath, sourcePath = None) :
     specified. Use targetPath to specify where the project will be restored.
     Rapuma will register the project there.'''
 
+    print 'ttttttttttttttttttttttttttttt'
+
     # Check to see if the user included the extention
     try :
         pid.split('.')[1] == 'rapuma'
@@ -423,6 +425,7 @@ def restoreArchive (pid, targetPath, sourcePath = None) :
     pc          = ProjConfig(local)
     log         = ProjLog(local, uc)
     aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
+#    import pdb; pdb.set_trace()
     uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
     # Finish here
@@ -1019,7 +1022,6 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-#projCommand.add_argument('-a', '--add', action='store_true', help='Add a new publishing project on this system.')
 projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-o', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
 projCommand.add_argument('-g', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')

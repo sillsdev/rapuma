@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil, codecs, unicodedata
+import os, shutil, codecs, unicodedata, re
 #from configobj import ConfigObj, Section
 from functools import partial
 
@@ -317,30 +317,38 @@ class Text (Manager) :
         '''Log the figure data in the illustration.conf. If nothing is returned, the
         existing \fig markers with their contents will be removed. That is the default
         behavior.'''
-        
+
+        # Description of figKeys (in order found in \fig)
+            # description = A brief description of what the illustration is about
+            # file = The file name of the illustration (only the file name)
+            # caption = The caption that will be used with the illustration (if turned on)
+            # width = The width or span the illustration will have (span/col)
+            # location = Location information that could be printed in the caption reference
+            # copyright = Copyright information for the illustration
+            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
+
         fig = figConts.group(1).split('|')
-        figKeys = ['description', 'fileName', 'span', 'refRange', 'copyright', 'caption', 'location']
+        figKeys = ['description', 'file', 'width', 'location', 'copyright', 'caption', 'reference']
         figDict = {}
 
         # Add all the figure info to the dictionary
         c = 0
-        for v in fig :
-            figDict[figKeys[c]] = v
+        for value in fig :
+            figDict[figKeys[c]] = value
             c +=1
 
         # Add additional information, get rid of stuff we don't need
-        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
-        figDict['useIllustration'] = True
+        figDict['illustrationID'] = figDict['file'].split('.')[0]
+        figDict['useThisIllustration'] = True
+        figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()
-        figDict['chapter'] = figDict['location'].split(':')[0]
-        figDict['verse'] = figDict['location'].split(':')[1]
+        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)\:[0-9]+', ur'\1', figDict['reference'].upper())
+        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+:([0-9]+)', ur'\1', figDict['reference'].upper())
         figDict['scale'] = '1.0'
-        if figDict['span'] == 'col' :
+        if figDict['width'] == 'col' :
             figDict['position'] = 'tl'
         else :
             figDict['position'] = 't'
-
-        del figDict['location']
 
         illustrationConfig = self.managers[self.cType + '_Illustration'].illustrationConfig
         if not testForSetting(illustrationConfig, 'Illustrations') :

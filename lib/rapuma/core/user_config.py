@@ -99,24 +99,22 @@ class UserConfig (object) :
         '''If it is not there, create an entry in the user's
         rapuma.conf located in the user's config folder.'''
 
-        if not self.isRegisteredProject(pid) :
+        buildConfSection(self.userConfig, 'Projects')
+        buildConfSection(self.userConfig['Projects'], pid)
 
-            buildConfSection(self.userConfig, 'Projects')
-            buildConfSection(self.userConfig['Projects'], pid)
+        # Now add the project data
+        self.userConfig['Projects'][pid]['projectName']         = pname
+        self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
+        self.userConfig['Projects'][pid]['projectPath']         = projHome
+        self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
+        # To hopefully prevent "Key not found" issues we will add a
+        # blanked out source path setting for each component type
+        # This may need to be changed at some point
+        for cType in self.userConfig['System']['recognizedComponentTypes'] :
+            self.userConfig['Projects'][pid][cType + '_sourcePath'] = None
 
-            # Now add the project data
-            self.userConfig['Projects'][pid]['projectName']         = pname
-            self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
-            self.userConfig['Projects'][pid]['projectPath']         = projHome
-            self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
-            # To hopefully prevent "Key not found" issues we will add a
-            # blanked out source path setting for each component type
-            # This may need to be changed at some point
-            for cType in self.userConfig['System']['recognizedComponentTypes'] :
-                self.userConfig['Projects'][pid][cType + '_sourcePath'] = None
-
-            self.userConfig.write()
-            return True
+        self.userConfig.write()
+        return True
 
 
     def unregisterProject (self, pid) :
