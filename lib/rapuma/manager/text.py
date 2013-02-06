@@ -342,8 +342,8 @@ class Text (Manager) :
         figDict['useThisIllustration'] = True
         figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()
-        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)\:[0-9]+', ur'\1', figDict['reference'].upper())
-        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+:([0-9]+)', ur'\1', figDict['reference'].upper())
+        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
+        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
         figDict['scale'] = '1.0'
         if figDict['width'] == 'col' :
             figDict['position'] = 'tl'

@@ -199,6 +199,7 @@ class Illustration (Manager) :
 
         # Check for a .piclist file
         piclistFile = self.project.components[cName].getCidPiclistPath(cid)
+        cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         obj = {}
         try :
@@ -218,7 +219,7 @@ class Illustration (Manager) :
                             if obj['location'] :
                                 thisRef = obj['location']
                             else :
-                                thisRef = obj['chapter'] + ':' + obj['verse']
+                                thisRef = obj['chapter'] + cvSep + obj['verse']
                         # If we made it this far we can output the line
                         writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
                             ' |' + obj['file'] + '|' + obj['width'] + '|' + obj['position'] + \
