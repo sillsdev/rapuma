@@ -182,7 +182,7 @@ class ProjLog (object) :
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
             'ILUS-020' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
-            'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder.'],
+            'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
             'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
             'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
             'ILUS-055' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] component folder.'],

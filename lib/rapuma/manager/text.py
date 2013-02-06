@@ -55,7 +55,7 @@ class Text (Manager) :
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         self.sourceEditor           = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
-        self.setSourceEditor(self.sourceEditor) 
+        self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Text'
@@ -290,7 +290,7 @@ class Text (Manager) :
                         # logUsfmFigure() logs the fig data and strips it from the working text
                         # Note: Using partial() to allows the passing of the cid param 
                         # into logUsfmFigure()
-                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logUsfmFigure, cid), contents)
+                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.components[cName].logFigure, cid), contents)
                         codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                         # Finish by copying the tempFile to the source
                         if not shutil.copy(tempFile, target) :
@@ -308,66 +308,6 @@ class Text (Manager) :
                 return True
         else :
             return True
-
-
-# FIXME: This needs to be moved to the USFM module
-
-
-    def logUsfmFigure (self, cid, figConts) :
-        '''Log the figure data in the illustration.conf. If nothing is returned, the
-        existing \fig markers with their contents will be removed. That is the default
-        behavior.'''
-
-        # Description of figKeys (in order found in \fig)
-            # description = A brief description of what the illustration is about
-            # file = The file name of the illustration (only the file name)
-            # caption = The caption that will be used with the illustration (if turned on)
-            # width = The width or span the illustration will have (span/col)
-            # location = Location information that could be printed in the caption reference
-            # copyright = Copyright information for the illustration
-            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
-
-        fig = figConts.group(1).split('|')
-        figKeys = ['description', 'file', 'width', 'location', 'copyright', 'caption', 'reference']
-        figDict = {}
-
-        # Add all the figure info to the dictionary
-        c = 0
-        for value in fig :
-            figDict[figKeys[c]] = value
-            c +=1
-
-        # Add additional information, get rid of stuff we don't need
-        figDict['illustrationID'] = figDict['file'].split('.')[0]
-        figDict['useThisIllustration'] = True
-        figDict['useThisCaptionRef'] = True
-        figDict['bid'] = cid.lower()
-        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
-        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
-        figDict['scale'] = '1.0'
-        if figDict['width'] == 'col' :
-            figDict['position'] = 'tl'
-        else :
-            figDict['position'] = 't'
-
-        illustrationConfig = self.managers[self.cType + '_Illustration'].illustrationConfig
-        if not testForSetting(illustrationConfig, 'Illustrations') :
-            buildConfSection(illustrationConfig, 'Illustrations')
-        # Put the dictionary info into the illustration conf file
-        if not testForSetting(illustrationConfig['Illustrations'], figDict['illustrationID'].upper()) :
-            buildConfSection(illustrationConfig['Illustrations'], figDict['illustrationID'].upper())
-        for k in figDict.keys() :
-            illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
-
-        # Write out the conf file to preserve the data found
-        writeConfFile(illustrationConfig)
-
-        # Just incase we need to keep the fig markers intact this will
-        # allow for that. However, default behavior is to strip them
-        # because usfmTex does not handle \fig markers. By returning
-        # them here, they will not be removed from the working text.
-        if str2bool(self.project.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
-            return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
     def usfmCopy (self, source, target, projSty = None) :

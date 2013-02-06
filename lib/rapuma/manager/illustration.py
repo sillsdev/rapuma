@@ -55,9 +55,19 @@ class Illustration (Manager) :
         self.Ctype                      = cType.capitalize()
         self.illustrationConfig         = ConfigObj(encoding='utf-8')
         self.project                    = project
+        self.projConfig                 = self.project.projConfig
+        self.userConfig                 = self.project.userConfig
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
-        self.illustrationsLib           = self.project.projConfig['Managers'][cType + '_Illustration']['illustrationsLib']
-        self.illustrationsLibFolder     = self.project.userConfig['Resources']['illustrations']
+        self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']
+        # If we have nothing in the project for pointing to an illustrations
+        # lib, put the default in here
+        if not self.userIllustrationsLibName :
+            self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
+            self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName'] = self.userIllustrationsLibName
+            writeConfFile(self.projConfig)
+
+        self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
+        self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
         self.sourcePath                 = getattr(self.project, self.cType + '_sourcePath')
         self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
@@ -73,11 +83,11 @@ class Illustration (Manager) :
 
         # Get persistant values from the config if there are any
         manager = self.cType + '_Illustration'
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.project.projConfig['Managers'][manager] :
-            self.project.projConfig['Managers'][manager] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
+        if newSectionSettings != self.projConfig['Managers'][manager] :
+            self.projConfig['Managers'][manager] = newSectionSettings
 
-        self.compSettings = self.project.projConfig['Managers'][manager]
+        self.compSettings = self.projConfig['Managers'][manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -135,11 +145,13 @@ class Illustration (Manager) :
         folder, and if found, copy it into the project. If a path is
         specified it will look there first and use that file.'''
 
+#        import pdb; pdb.set_trace()
+
         # Set some file names/paths
         places = []
         if path :
             places.append(os.path.join(path, fileName))
-        places.append(os.path.join(self.illustrationsLibFolder, self.illustrationsLib, fileName))
+        places.append(os.path.join(self.userIllustrationsLib, fileName))
         target = os.path.join(self.projIllustrationsFolder, fileName)
         # See if the file is there or not
         for p in places :
@@ -147,19 +159,19 @@ class Illustration (Manager) :
                 if force :
                     if not shutil.copy(p, target) :
                         self.project.log.writeToLog('ILUS-020', [fName(p),'True'])
-                    else :
-                        self.project.log.writeToLog('ILUS-040', [fName(p)])
+                        return True
                 else :
                     if not os.path.isfile(target) :
                         if not shutil.copy(p, target) :
                             self.project.log.writeToLog('ILUS-020', [fName(p),'False'])
-                        else :
-                            self.project.log.writeToLog('ILUS-040', [fName(p)])
+                            return True
                     else :
                         self.project.log.writeToLog('ILUS-030', [fName(p)])
                         return True
-                break
-        return True
+
+        # No joy, we're hosed
+        self.project.log.writeToLog('ILUS-040', [fName(p)])
+        dieNow()
 
 
     def getPics (self, cid) :
@@ -171,8 +183,8 @@ class Illustration (Manager) :
         for i in self.illustrationConfig['Illustrations'].keys() :
             if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
                 fileName = self.illustrationConfig['Illustrations'][i]['file']
-                if not self.installIllustrationFile (fileName, '', False) :
-                    dieNow()
+                if not os.path.isfile(os.path.join(self.projIllustrationsFolder, fileName)) :
+                    self.installIllustrationFile (fileName, '', False)
 
 
     def removeIllustrationFile (self, fileName) :
@@ -185,11 +197,11 @@ class Illustration (Manager) :
             self.project.log.writeToLog('ILUS-050', [fileName])
 
         # Check to see if this is a watermark file, if it is, remove config setting
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
-            org = self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
+        if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
+            org = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
             if org == fileName :
-                self.project.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
-                writeConfFile(self.project.projConfig)
+                self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
+                writeConfFile(self.projConfig)
 
 
     def createPiclistFile (self, cName, cid) :

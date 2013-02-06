@@ -16,7 +16,7 @@ Todo:
 <root>
     <setting>
         <name>Illustrations Library</name>
-        <key>illustrationsLib</key>
+        <key>userIllustrationsLibName</key>
         <description>The library of illustrations this component type will draw from. The library must be found in a folder of the same name installed in the user illustrations library.</description>
         <type>string</type>
         <value></value>

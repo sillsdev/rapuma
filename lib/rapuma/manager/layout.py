@@ -53,8 +53,6 @@ class Layout (Manager) :
         # File names
         self.layoutDefaultXmlConfFileName   = self.project.projectMediaIDCode + '_layout.xml'
         self.layoutDefaultConfFileName   = self.project.projectMediaIDCode + '_layout.conf'
-#        self.layoutDefaultXmlConfFileName   = 'layout_default.xml'
-#        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.manager + '.conf')
         self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.layoutDefaultConfFileName)
         # Set local var and override in project object (if needed)
         self.project.local.layoutConfFile   = self.layoutConfFile

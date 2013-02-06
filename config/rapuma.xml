@@ -143,6 +143,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Default Illustrations Library Name</name>
+            <key>defaultIllustrationsLibraryName</key>
+            <description>The name of the illustrations library that is most commonly used. This will go into all new projects but can be easily changed at the project level.</description>
+            <type>string</type>
+            <value>Knowles-600</value>
+        </setting>
     </section>
 </root>
 
