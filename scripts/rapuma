@@ -230,7 +230,7 @@ def makeExcludeFileList (aProject) :
     specific paths, etc.'''
 
     excludeFiles = []
-    excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex']
+    excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex', '.piclist', '.adj']
 
     # Work out from the component type what the settings file names are
     for cType in aProject.projConfig['CompTypes'].keys() :
