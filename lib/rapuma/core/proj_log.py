@@ -91,6 +91,8 @@ class ProjLog (object) :
             'COMP-200' : ['ERR', 'Process failed with error: [<<1>>]'],
             'COMP-210' : ['ERR', 'Component [<<1>>] not found.'],
             'COMP-220' : ['ERR', 'Component macro package [<<1>>] not supported.'],
+            'COMP-230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
+            'COMP-240' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
 
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],

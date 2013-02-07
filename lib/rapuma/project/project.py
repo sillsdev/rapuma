@@ -21,7 +21,7 @@
 # this process
 
 import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO
-#from configobj import ConfigObj, Section
+from configobj import ConfigObj, Section
 
 
 # Load the local classes

@@ -51,18 +51,18 @@ Todo:
             <value>Config,font.conf</value>
         </setting>
         <setting>
-            <name>Project Text Configuration File</name>
-            <key>textConfFile</key>
-            <description>The project text configuration file contains information for working with source and working text files.</description>
-            <type>list</type>
-            <value>Config,text.conf</value>
-        </setting>
-        <setting>
             <name>Project Illustrations Configuration File</name>
             <key>illustrationConfFile</key>
             <description>The project illustrations configuration file.</description>
             <type>list</type>
             <value>Config,illustration.conf</value>
+        </setting>
+        <setting>
+            <name>Project Components Adjustment Configuration File</name>
+            <key>adjustmentConfFile</key>
+            <description>The project components adjustment configuration file. This may be needed with certain TeX macro packages.</description>
+            <type>list</type>
+            <value>Config,adjustment.conf</value>
         </setting>
         <setting>
             <name>Project Log File</name>

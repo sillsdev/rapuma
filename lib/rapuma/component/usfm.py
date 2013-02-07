@@ -17,6 +17,7 @@
 # this process
 
 import os
+from configobj import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools import *
@@ -53,7 +54,7 @@ class Usfm (Component) :
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
-
+        self.adjustmentConfFile     = self.project.local.adjustmentConfFile
         # Get the comp settings
 #        self.project.addComponentType(self.Ctype)
         self.compSettings = self.project.projConfig['CompTypes'][self.Ctype]
@@ -76,6 +77,9 @@ class Usfm (Component) :
         # Pick up some init settings that come after the managers have been installed
         self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
         self.layoutConfig           = self.project.managers[self.cType + '_Layout'].layoutConfig
+        if not os.path.isfile(self.adjustmentConfFile) :
+            self.createProjAdjustmentConfFile(self.cType)
+        self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
 
         # Check if there is a font installed
         self.project.createManager(self.cType, 'font')
@@ -179,38 +183,42 @@ class Usfm (Component) :
                 # Add/manage the dependent files for this cid
                 if self.macroPackage == 'usfmTex' :
                     # Component adjustment file
-                    cidAdj = self.getCidAdjPath(cid)
                     if useManualAdjustments :
-                        if os.path.isfile(cidAdj + '.bak') :
-                            os.rename(cidAdj + '.bak', cidAdj)
-                        else :
-                            self.createAjustmentFile(cid)
-                    else :
-                        # If we are not using manual adjustments check to see if there is a
-                        # adjustment file and if there is, rename it so usfmTex (if we are
-                        # using it) will not pick it up
-                        if os.path.isfile(cidAdj) :
-                            os.rename(cidAdj, cidAdj + '.bak')
+                        cidAdjFile = self.getCidAdjPath(cid)
+                        if isOlder(cidAdjFile, self.adjustmentConfFile) :
+                            # Remake the piclist file
+                            if self.hasAdjustments(cType, cid) :
+                                self.createCompAdjustmentFile(cid)
+                            else :
+                                # If no adjustments, remove any exsiting file
+                                if os.path.isfile(cidAdjFile) :
+                                    os.remove(cidAdjFile)
                     # Component piclist file
                     self.project.buildComponentObject(self.cType, cidCName)
                     cidPiclist = self.project.components[cidCName].getCidPiclistPath(cid)
                     if useIllustrations :
-                        if not os.path.isfile(cidPiclist) :
-                            # First check if we have the illustrations we think we need
-                            # and get them if we do not.
+                        if self.project.managers[cType + '_Illustration'].hasIllustrations(cidCName) :
+                            if not os.path.isfile(cidPiclist) :
+                                # First check if we have the illustrations we think we need
+                                # and get them if we do not.
+                                self.project.managers[cType + '_Illustration'].getPics(cid)
+                                # Now make a fresh version of the piclist file
+                                self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                                self.project.log.writeToLog('ILUS-065', [cid])
+                            else :
+                                for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
+                                    if isOlder(cidPiclist, f) :
+                                        # Remake the piclist file
+                                        self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                                        self.project.log.writeToLog('ILUS-065', [cid])
+                            # Do a quick check to see if the illustration files for this book
+                            # are in the project. If it isn't, the run will be killed
                             self.project.managers[cType + '_Illustration'].getPics(cid)
-                            # Now make a fresh version of the piclist file
-                            self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                            self.project.log.writeToLog('ILUS-065', [cid])
                         else :
-                            for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
-                                if isOlder(cidPiclist, f) :
-                                    # Remake the piclist file
-                                    self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                                    self.project.log.writeToLog('ILUS-065', [cid])
-                        # Do a quick check to see if the illustration files for this book
-                        # are in the project. If it isn't, the run will be killed
-                        self.project.managers[cType + '_Illustration'].getPics(cid)
+                            # Do a little clean up and remove the auto-generated piclist file
+                            if os.path.isfile(cidPiclist) :
+                                os.remove(cidPiclist)
+                            
                     else :
                         # If we are not using illustrations then any existing piclist file will be removed
                         if os.path.isfile(cidPiclist) :
@@ -240,15 +248,77 @@ class Usfm (Component) :
         return True
 
 
-    def createAjustmentFile (self, cid) :
-        '''Create a manual adjustment file for this cid.'''
+    def hasAdjustments (self, cType, cid) :
+        '''Check for exsiting adjustment file. Return True if found.'''
 
-        # Check for a .adj file
-        adjFile = self.getCidAdjPath(cid)
-        if not os.path.isfile(adjFile) :
-            with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write('% Text adjustments file for: ' + cid + '\n\n')
-                writeObject.write('%' + cid.upper() + ' 1.1 +1 \n')
+        for c in self.adjustmentConfig.keys() :
+            try :
+                if c.lower().split(':')[0] != cType :
+                    pass
+                else :
+                    if c.lower().split(':')[1] == cid :
+                        return True
+            except Exception as e :
+                # If this doesn't work, we should probably quite here
+                dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+
+
+    def createCompAdjustmentFile (self, cid) :
+        '''Create an adjustment file for this cid. If entries exsist in
+        the adjustment.conf file.'''
+
+#        import pdb; pdb.set_trace()
+
+        cType = self.getComponentType(self.getRapumaCName(cid))
+        # Check for a master adj conf file
+        if os.path.isfile(self.adjustmentConfFile) :
+            adjFile = self.getCidAdjPath(cid)
+            for c in self.adjustmentConfig.keys() :
+                try :
+                    if c.lower().split(':')[0] != 'usfm' :
+                        pass
+                    comp = c.lower().split(':')[1]
+                except Exception as e :
+                    # If this doesn't work, we should probably quite here
+                    dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+                if  comp == cid and len(self.adjustmentConfig[c].keys()) > 0 :
+                    with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
+                        writeObject.write('% Auto-generated text adjustments file for: ' + cid + '\n')
+                        writeObject.write('% Do not edit. To make adjustments refer to: ' + fName(self.project.local.adjustmentConfFile) + ' \n\n')
+                        # Output like this: JAS 1.13 +1
+                        for k, v in self.adjustmentConfig[c].iteritems() :
+                            adj = v
+                            if int(v) > 0 : 
+                                adj = '+' + v
+                            writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
+
+                        self.project.log.writeToLog('COMP-230', [fName(adjFile)])
+        else :
+            self.createProjAdjustmentConfFile(cType)
+
+
+    def createProjAdjustmentConfFile (self, cType) :
+        '''Create a project master component adjustment file that cid piclist
+        files will be created from.'''
+
+        adjustmentConfFile = self.project.local.adjustmentConfFile
+        with codecs.open(adjustmentConfFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write('# This is the master manual adjustment file for the ' + cType.capitalize() + ' component type.\n')
+            writeObject.write('# Adjustments are layed out in a section/key/value arrangment as follows:\n')
+            writeObject.write('# \t[CTYPE:COMPONENT]\n')
+            writeObject.write('# \t\t3.4 = 1\n')
+            writeObject.write('# \t\t5.8 = 2\n')
+            writeObject.write('# \t\t8.3 = -1\n')
+            writeObject.write('# Whereas CTYPE is the component type code (upper case) and \n')
+            writeObject.write('# COMPONENT is the component the adjustments to follow are for.\n')
+            writeObject.write('# Key is the chapter and verse and value is the number of lines\n')
+            writeObject.write('# to be added or removed from a specified paragraph.\n\n\n')
+            for key in sorted(self.usfmCidInfo().iterkeys()) :
+                bookName = self.getUsfmName(key.lower())
+                writeObject.write('# ' + bookName.title() + '\n')
+                writeObject.write('[' + cType.upper() + ':' + key.upper() + ']\n\n')
+
+        self.project.log.writeToLog('COMP-240', [fName(adjustmentConfFile)])
 
 
 ###############################################################################
