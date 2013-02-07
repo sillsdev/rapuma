@@ -573,18 +573,11 @@ def templateToProject (uc, projHome, pid, tid, pname, source = None) :
     terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
-def synchronize_pull (pid) :
-    '''Synchronize the local project with the cloud by pulling new
-    data from the cloud into the local project.'''
+def sendReceive (pid) :
+    '''Synchronize the local project with the cloud by pulling and
+    pushing data to and from the cloud into the local project.'''
 
-    sys.exit('synchronize_pull() is not working yet!')
-
-
-def synchronize_push (pid) :
-    '''Synchronize project data stored in the cloud by pushing
-    the local data to the cloud.'''
-
-    sys.exit('synchronize_push() is not working yet!')
+    sys.exit('sendReceive() is not working yet!')
 
 
 def makeProjectScripts (uc, pid) :
@@ -602,8 +595,9 @@ def makeProjectScripts (uc, pid) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
                      'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'placeholdersOff', \
-                       'placeholdersOn', 'postprocess', 'render', 'restore', 'template', 'update', \
-                         'updateScripts', 'view', 'watermarkOff', 'watermarkOn'] :
+                       'placeholdersOn', 'postprocess', 'render', 'restore', 'sendReceive', \
+                          'template', 'update', 'updateScripts', 'view', 'watermarkOff', \
+                            'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -645,6 +639,8 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
             elif script == 'restore' :
                 writeObject.write('rapuma preserve ' + pid + ' -b -r \n\n')
+            elif script == 'sendReceive' :
+                writeObject.write('rapuma project ' + pid + ' -e \n\n')
             elif script == 'template' :
                 writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
             elif script == 'update' :
@@ -752,6 +748,8 @@ def userArguments (args) :
             # New (to current system) project from archive
             elif args['archive'] :
                 restoreArchive(pid, targetPath, sourcePath)
+            elif args['sendReceive'] :
+                sendReceive(pid)
             # Just creating from scratch
             else :
                 # Create a new project
@@ -1029,6 +1027,7 @@ projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/re
 projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
 projCommand.add_argument('-v', '--revert', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
 projCommand.add_argument('-c', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
+projCommand.add_argument('-e', '--sendReceive', action='store_true', help='[NOT WORKING!] Synchronize the local project with the cloud project by pushing and pulling cloud data.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -1147,8 +1146,6 @@ preserveCommand.add_argument('project_id', help=' A project ID for the project y
 preserveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
 preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
 preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
-preserveCommand.add_argument('-p', '--synchronize_pull', action='store_true', help='[NOT WORKING!] Synchronize the local project with the cloud project by pulling new data from the cloud.')
-preserveCommand.add_argument('-u', '--synchronize_push', action='store_true', help='[NOT WORKING!] Synchronize the cloud project with the local project by pushing new data to the cloud.')
 
 # Add Project edit subprocess arguments
 editCommand = subparsers.add_parser('edit', help='Commands for editing project files.')

@@ -120,6 +120,8 @@ class Project (object) :
             if not os.path.isdir(getattr(self.local, folder)) :
                 os.makedirs(getattr(self.local, folder))
 
+        # Go ahead and set this as the current project
+        self.setProjCurrent(self.projectIDCode)
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
@@ -183,6 +185,27 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def setProjCurrent (self, pid) :
+        '''Compare pid with the current recored pid e rapuma.conf. If it is
+        different change to the new pid. If not, leave it alone.'''
+
+        currentPid = self.userConfig['System']['current']
+        if pid != currentPid :
+            self.userConfig['System']['current'] = pid
+            writeConfFile(self.userConfig)
+
+
+    def setCidCurrent (self, cType, cName) :
+        '''Compare cName with the current recorded cName. If it is different
+        then change to the new cName. If not, leave it alone.'''
+
+        currentCName = self.projConfig['CompTypes'][cType.capitalize()]['current']
+        if cName != currentCName :
+            self.projConfig['CompTypes'][cType.capitalize()]['current'] = cName
+            writeConfFile(self.projConfig)
+
+
+
     def renderComponent (self, cType, cName, force = False) :
         '''Render a component which includes any subcomponents. If a cid
         is passed it will first try to find out the real component name,
@@ -225,6 +248,7 @@ class Project (object) :
         # If we made it this far, try rendering
         if validCName :
             self.createComponent(validCName).render(force)
+            self.setCidCurrent(cType, cName)
             return True
 
 
