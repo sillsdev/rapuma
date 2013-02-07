@@ -182,7 +182,7 @@ class Illustration (Manager) :
 
         for i in self.illustrationConfig['Illustrations'].keys() :
             if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
-                fileName = self.illustrationConfig['Illustrations'][i]['file']
+                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
                 if not os.path.isfile(os.path.join(self.projIllustrationsFolder, fileName)) :
                     self.installIllustrationFile (fileName, '', False)
 
