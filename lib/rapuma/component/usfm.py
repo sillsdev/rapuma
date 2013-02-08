@@ -251,18 +251,15 @@ class Usfm (Component) :
 
 
     def hasAdjustments (self, cType, cid) :
-        '''Check for exsiting adjustment file. Return True if found.'''
+        '''Check for exsiting adjustments under a book section in
+        the adjustment.conf file. Return True if found.'''
 
-        for c in self.adjustmentConfig.keys() :
-            try :
-                if c.lower().split(':')[0] != cType :
-                    pass
-                else :
-                    if c.lower().split(':')[1] == cid :
-                        return True
-            except Exception as e :
-                # If this doesn't work, we should probably quite here
-                dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+        try :
+            if self.adjustmentConfig[cType.upper() + ':' + cid.upper()].keys() :
+                return True
+        except Exception as e :
+            # If this doesn't work, we should probably quite here
+            dieNow('Error: Component ID [' + cType.upper() + ':' + cid.upper() + '] not found in adjustment file: ' + str(e) + '\n')
 
 
     def createCompAdjustmentFile (self, cid) :
