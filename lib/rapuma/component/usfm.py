@@ -185,7 +185,7 @@ class Usfm (Component) :
                     # Component adjustment file
                     if useManualAdjustments :
                         cidAdjFile = self.getCidAdjPath(cid)
-                        if isOlder(cidAdjFile, self.adjustmentConfFile) :
+                        if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
                             # Remake the piclist file
                             if self.hasAdjustments(cType, cid) :
                                 self.createCompAdjustmentFile(cid)
@@ -197,6 +197,7 @@ class Usfm (Component) :
                     self.project.buildComponentObject(self.cType, cidCName)
                     cidPiclist = self.project.components[cidCName].getCidPiclistPath(cid)
                     if useIllustrations :
+#                        import pdb; pdb.set_trace()
                         if self.project.managers[cType + '_Illustration'].hasIllustrations(cidCName) :
                             if not os.path.isfile(cidPiclist) :
                                 # First check if we have the illustrations we think we need
@@ -207,7 +208,8 @@ class Usfm (Component) :
                                 self.project.log.writeToLog('ILUS-065', [cid])
                             else :
                                 for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
-                                    if isOlder(cidPiclist, f) :
+                                    if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
+#                                    if isOlder(cidPiclist, f) :
                                         # Remake the piclist file
                                         self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
                                         self.project.log.writeToLog('ILUS-065', [cid])
@@ -341,7 +343,7 @@ class Usfm (Component) :
             # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
 
         fig = figConts.group(1).split('|')
-        figKeys = ['description', 'file', 'width', 'location', 'copyright', 'caption', 'reference']
+        figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
         figDict = {}
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
 
@@ -352,7 +354,7 @@ class Usfm (Component) :
             c +=1
 
         # Add additional information, get rid of stuff we don't need
-        figDict['illustrationID'] = figDict['file'].split('.')[0]
+        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
         figDict['useThisIllustration'] = True
         figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()

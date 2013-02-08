@@ -4,7 +4,7 @@ hg pull http://dennis_drescher:kokou@hg.palaso.org/pub-rpm
 
 echo Pulled updated version from the main repository
 
-hg update --repository /home/nancy/Projects/rapuma
+hg update --repository ~/Projects/rapuma
 
 echo Updated the local repository version of Rapuma
 

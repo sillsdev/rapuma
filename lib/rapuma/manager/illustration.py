@@ -211,7 +211,6 @@ class Illustration (Manager) :
         for i in self.illustrationConfig['Illustrations'].keys() :
             if self.illustrationConfig['Illustrations'][i]['bid'] == thisBid :
                 return True
-#        return True
 
 
     def createPiclistFile (self, cName, cid) :
@@ -224,14 +223,6 @@ class Illustration (Manager) :
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         obj = {}
-#        # Do a quick check to see if the component has any illustrations
-#        # associated with it. If not, it can stop now.
-#        print 'zzzzzzzzzzzzz', piclistFile
-#        if not self.hasIllustrations(cName) :
-#            # Do a little clean up and remove the auto-generated piclist file
-#            if os.path.isfile(piclistFile) :
-#                os.remove(piclistFile)
-#            return
 
         try :
             with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
@@ -253,7 +244,7 @@ class Illustration (Manager) :
                                 thisRef = obj['chapter'] + cvSep + obj['verse']
                         # If we made it this far we can output the line
                         writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
-                            ' |' + obj['file'] + '|' + obj['width'] + '|' + obj['position'] + \
+                            ' |' + obj['fileName'] + '|' + obj['width'] + '|' + obj['position'] + \
                                 '|' + obj['scale'] + '|' + obj['copyright'] + '|' + obj['caption'] + '|' + thisRef + ' \n')
             # Report to log
             self.project.log.writeToLog('ILUS-065', [cid])

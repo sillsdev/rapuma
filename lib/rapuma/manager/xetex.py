@@ -276,17 +276,21 @@ class Xetex (Manager) :
     def displayPdfOutput (self, pdfFile) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
+#        import pdb; pdb.set_trace()
         if self.usePdfViewer :
-
             # Build the viewer command
             self.pdfViewer.append(pdfFile)
             # Run the XeTeX and collect the return code for analysis
             try :
                 subprocess.Popen(self.pdfViewer)
+                # FIXME: We need to pop() the last item (pdfFile)
+                # to avoid it somehow being writen out to the proj.conf
+                self.pdfViewer.pop()
                 return True
             except Exception as e :
                 # If we don't succeed, we should probably quite here
                 self.project.log.writeToLog('XTEX-105', [str(e)])
+                
 
 
     def makeHyphenationTexFile (self) :
