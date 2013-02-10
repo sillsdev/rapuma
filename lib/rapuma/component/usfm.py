@@ -328,7 +328,7 @@ class Usfm (Component) :
         section = cType.upper() + ':' + cid.upper()
         if section not in self.adjustmentConfig.keys() :
             buildConfSection(self.adjustmentConfig, section)
-            self.adjustmentConfig[section]['1.1'] = 1
+#            self.adjustmentConfig[section]['#1.1'] = 1
             writeConfFile(self.adjustmentConfig)
 
         self.project.log.writeToLog('COMP-240', [fName(adjustmentConfFile)])
