@@ -184,12 +184,11 @@ class Usfm (Component) :
                 if self.macroPackage == 'usfmTex' :
                     # Component adjustment file
                     if useManualAdjustments :
+                        self.createProjAdjustmentConfFile(cType, cid)
                         cidAdjFile = self.getCidAdjPath(cid)
                         if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
-                            # Remake the piclist file
-                            if self.hasAdjustments(cType, cid) :
-                                self.createCompAdjustmentFile(cid)
-                            else :
+                            # Remake the adjustment file
+                            if not self.createCompAdjustmentFile(cid) :
                                 # If no adjustments, remove any exsiting file
                                 if os.path.isfile(cidAdjFile) :
                                     os.remove(cidAdjFile)
@@ -257,9 +256,8 @@ class Usfm (Component) :
         try :
             if self.adjustmentConfig[cType.upper() + ':' + cid.upper()].keys() :
                 return True
-        except Exception as e :
-            # If this doesn't work, we should probably quite here
-            dieNow('Error: Component ID [' + cType.upper() + ':' + cid.upper() + '] not found in adjustment file: ' + str(e) + '\n')
+        except  :
+            return False
 
 
     def createCompAdjustmentFile (self, cid) :
@@ -268,54 +266,70 @@ class Usfm (Component) :
 
 #        import pdb; pdb.set_trace()
 
+
+
         cType = self.getComponentType(self.getRapumaCName(cid))
-        # Check for a master adj conf file
-        if os.path.isfile(self.adjustmentConfFile) :
-            adjFile = self.getCidAdjPath(cid)
-            for c in self.adjustmentConfig.keys() :
-                try :
-                    if c.lower().split(':')[0] != 'usfm' :
-                        pass
-                    comp = c.lower().split(':')[1]
-                except Exception as e :
-                    # If this doesn't work, we should probably quite here
-                    dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
-                if  comp == cid and len(self.adjustmentConfig[c].keys()) > 0 :
-                    with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                        writeObject.write('% Auto-generated text adjustments file for: ' + cid + '\n')
-                        writeObject.write('% Do not edit. To make adjustments refer to: ' + fName(self.project.local.adjustmentConfFile) + ' \n\n')
-                        # Output like this: JAS 1.13 +1
-                        for k, v in self.adjustmentConfig[c].iteritems() :
-                            adj = v
-                            if int(v) > 0 : 
-                                adj = '+' + v
-                            writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
+        if self.hasAdjustments(cType, cid) :
+            # Check for a master adj conf file
+            if os.path.isfile(self.adjustmentConfFile) :
+                adjFile = self.getCidAdjPath(cid)
+                for c in self.adjustmentConfig.keys() :
+                    try :
+                        if c == 'GeneralSettings' :
+                            continue
+                        if c.lower().split(':')[0] != 'usfm' :
+                            continue
+                        comp = c.lower().split(':')[1]
+                    except Exception as e :
+                        # If this doesn't work, we should probably quite here
+                        dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+                    if  comp == cid and len(self.adjustmentConfig[c].keys()) > 0 :
+                        with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
+                            writeObject.write('% Auto-generated text adjustments file for: ' + cid + '\n')
+                            writeObject.write('% Do not edit. To make adjustments refer to: ' + fName(self.project.local.adjustmentConfFile) + ' \n\n')
+                            # Output like this: JAS 1.13 +1
+                            for k, v in self.adjustmentConfig[c].iteritems() :
+                                adj = v
+                                if int(v) > 0 : 
+                                    adj = '+' + str(v)
+                                writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
 
-                        self.project.log.writeToLog('COMP-230', [fName(adjFile)])
-        else :
-            self.createProjAdjustmentConfFile(cType)
+                            self.project.log.writeToLog('COMP-230', [fName(adjFile)])
+                return True
+            else :
+                self.createProjAdjustmentConfFile(cType, cid)
 
 
-    def createProjAdjustmentConfFile (self, cType) :
+    def createProjAdjustmentConfFile (self, cType, cid = None) :
         '''Create a project master component adjustment file that cid piclist
-        files will be created from.'''
+        files will be created from. This will run every time preprocess is
+        run but after the first time it will only add a section for the current
+        cid that is being run.'''
 
         adjustmentConfFile = self.project.local.adjustmentConfFile
-        with codecs.open(adjustmentConfFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write('# This is the master manual adjustment file for the ' + cType.capitalize() + ' component type.\n')
-            writeObject.write('# Adjustments are layed out in a section/key/value arrangment as follows:\n')
-            writeObject.write('# \t[CTYPE:COMPONENT]\n')
-            writeObject.write('# \t\t3.4 = 1\n')
-            writeObject.write('# \t\t5.8 = 2\n')
-            writeObject.write('# \t\t8.3 = -1\n')
-            writeObject.write('# Whereas CTYPE is the component type code (upper case) and \n')
-            writeObject.write('# COMPONENT is the component the adjustments to follow are for.\n')
-            writeObject.write('# Key is the chapter and verse and value is the number of lines\n')
-            writeObject.write('# to be added or removed from a specified paragraph.\n\n\n')
-            for key in sorted(self.usfmCidInfo().iterkeys()) :
-                bookName = self.getUsfmName(key.lower())
-                writeObject.write('# ' + bookName.title() + '\n')
-                writeObject.write('[' + cType.upper() + ':' + key.upper() + ']\n\n')
+        if not os.path.isfile(adjustmentConfFile) :
+            with codecs.open(adjustmentConfFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write('# This is the master manual adjustment file for the ' + cType.capitalize() + ' component type.\n')
+                writeObject.write('# Adjustments are layed out in a section/key/value arrangment as follows:\n')
+                writeObject.write('# \t[CTYPE:COMPONENT]\n')
+                writeObject.write('# \t\t3.4 = 1\n')
+                writeObject.write('# \t\t5.8 = 2\n')
+                writeObject.write('# \t\t8.3 = -1\n')
+                writeObject.write('# Whereas CTYPE is the component type code (upper case) and \n')
+                writeObject.write('# COMPONENT is the component the adjustments to follow are for.\n')
+                writeObject.write('# Key is the chapter and verse and value is the number of lines\n')
+                writeObject.write('# to be added or removed from a specified paragraph.\n\n\n')
+        # Now add a section for a cid if needed
+        if not cid :
+            return
+        if not self.adjustmentConfig :
+            self.adjustmentConfig = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
+
+        section = cType.upper() + ':' + cid.upper()
+        if section not in self.adjustmentConfig.keys() :
+            buildConfSection(self.adjustmentConfig, section)
+            self.adjustmentConfig[section]['1.1'] = 1
+            writeConfFile(self.adjustmentConfig)
 
         self.project.log.writeToLog('COMP-240', [fName(adjustmentConfFile)])
 
