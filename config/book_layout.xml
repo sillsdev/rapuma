@@ -594,25 +594,34 @@ Todo:
             <description>Set to true to use hyphenation in the project.  Hyphenation is important to any project but it needs to be setup before it can be used.  Therefore the default is false Default = False</description>
             <key>useHyphenation</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>TeX Hyphen Exceptions File</name>
+            <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
+            <key>hyphenExceptionsFile</key>
+            <type>string</type>
+            <value>hyphenation.tex</value>
+        </setting>
+        <setting>
+            <name>Input TeX Hyphen Exceptions File</name>
+            <description>Insert a setting that will input (connect) the project TeX hyphen exceptions file to the TeX renderer.</description>
+            <key>inputHyphenExceptionsFile</key>
+            <type>string</type>
+            <value>[Hyphenation:hyphenExceptionsFile]</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
+            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
         <setting>
             <name>Create New TeX Hyphen Language Name</name>
-            <description>Create a language name to be used for applying or creating hyphenation rules for text of a specific language. (\newlanguage). This setting is active when useHyphenation is set to True.</description>
-            <key>createHyphenLanguage</key>
+            <description>Create a language name to be used for applying or creating hyphenation rules for text of a specific language. (\newlanguage). This setting is active when useHyphenation is set to True and a value is entered in this field.</description>
+            <key>createAndSetHyphenLanguage</key>
             <type>string</type>
             <value></value>
             <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
-            <usfmTex>\newlanguage=\[v]</usfmTex>
-        </setting>
-        <setting>
-            <name>Set TeX Hyphen Language</name>
-            <description>Set a language name to be used for applying hyphenation rules to text from that same language. (\language). This setting is active when useHyphenation is set to True.</description>
-            <key>setHyphenLanguage</key>
-            <type>string</type>
-            <value></value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
-            <usfmTex>\language=\[v]</usfmTex>
+            <usfmTex>\def\newlanguage=\[v]\language=\[v]</usfmTex>
+            <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
             <name>TeX Hyphenation Penalty</name>
@@ -623,14 +632,12 @@ Todo:
             <boolDependFalse>Hyphenation:useHyphenation</boolDependFalse>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
-
-
         <setting>
             <name>TeX Hyphen Character</name>
             <description>Set the default TeX hyphen character to insert at hyphenation breaks (\defaulthyphenchar).  The normal is '‐' (U+2010) but it could be changed to use something like U+200B (ZWSP) Just change the character setting in the value. (Note that normally in the hyphenation word list source text you will find U+002D, a minus sign which also doubles for a hyphen character but it is not a proper one.) Remember to put a '"' (double quote) before the Unicode value, TeX needs this.   Default = "2010</description>
             <key>setHyphenCharacter</key>
             <type>string</type>
-            <value>"200B</value>
+            <value>"2010</value>
             <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\defaulthyphenchar=[v]</usfmTex>
         </setting>

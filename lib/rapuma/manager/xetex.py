@@ -67,7 +67,7 @@ class Xetex (Manager) :
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-        self.hyphenTexFile          = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphenTexFile']
+        self.hyphenExceptionsFile   = self.layoutConfig['Hyphenation']['hyphenExceptionsFile']
         self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
@@ -96,7 +96,7 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        self.useHyphenation         = str2bool(self.layoutConfig['Hyphenation']['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
 
         # Set file names with full path (this after booleans are set)
@@ -114,7 +114,7 @@ class Xetex (Manager) :
         else :
             self.custSty            = ''
         if self.useHyphenation :
-            self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenTexFile)
+            self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenExceptionsFile)
         else :
             self.hyphenTex          = ''
 
@@ -299,7 +299,7 @@ class Xetex (Manager) :
                 
 
 
-    def makeHyphenationTexFile (self) :
+    def makeHyphenExceptionFile (self) :
         '''Create a TeX hyphenation file.'''
 
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
@@ -307,6 +307,8 @@ class Xetex (Manager) :
             hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
             hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             hyphenTexObject.write('\hyphenation{\n\n}\n')
+            
+        return True
 
 
 ###############################################################################
@@ -408,18 +410,27 @@ class Xetex (Manager) :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
-                            if self.hasPlaceHolder(line) :
-                                (ht, hk) = self.getPlaceHolder(line)
+                            # Allow for multiple placeholders with "while"
+                            while self.hasPlaceHolder(line) :
+                                (holderType, holderKey) = self.getPlaceHolder(line)
                                 # Insert the raw value
-                                if ht == 'v' :
+                                if holderType == 'v' :
                                     line = self.insertValue(line, v)
+                                # Go get a value from another setting in the cfg
+                                elif holderType in cfg.keys() :
+                                    holderValue = cfg[holderType][holderKey]
+                                    line = self.insertValue(line, holderValue)
                                 # A value that needs a measurement unit attached
-                                elif ht == 'vm' :
+                                elif holderType == 'vm' :
                                     line = self.insertValue(line, self.addMeasureUnit(v))
                                 # A value that is a path
-                                elif ht == 'path' :
-                                    pth = getattr(self.project.local, hk)
+                                elif holderType == 'path' :
+                                    pth = getattr(self.project.local, holderKey)
                                     line = self.insertValue(line, pth)
+                                # A value that is a path separater character
+                                elif holderType == 'pathSep' :
+                                    pathSep = os.sep
+                                    line = self.insertValue(line, pathSep)
                         # Write this line out to the TeX settings file
                         writeObject.write(line + '\n')
 
@@ -603,8 +614,10 @@ class Xetex (Manager) :
                     # Custom sty file at the global level is optional as is hyphenation
                     if self.custSty :
                         cNameTexObject.write('\\stylesheet{' + self.custSty + '}\n')
-                    if self.checkDepHyphenFile() :
-                        cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
+# FIXME: We will not be putting a hyphen input into the component, instead that will be
+# added globally, one time only.
+#                    if self.checkDepHyphenFile() :
+#                        cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
                     # Create the cidTex list which is one or more cid components
                     for cid in self.projConfig['Components'][self.cName]['cidList'] :
                         cidCName = self.project.components[self.cName].getRapumaCName(cid)
@@ -643,11 +656,18 @@ class Xetex (Manager) :
 
         if self.useHyphenation :
             if not os.path.isfile(self.hyphenTex) :
-                self.makeHyphenationTexFile()
-                self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+                if self.makeHyphenExceptionFile() :
+                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+                    return True
+                else :
+                    # If we can't make it, we return False
+                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
+                    return False
+            else :
                 return True
         else :
-            return False
+            # If Hyphenation is turned off, we return True and don't need to worry about it.
+            return True
 
 
     def checkDepCidTex (self, cid) :

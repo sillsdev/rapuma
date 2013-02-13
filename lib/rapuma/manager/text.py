@@ -75,35 +75,6 @@ class Text (Manager) :
 ###############################################################################
 
 
-# REM: Changed getCompWorkingTextPath() -> usfm.getCidPath()
-#    def getCompWorkingTextPath (self, cid) :
-#        '''Return the full path of the cName working text file. This assumes
-#        the cName is valid.'''
-
-#        cName = getRapumaCName(cid)
-#        cType = self.project.projConfig['Components'][cName]['type']
-#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
-
-
-# REM: Changed getCompWorkingTextAdjPath() -> usfm.getCidAdjPath()
-#    def getCompWorkingTextAdjPath (self, cid) :
-#        '''Return the full path of the cName working text adjustments file. 
-#        This assumes the cName is valid.'''
-
-#        cName = getRapumaCName(cid)
-#        cType = self.project.projConfig['Components'][cName]['type']
-#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
-
-# REM: Changed getCompWorkingTextPiclistPath() -> usfm.getCidPiclistPath()
-#    def  (self, cid) :
-#        '''Return the full path of the cName working text illustrations file. 
-#        This assumes the cName is valid.'''
-
-#        cName = getRapumaCName(cid)
-#        cType = self.project.projConfig['Components'][cName]['type']
-#        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
-
-
     def setSourceEditor (self, editor) :
         '''Set the source editor for the cType. It assumes the editor is valid.
         This cannot fail.'''

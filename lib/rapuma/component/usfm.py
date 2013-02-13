@@ -156,6 +156,7 @@ class Usfm (Component) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
+        useHyphenation          = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['Hyphenation']['useHyphenation'])
         useWatermark            = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['usePageBorder'])
@@ -208,7 +209,6 @@ class Usfm (Component) :
                             else :
                                 for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
                                     if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
-#                                    if isOlder(cidPiclist, f) :
                                         # Remake the piclist file
                                         self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
                                         self.project.log.writeToLog('ILUS-065', [cid])
@@ -229,8 +229,9 @@ class Usfm (Component) :
                     self.project.log.writeToLog('COMP-220', [self.macroPackage])
 
 
-            # Run any hyphenation or word break routines
-
+            # Check to see if everything is good with hyphenation, die if it is not
+            if not self.project.managers[cType + '_Xetex'].checkDepHyphenFile() :
+                dieNow('Cannot continue. Hyphenation dependencies failed during check in usfm.py preProcessComponent()')
 
             # Be sure there is a watermark file listed in the conf and
             # installed if watermark is turned on (True). Fallback on the
