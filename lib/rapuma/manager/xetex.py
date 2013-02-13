@@ -218,7 +218,10 @@ class Xetex (Manager) :
 
 
     def makeTexSettingsDict (self, xmlFile) :
-        '''Create a dictionary object from a layout xml file.'''
+        '''Create a dictionary object from a layout xml file. This will track two kinds of
+        bool settings for both True and False so setting output can be determined depending
+        on what kind of bool it is. boolDependFalse is a very rare case though. Nonetheless
+        those are tracked for each setting regardless of their use.'''
 
         if  os.path.exists(xmlFile) :
             # Read in our XML file
@@ -226,21 +229,24 @@ class Xetex (Manager) :
             # Create an empty dictionary
             data = {}
             # Extract the section/key/value data
-            thisSection = ''; thisTex = ''; thisBoolDep = ''
+            thisSection = ''; thisTex = ''; thisBoolDepTrue = ''; thisBoolDepFalse = ''
             for event, elem in ElementTree.iterparse(xmlFile):
                 if elem.tag == 'setting' :
-                    if thisTex or thisBoolDep :
-                        data[thisSection] = {self.macroPackage : thisTex, 'boolDepend' : thisBoolDep}
+                    if thisTex or thisBoolDepTrue or thisBoolDepFalse:
+                        data[thisSection] = {self.macroPackage : thisTex, 'boolDependTrue' : thisBoolDepTrue, 'boolDependFalse' : thisBoolDepFalse}
                     thisSection = ''
                     thisTex = ''
-                    thisBoolDep = ''
+                    thisBoolDepTrue = ''
+                    thisBoolDepFalse = ''
                 if elem.tag == 'key' :
                     thisSection = elem.text
                 elif elem.tag == self.macroPackage :
                     thisTex = elem.text
-                elif elem.tag == 'boolDepend' :
-                    thisBoolDep = elem.text
-
+                elif elem.tag == 'boolDependTrue' :
+                    thisBoolDepTrue = elem.text
+                elif elem.tag == 'boolDependFalse' :
+                    thisBoolDepFalse = elem.text
+            # Ship it!
             return data
         else :
             raise IOError, "Can't open " + xmlFile
@@ -381,23 +387,26 @@ class Xetex (Manager) :
             writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
             writeObject.write(self.texFileHeader(fName(self.setFile)))
 
-    #        import pdb; pdb.set_trace()
-
             # Bring in the settings from the layoutConfig
             cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
             for section in cfg.keys() :
                 writeObject.write('\n% ' + section + '\n')
-
                 for k, v in cfg[section].iteritems() :
-                    # This will prevent output on empty fields
+                    # This will prevent output on empty fields, never output when there is no value
                     if not v :
                         continue
-
+                    # Gather each macro package line we need to output
                     if testForSetting(macTexVals, k, self.macroPackage) :
                         line = macTexVals[k][self.macroPackage]
-                        # If there is a boolDepend then we don't need to output
-                        if testForSetting(macTexVals, k, 'boolDepend') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDepend'])) :
+                        # Test for boolDepend True and False. If there is a boolDepend then we don't need to output just yet
+                        # These next two if/elif statements insure that output happens in the proper condition.
+                        # In some cases we want output only if a certain bool is set to true, but in a few rare cases
+                        # we want output when a certain bool is set to false. These will screen for both cases.
+                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDependTrue'])) :
                             continue
+                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDependFalse'])) == False :
+                            continue
+                        # After having made it past the previous two tests, we can ouput now.
                         else :
                             if self.hasPlaceHolder(line) :
                                 (ht, hk) = self.getPlaceHolder(line)
@@ -411,11 +420,10 @@ class Xetex (Manager) :
                                 elif ht == 'path' :
                                     pth = getattr(self.project.local, hk)
                                     line = self.insertValue(line, pth)
-
+                        # Write this line out to the TeX settings file
                         writeObject.write(line + '\n')
 
-            # Add all the font def commands
-
+            # Move on to Fonts, add all the font def commands
             def addParams (writeObject, pList, line) :
                 for k,v in pList.iteritems() :
                     if v :

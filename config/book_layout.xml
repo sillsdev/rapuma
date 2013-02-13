@@ -42,7 +42,7 @@ Todo:
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>ChapterVerse:omitVerseNumberOne</boolDepend>
+            <boolDependTrue>ChapterVerse:omitVerseNumberOne</boolDependTrue>
             <usfmTex>\OmitVerseNumberOnetrue</usfmTex>
         </setting>
         <setting>
@@ -51,7 +51,7 @@ Todo:
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>ChapterVerse:omitAllChapterNumbers</boolDepend>
+            <boolDependTrue>ChapterVerse:omitAllChapterNumbers</boolDependTrue>
             <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
         <setting>
@@ -129,7 +129,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Columns:columnGutterRule</boolDepend>
+            <boolDependTrue>Columns:columnGutterRule</boolDependTrue>
             <usfmTex>\ColumnGutterRuletrue</usfmTex>
         </setting>
         <setting>
@@ -163,7 +163,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <usfmTex>\ColumnGutterRuleSkip=[vm]</usfmTex>
-            <boolDepend>Columns:columnGutterRule</boolDepend>
+            <boolDependTrue>Columns:columnGutterRule</boolDependTrue>
         </setting>
     </section>
     <section>
@@ -197,7 +197,7 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDepend>Crossreferences:useAutoCallerCrossrefs</boolDepend>
+            <boolDependTrue>Crossreferences:useAutoCallerCrossrefs</boolDependTrue>
             <usfmTex>\AutoCallers{x}{[v]}</usfmTex>
         </setting>
         <setting>
@@ -206,7 +206,7 @@ Todo:
             <key>useNumericCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Crossreferences:useNumericCallersCrossrefs</boolDepend>
+            <boolDependTrue>Crossreferences:useNumericCallersCrossrefs</boolDependTrue>
             <usfmTex>\NumericCallers{x}</usfmTex>
         </setting>
         <setting>
@@ -215,7 +215,7 @@ Todo:
             <key>pageResetCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Crossreferences:pageResetCallersCrossrefs</boolDepend>
+            <boolDependTrue>Crossreferences:pageResetCallersCrossrefs</boolDependTrue>
             <usfmTex>\PageResetCallers{x}</usfmTex>
         </setting>
         <setting>
@@ -224,7 +224,7 @@ Todo:
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Crossreferences:omitCallerInCrossrefs</boolDepend>
+            <boolDependTrue>Crossreferences:omitCallerInCrossrefs</boolDependTrue>
             <usfmTex>\OmitCallerInNote{x}</usfmTex>
         </setting>
         <setting>
@@ -233,7 +233,7 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>Crossreferences:paragraphedCrossrefs</boolDepend>
+            <boolDependTrue>Crossreferences:paragraphedCrossrefs</boolDependTrue>
             <usfmTex>\ParagraphedNotes{x}</usfmTex>
         </setting>
     </section>
@@ -268,7 +268,7 @@ Todo:
             <key>autoCallerListFootnotes</key>
             <type>string</type>
             <value></value>
-            <boolDepend>Footnotes:useAutoCallerFootnotes</boolDepend>
+            <boolDependTrue>Footnotes:useAutoCallerFootnotes</boolDependTrue>
             <usfmTex>\AutoCallers{f}{[v]}</usfmTex>
         </setting>
         <setting>
@@ -277,7 +277,7 @@ Todo:
             <key>useNumericCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Footnotes:useNumericCallersFootnotes</boolDepend>
+            <boolDependTrue>Footnotes:useNumericCallersFootnotes</boolDependTrue>
             <usfmTex>\NumericCallers{f}</usfmTex>
         </setting>
         <setting>
@@ -286,7 +286,7 @@ Todo:
             <key>pageResetCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Footnotes:pageResetCallersFootnotes</boolDepend>
+            <boolDependTrue>Footnotes:pageResetCallersFootnotes</boolDependTrue>
             <usfmTex>\PageResetCallers{f}</usfmTex>
         </setting>
         <setting>
@@ -295,7 +295,7 @@ Todo:
             <key>omitCallerInFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Footnotes:omitCallerInFootnotes</boolDepend>
+            <boolDependTrue>Footnotes:omitCallerInFootnotes</boolDependTrue>
             <usfmTex>\OmitCallerInNote{f}</usfmTex>
         </setting>
         <setting>
@@ -304,7 +304,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>Footnotes:paragraphedFootnotes</boolDepend>
+            <boolDependTrue>Footnotes:paragraphedFootnotes</boolDependTrue>
             <usfmTex>\ParagraphedNotes{f}</usfmTex>
         </setting>
         <setting>
@@ -377,7 +377,7 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
-            <boolDepend>HeaderFooter:useRunningHeaderRule</boolDepend>
+            <boolDependTrue>HeaderFooter:useRunningHeaderRule</boolDependTrue>
             <usfmTex>\RHruleposition=[vm]</usfmTex>
         </setting>
         <setting>
@@ -490,7 +490,7 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>HeaderContent:showVerseReferences</boolDepend>
+            <boolDependTrue>HeaderContent:showVerseReferences</boolDependTrue>
             <usfmTex>\VerseRefstrue</usfmTex>
         </setting>
         <setting>
@@ -499,7 +499,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>HeaderContent:omitBookReference</boolDepend>
+            <boolDependTrue>HeaderContent:omitBookReference</boolDependTrue>
             <usfmTex>\OmitBookReftrue</usfmTex>
         </setting>
         <setting>
@@ -508,7 +508,7 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>HeaderContent:omitChapterNumberRH</boolDepend>
+            <boolDependTrue>HeaderContent:omitChapterNumberRH</boolDependTrue>
             <usfmTex>\OmitChapterNumberRHtrue</usfmTex>
             <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
@@ -590,43 +590,80 @@ Todo:
         <sectionID>Hyphenation</sectionID>
         <description>Some information for building TeX commands for building the hyphenation control file and other related files located in the project's hyphenation folder.  Some file names are stored in this section.  These are not used in the makefile process and can vary depending on how the process is run.  Note: remember to re-make/overwrite the current TeX Hyphenation file for the changes to take effect.</description>
         <setting>
-            <name>Use Hyphenation</name>
+            <name>USFM Use Hyphenation</name>
             <description>Set to true to use hyphenation in the project.  Hyphenation is important to any project but it needs to be setup before it can be used.  Therefore the default is false Default = False</description>
             <key>useHyphenation</key>
             <type>boolean</type>
             <value>True</value>
         </setting>
         <setting>
-            <name>USFM TeX Hyphen Character</name>
-            <description>Set the default hyphen character to insert at hyphenation breaks.  The normal is '‐' (U+2010) but it could be changed to use something like U+200B (ZWSP) Just change the character setting in the value. (Note that normally in the hyphenation word list source text you will find U+002D, a minus sign which also doubles for a hyphen character but it is not a proper one.) Remember to put a '"' (double quote) before the Unicode value, TeX needs this.   Default = "2010</description>
+            <name>Create New TeX Hyphen Language Name</name>
+            <description>Create a language name to be used for applying or creating hyphenation rules for text of a specific language. (\newlanguage). This setting is active when useHyphenation is set to True.</description>
+            <key>createHyphenLanguage</key>
+            <type>string</type>
+            <value></value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\newlanguage=\[v]</usfmTex>
+        </setting>
+        <setting>
+            <name>Set TeX Hyphen Language</name>
+            <description>Set a language name to be used for applying hyphenation rules to text from that same language. (\language). This setting is active when useHyphenation is set to True.</description>
+            <key>setHyphenLanguage</key>
+            <type>string</type>
+            <value></value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\language=\[v]</usfmTex>
+        </setting>
+        <setting>
+            <name>TeX Hyphenation Penalty</name>
+            <description>If useHyphenation is set to False, this will automatically set the TeX \hyphenpenalty setting to 10000 which effectivly turns off hyphenation. If useHyphenation is set to True, this setting should be overwritten with the necessary settings to make hyphenation work. (In theory.)</description>
+            <key>texHyphenOff</key>
+            <type>integer</type>
+            <value>10000</value>
+            <boolDependFalse>Hyphenation:useHyphenation</boolDependFalse>
+            <usfmTex>\hyphenpenalty=[v]</usfmTex>
+        </setting>
+
+
+        <setting>
+            <name>TeX Hyphen Character</name>
+            <description>Set the default TeX hyphen character to insert at hyphenation breaks (\defaulthyphenchar).  The normal is '‐' (U+2010) but it could be changed to use something like U+200B (ZWSP) Just change the character setting in the value. (Note that normally in the hyphenation word list source text you will find U+002D, a minus sign which also doubles for a hyphen character but it is not a proper one.) Remember to put a '"' (double quote) before the Unicode value, TeX needs this.   Default = "2010</description>
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"200B</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\defaulthyphenchar=[v]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Hyphenation Penalty</name>
-            <description>The bigger the number the harder it is to break a word in the hyphen list.   Default = 0</description>
+            <name>TeX Hyphenation Penalty</name>
+            <description>The bigger the number the harder it is to break a word in the hyphen list (\hyphenpenalty). This setting is active when useHyphenation is set to True.  Default = 0</description>
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>0</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Explicit Hyphenation Penalty</name>
-            <description>Like with \hyphenpenalty this will adjust TEX's ability to break explicit hyphens.  These are words that occure in the text which are spelled with a hyphen in them.  Normally, TeX will not touch these unless this is set to a low number like -50.   Default = 50</description>
+            <name>TeX Explicit Hyphenation Penalty</name>
+            <description>Like with \hyphenpenalty this will adjust TEX's ability to break explicit hyphens.  These are words that occure in the text which are spelled with a hyphen in them.  Normally, TeX will not touch these unless this is set to a low number like -50. This setting is active when useHyphenation is set to True. Default = 50</description>
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\exhyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Pretolerance</name>
-            <description>Pretolerance is an integer parameter that is used in TeX's line breaking algorithm as described below.  Use an integer from -1 to 10000.  If \pretolerance is -1, then TeX bypasses the first attempt at breaking a paragraph without hyphenation.  Normally it is always best to allow TeX to use its defaults first so the setting here is nothing by default.   Default = nothing</description>
+            <name>TeX Pretolerance</name>
+            <description>Pretolerance is an integer parameter that is used in TeX's line breaking algorithm as described below.  Use an integer from -1 to 10000.  If \pretolerance is -1, then TeX bypasses the first attempt at breaking a paragraph without hyphenation.  Normally it is always best to allow TeX to use its defaults first so the setting here is nothing by default. This setting is active when useHyphenation is set to True. Default = nothing</description>
             <key>pretolerance</key>
             <type>integer</type>
             <value></value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\pretolerance=[v]</usfmTex>
         </setting>
         <setting>
-            <name>USFM TeX Final Hyphen Break Rules</name>
-            <description>With some languages there may be consistent and easy places to break a word and these breaks can be applied automatically when the hyphen exceptions word list is being generated.  This is done by including a simple (or not so simple) regular expression (regex) in this field.  Example: (?u).(\u1064|\u1038)(?=\w.) This regex notation will be used in the hyphen word list generator to increase the number of breaks that can occur on words that qualify.</description>
+            <name>TeX Final Hyphen Break Rules</name>
+            <description>[Experimental]: With some languages there may be consistent and easy places to break a word and these breaks can be applied automatically when the hyphen exceptions word list is being generated.  This is done by including a simple (or not so simple) regular expression (regex) in this field.  Example: (?u).(\u1064|\u1038)(?=\w.) This regex notation will be used in the hyphen word list generator to increase the number of breaks that can occur on words that qualify.</description>
             <key>Hyphenbreakrules</key>
             <type>string</type>
             <value></value>
@@ -642,7 +679,7 @@ Todo:
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDepend>Illustrations:useFigurePlaceHolders</boolDepend>
+            <boolDependTrue>Illustrations:useFigurePlaceHolders</boolDependTrue>
             <usfmTex>\FigurePlaceholderstrue</usfmTex>
         </setting>
         <setting>
@@ -665,7 +702,7 @@ Todo:
             <key>useIllustrations</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDepend>Illustrations:useIllustrations</boolDepend>
+            <boolDependTrue>Illustrations:useIllustrations</boolDependTrue>
             <usfmTex>\PicPath={[path:projIllustrationsFolder]/}</usfmTex>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
@@ -791,7 +828,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <usfmTex>\CropMarkstrue</usfmTex>
-            <boolDepend>PageLayout:useCropmarks</boolDepend>
+            <boolDependTrue>PageLayout:useCropmarks</boolDependTrue>
         </setting>
         <setting>
             <name>USFM TeX Page Border</name>
@@ -800,7 +837,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <usfmTex></usfmTex>
-            <boolDepend></boolDepend>
+            <boolDependTrue></boolDependTrue>
         </setting>
         <setting>
             <name>USFM TeX Page Border File</name>
@@ -816,7 +853,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <usfmTex></usfmTex>
-            <boolDepend></boolDepend>
+            <boolDependTrue></boolDependTrue>
         </setting>
         <setting>
             <name>USFM TeX Page Border Scale</name>
