@@ -26,10 +26,11 @@ from configobj import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.core.pt_tools import *
+#from rapuma.core.pt_tools import *
 import rapuma.project.manager as mngr
-import rapuma.component.component as cmpt
+#import rapuma.component.component as cmpt
 import rapuma.core.user_config as userConfig
+from rapuma.component.usfm import PT_Tools
 from importlib import import_module
 
 ###############################################################################
@@ -42,7 +43,7 @@ class Project (object) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
-
+        self.pt_tools               = PT_Tools(self)
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
@@ -999,7 +1000,7 @@ class Project (object) :
         self.log.writeToLog('XPRT-040')
         for cid in self.components[cName].getSubcomponentList(cName) :
             cidCName = self.components[cName].getRapumaCName(cid)
-            ptName = formPTName(self, cName, cid)
+            ptName = self.pt_tools.formPTName(cName, cid)
             # Test, no name = no success
             if not ptName :
                 self.log.writeToLog('XPRT-010')

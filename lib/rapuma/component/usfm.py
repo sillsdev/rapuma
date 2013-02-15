@@ -16,12 +16,11 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, dircache
 from configobj import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools import *
-#from rapuma.core.pt_tools import * # (do not seem to need this)
 from rapuma.component.component import Component
 
 
@@ -704,7 +703,7 @@ class PT_Tools (Component) :
 
 
 
-    def formPTName (self, project, cName, cid) :
+    def formPTName (self, cName, cid) :
         '''Using valid PT project settings from the project configuration, form
         a valid PT file name that can be used for a number of operations.'''
 
@@ -712,12 +711,12 @@ class PT_Tools (Component) :
         #           number of use cases.
 
         try :
-            nameFormID = project.projConfig['Managers']['usfm_Text']['nameFormID']
-            postPart = project.projConfig['Managers']['usfm_Text']['postPart']
-            prePart = project.projConfig['Managers']['usfm_Text']['prePart']
+            nameFormID = self.project.projConfig['Managers']['usfm_Text']['nameFormID']
+            postPart = self.project.projConfig['Managers']['usfm_Text']['postPart']
+            prePart = self.project.projConfig['Managers']['usfm_Text']['prePart']
 
             if nameFormID == '41MAT' :
-                mainName = project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
+                mainName = self.project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
                 if prePart and prePart != 'None' :
                     thisFile = prePart + mainName + postPart
                 else :
@@ -727,13 +726,13 @@ class PT_Tools (Component) :
             return False
 
 
-    def formGenericName (self, project, cid) :
+    def formGenericName (self, cid) :
         '''Figure out the best way to form a valid file name given the
         source is not coming from a PT project.'''
 
     # FIXME: This will be expanded as we find more use cases
 
-        postPart = project.projConfig['Managers']['usfm_Text']['postPart']
+        postPart = self.project.projConfig['Managers']['usfm_Text']['postPart']
         return cid + '.' + postPart
 
 
@@ -849,7 +848,7 @@ class PT_Tools (Component) :
                     return xmlFileToDict(ssfFile)
 
 
-    def getSourceEditor (self, projConfig, sourcePath, cType) :
+    def getSourceEditor (self, sourcePath, cType) :
         '''Return the sourceEditor if it is set. If not try to
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
@@ -858,8 +857,8 @@ class PT_Tools (Component) :
         se = 'generic'
         Ctype = cType.capitalize()
         # FIXME: This may need expanding as more use cases arrise
-        if testForSetting(projConfig['CompTypes'][Ctype], 'sourceEditor') :
-            se = projConfig['CompTypes'][Ctype]['sourceEditor']
+        if testForSetting(self.project.projConfig['CompTypes'][Ctype], 'sourceEditor') :
+            se = self.project.projConfig['CompTypes'][Ctype]['sourceEditor']
         else :
             if self.findSsfFile(sourcePath) :
                 se = 'paratext'

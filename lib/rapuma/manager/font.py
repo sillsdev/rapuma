@@ -24,7 +24,7 @@ import os, shutil, zipfile
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.core.pt_tools import *
+from rapuma.component.usfm import PT_Tools
 from rapuma.project.manager import Manager
 
 
@@ -43,6 +43,7 @@ class Font (Manager) :
         super(Font, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.pt_tools               = PT_Tools(project)
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
@@ -74,7 +75,7 @@ class Font (Manager) :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
+        self.sourceEditor = self.pt_tools.getSourceEditor(self.sourcePath, self.cType)
 
         if not self.ptDefaultFont :
             ptSet = getPTSettings(self.sourcePath)

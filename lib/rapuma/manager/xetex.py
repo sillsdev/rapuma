@@ -23,14 +23,6 @@ import subprocess
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
-
-# FIXME: How do I access the PT_Tools class and make it
-# available to the rest of this module
-
-# For now we need to use this to get by
-from rapuma.core.pt_tools import *
-
-# What we want is something like this
 from rapuma.component.usfm import PT_Tools
 
 
@@ -47,10 +39,10 @@ class Xetex (Manager) :
         '''Do the primary initialization for this manager.'''
 
         super(Xetex, self).__init__(project, cfg)
-        self.pt_tools = PT_Tools(project)
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
+        self.pt_tools               = PT_Tools(project)
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg
@@ -322,6 +314,9 @@ class Xetex (Manager) :
 
 
 
+
+
+
 # FIXME: Start working on hyphenation here need to bring in the PT hyphatedWords.txt file
 # and process/harvest that to get our exceptions word list for TeX hyphenation.
 
@@ -407,6 +402,9 @@ class Xetex (Manager) :
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
 
         return True
+
+
+
 
 
 

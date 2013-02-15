@@ -25,8 +25,8 @@ from functools import partial
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.core.pt_tools import *
 from rapuma.project.manager import Manager
+from rapuma.component.usfm import PT_Tools
 import palaso.sfm as sfm
 from palaso.sfm import usfm, style, element, text
 
@@ -46,6 +46,7 @@ class Text (Manager) :
         super(Text, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.pt_tools               = PT_Tools(project)
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
@@ -54,7 +55,7 @@ class Text (Manager) :
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
-        self.sourceEditor           = getSourceEditor(self.project.projConfig, self.sourcePath, self.cType)
+        self.sourceEditor           = self.pt_tools.getSourceEditor(self.sourcePath, self.cType)
         self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
@@ -96,12 +97,12 @@ class Text (Manager) :
         # the defaults and hope for the best.
         if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = getPTSettings(self.sourcePath)
+            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
             if self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
-                newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet)
+                newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
             else :
                 newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, True)
 
@@ -156,9 +157,9 @@ class Text (Manager) :
         # Build the file name
         thisFile = ''
         if self.sourceEditor.lower() == 'paratext' :
-            thisFile = formPTName(self.project, cName, cid)
+            thisFile = self.pt_tools.formPTName(cName, cid)
         elif self.sourceEditor.lower() == 'generic' :
-            thisFile = formGenericName(self.project, cid)
+            thisFile = self.pt_tools.formGenericName(cid)
         else :
             self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
 
