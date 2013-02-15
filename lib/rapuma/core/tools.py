@@ -218,6 +218,19 @@ def isInZip(file, zip) :
             return False
 
 
+def rtnUnicodeValue(char) :
+    '''Return the Unicode value as a string.'''
+
+    n = ord(char)
+    # There are 2 ways to format the output:
+    #   value = "%04X"% n
+    #   value = "{:04X}".format(n)
+    # The second way is prefered because it conforms to Py 3.0
+
+    return "{:04X}".format(n)
+
+
+
 ###############################################################################
 ########################## Config/Dictionary routines #########################
 ###############################################################################

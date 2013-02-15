@@ -307,28 +307,11 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-105', [str(e)])
 
 
-
-
-
-
-
-
-
-
-
-
-# FIXME: Start working on hyphenation here need to bring in the PT hyphatedWords.txt file
-# and process/harvest that to get our exceptions word list for TeX hyphenation.
-
-
-
-
     def makeHyphenExceptionFile (self) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
 
-# FIXME: Leave this here until we know why it is being called more than once
-        print 'zzzzzzzzzzzzzzz Calling makeHyphenExceptionFile zzzzzzzzzzzzzzzzzzzzzz'
+#        import pdb; pdb.set_trace()
 
         # First we need some words to work with
         exceptions = []
@@ -376,40 +359,24 @@ class Xetex (Manager) :
     def makeLccodeFile (self) :
         '''Make a simple starter lccode file to be used with TeX hyphenation.'''
 
+        # Create the file and put default settings in it
         with codecs.open(self.lccodeTex, "w", encoding='utf_8') as lccodeObject :
             lccodeObject.write('% ' + fName(self.lccodeTex) + '\n')
             lccodeObject.write('% This is an auto-generated lccode rules file for this project.\n')
             lccodeObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
 
-# FIXME: Now we want to dig into the PT settings and pull out all the non-word-forming
-# characters from the punctuation inventory.
-
-# We need to turn Unicode character values into strings for use in TeX
-# There are a couple ways:
-
-# 1)        n = ord(<single utf-8 character>)
-
-# 2a)       value = "%04X"% n
-# 2b)       value = "{:04X}".format(n)
-
-# In both cases output can be changed to lower case by changing the "X" to "x"
-# Output from both should be something like "0e25" or "0E25" (x|X)
-# 2b is perfered as it conforms to Py 3.0
-
-
+            # Get the non-word-forming characters from the PT settings
+            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
+            chars = []
+            chars = ptSet['ScriptureText']['ValidPunctuation'].split()
+            for c in chars :
+                uv = rtnUnicodeValue(c.replace('_', ''))
+                lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
 
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
 
         return True
-
-
-
-
-
-
-
-
 
 
 
@@ -767,29 +734,21 @@ class Xetex (Manager) :
         True if the following are true: file exsists, or, no hyphenation is required.'''
 
         if self.useHyphenation :
-        
-# FIXME: Override here
-        
-            self.makeHyphenExceptionFile()
-
-
-# FIXME: Additional dependency to handle Hook this up to the hyphenation TeX file
-            self.makeLccodeFile()
-
+            if not os.path.isfile(self.hyphenTex) :
+                if self.makeHyphenExceptionFile() :
+                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+                else :
+                    # If we can't make it, we return False
+                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
+                    return False
+            if not os.path.isfile(self.lccodeFile) :
+                if self.makeLccodeFile() :
+                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeFile)])
+                else :
+                    # If we can't make it, we return False
+                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeFile)])
+                    return False
             return True
-
-# FIXME: Turn this back on when finished (and modify)
-
-#            if not os.path.isfile(self.hyphenTex) :
-#                if self.makeHyphenExceptionFile() :
-#                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
-#                    return True
-#                else :
-#                    # If we can't make it, we return False
-#                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
-#                    return False
-#            else :
-#                return True
         else :
             # If Hyphenation is turned off, we return True and don't need to worry about it.
             return True

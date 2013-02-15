@@ -227,10 +227,10 @@ class Usfm (Component) :
                 else :
                     self.project.log.writeToLog('COMP-220', [self.macroPackage])
 
-
+            # FIXME: This may not be needed here as it is called during the setup file checks
             # Check to see if everything is good with hyphenation, die if it is not
-            if not self.project.managers[cType + '_Xetex'].checkDepHyphenFile() :
-                dieNow('Cannot continue. Hyphenation dependencies failed during check in usfm.py preProcessComponent()')
+#            if not self.project.managers[cType + '_Xetex'].checkDepHyphenFile() :
+#                dieNow('Cannot continue. Hyphenation dependencies failed during check in usfm.py preProcessComponent()')
 
             # Be sure there is a watermark file listed in the conf and
             # installed if watermark is turned on (True). Fallback on the
