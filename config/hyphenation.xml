@@ -15,11 +15,25 @@ Todo:
 
 <root>
     <setting>
-        <name>Manager Type</name>
-        <key>type</key>
-        <description>The manager model (type) this manager is associated with.</description>
+        <name>ParaTExt Hyphenation File Name</name>
+        <key>ptHyphenFileName</key>
+        <description>The name of the ParaTExt source hyphenation file.</description>
         <type>string</type>
-        <value>hyphenation</value>
+        <value>hyphenatedWords.txt</value>
+    </setting>
+    <setting>
+        <name>ParaTExt Hyphenation Import RegEx</name>
+        <key>ptHyphenImportRegEx</key>
+        <description>Hyphenated words from ParaTExt need converting to be used in a TeX hyphen exceptions list. This is regex that will be used with the Python re.sub() function to preform that transformation. This regex is contined in a list of two elements. The list should include both the search and replace sides. These will be inserted into the operating code to do the transformation. In its most basic form it will replace "=" with "-" but you should be able to expand the regex to do much more. Defalt = ("\=", "-")</description>
+        <type>list</type>
+        <value>"\=", "-"</value>
+    </setting>
+    <setting>
+        <name>Advanced Hyphenation Import RegEx</name>
+        <key>advancedHyphenImportRegEx</key>
+        <description>Some times additional hyphenation processing is needed. This is a second optional field where you provide a second regex for special transformations. If left blank it will not be used.</description>
+        <type>list</type>
+        <value></value>
     </setting>
 </root>
 

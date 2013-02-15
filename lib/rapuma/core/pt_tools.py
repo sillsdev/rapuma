@@ -34,6 +34,66 @@ from palaso.sfm import usfm, style, element, text
 ###############################################################################
 
 
+
+
+# FIXME: Working here yet
+
+
+#def getPTHyphenWordList (rcfg, pcfg) :
+#    '''Return a list of hyphenated words found in a ParaTExt project
+#    hyphated words text file.'''
+
+#    # Note: it is a given that the cType is usfm
+#    projectIDCode = pcfg['ProjectInfo']['projectIDCode']
+#    usfm_sourcePath = rcfg['Projects'][projectIDCode]['usfm_sourcePath']
+#    ptHyphenFileName = pcfg['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+#    ptHyphenFile = os.path.join(usfm_sourcePath, ptHyphenFileName)
+#    wordList = []
+#    
+#    # Go get the file if it is to be had
+#    if os.path.isfile(ptHyphenFile) :
+#        with codecs.open(ptHyphenFile, "r", encoding='utf_8') as hyphenWords :
+#            for line in hyphenWords :
+#                # Using the logic that there can only be one word in a line
+#                # if the line contains more than one word it is not wanted
+#                word = line.split()
+#                if len(word) == 1 :
+#                    wordList.append(word[0])
+#        return wordList
+#    else :
+#        return False
+
+
+#def ptToTexHyphenWordList (pcfg, wordList) :
+#    '''Convert a hyphenated word list from PT to a TeX type word list.'''
+
+#    # The ptHyphenImportRegEx will come in in a 2 element list
+#    ptHyphenImportRegEx = pcfg['Managers']['usfm_Hyphenation']['ptHyphenImportRegEx']
+#    advancedHyphenImportRegEx = pcfg['Managers']['usfm_Hyphenation']['advancedHyphenImportRegEx']
+#    search = ptHyphenImportRegEx[0]
+#    replace = ptHyphenImportRegEx[1]
+#    texWordList = []
+#    for word in wordList :
+#        tWord = re.sub(ptHyphenImportRegEx[0], ptHyphenImportRegEx[1], word)
+#        # In case we want to do more...
+#        if advancedHyphenImportRegEx :
+#            tWord = re.sub(advancedHyphenImportRegEx[0], advancedHyphenImportRegEx[1], tWord)
+#        texWordList.append(tWord)
+
+#    if len(texWordList) > 0 :
+#        return texWordList
+#    else :
+#        return False
+#    
+
+
+
+
+
+
+
+
+
 def formPTName (project, cName, cid) :
     '''Using valid PT project settings from the project configuration, form
     a valid PT file name that can be used for a number of operations.'''

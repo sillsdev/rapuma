@@ -22,8 +22,16 @@ import subprocess
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.core.pt_tools import *
 from rapuma.project.manager import Manager
+
+# FIXME: How do I access the PT_Tools class and make it
+# available to the rest of this module
+
+# For now we need to use this to get by
+from rapuma.core.pt_tools import *
+
+# What we want is something like this
+from rapuma.component.usfm import PT_Tools
 
 
 ###############################################################################
@@ -39,6 +47,7 @@ class Xetex (Manager) :
         '''Do the primary initialization for this manager.'''
 
         super(Xetex, self).__init__(project, cfg)
+        self.pt_tools = PT_Tools(project)
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
@@ -59,6 +68,7 @@ class Xetex (Manager) :
         if self.cType + '_Font' not in self.managers :
             self.project.createManager(self.cType, 'font')
         self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
+        self.userConfig             = self.project.userConfig
         # Config Settings
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
@@ -67,7 +77,13 @@ class Xetex (Manager) :
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
         self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
         self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-        self.hyphenExceptionsFile   = self.layoutConfig['Hyphenation']['hyphenExceptionsFile']
+        # Note: a little slight-of-hand goes on here with the processLinePlaceholders()
+        # function when we send it the same value in two places. One acts as the line value
+        # with a placeholder while acts as the value itself, which happens to need converting.
+        lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
+        self.lccodeFile             = self.processLinePlaceholders(lccodeValue, lccodeValue)
+        hyphenExceptValue           = self.layoutConfig['Hyphenation']['hyphenExceptionsFile']
+        self.hyphenExceptionsFile   = self.processLinePlaceholders(hyphenExceptValue, hyphenExceptValue)
         self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
@@ -109,6 +125,7 @@ class Xetex (Manager) :
         self.setFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.setFileName)
         self.extFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.extFileName)
         self.globSty                = os.path.join(self.projStylesFolder, self.mainStyleFile)
+        self.lccodeTex              = os.path.join(self.local.projHyphenationFolder, self.lccodeFile)
         if os.path.isfile(os.path.join(self.projStylesFolder, self.customStyleFile)) :
             self.custSty            = os.path.join(self.projStylesFolder, self.customStyleFile)
         else :
@@ -296,19 +313,106 @@ class Xetex (Manager) :
             except Exception as e :
                 # If we don't succeed, we should probably quite here
                 self.project.log.writeToLog('XTEX-105', [str(e)])
-                
+
+
+
+
+
+
+
+
+
+# FIXME: Start working on hyphenation here need to bring in the PT hyphatedWords.txt file
+# and process/harvest that to get our exceptions word list for TeX hyphenation.
+
+
 
 
     def makeHyphenExceptionFile (self) :
-        '''Create a TeX hyphenation file.'''
+        '''Create a TeX hyphenation file. There must be a texWordList for this
+        to work properly.'''
+
+# FIXME: Leave this here until we know why it is being called more than once
+        print 'zzzzzzzzzzzzzzz Calling makeHyphenExceptionFile zzzzzzzzzzzzzzzzzzzzzz'
+
+        # First we need some words to work with
+        exceptions = []
+        fullList = []
+        sortedList = []
+        # Get the raw PT hyphated words (This is all we can support right now)
+        if self.sourceEditor == 'paratext' :
+            wordList = self.pt_tools.getPTHyphenWordList()
+            if not wordList :
+                self.project.log.writeToLog('XTEX-180')
+                dieNow()
+            # Pull out any harden non-breaking hyphated words
+            for word in wordList :
+                if u'\u2011' in word :
+                    exceptions.append(word)
+                    wordList.remove(word)
+            # Pick out any marked exceptions
+            for word in wordList : 
+                if word[:1] == '*' :
+                    exceptions.append(word[1:])
+                    wordList.remove(word)
+            # Now prepare the words for use with TeX
+            texWordList = self.pt_tools.ptToTexHyphenWordList(wordList)
+            if not texWordList :
+                self.project.log.writeToLog('XTEX-190')
+                dieNow()
+            # Add back in the excptions
+            fullList = texWordList + exceptions
+        # Now sort the resulting list
+        sortedList = sorted(fullList)
 
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
             hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
             hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
-            hyphenTexObject.write('\hyphenation{\n\n}\n')
-            
+            hyphenTexObject.write('\hyphenation{\n')
+            for word in sortedList :
+                hyphenTexObject.write(word + '\n')
+
+            hyphenTexObject.write('}\n')
+
         return True
+
+
+    def makeLccodeFile (self) :
+        '''Make a simple starter lccode file to be used with TeX hyphenation.'''
+
+        with codecs.open(self.lccodeTex, "w", encoding='utf_8') as lccodeObject :
+            lccodeObject.write('% ' + fName(self.lccodeTex) + '\n')
+            lccodeObject.write('% This is an auto-generated lccode rules file for this project.\n')
+            lccodeObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
+            lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
+
+# FIXME: Now we want to dig into the PT settings and pull out all the non-word-forming
+# characters from the punctuation inventory.
+
+# We need to turn Unicode character values into strings for use in TeX
+# There are a couple ways:
+
+# 1)        n = ord(<single utf-8 character>)
+
+# 2a)       value = "%04X"% n
+# 2b)       value = "{:04X}".format(n)
+
+# In both cases output can be changed to lower case by changing the "X" to "x"
+# Output from both should be something like "0e25" or "0E25" (x|X)
+# 2b is perfered as it conforms to Py 3.0
+
+
+
+            lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
+
+        return True
+
+
+
+
+
+
 
 
 ###############################################################################
@@ -358,6 +462,37 @@ class Xetex (Manager) :
         return True
 
 
+    def processLinePlaceholders (self, line, value) :
+        '''Search a line for a type of Rapuma placeholder and insert the value.'''
+
+        # Allow for multiple placeholders with "while"
+        while self.hasPlaceHolder(line) :
+            (holderType, holderKey) = self.getPlaceHolder(line)
+            # Insert the raw value
+            if holderType == 'v' :
+                line = self.insertValue(line, value)
+            # Go get a value from another setting in the self.layoutConfig
+            elif holderType in self.layoutConfig.keys() :
+                holderValue = self.layoutConfig[holderType][holderKey]
+                line = self.insertValue(line, holderValue)
+            # A value that needs a measurement unit attached
+            elif holderType == 'vm' :
+                line = self.insertValue(line, self.addMeasureUnit(value))
+            # A value that is a path
+            elif holderType == 'path' :
+                pth = getattr(self.project.local, holderKey)
+                line = self.insertValue(line, pth)
+            # A value that is a path separater character
+            elif holderType == 'pathSep' :
+                pathSep = os.sep
+                line = self.insertValue(line, pathSep)
+            # A value that contains a system delclaired value
+            elif holderType == 'self' :
+                line = self.insertValue(line, getattr(self, holderKey))
+
+        return line
+
+
     def makeDepSetFile (self) :
         '''Create the main settings file that XeTeX will use in cNameTex to render 
         cNamePdf. This is a required file so it will run every time. However, it
@@ -390,10 +525,9 @@ class Xetex (Manager) :
             writeObject.write(self.texFileHeader(fName(self.setFile)))
 
             # Bring in the settings from the layoutConfig
-            cfg = self.project.managers[self.cType + '_Layout'].layoutConfig
-            for section in cfg.keys() :
+            for section in self.layoutConfig.keys() :
                 writeObject.write('\n% ' + section + '\n')
-                for k, v in cfg[section].iteritems() :
+                for k, v in self.layoutConfig[section].iteritems() :
                     # This will prevent output on empty fields, never output when there is no value
                     if not v :
                         continue
@@ -404,33 +538,14 @@ class Xetex (Manager) :
                         # These next two if/elif statements insure that output happens in the proper condition.
                         # In some cases we want output only if a certain bool is set to true, but in a few rare cases
                         # we want output when a certain bool is set to false. These will screen for both cases.
-                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDependTrue'])) :
+                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependTrue'])) :
                             continue
-                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(cfg, macTexVals[k]['boolDependFalse'])) == False :
+                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
-                            # Allow for multiple placeholders with "while"
-                            while self.hasPlaceHolder(line) :
-                                (holderType, holderKey) = self.getPlaceHolder(line)
-                                # Insert the raw value
-                                if holderType == 'v' :
-                                    line = self.insertValue(line, v)
-                                # Go get a value from another setting in the cfg
-                                elif holderType in cfg.keys() :
-                                    holderValue = cfg[holderType][holderKey]
-                                    line = self.insertValue(line, holderValue)
-                                # A value that needs a measurement unit attached
-                                elif holderType == 'vm' :
-                                    line = self.insertValue(line, self.addMeasureUnit(v))
-                                # A value that is a path
-                                elif holderType == 'path' :
-                                    pth = getattr(self.project.local, holderKey)
-                                    line = self.insertValue(line, pth)
-                                # A value that is a path separater character
-                                elif holderType == 'pathSep' :
-                                    pathSep = os.sep
-                                    line = self.insertValue(line, pathSep)
+                            line = self.processLinePlaceholders(line, v)
+
                         # Write this line out to the TeX settings file
                         writeObject.write(line + '\n')
 
@@ -531,7 +646,6 @@ class Xetex (Manager) :
             writeObject.close()
             self.project.log.writeToLog('XTEX-040', [fName(self.setFile)])
             return True
-
 
 
     def makeDepSetExtFile (self) :
@@ -655,16 +769,29 @@ class Xetex (Manager) :
         True if the following are true: file exsists, or, no hyphenation is required.'''
 
         if self.useHyphenation :
-            if not os.path.isfile(self.hyphenTex) :
-                if self.makeHyphenExceptionFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
-                    return True
-                else :
-                    # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
-                    return False
-            else :
-                return True
+        
+# FIXME: Override here
+        
+            self.makeHyphenExceptionFile()
+
+
+# FIXME: Additional dependency to handle Hook this up to the hyphenation TeX file
+            self.makeLccodeFile()
+
+            return True
+
+# FIXME: Turn this back on when finished (and modify)
+
+#            if not os.path.isfile(self.hyphenTex) :
+#                if self.makeHyphenExceptionFile() :
+#                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+#                    return True
+#                else :
+#                    # If we can't make it, we return False
+#                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
+#                    return False
+#            else :
+#                return True
         else :
             # If Hyphenation is turned off, we return True and don't need to worry about it.
             return True

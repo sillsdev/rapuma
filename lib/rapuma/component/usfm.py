@@ -643,13 +643,65 @@ class Usfm (Component) :
 ###############################################################################
 ###############################################################################
 
-# FIXME: Right now the following code is not hooked up and everything refers
-# to the function module, pt_tools.py. How do we wire this class up to work
-# instead of that module?
-
-
 class PT_Tools (Component) :
     '''This class contains functions for working with USFM data in ParaTExt.'''
+
+    def __init__(self, project) :
+
+        self.project = project
+
+
+
+    def getPTHyphenWordList (self) :
+        '''Return a list of hyphenated words found in a ParaTExt project
+        hyphated words text file.'''
+
+        # Note: it is a given that the cType is usfm
+        projectIDCode = self.project.projConfig['ProjectInfo']['projectIDCode']
+        usfm_sourcePath = self.project.userConfig['Projects'][projectIDCode]['usfm_sourcePath']
+        ptHyphenFileName = self.project.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        ptHyphenFile = os.path.join(usfm_sourcePath, ptHyphenFileName)
+        wordList = []
+        
+        # Go get the file if it is to be had
+        if os.path.isfile(ptHyphenFile) :
+            with codecs.open(ptHyphenFile, "r", encoding='utf_8') as hyphenWords :
+                for line in hyphenWords :
+                    # Using the logic that there can only be one word in a line
+                    # if the line contains more than one word it is not wanted
+                    word = line.split()
+                    if len(word) == 1 :
+                        wordList.append(word[0])
+            return wordList
+        else :
+            return False
+
+
+    def ptToTexHyphenWordList (self, wordList) :
+        '''Convert a hyphenated word list from PT to a TeX type word list.'''
+
+        # The ptHyphenImportRegEx will come in in a 2 element list
+        ptHyphenImportRegEx = self.project.projConfig['Managers']['usfm_Hyphenation']['ptHyphenImportRegEx']
+        advancedHyphenImportRegEx = self.project.projConfig['Managers']['usfm_Hyphenation']['advancedHyphenImportRegEx']
+        search = ptHyphenImportRegEx[0]
+        replace = ptHyphenImportRegEx[1]
+        texWordList = []
+        for word in wordList :
+            tWord = re.sub(ptHyphenImportRegEx[0], ptHyphenImportRegEx[1], word)
+            # In case we want to do more...
+            if advancedHyphenImportRegEx :
+                tWord = re.sub(advancedHyphenImportRegEx[0], advancedHyphenImportRegEx[1], tWord)
+            texWordList.append(tWord)
+
+        if len(texWordList) > 0 :
+            return texWordList
+        else :
+            return False
+
+
+
+
+
 
 
     def formPTName (self, project, cName, cid) :

@@ -667,6 +667,9 @@ class Project (object) :
     def lockUnlock (self, cName, lock = True, force = False) :
         '''Lock or unlock to enable or disable actions to be taken on a component.'''
 
+        # Create the component object now
+        self.createComponent(cName)
+
         # First be sure this is a valid component
         if not self.components[cName] :
             self.log.writeToLog('LOCK-010', [cName])
