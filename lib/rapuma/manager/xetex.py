@@ -741,12 +741,12 @@ class Xetex (Manager) :
                     # If we can't make it, we return False
                     self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
                     return False
-            if not os.path.isfile(self.lccodeFile) :
+            if not os.path.isfile(self.lccodeTex) :
                 if self.makeLccodeFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeFile)])
+                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTex)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeFile)])
+                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeTex)])
                     return False
             return True
         else :

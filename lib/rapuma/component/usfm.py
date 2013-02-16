@@ -77,7 +77,9 @@ class Usfm (Component) :
         self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
         self.layoutConfig           = self.project.managers[self.cType + '_Layout'].layoutConfig
         if not os.path.isfile(self.adjustmentConfFile) :
-            self.createProjAdjustmentConfFile(self.cType)
+            if self.createProjAdjustmentConfFile(self.cType) :
+                self.project.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
+        # Now get the adj config
         self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
 
         # Check if there is a font installed
@@ -184,10 +186,11 @@ class Usfm (Component) :
                 if self.macroPackage == 'usfmTex' :
                     # Component adjustment file
                     if useManualAdjustments :
-                        self.createProjAdjustmentConfFile(cType, cid)
+# FIXME: Making the adj conf file is probably not needed here, that should have been done already
+#                        self.createProjAdjustmentConfFile(cType, cid)
                         cidAdjFile = self.getCidAdjPath(cid)
                         if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
-                            # Remake the adjustment file
+                            # Remake the adjustment file (if needed)
                             if not self.createCompAdjustmentFile(cid) :
                                 # If no adjustments, remove any exsiting file
                                 if os.path.isfile(cidAdjFile) :
@@ -266,8 +269,6 @@ class Usfm (Component) :
 
 #        import pdb; pdb.set_trace()
 
-
-
         cType = self.getComponentType(self.getRapumaCName(cid))
         if self.hasAdjustments(cType, cid) :
             # Check for a master adj conf file
@@ -296,8 +297,6 @@ class Usfm (Component) :
 
                             self.project.log.writeToLog('COMP-230', [fName(adjFile)])
                 return True
-            else :
-                self.createProjAdjustmentConfFile(cType, cid)
 
 
     def createProjAdjustmentConfFile (self, cType, cid = None) :
@@ -328,10 +327,11 @@ class Usfm (Component) :
         section = cType.upper() + ':' + cid.upper()
         if section not in self.adjustmentConfig.keys() :
             buildConfSection(self.adjustmentConfig, section)
+# FIXME: It would be nice if we could write out a commented config line as an example
 #            self.adjustmentConfig[section]['#1.1'] = 1
             writeConfFile(self.adjustmentConfig)
 
-        self.project.log.writeToLog('COMP-240', [fName(adjustmentConfFile)])
+        return True
 
 
 ###############################################################################

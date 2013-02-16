@@ -79,16 +79,17 @@ class Layout (Manager) :
             orgFileName                 = orgLayoutConfig.filename
             layoutDefault               = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
             layoutDefault.merge(orgLayoutConfig)
-            # Only write out if there are differences detected
-            if orgLayoutConfig == layoutDefault :
+            # A key comparison should be enough to tell if it is the same or not
+            if orgLayoutConfig.keys() == layoutDefault.keys() :
                 self.layoutConfig = orgLayoutConfig
                 self.layoutConfig.filename = orgFileName
-                self.project.log.writeToLog('LYOT-030')
+# Probably not needed to report as it should be normal
+#                self.project.log.writeToLog('LYOT-020')
             else :
                 self.layoutConfig = layoutDefault
                 self.layoutConfig.filename = orgFileName
                 writeConfFile(self.layoutConfig)
-                self.project.log.writeToLog('LYOT-020')
+                self.project.log.writeToLog('LYOT-030')
 
 
 ###############################################################################
