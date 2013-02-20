@@ -299,6 +299,11 @@ class ProjLog (object) :
             'EDIT-030' : ['ERR', 'No files found to edit with the commands supplied.'],
             'EDIT-040' : ['MSG', 'Component files for [<<1>>] have been opened in your file editor.'],
 
+            'USFM-000' : ['MSG', 'Messages for the USFM module.'],
+            'USFM-005' : ['MSG', 'Unassigned error message ID.'],
+            'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
+
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],
             'TEST-010' : ['MSG', 'TEST-010 - Unassigned error message ID.'],

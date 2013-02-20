@@ -43,7 +43,7 @@ class Project (object) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
-        self.pt_tools               = PT_Tools(self)
+#        self.pt_tools               = PT_Tools(self)
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
@@ -123,6 +123,9 @@ class Project (object) :
 
         # Go ahead and set this as the current project
         self.setProjCurrent(self.projectIDCode)
+
+        # Add modules because we have all the "self" needed at this point
+        self.pt_tools = PT_Tools(self)
 
 ###############################################################################
 ############################ Manager Level Functions ##########################

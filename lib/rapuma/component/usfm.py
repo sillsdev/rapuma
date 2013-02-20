@@ -630,12 +630,6 @@ class Usfm (Component) :
                }
 
 
-
-
-
-
-
-
 ###############################################################################
 ###############################################################################
 ########################## ParaTExt Class Functions ###########################
@@ -647,8 +641,37 @@ class PT_Tools (Component) :
 
     def __init__(self, project) :
 
-        self.project = project
+        self.cType                  = 'usfm'
+        self.project                = project
+        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
 
+
+    def getNWFChars (self) :
+        '''Return a list of non-word-forming characters from the PT settings
+        field [ValidPunctuation] in the translation project.'''
+
+        ptSet = self.getPTSettings(self.sourcePath)
+        chars = []
+        for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
+            # Leave it a lone if it is a single character
+            if len(c) == 1 :
+                chars.append(c)
+            # A pair is what we expect
+            elif len(c) == 2 :
+                # We expect "_" to be part of the pair
+                try :
+                    if c.find('_') > 0 :
+                        chars.append(c.replace('_', ''))
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.project.log.writeToLog('USFM-010', [str(e)])
+                    dieNow()
+            else :
+                # Something really strange happened
+                self.project.log.writeToLog('USFM-020', [c])
+                dieNow()
+
+        return chars
 
 
     def getPTHyphenWordList (self) :
@@ -696,11 +719,6 @@ class PT_Tools (Component) :
             return texWordList
         else :
             return False
-
-
-
-
-
 
 
     def formPTName (self, cName, cid) :

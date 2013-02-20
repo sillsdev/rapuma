@@ -597,13 +597,6 @@ Todo:
             <value>False</value>
         </setting>
         <setting>
-            <name>TeX Hyphen Exceptions File</name>
-            <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
-            <key>hyphenExceptionsFile</key>
-            <type>string</type>
-            <value>[self:cType]_hyphenation.tex</value>
-        </setting>
-        <setting>
             <name>TeX lccode File Name</name>
             <key>lccodeFile</key>
             <description>The name of the file that TeX will call on to load lccode rules for hyphenation.</description>
@@ -611,24 +604,11 @@ Todo:
             <value>[self:cType]_lccode.tex</value>
         </setting>
         <setting>
-            <name>Input TeX Hyphen Exceptions File</name>
-            <description>Insert a setting that will input (connect) the project TeX hyphen exceptions file to the TeX renderer.</description>
-            <key>inputHyphenExceptionsFile</key>
+            <name>TeX Hyphen Exceptions File</name>
+            <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
+            <key>hyphenExceptionsFile</key>
             <type>string</type>
-            <value>[Hyphenation:hyphenExceptionsFile]</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
-            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
-            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
-        </setting>
-        <setting>
-            <name>Input TeX lccode File</name>
-            <description>Insert a setting that will input (connect) the project TeX lccode file to the TeX renderer.</description>
-            <key>inputLccodeFile</key>
-            <type>string</type>
-            <value>[Hyphenation:lccodeFile]</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
-            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
-            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
+            <value>[self:cType]_hyphenation.tex</value>
         </setting>
         <setting>
             <name>Create New TeX Hyphen Language Name</name>
@@ -686,11 +666,31 @@ Todo:
             <usfmTex>\pretolerance=[v]</usfmTex>
         </setting>
         <setting>
-            <name>TeX Final Hyphen Break Rules</name>
-            <description>[Experimental]: With some languages there may be consistent and easy places to break a word and these breaks can be applied automatically when the hyphen exceptions word list is being generated.  This is done by including a simple (or not so simple) regular expression (regex) in this field.  Example: (?u).(\u1064|\u1038)(?=\w.) This regex notation will be used in the hyphen word list generator to increase the number of breaks that can occur on words that qualify.</description>
-            <key>Hyphenbreakrules</key>
+            <name>TeX Inputs Order</name>
+            <description>With some TeX input files it matters greatly what the order is in wich they are inputed. This field specifies this order.</description>
+            <key>inputsOrder</key>
+            <type>list</type>
+            <value>inputLccodeFile,inputHyphenExceptionsFile</value>
+        </setting>
+        <setting>
+            <name>Input TeX lccode File</name>
+            <description>Insert a setting that will input (connect) the project TeX lccode file to the TeX renderer.</description>
+            <key>inputLccodeFile</key>
             <type>string</type>
-            <value></value>
+            <value>[Hyphenation:lccodeFile]</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
+            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
+        </setting>
+        <setting>
+            <name>Input TeX Hyphen Exceptions File</name>
+            <description>Insert a setting that will input (connect) the project TeX hyphen exceptions file to the TeX renderer.</description>
+            <key>inputHyphenExceptionsFile</key>
+            <type>string</type>
+            <value>[Hyphenation:hyphenExceptionsFile]</value>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
+            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
     </section>
     <section>

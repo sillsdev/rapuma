@@ -307,6 +307,22 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-105', [str(e)])
 
 
+
+
+
+
+
+
+
+
+# FIXME: Need to make sure rules apply all the time
+
+#   1) abc-efg      = abc-efg   / exsiting hyphenated words pass through
+#   2) *abc-efg     = abc|=|efg / hyphated words demarked by * are hardened (002D = 2011)
+#   3) abc=efg      = abc-efg   / soft hyphens are added to a word
+#   4) abc-efg=hij  = ()        / mixed syntax is illegal
+
+
     def makeHyphenExceptionFile (self) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
@@ -316,25 +332,39 @@ class Xetex (Manager) :
         # First we need some words to work with
         exceptions = []
         fullList = []
+        wordList = ()
         sortedList = []
         # Get the raw PT hyphated words (This is all we can support right now)
         if self.sourceEditor == 'paratext' :
-            wordList = self.pt_tools.getPTHyphenWordList()
+            wordList = tuple(self.pt_tools.getPTHyphenWordList())
+            print type(wordList)
+            fullList = list(wordList)
+            print wordList, fullList
             if not wordList :
                 self.project.log.writeToLog('XTEX-180')
                 dieNow()
             # Pull out any harden non-breaking hyphated words
+#            import pdb; pdb.set_trace()
             for word in wordList :
+                print word
                 if u'\u2011' in word :
+                    print 'Hard Word: ', word
                     exceptions.append(word)
-                    wordList.remove(word)
-            # Pick out any marked exceptions
-            for word in wordList : 
-                if word[:1] == '*' :
-                    exceptions.append(word[1:])
-                    wordList.remove(word)
+                    fullList.remove(word)
+                # Pick out any marked exceptions
+                # Word needs to be hardened (002D = 2011)
+                elif word[:1] == '*' :
+                    print 'Word to harden: ', word
+                    hWord = word.replace(u'\u002D', u'\u2011')
+                    exceptions.append(hWord[1:])
+                    print 'Removing: ', word
+                    fullList.remove(word)
+                    print wordList
+
+            print exceptions, fullList
+
             # Now prepare the words for use with TeX
-            texWordList = self.pt_tools.ptToTexHyphenWordList(wordList)
+            texWordList = self.pt_tools.ptToTexHyphenWordList(fullList)
             if not texWordList :
                 self.project.log.writeToLog('XTEX-190')
                 dieNow()
@@ -342,6 +372,12 @@ class Xetex (Manager) :
             fullList = texWordList + exceptions
         # Now sort the resulting list
         sortedList = sorted(fullList)
+
+
+
+        print fullList
+
+
 
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
@@ -356,6 +392,31 @@ class Xetex (Manager) :
         return True
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# FIXME: Working here
+
+
+
     def makeLccodeFile (self) :
         '''Make a simple starter lccode file to be used with TeX hyphenation.'''
 
@@ -365,15 +426,14 @@ class Xetex (Manager) :
             lccodeObject.write('% This is an auto-generated lccode rules file for this project.\n')
             lccodeObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
+            # Add in all our non-word-forming characters as found in our PT project
+            for c in self.pt_tools.getNWFChars() :
+                uv = rtnUnicodeValue(c)
+                # We handel these chars special in this context
+                if not uv in ['2011', '002D'] :
+                    lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
 
-            # Get the non-word-forming characters from the PT settings
-            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
-            chars = []
-            chars = ptSet['ScriptureText']['ValidPunctuation'].split()
-            for c in chars :
-                uv = rtnUnicodeValue(c.replace('_', ''))
-                lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
-
+            # Add special exceptions
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
 
         return True
@@ -428,7 +488,8 @@ class Xetex (Manager) :
 
 
     def processLinePlaceholders (self, line, value) :
-        '''Search a line for a type of Rapuma placeholder and insert the value.'''
+        '''Search a string (or line) for a type of Rapuma placeholder and
+        insert the value. This is for building certain kinds of config values.'''
 
         # Allow for multiple placeholders with "while"
         while self.hasPlaceHolder(line) :
@@ -492,27 +553,48 @@ class Xetex (Manager) :
             # Bring in the settings from the layoutConfig
             for section in self.layoutConfig.keys() :
                 writeObject.write('\n% ' + section + '\n')
+                vals = {}
+                inputsOrder = []
                 for k, v in self.layoutConfig[section].iteritems() :
-                    # This will prevent output on empty fields, never output when there is no value
+                    # Be on the look out for an input ordering field. If there is one
+                    # it should have two or more items in the list this becomes the
+                    # base for our inputsOrder list used for output
+                    if k == 'inputsOrder' :
+                        inputsOrder = v
+                        continue
+                    # This will prevent output on empty fields, never output when
+                    # there is no value
                     if not v :
                         continue
                     # Gather each macro package line we need to output
                     if testForSetting(macTexVals, k, self.macroPackage) :
-                        line = macTexVals[k][self.macroPackage]
-                        # Test for boolDepend True and False. If there is a boolDepend then we don't need to output just yet
-                        # These next two if/elif statements insure that output happens in the proper condition.
-                        # In some cases we want output only if a certain bool is set to true, but in a few rare cases
-                        # we want output when a certain bool is set to false. These will screen for both cases.
+                        macVal = (macTexVals[k][self.macroPackage])
+                        # Test for boolDepend True and False. If there is a boolDepend
+                        # then we don't need to output just yet. These next two if/elif
+                        # statements insure that output happens in the proper condition.
+                        # In some cases we want output only if a certain bool is set to
+                        # true, but in a few rare cases we want output when a certain
+                        # bool is set to false. These will screen for both cases.
                         if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependTrue'])) :
                             continue
                         elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
-                            line = self.processLinePlaceholders(line, v)
-
-                        # Write this line out to the TeX settings file
-                        writeObject.write(line + '\n')
+                            # Here we will build a dictionary for this section made up
+                            # of all the k, v, and macVals needed. We also build a
+                            # list of keys to be used for ordered output
+                            vals[k] = [v, macVal]
+                            if not k in inputsOrder :
+                                # In case there was an inputsOrder list in the config,
+                                # this will prepend the value to that list. The idea is
+                                # that the ordered output goes last (or at the bottom)
+                                inputsOrder.insert(0, k)
+                # Write this line out to the TeX settings file
+                for key in inputsOrder :
+                    # Here we will write out the contents of the dict and becareful to
+                    # put the inputsOrder keys at the end of the section in the order specified
+                    writeObject.write(self.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
 
             # Move on to Fonts, add all the font def commands
             def addParams (writeObject, pList, line) :
