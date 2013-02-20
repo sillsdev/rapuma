@@ -594,6 +594,12 @@ class Xetex (Manager) :
                 for key in inputsOrder :
                     # Here we will write out the contents of the dict and becareful to
                     # put the inputsOrder keys at the end of the section in the order specified
+
+
+# FIXME: Problem with key not found on inputLccodeFile key
+
+
+                    print 'zzzzzzzzzzzzzz', key, vals
                     writeObject.write(self.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
 
             # Move on to Fonts, add all the font def commands

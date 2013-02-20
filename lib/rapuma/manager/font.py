@@ -78,7 +78,7 @@ class Font (Manager) :
         self.sourceEditor = self.pt_tools.getSourceEditor(self.sourcePath, self.cType)
 
         if not self.ptDefaultFont :
-            ptSet = getPTSettings(self.sourcePath)
+            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont

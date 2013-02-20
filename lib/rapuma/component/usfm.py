@@ -643,7 +643,11 @@ class PT_Tools (Component) :
 
         self.cType                  = 'usfm'
         self.project                = project
-        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
+        # On new projects there is no source path let's 'try' this
+        try :
+            self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
+        except :
+            self.sourcePath         = ''
 
 
     def getNWFChars (self) :
