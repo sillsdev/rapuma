@@ -22,6 +22,13 @@ Todo:
         <value>hyphenatedWords.txt</value>
     </setting>
     <setting>
+        <name>Hyphenation Errors File Name</name>
+        <key>ptHyphErrFileName</key>
+        <description>The name of the file Rapuma generates which contains words that were rejected by the hyphenation process.</description>
+        <type>string</type>
+        <value>[self:cType]_hyphenatedWordErrors.txt</value>
+    </setting>
+    <setting>
         <name>ParaTExt Hyphenation Import RegEx</name>
         <key>ptHyphenImportRegEx</key>
         <description>Hyphenated words from ParaTExt need converting to be used in a TeX hyphen exceptions list. This is regex that will be used with the Python re.sub() function to preform that transformation. This regex is contined in a list of two elements. The list should include both the search and replace sides. These will be inserted into the operating code to do the transformation. In its most basic form it will replace "=" with "-" but you should be able to expand the regex to do much more. Defalt = ("\=", "-")</description>

@@ -7,7 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This class will handle generic project hyphenation tasks.
 
 # History:
 # 20111207 - djd - Started with intial file
@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, re
 
 
 # Load the local classes
@@ -33,6 +33,8 @@ from rapuma.project.manager import Manager
 
 class Hyphenation (Manager) :
 
+#    _hyphens_re = re.compile(u'\u002D|\u00AD|\u2010') # Don't include U+2011 so we don't break on it.
+
     # Shared values
     xmlConfFile     = 'hyphenation.xml'
 
@@ -45,8 +47,6 @@ class Hyphenation (Manager) :
     def __init__(self, project, cfg, cType) :
         '''Initialize the Hyphenation manager.'''
 
-        '''Do the primary initialization for this manager.'''
-
         super(Hyphenation, self).__init__(project, cfg)
 
         # Set values for this manager
@@ -54,12 +54,23 @@ class Hyphenation (Manager) :
         self.cfg                        = cfg
         self.cType                      = cType
 
+###############################################################################
+############################ Manager Level Functions ##########################
+###############################################################################
 
-# FIXME: 
-# Functions will need to be added that will process hyphenation data into a
-# file that can be used by the renderer to hyphenate the text it is working
-# with. Initially this will be for TeX rendering but can/should be expanded
-# to other types of renderers.
+    def hardenExceptWords (self, words) :
+        '''Harden a list of hyphated words by changing soft hyphens
+        for non-breaking hyphens.'''
+
+        for w in list(words) :
+            nw = re.sub(u'\u002D', u'\u2011', w)
+            if w != nw :
+                words.add(nw)
+            words.remove(w)
+
+        return words
+
+
 
 
 

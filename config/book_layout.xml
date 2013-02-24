@@ -670,6 +670,7 @@ Todo:
             <description>With some TeX input files it matters greatly what the order is in wich they are inputed. This field specifies this order.</description>
             <key>inputsOrder</key>
             <type>list</type>
+            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
             <value>inputLccodeFile,inputHyphenExceptionsFile</value>
         </setting>
         <setting>

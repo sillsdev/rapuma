@@ -62,12 +62,12 @@ class Usfm (Component) :
         newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
         if newSectionSettings != self.project.projConfig['CompTypes'][self.Ctype] :
             self.project.projConfig['CompTypes'][self.Ctype] = newSectionSettings
-
+        # Set them here
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-        self.usfmManagers = ['text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer]
-#        self.usfmManagers = ['text', 'style', 'font', 'layout', 'illustration', self.renderer]
+        # Build a tuple of managers
+        self.usfmManagers = ('text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -632,18 +632,239 @@ class Usfm (Component) :
 
 ###############################################################################
 ###############################################################################
-########################## ParaTExt Class Functions ###########################
+############################## ParaTExt Classes ###############################
 ###############################################################################
 ###############################################################################
 
-class PT_Tools (Component) :
-    '''This class contains functions for working with USFM data in ParaTExt.'''
+###############################################################################
+########################## Hyphenation Class Functions ########################
+###############################################################################
+
+# Overview:
+# A ParaTExt hyphenation word list (hyphenatedWords.txt) can potentually contain
+# the following types of words:
+#
+#   1) abc-efg      = abc-efg   / exsiting words that contain a hyphen(s)
+#   2) *abc-efg     = abc-efg   / exception words demarked by '*'
+#   3) abc=efg      = abc-efg   / soft hyphens are added to a word
+#   4) abcefg       = abcefg    / no hyphens found (may need further processing)
+#
+# (* Note that the "*" demarker is currently not a part of the ParaTExt interface.
+#   This character is added to the file manually by the user. These words will
+#   be hardened - 002D = 2011)
+#
+# There may be some problems with words encountered. If any of the following are
+# found, report and stop processing:
+#
+#   1) mixed syntax is illegal (abc-efg=hij)
+
+
+class PT_HyphenTools (Component) :
+    '''Hyphenation-specific functions. Only called (important) when needed.'''
 
     def __init__(self, project) :
 
         self.cType                  = 'usfm'
+        self.Ctype                  = self.cType.capitalize()
         self.project                = project
+        self.managers               = project.managers
+        self.projConfig             = project.projConfig
+        self.userConfig             = project.userConfig
         # On new projects there is no source path let's 'try' this
+        # FIXME: Why is this not done at the project level
+        try :
+            self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
+        except :
+            self.sourcePath         = ''
+        if self.cType + '_Layout' not in self.managers :
+            self.project.createManager(self.cType, 'layout')
+        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+        self.useHyphenation         = str2bool(self.layoutConfig['Hyphenation']['useHyphenation'])
+        # Some hyphenation handling settings and data that might work
+        # better if they were more global
+        self.allPtHyphenWords       = set()
+        self.goodPtHyphenWords      = set()
+        self.badWords               = set()
+        self.hyphenWords            = set()
+        self.exceptionWords         = set()
+        self.softHyphenWords        = set()
+        self.processWords           = set()
+        self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
+        self.ptHyphErrFileName      = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
+        self.ptHyphErrFile          = os.path.join(self.project.local.projHyphenationFolder, self.ptHyphErrFileName)
+
+
+    def processHyphens(self) :
+        '''This controls the processing of the master PT hyphenation file.'''
+
+        # These calls may be order-sensitive
+        self.getAllPtHyphenWords()
+        self.getExceptionWords()
+        self.getHyphenWords()
+        self.getSoftHyphenWords()
+        self.getProcessWords()
+
+
+    def getExceptionWords (self) :
+        '''Return a data set of exception words found in a ParaTExt project
+        hyphen word list that have a '*' in front of them. This indicates that
+
+        they need to be spelled and rendered just as they are, they cannot be
+        broken. This set will go on for further processing, normally "hardening" 
+        will be done.'''
+
+        # Go get the file if it is to be had
+        for word in list(self.goodPtHyphenWords) :
+            if word[:1] == '*' :
+                self.exceptionWords.add(word[1:])
+                self.goodPtHyphenWords.remove(word)
+
+
+    def getHyphenWords (self) :
+        '''Return a data set of pre-hyphated words found in a ParaTExt project
+        hyphen words list. These are words that are spelled with a hyphen in
+        them but can break on line endings.'''
+
+        # Go get the file if it is to be had
+        for word in list(self.goodPtHyphenWords) :
+            if '-' in word :
+                self.hyphenWords.add(word)
+                self.goodPtHyphenWords.remove(word)
+
+
+    def getSoftHyphenWords (self) :
+        '''Return a data set of words that contain user-injected soft hyphens.'''
+
+        for word in list(self.goodPtHyphenWords) :
+            if '=' in word :
+                self.softHyphenWords.add(word)
+                self.goodPtHyphenWords.remove(word)
+
+
+    def getProcessWords (self) :
+        '''Return a data set of words that contain words that do not contain
+        hyphens, soft hyphens or are exceptions. These words, if desired, may
+
+        have further proecesses done to them. This process must be run after
+        getExceptionWords(), getSoftHyphenWords() and getHyphenWords().'''
+
+        self.processWords = self.goodPtHyphenWords.copy()
+        self.processWords.difference_update(self.exceptionWords)
+        self.processWords.difference_update(self.softHyphenWords)
+        self.processWords.difference_update(self.hyphenWords)
+
+
+    def checkForBadWords (self) :
+        '''Check the words in the master list for bad syntax. Remove them
+        and put them in a hyphen error words file in the project and give
+        a warning to the user.'''
+
+        for word in list(self.allPtHyphenWords) :
+            if '-' in word and '=' in word :
+                self.badWords.add(word)
+            else :
+                # Make the good words list here
+                self.goodPtHyphenWords.add(word)
+
+        if len(self.badWords) :
+            errWords = list(self.badWords)
+            errWords.sort()
+            with codecs.open(self.ptHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
+                wordErrorsObject.write('# ' + fName(self.ptHyphErrFile) + '\n')
+                wordErrorsObject.write('# This is an auto-generated file which contains errors in the hyphenation words file.\n')
+                for word in errWords :
+                    wordErrorsObject.write(word + '\n')
+
+            # Report the problem to the user
+            self.project.log.writeToLog('USFM-030', [self.ptHyphErrFile])
+
+
+    def getAllPtHyphenWords (self) :
+        '''Return a data set of all the words found in a ParaTExt project
+        hyphated words text file. The Py set() method is used for moving
+        the data because some lists can get really big. This will return the
+        entire wordlist as it is found in the ptHyphenFile. That can be used
+        for other processing.'''
+
+        # Go get the file if it is to be had
+        if os.path.isfile(self.ptHyphenFile) :
+            with codecs.open(self.ptHyphenFile, "r", encoding='utf_8') as hyphenWords :
+                for line in hyphenWords :
+                    # Using the logic that there can only be one word in a line
+                    # if the line contains more than one word it is not wanted
+                    word = line.split()
+                    if len(word) == 1 :
+                        self.allPtHyphenWords.add(word[0])
+
+            self.checkForBadWords()
+
+
+    def wordTotals (self) :
+        '''Return a report on word processing totals. For accuracy this is
+        dependent on getExceptionWords(), getSoftHyphenWords(), getHyphenWords()
+        and getProcessWords to be run before it. If the difference is off, die
+        here and report the numbers.'''
+
+        wrds = len(self.allPtHyphenWords)
+        badw = len(self.badWords)
+        excp = len(self.exceptionWords)
+        soft = len(self.softHyphenWords)
+        hyph = len(self.hyphenWords)
+        pwrd = len(self.processWords)
+        diff = wrds - (badw + excp + soft + hyph + pwrd)
+        
+        rpt = '\tAll words = ' + str(wrds) + '\n' \
+                '\tBad words = ' + str(badw) + '\n' \
+                '\tException words = ' + str(excp) + '\n' \
+                '\tSoft hyphen words = ' + str(soft) + '\n' \
+                '\tHyphen words = ' + str(hyph) + '\n' \
+                '\tProcess words = ' + str(pwrd) + '\n' \
+                '\tDifference = ' + str(diff) + '\n\n' \
+
+        # Die here if the diff is off (not 0)
+        if diff != 0 :
+            dieNow('\nWord totals do not balance.\n\n' + rpt + 'Rapuma halted!\n')
+
+        return [['Total words', str(wrds)], ['Bad words', str(badw)], ['Exception words', str(excp)], ['Soft Hyphen words', str(soft)], ['Hyphen words', str(hyph)], ['Process words', str(pwrd)]]
+
+
+    def pt2GenHyphens (self, hyphenWords) :
+        '''Create a set of generic hyphen markers on a given list of words
+        that contain hyphens or PT hyphen markers (=).'''
+        
+        # Make a new set to work on and pass on
+        for word in list(hyphenWords) :
+            soft = re.sub(u'\=', u'<->', word)
+            norm = re.sub(u'\-', u'<->', word)
+            if word != soft :
+                hyphenWords.add(soft)
+                hyphenWords.remove(word)
+            elif word != norm :
+                hyphenWords.add(norm)
+                hyphenWords.remove(word)
+
+        return hyphenWords
+
+
+
+###############################################################################
+############################ PT Data Class Functions ##########################
+###############################################################################
+
+class PT_Tools (Component) :
+    '''This class contains functions for working with general USFM data in ParaTExt.'''
+
+    def __init__(self, project) :
+
+        self.cType                  = 'usfm'
+        self.Ctype                  = self.cType.capitalize()
+        self.project                = project
+        self.managers               = project.managers
+        self.projConfig             = project.projConfig
+        self.userConfig             = project.userConfig
+        # On new projects there is no source path let's 'try' this
+        # FIXME: Why is this not done at the project level?
         try :
             self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
         except :
@@ -678,53 +899,6 @@ class PT_Tools (Component) :
         return chars
 
 
-    def getPTHyphenWordList (self) :
-        '''Return a list of hyphenated words found in a ParaTExt project
-        hyphated words text file.'''
-
-        # Note: it is a given that the cType is usfm
-        projectIDCode = self.project.projConfig['ProjectInfo']['projectIDCode']
-        usfm_sourcePath = self.project.userConfig['Projects'][projectIDCode]['usfm_sourcePath']
-        ptHyphenFileName = self.project.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        ptHyphenFile = os.path.join(usfm_sourcePath, ptHyphenFileName)
-        wordList = []
-        
-        # Go get the file if it is to be had
-        if os.path.isfile(ptHyphenFile) :
-            with codecs.open(ptHyphenFile, "r", encoding='utf_8') as hyphenWords :
-                for line in hyphenWords :
-                    # Using the logic that there can only be one word in a line
-                    # if the line contains more than one word it is not wanted
-                    word = line.split()
-                    if len(word) == 1 :
-                        wordList.append(word[0])
-            return wordList
-        else :
-            return False
-
-
-    def ptToTexHyphenWordList (self, wordList) :
-        '''Convert a hyphenated word list from PT to a TeX type word list.'''
-
-        # The ptHyphenImportRegEx will come in in a 2 element list
-        ptHyphenImportRegEx = self.project.projConfig['Managers']['usfm_Hyphenation']['ptHyphenImportRegEx']
-        advancedHyphenImportRegEx = self.project.projConfig['Managers']['usfm_Hyphenation']['advancedHyphenImportRegEx']
-        search = ptHyphenImportRegEx[0]
-        replace = ptHyphenImportRegEx[1]
-        texWordList = []
-        for word in wordList :
-            tWord = re.sub(ptHyphenImportRegEx[0], ptHyphenImportRegEx[1], word)
-            # In case we want to do more...
-            if advancedHyphenImportRegEx :
-                tWord = re.sub(advancedHyphenImportRegEx[0], advancedHyphenImportRegEx[1], tWord)
-            texWordList.append(tWord)
-
-        if len(texWordList) > 0 :
-            return texWordList
-        else :
-            return False
-
-
     def formPTName (self, cName, cid) :
         '''Using valid PT project settings from the project configuration, form
         a valid PT file name that can be used for a number of operations.'''
@@ -733,9 +907,9 @@ class PT_Tools (Component) :
         #           number of use cases.
 
         try :
-            nameFormID = self.project.projConfig['Managers']['usfm_Text']['nameFormID']
-            postPart = self.project.projConfig['Managers']['usfm_Text']['postPart']
-            prePart = self.project.projConfig['Managers']['usfm_Text']['prePart']
+            nameFormID = self.projConfig['Managers']['usfm_Text']['nameFormID']
+            postPart = self.projConfig['Managers']['usfm_Text']['postPart']
+            prePart = self.projConfig['Managers']['usfm_Text']['prePart']
 
             if nameFormID == '41MAT' :
                 mainName = self.project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
@@ -754,14 +928,14 @@ class PT_Tools (Component) :
 
     # FIXME: This will be expanded as we find more use cases
 
-        postPart = self.project.projConfig['Managers']['usfm_Text']['postPart']
+        postPart = self.projConfig['Managers']['usfm_Text']['postPart']
         return cid + '.' + postPart
 
 
-    def getPTFont (self, sourcePath) :
+    def getPTFont (self) :
         '''Just return the name of the font used in a PT project.'''
 
-        ssf = self.getPTSettings(sourcePath)
+        ssf = self.getPTSettings(self.sourcePath)
         return ssf['ScriptureText']['DefaultFont']
 
 
@@ -797,7 +971,7 @@ class PT_Tools (Component) :
         return sysSet
 
 
-    def findSsfFile (self, sourcePath) :
+    def findSsfFile (self) :
         '''Look for the ParaTExt project settings file. The immediat PT project
         is the parent folder and the PT environment that the PT projet is found
         in, if any, is the grandparent folder. the .ssf (settings) file in the
@@ -816,7 +990,7 @@ class PT_Tools (Component) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = sourcePath
+        parentFolder = self.sourcePath
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -859,30 +1033,29 @@ class PT_Tools (Component) :
         return os.path.join(ptPath, ssfFileName)
 
 
-    def getPTSettings (self, sourcePath) :
+    def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
         # Return the dictionary
-        if os.path.isdir(sourcePath) :
-            ssfFile = self.findSsfFile(sourcePath)
+        if os.path.isdir(self.sourcePath) :
+            ssfFile = self.findSsfFile()
             if ssfFile :
                 if os.path.isfile(ssfFile) :
                     return xmlFileToDict(ssfFile)
 
 
-    def getSourceEditor (self, sourcePath, cType) :
+    def getSourceEditor (self) :
         '''Return the sourceEditor if it is set. If not try to
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
 
     #    import pdb; pdb.set_trace()
         se = 'generic'
-        Ctype = cType.capitalize()
         # FIXME: This may need expanding as more use cases arrise
-        if testForSetting(self.project.projConfig['CompTypes'][Ctype], 'sourceEditor') :
-            se = self.project.projConfig['CompTypes'][Ctype]['sourceEditor']
+        if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+            se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
-            if self.findSsfFile(sourcePath) :
+            if self.findSsfFile() :
                 se = 'paratext'
 
         return se

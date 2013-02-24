@@ -317,10 +317,6 @@ class Xetex (Manager) :
 
 # FIXME: Need to make sure rules apply all the time
 
-#   1) abc-efg      = abc-efg   / exsiting hyphenated words pass through
-#   2) *abc-efg     = abc|=|efg / hyphated words demarked by * are hardened (002D = 2011)
-#   3) abc=efg      = abc-efg   / soft hyphens are added to a word
-#   4) abc-efg=hij  = ()        / mixed syntax is illegal
 
 
     def makeHyphenExceptionFile (self) :
@@ -329,62 +325,63 @@ class Xetex (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        # First we need some words to work with
-        exceptions = []
-        fullList = []
-        wordList = ()
-        sortedList = []
-        # Get the raw PT hyphated words (This is all we can support right now)
+        # If we are using PT, these are the types of word sets that we will
+        # get from it to work with when pt_hyTools.processHyphens() is called:
+        # pt_hyTools.allWords       All words from the master hyphen list
+        # pt_hyTools.hyphenWords    Words spelled with hyphens (can be broken)
+        # pt_hyTools.softHyphWords  Words with inserted soft hyphens (for line breaking)
+        # pt_hyTools.exceptionWords Exception words (not to be acted on)
+        # pt_hyTools.processWords   Words that (may) need hyphens inserted
+        # These are other lists and sets that are used here
+        nonProcess      = set()
+        fullList        = set()
+        # Process starting with the raw PT hyphated words (This is all we can support right now)
         if self.sourceEditor == 'paratext' :
-            wordList = tuple(self.pt_tools.getPTHyphenWordList())
-            print type(wordList)
-            fullList = list(wordList)
-            print wordList, fullList
-            if not wordList :
-                self.project.log.writeToLog('XTEX-180')
-                dieNow()
-            # Pull out any harden non-breaking hyphated words
-#            import pdb; pdb.set_trace()
-            for word in wordList :
-                print word
-                if u'\u2011' in word :
-                    print 'Hard Word: ', word
-                    exceptions.append(word)
-                    fullList.remove(word)
-                # Pick out any marked exceptions
-                # Word needs to be hardened (002D = 2011)
-                elif word[:1] == '*' :
-                    print 'Word to harden: ', word
-                    hWord = word.replace(u'\u002D', u'\u2011')
-                    exceptions.append(hWord[1:])
-                    print 'Removing: ', word
-                    fullList.remove(word)
-                    print wordList
+            from rapuma.component.usfm import PT_HyphenTools
+            pt_hyTools = PT_HyphenTools(self.project)
+            pt_hyTools.processHyphens()
+            # Report the word harvest to the log
+            rpt = pt_hyTools.wordTotals()
+            for c in rpt :
+                self.project.log.writeToLog('XTEX-200', [c[0], c[1]])
 
-            print exceptions, fullList
+        else :
+            dieNow('Error: Editor not supported: ' + self.sourceEditor)
 
-            # Now prepare the words for use with TeX
-            texWordList = self.pt_tools.ptToTexHyphenWordList(fullList)
-            if not texWordList :
-                self.project.log.writeToLog('XTEX-190')
-                dieNow()
-            # Add back in the excptions
-            fullList = texWordList + exceptions
-        # Now sort the resulting list
-        sortedList = sorted(fullList)
+        # Change to gneric hyphens
+        pt_hyTools.pt2GenHyphens(pt_hyTools.hyphenWords)
+        pt_hyTools.pt2GenHyphens(pt_hyTools.softHyphenWords)
+        pt_hyTools.pt2GenHyphens(self.managers[self.cType + '_Hyphenation'].hardenExceptWords(pt_hyTools.exceptionWords))
+        # Pull together all the words that do not need to be processed but
+        # will be added back in when the process portion is done.
+        nonProcess = pt_hyTools.hyphenWords.union(pt_hyTools.exceptionWords).union(pt_hyTools.softHyphenWords)
 
+        # -----------
+        #
+        # FIXME: At this point we will want to factor in prefixes, suffixes
+        # and exceptions it might look like this:
+        # 1) Check to see if word processing is desired, use a regex to trigger
+        # 2) Look for prefix/suffix file, if found, load it up, set trigger
+        # 3) Loop through the processWords, pull the prefix and/or suffix off (store)
+        # 4) Process the root word with the syllable breaker regex, insert generic markers
+        # 5) Reattach prefix and/or suffix with generic markers
+        # 
+        # -----------
 
-
-        print fullList
-
-
-
+        # Merge the nonProcess words with the processWords
+        fullList = nonProcess.union(pt_hyTools.processWords)
+        # Turn generic hyphen markers into markers that will work with XeTeX
+        self.gen2TexHyphens(fullList)
+        # Change that to a list so it can be sorted
+        texHWordList = list(fullList)
+        texHWordList.sort()
+        # Create the output file here
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
             hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
             hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             hyphenTexObject.write('\hyphenation{\n')
-            for word in sortedList :
+            for word in texHWordList :
                 hyphenTexObject.write(word + '\n')
 
             hyphenTexObject.write('}\n')
@@ -392,29 +389,14 @@ class Xetex (Manager) :
         return True
 
 
+    def gen2TexHyphens (self, wordList) :
+        '''Change generic hyphen markers to plain 002D hyphen characters.'''
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Working here
-
+        for word in list(wordList) :
+            nw = re.sub(u'<->', u'-', word)
+            if nw != word :
+                wordList.add(nw)
+                wordList.remove(word)
 
 
     def makeLccodeFile (self) :
@@ -534,7 +516,7 @@ class Xetex (Manager) :
         if os.path.isfile(self.setFile) :
             for f in dep :
                 if isOlder(self.setFile, f) :
-                    # Something changed in the layout conf file
+                    # Something changed in a conf file this is dependent on
                     makeIt = True
                     break
         else :
@@ -560,8 +542,11 @@ class Xetex (Manager) :
                     # it should have two or more items in the list this becomes the
                     # base for our inputsOrder list used for output
                     if k == 'inputsOrder' :
-                        inputsOrder = v
-                        continue
+                        # Need to be sure to check for a boolDepend and pick this up 
+                        # if it is turned on
+                        if testForSetting(macTexVals, k, 'boolDependTrue') and str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependTrue'])) :
+                            inputsOrder = v
+                            continue
                     # This will prevent output on empty fields, never output when
                     # there is no value
                     if not v :
@@ -594,12 +579,6 @@ class Xetex (Manager) :
                 for key in inputsOrder :
                     # Here we will write out the contents of the dict and becareful to
                     # put the inputsOrder keys at the end of the section in the order specified
-
-
-# FIXME: Problem with key not found on inputLccodeFile key
-
-
-                    print 'zzzzzzzzzzzzzz', key, vals
                     writeObject.write(self.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
 
             # Move on to Fonts, add all the font def commands
@@ -781,11 +760,6 @@ class Xetex (Manager) :
                     # Custom sty file at the global level is optional as is hyphenation
                     if self.custSty :
                         cNameTexObject.write('\\stylesheet{' + self.custSty + '}\n')
-# FIXME: We will not be putting a hyphen input into the component, instead that will be
-# added globally, one time only.
-#                    if self.checkDepHyphenFile() :
-#                        cNameTexObject.write('\\input \"' + self.hyphenTex + '\"\n')
-                    # Create the cidTex list which is one or more cid components
                     for cid in self.projConfig['Components'][self.cName]['cidList'] :
                         cidCName = self.project.components[self.cName].getRapumaCName(cid)
                         cidTex = os.path.join(self.projComponentsFolder, cidCName, cid + '.tex')
@@ -817,9 +791,8 @@ class Xetex (Manager) :
 
     def checkDepHyphenFile (self) :
         '''If hyphenation is used, check for the exsistance of the TeX Hyphenation 
-        file. If one is not found, create a default file. At some point, this will
-        need to expanded to accomodate hyphenation rules and words. This will return
-        True if the following are true: file exsists, or, no hyphenation is required.'''
+        files. If one of them is not found, kindly ask the appropreate function to
+        make it.'''
 
         if self.useHyphenation :
             if not os.path.isfile(self.hyphenTex) :

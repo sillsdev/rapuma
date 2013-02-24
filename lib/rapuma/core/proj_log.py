@@ -128,6 +128,7 @@ class ProjLog (object) :
             'XTEX-170' : ['ERR', 'TeX hyphenation dependent file [<<1>>] is missing! This is a required file when hyphenation is turned on.'],
             'XTEX-180' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
             'XTEX-190' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
+            'XTEX-200' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
@@ -303,6 +304,7 @@ class ProjLog (object) :
             'USFM-005' : ['MSG', 'Unassigned error message ID.'],
             'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
             'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            'USFM-030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

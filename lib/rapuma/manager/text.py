@@ -55,7 +55,7 @@ class Text (Manager) :
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
-        self.sourceEditor           = self.pt_tools.getSourceEditor(self.sourcePath, self.cType)
+        self.sourceEditor           = self.pt_tools.getSourceEditor()
         self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
@@ -97,7 +97,7 @@ class Text (Manager) :
         # the defaults and hope for the best.
         if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
+            ptSet = self.pt_tools.getPTSettings()
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.

@@ -52,7 +52,6 @@ class Font (Manager) :
         self.project                = project
         self.manager                = self.cType + '_Font'
         self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
 
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
@@ -75,10 +74,10 @@ class Font (Manager) :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = self.pt_tools.getSourceEditor(self.sourcePath, self.cType)
+        self.sourceEditor = self.pt_tools.getSourceEditor()
 
         if not self.ptDefaultFont :
-            ptSet = self.pt_tools.getPTSettings(self.sourcePath)
+            ptSet = self.pt_tools.getPTSettings()
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont

@@ -159,6 +159,8 @@ class Project (object) :
         '''Create a manager reference in the project config that components
         will point to.'''
 
+#        import pdb; pdb.set_trace()
+
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
         # Insert the Manager section if it is not already there
@@ -174,8 +176,9 @@ class Project (object) :
             if not testForSetting(self.projConfig['Managers'][fullName], k) :
                 self.projConfig['Managers'][fullName][k] = v
                 # If we are dealing with an empty string, don't bother writing out
-                # Trying to avoid needless conf updating here
-                if v != '' :
+                # Trying to avoid needless conf updating here. Just in case we are
+                # working with a list, we'll use len()
+                if len(v) > 0 :
                     update = True
         # Update the conf if one or more settings were changed
         if update :
