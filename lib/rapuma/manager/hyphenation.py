@@ -52,6 +52,7 @@ class Hyphenation (Manager) :
         # Set values for this manager
         self.cfg                        = cfg
         self.cType                      = cType
+        self.Ctype                      = cType.capitalize()
         self.project                    = project
         self.manager                    = self.cType + '_Hyphenation'
         self.managers                   = project.managers
@@ -72,6 +73,7 @@ class Hyphenation (Manager) :
         self.nonProcessWords            = set()
         self.processWords               = set()
         self.fullList                   = set()
+        self.finalList                  = list()
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
@@ -80,19 +82,40 @@ class Hyphenation (Manager) :
     def turnOnHyphenation (self, cType) :
         '''Turn on hyphenation for a specified component type.'''
 
-        self.layoutConfig['Hyphenation']['useHyphenation'] = True
+        self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation'] = True
+        writeConfFile(self.projConfig)
+        self.project.log.writeToLog('HYPH-050', [cType])
+
+
+    def turnOffHyphenation (self, cType) :
+        '''Turn off hyphenation for a specified component type.'''
+
+        self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation'] = False
+        writeConfFile(self.projConfig)
+        self.project.log.writeToLog('HYPH-055', [cType])
 
 
     def addHyphenation (self, cType) :
         '''Add hyphenation to a project for a specified component type.'''
 
-        
+        # Make sure we turn it on if it isn't already
+        if not str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
+            self.turnOnHyphenation(cType)
+
+
+    def removeHyphenation (self, cType) :
+        '''Remove hyphenation from a project for a specified component type.'''
+
+        # Make sure we turn it on if it isn't already
+        if str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
+            self.turnOffHyphenation(cType)
 
 
     def updateHyphenation (self, cType) :
         '''Update critical hyphenation control files for a specified component type.'''
 
-        
+        self.harvestSource()
+        self.makeHyphenatedWords()
 
 
     def harvestSource (self) :
@@ -132,7 +155,7 @@ class Hyphenation (Manager) :
         self.processWords = pt_hyTools.processWords
 
 
-    def getHyphenatedWords (self) :
+    def makeHyphenatedWords (self) :
         '''Return a sorted list of hyphenated words.'''
 
 #        import pdb; pdb.set_trace()
@@ -149,9 +172,9 @@ class Hyphenation (Manager) :
         # file in the project Hyphenation folder. If that file is there and it contains
         # any prefix or suffix definitions, they will be loaded up and words will
         # be checked for them. That file is made by default here with this function:
-        self.hy_tools.makePrefixSuffixHyphFile()
+        self.makePrefixSuffixHyphFile()
         # The prefixes and suffixes are pulled in with this function:
-        self.hy_tools.getPrefixSufixLists()
+        self.getPrefixSufixLists()
         # This will create two sets of data: hy_tools.prefixList and hy_tools.suffixList
         # If either or both have data in them they will be used for building the main
         # process word dictionary data set.
@@ -176,18 +199,18 @@ class Hyphenation (Manager) :
         # -----------
 
 
-        dieNow()
+#        dieNow()
 
 
 
         # Merge the nonProcess words with the processWords
-        self.fullList = self.nonProcess.union(self.processWords)
+        self.fullList = self.nonProcessWords.union(self.processWords)
         # Turn generic hyphen markers into markers that will work with XeTeX
         self.gen2TexHyphens(self.fullList)
         # Turn set into list
-        returnList = list(self.fullList)
-        # Return the list sorted
-        return returnList.sorted()
+        self.finalList = list(self.fullList)
+        # Sort the list
+        self.finalList.sort()
 
 
     def gen2TexHyphens (self, wordList) :
@@ -228,9 +251,10 @@ class Hyphenation (Manager) :
 
 
     def getPrefixSufixLists (self) :
-    '''Call the proper function to create prefix and suffix lists if the file exsists and
-    there is data in it.'''
+        '''Call the proper function to create prefix and suffix lists if the file exsists and
+        there is data in it.'''
 
+        pass
 
 
 

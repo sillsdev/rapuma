@@ -105,7 +105,7 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = str2bool(self.layoutConfig['Hyphenation']['useHyphenation'])
+        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
 
         # Set file names with full path (this after booleans are set)
@@ -158,12 +158,34 @@ class Xetex (Manager) :
         return val + mu
 
 
-    def rtnBoolDepend (self, cfg, bd) :
+    def rtnBoolDepend (self, bdep) :
         '''Return the boolean value of a boolDepend target. This assumes that
-        the format is section:key, if it ever becomes different, this breaks.'''
+        the format is config:section:key, if it ever becomes different, this breaks.
+        The config is expected to be the common internal reference so consitency is
+        absolutly necessary for this to work.'''
 
-        bdl = bd.split(':')
-        return cfg[bdl[0]][bdl[1]]
+        parts = bdep.split(':')
+        ptn = len(parts)
+        cfg = getattr(self, parts[0])
+        if ptn == 3 :
+            sec = parts[1]
+            key = parts[2]
+            if self.hasPlaceHolder(sec) :
+                (holderType, holderKey) = self.getPlaceHolder(sec)
+                # system (self) delclaired value
+                if holderType == 'self' :
+                    sec = self.insertValue(sec, getattr(self, holderKey))
+            return cfg[sec][key]
+        if ptn == 4 :
+            secA = parts[1]
+            secB = parts[2]
+            key = parts[3]
+            if self.hasPlaceHolder(secB) :
+                (holderType, holderKey) = self.getPlaceHolder(secB)
+                # system (self) delclaired value
+                if holderType == 'self' :
+                    secB = self.insertValue(secB, getattr(self, holderKey))
+            return cfg[secA][secB][key]
 
 
     def hasPlaceHolder (self, line) :
@@ -182,6 +204,8 @@ class Xetex (Manager) :
         cnts = line[begin + 1:end - 1]
         if cnts.find(':') > -1 :
             return cnts.split(':')
+        elif cnts.find('.') > -1 :
+            return cnts.split('.')
         else :
             return cnts, ''
 
@@ -313,14 +337,14 @@ class Xetex (Manager) :
         to work properly.'''
 
         # Call the Hyphenation manager to return a sorted list of hyphenated words
-        texHWordList = self.hy_tools.getHyphenatedWords()
+        self.hy_tools.updateHyphenation(self.cType)
         # Create the output file here
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
             hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
             hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             hyphenTexObject.write('\hyphenation{\n')
-            for word in texHWordList :
+            for word in self.hy_tools.finalList :
                 hyphenTexObject.write(word + '\n')
 
             hyphenTexObject.write('}\n')
@@ -473,7 +497,7 @@ class Xetex (Manager) :
                     if k == 'inputsOrder' :
                         # Need to be sure to check for a boolDepend and pick this up 
                         # if it is turned on
-                        if testForSetting(macTexVals, k, 'boolDependTrue') and str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependTrue'])) :
+                        if testForSetting(macTexVals, k, 'boolDependTrue') and str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
                             inputsOrder = v
                             continue
                     # This will prevent output on empty fields, never output when
@@ -489,9 +513,9 @@ class Xetex (Manager) :
                         # In some cases we want output only if a certain bool is set to
                         # true, but in a few rare cases we want output when a certain
                         # bool is set to false. These will screen for both cases.
-                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependTrue'])) :
+                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
                             continue
-                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(self.layoutConfig, macTexVals[k]['boolDependFalse'])) == False :
+                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :

@@ -828,6 +828,8 @@ def userArguments (args) :
         manager = args['component_type'] + '_Hyphenation'
         if args['add'] :
             aProject.managers[manager].addHyphenation(args['component_type'])
+        elif args['remove'] :
+            aProject.managers[manager].removeHyphenation(args['component_type'])
         elif args['update'] :
             aProject.managers[manager].updateHyphenation(args['component_type'])
 
@@ -1079,6 +1081,7 @@ postprocessCommand = subparsers.add_parser('hyphen', help='General settings for 
 postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
 postprocessCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
+postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
 postprocessCommand.add_argument('-u', '--update', action='store_true', help='Update the hyphenation files. This is done normally when adjustments are made to configuration or a word list.')
 
 # Add illustration subprocess arguments

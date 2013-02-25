@@ -157,7 +157,7 @@ class Usfm (Component) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        useHyphenation          = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['Hyphenation']['useHyphenation'])
+        useHyphenation          = str2bool(self.project.managers[self.cType + '_Layout'].projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         useWatermark            = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['usePageBorder'])
@@ -678,7 +678,7 @@ class PT_HyphenTools (Component) :
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
-        self.useHyphenation         = str2bool(self.layoutConfig['Hyphenation']['useHyphenation'])
+        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         # Some hyphenation handling settings and data that might work
         # better if they were more global
         self.allPtHyphenWords       = set()
@@ -688,16 +688,48 @@ class PT_HyphenTools (Component) :
         self.exceptionWords         = set()
         self.softHyphenWords        = set()
         self.processWords           = set()
-        self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
+        # File Names
         self.ptHyphErrFileName      = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-        self.ptHyphErrFile          = os.path.join(self.project.local.projHyphenationFolder, self.ptHyphErrFileName)
+        self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        # Paths
+        self.projHyphenationFolder  = self.project.local.projHyphenationFolder
+        self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
+        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
+        self.ptHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
+        self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
+
+
+    def copyPtHyphenWords (self) :
+        '''Simple copy of the ParaTExt project hyphenation words list to the project.'''
+
+        if os.path.isfile(self.ptHyphenFile) :
+            if os.path.isfile(self.ptProjHyphenFile) :
+                os.remove(self.ptProjHyphenFile)
+            shutil.copy(self.ptHyphenFile, self.ptProjHyphenFile)
+        else :
+            self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
+            dieNow()
+
+
+    def backupPtHyphenWords (self) :
+        '''Backup the ParaTExt project hyphenation words list to the project.'''
+
+        if os.path.isfile(self.ptHyphenFile) :
+            if os.path.isfile(self.ptHyphenFileBak) :
+                os.remove(self.ptHyphenFileBak)
+            shutil.copy(self.ptHyphenFile, self.ptHyphenFileBak)
+            makeReadOnly(self.ptHyphenFileBak)
+        else :
+            self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
+            dieNow()
 
 
     def processHyphens(self) :
         '''This controls the processing of the master PT hyphenation file.'''
 
         # These calls may be order-sensitive
+        self.copyPtHyphenWords()
+        self.backupPtHyphenWords()
         self.getAllPtHyphenWords()
         self.getExceptionWords()
         self.getHyphenWords()
@@ -787,8 +819,8 @@ class PT_HyphenTools (Component) :
         for other processing.'''
 
         # Go get the file if it is to be had
-        if os.path.isfile(self.ptHyphenFile) :
-            with codecs.open(self.ptHyphenFile, "r", encoding='utf_8') as hyphenWords :
+        if os.path.isfile(self.ptProjHyphenFile) :
+            with codecs.open(self.ptProjHyphenFile, "r", encoding='utf_8') as hyphenWords :
                 for line in hyphenWords :
                     # Using the logic that there can only be one word in a line
                     # if the line contains more than one word it is not wanted
@@ -874,7 +906,7 @@ class PT_Tools (Component) :
         '''Return a list of non-word-forming characters from the PT settings
         field [ValidPunctuation] in the translation project.'''
 
-        ptSet = self.getPTSettings(self.sourcePath)
+        ptSet = self.getPTSettings()
         chars = []
         for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
             # Leave it a lone if it is a single character

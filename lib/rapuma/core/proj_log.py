@@ -131,6 +131,8 @@ class ProjLog (object) :
             'HYPH-020' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
             'HYPH-030' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
             'HYPH-040' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
+            'HYPH-050' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
+            'HYPH-055' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
@@ -307,6 +309,7 @@ class ProjLog (object) :
             'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
             'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
             'USFM-030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
+            'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

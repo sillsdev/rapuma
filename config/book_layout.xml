@@ -42,7 +42,7 @@ Todo:
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>ChapterVerse:omitVerseNumberOne</boolDependTrue>
+            <boolDependTrue>layoutConfig:ChapterVerse:omitVerseNumberOne</boolDependTrue>
             <usfmTex>\OmitVerseNumberOnetrue</usfmTex>
         </setting>
         <setting>
@@ -51,7 +51,7 @@ Todo:
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>ChapterVerse:omitAllChapterNumbers</boolDependTrue>
+            <boolDependTrue>layoutConfig:ChapterVerse:omitAllChapterNumbers</boolDependTrue>
             <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
         <setting>
@@ -129,7 +129,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Columns:columnGutterRule</boolDependTrue>
+            <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
             <usfmTex>\ColumnGutterRuletrue</usfmTex>
         </setting>
         <setting>
@@ -163,7 +163,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <usfmTex>\ColumnGutterRuleSkip=[vm]</usfmTex>
-            <boolDependTrue>Columns:columnGutterRule</boolDependTrue>
+            <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
         </setting>
     </section>
     <section>
@@ -197,7 +197,7 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>Crossreferences:useAutoCallerCrossrefs</boolDependTrue>
+            <boolDependTrue>layoutConfig:Crossreferences:useAutoCallerCrossrefs</boolDependTrue>
             <usfmTex>\AutoCallers{x}{[v]}</usfmTex>
         </setting>
         <setting>
@@ -206,7 +206,7 @@ Todo:
             <key>useNumericCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Crossreferences:useNumericCallersCrossrefs</boolDependTrue>
+            <boolDependTrue>layoutConfig:Crossreferences:useNumericCallersCrossrefs</boolDependTrue>
             <usfmTex>\NumericCallers{x}</usfmTex>
         </setting>
         <setting>
@@ -215,7 +215,7 @@ Todo:
             <key>pageResetCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Crossreferences:pageResetCallersCrossrefs</boolDependTrue>
+            <boolDependTrue>layoutConfig:Crossreferences:pageResetCallersCrossrefs</boolDependTrue>
             <usfmTex>\PageResetCallers{x}</usfmTex>
         </setting>
         <setting>
@@ -224,7 +224,7 @@ Todo:
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Crossreferences:omitCallerInCrossrefs</boolDependTrue>
+            <boolDependTrue>layoutConfig:Crossreferences:omitCallerInCrossrefs</boolDependTrue>
             <usfmTex>\OmitCallerInNote{x}</usfmTex>
         </setting>
         <setting>
@@ -233,7 +233,7 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>Crossreferences:paragraphedCrossrefs</boolDependTrue>
+            <boolDependTrue>layoutConfig:Crossreferences:paragraphedCrossrefs</boolDependTrue>
             <usfmTex>\ParagraphedNotes{x}</usfmTex>
         </setting>
     </section>
@@ -268,7 +268,7 @@ Todo:
             <key>autoCallerListFootnotes</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>Footnotes:useAutoCallerFootnotes</boolDependTrue>
+            <boolDependTrue>layoutConfig:Footnotes:useAutoCallerFootnotes</boolDependTrue>
             <usfmTex>\AutoCallers{f}{[v]}</usfmTex>
         </setting>
         <setting>
@@ -277,7 +277,7 @@ Todo:
             <key>useNumericCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Footnotes:useNumericCallersFootnotes</boolDependTrue>
+            <boolDependTrue>layoutConfig:Footnotes:useNumericCallersFootnotes</boolDependTrue>
             <usfmTex>\NumericCallers{f}</usfmTex>
         </setting>
         <setting>
@@ -286,7 +286,7 @@ Todo:
             <key>pageResetCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Footnotes:pageResetCallersFootnotes</boolDependTrue>
+            <boolDependTrue>layoutConfig:Footnotes:pageResetCallersFootnotes</boolDependTrue>
             <usfmTex>\PageResetCallers{f}</usfmTex>
         </setting>
         <setting>
@@ -295,7 +295,7 @@ Todo:
             <key>omitCallerInFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Footnotes:omitCallerInFootnotes</boolDependTrue>
+            <boolDependTrue>layoutConfig:Footnotes:omitCallerInFootnotes</boolDependTrue>
             <usfmTex>\OmitCallerInNote{f}</usfmTex>
         </setting>
         <setting>
@@ -304,7 +304,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>Footnotes:paragraphedFootnotes</boolDependTrue>
+            <boolDependTrue>layoutConfig:Footnotes:paragraphedFootnotes</boolDependTrue>
             <usfmTex>\ParagraphedNotes{f}</usfmTex>
         </setting>
         <setting>
@@ -377,7 +377,7 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
-            <boolDependTrue>HeaderFooter:useRunningHeaderRule</boolDependTrue>
+            <boolDependTrue>layoutConfig:HeaderFooter:useRunningHeaderRule</boolDependTrue>
             <usfmTex>\RHruleposition=[vm]</usfmTex>
         </setting>
         <setting>
@@ -490,7 +490,7 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>HeaderContent:showVerseReferences</boolDependTrue>
+            <boolDependTrue>layoutConfig:HeaderContent:showVerseReferences</boolDependTrue>
             <usfmTex>\VerseRefstrue</usfmTex>
         </setting>
         <setting>
@@ -499,7 +499,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>HeaderContent:omitBookReference</boolDependTrue>
+            <boolDependTrue>layoutConfig:HeaderContent:omitBookReference</boolDependTrue>
             <usfmTex>\OmitBookReftrue</usfmTex>
         </setting>
         <setting>
@@ -508,7 +508,7 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>HeaderContent:omitChapterNumberRH</boolDependTrue>
+            <boolDependTrue>layoutConfig:HeaderContent:omitChapterNumberRH</boolDependTrue>
             <usfmTex>\OmitChapterNumberRHtrue</usfmTex>
             <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
@@ -590,25 +590,18 @@ Todo:
         <sectionID>Hyphenation</sectionID>
         <description>Some information for building TeX commands for building the hyphenation control file and other related files located in the project's hyphenation folder.  Some file names are stored in this section.  These are not used in the makefile process and can vary depending on how the process is run.  Note: remember to re-make/overwrite the current TeX Hyphenation file for the changes to take effect.</description>
         <setting>
-            <name>USFM Use Hyphenation</name>
-            <description>Set to true to use hyphenation in the project.  Hyphenation is important to any project but it needs to be setup before it can be used.  Therefore the default is false Default = False</description>
-            <key>useHyphenation</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
             <name>TeX lccode File Name</name>
             <key>lccodeFile</key>
             <description>The name of the file that TeX will call on to load lccode rules for hyphenation.</description>
             <type>string</type>
-            <value>[self:cType]_lccode.tex</value>
+            <value>[self.cType]_lccode.tex</value>
         </setting>
         <setting>
             <name>TeX Hyphen Exceptions File</name>
             <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
             <key>hyphenExceptionsFile</key>
             <type>string</type>
-            <value>[self:cType]_hyphenation.tex</value>
+            <value>[self.cType]_hyphenation.tex</value>
         </setting>
         <setting>
             <name>Create New TeX Hyphen Language Name</name>
@@ -616,7 +609,7 @@ Todo:
             <key>createAndSetHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\def\newlanguage=\[v]\language=\[v]</usfmTex>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -626,7 +619,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>Hyphenation:useHyphenation</boolDependFalse>
+            <boolDependFalse>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependFalse>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -635,7 +628,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"2010</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\defaulthyphenchar=[v]</usfmTex>
         </setting>
         <setting>
@@ -644,7 +637,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -653,7 +646,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\exhyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -662,7 +655,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value></value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\pretolerance=[v]</usfmTex>
         </setting>
         <setting>
@@ -670,7 +663,7 @@ Todo:
             <description>With some TeX input files it matters greatly what the order is in wich they are inputed. This field specifies this order.</description>
             <key>inputsOrder</key>
             <type>list</type>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <value>inputLccodeFile,inputHyphenExceptionsFile</value>
         </setting>
         <setting>
@@ -679,7 +672,7 @@ Todo:
             <key>inputLccodeFile</key>
             <type>string</type>
             <value>[Hyphenation:lccodeFile]</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
@@ -689,7 +682,7 @@ Todo:
             <key>inputHyphenExceptionsFile</key>
             <type>string</type>
             <value>[Hyphenation:hyphenExceptionsFile]</value>
-            <boolDependTrue>Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
@@ -704,7 +697,7 @@ Todo:
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>Illustrations:useFigurePlaceHolders</boolDependTrue>
+            <boolDependTrue>layoutConfig:Illustrations:useFigurePlaceHolders</boolDependTrue>
             <usfmTex>\FigurePlaceholderstrue</usfmTex>
         </setting>
         <setting>
@@ -727,7 +720,7 @@ Todo:
             <key>useIllustrations</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>Illustrations:useIllustrations</boolDependTrue>
+            <boolDependTrue>layoutConfig:Illustrations:useIllustrations</boolDependTrue>
             <usfmTex>\PicPath={[path:projIllustrationsFolder]/}</usfmTex>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
@@ -853,7 +846,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <usfmTex>\CropMarkstrue</usfmTex>
-            <boolDependTrue>PageLayout:useCropmarks</boolDependTrue>
+            <boolDependTrue>layoutConfig:PageLayout:useCropmarks</boolDependTrue>
         </setting>
         <setting>
             <name>USFM TeX Page Border</name>
