@@ -125,10 +125,12 @@ class ProjLog (object) :
             'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
             'XTEX-160' : ['ERR', 'Failed to add lines background to [<<1>>].'],
             'XTEX-165' : ['LOG', 'Successfully added lines background to [<<1>>].'],
-            'XTEX-170' : ['ERR', 'TeX hyphenation dependent file [<<1>>] is missing! This is a required file when hyphenation is turned on.'],
-            'XTEX-180' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
-            'XTEX-190' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
-            'XTEX-200' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
+
+            'HYPH-000' : ['MSG', 'Hyphenation module messages'],
+            'HYPH-010' : ['ERR', 'TeX hyphenation dependent file [<<1>>] is missing! This is a required file when hyphenation is turned on.'],
+            'HYPH-020' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
+            'HYPH-030' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
+            'HYPH-040' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],

@@ -671,7 +671,6 @@ class PT_HyphenTools (Component) :
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
         # On new projects there is no source path let's 'try' this
-        # FIXME: Why is this not done at the project level
         try :
             self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
         except :

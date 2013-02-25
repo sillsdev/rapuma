@@ -26,19 +26,19 @@ Todo:
         <key>ptHyphErrFileName</key>
         <description>The name of the file Rapuma generates which contains words that were rejected by the hyphenation process.</description>
         <type>string</type>
-        <value>[self:cType]_hyphenatedWordErrors.txt</value>
+        <value>hyphenatedWordErrors.txt</value>
     </setting>
     <setting>
-        <name>ParaTExt Hyphenation Import RegEx</name>
-        <key>ptHyphenImportRegEx</key>
-        <description>Hyphenated words from ParaTExt need converting to be used in a TeX hyphen exceptions list. This is regex that will be used with the Python re.sub() function to preform that transformation. This regex is contined in a list of two elements. The list should include both the search and replace sides. These will be inserted into the operating code to do the transformation. In its most basic form it will replace "=" with "-" but you should be able to expand the regex to do much more. Defalt = ("\=", "-")</description>
-        <type>list</type>
-        <value>"\=", "-"</value>
+        <name>Hyphenation Prefix/Suffix File Name</name>
+        <key>prefixSuffixHyphFileName</key>
+        <description>The name of the file that contains prefixes and/or suffixes for project words. This file is optional and if any prefixes or suffixes are found Rapuma will attempt to insert hyphens between any found and the root word.</description>
+        <type>string</type>
+        <value>prefixSuffixHyphens.txt</value>
     </setting>
     <setting>
-        <name>Advanced Hyphenation Import RegEx</name>
-        <key>advancedHyphenImportRegEx</key>
-        <description>Some times additional hyphenation processing is needed. This is a second optional field where you provide a second regex for special transformations. If left blank it will not be used.</description>
+        <name>Hyphenation Word Processing RegEx</name>
+        <key>hyphWordProcessRegEx</key>
+        <description>Some times it is necessary to split root word syllables for hyphenation. This regex is contined in a list of two elements. The list should include both the search and replace sides. These will be inserted into the operating code to do the transformation. This is optional and if left blank, no processing will be attempted.</description>
         <type>list</type>
         <value></value>
     </setting>

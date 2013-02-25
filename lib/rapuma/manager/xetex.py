@@ -42,7 +42,6 @@ class Xetex (Manager) :
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
-        self.pt_tools               = PT_Tools(project)
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg
@@ -52,6 +51,8 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
+        self.pt_tools               = PT_Tools(project)
+        self.hy_tools               = self.managers[self.cType + '_Hyphenation']
         # ConfigObjs
         self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
@@ -307,74 +308,12 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-105', [str(e)])
 
 
-
-
-
-
-
-
-
-
-# FIXME: Need to make sure rules apply all the time
-
-
-
     def makeHyphenExceptionFile (self) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
 
-#        import pdb; pdb.set_trace()
-
-        # If we are using PT, these are the types of word sets that we will
-        # get from it to work with when pt_hyTools.processHyphens() is called:
-        # pt_hyTools.allWords       All words from the master hyphen list
-        # pt_hyTools.hyphenWords    Words spelled with hyphens (can be broken)
-        # pt_hyTools.softHyphWords  Words with inserted soft hyphens (for line breaking)
-        # pt_hyTools.exceptionWords Exception words (not to be acted on)
-        # pt_hyTools.processWords   Words that (may) need hyphens inserted
-        # These are other lists and sets that are used here
-        nonProcess      = set()
-        fullList        = set()
-        # Process starting with the raw PT hyphated words (This is all we can support right now)
-        if self.sourceEditor == 'paratext' :
-            from rapuma.component.usfm import PT_HyphenTools
-            pt_hyTools = PT_HyphenTools(self.project)
-            pt_hyTools.processHyphens()
-            # Report the word harvest to the log
-            rpt = pt_hyTools.wordTotals()
-            for c in rpt :
-                self.project.log.writeToLog('XTEX-200', [c[0], c[1]])
-
-        else :
-            dieNow('Error: Editor not supported: ' + self.sourceEditor)
-
-        # Change to gneric hyphens
-        pt_hyTools.pt2GenHyphens(pt_hyTools.hyphenWords)
-        pt_hyTools.pt2GenHyphens(pt_hyTools.softHyphenWords)
-        pt_hyTools.pt2GenHyphens(self.managers[self.cType + '_Hyphenation'].hardenExceptWords(pt_hyTools.exceptionWords))
-        # Pull together all the words that do not need to be processed but
-        # will be added back in when the process portion is done.
-        nonProcess = pt_hyTools.hyphenWords.union(pt_hyTools.exceptionWords).union(pt_hyTools.softHyphenWords)
-
-        # -----------
-        #
-        # FIXME: At this point we will want to factor in prefixes, suffixes
-        # and exceptions it might look like this:
-        # 1) Check to see if word processing is desired, use a regex to trigger
-        # 2) Look for prefix/suffix file, if found, load it up, set trigger
-        # 3) Loop through the processWords, pull the prefix and/or suffix off (store)
-        # 4) Process the root word with the syllable breaker regex, insert generic markers
-        # 5) Reattach prefix and/or suffix with generic markers
-        # 
-        # -----------
-
-        # Merge the nonProcess words with the processWords
-        fullList = nonProcess.union(pt_hyTools.processWords)
-        # Turn generic hyphen markers into markers that will work with XeTeX
-        self.gen2TexHyphens(fullList)
-        # Change that to a list so it can be sorted
-        texHWordList = list(fullList)
-        texHWordList.sort()
+        # Call the Hyphenation manager to return a sorted list of hyphenated words
+        texHWordList = self.hy_tools.getHyphenatedWords()
         # Create the output file here
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
@@ -387,16 +326,6 @@ class Xetex (Manager) :
             hyphenTexObject.write('}\n')
 
         return True
-
-
-    def gen2TexHyphens (self, wordList) :
-        '''Change generic hyphen markers to plain 002D hyphen characters.'''
-
-        for word in list(wordList) :
-            nw = re.sub(u'<->', u'-', word)
-            if nw != word :
-                wordList.add(nw)
-                wordList.remove(word)
 
 
     def makeLccodeFile (self) :
@@ -795,6 +724,8 @@ class Xetex (Manager) :
         make it.'''
 
         if self.useHyphenation :
+# FIXME: Put a dependency filter here. If this file is older than the source hyphenation 
+# file and/or the prefixSuffixHyphFile (hmmm, need to think here...)
             if not os.path.isfile(self.hyphenTex) :
                 if self.makeHyphenExceptionFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
@@ -802,6 +733,7 @@ class Xetex (Manager) :
                     # If we can't make it, we return False
                     self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
                     return False
+# FIXME: Need a dependency filter here as well
             if not os.path.isfile(self.lccodeTex) :
                 if self.makeLccodeFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTex)])
