@@ -727,9 +727,17 @@ class PT_HyphenTools (Component) :
     def processHyphens(self) :
         '''This controls the processing of the master PT hyphenation file.'''
 
-        # These calls may be order-sensitive
-        self.copyPtHyphenWords()
-        self.backupPtHyphenWords()
+        # These calls may be order-sensitive, update local project source
+        # copy only if there has been a change in the PT source
+        if not os.path.isfile(self.ptProjHyphenFile) or isOlder(self.ptProjHyphenFile, self.ptHyphenFile) :
+#        if isOlder(self.ptProjHyphenFile, self.ptHyphenFile) :
+            self.copyPtHyphenWords()
+            self.backupPtHyphenWords()
+            self.project.log.writeToLog('USFM-050', [fName(self.ptProjHyphenFile)])
+        else :
+            self.project.log.writeToLog('USFM-055', [fName(self.ptProjHyphenFile)])
+
+        # Continue by processing the files located in the project
         self.getAllPtHyphenWords()
         self.getExceptionWords()
         self.getHyphenWords()

@@ -72,8 +72,11 @@ class Hyphenation (Manager) :
         # Data containers for this module
         self.nonProcessWords            = set()
         self.processWords               = set()
+        self.processDict                = dict()
         self.fullList                   = set()
         self.finalList                  = list()
+        self.prefixes                   = list()
+        self.suffixes                   = list()
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
@@ -101,10 +104,14 @@ class Hyphenation (Manager) :
         # Make sure we turn it on if it isn't already
         if not str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
             self.turnOnHyphenation(cType)
+        # Add the files to the project
+        self.updateHyphenation(cType)
 
 
     def removeHyphenation (self, cType) :
-        '''Remove hyphenation from a project for a specified component type.'''
+        '''Remove hyphenation from a project for a specified component type.
+        No removal of files will occure, only the useHyphenation will be set 
+        to false.'''
 
         # Make sure we turn it on if it isn't already
         if str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
@@ -175,11 +182,104 @@ class Hyphenation (Manager) :
         self.makePrefixSuffixHyphFile()
         # The prefixes and suffixes are pulled in with this function:
         self.getPrefixSufixLists()
-        # This will create two sets of data: hy_tools.prefixList and hy_tools.suffixList
+
+
+# FIXME: Think this through, does it need to be some complex since we are working
+# off of an edited word list? Can we just go with regex syllable breaking and call
+# it done? Do we even need to process pre/suf breaks. Isn't that done already?
+
+
+        # Build a regex for both prefixes and suffixes
+        # First sort the lists
+        self.prefixes.sort(key=len,reverse=True)
+        self.prefixes.sort(reverse=True)
+        self.suffixes.sort(key=len,reverse=True)
+        self.suffixes.sort(reverse=True)
+        
+        # Make the Regexes
+        prefixTest = re.compile("^(?ui)(" + ('|'.join(self.prefixes)) + ")(?=-?\w\W{0,6}\w)")
+        suffixTest = re.compile("(?ui)(?<=..)(" + ('|'.join(self.suffixes)) + ")$")
+
+        c = 0
+        for word in frozenset(self.processWords):
+            m = suffixTest.sub(r"-\1", prefixTest.sub(r"\1-", word))
+#            if '-' in m and m[-1] != '-' and not self._hyphenations.has_key(word):
+#                self._hyphenations[word] = m
+#                self._wordlistReport.discard(word)
+            print c, m
+            c +=1
+
+        # Testing
+#        for w in self._hyphenations[word] :
+#            print w
+
+        dieNow()
+
+        # This will create two sets of data: self.prefixes and self.suffixes
         # If either or both have data in them they will be used for building the main
-        # process word dictionary data set.
+        # process word dictionary data set with this:
+        for word in self.processWords :
+
+# FIXME: Some old code from ptxplus
 
 
+
+#        
+#        for word in frozenset(self._wordlistReport):
+#            m = suffixTest.sub(r"-\1", prefixTest.sub(r"\1-", word))
+#            if '-' in m and m[-1] != '-' and not self._hyphenations.has_key(word):
+#                self._hyphenations[word] = m
+#                self._wordlistReport.discard(word)
+#        self.logHyphenCount("prefix/suffix hyphenation")
+
+
+#    def generateRuleBrokenHyphenations(self, hyphenBreakRules):
+#        '''Generate hyphenated words based on a regexp rule supplied by
+#            the conf file.'''
+
+#        if hyphenBreakRules:
+#            try:
+#                hyphenBreaks = re.compile(hyphenBreakRules)
+#            except:
+#                self._log_manager.log("ERRR", "Hyphenation auto-generation failed. Could not compile hyphen break rule:" + str(sys.exc_info()[1]))
+#                raise
+#            for word in frozenset(self._wordlistReport):
+#                hyphenation = word
+#                for off,match in enumerate(hyphenBreaks.finditer(word)):
+#                    hyphenation = hyphenation[:match.end()+off] + '-' + hyphenation[match.end()+off:]
+#                hyphenation = hyphenation.strip('-')
+#                if hyphenation != word and word not in self._hyphenations:
+#                    self._hyphenations[word] = hyphenation
+#                    self._wordlistReport.discard(word)
+#            self.logHyphenCount("Rules based hyphenation")
+
+
+#    def writeHyphenationList(self, newHyphenationFile):
+#        # Output the values sorted by key to the newHyphenationFile (simple word list)
+#        # Turn the hyphenList to a list and sort it on the key.
+#        double_hyphens = re.compile(u'-{2,}')
+#        hyphenkeys = list(set(self._hyphenations.itervalues()))
+#        hyphenkeys.sort()
+#        f = codecs.open(newHyphenationFile, "w", encoding='utf_8')
+#        f.writelines(double_hyphens.sub('-',v).strip('-') +'\n' for v in hyphenkeys)
+#        f.close()
+#        self._log_manager.log('DBUG', "Total hyphenations added = %d" % sum(self._hyphenCounts.itervalues()))
+#        self._log_manager.log("DBUG", "Hyphenated word list created, made " + str(len(hyphenkeys)) + " words.")
+
+#    def writeFailedWords(self,path):
+#        f = codecs.open(path, "w", encoding='utf_8')
+#        words = list(w+'\n' for w in self._wordlistReport)
+#        words.sort(key=len)
+#        f.writelines(words)
+#        f.close()
+
+
+
+
+            self.processDict[word] = [{'pre' : ''}, {'root' : word}, {'suf' : ''}]
+
+        for k in self.processDict.iteritems() :
+            print k
 
         # -----------
         #
@@ -210,6 +310,10 @@ class Hyphenation (Manager) :
         # Turn set into list
         self.finalList = list(self.fullList)
         # Sort the list
+# FIXME: Could we apply this kind of sort instead?
+#        self.prefixes.sort(key=len,reverse=True)
+#        self.prefixes.sort(reverse=True)
+        
         self.finalList.sort()
 
 
@@ -239,8 +343,6 @@ class Hyphenation (Manager) :
     def makePrefixSuffixHyphFile (self) :
         '''Create a file that will (or might) contain prefixes and suffixes.'''
 
-        print self.prefixSuffixHyphFile
-
         if not os.path.isfile(self.prefixSuffixHyphFile) :
             with codecs.open(self.prefixSuffixHyphFile, "w", encoding='utf_8') as psHyphObject :
                 psHyphObject.write('# ' + fName(self.prefixSuffixHyphFile) + '\n')
@@ -254,8 +356,21 @@ class Hyphenation (Manager) :
         '''Call the proper function to create prefix and suffix lists if the file exsists and
         there is data in it.'''
 
-        pass
-
+        if os.path.isfile(self.prefixSuffixHyphFile) :
+            with codecs.open(self.prefixSuffixHyphFile, "r", encoding='utf_8') as psWords :
+                for line in psWords :
+                    # Using the logic that there can only be one word in a line
+                    # if the line contains more than one word it is not wanted
+                    ps = line.split()
+                    if len(ps) == 1 :
+                        # Look for suffixes
+                        if ps[0][:1] == '-' :
+#                            self.suffixes.append(ps[0][1:])
+                            self.suffixes.append(ps[0])
+                        # Look for prefixes
+                        elif ps[0][-1:] == '-' :
+#                            self.prefixes.append(ps[0][:-1])
+                            self.prefixes.append(ps[0])
 
 
 

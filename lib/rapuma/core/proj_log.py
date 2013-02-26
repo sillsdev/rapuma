@@ -310,6 +310,8 @@ class ProjLog (object) :
             'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
             'USFM-030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
             'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
+            'USFM-050' : ['LOG', 'Updated project file: [<<1>>]'],
+            'USFM-055' : ['LOG', 'Did not update project file: [<<1>>]'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

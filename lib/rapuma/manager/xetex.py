@@ -160,9 +160,10 @@ class Xetex (Manager) :
 
     def rtnBoolDepend (self, bdep) :
         '''Return the boolean value of a boolDepend target. This assumes that
-        the format is config:section:key, if it ever becomes different, this breaks.
-        The config is expected to be the common internal reference so consitency is
-        absolutly necessary for this to work.'''
+        the format is config:section:key, or config:section:section:key, if
+        it ever becomes different, this breaks. The config is expected to be 
+        the common internal reference so consitency is absolutly necessary for 
+        this to work.'''
 
         parts = bdep.split(':')
         ptn = len(parts)
@@ -216,7 +217,6 @@ class Xetex (Manager) :
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]
-#        return line.replace(ph, unicode(v, encoding='utf_8'))
         return line.replace(ph, v)
 
 
