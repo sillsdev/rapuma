@@ -24,6 +24,7 @@ import subprocess
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
 from rapuma.component.usfm import PT_Tools
+from rapuma.core.proj_config import ConfigTools
 
 
 ###############################################################################
@@ -42,6 +43,9 @@ class Xetex (Manager) :
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
+        
+        
+        
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg
@@ -52,6 +56,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = PT_Tools(project)
+        self.configTools            = ConfigTools(project)
         self.hy_tools               = self.managers[self.cType + '_Hyphenation']
         # ConfigObjs
         self.projConfig             = project.projConfig
@@ -74,15 +79,18 @@ class Xetex (Manager) :
         # function when we send it the same value in two places. One acts as the line value
         # with a placeholder while acts as the value itself, which happens to need converting.
         lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
-        self.lccodeFile             = self.processLinePlaceholders(lccodeValue, lccodeValue)
+        self.lccodeFile             = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
         hyphenExceptValue           = self.layoutConfig['Hyphenation']['hyphenExceptionsFile']
-        self.hyphenExceptionsFile   = self.processLinePlaceholders(hyphenExceptValue, hyphenExceptValue)
+        self.hyphenExceptionsFile   = self.configTools.processLinePlaceholders(hyphenExceptValue, hyphenExceptValue)
+        compHyphenValue             = self.layoutConfig['Hyphenation']['compHyphenFile']
+        self.compHyphenFile         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
         self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
+        self.projHyphenationFolder  = self.local.projHyphenationFolder
         self.projFontsFolder        = self.local.projFontsFolder
         self.projStylesFolder       = self.local.projStylesFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
@@ -125,8 +133,10 @@ class Xetex (Manager) :
             self.custSty            = ''
         if self.useHyphenation :
             self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenExceptionsFile)
+            self.compHyphen         = os.path.join(self.projHyphenationFolder, self.compHyphenFile)
         else :
             self.hyphenTex          = ''
+            self.compHyphen         = ''
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.cNameFolder) :
@@ -151,13 +161,6 @@ class Xetex (Manager) :
 ############################ Manager Level Functions ##########################
 ###############################################################################
 
-    def addMeasureUnit (self, val) :
-        '''Return the value with the specified measurement unit attached.'''
-        
-        mu = self.managers[self.cType + '_Layout'].layoutConfig['GeneralSettings']['measurementUnit']
-        return val + mu
-
-
     def rtnBoolDepend (self, bdep) :
         '''Return the boolean value of a boolDepend target. This assumes that
         the format is config:section:key, or config:section:section:key, if
@@ -171,53 +174,22 @@ class Xetex (Manager) :
         if ptn == 3 :
             sec = parts[1]
             key = parts[2]
-            if self.hasPlaceHolder(sec) :
-                (holderType, holderKey) = self.getPlaceHolder(sec)
+            if self.configTools.hasPlaceHolder(sec) :
+                (holderType, holderKey) = self.configTools.getPlaceHolder(sec)
                 # system (self) delclaired value
                 if holderType == 'self' :
-                    sec = self.insertValue(sec, getattr(self, holderKey))
+                    sec = self.configTools.insertValue(sec, getattr(self, holderKey))
             return cfg[sec][key]
         if ptn == 4 :
             secA = parts[1]
             secB = parts[2]
             key = parts[3]
-            if self.hasPlaceHolder(secB) :
-                (holderType, holderKey) = self.getPlaceHolder(secB)
+            if self.configTools.hasPlaceHolder(secB) :
+                (holderType, holderKey) = self.configTools.getPlaceHolder(secB)
                 # system (self) delclaired value
                 if holderType == 'self' :
-                    secB = self.insertValue(secB, getattr(self, holderKey))
+                    secB = self.configTools.insertValue(secB, getattr(self, holderKey))
             return cfg[secA][secB][key]
-
-
-    def hasPlaceHolder (self, line) :
-        '''Return True if this line has a data place holder in it.'''
-
-        # If things get more complicated we may need to beef this up a bit
-        if line.find('[') > -1 and line.find(']') > -1 :
-            return True
-
-
-    def getPlaceHolder (self, line) :
-        '''Return place holder type and a key if one exists from a TeX setting line.'''
-
-        begin = line.find('[')
-        end = line.find(']') + 1
-        cnts = line[begin + 1:end - 1]
-        if cnts.find(':') > -1 :
-            return cnts.split(':')
-        elif cnts.find('.') > -1 :
-            return cnts.split('.')
-        else :
-            return cnts, ''
-
-
-    def insertValue (self, line, v) :
-        '''Insert a value where a place holder is.'''
-
-        begin = line.find('[')
-        end = line.find(']') + 1
-        ph = line[begin:end]
-        return line.replace(ph, v)
 
 
     def texFileHeader (self, fName) :
@@ -336,16 +308,23 @@ class Xetex (Manager) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
 
-        # Call the Hyphenation manager to return a sorted list of hyphenated words
-        self.hy_tools.updateHyphenation(self.cType)
         # Create the output file here
         with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
             hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
             hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
             hyphenTexObject.write('\hyphenation{\n')
-            for word in self.hy_tools.finalList :
-                hyphenTexObject.write(word + '\n')
+            # Look for the intermediate component hyphenation file, remake if needed
+            # Go get the file if it is to be had
+            if not os.path.isfile(self.compHyphen) :
+                # Call the Hyphenation manager to create a sorted file of hyphenated words
+                self.hy_tools.updateHyphenation(self.cType)
+            with codecs.open(self.compHyphen, "r", encoding='utf_8') as hyphenWords :
+                for word in hyphenWords :
+                    # Strip out commented lines/words
+                    if word[:1] != '#' and word != '' :
+                        # Swap the generic hyphen markers out if they are there
+                        hyphenTexObject.write(re.sub(u'<->', u'-', word))
 
             hyphenTexObject.write('}\n')
 
@@ -420,38 +399,6 @@ class Xetex (Manager) :
                     self.removeMargVerse()
 
         return True
-
-
-    def processLinePlaceholders (self, line, value) :
-        '''Search a string (or line) for a type of Rapuma placeholder and
-        insert the value. This is for building certain kinds of config values.'''
-
-        # Allow for multiple placeholders with "while"
-        while self.hasPlaceHolder(line) :
-            (holderType, holderKey) = self.getPlaceHolder(line)
-            # Insert the raw value
-            if holderType == 'v' :
-                line = self.insertValue(line, value)
-            # Go get a value from another setting in the self.layoutConfig
-            elif holderType in self.layoutConfig.keys() :
-                holderValue = self.layoutConfig[holderType][holderKey]
-                line = self.insertValue(line, holderValue)
-            # A value that needs a measurement unit attached
-            elif holderType == 'vm' :
-                line = self.insertValue(line, self.addMeasureUnit(value))
-            # A value that is a path
-            elif holderType == 'path' :
-                pth = getattr(self.project.local, holderKey)
-                line = self.insertValue(line, pth)
-            # A value that is a path separater character
-            elif holderType == 'pathSep' :
-                pathSep = os.sep
-                line = self.insertValue(line, pathSep)
-            # A value that contains a system delclaired value
-            elif holderType == 'self' :
-                line = self.insertValue(line, getattr(self, holderKey))
-
-        return line
 
 
     def makeDepSetFile (self) :
@@ -532,7 +479,7 @@ class Xetex (Manager) :
                 for key in inputsOrder :
                     # Here we will write out the contents of the dict and becareful to
                     # put the inputsOrder keys at the end of the section in the order specified
-                    writeObject.write(self.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
+                    writeObject.write(self.configTools.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
 
             # Move on to Fonts, add all the font def commands
             def addParams (writeObject, pList, line) :
@@ -750,7 +697,7 @@ class Xetex (Manager) :
         if self.useHyphenation :
 # FIXME: Put a dependency filter here. If this file is older than the source hyphenation 
 # file and/or the prefixSuffixHyphFile (hmmm, need to think here...)
-            if not os.path.isfile(self.hyphenTex) :
+            if not os.path.isfile(self.hyphenTex) or isOlder(self.hyphenTex, self.compHyphenFile):
                 if self.makeHyphenExceptionFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
                 else :

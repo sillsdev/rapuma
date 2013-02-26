@@ -597,6 +597,13 @@ Todo:
             <value>[self.cType]_lccode.tex</value>
         </setting>
         <setting>
+            <name>Component Hyphen File</name>
+            <description>The master list of hyphenated words for a component to use for hyphenation processes. This is created by other processes and is an intermediate form to be used by the rendering system.</description>
+            <key>compHyphenFile</key>
+            <type>string</type>
+            <value>[self.cType]_hyphenation.txt</value>
+        </setting>
+        <setting>
             <name>TeX Hyphen Exceptions File</name>
             <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
             <key>hyphenExceptionsFile</key>

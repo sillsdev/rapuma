@@ -57,6 +57,99 @@ class ProjConfig (object) :
 
 
 
+class ConfigTools (object) :
+    '''Configuration handling functions.'''
+
+    def __init__(self, project) :
+
+        self.project                = project
+        self.managers               = project.managers
+        self.projConfig             = project.projConfig
+        # FIXME, at some point...
+        # Prob the managers in projConfig to find the cType.
+        # Note this will not work if we ever go to multi-
+        # component-type projects. :-(
+        for manager in self.projConfig['Managers'].keys() :
+            # We will use 'Layout' as our hook
+            if 'Layout' in manager :
+                self.cType          = manager.split('_')[0]
+        self.Ctype                  = self.cType.capitalize()
+        if self.cType + '_Layout' not in self.managers :
+            self.project.createManager(self.cType, 'layout')
+        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+#        self.userConfig             = project.userConfig
+
+
+    def processLinePlaceholders (self, line, value) :
+        '''Search a string (or line) for a type of Rapuma placeholder and
+        insert the value. This is for building certain kinds of config values.'''
+
+        # Allow for multiple placeholders with "while"
+        while self.hasPlaceHolder(line) :
+            (holderType, holderKey) = self.getPlaceHolder(line)
+            # Insert the raw value
+            if holderType == 'v' :
+                line = self.insertValue(line, value)
+            # Go get a value from another setting in the self.layoutConfig
+            elif holderType in self.layoutConfig.keys() :
+                holderValue = self.layoutConfig[holderType][holderKey]
+                line = self.insertValue(line, holderValue)
+            # A value that needs a measurement unit attached
+            elif holderType == 'vm' :
+                line = self.insertValue(line, self.addMeasureUnit(value))
+            # A value that is a path
+            elif holderType == 'path' :
+                pth = getattr(self.project.local, holderKey)
+                line = self.insertValue(line, pth)
+            # A value that is a path separater character
+            elif holderType == 'pathSep' :
+                pathSep = os.sep
+                line = self.insertValue(line, pathSep)
+            # A value that contains a system delclaired value
+            elif holderType == 'self' :
+                line = self.insertValue(line, getattr(self, holderKey))
+
+        return line
+
+
+    def insertValue (self, line, v) :
+        '''Insert a value where a place holder is.'''
+
+        begin = line.find('[')
+        end = line.find(']') + 1
+        ph = line[begin:end]
+
+        return line.replace(ph, v)
+
+
+    def hasPlaceHolder (self, line) :
+        '''Return True if this line has a data place holder in it.'''
+
+        # If things get more complicated we may need to beef this up a bit
+        if line.find('[') > -1 and line.find(']') > -1 :
+            return True
+
+
+    def getPlaceHolder (self, line) :
+        '''Return place holder type and a key if one exists from a TeX setting line.'''
+
+        begin = line.find('[')
+        end = line.find(']') + 1
+        cnts = line[begin + 1:end - 1]
+        if cnts.find(':') > -1 :
+            return cnts.split(':')
+        elif cnts.find('.') > -1 :
+            return cnts.split('.')
+        else :
+            return cnts, ''
+
+
+    def addMeasureUnit (self, val) :
+        '''Return the value with the specified measurement unit attached.'''
+        
+        mu = self.layoutConfig['GeneralSettings']['measurementUnit']
+        return val + mu
+
 
 
 
