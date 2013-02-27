@@ -24,7 +24,7 @@ import os, shutil, warnings
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
-#from rapuma.component.usfm import PT_Tools
+from rapuma.component.usfm import PT_Tools
 
 
 ###############################################################################
@@ -42,7 +42,7 @@ class Style (Manager) :
         super(Style, self).__init__(project, cfg)
 
         # Set values for this manager
-#        self.pt_tools               = PT_Tools(project)
+        self.pt_tools               = PT_Tools(project)
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
@@ -147,7 +147,7 @@ class Style (Manager) :
         project styles too.'''
 
         # First pick up our PT settings
-        ptConf = getPTSettings(self.sourcePath)
+        ptConf = self.pt_tools.getPTSettings()
         if not ptConf :
             return False
 

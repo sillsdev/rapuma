@@ -104,7 +104,7 @@ class Text (Manager) :
             if self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
                 newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
             else :
-                newCompSet = mapPTTextSettings(self.compSettings.dict(), ptSet, True)
+                newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet, True)
 
             if not newCompSet == oldCompSet :
                 self.compSettings.merge(newCompSet)

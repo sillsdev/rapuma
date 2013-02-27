@@ -474,9 +474,7 @@ class Project (object) :
             # Force on add always means we delete the component first
             # before we do anything else
             if force :
-                if not self.removeComponent(cName, force) :
-                    self.log.writeToLog('COMP-140', [cName])
-                    dieNow()
+                self.removeComponent(cName, force)
 
             # Put the (refreshed) settings back in the project config
             if not self.insertComponent(cType, cName, cid) :
@@ -539,24 +537,29 @@ class Project (object) :
         self.createComponent(cName)
 
         # First test for lock
-        if self.isLocked(cName) :
+        if self.isLocked(cName) and force == False :
             self.log.writeToLog('COMP-110', [cName])
             dieNow()
 
         # Remove subcomponents from the target if there are any
-        if self.components[cName].isCompleteComponent(cName) :
+        buildConfSection(self.projConfig, 'Components')
+        if isConfSection(self.projConfig['Components'], cName) :
             # FIXME: What may be needed here is a way to look for conflicts
             # between components that share the same subcomponents.
             for cid in self.components[cName].getSubcomponentList(cName) :
                 cidName = self.components[cName].getRapumaCName(cid)
                 if self.components[cName].isCompleteComponent(cidName) :
                     self.uninstallComponent(cidName, force)
-        # Remove the target component
-        self.uninstallComponent(cName, force)
-        # Test for success
-        if not self.components[cName].isCompleteComponent(cName) :
-            self.log.writeToLog('COMP-120', [cName])
-            return True
+            # Remove the target component
+            self.uninstallComponent(cName, force)
+            # Test for success
+            if not self.components[cName].isCompleteComponent(cName) :
+                self.log.writeToLog('COMP-120', [cName])
+            else :
+                self.log.writeToLog('COMP-140', [cName])
+                dieNow()
+        else :
+            self.log.writeToLog('COMP-150', [cName])
 
 
     def uninstallComponent (self, cName, force = False) :
@@ -567,7 +570,7 @@ class Project (object) :
         This does not return anything. We trust it worked.'''
 
         # First test for lock
-        if self.isLocked(cName) :
+        if self.isLocked(cName) and force == False :
             self.log.writeToLog('COMP-110', [cName])
             dieNow()
 
