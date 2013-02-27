@@ -831,7 +831,7 @@ def userArguments (args) :
         elif args['remove'] :
             aProject.managers[manager].removeHyphenation(args['component_type'])
         elif args['update'] :
-            aProject.managers[manager].updateHyphenation(args['component_type'])
+            aProject.managers[manager].updateHyphenation(args['force'])
 
     # Illustration level commands
     elif sys.argv[1].lower() == 'illustration' :
@@ -1082,6 +1082,7 @@ postprocessCommand.add_argument('project_id', help='Project ID (a positional arg
 postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
 postprocessCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
 postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
+postprocessCommand.add_argument('-f', '--force', action='store_true', help='When used with update (-u), this will delete the source hyphenation file that was copied into the project when it was created. Use this only if you are sure you want to replace it. Any edits done to this file will be lost.')
 postprocessCommand.add_argument('-u', '--update', action='store_true', help='Update the hyphenation files. This is done normally when adjustments are made to configuration or a word list.')
 
 # Add illustration subprocess arguments

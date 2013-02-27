@@ -695,7 +695,7 @@ class PT_HyphenTools (Component) :
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
         self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
         self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
-        self.ptHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
+        self.ptProjHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
         self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
 
 
@@ -703,8 +703,6 @@ class PT_HyphenTools (Component) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.'''
 
         if os.path.isfile(self.ptHyphenFile) :
-            if os.path.isfile(self.ptProjHyphenFile) :
-                os.remove(self.ptProjHyphenFile)
             shutil.copy(self.ptHyphenFile, self.ptProjHyphenFile)
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
@@ -715,17 +713,22 @@ class PT_HyphenTools (Component) :
         '''Backup the ParaTExt project hyphenation words list to the project.'''
 
         if os.path.isfile(self.ptHyphenFile) :
-            if os.path.isfile(self.ptHyphenFileBak) :
-                os.remove(self.ptHyphenFileBak)
-            shutil.copy(self.ptHyphenFile, self.ptHyphenFileBak)
-            makeReadOnly(self.ptHyphenFileBak)
+            shutil.copy(self.ptHyphenFile, self.ptProjHyphenFileBak)
+            makeReadOnly(self.ptProjHyphenFileBak)
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
             dieNow()
 
 
-    def processHyphens(self) :
+    def processHyphens(self, force = None) :
         '''This controls the processing of the master PT hyphenation file.'''
+
+        # The project source files are protected but if force is used
+        # we need to delete them here.
+        if force :
+            os.remove(self.ptProjHyphenFile)
+            os.remove(self.ptProjHyphenFileBak)
+            self.project.log.writeToLog('USFM-060')
 
         # These calls may be order-sensitive, update local project source
         # copy only if there has been a change in the PT source

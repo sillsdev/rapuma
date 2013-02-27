@@ -133,6 +133,7 @@ class ProjLog (object) :
             'HYPH-040' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
             'HYPH-050' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
             'HYPH-055' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
+            'HYPH-060' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
@@ -312,6 +313,7 @@ class ProjLog (object) :
             'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
             'USFM-050' : ['LOG', 'Updated project file: [<<1>>]'],
             'USFM-055' : ['LOG', 'Did not update project file: [<<1>>]'],
+            'USFM-060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
 
             'TEST-000' : ['MSG', 'Test level messages (probably only in project.py)'],
             'TEST-005' : ['MSG', 'TEST-005 - Unassigned error message ID.'],

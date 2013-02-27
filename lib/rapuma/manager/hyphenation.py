@@ -64,12 +64,12 @@ class Hyphenation (Manager) :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig               = self.managers[self.cType + '_Layout'].layoutConfig
         # File Names
-        self.prefixSuffixHyphFileName   = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['prefixSuffixHyphFileName']
+#        self.prefixSuffixHyphFileName   = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['prefixSuffixHyphFileName']
         compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
         self.compHyphenFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
         # Paths
         self.projHyphenationFolder      = project.local.projHyphenationFolder
-        self.prefixSuffixHyphFile       = os.path.join(self.projHyphenationFolder, self.prefixSuffixHyphFileName)
+#        self.prefixSuffixHyphFile       = os.path.join(self.projHyphenationFolder, self.prefixSuffixHyphFileName)
         self.sourcePath                 = getattr(project, cType + '_sourcePath')
         self.compHyphenFile             = os.path.join(self.projHyphenationFolder, self.compHyphenFileName)
         # Misc Settings
@@ -120,21 +120,22 @@ class Hyphenation (Manager) :
             self.turnOffHyphenation(cType)
 
 
-    def updateHyphenation (self, cType) :
+    def updateHyphenation (self, force = None) :
         '''Update critical hyphenation control files for a specified component type.'''
 
         # Clean out the previous version of the component hyphenation file
         if os.path.isfile(self.compHyphenFile) :
             os.remove(self.compHyphenFile)
         # Create a new version
-        self.harvestSource()
+        self.harvestSource(force)
         self.makeHyphenatedWords()
         # Quick sanity test
         if not os.path.isfile(self.compHyphenFile) :
             dieNow('Failed to create: ' + self.compHyphenFile)
+        self.project.log.writeToLog('HYPH-060', [self.cType])
 
 
-    def harvestSource (self) :
+    def harvestSource (self, force = None) :
         '''Harvest from a source hyphenation word list all the properly formated words
         and put them into their proper hyphenation category for further processing. This
         will populate two lists that will be used for further processing. They are
@@ -151,7 +152,7 @@ class Hyphenation (Manager) :
         if self.sourceEditor == 'paratext' :
             from rapuma.component.usfm import PT_HyphenTools
             pt_hyTools = PT_HyphenTools(self.project)
-            pt_hyTools.processHyphens()
+            pt_hyTools.processHyphens(force)
             # Report the word harvest to the log
             rpt = pt_hyTools.wordTotals()
             for c in rpt :
@@ -166,7 +167,10 @@ class Hyphenation (Manager) :
 
         # Pull together all the words that do not need to be processed but
         # will be added back in when the process portion is done.
-        self.nonProcessWords = pt_hyTools.hyphenWords.union(pt_hyTools.exceptionWords).union(pt_hyTools.softHyphenWords)
+#        self.nonProcessWords = pt_hyTools.hyphenWords.union(pt_hyTools.exceptionWords).union(pt_hyTools.softHyphenWords)
+        self.nonProcessWords.update(pt_hyTools.exceptionWords)
+        self.nonProcessWords.update(pt_hyTools.hyphenWords)
+        self.nonProcessWords.update(pt_hyTools.softHyphenWords)
         # For clarity we will declare the set for process words
         self.processWords = pt_hyTools.processWords
 
@@ -221,42 +225,42 @@ class Hyphenation (Manager) :
             nw = re.sub(u'\u002D', u'\u2011', w)
             if w != nw :
                 words.add(nw)
-            words.remove(w)
+                words.remove(w)
 
         return words
 
 
-    def makePrefixSuffixHyphFile (self) :
-        '''Create a file that will (or might) contain prefixes and suffixes.'''
+#    def makePrefixSuffixHyphFile (self) :
+#        '''Create a file that will (or might) contain prefixes and suffixes.'''
 
-        if not os.path.isfile(self.prefixSuffixHyphFile) :
-            with codecs.open(self.prefixSuffixHyphFile, "w", encoding='utf_8') as psHyphObject :
-                psHyphObject.write('# ' + fName(self.prefixSuffixHyphFile) + '\n')
-                psHyphObject.write('# This file may contain prefixes and/or suffixes that are used with project root words.\n')
-                psHyphObject.write('# Each one must be listed on a separate line. Prefixes must have a hyphen character\n')
-                psHyphObject.write('# after it like this: "pre-". Suffixes need to have the same character following it\n')
-                psHyphObject.write('# like this: "-suf". Data in any other form will be ignored.\n\n')
+#        if not os.path.isfile(self.prefixSuffixHyphFile) :
+#            with codecs.open(self.prefixSuffixHyphFile, "w", encoding='utf_8') as psHyphObject :
+#                psHyphObject.write('# ' + fName(self.prefixSuffixHyphFile) + '\n')
+#                psHyphObject.write('# This file may contain prefixes and/or suffixes that are used with project root words.\n')
+#                psHyphObject.write('# Each one must be listed on a separate line. Prefixes must have a hyphen character\n')
+#                psHyphObject.write('# after it like this: "pre-". Suffixes need to have the same character following it\n')
+#                psHyphObject.write('# like this: "-suf". Data in any other form will be ignored.\n\n')
 
 
-    def getPrefixSufixLists (self) :
-        '''Call the proper function to create prefix and suffix lists if the file exsists and
-        there is data in it.'''
+#    def getPrefixSufixLists (self) :
+#        '''Call the proper function to create prefix and suffix lists if the file exsists and
+#        there is data in it.'''
 
-        if os.path.isfile(self.prefixSuffixHyphFile) :
-            with codecs.open(self.prefixSuffixHyphFile, "r", encoding='utf_8') as psWords :
-                for line in psWords :
-                    # Using the logic that there can only be one word in a line
-                    # if the line contains more than one word it is not wanted
-                    ps = line.split()
-                    if len(ps) == 1 :
-                        # Look for suffixes
-                        if ps[0][:1] == '-' :
-#                            self.suffixes.append(ps[0][1:])
-                            self.suffixes.append(ps[0])
-                        # Look for prefixes
-                        elif ps[0][-1:] == '-' :
-#                            self.prefixes.append(ps[0][:-1])
-                            self.prefixes.append(ps[0])
+#        if os.path.isfile(self.prefixSuffixHyphFile) :
+#            with codecs.open(self.prefixSuffixHyphFile, "r", encoding='utf_8') as psWords :
+#                for line in psWords :
+#                    # Using the logic that there can only be one word in a line
+#                    # if the line contains more than one word it is not wanted
+#                    ps = line.split()
+#                    if len(ps) == 1 :
+#                        # Look for suffixes
+#                        if ps[0][:1] == '-' :
+##                            self.suffixes.append(ps[0][1:])
+#                            self.suffixes.append(ps[0])
+#                        # Look for prefixes
+#                        elif ps[0][-1:] == '-' :
+##                            self.prefixes.append(ps[0][:-1])
+#                            self.prefixes.append(ps[0])
 
 
 

@@ -436,17 +436,31 @@ class Xetex (Manager) :
             for section in self.layoutConfig.keys() :
                 writeObject.write('\n% ' + section + '\n')
                 vals = {}
-                inputsOrder = []
+                # Be on the look out for an input ordering field. If there is one
+                # it should have two or more items in the list this becomes the
+                # base for our inputsOrder list used for output
+                try :
+                    inputsOrder = self.layoutConfig[section]['inputsOrder']
+                except :
+                    inputsOrder = []
                 for k, v in self.layoutConfig[section].iteritems() :
-                    # Be on the look out for an input ordering field. If there is one
-                    # it should have two or more items in the list this becomes the
-                    # base for our inputsOrder list used for output
+
+
+# FIXME: Working here
+
+
+                    # If there is an inputsOrder we should.......
                     if k == 'inputsOrder' :
                         # Need to be sure to check for a boolDepend and pick this up 
                         # if it is turned on
                         if testForSetting(macTexVals, k, 'boolDependTrue') and str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
-                            inputsOrder = v
+#                            inputsOrder = v
                             continue
+
+
+
+
+
                     # This will prevent output on empty fields, never output when
                     # there is no value
                     if not v :
@@ -475,6 +489,16 @@ class Xetex (Manager) :
                                 # this will prepend the value to that list. The idea is
                                 # that the ordered output goes last (or at the bottom)
                                 inputsOrder.insert(0, k)
+
+
+
+                if section == 'Hyphenation' :
+                    print inputsOrder
+
+
+
+
+
                 # Write this line out to the TeX settings file
                 for key in inputsOrder :
                     # Here we will write out the contents of the dict and becareful to
@@ -689,22 +713,25 @@ class Xetex (Manager) :
             return True
 
 
+
+
+
+
+
     def checkDepHyphenFile (self) :
         '''If hyphenation is used, check for the exsistance of the TeX Hyphenation 
         files. If one of them is not found, kindly ask the appropreate function to
         make it.'''
 
         if self.useHyphenation :
-# FIXME: Put a dependency filter here. If this file is older than the source hyphenation 
-# file and/or the prefixSuffixHyphFile (hmmm, need to think here...)
-            if not os.path.isfile(self.hyphenTex) or isOlder(self.hyphenTex, self.compHyphenFile):
+            if not os.path.isfile(self.hyphenTex) or isOlder(self.hyphenTex, self.compHyphen):
                 if self.makeHyphenExceptionFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
                 else :
                     # If we can't make it, we return False
                     self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
                     return False
-# FIXME: Need a dependency filter here as well
+# FIXME: Need a dependency filter here
             if not os.path.isfile(self.lccodeTex) :
                 if self.makeLccodeFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTex)])
@@ -716,6 +743,13 @@ class Xetex (Manager) :
         else :
             # If Hyphenation is turned off, we return True and don't need to worry about it.
             return True
+
+
+
+
+
+
+
 
 
     def checkDepCidTex (self, cid) :
