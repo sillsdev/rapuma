@@ -720,14 +720,16 @@ class PT_HyphenTools (Component) :
             dieNow()
 
 
-    def processHyphens(self, force = None) :
+    def processHyphens(self, force = False) :
         '''This controls the processing of the master PT hyphenation file.'''
 
         # The project source files are protected but if force is used
         # we need to delete them here.
         if force :
-            os.remove(self.ptProjHyphenFile)
-            os.remove(self.ptProjHyphenFileBak)
+            if os.path.isfile(self.ptProjHyphenFile) :
+                os.remove(self.ptProjHyphenFile)
+            if os.path.isfile(self.ptProjHyphenFileBak) :
+                os.remove(self.ptProjHyphenFileBak)
             self.project.log.writeToLog('USFM-060')
 
         # These calls may be order-sensitive, update local project source
@@ -919,25 +921,27 @@ class PT_Tools (Component) :
 
         ptSet = self.getPTSettings()
         chars = []
-        for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
-            # Leave it a lone if it is a single character
-            if len(c) == 1 :
-                chars.append(c)
-            # A pair is what we expect
-            elif len(c) == 2 :
-                # We expect "_" to be part of the pair
-                try :
-                    if c.find('_') > 0 :
-                        chars.append(c.replace('_', ''))
-                except Exception as e :
-                    # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog('USFM-010', [str(e)])
+        if testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
+            for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
+                # Leave it a lone if it is a single character
+                if len(c) == 1 :
+                    chars.append(c)
+                # A pair is what we expect
+                elif len(c) == 2 :
+                    # We expect "_" to be part of the pair
+                    try :
+                        if c.find('_') > 0 :
+                            chars.append(c.replace('_', ''))
+                    except Exception as e :
+                        # If we don't succeed, we should probably quite here
+                        self.project.log.writeToLog('USFM-010', [str(e)])
+                        dieNow()
+                else :
+                    # Something really strange happened
+                    self.project.log.writeToLog('USFM-020', [c])
                     dieNow()
-            else :
-                # Something really strange happened
-                self.project.log.writeToLog('USFM-020', [c])
-                dieNow()
-
+        else :
+            self.project.log.writeToLog('USFM-025')
         return chars
 
 
@@ -974,11 +978,12 @@ class PT_Tools (Component) :
         return cid + '.' + postPart
 
 
-    def getPTFont (self) :
-        '''Just return the name of the font used in a PT project.'''
+# FIXME: Depricated?
+#    def getPTFont (self) :
+#        '''Just return the name of the font used in a PT project.'''
 
-        ssf = self.getPTSettings(self.sourcePath)
-        return ssf['ScriptureText']['DefaultFont']
+#        ssf = self.getPTSettings(self.sourcePath)
+#        return ssf['ScriptureText']['DefaultFont']
 
 
     def mapPTTextSettings (self, sysSet, ptSet, force=False) :
