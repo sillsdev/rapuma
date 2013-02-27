@@ -115,6 +115,9 @@ class ConfigTools (object) :
     def insertValue (self, line, v) :
         '''Insert a value where a place holder is.'''
 
+        # Handle empty values here
+        if v == '[empty]' :
+            v = ''
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]

@@ -613,11 +613,21 @@ Todo:
         <setting>
             <name>Create New TeX Hyphen Language Name</name>
             <description>Create a language name to be used for applying or creating hyphenation rules for text of a specific language. (\newlanguage). This setting is active when useHyphenation is set to True and a value is entered in this field.</description>
-            <key>createAndSetHyphenLanguage</key>
+            <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
             <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
-            <usfmTex>\def\newlanguage=\[v]\language=\[v]</usfmTex>
+            <usfmTex>\newlanguage\[v]</usfmTex>
+            <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
+        </setting>
+        <setting>
+            <name>Set TeX Hyphen Language Name</name>
+            <description>Set a language name to be used for applying or creating hyphenation rules for text of a specific language. (\language=). This setting is dependent on the createHyphenLanguage.</description>
+            <key>setHyphenLanguage</key>
+            <type>string</type>
+            <value></value>
+            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <usfmTex>\language=\[v]</usfmTex>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
@@ -625,7 +635,7 @@ Todo:
             <description>Set the default TeX hyphen character to insert at hyphenation breaks (\defaulthyphenchar).  The normal is '‐' (U+2010) but it could be changed to use something like U+200B (ZWSP) Just change the character setting in the value. (Note that normally in the hyphenation word list source text you will find U+002D, a minus sign which also doubles for a hyphen character but it is not a proper one.) Remember to put a '"' (double quote) before the Unicode value, TeX needs this.   Default = "2010</description>
             <key>setHyphenCharacter</key>
             <type>string</type>
-            <value>"2010</value>
+            <value>"002D</value>
             <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
             <usfmTex>\defaulthyphenchar=[v]</usfmTex>
         </setting>

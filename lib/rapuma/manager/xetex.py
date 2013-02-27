@@ -436,31 +436,22 @@ class Xetex (Manager) :
             for section in self.layoutConfig.keys() :
                 writeObject.write('\n% ' + section + '\n')
                 vals = {}
+
+                # Do a precheck here for input order that could affect the section.
                 # Be on the look out for an input ordering field. If there is one
                 # it should have two or more items in the list this becomes the
                 # base for our inputsOrder list used for output
                 try :
-                    inputsOrder = self.layoutConfig[section]['inputsOrder']
+                    # This setting must have a boolDepend, check what it is here
+                    if str2bool(self.rtnBoolDepend(macTexVals['inputsOrder']['boolDependTrue'])) :
+                        inputsOrder = self.layoutConfig[section]['inputsOrder']
+                    else :
+                        inputsOrder = []
                 except :
                     inputsOrder = []
+
+                # Start gathering up all the items in this section now
                 for k, v in self.layoutConfig[section].iteritems() :
-
-
-# FIXME: Working here
-
-
-                    # If there is an inputsOrder we should.......
-                    if k == 'inputsOrder' :
-                        # Need to be sure to check for a boolDepend and pick this up 
-                        # if it is turned on
-                        if testForSetting(macTexVals, k, 'boolDependTrue') and str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
-#                            inputsOrder = v
-                            continue
-
-
-
-
-
                     # This will prevent output on empty fields, never output when
                     # there is no value
                     if not v :
@@ -490,19 +481,8 @@ class Xetex (Manager) :
                                 # that the ordered output goes last (or at the bottom)
                                 inputsOrder.insert(0, k)
 
-
-
-                if section == 'Hyphenation' :
-                    print inputsOrder
-
-
-
-
-
-                # Write this line out to the TeX settings file
+                # Write the lines out according to the inputsOrder
                 for key in inputsOrder :
-                    # Here we will write out the contents of the dict and becareful to
-                    # put the inputsOrder keys at the end of the section in the order specified
                     writeObject.write(self.configTools.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
 
             # Move on to Fonts, add all the font def commands
