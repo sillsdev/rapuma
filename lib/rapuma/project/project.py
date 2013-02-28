@@ -264,18 +264,20 @@ class Project (object) :
         when the component was created. This will pull up the user's differential
         viewer and compare the two files.'''
 
+        # Create the component object now
+        self.createComponent(cName)
         # First check to see if it is a valid component and get the cid
-        if self.hasCNameEntry(cName) :
-            if getUsfmCid(cName) :
-                cid = getUsfmCid(cName)
+        if self.components[cName].hasCNameEntry(cName) :
+            if self.components[cName].getUsfmCid(cName) :
+                cid = self.components[cName].getUsfmCid(cName)
             else :
                 self.log.writeToLog('COMP-185', [cName])
                 dieNow()
         else :
             # Might the cName be a cid?
             cid = cName
-            if getRapumaCName(cid) :
-                cName = getRapumaCName(cid)
+            if self.components[cName].getRapumaCName(cid) :
+                cName = self.components[cName].getRapumaCName(cid)
             else :
                 self.log.writeToLog('COMP-185', [cName])
                 dieNow()
