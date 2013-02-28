@@ -259,47 +259,6 @@ class Project (object) :
             return True
 
 
-    def compareComponent (self, cName) :
-        '''Compare a component with its source which was copied into the project
-        when the component was created. This will pull up the user's differential
-        viewer and compare the two files.'''
-
-        # Create the component object now
-        self.createComponent(cName)
-        # First check to see if it is a valid component and get the cid
-        if self.components[cName].hasCNameEntry(cName) :
-            if self.components[cName].getUsfmCid(cName) :
-                cid = self.components[cName].getUsfmCid(cName)
-            else :
-                self.log.writeToLog('COMP-185', [cName])
-                dieNow()
-        else :
-            # Might the cName be a cid?
-            cid = cName
-            if self.components[cName].getRapumaCName(cid) :
-                cName = self.components[cName].getRapumaCName(cid)
-            else :
-                self.log.writeToLog('COMP-185', [cName])
-                dieNow()
-
-        # Get the working and source file names
-        cType = self.projConfig['Components'][cName]['type']
-        working = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-        for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
-            if files.find('.source') > 0 :
-                source = os.path.join(self.local.projComponentsFolder, cName, files)
-                break
-
-        # Get diff viewer
-        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
-        try :
-            subprocess.call([diffViewer, working, source])
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-180', [str(e)])
-            dieNow()
-
-
     def createComponent (self, cName) :
         '''Create a component object that can be acted on. It is assumed
         this only happens for one component per session. This component
@@ -485,7 +444,7 @@ class Project (object) :
 
             # Install our working text files
             self.createManager(cType, 'text')
-            if self.managers[cType + '_Text'].installUsfmWorkingText(cName, cid, force) :
+            if self.components[cName].installUsfmWorkingText(cName, cid, force) :
 
                 # Finish the install by locking
                 self.lockUnlock(cName, True)
@@ -565,11 +524,10 @@ class Project (object) :
 
 
     def uninstallComponent (self, cName, force = False) :
-        '''This will remove a specific component from a project
-        configuration. However, if force is set to True both the
-        configuration entry and the physical files will be removed.
-        If the component is locked, the function will abort.
-        This does not return anything. We trust it worked.'''
+        '''This will remove a specific component from the project configuration as
+        well as the physical files. However, a backup will be made of the working
+        text for comparison purposes. If the component is locked, the function will
+        abort. This does not return anything. We trust it worked.'''
 
         # First test for lock
         if self.isLocked(cName) and force == False :
@@ -580,6 +538,8 @@ class Project (object) :
         # Otherwise, delete both the config and physical files
         buildConfSection(self.projConfig, 'Components')
         if isConfSection(self.projConfig['Components'], cName) :
+            # We will need to record the cType
+            cType = self.projConfig['Components'][cName]['type']
             del self.projConfig['Components'][cName]
             # Sanity check
             if not isConfSection(self.projConfig['Components'], cName) :
@@ -587,9 +547,21 @@ class Project (object) :
                 self.log.writeToLog('COMP-030', [cName])
             # Hopefully all went well with config delete, now on to the files
             if force :
-                compFolder = os.path.join(self.local.projComponentsFolder, cName)
-                if os.path.isdir(compFolder) :
-                    shutil.rmtree(compFolder)
+                cid             = self.components[cName].getUsfmCid(cName)
+                targetFolder    = os.path.join(self.local.projComponentsFolder, cName)
+                source          = os.path.join(targetFolder, cid + '.' + cType)
+                targetComp      = os.path.join(source + '.cv1')
+                if os.path.isfile(source) :
+                    # First a comparison backup needs to be made of the working text
+                    if os.path.isfile(targetComp) :
+                        makeWriteable(targetComp)
+                    shutil.copy(source, targetComp)
+                    makeReadOnly(targetComp)
+                    for fn in os.listdir(targetFolder) :
+                        f = os.path.join(targetFolder, fn)
+                        if f != targetComp :
+                            os.remove(f)
+
                     self.log.writeToLog('COMP-031', [cName])
                 else :
                     self.log.writeToLog('COMP-032', [cName])
@@ -657,6 +629,58 @@ class Project (object) :
         if not source :
             source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
         self.addComponent(cType, cName, cidList, source, force)
+        
+        # Now do a compare between the old component and the new one
+        if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
+            self.compareComponent(cName, 'working')
+
+
+    def compareComponent (self, cName, test) :
+        '''Compare a component with its source which was copied into the project
+        when the component was created. This will pull up the user's differential
+        viewer and compare the two files.'''
+
+        # Create the component object now (if there is not one)
+        self.createComponent(cName)
+        # First check to see if it is a valid component and get the cid
+        if self.components[cName].hasCNameEntry(cName) :
+            if self.components[cName].getUsfmCid(cName) :
+                cid = self.components[cName].getUsfmCid(cName)
+
+            else :
+                self.log.writeToLog('COMP-185', [cName])
+                dieNow()
+        else :
+            # Might the cName be a cid?
+            cid = cName
+            if self.components[cName].getRapumaCName(cid) :
+                cName = self.components[cName].getRapumaCName(cid)
+            else :
+                self.log.writeToLog('COMP-185', [cName])
+                dieNow()
+
+        # What kind of test is this
+        cType = self.projConfig['Components'][cName]['type']
+        if test == 'working' :
+            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
+        elif test == 'source' :
+            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
+                if files.find('.source') > 0 :
+                    old = os.path.join(self.local.projComponentsFolder, cName, files)
+                    break
+        else :
+            self.log.writeToLog('COMP-190', [test])
+
+        # Get diff viewer
+        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
+        try :
+            subprocess.call([diffViewer, new, old])
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('COMP-180', [str(e)])
+            dieNow()
 
 
 ###############################################################################

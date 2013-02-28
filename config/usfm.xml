@@ -14,6 +14,13 @@ Todo:
 
 <root>
     <setting>
+        <name>Validate Source Text</name>
+        <key>validateUsfm</key>
+        <description>Run a basic USFM validation check on the incoming source text.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
         <name>Current Component</name>
         <key>current</key>
         <description>The current (perhaps more accurately the previously processed) component.</description>

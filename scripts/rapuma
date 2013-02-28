@@ -66,7 +66,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130227194601'
+systemVersion   = '0.1.20130228200451'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -787,7 +787,7 @@ def userArguments (args) :
             aProject.createManager(args['component_type'], 'text')
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
         elif args['compare'] :
-            aProject.compareComponent(args['component_name'])
+            aProject.compareComponent(args['component_name'], args['compare'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -1051,7 +1051,7 @@ compCommand.add_argument('-i', '--id_list', help='Use this if this is a group co
 compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
-compCommand.add_argument('-c', '--compare', action='store_true', help='[NOT WORKING!] Compare a component with its source.')
+compCommand.add_argument('-c', '--compare', help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
 compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
 

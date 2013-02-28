@@ -13,9 +13,9 @@ Todo:
 
 <root>
     <setting>
-        <name>Validate Source Text</name>
-        <key>validateUsfm</key>
-        <description>Run a basic USFM validation check on the incoming source text.</description>
+        <name>Use Auto-compare Feature</name>
+        <key>useAutoCompare</key>
+        <description>When set to True, this will allow a compare to be done on a component.</description>
         <type>boolean</type>
         <value>True</value>
     </setting>
