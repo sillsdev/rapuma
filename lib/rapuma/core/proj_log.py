@@ -88,7 +88,7 @@ class ProjLog (object) :
             'COMP-180' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             'COMP-185' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
             'COMP-190' : ['ERR', 'Compare test: [<<1>>] is not valid.'],
-            'COMP-195' : ['MSG', 'Comparing component: [<<1>>] Close the viewer to return to the terminal prompt.'],
+            'COMP-195' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
             'COMP-200' : ['ERR', 'Process failed with error: [<<1>>]'],
             'COMP-210' : ['ERR', 'Component [<<1>>] not found.'],
             'COMP-220' : ['ERR', 'Component macro package [<<1>>] not supported.'],

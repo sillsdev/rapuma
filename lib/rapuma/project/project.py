@@ -673,15 +673,8 @@ class Project (object) :
         else :
             self.log.writeToLog('COMP-190', [test])
 
-        # Get diff viewer
-        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
-        try :
-            self.log.writeToLog('COMP-195', [cName])
-            subprocess.call([diffViewer, new, old])
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-180', [str(e)])
-            dieNow()
+        self.compare(new, old)
+
 
 
 ###############################################################################
@@ -1083,6 +1076,19 @@ class Project (object) :
 ###############################################################################
 ############################ System Level Functions ###########################
 ###############################################################################
+
+    def compare (self, new, old) :
+        '''Run a compare on two files.'''
+
+        # Get diff viewer
+        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
+        try :
+            self.log.writeToLog('COMP-195', [fName(new),fName(old)])
+            subprocess.call([diffViewer, new, old])
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('COMP-180', [str(e)])
+            dieNow()
 
 
     def run (self, command, opts, userConfig) :

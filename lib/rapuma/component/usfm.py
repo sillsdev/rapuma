@@ -875,16 +875,18 @@ class Usfm (Component) :
 # the following types of words:
 #
 #   1) abc-efg      = abc-efg   / exsiting words that contain a hyphen(s)
-#   2) *abc-efg     = abc-efg   / exception words demarked by '*'
+#   2) *abc-efg     = abc-efg   / approved words (by PT user) demarked by '*'
 #   3) abc=efg      = abc-efg   / soft hyphens are added to a word
 #   4) abcefg       = abcefg    / no hyphens found (may need further processing)
 #
-# (* Note that the "*" demarker is currently not a part of the ParaTExt interface.
-#   This character is added to the file manually by the user. These words will
-#   be hardened - 002D = 2011)
+# (* Note that the "*" demarker is added by ParaTExt as a user approves a given
+#   word. This character must be added manually if any processing is done outside
+#   of PT so that PT can "learn" how words should be hyphenated and will make
+#   better decisions in its automated hyphening. In theory, the user should be
+#   teach PT to the point where no outside processing is needed.
 #
 # There may be some problems with words encountered. If any of the following are
-# found, report and stop processing:
+# found they will be reported but it will not stop processing:
 #
 #   1) mixed syntax is illegal (abc-efg=hij)
 
@@ -900,6 +902,7 @@ class PT_HyphenTools (Component) :
         self.managers               = project.managers
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
+        self.hy_tools               = self.managers[self.cType + '_Hyphenation']
         # On new projects there is no source path let's 'try' this
         try :
             self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
@@ -923,17 +926,24 @@ class PT_HyphenTools (Component) :
         self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
         # Paths
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
-        self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
         self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
-        self.ptProjHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
+        self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
+        self.ptProjHyphenFileBak    = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
         self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
 
 
     def copyPtHyphenWords (self) :
-        '''Simple copy of the ParaTExt project hyphenation words list to the project.'''
+        '''Simple copy of the ParaTExt project hyphenation words list to the project.
+        But for an added twist, we will check and see if a compare file needs to be
+        made for the source file. This is because changes may be made to it and we
+        need to be able to do a compare.'''
 
         if os.path.isfile(self.ptHyphenFile) :
+            # Make the compare file first
+            shutil.copy(self.ptProjHyphenFile, )
             shutil.copy(self.ptHyphenFile, self.ptProjHyphenFile)
+            # Look for a hyphen process script and use it if found
+            self.hy_tools.preprocessSource()
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
             dieNow()

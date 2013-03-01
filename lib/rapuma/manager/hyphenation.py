@@ -63,14 +63,15 @@ class Hyphenation (Manager) :
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig               = self.managers[self.cType + '_Layout'].layoutConfig
-        # File Names
-#        self.prefixSuffixHyphFileName   = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['prefixSuffixHyphFileName']
-        compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
-        self.compHyphenFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
         # Paths
         self.projHyphenationFolder      = project.local.projHyphenationFolder
-#        self.prefixSuffixHyphFile       = os.path.join(self.projHyphenationFolder, self.prefixSuffixHyphFileName)
         self.sourcePath                 = getattr(project, cType + '_sourcePath')
+        # File Names
+        self.ptHyphenFileName           = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        self.ptProjHyphenFile           = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
+        self.ptProjHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
+        compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
+        self.compHyphenFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
         self.compHyphenFile             = os.path.join(self.projHyphenationFolder, self.compHyphenFileName)
         # Misc Settings
         self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
@@ -83,6 +84,18 @@ class Hyphenation (Manager) :
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
+
+    def preprocessSource (self) :
+        '''Run a hyphenation preprocess script on the project's source hyphenation
+        file. This happens when the component type import processes are happening.'''
+
+        pass
+
+
+    def compareWithSource (self) :
+        '''Compare working hyphenation file with the source.'''
+
+        self.project.compare(self.ptProjHyphenFile, self.ptProjHyphenFileBak)
 
 
     def turnOnHyphenation (self) :

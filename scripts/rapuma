@@ -593,11 +593,11 @@ def makeProjectScripts (uc, pid) :
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
-                     'cropmarksOn', 'edit', 'export', 'hyphenationOff', 'hyphenationOn', \
-                      'hyphenationUpdate', 'linesOff', 'linesOn', 'placeholdersOff', \
+                     'cropmarksOn', 'edit', 'export', 'hyphenationCompare', 'hyphenationOff', \
+                      'hyphenationOn', 'hyphenationUpdate', 'linesOff', 'linesOn', 'placeholdersOff', \
                        'placeholdersOn', 'postprocess', 'render', 'restore', 'sendReceive', \
-                          'template', 'update', 'updateScripts', 'view', 'watermarkOff', \
-                            'watermarkOn'] :
+                        'template', 'update', 'updateScripts', 'view', 'watermarkOff', \
+                         'watermarkOn'] :
         fullFile = os.path.join(local.projScriptsFolder, script)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
@@ -623,12 +623,14 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
                 writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
+            elif script == 'hyphenationCompare' :
+                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -c  \n\n')
             elif script == 'hyphenationOff' :
                 writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -r  \n\n')
             elif script == 'hyphenationOn' :
                 writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -a  \n\n')
             elif script == 'hyphenationUpdate' :
-                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -u  \n\n')
+                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -u $1 \n\n')
             elif script == 'linesOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
             elif script == 'linesOn' :
@@ -839,6 +841,8 @@ def userArguments (args) :
             aProject.managers[manager].turnOffHyphenation()
         elif args['update'] :
             aProject.managers[manager].updateHyphenation(args['force'])
+        elif args['compare'] :
+            aProject.managers[manager].compareWithSource()
 
     # Illustration level commands
     elif sys.argv[1].lower() == 'illustration' :
@@ -1084,13 +1088,14 @@ styleCommand.add_argument('-f', '--force', action='store_true', help='Force the 
 styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
 
 # Add text hyphenation processing subprocess arguments
-postprocessCommand = subparsers.add_parser('hyphen', help='General settings for handling component text hyphenation processing commands.')
-postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
-postprocessCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
-postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
-postprocessCommand.add_argument('-f', '--force', action='store_true', help='When used with update (-u), this will delete the source hyphenation file that was copied into the project when it was created. Use this only if you are sure you want to replace it. Any edits done to this file will be lost.')
-postprocessCommand.add_argument('-u', '--update', action='store_true', help='Update the hyphenation files. This is done normally when adjustments are made to configuration or a word list.')
+hyphenCommand = subparsers.add_parser('hyphen', help='General settings for handling component text hyphenation processing commands.')
+hyphenCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+hyphenCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
+hyphenCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
+hyphenCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
+hyphenCommand.add_argument('-f', '--force', action='store_true', help='When used with update (-u), this will delete the source hyphenation file that was copied into the project when it was created. Use this only if you are sure you want to replace it. Any edits done to this file will be lost.')
+hyphenCommand.add_argument('-u', '--update', action='store_true', help='Update the hyphenation files. This is done normally when adjustments are made to configuration or a word list.')
+hyphenCommand.add_argument('-c', '--compare', action='store_true', help='Compare the editable publishing project ParaTExt hyphenation file with its project source.')
 
 # Add illustration subprocess arguments
 illustrationCommand = subparsers.add_parser('illustration', help='General project illustration handling commands help')
