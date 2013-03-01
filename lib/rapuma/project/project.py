@@ -676,6 +676,7 @@ class Project (object) :
         # Get diff viewer
         diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
         try :
+            self.log.writeToLog('COMP-195', [cName])
             subprocess.call([diffViewer, new, old])
         except Exception as e :
             # If we don't succeed, we should probably quite here

@@ -84,43 +84,34 @@ class Hyphenation (Manager) :
 ############################ Manager Level Functions ##########################
 ###############################################################################
 
-    def turnOnHyphenation (self, cType) :
-        '''Turn on hyphenation for a specified component type.'''
 
-        self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation'] = True
-        writeConfFile(self.projConfig)
-        self.project.log.writeToLog('HYPH-050', [cType])
-
-
-    def turnOffHyphenation (self, cType) :
-        '''Turn off hyphenation for a specified component type.'''
-
-        self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation'] = False
-        writeConfFile(self.projConfig)
-        self.project.log.writeToLog('HYPH-055', [cType])
-
-
-    def addHyphenation (self, cType) :
-        '''Add hyphenation to a project for a specified component type.'''
+    def turnOnHyphenation (self) :
+        '''Turn on hyphenation to a project for a specified component type.'''
 
         # Make sure we turn it on if it isn't already
-        if not str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
-            self.turnOnHyphenation(cType)
-        # Add the files to the project
-        self.updateHyphenation(cType)
+        if not str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation']) :
+            self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = True
+            writeConfFile(self.projConfig)
+            self.project.log.writeToLog('HYPH-050', [self.cType])
+        else :
+            self.project.log.writeToLog('HYPH-055', [self.cType])
 
 
-    def removeHyphenation (self, cType) :
-        '''Remove hyphenation from a project for a specified component type.
+    def turnOffHyphenation (self) :
+        '''Turn off hyphenation from a project for a specified component type.
         No removal of files will occure, only the useHyphenation will be set 
         to false.'''
 
         # Make sure we turn it on if it isn't already
-        if str2bool(self.projConfig['Managers'][cType + '_Hyphenation']['useHyphenation']) :
-            self.turnOffHyphenation(cType)
+        if str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation']) :
+            self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = False
+            writeConfFile(self.projConfig)
+            self.project.log.writeToLog('HYPH-060', [self.cType])
+        else :
+            self.project.log.writeToLog('HYPH-065', [self.cType])
 
 
-    def updateHyphenation (self, force = None) :
+    def updateHyphenation (self, force = False) :
         '''Update critical hyphenation control files for a specified component type.'''
 
         # Clean out the previous version of the component hyphenation file
@@ -132,7 +123,7 @@ class Hyphenation (Manager) :
         # Quick sanity test
         if not os.path.isfile(self.compHyphenFile) :
             dieNow('Failed to create: ' + self.compHyphenFile)
-        self.project.log.writeToLog('HYPH-060', [self.cType])
+        self.project.log.writeToLog('HYPH-070', [self.cType])
 
 
     def harvestSource (self, force = None) :

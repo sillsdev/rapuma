@@ -593,7 +593,8 @@ def makeProjectScripts (uc, pid) :
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
     for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
-                     'cropmarksOn', 'edit', 'export', 'linesOff', 'linesOn', 'placeholdersOff', \
+                     'cropmarksOn', 'edit', 'export', 'hyphenationOff', 'hyphenationOn', \
+                      'hyphenationUpdate', 'linesOff', 'linesOn', 'placeholdersOff', \
                        'placeholdersOn', 'postprocess', 'render', 'restore', 'sendReceive', \
                           'template', 'update', 'updateScripts', 'view', 'watermarkOff', \
                             'watermarkOn'] :
@@ -612,7 +613,7 @@ def makeProjectScripts (uc, pid) :
             elif script == 'backup' :
                 writeObject.write('rapuma preserve ' + pid + ' -b \n\n')
             elif script == 'compare' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c \n\n')
+                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c working\n\n')
             elif script == 'cropmarksOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\n')
             elif script == 'cropmarksOn' :
@@ -622,6 +623,12 @@ def makeProjectScripts (uc, pid) :
                 writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
             elif script == 'export' :
                 writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
+            elif script == 'hyphenationOff' :
+                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -r  \n\n')
+            elif script == 'hyphenationOn' :
+                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -a  \n\n')
+            elif script == 'hyphenationUpdate' :
+                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -u  \n\n')
             elif script == 'linesOff' :
                 writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
             elif script == 'linesOn' :
@@ -827,9 +834,9 @@ def userArguments (args) :
         aProject.createManager(args['component_type'], 'hyphenation')
         manager = args['component_type'] + '_Hyphenation'
         if args['add'] :
-            aProject.managers[manager].addHyphenation(args['component_type'])
+            aProject.managers[manager].turnOnHyphenation()
         elif args['remove'] :
-            aProject.managers[manager].removeHyphenation(args['component_type'])
+            aProject.managers[manager].turnOffHyphenation()
         elif args['update'] :
             aProject.managers[manager].updateHyphenation(args['force'])
 
