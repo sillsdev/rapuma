@@ -940,7 +940,7 @@ class PT_HyphenTools (Component) :
 
         if os.path.isfile(self.ptHyphenFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            self.project.encodeCopy(self.cType, self.ptHyphenFile, self.ptProjHyphenFile)
+            utf8Copy(self.ptHyphenFile, self.ptProjHyphenFile)
             # Look for a hyphen process script and use it if found
             self.hy_tools.preprocessSource()
         else :
@@ -953,7 +953,7 @@ class PT_HyphenTools (Component) :
 
         if os.path.isfile(self.ptHyphenFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            self.project.encodeCopy(self.cType, self.ptHyphenFile, self.ptProjHyphenFileBak)
+            utf8Copy(self.ptHyphenFile, self.ptProjHyphenFileBak)
             makeReadOnly(self.ptProjHyphenFileBak)
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])

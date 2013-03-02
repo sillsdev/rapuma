@@ -120,6 +120,15 @@ def makeWriteable (fileName) :
     os.chmod(fileName, stat.S_IWRITE)
 
 
+def utf8Copy (source, target) :
+    '''Ensure a copy is done in utf-8 encoding.'''
+
+    with codecs.open(source, 'rt', 'utf_8_sig') as contents :
+        with codecs.open(target, 'w', 'utf_8_sig') as output :
+            lines = contents.read()
+            output.write(lines)
+
+
 def fName (fullPath) :
     '''Lazy way to extract the file name from a full path 
     using os.path.split().'''

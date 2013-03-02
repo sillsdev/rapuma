@@ -673,8 +673,8 @@ class Project (object) :
         else :
             self.log.writeToLog('COMP-190', [test])
 
+        # Turn it over to the generic compare tool
         self.compare(new, old)
-
 
 
 ###############################################################################
@@ -1077,33 +1077,23 @@ class Project (object) :
 ############################ System Level Functions ###########################
 ###############################################################################
 
+    def isDifferent (self, new, old) :
+        '''Return True if the contents of the files are different.'''
 
-
-
-
-
-
-
-
-    def compare (self, new, old) :
-        '''Run a compare on two files.'''
-
-
-# FIXME: The problem at this point is that different line endings case a false positive
-# Need a function that will normalize all line endings in a file
-
-# might want to use filecmp()
-
-        diff = difflib.ndiff(open(new).readlines(), open(old).readlines())
+        # Inside of diffl() open both files with universial line endings then
+        # check each line for differences.
+        diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())
         comp = False
         for d in diff :
             if d[:1] == '+' or d[:1] == '-' :
-                print d
-                comp = True
-#                break
-        
-#        if not filecmp.cmp(new, old, shallow=True) :
-        if comp :
+                return True
+
+
+    def compare (self, new, old) :
+        '''Run a compare on two files. Do not open in viewer unless it is different.'''
+
+        # If there are any differences, open the diff viewer
+        if self.isDifferent(new, old) :
             # Get diff viewer
             diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
             try :
@@ -1115,18 +1105,6 @@ class Project (object) :
                 dieNow()
         else :
             self.log.writeToLog('COMP-198')
-
-
-    def encodeCopy (self, cType, source, target) :
-        '''Copy a file and encode it to the project's encoding setting.'''
-
-        self.createManager(cType, 'text')
-        if self.managers[cType + '_Text'].sourceEncode == self.managers[cType + '_Text'].workEncode :
-            with codecs.open(source, 'rt', 'utf_8_sig') as contents :
-                with codecs.open(target, 'w', 'utf_8_sig') as output :
-                    lines = contents.read()
-                    lines = re.sub(u'/u002D', '', lines)
-                    output.write(lines)
 
 
     def run (self, command, opts, userConfig) :
