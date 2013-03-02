@@ -735,6 +735,24 @@ class Project (object) :
 ########################## Text Processing Functions ##########################
 ###############################################################################
 
+    def turnOnPreprocess (self, cType) :
+        '''Turn on preprocessing on incoming component text.'''
+
+        self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = True
+        writeConfFile(self.projConfig)
+
+# FIXME: working here, make this for both on and off
+
+
+        self.log.writeToLog('PREP-010', [cType])
+
+
+
+
+
+
+
+
     def runProcessScript (self, cName, scriptFileName = None) :
         '''Run a text processing script on a component (including subcomponents).
         This assumes the component and the script are valid and the component 

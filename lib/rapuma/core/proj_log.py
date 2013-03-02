@@ -138,6 +138,9 @@ class ProjLog (object) :
             'HYPH-060' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
             'HYPH-065' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
             'HYPH-070' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
+            'HYPH-080' : ['ERR', 'New preprocess script copied into the project. Please edit.'],
+            'HYPH-090' : ['MSG', 'Ran preprocess script on project hyphenation source file.'],
+            'HYPH-100' : ['ERR', 'Failed to run preprocess script on project hyphenation source file.'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],

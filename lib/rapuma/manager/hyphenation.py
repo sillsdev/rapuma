@@ -19,7 +19,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, re
+import os, re, shutil, subprocess
 
 
 # Load the local classes
@@ -64,10 +64,15 @@ class Hyphenation (Manager) :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig               = self.managers[self.cType + '_Layout'].layoutConfig
         # Paths
+        self.projScriptsFolder          = project.local.projScriptsFolder
         self.projHyphenationFolder      = project.local.projHyphenationFolder
+        self.rapumaScriptsFolder        = project.local.rapumaScriptsFolder
         self.sourcePath                 = getattr(project, cType + '_sourcePath')
         # File Names
+        self.sourcePreProcessScriptName = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
         self.ptHyphenFileName           = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        self.rapumaPreProcessScript     = os.path.join(self.rapumaScriptsFolder, self.sourcePreProcessScriptName)
+        self.projPreProcessScript       = os.path.join(self.projScriptsFolder, self.cType + '_' + self.sourcePreProcessScriptName)
         self.ptProjHyphenFile           = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
         self.ptProjHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
         compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
@@ -75,6 +80,7 @@ class Hyphenation (Manager) :
         self.compHyphenFile             = os.path.join(self.projHyphenationFolder, self.compHyphenFileName)
         # Misc Settings
         self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.useHyphenSourcePreprocess  = self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']
         # Data containers for this module
         self.nonProcessWords            = set()
         self.processWords               = set()
@@ -89,7 +95,20 @@ class Hyphenation (Manager) :
         '''Run a hyphenation preprocess script on the project's source hyphenation
         file. This happens when the component type import processes are happening.'''
 
-        pass
+        if self.useHyphenSourcePreprocess :
+            if not os.path.isfile(self.projPreProcessScript) :
+                shutil.copy(self.rapumaPreProcessScript, self.projPreProcessScript)
+                makeExecutable(self.projPreProcessScript)
+                self.project.log.writeToLog('HYPH-080')
+                dieNow()
+            else :
+                err = subprocess.call([self.projPreProcessScript, self.ptProjHyphenFile])
+                if err == 0 :
+                    self.project.log.writeToLog('HYPH-090')
+                    return True
+                else :
+                    self.project.log.writeToLog('HYPH-095')
+                    return False
 
 
     def compareWithSource (self) :
@@ -133,6 +152,9 @@ class Hyphenation (Manager) :
         # Clean out the previous version of the component hyphenation file
         if os.path.isfile(self.compHyphenFile) :
             os.remove(self.compHyphenFile)
+        # Run a hyphenation source preprocess if specified
+        if self.useHyphenSourcePreprocess :
+            self.preprocessSource()
         # Create a new version
         self.harvestSource(force)
         self.makeHyphenatedWords()
@@ -167,19 +189,18 @@ class Hyphenation (Manager) :
             # Change to gneric hyphens
             pt_hyTools.pt2GenHyphens(pt_hyTools.hyphenWords)
             pt_hyTools.pt2GenHyphens(pt_hyTools.softHyphenWords)
-            pt_hyTools.pt2GenHyphens(self.managers[self.cType + '_Hyphenation'].hardenExceptWords(pt_hyTools.exceptionWords))
+            pt_hyTools.pt2GenHyphens(self.managers[self.cType + '_Hyphenation'].hardenExceptWords(pt_hyTools.approvedWords))
 
         else :
             dieNow('Error: Editor not supported: ' + self.sourceEditor)
 
         # Pull together all the words that do not need to be processed but
         # will be added back in when the process portion is done.
-#        self.nonProcessWords = pt_hyTools.hyphenWords.union(pt_hyTools.exceptionWords).union(pt_hyTools.softHyphenWords)
-        self.nonProcessWords.update(pt_hyTools.exceptionWords)
+        self.nonProcessWords.update(pt_hyTools.approvedWords)
         self.nonProcessWords.update(pt_hyTools.hyphenWords)
         self.nonProcessWords.update(pt_hyTools.softHyphenWords)
         # For clarity we will declare the set for process words
-        self.processWords = pt_hyTools.processWords
+        self.nonHyphenWords = pt_hyTools.nonHyphenWords
 
 
     def doProcessWords (self) :

@@ -220,35 +220,42 @@ Todo:
         <setting>
             <name>Rapuma Documentation Folder</name>
             <key>rapumaDocumentFolder</key>
-            <description>The Rapuma document folder where Rapuma documentation is kept.</description>
+            <description>The Rapuma document docs folder where Rapuma documentation is kept.</description>
             <type>list</type>
             <value>docs</value>
         </setting>
         <setting>
             <name>Rapuma Fonts Folder</name>
             <key>rapumaFontsFolder</key>
-            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
+            <description>The Rapuma resource fonts folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,fonts</value>
         </setting>
         <setting>
             <name>Rapuma Macros Folder</name>
             <key>rapumaMacrosFolder</key>
-            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
+            <description>The Rapuma resource macros folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,macros</value>
         </setting>
         <setting>
+            <name>Rapuma Scripts Folder</name>
+            <key>rapumaScriptsFolder</key>
+            <description>The Rapuma resource scripts folder where various Rapuma system resources are kept.</description>
+            <type>list</type>
+            <value>resources,scripts</value>
+        </setting>
+        <setting>
             <name>Rapuma Examples Folder</name>
             <key>rapumaExamplesFolder</key>
-            <description>The Rapuma resource folder where various Rapuma project examples are kept.</description>
+            <description>The Rapuma resource examples folder where various Rapuma project examples are kept.</description>
             <type>list</type>
             <value>resources,examples</value>
         </setting>
         <setting>
             <name>Rapuma Illustrations Folder</name>
             <key>rapumaIllustrationsFolder</key>
-            <description>The Rapuma resource folder where various Rapuma system resources are kept.</description>
+            <description>The Rapuma resource illustrations folder where various Rapuma system resources are kept.</description>
             <type>list</type>
             <value>resources,illustrations</value>
         </setting>

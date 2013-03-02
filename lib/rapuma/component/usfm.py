@@ -458,16 +458,20 @@ class Usfm (Component) :
                 if self.usfmCopy(targetSource, target, projSty) :
 
                     # Run any working text preprocesses on the new component text
-                    scriptFileName = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
-                    preProScript = os.path.join(self.project.local.projScriptsFolder, scriptFileName)
-                    if os.path.isfile(preProScript) :
-#                        import pdb; pdb.set_trace()
-                        if self.project.isLocked(cName) :
-                            self.project.lockUnlock(cName, False, True)
-                        if not self.project.runProcessScript(cName, preProScript) :
+                    usePreprocessScript     = self.project.projConfig['CompTypes'][self.cType.capitalize()]['usePreprocessScript']
+                    preprocessScriptName    = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
+                    rapumaPreprocessScript  = os.path.join(self.project.local.rapumaScriptsFolder, preprocessScriptName)
+                    preprocessScript        = os.path.join(self.project.local.projScriptsFolder, self.cType + '_' + preprocessScriptName)
+                    if self.project.isLocked(cName) :
+                        self.project.lockUnlock(cName, False, True)
+                    if usePreprocessScript :
+                        if not os.path.isfile(preprocessScript) :
+                            shutil.copy(rapumaPreprocessScript, preprocessScript)
+                            makeExecutable(preprocessScript)
+                        if not self.project.runProcessScript(cName, preprocessScript) :
                             self.project.log.writeToLog('USFM-130', [cName])
-                        if not self.project.isLocked(cName) :
-                            self.project.lockUnlock(cName, True, True)
+                    if not self.project.isLocked(cName) :
+                        self.project.lockUnlock(cName, True, True)
 
                     # If this is a USFM component type we need to remove any \fig markers,
                     # and record them in the illustration.conf file for later use
@@ -918,9 +922,9 @@ class PT_HyphenTools (Component) :
         self.goodPtHyphenWords      = set()
         self.badWords               = set()
         self.hyphenWords            = set()
-        self.exceptionWords         = set()
+        self.approvedWords          = set()
         self.softHyphenWords        = set()
-        self.processWords           = set()
+        self.nonHyphenWords         = set()
         # File Names
         self.ptHyphErrFileName      = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
         self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
@@ -961,7 +965,9 @@ class PT_HyphenTools (Component) :
 
 
     def processHyphens(self, force = False) :
-        '''This controls the processing of the master PT hyphenation file.'''
+        '''This controls the processing of the master PT hyphenation file. The end
+        result are four data sets that are ready to be handed off to the next part
+        of the process.'''
 
         # The project source files are protected but if force is used
         # we need to delete them here.
@@ -975,7 +981,6 @@ class PT_HyphenTools (Component) :
         # These calls may be order-sensitive, update local project source
         # copy only if there has been a change in the PT source
         if not os.path.isfile(self.ptProjHyphenFile) or isOlder(self.ptProjHyphenFile, self.ptHyphenFile) :
-#        if isOlder(self.ptProjHyphenFile, self.ptHyphenFile) :
             self.copyPtHyphenWords()
             self.backupPtHyphenWords()
             self.project.log.writeToLog('USFM-050', [fName(self.ptProjHyphenFile)])
@@ -984,24 +989,44 @@ class PT_HyphenTools (Component) :
 
         # Continue by processing the files located in the project
         self.getAllPtHyphenWords()
-        self.getExceptionWords()
+        self.getApprovedWords()
         self.getHyphenWords()
         self.getSoftHyphenWords()
-        self.getProcessWords()
+        self.getNonHyhpenWords()
 
 
-    def getExceptionWords (self) :
-        '''Return a data set of exception words found in a ParaTExt project
+    def getAllPtHyphenWords (self) :
+        '''Return a data set of all the words found in a ParaTExt project
+        hyphated words text file. The Py set() method is used for moving
+
+        the data because some lists can get really big. This will return the
+        entire wordlist as it is found in the ptHyphenFile. That can be used
+        for other processing.'''
+
+        # Go get the file if it is to be had
+        if os.path.isfile(self.ptProjHyphenFile) :
+            with codecs.open(self.ptProjHyphenFile, "r", encoding='utf_8') as hyphenWords :
+                for line in hyphenWords :
+                    # Using the logic that there can only be one word in a line
+                    # if the line contains more than one word it is not wanted
+                    word = line.split()
+                    if len(word) == 1 :
+                        self.allPtHyphenWords.add(word[0])
+
+            # Now remove any bad/mal-formed words
+            self.checkForBadWords()
+
+
+    def getApprovedWords (self) :
+        '''Return a data set of approved words found in a ParaTExt project
         hyphen word list that have a '*' in front of them. This indicates that
-
-        they need to be spelled and rendered just as they are, they cannot be
-        broken. This set will go on for further processing, normally "hardening" 
-        will be done.'''
+        the spelling has been manually approved by the user. These words may
+        or may not contain hyphens'''
 
         # Go get the file if it is to be had
         for word in list(self.goodPtHyphenWords) :
             if word[:1] == '*' :
-                self.exceptionWords.add(word[1:])
+                self.approvedWords.add(word[1:])
                 self.goodPtHyphenWords.remove(word)
 
 
@@ -1018,7 +1043,9 @@ class PT_HyphenTools (Component) :
 
 
     def getSoftHyphenWords (self) :
-        '''Return a data set of words that contain user-injected soft hyphens.'''
+        '''Return a data set of words that contain soft hyphens but have not
+        been approved by the user. These are normally created by PT or some
+        external process.'''
 
         for word in list(self.goodPtHyphenWords) :
             if '=' in word :
@@ -1026,17 +1053,15 @@ class PT_HyphenTools (Component) :
                 self.goodPtHyphenWords.remove(word)
 
 
-    def getProcessWords (self) :
-        '''Return a data set of words that contain words that do not contain
-        hyphens, soft hyphens or are exceptions. These words, if desired, may
+    def getNonHyhpenWords (self) :
+        '''Return a data set of words that do not contain hyphens. These are
+        words that cannot normally be broken. This process must be run after
+        getApprovedWords(), getSoftHyphenWords() and getHyphenWords().'''
 
-        have further proecesses done to them. This process must be run after
-        getExceptionWords(), getSoftHyphenWords() and getHyphenWords().'''
-
-        self.processWords = self.goodPtHyphenWords.copy()
-        self.processWords.difference_update(self.exceptionWords)
-        self.processWords.difference_update(self.softHyphenWords)
-        self.processWords.difference_update(self.hyphenWords)
+        self.nonHyphenWords = self.goodPtHyphenWords.copy()
+        self.nonHyphenWords.difference_update(self.approvedWords)
+        self.nonHyphenWords.difference_update(self.softHyphenWords)
+        self.nonHyphenWords.difference_update(self.hyphenWords)
 
 
     def checkForBadWords (self) :
@@ -1064,38 +1089,18 @@ class PT_HyphenTools (Component) :
             self.project.log.writeToLog('USFM-030', [self.ptHyphErrFile])
 
 
-    def getAllPtHyphenWords (self) :
-        '''Return a data set of all the words found in a ParaTExt project
-        hyphated words text file. The Py set() method is used for moving
-        the data because some lists can get really big. This will return the
-        entire wordlist as it is found in the ptHyphenFile. That can be used
-        for other processing.'''
-
-        # Go get the file if it is to be had
-        if os.path.isfile(self.ptProjHyphenFile) :
-            with codecs.open(self.ptProjHyphenFile, "r", encoding='utf_8') as hyphenWords :
-                for line in hyphenWords :
-                    # Using the logic that there can only be one word in a line
-                    # if the line contains more than one word it is not wanted
-                    word = line.split()
-                    if len(word) == 1 :
-                        self.allPtHyphenWords.add(word[0])
-
-            self.checkForBadWords()
-
-
     def wordTotals (self) :
         '''Return a report on word processing totals. For accuracy this is
-        dependent on getExceptionWords(), getSoftHyphenWords(), getHyphenWords()
-        and getProcessWords to be run before it. If the difference is off, die
+        dependent on getApprovedWords(), getSoftHyphenWords(), getHyphenWords()
+        and getNonHyhpenWords to be run before it. If the difference is off, die
         here and report the numbers.'''
 
         wrds = len(self.allPtHyphenWords)
         badw = len(self.badWords)
-        excp = len(self.exceptionWords)
+        excp = len(self.approvedWords)
         soft = len(self.softHyphenWords)
         hyph = len(self.hyphenWords)
-        pwrd = len(self.processWords)
+        pwrd = len(self.nonHyphenWords)
         diff = wrds - (badw + excp + soft + hyph + pwrd)
         
         rpt = '\tAll words = ' + str(wrds) + '\n' \

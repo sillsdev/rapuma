@@ -15,11 +15,25 @@ Todo:
 
 <root>
     <setting>
-        <name>USFM Use Hyphenation</name>
+        <name>Use Hyphenation</name>
         <description>Set to true to use hyphenation in the project.  Hyphenation is important to any project but it needs to be setup before it can be used.  Therefore the default is false Default = False</description>
         <key>useHyphenation</key>
         <type>boolean</type>
         <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Hyphenation Source Preprocess</name>
+        <description>Set to true to use hyphenation source preprocessing. However, a hyphenation preprocess script will need to be present for it to work.</description>
+        <key>useHyphenSourcePreprocess</key>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Source Hyphenation Preprocess Script</name>
+        <key>sourcePreProcessScriptName</key>
+        <description>The name of the source hyphenation preprocess script file.</description>
+        <type>string</type>
+        <value>hyphenPreprocess.py</value>
     </setting>
     <setting>
         <name>ParaTExt Hyphenation File Name</name>
@@ -34,13 +48,6 @@ Todo:
         <description>The name of the file Rapuma generates which contains words that were rejected by the hyphenation process.</description>
         <type>string</type>
         <value>hyphenatedWordErrors.txt</value>
-    </setting>
-    <setting>
-        <name>Hyphenation Prefix/Suffix File Name</name>
-        <key>prefixSuffixHyphFileName</key>
-        <description>The name of the file that contains prefixes and/or suffixes for project words. This file is optional and if any prefixes or suffixes are found Rapuma will attempt to insert hyphens between any found and the root word.</description>
-        <type>string</type>
-        <value>prefixSuffixHyphens.txt</value>
     </setting>
     <setting>
         <name>Hyphenation Word Processing RegEx</name>

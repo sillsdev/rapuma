@@ -797,6 +797,8 @@ def userArguments (args) :
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
         elif args['compare'] :
             aProject.compareComponent(args['component_name'], args['compare'])
+        elif args['preprocess'] :
+            aProject.turnOnPreprocess(args['component_type'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -854,22 +856,6 @@ def userArguments (args) :
             aProject.managers[manager].installWatermarkFile(args['watermark'], args['path'], args['force'])
         elif args['remove'] :
             aProject.managers[manager].removeIllustrationFile(args['remove'])
-
-    # Preprocessing commands
-    elif sys.argv[1].lower() == 'preprocess' :
-        # Manage preprocess scripts for a component type. This is an automated 
-        # function. If desired a script will be installed and the user will manually
-        # edit it to their needs. When working text is installed, if there is a
-        # preprocess registered for that component type, the process will be run
-        # on the incoming text. This set of commands facilitating installing the
-        # the default script or removing the installed script, if force is used.
-
-        # Install a custom or a default preprocess script, force to overwrite what is there
-        if args['add'] :
-            aProject.installPreprocess(args['component_type'], args['force'])
-        # Disconnect a preprocessing script from the component type (this does not physically remove it)
-        elif args['remove'] :
-            aProject.removePreprocess(args['component_type'], args['force'])
 
     # Post processing commands
     elif sys.argv[1].lower() == 'postprocess' :
@@ -1065,6 +1051,7 @@ compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WOR
 compCommand.add_argument('-c', '--compare', help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
 compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
+compCommand.add_argument('-o', '--preprocess', action='store_true', help='Use preprocessing when importing and updating components.')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
@@ -1106,14 +1093,6 @@ illustrationCommand.add_argument('-w', '--watermark', help='Provide a file name 
 illustrationCommand.add_argument('-r', '--remove', help='Provide a file name for an illustration you wish to remove from the project.')
 illustrationCommand.add_argument('-p', '--path', help='If the illustration is in a unknown location, provide a valid path to where the illustration that is specified with -a.')
 illustrationCommand.add_argument('-f', '--force', action='store_true', help='Force (overwrite) an illustration of the same name in the specified project.')
-
-# Add text preprocessing subprocess arguments
-preprocessCommand = subparsers.add_parser('preprocess', help='General settings for handling component preprocessing commands.')
-preprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-preprocessCommand.add_argument('component_type', help='Specify the component type. This is required for a preprocess operation.')
-preprocessCommand.add_argument('-a', '--add', action='store_true', help='Install the default preprocess script into the project scripts folder. It will fail if one already exsists, unless force (-f) is used to overwrite it.')
-preprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a preprocess from the component type. This does not remove the actual script from the project, unless force (-f) is used. Then the script will be deleted.')
-preprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a preprocess script to be reset to default or removed.')
 
 # Add text post processing subprocess arguments
 postprocessCommand = subparsers.add_parser('postprocess', help='General settings for handling component post processing commands.')
