@@ -932,16 +932,15 @@ class PT_HyphenTools (Component) :
         self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
 
 
+###############################################################################
+
     def copyPtHyphenWords (self) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
-        But for an added twist, we will check and see if a compare file needs to be
-        made for the source file. This is because changes may be made to it and we
-        need to be able to do a compare.'''
+        We will also create a backup as well to be used for comparison or fallback.'''
 
         if os.path.isfile(self.ptHyphenFile) :
-            # Make the compare file first
-            shutil.copy(self.ptProjHyphenFile, )
-            shutil.copy(self.ptHyphenFile, self.ptProjHyphenFile)
+            # Use a special kind of copy to prevent problems with BOMs
+            self.project.encodeCopy(self.cType, self.ptHyphenFile, self.ptProjHyphenFile)
             # Look for a hyphen process script and use it if found
             self.hy_tools.preprocessSource()
         else :
@@ -953,7 +952,8 @@ class PT_HyphenTools (Component) :
         '''Backup the ParaTExt project hyphenation words list to the project.'''
 
         if os.path.isfile(self.ptHyphenFile) :
-            shutil.copy(self.ptHyphenFile, self.ptProjHyphenFileBak)
+            # Use a special kind of copy to prevent problems with BOMs
+            self.project.encodeCopy(self.cType, self.ptHyphenFile, self.ptProjHyphenFileBak)
             makeReadOnly(self.ptProjHyphenFileBak)
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])

@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO
+import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO, filecmp, difflib
 from configobj import ConfigObj, Section
 
 
@@ -1077,18 +1077,56 @@ class Project (object) :
 ############################ System Level Functions ###########################
 ###############################################################################
 
+
+
+
+
+
+
+
+
     def compare (self, new, old) :
         '''Run a compare on two files.'''
 
-        # Get diff viewer
-        diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
-        try :
-            self.log.writeToLog('COMP-195', [fName(new),fName(old)])
-            subprocess.call([diffViewer, new, old])
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-180', [str(e)])
-            dieNow()
+
+# FIXME: The problem at this point is that different line endings case a false positive
+# Need a function that will normalize all line endings in a file
+
+# might want to use filecmp()
+
+        diff = difflib.ndiff(open(new).readlines(), open(old).readlines())
+        comp = False
+        for d in diff :
+            if d[:1] == '+' or d[:1] == '-' :
+                print d
+                comp = True
+#                break
+        
+#        if not filecmp.cmp(new, old, shallow=True) :
+        if comp :
+            # Get diff viewer
+            diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
+            try :
+                self.log.writeToLog('COMP-195', [fName(new),fName(old)])
+                subprocess.call([diffViewer, new, old])
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
+                self.log.writeToLog('COMP-180', [str(e)])
+                dieNow()
+        else :
+            self.log.writeToLog('COMP-198')
+
+
+    def encodeCopy (self, cType, source, target) :
+        '''Copy a file and encode it to the project's encoding setting.'''
+
+        self.createManager(cType, 'text')
+        if self.managers[cType + '_Text'].sourceEncode == self.managers[cType + '_Text'].workEncode :
+            with codecs.open(source, 'rt', 'utf_8_sig') as contents :
+                with codecs.open(target, 'w', 'utf_8_sig') as output :
+                    lines = contents.read()
+                    lines = re.sub(u'/u002D', '', lines)
+                    output.write(lines)
 
 
     def run (self, command, opts, userConfig) :

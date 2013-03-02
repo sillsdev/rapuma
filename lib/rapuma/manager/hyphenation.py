@@ -93,7 +93,10 @@ class Hyphenation (Manager) :
 
 
     def compareWithSource (self) :
-        '''Compare working hyphenation file with the source.'''
+        '''Compare working hyphenation file with the original copied read-only
+        source file found in the project. This will help to konw what preprocess
+        changes were made (if changes where made) when it was imported into the
+        project. '''
 
         self.project.compare(self.ptProjHyphenFile, self.ptProjHyphenFileBak)
 
@@ -190,13 +193,6 @@ class Hyphenation (Manager) :
                 if nw != word :
                     self.processWords.add(nw)
                     self.processWords.remove(word)
-
-#            for w in self.processWords :
-#                print w
-#                
-#            dieNow()
-
-
 
 
     def makeHyphenatedWords (self) :
