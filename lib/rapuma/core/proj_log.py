@@ -138,8 +138,9 @@ class ProjLog (object) :
             'HYPH-060' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
             'HYPH-065' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
             'HYPH-070' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
-            'HYPH-080' : ['ERR', 'New preprocess script copied into the project. Please edit.'],
-            'HYPH-090' : ['MSG', 'Ran preprocess script on project hyphenation source file.'],
+            'HYPH-080' : ['ERR', 'New default hyphen preprocess script copied into the project. Please edit before using.'],
+            'HYPH-090' : ['MSG', 'Ran hyphen preprocess script on project hyphenation source file.'],
+            'HYPH-095' : ['ERR', 'Preprocess script failed to run on source file.'],
             'HYPH-100' : ['ERR', 'Failed to run preprocess script on project hyphenation source file.'],
 
             'TEXT-000' : ['MSG', 'Text module messages'],
@@ -236,6 +237,8 @@ class ProjLog (object) :
             'PROC-130' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
             'PROC-140' : ['MSG', 'Component preprocessing has already been set to [<<1>>] for type [<<2>>].'],
             'PROC-150' : ['MSG', 'Component preprocessing for type [<<1>>] is already set to [<<2>>].'],
+            'PROC-160' : ['WRN', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
+            'PROC-165' : ['LOG', 'Component preprocessing script is already installed.'],
 
             'POST-000' : ['MSG', 'Messages for post processing issues (mainly found in project.py)'],
             'POST-010' : ['ERR', 'The component type specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],

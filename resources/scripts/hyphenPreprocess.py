@@ -16,9 +16,6 @@ from rapuma.core.tools import *
 
 source = sys.argv[1]
 tempFile = source + '.tmp'
-bakFile = source + '.bak'
-# Make backup and temp file
-shutil.copy(source, bakFile)
 
 # Read in the source file
 contents = codecs.open(source, "rt", encoding="utf_8_sig").read()

@@ -646,7 +646,6 @@ class Project (object) :
         if self.components[cName].hasCNameEntry(cName) :
             if self.components[cName].getUsfmCid(cName) :
                 cid = self.components[cName].getUsfmCid(cName)
-
             else :
                 self.log.writeToLog('COMP-185', [cName])
                 dieNow()
@@ -744,6 +743,8 @@ class Project (object) :
         if current != onOff :
             if onOff == True :
                 self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = True
+                # Now check to see if the script is there and warn if not
+                self.installPreprocess(cType)
             else :
                 self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = False
 
@@ -751,6 +752,24 @@ class Project (object) :
             self.log.writeToLog('PROC-140', [str(onOff),cType])
         else :
             self.log.writeToLog('PROC-150', [cType,str(onOff)])
+
+
+    def installPreprocess (self, cType) :
+        '''Check to see if a preprocess script is installed. If not, install the
+        default script and give a warning that the script is not complete.'''
+
+        # File paths
+        preprocessScriptName   = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
+        rapumaPreprocessScript = os.path.join(self.local.rapumaScriptsFolder, preprocessScriptName)
+        preprocessScript       = os.path.join(self.local.projScriptsFolder, cType + '_' + preprocessScriptName)
+        # Check and copy if needed
+        if not os.path.isfile(preprocessScript) :
+            shutil.copy(rapumaPreprocessScript, preprocessScript)
+            makeExecutable(preprocessScript)
+            self.log.writeToLog('PROC-160')
+            dieNow()
+        else :
+            self.log.writeToLog('PROC-165')
 
 
     def runProcessScript (self, cName, scriptFileName = None) :
@@ -815,11 +834,11 @@ class Project (object) :
         return True
 
 
-    def recordPreprocessScript (self, cType, script) :
-        '''Record a preprocess script in the project.'''
+#    def recordPreprocessScript (self, cType, script) :
+#        '''Record a preprocess script in the project.'''
 
-        self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(script)
-        writeConfFile(self.projConfig)
+#        self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(script)
+#        writeConfFile(self.projConfig)
 
 
     def scriptInstall (self, source, target) :

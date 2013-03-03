@@ -58,9 +58,13 @@ class Usfm (Component) :
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.adjustmentConfFile     = self.project.local.adjustmentConfFile
         self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.usePreprocessScript    = self.project.projConfig['CompTypes'][self.cType.capitalize()]['usePreprocessScript']
         # Get the comp settings
         self.compSettings = self.project.projConfig['CompTypes'][self.Ctype]
-
+        # File paths
+        self.preprocessScriptName   = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
+        self.rapumaPreprocessScript = os.path.join(self.project.local.rapumaScriptsFolder, self.preprocessScriptName)
+        self.preprocessScript       = os.path.join(self.project.local.projScriptsFolder, self.cType + '_' + self.preprocessScriptName)
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
         if newSectionSettings != self.project.projConfig['CompTypes'][self.Ctype] :
@@ -69,7 +73,7 @@ class Usfm (Component) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-        # Build a tuple of managers
+        # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
@@ -101,11 +105,7 @@ class Usfm (Component) :
         # manager (It might be better to do this elsewhere, but where?)
         self.project.managers[self.cType + '_Text'].updateManagerSettings()
 
-
-
-
-
-
+        # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
 
 
@@ -456,19 +456,13 @@ class Usfm (Component) :
                 # To be sure nothing happens, copy from our project source
                 # backup file.
                 if self.usfmCopy(targetSource, target, projSty) :
-
                     # Run any working text preprocesses on the new component text
-                    usePreprocessScript     = self.project.projConfig['CompTypes'][self.cType.capitalize()]['usePreprocessScript']
-                    preprocessScriptName    = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
-                    rapumaPreprocessScript  = os.path.join(self.project.local.rapumaScriptsFolder, preprocessScriptName)
-                    preprocessScript        = os.path.join(self.project.local.projScriptsFolder, self.cType + '_' + preprocessScriptName)
                     if self.project.isLocked(cName) :
                         self.project.lockUnlock(cName, False, True)
-                    if usePreprocessScript :
-                        if not os.path.isfile(preprocessScript) :
-                            shutil.copy(rapumaPreprocessScript, preprocessScript)
-                            makeExecutable(preprocessScript)
-                        if not self.project.runProcessScript(cName, preprocessScript) :
+                    if self.usePreprocessScript :
+                        if not os.path.isfile(self.preprocessScript) :
+                            self.project.installPreprocess(self.cType)
+                        if not self.project.runProcessScript(cName, self.preprocessScript) :
                             self.project.log.writeToLog('USFM-130', [cName])
                     if not self.project.isLocked(cName) :
                         self.project.lockUnlock(cName, True, True)
