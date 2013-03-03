@@ -798,7 +798,7 @@ def userArguments (args) :
         elif args['compare'] :
             aProject.compareComponent(args['component_name'], args['compare'])
         elif args['preprocess'] :
-            aProject.turnOnPreprocess(args['component_type'])
+            aProject.turnOnOffPreprocess(args['component_type'], args['preprocess'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -1051,7 +1051,7 @@ compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WOR
 compCommand.add_argument('-c', '--compare', help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
 compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
-compCommand.add_argument('-o', '--preprocess', action='store_true', help='Use preprocessing when importing and updating components.')
+compCommand.add_argument('-o', '--preprocess', help='Turn on or off preprocessing when importing and updating components. To turn it on use "True", to turn off, use "False"')
 
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

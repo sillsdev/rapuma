@@ -735,22 +735,22 @@ class Project (object) :
 ########################## Text Processing Functions ##########################
 ###############################################################################
 
-    def turnOnPreprocess (self, cType) :
-        '''Turn on preprocessing on incoming component text.'''
+    def turnOnOffPreprocess (self, cType, onOff = False) :
+        '''Turn on or off preprocessing on incoming component text.'''
 
-        self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = True
-        writeConfFile(self.projConfig)
+        # Current status
+        current = self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript']
 
-# FIXME: working here, make this for both on and off
+        if current != onOff :
+            if onOff == True :
+                self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = True
+            else :
+                self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = False
 
-
-        self.log.writeToLog('PREP-010', [cType])
-
-
-
-
-
-
+            writeConfFile(self.projConfig)
+            self.log.writeToLog('PROC-140', [str(onOff),cType])
+        else :
+            self.log.writeToLog('PROC-150', [cType,str(onOff)])
 
 
     def runProcessScript (self, cName, scriptFileName = None) :
@@ -763,7 +763,7 @@ class Project (object) :
         if self.components[cName].isCompleteComponent(cName) :
             cType = self.components[cName].getComponentType(cName)
         else :
-            self.log.writeToLog('PREP-010', [cType])
+            self.log.writeToLog('PROC-110', [cType])
             dieNow()
 
         # Find the script we will use. It is assumed that if there is
@@ -772,7 +772,7 @@ class Project (object) :
         if scriptFileName :
             script = os.path.join(self.local.projScriptsFolder, scriptFileName)
             if not os.path.isfile(script) :
-                self.log.writeToLog('PREP-020', [cType])
+                self.log.writeToLog('PROC-120', [cType])
                 return False
         else :
             if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
@@ -780,13 +780,13 @@ class Project (object) :
                     scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
                     script = os.path.join(self.local.projScriptsFolder, scriptFileName)
                     if not os.path.isfile(script) :
-                        self.log.writeToLog('PREP-020', [cType])
+                        self.log.writeToLog('PROC-120', [cType])
                         return False
 
         # Check to see if the component is locked
         if testForSetting(self.projConfig['Components'][cName], 'isLocked') :
             if str2bool(self.projConfig['Components'][cName]['isLocked']) == True :
-                self.log.writeToLog('PREP-030', [cType])
+                self.log.writeToLog('PROC-130', [cType])
                 return False
 
         # If we made it this far, we can try running it
@@ -820,80 +820,6 @@ class Project (object) :
 
         self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] = fName(script)
         writeConfFile(self.projConfig)
-
-
-    def installPreprocess (self, cType, force = None) :
-        '''Install a preprocess script into the main components processing
-        folder for a specified component type. If installed This script 
-        will be run on every file of that type that is imported into the 
-        project. 
-        
-        This is a fairly open process. a default script will be installed
-        then the user will need to modify it.'''
-
-        # Define some internal vars
-        # Hard-coded preprocess file name (might there be another way?)
-        scriptFileName = cType + '-preprocess.py'
-        scriptSource = os.path.join(self.local.rapumaCompTypeFolder, cType, scriptFileName)
-
-        scriptTargetFolder  = self.local.projScriptsFolder
-        scriptTarget        = os.path.join(scriptTargetFolder, scriptFileName)
-
-        # First check for prexsisting script and record, if there is,
-        # just go a head and put a new one in and return
-        if force :
-            if os.path.isfile(scriptTarget) :
-                os.remove(scriptTarget)
-
-        # Look for an exsiting script and warn if found
-        if os.path.isfile(scriptTarget) :
-            self.log.writeToLog('PREP-085', [scriptFileName])
-            self.recordPreprocessScript(cType, scriptTarget)
-            return True
-
-        # At this point we are looking at a fresh install
-        # In case this is a new project we may need to install a component
-        # type and make a process (components) folder
-        if not self.components[cType] :
-            self.addComponentType(cType)
-
-        # Make the target folder if needed
-        if not os.path.isdir(scriptTargetFolder) :
-            os.makedirs(scriptTargetFolder)
-
-        # No script found, we can proceed
-        self.scriptInstall(scriptSource, scriptTarget)
-        if not os.path.isfile(scriptTarget) :
-            dieNow('Failed to install script!: ' + fName(scriptTarget))
-        else :
-            self.recordPreprocessScript(cType, scriptTarget)
-            self.log.writeToLog('PREP-110', [fName(scriptTarget)])
-            return True
-
-
-    def removePreprocess (self, cType, force = False) :
-        '''Remove (actually disconnect) a preprocess script from a
-        component type. This will not actually remove the script. That
-        would need to be done manually. Rather, this will remove the
-        script name entry from the component type so the process cannot
-        be accessed for this specific component type.'''
-
-        Ctype = cType.capitalize()
-        # Hard-coded preprocess file name (might there be another way?)
-        scriptFileName = cType + '-preprocess.py'
-        # Remove the old file if force is used
-        if force :
-            preProScript = os.path.join(self.local.projScriptsFolder, scriptFileName)
-            if os.path.isfile(preProScript) :
-                os.remove(preProScript)
-                self.log.writeToLog('PREP-140', [scriptFileName,Ctype])
-
-        # Moving on, reset the field to ''
-        self.projConfig['CompTypes'][Ctype]['preprocessScript'] = ''
-        writeConfFile(self.projConfig)
-        self.log.writeToLog('PREP-130', [scriptFileName,Ctype])
-
-        return True
 
 
     def scriptInstall (self, source, target) :
