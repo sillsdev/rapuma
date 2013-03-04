@@ -34,8 +34,6 @@ from rapuma.core.proj_config import ConfigTools
 
 class Hyphenation (Manager) :
 
-#    _hyphens_re = re.compile(u'\u002D|\u00AD|\u2010') # Don't include U+2011 so we don't break on it.
-
     # Shared values
     xmlConfFile     = 'hyphenation.xml'
 
@@ -82,10 +80,7 @@ class Hyphenation (Manager) :
         self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.useHyphenSourcePreprocess  = self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']
         # Data containers for this module
-        self.nonProcessWords            = set()
-        self.processWords               = set()
-        self.fullList                   = set()
-        self.finalList                  = list()
+        self.allHyphenWords             = set()
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
@@ -165,17 +160,15 @@ class Hyphenation (Manager) :
 
 
     def harvestSource (self, force = None) :
-        '''Harvest from a source hyphenation word list all the properly formated words
-        and put them into their proper hyphenation category for further processing. This
-        will populate two lists that will be used for further processing. They are
-        self.nonProcessWords, and self.processWords.'''
+        '''Call on the component type to harvest sets of hyphenation words
+        from its source list. These will be combined to form the master set.'''
 
         # Break our source down into the following sets:
-        # allWords       All words from the master hyphen list
-        # hyphenWords    Words spelled with hyphens (can be broken)
-        # softHyphWords  Words with inserted soft hyphens (for line breaking)
-        # exceptionWords Exception words (not to be acted on)
-        # processWords   Words that (may) need hyphens inserted
+        # allWords          All words from the master hyphen list
+        # approvedWords     Words of any kind that the user has explicitly approved
+        # hyphenWords       Words spelled with hyphens (can be broken)
+        # softHyphWords     Words with inserted soft hyphens (for line breaking)
+        # nonHyphenWords    Exception words (not to be acted on but included in list)
 
         # Process according to sourceEditor (PT is all we can support right now)
         if self.sourceEditor == 'paratext' :
@@ -187,33 +180,18 @@ class Hyphenation (Manager) :
             for c in rpt :
                 self.project.log.writeToLog('HYPH-040', [c[0], c[1]])
             # Change to gneric hyphens
+            pt_hyTools.pt2GenHyphens(pt_hyTools.approvedWords)
             pt_hyTools.pt2GenHyphens(pt_hyTools.hyphenWords)
             pt_hyTools.pt2GenHyphens(pt_hyTools.softHyphenWords)
-            pt_hyTools.pt2GenHyphens(self.managers[self.cType + '_Hyphenation'].hardenExceptWords(pt_hyTools.approvedWords))
-
         else :
             dieNow('Error: Editor not supported: ' + self.sourceEditor)
 
-        # Pull together all the words that do not need to be processed but
-        # will be added back in when the process portion is done.
-        self.nonProcessWords.update(pt_hyTools.approvedWords)
-        self.nonProcessWords.update(pt_hyTools.hyphenWords)
-        self.nonProcessWords.update(pt_hyTools.softHyphenWords)
-        # For clarity we will declare the set for process words
-        self.nonHyphenWords = pt_hyTools.nonHyphenWords
-
-
-    def doProcessWords (self) :
-        '''If there is a regex for word processing, run all the words in
-        the processWords set through the regex.'''
-
-        pwRegex = self.projConfig['Managers'][self.cType + '_Hyphenation']['hyphWordProcessRegEx']
-        if pwRegex :
-            for word in list(self.processWords) :
-                nw = re.sub(pwRegex[0], pwRegex[1], word)
-                if nw != word :
-                    self.processWords.add(nw)
-                    self.processWords.remove(word)
+        # Pull together all the words that will be in our final list.
+        self.allHyphenWords.update(pt_hyTools.approvedWords)
+        self.allHyphenWords.update(pt_hyTools.hyphenWords)
+        self.allHyphenWords.update(pt_hyTools.softHyphenWords)
+        # Add nonHyphenWords because they are exceptions
+        self.allHyphenWords.update(pt_hyTools.nonHyphenWords)
 
 
     def makeHyphenatedWords (self) :
@@ -222,12 +200,8 @@ class Hyphenation (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        # See if there is any thing to be done with the processWords set
-        self.doProcessWords()
-        # Merge the nonProcess words with the processWords
-        self.fullList = self.nonProcessWords.union(self.processWords)
         # Turn set into list
-        self.finalList = list(self.fullList)
+        self.finalList = list(self.allHyphenWords)
         # Sort the list
         self.finalList.sort()
         # Output to the project storage file for other processes
@@ -237,51 +211,6 @@ class Hyphenation (Manager) :
             for word in self.finalList :
                 compHyphObject.write(word + '\n')
 
-
-    def hardenExceptWords (self, words) :
-        '''Harden a list of hyphated words by changing soft hyphens
-        for non-breaking hyphens.'''
-
-        for w in list(words) :
-            nw = re.sub(u'\u002D', u'\u2011', w)
-            if w != nw :
-                words.add(nw)
-                words.remove(w)
-
-        return words
-
-
-#    def makePrefixSuffixHyphFile (self) :
-#        '''Create a file that will (or might) contain prefixes and suffixes.'''
-
-#        if not os.path.isfile(self.prefixSuffixHyphFile) :
-#            with codecs.open(self.prefixSuffixHyphFile, "w", encoding='utf_8') as psHyphObject :
-#                psHyphObject.write('# ' + fName(self.prefixSuffixHyphFile) + '\n')
-#                psHyphObject.write('# This file may contain prefixes and/or suffixes that are used with project root words.\n')
-#                psHyphObject.write('# Each one must be listed on a separate line. Prefixes must have a hyphen character\n')
-#                psHyphObject.write('# after it like this: "pre-". Suffixes need to have the same character following it\n')
-#                psHyphObject.write('# like this: "-suf". Data in any other form will be ignored.\n\n')
-
-
-#    def getPrefixSufixLists (self) :
-#        '''Call the proper function to create prefix and suffix lists if the file exsists and
-#        there is data in it.'''
-
-#        if os.path.isfile(self.prefixSuffixHyphFile) :
-#            with codecs.open(self.prefixSuffixHyphFile, "r", encoding='utf_8') as psWords :
-#                for line in psWords :
-#                    # Using the logic that there can only be one word in a line
-#                    # if the line contains more than one word it is not wanted
-#                    ps = line.split()
-#                    if len(ps) == 1 :
-#                        # Look for suffixes
-#                        if ps[0][:1] == '-' :
-##                            self.suffixes.append(ps[0][1:])
-#                            self.suffixes.append(ps[0])
-#                        # Look for prefixes
-#                        elif ps[0][-1:] == '-' :
-##                            self.prefixes.append(ps[0][:-1])
-#                            self.prefixes.append(ps[0])
 
 
 

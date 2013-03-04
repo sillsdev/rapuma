@@ -939,7 +939,7 @@ class PT_HyphenTools (Component) :
         if os.path.isfile(self.ptHyphenFile) :
             # Use a special kind of copy to prevent problems with BOMs
             utf8Copy(self.ptHyphenFile, self.ptProjHyphenFile)
-            # Look for a hyphen process script and use it if found
+            # Once copied, check if any preprocessing is needed
             self.hy_tools.preprocessSource()
         else :
             self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
@@ -961,7 +961,9 @@ class PT_HyphenTools (Component) :
     def processHyphens(self, force = False) :
         '''This controls the processing of the master PT hyphenation file. The end
         result are four data sets that are ready to be handed off to the next part
-        of the process.'''
+        of the process. It is assumed that at this point we have a valid PT hyphen
+        file that came out of PT that way or it was fixed during copy by a preprocess
+        script that was made to fix specific problems.'''
 
         # The project source files are protected but if force is used
         # we need to delete them here.

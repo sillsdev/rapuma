@@ -49,12 +49,5 @@ Todo:
         <type>string</type>
         <value>hyphenatedWordErrors.txt</value>
     </setting>
-    <setting>
-        <name>Hyphenation Word Processing RegEx</name>
-        <key>hyphWordProcessRegEx</key>
-        <description>Some times it is necessary to split root word syllables for hyphenation. This regex is contined in a list of two elements. The list should include both the search and replace sides. These will be inserted into the operating code to do the transformation. This is optional and if left blank, no processing will be attempted.</description>
-        <type>list</type>
-        <value></value>
-    </setting>
 </root>
 
