@@ -58,7 +58,6 @@ class Usfm (Component) :
         self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.adjustmentConfFile     = self.project.local.adjustmentConfFile
         self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.usePreprocessScript    = self.project.projConfig['CompTypes'][self.cType.capitalize()]['usePreprocessScript']
         # Get the comp settings
         self.compSettings = self.project.projConfig['CompTypes'][self.Ctype]
         # File paths
@@ -459,7 +458,7 @@ class Usfm (Component) :
                     # Run any working text preprocesses on the new component text
                     if self.project.isLocked(cName) :
                         self.project.lockUnlock(cName, False, True)
-                    if self.usePreprocessScript :
+                    if str2bool(self.usePreprocessScript) :
                         if not os.path.isfile(self.preprocessScript) :
                             self.project.installPreprocess(self.cType)
                         if not self.project.runProcessScript(cName, self.preprocessScript) :
@@ -502,6 +501,7 @@ class Usfm (Component) :
         # Bring in our source text
         if self.project.managers[self.cType + '_Text'].sourceEncode == self.project.managers[self.cType + '_Text'].workEncode :
             contents = codecs.open(source, 'rt', 'utf_8_sig')
+            print contents
             lines = contents.read()
         else :
             # Lets try to change the encoding.

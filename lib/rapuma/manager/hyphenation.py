@@ -90,7 +90,7 @@ class Hyphenation (Manager) :
         '''Run a hyphenation preprocess script on the project's source hyphenation
         file. This happens when the component type import processes are happening.'''
 
-        if self.useHyphenSourcePreprocess :
+        if str2bool(self.useHyphenSourcePreprocess) :
             if not os.path.isfile(self.projPreProcessScript) :
                 shutil.copy(self.rapumaPreProcessScript, self.projPreProcessScript)
                 makeExecutable(self.projPreProcessScript)
