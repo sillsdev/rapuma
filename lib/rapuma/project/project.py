@@ -192,6 +192,21 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
+    def listAllComponents (self, cType, cName) :
+        '''Generate a list of valid component IDs and cNames for this cType.'''
+
+        # Create the component object now
+        self.createComponent(cName)
+        # Get the component info dictionary
+        comps = self.components[cName].usfmCidInfo()
+        # List and sort
+        cList = list(comps.keys())
+        cList.sort()
+        # For now we'll output to terminal but may want to change this later.
+        for c in cList :
+            print c, comps[c][1]
+
+
     def setProjCurrent (self, pid) :
         '''Compare pid with the current recored pid e rapuma.conf. If it is
         different change to the new pid. If not, leave it alone.'''
