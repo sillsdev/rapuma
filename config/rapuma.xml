@@ -102,13 +102,6 @@ Todo:
         <sectionID>Resources</sectionID>
         <description>This section contains the location of addition resources the user may wish to access. Note resources in these specified locations will override any in the system of the same name.</description>
         <setting>
-            <name>Send/Receive Path</name>
-            <key>sendReceivePath</key>
-            <description>The full path to where projects will connect with a cloud storage system.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>Fonts Collection Path</name>
             <key>fonts</key>
             <description>The full path to where fonts are kept on this system that the user would like to access. Note that there must be a valid XML description file for each font family.</description>
@@ -154,6 +147,13 @@ Todo:
             <name>Project Templates Path</name>
             <key>templates</key>
             <description>The full path to where templates are kept on this system that the user will need access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Project Cloud Path</name>
+            <key>cloud</key>
+            <description>The full path to where cloud backups are kept on this system that the user will need access.</description>
             <type>string</type>
             <value></value>
         </setting>

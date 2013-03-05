@@ -57,7 +57,11 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pt_tools               = PT_Tools(project)
         self.configTools            = ConfigTools(project)
-        self.hy_tools               = self.managers[self.cType + '_Hyphenation']
+        try :
+            self.hy_tools           = self.managers[self.cType + '_Hyphenation']
+        except :
+            self.project.createManager(self.cType, 'hyphenation')
+            self.hy_tools           = self.managers[self.cType + '_Hyphenation']
         # ConfigObjs
         self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
