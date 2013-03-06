@@ -45,24 +45,17 @@ def dieNow (msg = '') :
     sys.exit(msg)
 
 
-def isOlder (child, parent) :
-    '''Check to see if the child (dependent) is older (has accumulated more
-    time) than the parent.  Return true if it is.'''
+def isOlder (first, second) :
+    '''Check to see if the first file is older than the second.
+    Return True if it is. This assumes that both files exist. If
+    not, then throw and exception error.'''
 
-    # If the child file is missing, it cannot be older than the parent
-    if not os.path.isfile(child) :
-        return False
-
-    # If the parent file is missing, the child is older by virture of exsistance :-)
-    if not os.path.isfile(parent) :
-        return True
-
-    childTime = int(os.path.getctime(child))
-    parentTime = int(os.path.getctime(parent))
-    if childTime < parentTime :
-        return True
-    else :
-        return False
+    try :
+        if int(os.path.getmtime(first)) > int(os.path.getmtime(second)) :
+            return True
+    except Exception as e :
+        # If this doesn't work, we should probably quite here
+        dieNow('Error: isOlder() failed with this error: ' + str(e))
 
 
 def isExecutable (fn) :

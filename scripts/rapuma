@@ -66,7 +66,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130228200451'
+systemVersion   = '0.1.20130306122042'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -285,7 +285,7 @@ def backupProject (pid) :
     zipUpProject(projHome, backupTarget, excludeFiles)
 
     # Finish here
-    terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget)
+    terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget + '\n')
 
 
 def archiveProject (pid, path = None) :
@@ -335,12 +335,12 @@ def archiveProject (pid, path = None) :
 
     # Remove references from user rapuma.conf
     if uc.unregisterProject(pid) :
-        terminal('Removed [' + pid + '] from user configuration.')
+        terminal('Removed [' + pid + '] from user configuration.\n')
     else :
-        terminal('Error: Failed to remove [' + pid + '] from user configuration.')
+        terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
 
     # Finish here
-    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget)
+    terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
 
 def zipUpProject (source, target = None, excludeFiles = None) :
@@ -572,8 +572,47 @@ def templateToProject (uc, projHome, pid, tid, pname, source = None) :
     terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
-def sendToCloud (pid) :
-    '''Send local project data to the cloud. If a file in the cloud is
+def pullFromCloud (pid) :
+    '''Pull data from cloud storage and merge/replace local data.
+    Do a full backup first before starting the actual pull operation.'''
+
+    # Do not do anything until we have done a backup
+    backupProject(pid)
+
+    # Get the paths we need
+    cloud               = os.path.join(uc.userConfig['Resources']['cloud'], pid)
+    projHome            = uc.userConfig['Projects'][pid]['projectPath']
+
+    # Get a total list of files from the project
+    cn = 0
+    cr = 0
+    for folder, subs, files in os.walk(cloud):
+        for fileName in files:
+            if not os.path.isdir(folder.replace(cloud, projHome)) :
+                os.makedirs(folder.replace(cloud, projHome))
+            cFile = os.path.join(folder, fileName)
+            pFile = os.path.join(folder, fileName).replace(cloud, projHome)
+            if not os.path.isfile(pFile) :
+                shutil.copy(cFile, pFile)
+                cn +=1
+            elif isOlder(cFile, pFile) :
+                if os.path.isfile(pFile) :
+                    os.remove(pFile)
+                shutil.copy(cFile, pFile)
+                cr +=1
+    # Report what happened
+    terminal('\nCompleted pulling data from the cloud.\n')
+    if cn == 0 and cr == 0 :
+        terminal('\tNo files updated.\n')
+    else :
+        if cn > 0 :
+            terminal('\tAdded: ' + str(cn) + ' file(s).\n')
+        if cr > 0 :
+            terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
+
+
+def pushToCloud (pid) :
+    '''Push local project data to the cloud. If a file in the cloud is
     older than the project file, it will be sent. Otherwise, it will
     be skipped.'''
 
@@ -581,10 +620,6 @@ def sendToCloud (pid) :
     projHome            = uc.userConfig['Projects'][pid]['projectPath']
     local               = ProjLocal(rapumaHome, userHome, projHome)
     cloud               = os.path.join(uc.userConfig['Resources']['cloud'], pid)
-    projFiles           = set()
-    cloudFiles          = set()
-    fileList            = []
-
 
     # Make a cloud
     if not os.path.isdir(cloud) :
@@ -594,30 +629,32 @@ def sendToCloud (pid) :
     excludeFiles        = makeExcludeFileList(aProject)
 
     # Get a total list of files from the project
+    cn = 0
+    cr = 0
     for folder, subs, files in os.walk(projHome):
         for fileName in files:
             if fileName not in excludeFiles :
-#                projFiles.add(os.path.join(folder, fileName))
-#                cloudFiles.add(os.path.join(folder, fileName).replace(projHome, cloud))
-#                fileList.append[fileName]
-#                if isOlder(os.path.join(folder, fileName).replace(projHome, cloud), os.path.join(folder, fileName)) :
-#                print isOlder(os.path.join(folder, fileName).replace(projHome, cloud), os.path.join(folder, fileName))
-#                print isOlder(os.path.join(folder, fileName), os.path.join(folder, fileName).replace(projHome, cloud))
                 if not os.path.isdir(folder.replace(projHome, cloud)) :
                     os.makedirs(folder.replace(projHome, cloud))
-                if isOlder(os.path.join(folder, fileName).replace(projHome, cloud), os.path.join(folder, fileName)) :
-#                if isOlder(os.path.join(folder, fileName), os.path.join(folder, fileName).replace(projHome, cloud)) :
-#                    print os.stat(os.path.join(folder, fileName))
-#                    print os.stat(os.path.join(folder, fileName).replace(projHome, cloud))
-#                    if os.path.isfile(os.path.join(folder, fileName).replace(projHome, cloud)) :
-#                        os.remove(os.path.join(folder, fileName).replace(projHome, cloud))
-                    shutil.copy(os.path.join(folder, fileName), os.path.join(folder, fileName).replace(projHome, cloud))
-                    print 'Copied ', fName(os.path.join(folder, fileName))
-#                else :
-#                    print 'Did not copy ', fName(os.path.join(folder, fileName))
-
-
-    sys.exit('sendToCloud() is not working yet!')
+                cFile = os.path.join(folder, fileName).replace(projHome, cloud)
+                pFile = os.path.join(folder, fileName)
+                if not os.path.isfile(cFile) :
+                    shutil.copy(pFile, cFile)
+                    cn +=1
+                elif isOlder(pFile, cFile) :
+                    if os.path.isfile(cFile) :
+                        os.remove(cFile)
+                    shutil.copy(pFile, cFile)
+                    cr +=1
+    # Report what happened
+    terminal('\nCompleted pushing/saving data to the cloud.\n')
+    if cn == 0 and cr == 0 :
+        terminal('\tNo files updated.\n')
+    else :
+        if cn > 0 :
+            terminal('\tAdded: ' + str(cn) + ' file(s).\n')
+        if cr > 0 :
+            terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
 
 def makeProjectScripts (uc, pid) :
@@ -772,11 +809,11 @@ def userArguments (args) :
         elif args['scripts'] :
             makeProjectScripts(uc, pid)
         # Backup (evaporate) to cloud
-        elif args['evaporate'] :
-            sendToCloud(pid)
+        elif args['push'] :
+            pushToCloud(pid)
         # Update (get rained on) from the cloud
-        elif args['rain'] :
-            getFromCloud(pid)
+        elif args['pull'] :
+            pullFromCloud(pid)
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
@@ -1081,8 +1118,8 @@ projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/re
 projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
 projCommand.add_argument('-v', '--revert', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
 projCommand.add_argument('-c', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
-projCommand.add_argument('-e', '--evaporate', action='store_true', help='Evaporate your local working project data to cloud storage.')
-projCommand.add_argument('-a', '--rain', action='store_true', help='Tell cloud storage to rain its project data on your local data. Any data in the cloud that is newer than your project data will overwrite files in your project. A backup will be made just before things get wet. :-)')
+projCommand.add_argument('-p', '--push', action='store_true', help='Push your local working project data to cloud storage.')
+projCommand.add_argument('-u', '--pull', action='store_true', help='Pull from cloud storage to your local data. Any data in the cloud that is newer than your project data will overwrite files in your project. A backup will be made just before the actual pull operation begins. :-)')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
