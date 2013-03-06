@@ -657,11 +657,53 @@ def pushToCloud (pid) :
             terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
 
+def getProjectScripInfo (pid) :
+    '''Create a dictionary of all the auxillary script information used in
+    most projects.'''
+
+    aProject = initProject(pid)
+    projHome            = uc.userConfig['Projects'][pid]['projectPath']
+    local               = ProjLocal(rapumaHome, userHome, projHome)
+    cType = 'usfm'
+
+    return {
+            'addBible'      : ['Add all the Scripture components for a Bible.',     'rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+            'addNT'         : ['Add all the Scripture components for an NT.',       'rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+            'addOT'         : ['Add all the Scripture components for an OT.',       'rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+            'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
+            'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
+            'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -u '], 
+            'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p '], 
+            'compare'       : ['Compare component working text with start point.',  'rapuma component ' + pid + ' ' + cType + ' $1 -c working'], 
+            'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False '], 
+            'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks True '], 
+            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' -c $1 -g -s'], 
+            'export'        : ['Export working text from component or group.',      'rapuma export ' + pid + ' ' + cType + ' $1 -e -f  '], 
+            'hyphenCompare' : ['Compare working hyphen file with source.',          'rapuma hyphen ' + pid + ' ' + cType + ' -c  '], 
+            'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 
+            'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
+            'hyphenUpdate'  : ['Update hyphenation working files.',                 'rapuma hyphen ' + pid + ' ' + cType + ' -u $1 '], 
+            'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False '], 
+            'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True '], 
+            'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False '], 
+            'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True '], 
+            'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
+            'render'        : ['Render a component.',                               'rapuma component ' + pid + ' ' + cType + ' $1 -e -f '], 
+            'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
+            'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
+            'update'        : ['Update a component from its source.',               'rapuma component ' + pid + ' ' + cType + ' $1 -u -f '], 
+            'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -s '], 
+            'view'          : ['View a component.',                                 'rapuma component ' + pid + ' ' + cType + ' $1 -e '], 
+            'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark False '], 
+            'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark True \n\n']
+        }
+
+
 def makeProjectScripts (uc, pid) :
     '''Create helper scripts for a project to help with repetitive tasks.
     If any scripts are present with the same name they will be overwritten.
     Note: This is only for temporary use due to the lack of an interface at
-    this time (20121217). It assumes the cType is usfm which, at some point
+    this time (20130306140636). It assumes the cType is usfm which, at some point
     may not be the case.'''
 
     aProject = initProject(pid)
@@ -670,75 +712,16 @@ def makeProjectScripts (uc, pid) :
     cType = 'usfm'
     if not os.path.isdir(local.projScriptsFolder) :
         os.mkdir(local.projScriptsFolder)
-    for script in ['addBible', 'addNT', 'addOT', 'archive', 'backup', 'compare', 'cropmarksOff', \
-                     'cropmarksOn', 'edit', 'export', 'hyphenationCompare', 'hyphenationOff', \
-                      'hyphenationOn', 'hyphenationUpdate', 'linesOff', 'linesOn', 'placeholdersOff', \
-                       'placeholdersOn', 'postprocess', 'render', 'restore', 'sendReceive', \
-                        'template', 'update', 'updateScripts', 'view', 'watermarkOff', \
-                         'watermarkOn'] :
-        fullFile = os.path.join(local.projScriptsFolder, script)
+    # Output the scripts
+    allScripts = getProjectScripInfo(pid)
+    for key in allScripts.keys() :
+        fullFile = os.path.join(local.projScriptsFolder, key)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('#!/bin/sh\n\n')
-            writeObject.write('# Rapuma automation script: ' + script + '\n\n')
-            if script == 'addBible' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
-            elif script == 'addNT' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"\n\n')
-            elif script == 'addOT' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"\n\n')
-            elif script == 'archive' :
-                writeObject.write('rapuma preserve ' + pid + ' -a \n\n')
-            elif script == 'backup' :
-                writeObject.write('rapuma preserve ' + pid + ' -b \n\n')
-            elif script == 'compare' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -c working\n\n')
-            elif script == 'cropmarksOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\n')
-            elif script == 'cropmarksOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks True \n\n')
-            elif script == 'edit' :
-                writeObject.write('rapuma edit ' + pid + ' -c $1 -g -s\n\n')
-            elif script == 'export' :
-                writeObject.write('rapuma export ' + pid + ' ' + cType + ' $1 -e -f  \n\n')
-            elif script == 'hyphenationCompare' :
-                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -c  \n\n')
-            elif script == 'hyphenationOff' :
-                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -r  \n\n')
-            elif script == 'hyphenationOn' :
-                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -a  \n\n')
-            elif script == 'hyphenationUpdate' :
-                writeObject.write('rapuma hyphen ' + pid + ' ' + cType + ' -u $1 \n\n')
-            elif script == 'linesOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\n')
-            elif script == 'linesOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\n')
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True \n\n')
-            elif script == 'placeholdersOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False \n\n')
-            elif script == 'placeholdersOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True \n\n')
-            elif script == 'postprocess' :
-                writeObject.write('rapuma locking ' + pid + ' $1 -u \n')
-                writeObject.write('rapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 \n\n')
-            elif script == 'render' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e -f \n\n')
-            elif script == 'restore' :
-                writeObject.write('rapuma preserve ' + pid + ' -b -r \n\n')
-            elif script == 'sendReceive' :
-                writeObject.write('rapuma project ' + pid + ' -e \n\n')
-            elif script == 'template' :
-                writeObject.write('rapuma preserve ' + pid + ' -t $1 \n\n')
-            elif script == 'update' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -u -f \n\n')
-            elif script == 'updateScripts' :
-                writeObject.write('rapuma project ' + pid + ' -s \n\n')
-            elif script == 'view' :
-                writeObject.write('rapuma component ' + pid + ' ' + cType + ' $1 -e \n\n')
-            elif script == 'watermarkOff' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark False \n\n')
-            elif script == 'watermarkOn' :
-                writeObject.write('rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark True \n\n')
+            writeObject.write('# Description: ' + allScripts[key][0] + '\n\n')
+            writeObject.write('echo \n')
+            writeObject.write('echo Rapuma script: ' + allScripts[key][0] + '\n\n')
+            writeObject.write(allScripts[key][1] + '\n\n')
 
         # Make the script executable
         makeExecutable(fullFile)
