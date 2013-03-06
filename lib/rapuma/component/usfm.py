@@ -733,7 +733,8 @@ class Usfm (Component) :
 
     #            ID     Comp Name                               Comp ID                         PT ID
         return {
-                'gen' : ['Genesis',                             'genesis',                      '01'],
+                '_z_' : ['USFM InternalCaller',                 'usfm_internal_caller',         '00'], 
+                'gen' : ['Genesis',                             'genesis',                      '01'], 
                 'exo' : ['Exodus',                              'exodus',                       '02'], 
                 'lev' : ['Leviticus',                           'leviticus',                    '03'], 
                 'num' : ['Numbers',                             'numbers',                      '04'], 
@@ -855,6 +856,7 @@ class Usfm (Component) :
                 'rep' : ['Reproof (Proverbs 25-31)',            'reproof_proverbs_25-31',       'C1'], 
                 '4ba' : ['4 Baruch (Rest of Baruch)',           '4_baruch',                     'C2'], 
                 'lao' : ['Laodiceans',                          'laodiceans',                   'C3'] 
+
                }
 
 

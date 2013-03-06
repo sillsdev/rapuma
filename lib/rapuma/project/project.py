@@ -192,19 +192,21 @@ class Project (object) :
 ########################## Component Level Functions ##########################
 ###############################################################################
 
-    def listAllComponents (self, cType, cName) :
+    def listAllComponents (self, cType) :
         '''Generate a list of valid component IDs and cNames for this cType.'''
 
-        # Create the component object now
-        self.createComponent(cName)
+        # Create the component object now with a special component caller ID
+        self.createComponent('usfm_internal_caller')
         # Get the component info dictionary
-        comps = self.components[cName].usfmCidInfo()
+        print self.components['usfm_internal_caller']
+        comps = self.components['usfm_internal_caller'].usfmCidInfo()
         # List and sort
         cList = list(comps.keys())
         cList.sort()
         # For now we'll output to terminal but may want to change this later.
         for c in cList :
-            print c, comps[c][1]
+            if c != '_z_' :
+                print c, comps[c][1]
 
 
     def setProjCurrent (self, pid) :
@@ -284,8 +286,20 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # Create a special component object if called
+        if cName == 'usfm_internal_caller' :
+            cfg = dict()
+            self.cName = cName
+            cType = cName.split('_')[0]
+            buildConfSection(cfg, 'Components')
+            buildConfSection(cfg['Components'], cName)
+            cfg['Components'][cName]['type'] = cType
+            module = import_module('rapuma.component.' + cType)
+            ManagerClass = getattr(module, cType.capitalize())
+            compobj = ManagerClass(self, cfg)
+            self.components[cName] = compobj
         # Otherwise, create a new one and return it
-        if testForSetting(self.projConfig, 'Components', cName) :
+        elif testForSetting(self.projConfig, 'Components', cName) :
             # Set the primary component name
             self.cName = cName
             cfg = self.projConfig['Components'][cName]

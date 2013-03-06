@@ -667,6 +667,7 @@ def getProjectScripInfo (pid) :
     cType = 'usfm'
 
     return {
+            'add'           : ['Add all a Scripture component(s).',                 'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
             'addBible'      : ['Add all the Scripture components for a Bible.',     'rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addNT'         : ['Add all the Scripture components for an NT.',       'rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addOT'         : ['Add all the Scripture components for an OT.',       'rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
@@ -685,6 +686,7 @@ def getProjectScripInfo (pid) :
             'hyphenUpdate'  : ['Update hyphenation working files.',                 'rapuma hyphen ' + pid + ' ' + cType + ' -u $1 '], 
             'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False '], 
             'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True '], 
+            'listComps'     : ['List all USFM components.',                         'rapuma component ' + pid + ' ' + cType + ' internal_caller -l '], 
             'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False '], 
             'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True '], 
             'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
@@ -720,7 +722,7 @@ def makeProjectScripts (uc, pid) :
             writeObject.write('#!/bin/sh\n\n')
             writeObject.write('# Description: ' + allScripts[key][0] + '\n\n')
             writeObject.write('echo \n')
-            writeObject.write('echo Rapuma script: ' + allScripts[key][0] + '\n\n')
+            writeObject.write('echo Rapuma helper script: ' + allScripts[key][0] + '\n\n')
             writeObject.write(allScripts[key][1] + '\n\n')
 
         # Make the script executable
@@ -834,6 +836,8 @@ def userArguments (args) :
                     makeProjectScripts(uc, args['project_id'])
 
     elif sys.argv[1].lower() == 'component' :
+        if args['list'] :
+            aProject.listAllComponents(args['component_type'])
         if not args['component_name'] :
             sys.exit('\nERROR: Must provide a component name when adding a new component. Process halted!\n')
         # Add a new component
@@ -841,31 +845,29 @@ def userArguments (args) :
             if not args['id_list'] :
                 sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
             else :
-                aProject.addComponent(args['component_type'], args['component_name'], args['id_list'], args['source'], args['force'])
+                aProject.addComponent(args['component_type'], args['component_name'].lower(), args['id_list'], args['source'], args['force'])
         # Delete a component
         elif args['update'] :
             # Update a component, --source is optional but if given it will
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateComponent(args['component_name'], args['source'], args['force'])
+            aProject.updateComponent(args['component_name'].lower(), args['source'], args['force'])
         elif args['remove'] :
             # If -f is used, we delete all the files with this cid
-            aProject.removeComponent(args['component_name'], args['force'])
+            aProject.removeComponent(args['component_name'].lower(), args['force'])
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
         elif args['execute'] :
-            aProject.renderComponent(args['component_type'], args['component_name'], args['force'])
+            aProject.renderComponent(args['component_type'], args['component_name'].lower(), args['force'])
         elif args['validate'] :
             aProject.createManager(args['component_type'], 'text')
             aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
         elif args['compare'] :
-            aProject.compareComponent(args['component_name'], args['compare'])
+            aProject.compareComponent(args['component_name'].lower(), args['compare'])
         elif args['preprocess'] :
             aProject.turnOnOffPreprocess(args['component_type'], args['preprocess'])
-        elif args['list'] :
-            aProject.listAllComponents(args['component_type'], args['component_name'])
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -934,10 +936,10 @@ def userArguments (args) :
         if args['execute'] :
             if not args['script'] :
                 sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
-            elif not args['component_name'] :
+            elif not args['component_name'].lower() :
                 sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
             else :
-                aProject.runProcessScript(args['component_name'], args['script'])
+                aProject.runProcessScript(args['component_name'].lower(), args['script'])
         # Install a custom or a default post process script, force to overwrite what is there
         elif args['add'] :
             filePath = ''
@@ -967,21 +969,21 @@ def userArguments (args) :
         aProject = initProject(args['project_id'])
         # Lock component
         if args['lock'] :
-            aProject.lockUnlock(args['component_name'], True, args['force'])
+            aProject.lockUnlock(args['component_name'].lower(), True, args['force'])
         # Unlock component
         elif args['unlock'] :
-            aProject.lockUnlock(args['component_name'], False, args['force'])
+            aProject.lockUnlock(args['component_name'].lower(), False, args['force'])
 
     # Exporting commands
     elif sys.argv[1].lower() == 'export' :
         # Check further for required args
-        if not args['component_name'] :
+        if not args['component_name'].lower() :
             sys.exit('\nERROR: Component ID is missing from command argument. Process halted!\n')
         else :
             aProject.createManager(args['component_type'], 'text')
         # Execute an export
         if args['execute'] :
-            aProject.export(args['component_type'], args['component_name'], args['path'], args['script'], args['bundle'], args['force'])
+            aProject.export(args['component_type'], args['component_name'].lower(), args['path'], args['script'], args['bundle'], args['force'])
 
     # Install file commands
     elif sys.argv[1].lower() == 'install' :
