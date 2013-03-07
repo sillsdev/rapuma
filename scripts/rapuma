@@ -686,7 +686,7 @@ def getProjectScripInfo (pid) :
             'hyphenUpdate'  : ['Update hyphenation working files.',                 'rapuma hyphen ' + pid + ' ' + cType + ' -u $1 '], 
             'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False '], 
             'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True '], 
-            'listComps'     : ['List all USFM components.',                         'rapuma component ' + pid + ' ' + cType + ' internal_caller -l '], 
+            'listComps'     : ['List all USFM components.',                         'rapuma component ' + pid + ' ' + cType + ' usfm_internal_caller -l '], 
             'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False '], 
             'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True '], 
             'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
@@ -733,7 +733,7 @@ def makeProjectScripts (uc, pid) :
 
 def updateRapuma () :
     '''Run the general update script that will pull down the latest version
-    from the Rapuma repo, then build and install.'''
+    from the Rapuma repo, then build and install it.'''
 
     os.system(os.path.join(rapumaHome, 'update.sh'))
 
