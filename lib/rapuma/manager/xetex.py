@@ -652,7 +652,8 @@ class Xetex (Manager) :
             if f == '' :
                 continue
 
-            if isOlder(cNameTex, f) or not os.path.isfile(cNameTex) :
+#            if isOlder(cNameTex, f) or not os.path.isfile(cNameTex) :
+            if not os.path.isfile(cNameTex) or isOlder(cNameTex, f) :
                 # Start writing out the cName.tex file. Check/make dependencies as we go.
                 # If we fail to make a dependency it will die and report during that process.
                 with codecs.open(cNameTex, "w", encoding='utf_8') as cNameTexObject :
@@ -826,7 +827,7 @@ class Xetex (Manager) :
 
         # Render if cNamePdf is older or is missing
         for d in dep :
-            if isOlder(cNamePdf, d) or not os.path.isfile(cNamePdf) :
+            if not os.path.isfile(cNamePdf) or isOlder(cNamePdf, d) :
                 # Create the environment that XeTeX will use. This will be temporarily set
                 # by subprocess.call() just before XeTeX is run.
                 texInputsLine = self.project.local.projHome + ':' \

@@ -255,8 +255,8 @@ class Project (object) :
             if self.components[cName].isCompleteComponent(cName) :
                 validCName = cName
             else :
-                cName = getRapumaCName(cName)
-                if self.hasCNameEntry(cName) :
+                cName = self.components[cName].getRapumaCName(cName)
+                if self.components[cName].hasCNameEntry(cName) :
                     validCName = cName
                 else :
                     # Well, we did try

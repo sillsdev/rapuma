@@ -54,6 +54,7 @@ def isOlder (first, second) :
         if int(os.path.getmtime(first)) > int(os.path.getmtime(second)) :
             return True
     except Exception as e :
+        import pdb; pdb.set_trace()
         # If this doesn't work, we should probably quite here
         dieNow('Error: isOlder() failed with this error: ' + str(e))
 

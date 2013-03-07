@@ -190,7 +190,7 @@ class Usfm (Component) :
                 self.project.buildComponentObject(self.cType, cidCName)
                 # Create the working text
                 if not os.path.isfile(cidUsfm) :
-                    self.project.managers[self.cType + '_Text'].installUsfmWorkingText(cName, cid)
+                    self.installUsfmWorkingText(cName, cid)
                 # Add/manage the dependent files for this cid
                 if self.macroPackage == 'usfmTex' :
                     # Component adjustment file
@@ -198,7 +198,8 @@ class Usfm (Component) :
 # FIXME: Making the adj conf file is probably not needed here, that should have been done already
 #                        self.createProjAdjustmentConfFile(cType, cid)
                         cidAdjFile = self.getCidAdjPath(cid)
-                        if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
+#                        if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
+                        if not os.path.isfile(cidAdjFile) or isOlder(cidAdjFile, self.adjustmentConfFile) :
                             # Remake the adjustment file (if needed)
                             if not self.createCompAdjustmentFile(cid) :
                                 # If no adjustments, remove any exsiting file
@@ -432,64 +433,63 @@ class Usfm (Component) :
                 dieNow()
 
         # Now do the age checks and copy if source is newer than target
-        if not isOlder(target, source) or force :
-            if not os.path.isfile(target) or force :
+        if force or not os.path.isfile(target) or isOlder(target, source) :
 
-                # Make target folder if needed
-                if not os.path.isdir(targetFolder) :
-                    os.makedirs(targetFolder)
+            # Make target folder if needed
+            if not os.path.isdir(targetFolder) :
+                os.makedirs(targetFolder)
 
-                # Always save an untouched copy of the source and set to
-                # read only. We may need this to restore/reset later.
-                if os.path.isfile(targetSource) :
-                    # Don't bother if we copied from it in the first place
-                    if targetSource != source :
-                        # Reset permissions to overwrite
-                        makeWriteable(targetSource)
-                        shutil.copy(source, targetSource)
-                        makeReadOnly(targetSource)
-                else :
+            # Always save an untouched copy of the source and set to
+            # read only. We may need this to restore/reset later.
+            if os.path.isfile(targetSource) :
+                # Don't bother if we copied from it in the first place
+                if targetSource != source :
+                    # Reset permissions to overwrite
+                    makeWriteable(targetSource)
                     shutil.copy(source, targetSource)
                     makeReadOnly(targetSource)
-
-                # To be sure nothing happens, copy from our project source
-                # backup file.
-                if self.usfmCopy(targetSource, target, projSty) :
-                    # Run any working text preprocesses on the new component text
-                    if self.project.isLocked(cName) :
-                        self.project.lockUnlock(cName, False, True)
-                    if str2bool(self.usePreprocessScript) :
-                        if not os.path.isfile(self.preprocessScript) :
-                            self.project.installPreprocess(self.cType)
-                        if not self.project.runProcessScript(cName, self.preprocessScript) :
-                            self.project.log.writeToLog('USFM-130', [cName])
-                    if not self.project.isLocked(cName) :
-                        self.project.lockUnlock(cName, True, True)
-
-                    # If this is a USFM component type we need to remove any \fig markers,
-                    # and record them in the illustration.conf file for later use
-                    if self.cType == 'usfm' :
-                        tempFile = target + '.tmp'
-                        contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                        # logUsfmFigure() logs the fig data and strips it from the working text
-                        # Note: Using partial() to allows the passing of the cid param 
-                        # into logUsfmFigure()
-                        contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.components[cName].logFigure, cid), contents)
-                        codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
-                        # Finish by copying the tempFile to the source
-                        if not shutil.copy(tempFile, target) :
-                            # Take out the trash
-                            os.remove(tempFile)
-
-                    # If the text is there, we should return True so do a last check to see
-                    if os.path.isfile(target) :
-                        self.project.log.writeToLog('USFM-140', [cName])
-                        return True
-                else :
-                    self.project.log.writeToLog('USFM-150', [source,fName(target)])
-                    return False
             else :
-                return True
+                shutil.copy(source, targetSource)
+                makeReadOnly(targetSource)
+
+            # To be sure nothing happens, copy from our project source
+            # backup file.
+            if self.usfmCopy(targetSource, target, projSty) :
+                # Run any working text preprocesses on the new component text
+                if self.project.isLocked(cName) :
+                    self.project.lockUnlock(cName, False, True)
+                if str2bool(self.usePreprocessScript) :
+                    if not os.path.isfile(self.preprocessScript) :
+                        self.project.installPreprocess(self.cType)
+                    if not self.project.runProcessScript(cName, self.preprocessScript) :
+                        self.project.log.writeToLog('USFM-130', [cName])
+                if not self.project.isLocked(cName) :
+                    self.project.lockUnlock(cName, True, True)
+
+                # If this is a USFM component type we need to remove any \fig markers,
+                # and record them in the illustration.conf file for later use
+                if self.cType == 'usfm' :
+                    tempFile = target + '.tmp'
+                    contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+                    # logUsfmFigure() logs the fig data and strips it from the working text
+                    # Note: Using partial() to allows the passing of the cid param 
+                    # into logUsfmFigure()
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.components[cName].logFigure, cid), contents)
+                    codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
+                    # Finish by copying the tempFile to the source
+                    if not shutil.copy(tempFile, target) :
+                        # Take out the trash
+                        os.remove(tempFile)
+
+                # If the text is there, we should return True so do a last check to see
+                if os.path.isfile(target) :
+                    self.project.log.writeToLog('USFM-140', [cName])
+                    return True
+            else :
+                self.project.log.writeToLog('USFM-150', [source,fName(target)])
+                return False
+#            else :
+#                return True
         else :
             return True
 
@@ -501,7 +501,6 @@ class Usfm (Component) :
         # Bring in our source text
         if self.project.managers[self.cType + '_Text'].sourceEncode == self.project.managers[self.cType + '_Text'].workEncode :
             contents = codecs.open(source, 'rt', 'utf_8_sig')
-            print contents
             lines = contents.read()
         else :
             # Lets try to change the encoding.

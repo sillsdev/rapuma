@@ -667,7 +667,7 @@ def getProjectScripInfo (pid) :
     cType = 'usfm'
 
     return {
-            'add'           : ['Add all a Scripture component(s).',                 'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
+            'add'           : ['Add all a Scripture component\(s\).',                 'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
             'addBible'      : ['Add all the Scripture components for a Bible.',     'rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addNT'         : ['Add all the Scripture components for an NT.',       'rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addOT'         : ['Add all the Scripture components for an OT.',       'rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
