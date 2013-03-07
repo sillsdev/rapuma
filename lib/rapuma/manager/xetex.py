@@ -628,9 +628,9 @@ class Xetex (Manager) :
             cidTexObject.write(self.texFileHeader(fName(cidTex)))
             # User sty and macro extentions are optional at the cid level
             if os.path.isfile(os.path.join(cidTexExt)) :
-                cNameTexObject.write('\\input \"' + cidTexExt + '\"\n')
+                cidTexObject.write('\\input \"' + cidTexExt + '\"\n')
             if os.path.isfile(os.path.join(cidSty)) :
-                cNameTexObject.write('\\stylesheet{' + cidSty + '}\n')
+                cidTexObject.write('\\stylesheet{' + cidSty + '}\n')
             # The cid is not optional!
             if self.checkDepCidUsfm(cidUsfm) :
                 cidTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
@@ -716,6 +716,12 @@ class Xetex (Manager) :
                     # If we can't make it, we return False
                     self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
                     return False
+
+
+
+
+
+
 # FIXME: Need a dependency filter here
             if not os.path.isfile(self.lccodeTex) :
                 if self.makeLccodeFile() :

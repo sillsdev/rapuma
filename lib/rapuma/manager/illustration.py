@@ -236,6 +236,28 @@ class Illustration (Manager) :
                     if not str2bool(obj['useThisIllustration']) :
                         continue
 
+
+
+# FIXME: Working here
+
+
+
+
+                    # Is a caption going to be used on this illustration?
+                    if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
+                        if str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
+                            and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaption']) :
+                            if obj['location'] :
+                                thisRef = obj['location']
+
+
+
+
+
+
+
+
+                    # Work out if we want a caption reference or not for this illustration
                     if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
                         if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
                             and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaptionRef']) :

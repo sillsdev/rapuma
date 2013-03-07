@@ -725,6 +725,13 @@ Todo:
             <value>:</value>
         </setting>
         <setting>
+            <name>USFM TeX Captions</name>
+            <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
+            <key>useCaptions</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
             <name>USFM TeX Caption Reference</name>
             <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
             <key>useCaptionReferences</key>

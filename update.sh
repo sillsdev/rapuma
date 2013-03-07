@@ -8,10 +8,10 @@ hg update --repository ~/Projects/rapuma
 
 echo Updated the local repository version of Rapuma
 
-./setup.py build
+~/Projects/rapuma/setup.py build
 
 echo Built the local version of Rapuma with the latest version
 
-sudo ./setup.py install
+sudo ~/Projects/rapuma/setup.py install
 
 echo Installed Rapuma
