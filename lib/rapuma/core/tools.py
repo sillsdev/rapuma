@@ -49,10 +49,9 @@ def isOlder (first, second) :
     '''Check to see if the first file is older than the second.
     Return True if it is. This assumes that both files exist. If
     not, then throw and exception error.'''
-
+    
     try :
-        if int(os.path.getmtime(first)) > int(os.path.getmtime(second)) :
-            return True
+        return not os.path.exists(second) or (os.path.getmtime(first) < os.path.getmtime(second))
     except Exception as e :
         import pdb; pdb.set_trace()
         # If this doesn't work, we should probably quite here

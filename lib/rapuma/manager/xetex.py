@@ -826,35 +826,44 @@ class Xetex (Manager) :
                 dep.append(cidIlls)
 
         # Render if cNamePdf is older or is missing
-        for d in dep :
-            if not os.path.isfile(cNamePdf) or isOlder(cNamePdf, d) :
-                # Create the environment that XeTeX will use. This will be temporarily set
-                # by subprocess.call() just before XeTeX is run.
-                texInputsLine = self.project.local.projHome + ':' \
-                                + self.projMacPackFolder + ':' \
-                                + self.projMacrosFolder + ':' \
-                                + os.path.join(self.projComponentsFolder, self.cName) + ':.'
+        render = False
+        if not os.path.isfile(cNamePdf) :
+            render = True
+        else :
+            for d in dep :
+                if isOlder(cNamePdf, d) :
+                    render = True
+                    break
 
-                # Create the environment dictionary that will be fed into subprocess.call()
-                envDict = dict(os.environ)
-                envDict['TEXINPUTS'] = texInputsLine
+        # Call the renderer
+        if render :
+            # Create the environment that XeTeX will use. This will be temporarily set
+            # by subprocess.call() just before XeTeX is run.
+            texInputsLine = self.project.local.projHome + ':' \
+                            + self.projMacPackFolder + ':' \
+                            + self.projMacrosFolder + ':' \
+                            + os.path.join(self.projComponentsFolder, self.cName) + ':.'
 
-                # Create the XeTeX command argument list that subprocess.call()
-                # will run with
-                cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
+            # Create the environment dictionary that will be fed into subprocess.call()
+            envDict = dict(os.environ)
+            envDict['TEXINPUTS'] = texInputsLine
 
-                # Run the XeTeX and collect the return code for analysis
+            # Create the XeTeX command argument list that subprocess.call()
+            # will run with
+            cmds = ['xetex', '-output-directory=' + self.cNameFolder, cNameTex]
+
+            # Run the XeTeX and collect the return code for analysis
 #                dieNow()
-                rCode = subprocess.call(cmds, env = envDict)
+            rCode = subprocess.call(cmds, env = envDict)
 
-                # Analyse the return code
-                if rCode == int(0) :
-                    self.project.log.writeToLog('XTEX-025', [fName(cNameTex)])
-                elif rCode in self.xetexErrorCodes :
-                    self.project.log.writeToLog('XTEX-030', [fName(cNameTex), self.xetexErrorCodes[rCode], str(rCode)])
-                else :
-                    self.project.log.writeToLog('XTEX-035', [str(rCode)])
-                    dieNow()
+            # Analyse the return code
+            if rCode == int(0) :
+                self.project.log.writeToLog('XTEX-025', [fName(cNameTex)])
+            elif rCode in self.xetexErrorCodes :
+                self.project.log.writeToLog('XTEX-030', [fName(cNameTex), self.xetexErrorCodes[rCode], str(rCode)])
+            else :
+                self.project.log.writeToLog('XTEX-035', [str(rCode)])
+                dieNow()
 
         # Add lines background for composition work
         if str2bool(self.layoutConfig['PageLayout']['useLines']) :
