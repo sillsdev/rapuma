@@ -235,28 +235,13 @@ class Illustration (Manager) :
                     # Filter out if needed with this
                     if not str2bool(obj['useThisIllustration']) :
                         continue
-
-
-
-# FIXME: Working here
-
-
-
-
                     # Is a caption going to be used on this illustration?
+                    caption = ''
                     if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
                         if str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
                             and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaption']) :
-                            if obj['location'] :
-                                thisRef = obj['location']
-
-
-
-
-
-
-
-
+                            if obj['caption'] :
+                                caption = obj['caption']
                     # Work out if we want a caption reference or not for this illustration
                     if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
                         if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
@@ -268,7 +253,7 @@ class Illustration (Manager) :
                         # If we made it this far we can output the line
                         writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
                             ' |' + obj['fileName'] + '|' + obj['width'] + '|' + obj['position'] + \
-                                '|' + obj['scale'] + '|' + obj['copyright'] + '|' + obj['caption'] + '|' + thisRef + ' \n')
+                                '|' + obj['scale'] + '|' + obj['copyright'] + '|' + caption + '|' + thisRef + ' \n')
             # Report to log
             self.project.log.writeToLog('ILUS-065', [cid])
             return True
