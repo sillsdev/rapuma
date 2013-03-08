@@ -198,7 +198,6 @@ class Project (object) :
         # Create the component object now with a special component caller ID
         self.createComponent('usfm_internal_caller')
         # Get the component info dictionary
-        print self.components['usfm_internal_caller']
         comps = self.components['usfm_internal_caller'].usfmCidInfo()
         # List and sort
         cList = list(comps.keys())

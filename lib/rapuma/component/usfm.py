@@ -594,6 +594,7 @@ class Usfm (Component) :
         # Add additional information, get rid of stuff we don't need
         figDict['illustrationID'] = figDict['fileName'].split('.')[0]
         figDict['useThisIllustration'] = True
+        figDict['useThisCaption'] = True
         figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()
         figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())

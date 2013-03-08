@@ -96,6 +96,16 @@ class ProjLog (object) :
             'COMP-230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
             'COMP-240' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
 
+            'BIND-000' : ['MSG', 'XeTeX module messages'],
+            'BIND-005' : ['MSG', 'Unassigned message.'],
+            'BIND-010' : ['MSG', 'Created the [<<1>>] binding group.'],
+            'BIND-012' : ['WRN', 'The [<<1>>] binding group already exists. Use force to replace.'],
+            'BIND-015' : ['ERR', 'Failed to create the [<<1>>] binding group. Got error: [<<2>>]'],
+            'BIND-020' : ['MSG', 'Removed the [<<1>>] binding group.'],
+            'BIND-025' : ['ERR', 'The [<<1>>] binding group was not found.'],
+            'BIND-030' : ['MSG', 'Completed proccessing on the [<<1>>] binding group.'],
+            'BIND-035' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding group.'],
+
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
             'XTEX-010' : ['LOG', 'Version number: [<<1>>], was found. Assumed persistent values have been merged.'],
