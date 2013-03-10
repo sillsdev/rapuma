@@ -189,8 +189,454 @@ class Project (object) :
 
 
 ###############################################################################
-########################## Component Level Functions ##########################
+############################ Group Level Functions ############################
 ###############################################################################
+
+
+# FIXME: Starting to implent group handling functions
+
+
+#-----------------------------------------------
+
+
+
+    def renderGroup (self, gid, force = False) :
+        '''Render a group of subcomponents.'''
+
+#        import pdb; pdb.set_trace()
+
+        # If we made it this far, try rendering
+        if checkForGid(gid) :
+            self.createGroup(gid).render(force)
+            self.setGidCurrent(cType, gid)
+            return True
+
+
+    def createGroup (self, gid) :
+        '''Create a component object that can be acted on. It is assumed
+        this only happens for one component per session. This component
+        may contain subcomponents that support this one.'''
+
+        # If the object already exists just return it
+        if gid in self.groups: return self.groups[gid]
+
+#        import pdb; pdb.set_trace()
+
+        # Create a special component object if called
+        if cName == 'usfm_internal_caller' :
+            cfg = dict()
+            self.cName = cName
+            cType = cName.split('_')[0]
+            buildConfSection(cfg, 'Components')
+            buildConfSection(cfg['Components'], cName)
+            cfg['Components'][cName]['type'] = cType
+            module = import_module('rapuma.component.' + cType)
+            ManagerClass = getattr(module, cType.capitalize())
+            compobj = ManagerClass(self, cfg)
+            self.components[cName] = compobj
+        # Otherwise, create a new one and return it
+        elif testForSetting(self.projConfig, 'Components', cName) :
+            # Set the primary component name
+            self.cName = cName
+            cfg = self.projConfig['Components'][cName]
+            cType = cfg['type']
+            module = import_module('rapuma.component.' + cType)
+            ManagerClass = getattr(module, cType.capitalize())
+            compobj = ManagerClass(self, cfg)
+            self.components[cName] = compobj
+        else :
+            self.log.writeToLog('COMP-040', [cName])
+            return False
+
+        return compobj
+
+
+    def addGroup (self, cType, gid, cidList, newSource = None, force = False) :
+        '''This handels adding a component which can contain one or more sub-components.'''
+
+        # Check for cName setting
+        # FIXME: There is something is wrong about doing this here
+        if not self.cName :
+            self.cName = cName
+
+        # Do not want to add this component, non-force, if it already exsists.
+        if cName in self.projConfig['Components'].keys() and not force and self.isLocked(cName) :
+            self.log.writeToLog('COMP-115', [cName])
+            dieNow()
+
+        # Work out the source path
+        oldSource = ''
+        if newSource :
+            newSource = resolvePath(newSource)
+            if not os.path.isdir(newSource) :
+                self.log.writeToLog('COMP-160', [newSource])
+                dieNow()
+
+        if self.hasSourcePath(cType) :
+            if os.path.isdir(self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']) :
+                oldSource = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
+
+        # If the new source is valid, we will add that to the config now
+        # so that processes to follow will have that setting available.
+        if newSource :
+            source = newSource
+            self.addCompTypeSourcePath(cType, source)
+            setattr(self, cType + '_sourcePath', source)
+        # If there is no newSource, then the status quo will work okay
+        elif oldSource :
+            source = oldSource
+        # No new or old source means we are hossed
+        else :
+            self.log.writeToLog('COMP-170')
+            dieNow()
+
+        # The cList can be one or more valid component IDs
+        # It is expected that the data for this list is in
+        # this format: "id1 id2 id3 ect", unless it is coming
+        # internally which means it might alread be a proper
+        # list. We'll check first.
+        if type(cidList) != list :
+            cidList = cidList.split()
+
+#        import pdb; pdb.set_trace()
+
+        # Add the info to the components
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], cName)
+        self.projConfig['Components'][cName]['type'] = cType
+        self.projConfig['Components'][cName]['cidList'] = cidList
+        self.projConfig['Components'][cName]['isLocked'] = True
+
+        # Create the component object now that we have an entry in the config
+        self.createComponent(cName)
+
+        # Add subcomponents
+        for cid in cidList :
+            # If cName for the cid is the same as the main component cName
+            # we have to unlock it to avoid a problem in this step.
+            if self.components[cName].getRapumaCName(cid) == cName :
+                self.projConfig['Components'][cName]['isLocked'] = False
+            if not self.installComponent(cType, cName, cid, source, force) :
+                if not self.components[cName].isCompleteComponent(self.components[cName].getRapumaCName(cid)) :
+                    dieNow()
+
+        # If there was more than one subcomponent, this is a group
+        # thus we should make a folder for it.
+        if len(cidList) > 1 :
+            if not os.path.isdir(os.path.join(self.local.projComponentsFolder, cName)) :
+                os.mkdir(os.path.join(self.local.projComponentsFolder, cName))
+
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            self.log.writeToLog('COMP-015', [cName])
+
+
+    def installGroup (self, cType, cName, cid, source, force = False) :
+        '''This will add a component to the object we created above in createComponent().
+        If the component is already listed in the project configuration it will not proceed
+        unless force is set to True. Then it will remove the component listing, along with 
+
+        its files so a fresh copy can be added to the project. This works at the single
+        component level. The cid must be validated against its type.'''
+
+#        import pdb; pdb.set_trace()
+
+        # See if the working text is present, quite if it is not
+        if cType == 'usfm' :
+            # To maintain the distinction between comp name and comp ID, we will
+            # auto-create a name for this component that is taken from its valid
+            # name in the component dictionary. We will also validate the ID too.
+            if self.components[cName].hasUsfmCidInfo(cid) :
+                cName = self.components[cName].getRapumaCName(cid)
+            else :
+                self.log.writeToLog('COMP-010', [cid])
+                dieNow()
+
+            # Current thinking is that a locked component cannot be touched,
+            # not even by force (-f) Check here to see if that is the case.
+            # Give a warning if it is and return False
+            if self.isLocked(cName) :
+                self.log.writeToLog('COMP-115', [cName])
+                return False
+
+            # Force on add always means we delete the component first
+            # before we do anything else
+            if force :
+                self.removeComponent(cName, force)
+
+            # Put the (refreshed) settings back in the project config
+            if not self.insertComponent(cType, cName, cid) :
+                self.log.writeToLog('COMP-100', [cName])
+                dieNow()
+
+            # Install our working text files
+            self.createManager(cType, 'text')
+            if self.components[cName].installUsfmWorkingText(cName, cid, force) :
+
+                # Finish the install by locking
+                self.lockUnlock(cName, True)
+
+                # Report in context to force use or not
+                if force :
+                    self.log.writeToLog('COMP-022', [cName])
+                else :
+                    self.log.writeToLog('COMP-020', [cName])
+
+            else :
+                self.log.writeToLog('TEXT-160', [cName])
+                return False
+        else :
+            self.log.writeToLog('COMP-005', [cType])
+            dieNow()
+
+        # If we got this far it must be okay to leave
+        return True
+
+
+    def insertGroup (self, cType, gid, cidList) :
+        '''Insert a single component into the project.conf and create a component manager.'''
+
+        buildConfSection(self.projConfig, 'Components')
+        buildConfSection(self.projConfig['Components'], gid)
+        self.projConfig['Components'][gid]['type'] = cType
+        self.projConfig['Components'][gid]['cidList'] = [cidList]
+        self.projConfig['Components'][gid]['isLocked'] = False
+        self.projConfig['Components'][gid]['style'] = ''
+        self.buildGroupObject(cType, gid)
+        # Save our config settings
+        if writeConfFile(self.projConfig) :
+            return True
+
+
+    def buildGroupObject (self, cType, gid) :
+        '''This will load the group type manager object.'''
+
+        cfg = self.projConfig['Group'][gid]
+        module = import_module('rapuma.group.' + cType)
+        ManagerClass = getattr(module, cType.capitalize())
+        compobj = ManagerClass(self, cfg)
+        self.components[cName] = compobj
+
+
+    def removeGroup (self, gid, force = False) :
+        '''Handler to remove a group. If it is not found return True anyway.'''
+
+        # Create the group object now
+        self.createGroup(gid)
+
+        # First test for lock
+        if self.isLocked(gid) and force == False :
+            self.log.writeToLog('COMP-110', [gid])
+            dieNow()
+
+        # Remove subcomponents from the target if there are any
+        buildConfSection(self.projConfig, 'Groups')
+        if isConfSection(self.projConfig['Groups'], cName) :
+            # FIXME: What may be needed here is a way to look for conflicts
+            # between components that share the same subcomponents.
+            for cid in self.components[cName].getSubcomponentList(cName) :
+                cidName = self.components[cName].getRapumaCName(cid)
+                if self.components[cName].isCompleteComponent(cidName) :
+                    self.uninstallComponent(cidName, force)
+            # Remove the target component
+            self.uninstallComponent(cName, force)
+            # Test for success
+            if not self.components[cName].isCompleteComponent(cName) :
+                self.log.writeToLog('COMP-120', [cName])
+            else :
+                self.log.writeToLog('COMP-140', [cName])
+                dieNow()
+        else :
+            self.log.writeToLog('COMP-150', [cName])
+
+
+    def uninstallGroup (self, gid, force = False) :
+        '''This will remove a specific component from the project configuration as
+        well as the physical files. However, a backup will be made of the working
+        text for comparison purposes. If the component is locked, the function will
+
+        abort. This does not return anything. We trust it worked.'''
+
+        # First test for lock
+        if self.isLocked(cName) and force == False :
+            self.log.writeToLog('COMP-110', [cName])
+            dieNow()
+
+        # We will not bother if it is not in the config file.
+        # Otherwise, delete both the config and physical files
+        buildConfSection(self.projConfig, 'Components')
+        if isConfSection(self.projConfig['Components'], cName) :
+            # We will need to record the cType
+            cType = self.projConfig['Components'][cName]['type']
+            del self.projConfig['Components'][cName]
+            # Sanity check
+            if not isConfSection(self.projConfig['Components'], cName) :
+                writeConfFile(self.projConfig)
+                self.log.writeToLog('COMP-030', [cName])
+            # Hopefully all went well with config delete, now on to the files
+            if force :
+                cid             = self.components[cName].getUsfmCid(cName)
+                targetFolder    = os.path.join(self.local.projComponentsFolder, cName)
+                source          = os.path.join(targetFolder, cid + '.' + cType)
+                targetComp      = os.path.join(source + '.cv1')
+                if os.path.isfile(source) :
+                    # First a comparison backup needs to be made of the working text
+                    if os.path.isfile(targetComp) :
+                        makeWriteable(targetComp)
+                    shutil.copy(source, targetComp)
+                    makeReadOnly(targetComp)
+                    for fn in os.listdir(targetFolder) :
+                        f = os.path.join(targetFolder, fn)
+                        if f != targetComp :
+                            os.remove(f)
+
+                    self.log.writeToLog('COMP-031', [cName])
+                else :
+                    self.log.writeToLog('COMP-032', [cName])
+
+                self.log.writeToLog('COMP-033', [cName])
+
+            self.log.writeToLog('COMP-035', [cName])
+
+
+    def updateGroup (self, gid, source = None, force = False) :
+        '''Update a component, --source is optional but if given it will
+        overwrite the current setting. The use of this function implies
+        that this is forced so no force setting is used.'''
+
+        # Create the component object now
+        self.createComponent(cName)
+
+        # Check to be sure the component exsits
+        if not self.components[cName] :
+            self.log.writeToLog('COMP-210', [cName])
+            dieNow()
+
+        # If force is used, just unlock by default
+        if force :
+            self.lockUnlock(cName, False, force)
+
+        # Be sure the component (and subcomponents) are unlocked
+        if self.isLocked(cName) :
+            self.log.writeToLog('COMP-110', [cName])
+            dieNow()
+
+        # Here we essentially re-add the component
+        cType = self.components[cName].getComponentType(cName)
+        cidList = self.components[cName].getSubcomponentList(cName)
+        if not source :
+            source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
+        self.addComponent(cType, cName, cidList, source, force)
+        
+        # Now do a compare between the old component and the new one
+        if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
+            self.compareComponent(cName, 'working')
+
+
+
+
+
+
+
+#------------------------------------------------
+
+
+
+
+
+
+
+
+    def hasSourcePath (self, cType) :
+
+        '''Check to see if there is a pre-exsisting path.'''
+
+        Ctype = cType.capitalize()
+        if testForSetting(self.userConfig['Projects'][self.projectIDCode], cType + '_sourcePath') :
+            if self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] != '' :
+                return True
+
+
+    def sourceIsSame (self, cType, source) :
+        '''Check to see if the existing path is the same as the
+        new proposed path.'''
+
+        curPath = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
+        if curPath == source :
+            return True
+
+
+    def addCompTypeSourcePath (self, cType, source) :
+        '''Add a source path for a component type if one does not
+
+        already exsist. If one exists, replace anyway. Last in wins!
+        The assumption is only one path per component type.'''
+
+        Ctype = cType.capitalize()
+        # Path has been resolved in Rapuma, we assume it should be valid.
+        # But it could be a full file name. We need to sort that out.
+        try :
+            if os.path.isdir(source) :
+                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = source
+            else :
+                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = os.path.split(source)[0]
+
+            writeConfFile(self.userConfig)
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog('PROJ-100', [str(e)])
+            dieNow()
+
+
+    def isLocked (self, item) :
+        '''Test to see if a component is locked. Return True if the item is 
+        locked. '''
+
+        try :
+            if str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
+                return True
+            else :
+                return False
+        except :
+            return False
+
+
+    def lockUnlock (self, cName, lock = True, force = False) :
+        '''Lock or unlock to enable or disable actions to be taken on a component.'''
+
+        # Create the component object now
+        self.createComponent(cName)
+
+        # First be sure this is a valid component
+        if not self.components[cName] :
+            self.log.writeToLog('LOCK-010', [cName])
+            dieNow()
+
+        # If force is set, set locks on subcomponents
+        if force :
+            for cid in self.components[cName].getSubcomponentList(cName) :
+                cidName = self.components[cName].getRapumaCName(cid)
+                self.setLock(cidName, lock)
+
+        # Set lock on this specific component
+        if self.setLock(cName, lock) :
+            return True
+
+
+    def setLock (self, cName, lock) :
+        '''Set a lock to True or False.'''
+
+        if testForSetting(self.projConfig['Components'], cName) :
+            self.projConfig['Components'][cName]['isLocked'] = lock
+            # Update the projConfig
+            if writeConfFile(self.projConfig) :
+                # Report back
+                self.log.writeToLog('LOCK-020', [cName, str(lock)])
+                return True
+        else :
+            self.log.writeToLog('LOCK-030', [cName, str(lock)])
+            return False
+
 
     def listAllComponents (self, cType) :
         '''Generate a list of valid component IDs and cNames for this cType.'''
@@ -207,6 +653,10 @@ class Project (object) :
             if c != '_z_' :
                 print c, comps[c][1]
 
+
+###############################################################################
+########################## Component Level Functions ##########################
+###############################################################################
 
     def setProjCurrent (self, pid) :
         '''Compare pid with the current recored pid e rapuma.conf. If it is
@@ -226,7 +676,6 @@ class Project (object) :
         if cName != currentCName :
             self.projConfig['CompTypes'][cType.capitalize()]['current'] = cName
             writeConfFile(self.projConfig)
-
 
 
     def renderComponent (self, cType, cName, force = False) :
@@ -312,45 +761,6 @@ class Project (object) :
             return False
 
         return compobj
-
-
-    def hasSourcePath (self, cType) :
-        '''Check to see if there is a pre-exsisting path.'''
-
-        Ctype = cType.capitalize()
-        if testForSetting(self.userConfig['Projects'][self.projectIDCode], cType + '_sourcePath') :
-            if self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] != '' :
-                return True
-
-
-    def sourceIsSame (self, cType, source) :
-        '''Check to see if the existing path is the same as the
-        new proposed path.'''
-
-        curPath = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
-        if curPath == source :
-            return True
-
-
-    def addCompTypeSourcePath (self, cType, source) :
-        '''Add a source path for a component type if one does not
-        already exsist. If one exists, replace anyway. Last in wins!
-        The assumption is only one path per component type.'''
-
-        Ctype = cType.capitalize()
-        # Path has been resolved in Rapuma, we assume it should be valid.
-        # But it could be a full file name. We need to sort that out.
-        try :
-            if os.path.isdir(source) :
-                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = source
-            else :
-                self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath'] = os.path.split(source)[0]
-
-            writeConfFile(self.userConfig)
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('PROJ-100', [str(e)])
-            dieNow()
 
 
     def addComponent (self, cType, cName, cidList, newSource = None, force = False) :
@@ -702,60 +1112,6 @@ class Project (object) :
 
         # Turn it over to the generic compare tool
         self.compare(new, old)
-
-
-###############################################################################
-############################### Locking Functions #############################
-###############################################################################
-
-    def isLocked (self, item) :
-        '''Test to see if a component is locked. Return True if the item is 
-        locked. '''
-
-        try :
-            if str2bool(testForSetting(self.projConfig['Components'], item, 'isLocked')) == True :
-                return True
-            else :
-                return False
-        except :
-            return False
-
-
-    def lockUnlock (self, cName, lock = True, force = False) :
-        '''Lock or unlock to enable or disable actions to be taken on a component.'''
-
-        # Create the component object now
-        self.createComponent(cName)
-
-        # First be sure this is a valid component
-        if not self.components[cName] :
-            self.log.writeToLog('LOCK-010', [cName])
-            dieNow()
-
-        # If force is set, set locks on subcomponents
-        if force :
-            for cid in self.components[cName].getSubcomponentList(cName) :
-                cidName = self.components[cName].getRapumaCName(cid)
-                self.setLock(cidName, lock)
-
-        # Set lock on this specific component
-        if self.setLock(cName, lock) :
-            return True
-
-
-    def setLock (self, cName, lock) :
-        '''Set a lock to True or False.'''
-
-        if testForSetting(self.projConfig['Components'], cName) :
-            self.projConfig['Components'][cName]['isLocked'] = lock
-            # Update the projConfig
-            if writeConfFile(self.projConfig) :
-                # Report back
-                self.log.writeToLog('LOCK-020', [cName, str(lock)])
-                return True
-        else :
-            self.log.writeToLog('LOCK-030', [cName, str(lock)])
-            return False
 
 
 ###############################################################################

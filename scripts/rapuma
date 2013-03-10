@@ -66,7 +66,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130308044840'
+systemVersion   = '0.1.20130309193115'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -799,6 +799,7 @@ def userArguments (args) :
     if sys.argv[1].lower() == 'system' :
         pass
 
+    # Project level commands
     elif sys.argv[1].lower() == 'project' :
         pid = args['project_id']
         # Remove an exsisting project
@@ -810,9 +811,6 @@ def userArguments (args) :
         # Create/refresh helper scripts
         elif args['scripts'] :
             makeProjectScripts(uc, pid)
-        # Backup (evaporate) to cloud
-        elif args['push'] :
-            pushToCloud(pid)
         # Update (get rained on) from the cloud
         elif args['pull'] :
             pullFromCloud(pid)
@@ -852,41 +850,68 @@ def userArguments (args) :
                 if str2bool(uc.userConfig['System']['autoHelperScripts']) :
                     makeProjectScripts(uc, args['project_id'])
 
-    elif sys.argv[1].lower() == 'component' :
-        if args['list'] :
-            aProject.listAllComponents(args['component_type'])
-        if not args['component_name'] :
-            sys.exit('\nERROR: Must provide a component name when adding a new component. Process halted!\n')
-        # Add a new component
+    # Group level commands
+    elif sys.argv[1].lower() == 'group' :
+        # Add a new group
         if args['add'] :
             if not args['id_list'] :
-                sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs (sub-components) when adding a component. Process halted!\n')
+                sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
             else :
-                aProject.addComponent(args['component_type'], args['component_name'].lower(), args['id_list'], args['source'], args['force'])
-        # Delete a component
+                aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source'], args['force'])
+        # Remove a group from the project
+        elif args['remove'] :
+            aProject.removeGroup(args['group_id'].lower(), args['force'])
+        # Update a component, --source is optional but if given it will
         elif args['update'] :
-            # Update a component, --source is optional but if given it will
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateComponent(args['component_name'].lower(), args['source'], args['force'])
-        elif args['remove'] :
-            # If -f is used, we delete all the files with this cid
-            aProject.removeComponent(args['component_name'].lower(), args['force'])
+            aProject.updateGroup(args['group_id'].lower(), args['force'])
+        # Execute/render a group of components
+        elif args['execute'] :
+            aProject.renderGroup(args['group_id'], args['force'])
+        # Get a whole list of component IDs and names
+        elif args['list'] :
+            aProject.listAllComponents(args['component_type'])
+        # Turn on or off preprocessing on import or updating (specific for cType)
+        elif args['preprocess'] :
+            aProject.turnOnOffPreprocess(args['component_type'], args['preprocess'])
+        # Lock component
+        if args['lock'] :
+            aProject.lockUnlock(args['group_id'].lower())
+        # Unlock component
+        elif args['unlock'] :
+            aProject.lockUnlock(args['group_id'].lower())
+        # Assign/unassign Style
+        elif args['style'] :
+            aProject.createManager(args['component_type'], 'style')
+            manager = args['component_type'] + '_Style'
+            if args['add'] :
+                aProject.managers[manager].addStyleFile(args['component_type'], args['path'], args['force'])
+            elif args['remove'] :
+                aProject.managers[manager].removeStyleFile(args['component_type'], args['force'])
+
+    # Component level commands
+    elif sys.argv[1].lower() == 'component' :
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
         elif args['execute'] :
-            aProject.renderComponent(args['component_type'], args['component_name'].lower(), args['force'])
+            aProject.renderComponent(args['component_id'].lower(), args['force'])
+        # Update a single component
+        elif args['update'] :
+            aProject.updateComponent(args['component_id'].lower(), args['force'])
+        # Validate a single component
         elif args['validate'] :
-            aProject.createManager(args['component_type'], 'text')
-            aProject.managers[args['component_type'] + '_Text'].testCompTextFile(args['path'])
+            sys.exit('\nERROR: Validate not working yet (usfm_Text.testCompTextFile())\n')
+        # Compare a component with backups of working or source text
         elif args['compare'] :
-            aProject.compareComponent(args['component_name'].lower(), args['compare'])
-        elif args['preprocess'] :
-            aProject.turnOnOffPreprocess(args['component_type'], args['preprocess'])
+            aProject.compareComponent(args['component_id'].lower(), args['compare'])
+        # Commands for editing project files
+        elif args['edit'] :
+                aProject.edit(args['component_id'])
 
-    #Binding level commands
+    # Binding level commands
     elif sys.argv[1].lower() == 'binding' :
         aProject.createManager(aProject.projectMediaIDCode, 'binding')
         manager = aProject.projectMediaIDCode + '_Binding'
@@ -913,23 +938,6 @@ def userArguments (args) :
                 aProject.managers[manager].setPrimaryFont(args['component_type'].capitalize(), font, args['force'])
         else :
             sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
-
-    # Style level commands
-    elif sys.argv[1].lower() == 'style' :
-        aProject.createManager(args['component_type'], 'style')
-        manager = args['component_type'] + '_Style'
-        if args['style_type'] :
-            if args['add'] :
-                aProject.managers[manager].addStyleFile(args['style_type'], args['path'], args['force'])
-            elif args['remove'] :
-                aProject.managers[manager].removeStyleFile(args['Style_type'], args['force'])
-            elif args['validate'] :
-                # In this context we want to stop if an error is found and report it
-                # Passing true to validateStyleFile will do that
-                aProject.managers[manager].testStyleFile(args['path'])
-        else :
-            if args['style_type'].lower() not in ['main', 'custom'] :
-                sys.exit('\nERROR: Style file type (-t) is either missing or incorrect.\n')
 
     # Hyphenation level commands
     elif sys.argv[1].lower() == 'hyphen' :
@@ -993,16 +1001,6 @@ def userArguments (args) :
         else :
             sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
 
-    # Locking commands
-    elif sys.argv[1].lower() == 'locking' :
-        aProject = initProject(args['project_id'])
-        # Lock component
-        if args['lock'] :
-            aProject.lockUnlock(args['component_name'].lower(), True, args['force'])
-        # Unlock component
-        elif args['unlock'] :
-            aProject.lockUnlock(args['component_name'].lower(), False, args['force'])
-
     # Exporting commands
     elif sys.argv[1].lower() == 'export' :
         # Check further for required args
@@ -1038,30 +1036,27 @@ def userArguments (args) :
             # Bad command
             sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
-    # The demo commands were intercepted at the begining
-
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
         isProject(args['project_id'])
+        # Archive the project
         if args['archive'] :
             archiveProject(args['project_id'])
+        # Backup the project (simple)
         elif args['backup'] :
             backupProject(args['project_id'])
+        # Create a template of the current project
         elif args['template'] :
             if isTemplate(args['template']) :
                 sys.exit('\nError: This template [' + args['template'] + '] already exsists. Process halted.\n')
             projectToTemplate(args['project_id'], args['template'])
-        elif args['synchronize_pull'] :
-            synchronize_pull(args['project_id'])
-        elif args['synchronize_push'] :
-            synchronize_push(args['project_id'])
+        # Backup (evaporate) to cloud
+        elif args['cloud'] :
+            pushToCloud(args['project_id'])
+        # Handle bad commands
         else :
             # Bad command
-            sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -p (synchronize_pull), or -u (synchronize_push). Process halted!\n')
-
-    # Commands for editing project files
-    elif sys.argv[1].lower() == 'edit' :
-            aProject.edit(args['component'], args['global'], args['system'])
+            sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -c (--cloud). Process halted!\n')
 
     # Totally lost
     else:
@@ -1135,23 +1130,35 @@ projCommand.add_argument('-v', '--revert', help='This will revert the project to
 projCommand.add_argument('-a', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
 projCommand.add_argument('-c', '--cloud', action='store_true', help='Pull from cloud storage to your local data. Any data in the cloud that is newer than your project data will overwrite files in your project. A backup will be made just before the actual pull operation begins. If the project is not found in your local data set, the cloud function will copy it to the default project location (unless --targetPath is specified) and make an entry for it in your system configuration.')
 
+# Add group subprocess arguments
+groupCommand = subparsers.add_parser('group', help='General project group management commands help')
+groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+groupCommand.add_argument('group_id', help='The component type is needed for creating a new component.')
+groupCommand.add_argument('-c', '--component_type', help='The group component type is needed for creating a new group.')
+groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component group to this project.')
+groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component group from this project.')
+groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
+groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
+groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific group in this project.')
+groupCommand.add_argument('-u', '--update', action='store_true', help='Update a component group. If -s (source) is used a new component source path will be recorded as well.')
+groupCommand.add_argument('-p', '--preprocess', help='Turn on or off preprocessing when importing and updating components. To turn it on use "True", to turn off, use "False"')
+groupCommand.add_argument('-o', '--output_list', action='store_true', help='Generate a list of valid component IDs with their names for the specified component type.')
+groupCommand.add_argument('-l', '--lock', action='store_true', help='Lock a component group.')
+groupCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a component group.')
+groupCommand.add_argument('-y', '--style', action='store_true', help='Add/assign or Remove/unassign an override style file for a component group. Use along with -a, -r, and -f.')
+
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-compCommand.add_argument('component_type', help='The component type is needed for creating a new component.')
-compCommand.add_argument('component_name', help='The component name, required for creating a new component or any actions to be done to it.')
-compCommand.add_argument('-a', '--add', action='store_true', help='Add a new component to this project.')
-compCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component from this project.')
-compCommand.add_argument('-s', '--source', help='Provide a valid path to where the source file is found. (Used for adding/updating components, one source path per component type allowed.)')
-compCommand.add_argument('-i', '--id_list', help='Use this if this is a group component. This is a list of components to be in this group. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
-compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this project.')
+compCommand.add_argument('group_id', help='The group ID this component is a part of.')
+compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
+compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a lock is needed.')
+compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this group.')
 compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
 compCommand.add_argument('-c', '--compare', help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
-compCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific file is to be tested.')
-compCommand.add_argument('-u', '--update', action='store_true', help='Update a component. If -s (source) is used a new component source path will be recorded as well.')
-compCommand.add_argument('-o', '--preprocess', help='Turn on or off preprocessing when importing and updating components. To turn it on use "True", to turn off, use "False"')
-compCommand.add_argument('-l', '--list', action='store_true', help='Generate a list of valid component IDs with their names for this component type.')
+compCommand.add_argument('-u', '--update', action='store_true', help='Update a specific component in a specified group.')
+compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a specific component from a specified group.')
 
 # Add binding subprocess arguments
 bindCommand = subparsers.add_parser('binding', help='General project binding management commands help')
@@ -1173,21 +1180,10 @@ fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the
 fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
 fontCommand.add_argument('-m', '--main', action='store_true', help='Set, the specified (valid system) font to be the main (primary) font for this component type.')
 
-# Add style subprocess arguments
-styleCommand = subparsers.add_parser('style', help='General component style handling commands help')
-styleCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-styleCommand.add_argument('component_type', help='The component type is needed when adding a style for this type of component. (This is a required positional argument.)')
-styleCommand.add_argument('style_type', help='The type of style file this is. There are two acceptable types, \"main\" and \"custom\". (This is a required positional argument.)')
-styleCommand.add_argument('-a', '--add', action='store_true', help='Add a new style for a specific comonent type.')
-styleCommand.add_argument('-r', '--remove', action='store_true', help='Remove a style file for this component type.')
-styleCommand.add_argument('-p', '--path', help='Provide a valid path and file name if a specific style file is required or to be auto-generated. Otherwise, a default will be used.')
-styleCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a style from this component.')
-styleCommand.add_argument('-v', '--validate', action='store_true', help='[NOT IMPLEMENTED] Validate a style file. Must use -p to provide a path and file name.')
-
 # Add text hyphenation processing subprocess arguments
 hyphenCommand = subparsers.add_parser('hyphen', help='General settings for handling component text hyphenation processing commands.')
 hyphenCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-hyphenCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
+hyphenCommand.add_argument('component_type', help='Specify the component group.')
 hyphenCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
 hyphenCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
 hyphenCommand.add_argument('-f', '--force', action='store_true', help='When used with update (-u), this will delete the source hyphenation file that was copied into the project when it was created. Use this only if you are sure you want to replace it. Any edits done to this file will be lost.')
@@ -1224,14 +1220,6 @@ settingsCommand.add_argument('section', help='The section path to the key/value 
 settingsCommand.add_argument('key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('value', help='A new value to add or change to the specified key.')
 
-# Add Project Locking subprocess arguments
-lockCommand = subparsers.add_parser('locking', help='Commands for locking down projects or parts of a project. This will prevent accidental processing.')
-lockCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-lockCommand.add_argument('component_name', help='A specific component name required for locking or unlocking.')
-lockCommand.add_argument('-l', '--lock', action='store_true', help='Lock a project or component. If a component or component type are not specified, the entire project will be locked and not available to any processes.')
-lockCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a project or component. This is hierarchical. If the entire project is locked, unlocking component types or components cannot take place until the entire project is unlocked.')
-lockCommand.add_argument('-f', '--force', action='store_true', help='Force lock/unlock of any subcomponents that belong to the specified component.')
-
 # Add Project exporting subprocess arguments
 exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')
 exportCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
@@ -1260,20 +1248,13 @@ macroCommand.add_argument('-c', '--command', help='Add a list (\'[rapuma 1, rapu
 macroCommand.add_argument('-p', '--path', help='If the macro you are adding already exsists, specify the path to it and include the name of the file. This would be used with the -a command and instead of -c command.')
 macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
 
-# Add Project archive subprocess arguments
+# Add Project preserve subprocess arguments
 preserveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
 preserveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
 preserveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
 preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
 preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
 preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back project data to cloud storage.')
-
-# Add Project edit subprocess arguments
-editCommand = subparsers.add_parser('edit', help='Commands for editing project files.')
-editCommand.add_argument('project_id', help=' A project ID for the project you wish to edit files in.')
-editCommand.add_argument('-c', '--component', help='Edit files related to the specified component.')
-editCommand.add_argument('-g', '--global', action='store_true', help='Edit global project files, including configuration, macro and style files.')
-editCommand.add_argument('-s', '--system', action='store_true', help='Edit system files, like the Rapuma configuration file.')
 
 # Send the collected arguments to the handler
 userArguments(vars(parser.parse_args()))
