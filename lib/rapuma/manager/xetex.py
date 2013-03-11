@@ -23,7 +23,7 @@ import subprocess
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
-from rapuma.component.usfm import PT_Tools
+from rapuma.group.usfm import PT_Tools
 from rapuma.core.proj_config import ConfigTools
 
 
@@ -51,7 +51,6 @@ class Xetex (Manager) :
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
-        self.cName                  = project.cName
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
@@ -98,7 +97,7 @@ class Xetex (Manager) :
         self.projFontsFolder        = self.local.projFontsFolder
         self.projStylesFolder       = self.local.projStylesFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
-        self.cNameFolder            = os.path.join(self.projComponentsFolder, self.cName)
+#        self.cNameFolder            = os.path.join(self.projComponentsFolder, self.cName)
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         # File names
@@ -143,8 +142,8 @@ class Xetex (Manager) :
             self.compHyphen         = ''
 
         # Make any dependent folders if needed
-        if not os.path.isdir(self.cNameFolder) :
-            os.mkdir(self.cNameFolder)
+#        if not os.path.isdir(self.cNameFolder) :
+#            os.mkdir(self.cNameFolder)
 
         # Check to see if the PDF viewer is ready to go
         if not self.pdfViewer :

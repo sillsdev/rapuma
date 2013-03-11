@@ -25,7 +25,7 @@ import os, shutil, codecs, re
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
-from rapuma.component.usfm import PT_Tools
+from rapuma.group.usfm import PT_Tools
 
 
 ###############################################################################

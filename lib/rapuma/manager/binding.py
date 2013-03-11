@@ -77,11 +77,11 @@ class Binding (Manager) :
 
         try :
             # Add the info to the components section
-            buildConfSection(self.projConfig, 'Components')
-            if not testForSetting(self.projConfig['Components'], bgID) :
-                buildConfSection(self.projConfig['Components'], bgID)
-                self.projConfig['Components'][bgID]['type'] = self.mType
-                self.projConfig['Components'][bgID]['cidList'] = cgIDs.split()
+            buildConfSection(self.projConfig, 'Groups')
+            if not testForSetting(self.projConfig['Groups'], bgID) :
+                buildConfSection(self.projConfig['Groups'], bgID)
+                self.projConfig['Groups'][bgID]['cType'] = self.mType
+                self.projConfig['Groups'][bgID]['cidList'] = cgIDs.split()
                 writeConfFile(self.projConfig)
                 self.project.log.writeToLog('BIND-010', [bgID])
             else :
@@ -95,8 +95,8 @@ class Binding (Manager) :
     def removeBindingGroup (self, bgID) :
         '''Remove a binding group from the project config.'''
 
-        if testForSetting(self.projConfig['Components'], bgID) :
-            del self.projConfig['Components'][bgID]
+        if testForSetting(self.projConfig['Groups'], bgID) :
+            del self.projConfig['Groups'][bgID]
             writeConfFile(self.projConfig)
             self.project.log.writeToLog('BIND-020', [bgID])
         else :
@@ -113,7 +113,7 @@ class Binding (Manager) :
         if not os.path.exists(outputPath) :
             os.makedirs(outputPath)
         # Append each of the input files
-        for f in self.projConfig['Components'][bgID]['cidList'] :
+        for f in self.projConfig['Groups'][bgID]['cidList'] :
             f = os.path.join(self.projComponentsFolder, f, f + '.pdf')
             confCommand.append(f)
         # Now the rest of the commands and output file

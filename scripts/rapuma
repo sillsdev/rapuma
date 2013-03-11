@@ -735,6 +735,9 @@ def makeProjectScripts (uc, pid) :
         # Make the script executable
         makeExecutable(fullFile)
 
+    # Outpu scripts for project groups
+    # FIXME: write the code for this
+
     terminal('\nCompleted creating/recreating helper scripts.\n')
 
 
@@ -778,21 +781,21 @@ def userArguments (args) :
         elif args['update'] :
             updateRapuma()
 
-    # Test project ID, intercept if it is an example demo
+    # Test project ID, intercept if it is a special command
     elif sys.argv[1].lower() != 'project' :
         isProject(args['project_id'])
         # Now setup the project and look for and test the component type if needed
         aProject = initProject(args['project_id'])
         # Test component type if used
-        if 'component_type' in args :
-            exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
-            if not sys.argv[1].lower() in exclude :
-                if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
-                    if args['component_type'] in uc.userConfig['System']['recognizedComponentTypes'] :
-                        if not aProject.addComponentType(args['component_type']) :
-                            sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
-                    else :
-                        sys.exit('\nERROR: Component type given: ' + args['component_type'] + ' Is not valid in Rapuma. Process halted!\n')
+#        if 'component_type' in args :
+#            exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
+#            if not sys.argv[1].lower() in exclude :
+#                if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
+#                    if args['component_type'] in uc.userConfig['System']['recognizedComponentTypes'] :
+#                        if not aProject.addComponentType(args['component_type']) :
+#                            sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
+#                    else :
+#                        sys.exit('\nERROR: Component type given: ' + args['component_type'] + ' Is not valid in Rapuma. Process halted!\n')
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -854,8 +857,10 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'group' :
         # Add a new group
         if args['add'] :
-            if not args['id_list'] :
+            if not args['cid_list'] :
                 sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
+            elif not args['component_type'] :
+                sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
             else :
                 aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source'], args['force'])
         # Remove a group from the project
@@ -896,7 +901,7 @@ def userArguments (args) :
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
-        elif args['execute'] :
+        if args['execute'] :
             aProject.renderComponent(args['component_id'].lower(), args['force'])
         # Update a single component
         elif args['update'] :
@@ -1145,7 +1150,7 @@ groupCommand.add_argument('-u', '--update', action='store_true', help='Update a 
 groupCommand.add_argument('-p', '--preprocess', help='Turn on or off preprocessing when importing and updating components. To turn it on use "True", to turn off, use "False"')
 groupCommand.add_argument('-o', '--output_list', action='store_true', help='Generate a list of valid component IDs with their names for the specified component type.')
 groupCommand.add_argument('-l', '--lock', action='store_true', help='Lock a component group.')
-groupCommand.add_argument('-u', '--unlock', action='store_true', help='Unlock a component group.')
+groupCommand.add_argument('-n', '--unlock', action='store_true', help='Unlock a component group.')
 groupCommand.add_argument('-y', '--style', action='store_true', help='Add/assign or Remove/unassign an override style file for a component group. Use along with -a, -r, and -f.')
 
 # Add component subprocess arguments

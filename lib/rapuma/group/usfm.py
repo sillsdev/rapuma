@@ -349,7 +349,7 @@ class Usfm (Component) :
 ###############################################################################
 
 
-    def installUsfmWorkingText (self, cName, cid, force = False) :
+    def installUsfmWorkingText (self, gid, cid, force = False) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name. If a USFM text file
         is not located in a PT project folder, the editor cannot be set
@@ -372,7 +372,7 @@ class Usfm (Component) :
         # Build the file name
         thisFile = ''
         if self.sourceEditor.lower() == 'paratext' :
-            thisFile = self.pt_tools.formPTName(cName, cid)
+            thisFile = self.pt_tools.formPTName(gid, cid)
         elif self.sourceEditor.lower() == 'generic' :
             thisFile = self.pt_tools.formGenericName(cid)
         else :
@@ -412,7 +412,7 @@ class Usfm (Component) :
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
-        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cName)
+        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
         target          = os.path.join(targetFolder, cid + '.' + self.cType)
         targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
@@ -456,15 +456,11 @@ class Usfm (Component) :
             # backup file.
             if self.usfmCopy(targetSource, target, projSty) :
                 # Run any working text preprocesses on the new component text
-                if self.project.isLocked(cName) :
-                    self.project.lockUnlock(cName, False, True)
                 if str2bool(self.usePreprocessScript) :
                     if not os.path.isfile(self.preprocessScript) :
                         self.project.installPreprocess(self.cType)
-                    if not self.project.runProcessScript(cName, self.preprocessScript) :
-                        self.project.log.writeToLog('USFM-130', [cName])
-                if not self.project.isLocked(cName) :
-                    self.project.lockUnlock(cName, True, True)
+                    if not self.project.runProcessScript(cid, self.preprocessScript) :
+                        self.project.log.writeToLog('USFM-130', [cid])
 
                 # If this is a USFM component type we need to remove any \fig markers,
                 # and record them in the illustration.conf file for later use
@@ -474,7 +470,7 @@ class Usfm (Component) :
                     # logUsfmFigure() logs the fig data and strips it from the working text
                     # Note: Using partial() to allows the passing of the cid param 
                     # into logUsfmFigure()
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.components[cName].logFigure, cid), contents)
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.groups[gid].logFigure, cid), contents)
                     codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                     # Finish by copying the tempFile to the source
                     if not shutil.copy(tempFile, target) :
@@ -483,13 +479,11 @@ class Usfm (Component) :
 
                 # If the text is there, we should return True so do a last check to see
                 if os.path.isfile(target) :
-                    self.project.log.writeToLog('USFM-140', [cName])
+                    self.project.log.writeToLog('USFM-140', [cid])
                     return True
             else :
                 self.project.log.writeToLog('USFM-150', [source,fName(target)])
                 return False
-#            else :
-#                return True
         else :
             return True
 
@@ -627,11 +621,11 @@ class Usfm (Component) :
             return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
-    def getComponentType (self, cName) :
+    def getComponentType (self, gid) :
         '''Return the cType for a component.'''
 
         try :
-            cType = self.project.projConfig['Components'][cName]['type']
+            cType = self.project.projConfig['Groups'][gid]['cType']
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
@@ -656,13 +650,13 @@ class Usfm (Component) :
         return True
 
 
-    def hasCNameEntry (self, cName) :
-        '''Check for a config component entry.'''
+#    def hasCNameEntry (self, cName) :
+#        '''Check for a config component entry.'''
 
-        buildConfSection(self.project.projConfig, 'Components')
+#        buildConfSection(self.project.projConfig, 'Components')
 
-        if testForSetting(self.project.projConfig['Components'], cName) :
-            return True
+#        if testForSetting(self.project.projConfig['Components'], cName) :
+#            return True
 
 
     def hasUsfmCidInfo (self, cid) :
@@ -1188,7 +1182,7 @@ class PT_Tools (Component) :
         return chars
 
 
-    def formPTName (self, cName, cid) :
+    def formPTName (self, gid, cid) :
         '''Using valid PT project settings from the project configuration, form
         a valid PT file name that can be used for a number of operations.'''
 
@@ -1201,7 +1195,7 @@ class PT_Tools (Component) :
             prePart = self.projConfig['Managers']['usfm_Text']['prePart']
 
             if nameFormID == '41MAT' :
-                mainName = self.project.components[cName].getUsfmCidInfo(cid)[2] + cid.upper()
+                mainName = self.project.groups[gid].getUsfmCidInfo(cid)[2] + cid.upper()
                 if prePart and prePart != 'None' :
                     thisFile = prePart + mainName + postPart
                 else :
