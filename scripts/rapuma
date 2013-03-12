@@ -875,11 +875,11 @@ def userArguments (args) :
         elif args['execute'] :
             aProject.renderGroup(args['group_id'], args['force'])
         # Get a whole list of component IDs and names
-        elif args['list'] :
+        elif args['output_list'] :
             aProject.listAllComponents(args['component_type'])
         # Turn on or off preprocessing on import or updating (specific for cType)
         elif args['preprocess'] :
-            aProject.turnOnOffPreprocess(args['component_type'], args['preprocess'])
+            aProject.turnOnOffPreprocess(args['group_id'], args['preprocess'])
         # Lock component
         if args['lock'] :
             aProject.lockUnlock(args['group_id'].lower())

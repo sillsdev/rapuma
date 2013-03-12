@@ -7,6 +7,7 @@
   <file path="file:///home/dennis/Projects/rapuma/config/rapuma.xml"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/project.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/group.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_log.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/tools.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py"/>
@@ -19,9 +20,8 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/style.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/binding.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/text.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/component/usfm.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py"/>
   <file path="file:///home/dennis/Projects/rapuma/config/usfm.xml"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LATN-NTMOD.old/Styles/usfm.sty"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py"/>
 </session>
 </saved-sessions>

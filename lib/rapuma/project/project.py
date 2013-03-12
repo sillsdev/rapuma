@@ -48,7 +48,6 @@ class Project (object) :
         self.projConfig             = projConfig
         self.log                    = log
         self.systemVersion          = systemVersion
-        self.gid                    = ''
         self.groups                 = {}
 #        self.components             = {}
 #        self.componentType          = {}
@@ -57,18 +56,6 @@ class Project (object) :
         self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
         self.projectName            = self.projConfig['ProjectInfo']['projectName']
 
-        # Get component source path(s)
-        for cType in self.userConfig['System']['recognizedComponentTypes'] :
-            sourcePath = ''
-            try :
-                sourcePath = userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                terminal('No source path found for: [' + str(e) + ']')
-                terminal('Please add a source path for this component type.')
-#                dieNow()
-            if sourcePath :
-                setattr(self, cType + '_sourcePath', sourcePath)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -77,10 +64,6 @@ class Project (object) :
         except :
             pass
 
-        # Initialize the project type
-        # FIXME: some additional work needs to be done to simplify this
-        # This will have to do for now.
-        
 #        import pdb; pdb.set_trace()
 
         m = import_module('rapuma.project.' + self.projectMediaIDCode)
@@ -188,20 +171,33 @@ class Project (object) :
 ############################ Group Level Functions ############################
 ###############################################################################
 
-    def renderGroup (self, cType, gid, force = False) :
+    def getGroupSourcePath (self, gid) :
+        '''Get the source path for a specified group.'''
+
+        try :
+            sourcePath = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            terminal('No source path found for: [' + str(e) + ']')
+            terminal('Please add a source path for this component type.')
+
+        return sourcePath
+
+
+
+    def renderGroup (self, gid, force = False) :
         '''Render a group of subcomponents.'''
 
 #        import pdb; pdb.set_trace()
 
-        # If we made it this far, try rendering
-        if checkForGid(gid) :
-            cType = self.projConfig['Groups'][gid]['cType']
-            self.createGroup(gid, cType).render(force)
-            self.setGidCurrent(cType, gid)
+        # Do a basic test for exsistance
+        if isConfSection(self.projConfig['Groups'], gid) :
+#            cType = self.projConfig['Groups'][gid]['cType']
+            self.createGroup(gid).render(force)
             return True
 
 
-    def createGroup (self, gid, cType) :
+    def createGroup (self, gid) :
         '''Create a group object that can be acted on. It is assumed
         this only happens for one group per session. This group
         will contain one or more compoenents. The information for
@@ -212,23 +208,21 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
+        cType = self.projConfig['Groups'][gid]['cType']
         # Create a special component object if called
-        self.gid = gid
+#        self.gid = gid
         cfg = self.projConfig['Groups'][gid]
         module = import_module('rapuma.group.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         compobj = ManagerClass(self, cfg)
         self.groups[gid] = compobj
+        setattr(self.groups[gid], 'gid', gid)
 
         return compobj
 
 
     def addGroup (self, cType, gid, cidList, newSource = None, force = False) :
         '''This handels adding a group which can contain one or more components.'''
-
-        # Set the gid if it is not already
-        if not self.gid :
-            self.gid = gid
 
         # Do not want to add this group, non-force, if it already exsists.
         buildConfSection(self.projConfig, 'Groups')
@@ -272,15 +266,34 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # Add the info to the group config info
+        # The assumption is that the conf needs to be
+        # reset incase there is any residual stuff from 
+        # a previous attempt to add the same group. But if
+        # it is new, we can just pass
+        try :
+            del self.projConfig['Groups'][gid]
+        except :
+            pass
+
+        # Get persistant values from the config
         buildConfSection(self.projConfig, 'Groups')
         buildConfSection(self.projConfig['Groups'], gid)
-        self.projConfig['Groups'][gid]['cType']     = cType
-        self.projConfig['Groups'][gid]['cidList']   = cidList
-        self.projConfig['Groups'][gid]['style']     = ''
+        newSectionSettings = getPersistantSettings(self.projConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
+        if newSectionSettings != self.projConfig['Groups'][gid] :
+            self.projConfig['Groups'][gid] = newSectionSettings
+
+        # Add/Modify the info to the group config info
+        ppsBase = self.projConfig['Groups'][gid]['preprocessScript']
+        styBase = self.projConfig['Groups'][gid]['styleFile']
+        macBase = self.projConfig['Groups'][gid]['macroFile']
+        self.projConfig['Groups'][gid]['cType']                 = cType
+        self.projConfig['Groups'][gid]['cidList']               = cidList
+        self.projConfig['Groups'][gid]['preprocessScript']      = gid + '_' + ppsBase
+        self.projConfig['Groups'][gid]['styleFile']             = gid + '_' + styBase
+        self.projConfig['Groups'][gid]['macroFile']             = gid + '_' + macBase
 
         # Create the group object now that we have an entry in the config
-        self.createGroup(gid, cType)
+        self.createGroup(gid)
         # Install the group's components
         self.installGroupComps(gid, force)
         # Create an empty component group folder if needed
@@ -342,7 +355,7 @@ class Project (object) :
         cType     = self.projConfig['Groups'][gid]['cType']
         groupFolder = os.path.join(self.local.projComponentsFolder, gid)
         # Create the group object now
-        self.createGroup(gid, cType)
+        self.createGroup(gid)
 
         # First test for lock
         if self.isLocked(gid) and force == False :
@@ -359,6 +372,11 @@ class Project (object) :
                 self.log.writeToLog('GRUP-090', [gid])
         else :
             self.log.writeToLog('GRUP-050', [gid])
+            
+        # Now remove the config entry
+        del self.projConfig['Groups'][gid]
+        if writeConfFile(self.projConfig) :
+            self.log.writeToLog('GRUP-120', [gid])
 
 
 #    def uninstallGroup (self, gid, force = False) :
@@ -410,38 +428,32 @@ class Project (object) :
 #            self.log.writeToLog('COMP-035', [cid])
 
 
-    def updateGroup (self, gid, source = None, force = False) :
-        '''Update a component, --source is optional but if given it will
+    def updateGroup (self, gid, force = False) :
+        '''Update a group, --source is optional but if given it will
         overwrite the current setting. The use of this function implies
         that this is forced so no force setting is used.'''
 
-        # Create the component object now
-        self.createComponent(cName)
+        # Create the group object now
+        self.createGroup(gid)
 
-        # Check to be sure the component exsits
-        if not self.components[cName] :
-            self.log.writeToLog('COMP-210', [cName])
+        # Check to be sure the group exsits
+        if not self.groups[gid] :
+            self.log.writeToLog('COMP-210', [gid])
             dieNow()
 
         # If force is used, just unlock by default
         if force :
-            self.lockUnlock(cName, False, force)
+            self.lockUnlock(gid, False)
 
-        # Be sure the component (and subcomponents) are unlocked
-        if self.isLocked(cName) :
-            self.log.writeToLog('COMP-110', [cName])
+        # Be sure the group is unlocked
+        if self.isLocked(gid) :
+            self.log.writeToLog('COMP-110', [gid])
             dieNow()
 
-        # Here we essentially re-add the component
-        cType = self.groups[gid].getComponentType(gid)
-        cidList = self.groups[gid].getSubcomponentList(gid)
-        if not source :
-            source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
-        self.addComponent(cType, cName, cidList, source, force)
-        
-        # Now do a compare between the old component and the new one
-        if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
-            self.compareComponent(cName, 'working')
+        # Here we essentially re-add the components of the group
+        self.installGroupComps(gid, force)
+        # Now lock it down
+        self.lockUnlock(gid, True)
 
 
     def hasSourcePath (self, gid) :
@@ -595,14 +607,13 @@ class Project (object) :
             writeConfFile(self.userConfig)
 
 
-    def setCidCurrent (self, cType, cName) :
-        '''Compare cName with the current recorded cName. If it is different
-        then change to the new cName. If not, leave it alone.'''
+#    def setGroupCurrent (self, gid) :
+#        '''Record the current group that is being worked on.'''
 
-        currentCName = self.projConfig['CompTypes'][cType.capitalize()]['current']
-        if cName != currentCName :
-            self.projConfig['CompTypes'][cType.capitalize()]['current'] = cName
-            writeConfFile(self.projConfig)
+#        currentCName = self.projConfig['CompTypes'][cType.capitalize()]['current']
+#        if cName != currentCName :
+#            self.projConfig['CompTypes'][cType.capitalize()]['current'] = cName
+#            writeConfFile(self.projConfig)
 
 
     def renderComponent (self, cType, cName, force = False) :
@@ -855,16 +866,6 @@ class Project (object) :
 #        self.components[cName] = compobj
 
 
-
-
-
-
-
-
-
-
-
-
 #    def removeComponentFiles (self, gid, cid, force = False) :
 #        '''Handler to remove a component from a project group. However, if the
 #        files are shared by another group, it will not remove them. and return
@@ -943,8 +944,9 @@ class Project (object) :
         cidList = self.groups[gid].getSubcomponentList(gid)
         if not source :
             source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
-        self.addComponent(cType, cName, cidList, source, force)
-        
+#        self.addComponent(cType, cName, cidList, source, force)
+        installUsfmWorkingText (self, gid, cid, force = False)        
+
         # Now do a compare between the old component and the new one
         if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
             self.compareComponent(cName, 'working')
@@ -995,34 +997,24 @@ class Project (object) :
 ########################## Text Processing Functions ##########################
 ###############################################################################
 
-    def turnOnOffPreprocess (self, cType, onOff = False) :
+    def turnOnOffPreprocess (self, gid, onOff) :
         '''Turn on or off preprocessing on incoming component text.'''
 
-        # Current status
-        current = self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript']
-
-        if current != onOff :
-            if onOff == True :
-                self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = True
-                # Now check to see if the script is there and warn if not
-                self.installPreprocess(cType)
-            else :
-                self.projConfig['CompTypes'][cType.capitalize()]['usePreprocessScript'] = False
-
-            writeConfFile(self.projConfig)
-            self.log.writeToLog('PROC-140', [str(onOff),cType])
-        else :
-            self.log.writeToLog('PROC-150', [cType,str(onOff)])
+        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff.capitalize()
+        writeConfFile(self.projConfig)
+        self.log.writeToLog('PROC-140', [onOff, gid])
 
 
-    def installPreprocess (self, cType) :
+    def installPreprocess (self, gid) :
         '''Check to see if a preprocess script is installed. If not, install the
         default script and give a warning that the script is not complete.'''
 
+        cType = self.groups[gid].getComponentType(gid)
+
         # File paths
-        preprocessScriptName   = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-        rapumaPreprocessScript = os.path.join(self.local.rapumaScriptsFolder, preprocessScriptName)
-        preprocessScript       = os.path.join(self.local.projScriptsFolder, cType + '_' + preprocessScriptName)
+        preprocessScriptName   = self.projConfig['Groups'][gid]['preprocessScript']
+        rapumaPreprocessScript = os.path.join(self.local.rapumaScriptsFolder, cType, preprocessScriptName.replace(gid, cType))
+        preprocessScript       = os.path.join(self.local.projScriptsFolder, preprocessScriptName)
         # Check and copy if needed
         if not os.path.isfile(preprocessScript) :
             shutil.copy(rapumaPreprocessScript, preprocessScript)
@@ -1033,64 +1025,23 @@ class Project (object) :
             self.log.writeToLog('PROC-165')
 
 
-    def runProcessScript (self, gid, scriptFileName = None) :
-        '''Run a text processing script on a component (including subcomponents).
-        This assumes the component and the script are valid and the component 
-        lock is turned off. However, it will look for a lock at the subcomponent 
-        level too.'''
+    def runProcessScript (self, gid, cid, scriptFileName) :
+        '''Run a text processing script on a component. This assumes the 
+        component and the script are valid and the component lock is turned 
+        off. If not, you cannot expect any good to come of this.'''
 
-        # First test to see if we can run, quite if not
-        if self.groups[gid].isCompleteComponent(cid) :
-            cType = self.groups[gid].getComponentType(gid)
+        cType = self.groups[gid].getComponentType(gid)
+
+        target = os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType)
+        # subprocess will fail if permissions are not set on the
+        # script we want to run. The correct permission should have
+        # been set when we did the installation.
+        err = subprocess.call([scriptFileName, target])
+        if err == 0 :
+            self.log.writeToLog('PROC-010', [fName(target), fName(scriptFileName)])
         else :
-            self.log.writeToLog('PROC-110', [cType])
-            dieNow()
-
-        # Find the script we will use. It is assumed that if there is
-        # no scriptFileName given, we are working with a pre, not
-        # post process.
-        if scriptFileName :
-            script = os.path.join(self.local.projScriptsFolder, scriptFileName)
-            if not os.path.isfile(script) :
-                self.log.writeToLog('PROC-120', [cType])
-                return False
-        else :
-            if testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'preprocessScript') :
-                if self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript'] :
-                    scriptFileName = self.projConfig['CompTypes'][cType.capitalize()]['preprocessScript']
-                    script = os.path.join(self.local.projScriptsFolder, scriptFileName)
-                    if not os.path.isfile(script) :
-                        self.log.writeToLog('PROC-120', [cType])
-                        return False
-
-        # Check to see if the component is locked
-        if testForSetting(self.projConfig['Components'][cName], 'isLocked') :
-            if str2bool(self.projConfig['Components'][cName]['isLocked']) == True :
-                self.log.writeToLog('PROC-130', [cType])
-                return False
-
-        # If we made it this far, we can try running it
-        for cid in self.components[cName].getSubcomponentList(cName) :
-            cidName = self.components[cName].getRapumaCName(cid)
-            if not str2bool(self.projConfig['Components'][cidName]['isLocked']) :
-                cType = self.groups[gid].getComponentType(gid)
-                target = os.path.join(self.local.projComponentsFolder, cidName, cid + '.' + cType)
-                if os.path.isfile(script) :
-                    # subprocess will fail if permissions are not set on the
-                    # script we want to run. The correct permission should have
-                    # been set when we did the installation.
-                    err = subprocess.call([script, target])
-                    if err == 0 :
-                        self.log.writeToLog('PROC-010', [fName(target), fName(script)])
-                    else :
-                        self.log.writeToLog('PROC-020', [fName(target), fName(script), str(err)])
-                        return False
-                else :
-                    self.log.writeToLog('PROC-030', [fName(target), fName(script)])
-                    return False
-            else :
-                self.log.writeToLog('PROC-050', [cName, fName(script)])
-                return False
+            self.log.writeToLog('PROC-020', [fName(target), fName(scriptFileName), str(err)])
+            return False
 
         return True
 

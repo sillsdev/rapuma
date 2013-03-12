@@ -42,27 +42,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Preprocess Script</name>
-        <key>preprocessScript</key>
-        <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>
-        <type>string</type>
-        <value>compPreprocess.py</value>
-    </setting>
-    <setting>
-        <name>Post Process Scripts</name>
-        <key>postprocessScripts</key>
-        <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>
-        <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Use Component Preprocess Script</name>
-        <key>usePreprocessScript</key>
-        <description>Use preprocessing script on incoming component text.</description>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
-    <setting>
         <name>Use Manual Adjustments</name>
         <key>useManualAdjustments</key>
         <description>Use manual paragraph adjustments.</description>

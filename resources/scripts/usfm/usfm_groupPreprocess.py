@@ -25,6 +25,9 @@ contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
 
 # Do stuff here
 
+terminal('\nThe preprocessScript has not been modified for this project yet. Nothing has been done.\n')
+
+
 # Write out a temp file so we can do some checks
 codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
 

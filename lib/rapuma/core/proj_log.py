@@ -70,6 +70,7 @@ class ProjLog (object) :
             'GRUP-090' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
             'GRUP-100' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
             'GRUP-110' : ['LOG', 'Created the [<<1>>] component group folder.'],
+            'GRUP-120' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
 
             'COMP-000' : ['MSG', 'Component processing messages'],
             'COMP-005' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
@@ -249,8 +250,7 @@ class ProjLog (object) :
             'PROC-110' : ['ERR', 'The component specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
             'PROC-120' : ['ERR', 'Could not run preprocess, file not found: [<<1>>].'],
             'PROC-130' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
-            'PROC-140' : ['MSG', 'Component preprocessing has already been set to [<<1>>] for type [<<2>>].'],
-            'PROC-150' : ['MSG', 'Component preprocessing for type [<<1>>] is already set to [<<2>>].'],
+            'PROC-140' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
             'PROC-160' : ['WRN', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
             'PROC-165' : ['LOG', 'Component preprocessing script is already installed.'],
 

@@ -36,11 +36,6 @@ class Illustration (Manager) :
     # Shared values
     xmlConfFile     = 'illustration.xml'
 
-###############################################################################
-############################ Project Level Functions ##########################
-###############################################################################
-
-
     def __init__(self, project, cfg, cType) :
         '''Initialize the Illustration manager.'''
 
@@ -70,7 +65,6 @@ class Illustration (Manager) :
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
         self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
-        self.sourcePath                 = getattr(self.project, self.cType + '_sourcePath')
         self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
         self.backgroundTypes            = ['watermark', 'lines']
 

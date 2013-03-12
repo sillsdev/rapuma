@@ -51,7 +51,6 @@ class Text (Manager) :
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         self.sourceEditor           = self.pt_tools.getSourceEditor()
         self.setSourceEditor(self.sourceEditor)
 
@@ -86,7 +85,7 @@ class Text (Manager) :
             writeConfFile(self.project.projConfig)
 
 
-    def updateManagerSettings (self) :
+    def updateManagerSettings (self, gid) :
         '''Update the settings for this manager if needed.'''
 
         # If the source editor is PT, then a lot of information can be
@@ -94,7 +93,7 @@ class Text (Manager) :
         # the defaults and hope for the best.
         if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = self.pt_tools.getPTSettings()
+            ptSet = self.pt_tools.getPTSettings(gid)
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.

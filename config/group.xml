@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: usfm.xml
+Description:
+This is a component type description for USFM type component to be used 
+in most any type of project.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Group Component Type</name>
+        <key>cType</key>
+        <description>The type of components that are to be used for this group. (Only one is allowed.)</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Group Components</name>
+        <key>cidList</key>
+        <description>A list of components of a single type that will be included in this group.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Group Style File</name>
+        <key>styleFile</key>
+        <description>The name of the file that contains special format styles for rendering the text of this group.</description>
+        <type>string</type>
+        <value>groupStyles.sty</value>
+    </setting>
+    <setting>
+        <name>Group Macro File</name>
+        <key>macroFile</key>
+        <description>The name of the file that contains special macros for rendering the text of this group.</description>
+        <type>string</type>
+        <value>groupMacros.tex</value>
+    </setting>
+    <setting>
+        <name>Group Preprocess Script File</name>
+        <key>preprocessScript</key>
+        <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>
+        <type>string</type>
+        <value>groupPreprocess.py</value>
+    </setting>
+    <setting>
+        <name>Group Post Process Scripts</name>
+        <key>postprocessScripts</key>
+        <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Use Group Preprocess Script</name>
+        <key>usePreprocessScript</key>
+        <description>Use preprocessing script on incoming component text for this group.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Group Macros</name>
+        <key>useMacros</key>
+        <description>Use group-level macros for rendering text for this group.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Group Styles</name>
+        <key>useStyles</key>
+        <description>Use group-level styles for formating rendered text for this group.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Group Hyphenation</name>
+        <key>useHyphenation</key>
+        <description>Use hyphenation on group text.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Group Illustrations</name>
+        <key>useIllustrations</key>
+        <description>Use illustrations in this group text.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+</root>
+

@@ -99,7 +99,6 @@ class Xetex (Manager) :
         self.projMacrosFolder       = self.local.projMacrosFolder
 #        self.cNameFolder            = os.path.join(self.projComponentsFolder, self.cName)
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
-        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
         # File names
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
         self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'

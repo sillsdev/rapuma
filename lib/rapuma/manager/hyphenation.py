@@ -38,11 +38,6 @@ class Hyphenation (Manager) :
     xmlConfFile     = 'hyphenation.xml'
 
 
-###############################################################################
-############################ Project Level Functions ##########################
-###############################################################################
-
-
     def __init__(self, project, cfg, cType) :
         '''Initialize the Hyphenation manager.'''
 
@@ -65,7 +60,6 @@ class Hyphenation (Manager) :
         self.projScriptsFolder          = project.local.projScriptsFolder
         self.projHyphenationFolder      = project.local.projHyphenationFolder
         self.rapumaScriptsFolder        = project.local.rapumaScriptsFolder
-        self.sourcePath                 = getattr(project, cType + '_sourcePath')
         # File Names
         self.sourcePreProcessScriptName = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
         self.ptHyphenFileName           = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']

@@ -28,6 +28,9 @@ from rapuma.core.tools import *
 
 class Group (object) :
 
+    # Shared values
+    xmlConfFile     = 'group.xml'
+
     def __init__(self, project, cfg, parent = None) :
         '''Initialize this class.'''
 

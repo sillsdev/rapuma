@@ -52,18 +52,14 @@ class Usfm (Component) :
         self.cfg                    = cfg
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
-        self.mType                  = self.project.projectMediaIDCode
+        self.mType                  = project.projectMediaIDCode
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourcePath             = getattr(self.project, self.cType + '_sourcePath')
-        self.renderer               = self.project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.adjustmentConfFile     = self.project.local.adjustmentConfFile
-        self.sourceEditor           = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
+        self.adjustmentConfFile     = project.local.adjustmentConfFile
+        self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         # Get the comp settings
-        self.compSettings = self.project.projConfig['CompTypes'][self.Ctype]
-        # File paths
-        self.preprocessScriptName   = self.project.projConfig['CompTypes'][self.cType.capitalize()]['preprocessScript']
-        self.rapumaPreprocessScript = os.path.join(self.project.local.rapumaScriptsFolder, self.preprocessScriptName)
-        self.preprocessScript       = os.path.join(self.project.local.projScriptsFolder, self.cType + '_' + self.preprocessScriptName)
+        self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
+
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
         if newSectionSettings != self.project.projConfig['CompTypes'][self.Ctype] :
@@ -99,10 +95,10 @@ class Usfm (Component) :
 
             self.project.managers[self.cType + '_Font'].installFont(font)
 
-        # To better facilitate rendering that might be happening on this run, we
-        # will update source file names and other settings used in the usfm_Text
-        # manager (It might be better to do this elsewhere, but where?)
-        self.project.managers[self.cType + '_Text'].updateManagerSettings()
+#        # To better facilitate rendering that might be happening on this run, we
+#        # will update source file names and other settings used in the usfm_Text
+#        # manager (It might be better to do this elsewhere, but where?)
+#        self.project.managers[self.cType + '_Text'].updateManagerSettings()
 
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
@@ -116,42 +112,33 @@ class Usfm (Component) :
         '''Return the full path of the cName working text file. This assumes
         the cName is valid.'''
 
-        cName = self.getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType)
+        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.' + self.cType)
 
 
     def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        cName = self.getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.adj')
+        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.adj')
 
 
     def getCidPiclistPath (self, cid) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
-        cName = self.getRapumaCName(cid)
-        cType = self.project.projConfig['Components'][cName]['type']
-        return os.path.join(self.project.local.projComponentsFolder, cName, cid + '.piclist')
+        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.piclist')
 
 
     def render(self, force) :
         '''Does USFM specific rendering of a USFM component'''
-            # useful variables: self.project, self.cfg
 
-        self.cidList = self.cfg['cidList']
-
+        cidList = self.cfg['cidList']
 #        import pdb; pdb.set_trace()
 
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
-        for cid in self.cidList :
-            cName = self.getRapumaCName(cid)
-            if not self.preProcessComponent(cName) :
+        for cid in cidList :
+            if not self.preProcessGroup() :
                 return False
 
         # With everything in place we can render the component and we pass-through
@@ -161,103 +148,91 @@ class Usfm (Component) :
         return True
 
 
-    def preProcessComponent (self, cName) :
-        '''This will prepare a component for rendering by checking for
+    def preProcessGroup (self) :
+        '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        useHyphenation          = str2bool(self.project.managers[self.cType + '_Layout'].projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        useIllustrations        = str2bool(self.cfg['useIllustrations'])
+        useHyphenation          = str2bool(self.cfg['useHyphenation'])
         useWatermark            = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['usePageBorder'])
-        useIllustrations        = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['Illustrations']['useIllustrations'])
         useManualAdjustments    = str2bool(self.project.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
 
-        # First see if this is a valid component. This is a little
-        # redundant as this is done in project.py as well. It should
-        # be caught there first but just in case we'll do it here too.
-        if not self.hasCNameEntry(cName) :
-            self.project.log.writeToLog('COMP-010', [cName])
-            return False
-        else :
-            # See if the working text is present for each subcomponent in the
-            # component and try to install it if it is not
-            for cid in self.project.projConfig['Components'][cName]['cidList'] :
-                cidCName = self.getRapumaCName(cid)
-                cType = self.project.projConfig['Components'][cidCName]['type']
-                cidUsfm = self.getCidPath(cid)
-                # Build a component object for this cid (cidCName)
-                self.project.buildComponentObject(self.cType, cidCName)
-                # Create the working text
-                if not os.path.isfile(cidUsfm) :
-                    self.installUsfmWorkingText(cName, cid)
-                # Add/manage the dependent files for this cid
-                if self.macroPackage == 'usfmTex' :
-                    # Component adjustment file
-                    if useManualAdjustments :
-# FIXME: Making the adj conf file is probably not needed here, that should have been done already
-#                        self.createProjAdjustmentConfFile(cType, cid)
-                        cidAdjFile = self.getCidAdjPath(cid)
+        # See if the working text is present for each subcomponent in the
+        # component and try to install it if it is not
+        for cid in self.cfg['cidList'] :
+            cType = self.cfg['cType']
+            cidUsfm = self.getCidPath(cid)
+            # Create the working text
+            if not os.path.isfile(cidUsfm) :
+                self.installUsfmWorkingText(self.gid, cid)
+            # Add/manage the dependent files for this cid
+            if self.macroPackage == 'usfmTex' :
+                # Component adjustment file
+                if useManualAdjustments :
+                    cidAdjFile = self.getCidAdjPath(cid)
 #                        if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
-                        if not os.path.isfile(cidAdjFile) or isOlder(cidAdjFile, self.adjustmentConfFile) :
-                            # Remake the adjustment file (if needed)
-                            if not self.createCompAdjustmentFile(cid) :
-                                # If no adjustments, remove any exsiting file
-                                if os.path.isfile(cidAdjFile) :
-                                    os.remove(cidAdjFile)
-                    # Component piclist file
-                    self.project.buildComponentObject(self.cType, cidCName)
-                    cidPiclist = self.project.components[cidCName].getCidPiclistPath(cid)
-                    if useIllustrations :
+                    if not os.path.isfile(cidAdjFile) or isOlder(cidAdjFile, self.adjustmentConfFile) :
+                        # Remake the adjustment file (if needed)
+                        if not self.createCompAdjustmentFile(cid) :
+                            # If no adjustments, remove any exsiting file
+                            if os.path.isfile(cidAdjFile) :
+                                os.remove(cidAdjFile)
+                # Component piclist file
+#                self.project.buildComponentObject(self.cType, cidCName)
+                cidPiclist = self.project.groups[self.gid].getCidPiclistPath(cid)
+                if useIllustrations :
 #                        import pdb; pdb.set_trace()
-                        if self.project.managers[cType + '_Illustration'].hasIllustrations(cidCName) :
-                            if not os.path.isfile(cidPiclist) :
-                                # First check if we have the illustrations we think we need
-                                # and get them if we do not.
-                                self.project.managers[cType + '_Illustration'].getPics(cid)
-                                # Now make a fresh version of the piclist file
-                                self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                                self.project.log.writeToLog('ILUS-065', [cid])
-                            else :
-                                for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
-                                    if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
-                                        # Remake the piclist file
-                                        self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                                        self.project.log.writeToLog('ILUS-065', [cid])
-                            # Do a quick check to see if the illustration files for this book
-                            # are in the project. If it isn't, the run will be killed
+                    if self.project.managers[cType + '_Illustration'].hasIllustrations(cidCName) :
+                        if not os.path.isfile(cidPiclist) :
+                            # First check if we have the illustrations we think we need
+                            # and get them if we do not.
                             self.project.managers[cType + '_Illustration'].getPics(cid)
+                            # Now make a fresh version of the piclist file
+                            self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                            self.project.log.writeToLog('ILUS-065', [cid])
                         else :
-                            # Do a little clean up and remove the auto-generated piclist file
-                            if os.path.isfile(cidPiclist) :
-                                os.remove(cidPiclist)
-                            
+                            for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
+                                if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
+                                    # Remake the piclist file
+                                    self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
+                                    self.project.log.writeToLog('ILUS-065', [cid])
+                        # Do a quick check to see if the illustration files for this book
+                        # are in the project. If it isn't, the run will be killed
+                        self.project.managers[cType + '_Illustration'].getPics(cid)
                     else :
-                        # If we are not using illustrations then any existing piclist file will be removed
+                        # Do a little clean up and remove the auto-generated piclist file
                         if os.path.isfile(cidPiclist) :
                             os.remove(cidPiclist)
-                            self.project.log.writeToLog('ILUS-055', [cName])
+                        
                 else :
-                    self.project.log.writeToLog('COMP-220', [self.macroPackage])
+                    # If we are not using illustrations then any existing piclist file will be removed
+                    if os.path.isfile(cidPiclist) :
+                        os.remove(cidPiclist)
+                        self.project.log.writeToLog('ILUS-055', [cName])
+            else :
+                self.project.log.writeToLog('COMP-220', [self.macroPackage])
 
-            # FIXME: This may not be needed here as it is called during the setup file checks
-            # Check to see if everything is good with hyphenation, die if it is not
+        # FIXME: This may not be needed here as it is called during the setup file checks
+        # Check to see if everything is good with hyphenation, die if it is not
 #            if not self.project.managers[cType + '_Xetex'].checkDepHyphenFile() :
 #                dieNow('Cannot continue. Hyphenation dependencies failed during check in usfm.py preProcessComponent()')
 
-            # Be sure there is a watermark file listed in the conf and
-            # installed if watermark is turned on (True). Fallback on the
-            # the default if needed.
-            if useWatermark :
-                if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('watermark') :
-                    self.project.managers[cType + '_Illustration'].installBackgroundFile('watermark', 'watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+        # Be sure there is a watermark file listed in the conf and
+        # installed if watermark is turned on (True). Fallback on the
+        # the default if needed.
+        if useWatermark :
+            if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('watermark') :
+                self.project.managers[cType + '_Illustration'].installBackgroundFile('watermark', 'watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
 
-            # Same for lines background file used for composition
-            if useLines :
-                if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('lines') :
-                    self.project.managers[cType + '_Illustration'].installBackgroundFile('lines', 'lines_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+        # Same for lines background file used for composition
+        if useLines :
+            if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('lines') :
+                self.project.managers[cType + '_Illustration'].installBackgroundFile('lines', 'lines_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
 
-            # Any more stuff to run?
+        # Any more stuff to run?
 
         return True
 
@@ -279,8 +254,7 @@ class Usfm (Component) :
 
 #        import pdb; pdb.set_trace()
 
-        cType = self.getComponentType(self.getRapumaCName(cid))
-        if self.hasAdjustments(cType, cid) :
+        if self.hasAdjustments(self.cType, cid) :
             # Check for a master adj conf file
             if os.path.isfile(self.adjustmentConfFile) :
                 adjFile = self.getCidAdjPath(cid)
@@ -358,6 +332,8 @@ class Usfm (Component) :
 
 #        import pdb; pdb.set_trace()
 
+        sourcePath = self.project.getGroupSourcePath(gid)
+
         # Check if there is a font installed
         self.project.createManager(self.cType, 'font')
         if not self.project.managers[self.cType + '_Font'].varifyFont() :
@@ -407,8 +383,8 @@ class Usfm (Component) :
         # Current assuption is that source text is located in a directory above the
         # that is the default. In case that is not the case, we can override that and
         # specify a path to the source. If that exists, then we will use that instead.
-        if self.sourcePath :
-            source      = os.path.join(self.sourcePath, thisFile)
+        if sourcePath :
+            source      = os.path.join(sourcePath, thisFile)
         else :
             source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
 
@@ -456,10 +432,11 @@ class Usfm (Component) :
             # backup file.
             if self.usfmCopy(targetSource, target, projSty) :
                 # Run any working text preprocesses on the new component text
-                if str2bool(self.usePreprocessScript) :
-                    if not os.path.isfile(self.preprocessScript) :
-                        self.project.installPreprocess(self.cType)
-                    if not self.project.runProcessScript(cid, self.preprocessScript) :
+                if str2bool(self.project.projConfig['Groups'][gid]['usePreprocessScript']) :
+                    preprocessScript = os.path.join(self.project.local.projScriptsFolder, self.project.projConfig['Groups'][gid]['preprocessScript'])
+                    if not os.path.isfile(preprocessScript) :
+                        self.project.installPreprocess(gid)
+                    if not self.project.runProcessScript(gid, cid, preprocessScript) :
                         self.project.log.writeToLog('USFM-130', [cid])
 
                 # If this is a USFM component type we need to remove any \fig markers,
@@ -624,30 +601,23 @@ class Usfm (Component) :
     def getComponentType (self, gid) :
         '''Return the cType for a component.'''
 
+#        import pdb; pdb.set_trace()
+
         try :
             cType = self.project.projConfig['Groups'][gid]['cType']
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
+            self.project.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
             dieNow()
 
         return cType
 
 
-    def isCompleteComponent (self, cName) :
+    def isCompleteComponent (self, gid, cid) :
         '''A two-part test to see if a component has a config entry and a file.'''
 
-        if self.hasCNameEntry(cName) :
-            for cid in self.getSubcomponentList(cName) :
-                cidName = self.getRapumaCName(cid)
-                cType = self.getComponentType(cidName)
-                # For subcomponents look for working text
-                if not self.hasCidFile(cidName, cid, cType) :
-                    return False
-        else :
-            return False
-
-        return True
+        if self.hasCidFile(gid, cid) :
+            return True
 
 
 #    def hasCNameEntry (self, cName) :
@@ -666,11 +636,12 @@ class Usfm (Component) :
             return True
 
 
-    def hasCidFile (self, cName, cid, cType) :
+    def hasCidFile (self, gid, cid) :
         '''Return True or False depending on if a working file exists 
         for a given cName.'''
 
-        return os.path.isfile(os.path.join(self.project.local.projComponentsFolder, cName, cid + '.' + cType))
+        cType = self.project.projConfig['Groups'][gid]['cType']
+        return os.path.isfile(os.path.join(self.project.local.projComponentsFolder, cid, cid + '.' + cType))
 
 
     def getUsfmCidInfo (self, cid) :
@@ -682,44 +653,44 @@ class Usfm (Component) :
             return False
 
 
-    def getUsfmName (self, cid) :
-        '''Look up and return the actual name for a valid cid.'''
+#    def getUsfmName (self, cid) :
+#        '''Look up and return the actual name for a valid cid.'''
 
-        if self.hasUsfmCidInfo(cid) :
-            return self.getUsfmCidInfo(cid)[0]
-
-
-    def getRapumaCName (self, cid) :
-        '''Look up and return the Rapuma component name for a valid cid.
-        But if the cid happens to be a cName already, that will be returned.'''
-
-        if self.hasUsfmCidInfo(cid) :
-            return self.getUsfmCidInfo(cid)[1]
-        else :
-            # FIXME: This seems a little weak. What if the cid is an invalid cName?
-            return cid
+#        if self.hasUsfmCidInfo(cid) :
+#            return self.getUsfmCidInfo(cid)[0]
 
 
-    def getUsfmCid (self, cName) :
-        '''Find the cid by using the cName to look.'''
+#    def getRapumaCName (self, cid) :
+#        '''Look up and return the Rapuma component name for a valid cid.
+#        But if the cid happens to be a cName already, that will be returned.'''
 
-        info = self.usfmCidInfo()
-        for k, v in info.iteritems() :
-            if info[k][1] == cName :
-                return k
+#        if self.hasUsfmCidInfo(cid) :
+#            return self.getUsfmCidInfo(cid)[1]
+#        else :
+#            # FIXME: This seems a little weak. What if the cid is an invalid cName?
+#            return cid
 
 
-    def getSubcomponentList (self, cName) :
-        '''Return the list of subcomponents for a cName.'''
+#    def getUsfmCid (self, cName) :
+#        '''Find the cid by using the cName to look.'''
 
-        try :
-            cidList = self.project.projConfig['Components'][cName]['cidList']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
-            dieNow()
+#        info = self.usfmCidInfo()
+#        for k, v in info.iteritems() :
+#            if info[k][1] == cName :
+#                return k
 
-        return cidList
+
+#    def getSubcomponentList (self, cName) :
+#        '''Return the list of subcomponents for a cName.'''
+
+#        try :
+#            cidList = self.project.projConfig['Components'][cName]['cidList']
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
+#            dieNow()
+
+#        return cidList
 
 
     def usfmCidInfo (self) :
@@ -897,11 +868,6 @@ class PT_HyphenTools (Component) :
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
         self.hy_tools               = self.managers[self.cType + '_Hyphenation']
-        # On new projects there is no source path let's 'try' this
-        try :
-            self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
-        except :
-            self.sourcePath         = ''
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
@@ -920,7 +886,7 @@ class PT_HyphenTools (Component) :
         self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
         # Paths
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
-        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
+#        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
         self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
         self.ptProjHyphenFileBak    = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
         self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
@@ -1144,13 +1110,6 @@ class PT_Tools (Component) :
         self.managers               = project.managers
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
-        # On new projects there is no source path let's 'try' this
-        # FIXME: Why is this not done at the project level?
-        try :
-            self.sourcePath         = getattr(self.project, self.cType + '_sourcePath')
-        except :
-            self.sourcePath         = ''
-
 
     def getNWFChars (self) :
         '''Return a list of non-word-forming characters from the PT settings
@@ -1215,14 +1174,6 @@ class PT_Tools (Component) :
         return cid + '.' + postPart
 
 
-# FIXME: Depricated?
-#    def getPTFont (self) :
-#        '''Just return the name of the font used in a PT project.'''
-
-#        ssf = self.getPTSettings(self.sourcePath)
-#        return ssf['ScriptureText']['DefaultFont']
-
-
     def mapPTTextSettings (self, sysSet, ptSet, force=False) :
         '''Map the text settings from a PT project SSF file into the text
         manager's settings. If no setting is present in the config, add
@@ -1274,7 +1225,7 @@ class PT_Tools (Component) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = self.sourcePath
+        parentFolder = sourcePath
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -1317,11 +1268,13 @@ class PT_Tools (Component) :
         return os.path.join(ptPath, ssfFileName)
 
 
-    def getPTSettings (self) :
+    def getPTSettings (self, gid) :
         '''Return the data into a dictionary for the system to use.'''
 
+        sourcePath = self.getGroupSourcePath(gid)
+
         # Return the dictionary
-        if os.path.isdir(self.sourcePath) :
+        if os.path.isdir(sourcePath) :
             ssfFile = self.findSsfFile()
             if ssfFile :
                 if os.path.isfile(ssfFile) :
