@@ -22,7 +22,8 @@ from functools import partial
 
 # Load the local classes
 from rapuma.core.tools import *
-from rapuma.component.component import Component
+#from rapuma.component.component import Component
+from rapuma.group.group import Group
 import palaso.sfm as sfm
 from palaso.sfm import usfm, style, element, text
 
@@ -36,7 +37,7 @@ from palaso.sfm import usfm, style, element, text
 
 
 
-class Usfm (Component) :
+class Usfm (Group) :
     '''This class contains information about a type of component 
     used in a type of project.'''
 
@@ -129,21 +130,23 @@ class Usfm (Component) :
         return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.piclist')
 
 
-    def render(self, force) :
+    def render(self, renderParams) :
         '''Does USFM specific rendering of a USFM component'''
 
-        cidList = self.cfg['cidList']
 #        import pdb; pdb.set_trace()
 
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
-        for cid in cidList :
+        for cid in renderParams['cidList'] :
             if not self.preProcessGroup() :
                 return False
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(force)
+        # One problem we try to get around here is that some group params are not
+        # in the manager object. We get around that by passing the group object (self)
+        # to the renderer run() command. This may not be the best way to do this.
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(renderParams)
 
         return True
 
@@ -856,7 +859,7 @@ class Usfm (Component) :
 #   1) mixed syntax is illegal (abc-efg=hij)
 
 
-class PT_HyphenTools (Component) :
+class PT_HyphenTools (Group) :
     '''Hyphenation-specific functions. Only called (important) when needed.'''
 
     def __init__(self, project) :
@@ -1099,7 +1102,7 @@ class PT_HyphenTools (Component) :
 ############################ PT Data Class Functions ##########################
 ###############################################################################
 
-class PT_Tools (Component) :
+class PT_Tools (Group) :
     '''This class contains functions for working with general USFM data in ParaTExt.'''
 
     def __init__(self, project) :

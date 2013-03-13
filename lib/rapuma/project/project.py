@@ -185,15 +185,25 @@ class Project (object) :
 
 
 
-    def renderGroup (self, gid, force = False) :
-        '''Render a group of subcomponents.'''
+    def renderGroup (self, gid, cidList = None, force = False) :
+        '''Render a group of subcomponents or any number of components
+        in the group specified in the cidList.'''
 
 #        import pdb; pdb.set_trace()
 
         # Do a basic test for exsistance
         if isConfSection(self.projConfig['Groups'], gid) :
-#            cType = self.projConfig['Groups'][gid]['cType']
-            self.createGroup(gid).render(force)
+            # Check for cidList, use std group if it isn't there
+            if cidList :
+                if isinstance(cidList, str) :
+                    cidList = cidList.split()
+            else :
+                cidList = self.projConfig['Groups'][gid]['cidList']
+
+            # Make a dictionary of the rendering params for this run
+            renderParams = {'gid' : gid, 'cidList' : cidList, 'force' : force}
+            # Now create the group and pass the param on
+            self.createGroup(gid).render(renderParams)
             return True
 
 

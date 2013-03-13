@@ -123,17 +123,17 @@ class Text (Manager) :
 
         return True
 
+# FIXME: This seems really old and out of date
+#    def installWorkingText (self, cName, cid, force = False) :
+#        '''Call on the component type text install function.'''
 
-    def installWorkingText (self, cName, cid, force = False) :
-        '''Call on the component type text install function.'''
+#        # Check to see if text manager settings need updating
+#        self.updateManagerSettings()
 
-        # Check to see if text manager settings need updating
-        self.updateManagerSettings()
-
-        if self.cType == 'usfm' :
-            self.project.components[cName].installUsfmWorkingText(cName, cid, force)
-        else :
-            self.project.log.writeToLog('TEXT-005', [self.cType])
+#        if self.cType == 'usfm' :
+#            self.project.components[cName].installUsfmWorkingText(cName, cid, force)
+#        else :
+#            self.project.log.writeToLog('TEXT-005', [self.cType])
 
 
     def testCompTextFile (self, source, projSty = None) :
