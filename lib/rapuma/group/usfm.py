@@ -51,6 +51,7 @@ class Usfm (Group) :
         self.project                = project
         self.cName                  = ''
         self.cfg                    = cfg
+        self.gid                    = project.gid
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.mType                  = project.projectMediaIDCode

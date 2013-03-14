@@ -70,6 +70,9 @@ class Hyphenation (Manager) :
         compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
         self.compHyphenFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
         self.compHyphenFile             = os.path.join(self.projHyphenationFolder, self.compHyphenFileName)
+        compLccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
+        self.compLccodeFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
+        self.compLccodeFile             = os.path.join(self.projHyphenationFolder, self.compLccodeFileName)
         # Misc Settings
         self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.useHyphenSourcePreprocess  = self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']

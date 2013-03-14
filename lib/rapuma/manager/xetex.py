@@ -43,12 +43,10 @@ class Xetex (Manager) :
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
-        
-        
-        
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg
+        self.gid                    = project.gid
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
         self.renderer               = 'xetex'
@@ -56,53 +54,26 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pt_tools               = PT_Tools(project)
         self.configTools            = ConfigTools(project)
-        try :
-            self.hy_tools           = self.managers[self.cType + '_Hyphenation']
-        except :
+        # Bring in some manager objects we will need
+        if self.cType + '_Hyphenation' not in self.manager :
             self.project.createManager(self.cType, 'hyphenation')
-            self.hy_tools           = self.managers[self.cType + '_Hyphenation']
-        # ConfigObjs
-        self.projConfig             = project.projConfig
+        self.hyphenation = self.managers[self.cType + '_Hyphenation']
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
-        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+        self.layout = self.managers[self.cType + '_Layout']
         if self.cType + '_Font' not in self.managers :
             self.project.createManager(self.cType, 'font')
-        self.fontConfig             = self.managers[self.cType + '_Font'].fontConfig
+        self.font = self.managers[self.cType + '_Font']
+        # Get config objs
+        self.projConfig             = project.projConfig
+        self.layoutConfig           = self.layout.layoutConfig
+        self.fontConfig             = self.font.fontConfig
         self.userConfig             = self.project.userConfig
-        # Config Settings
-        self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
+        # Some config settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
-        self.mainStyleFile          = self.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-        self.customStyleFile        = self.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-        # Note: a little slight-of-hand goes on here with the processLinePlaceholders()
-        # function when we send it the same value in two places. One acts as the line value
-        # with a placeholder while acts as the value itself, which happens to need converting.
-        lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
-        self.lccodeFile             = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
-        hyphenExceptValue           = self.layoutConfig['Hyphenation']['hyphenExceptionsFile']
-        self.hyphenExceptionsFile   = self.configTools.processLinePlaceholders(hyphenExceptValue, hyphenExceptValue)
-        compHyphenValue             = self.layoutConfig['Hyphenation']['compHyphenFile']
-        self.compHyphenFile         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
-        self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
-        # Folder paths
-        self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
-        self.rapumaConfigFolder     = self.local.rapumaConfigFolder
-        self.projConfFolder         = self.local.projConfFolder
-        self.projComponentsFolder   = self.local.projComponentsFolder
-        self.projHyphenationFolder  = self.local.projHyphenationFolder
-        self.projFontsFolder        = self.local.projFontsFolder
-        self.projStylesFolder       = self.local.projStylesFolder
-        self.projMacrosFolder       = self.local.projMacrosFolder
-        self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
-        # File names
-        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, 'ptxplus-marginalverses.tex')
-        self.macLinkFile            = 'xetex_macLink' + self.cType + '.tex'
-        self.setFileName            = 'xetex_settings_' + self.cType + '.tex'
-        self.extFileName            = 'xetex_settings_' + self.cType + '-ext.tex'
 
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
@@ -116,28 +87,58 @@ class Xetex (Manager) :
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
+        self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
 
-        # Set file names with full path (this after booleans are set)
+        # File names
+        # Some of these file names will only be used once but for consitency
+        # we will create them all in one place.
+        self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
+        self.macLinkFileName        = self.cType + '_macLink.tex'
+        self.setTexFileName         = self.cType + '_set.tex'
+        self.extTexFileName         = self.cType + '_set-ext.tex'
+        self.grpExtTexFileName      = self.gid + '_' + self.cType + '-ext.tex'
+        self.styFileName            = self.cType + '.sty'
+        self.extStyFileName         = self.cType + '-ext.sty'
+        self.grpExtStyFileName      = self.gid + '_' + self.cType + '-ext.sty'
+        self.lccodeFileName         = self.hyphenation.compLccodeFileName
+        self.compHyphFileName       = self.hyphenation.compHyphenFileName
+        self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
+        # Folder paths
+        self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
+        self.rapumaMacPackFolder    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
+        self.rapumaConfigFolder     = self.local.rapumaConfigFolder
+        self.projConfFolder         = self.local.projConfFolder
+        self.projComponentsFolder   = self.local.projComponentsFolder
+        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
+        self.projHyphenationFolder  = self.local.projHyphenationFolder
+        self.projFontsFolder        = self.local.projFontsFolder
+        self.projStylesFolder       = self.local.projStylesFolder
+        self.projMacrosFolder       = self.local.projMacrosFolder
+        self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
+        # Set file names with full path 
+        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
         self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
         self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
-        self.macLink                = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFile)
-        self.setFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.setFileName)
-        self.extFile                = os.path.join(self.projMacrosFolder, self.macroPackage, self.extFileName)
-        self.globSty                = os.path.join(self.projStylesFolder, self.mainStyleFile)
-        self.lccodeTex              = os.path.join(self.local.projHyphenationFolder, self.lccodeFile)
-        if self.useHyphenation :
-            self.hyphenTex          = os.path.join(self.local.projHyphenationFolder, self.hyphenExceptionsFile)
-            self.compHyphen         = os.path.join(self.projHyphenationFolder, self.compHyphenFile)
-        else :
-            self.hyphenTex          = ''
-            self.compHyphen         = ''
+        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
+        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
+        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
+        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
+        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
+        self.styFile                = os.path.join(self.projStylesFolder, self.styFileName)
+        self.extStyFile             = os.path.join(self.projStylesFolder, self.extStyFileName)
+        self.grpExtStyFile          = os.path.join(self.projStylesFolder, self.grpExtStyFileName)
+        self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
+        self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
+        self.lccodeFile             = os.path.join(self.projHyphenationFolder, self.lccodeFileName)
+        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
+        self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
 
         # Make any dependent folders if needed
-#        if not os.path.isdir(self.gidFolder) :
-#            os.mkdir(self.gidFolder)
+        if not os.path.isdir(self.gidFolder) :
+            os.mkdir(self.gidFolder)
 
         # Check to see if the PDF viewer is ready to go
         if not self.pdfViewer :
@@ -255,31 +256,27 @@ class Xetex (Manager) :
             raise IOError, "Can't open " + xmlFile
 
 
-    def copyInMacros (self, cType) :
+    def copyInMacros (self) :
         '''Copy in the right macro set for this component and renderer combination.'''
 
-        if cType.lower() == 'usfm' :
-            macrosTarget    = os.path.join(self.projMacrosFolder, self.macroPackage)
-            macrosSource    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
-            copyExempt      = [fName(self.extFile), fName(self.ptxMargVerseFile)]
+        if self.cType.lower() == 'usfm' :
 
             # Copy in to the process folder the macro package for this component
-            if not os.path.isdir(macrosTarget) :
-                os.makedirs(macrosTarget)
+            if not os.path.isdir(self.projMacPackFolder) :
+                os.makedirs(self.projMacPackFolder)
 
             mCopy = False
-            for root, dirs, files in os.walk(macrosSource) :
+            for root, dirs, files in os.walk(self.rapumaMacPackFolder) :
                 for f in files :
-                    fTarget = os.path.join(macrosTarget, f)
-                    if fName(f) not in copyExempt :
-                        if not os.path.isfile(fTarget) :
-                            shutil.copy(os.path.join(macrosSource, f), fTarget)
-                            mCopy = True
-                            self.project.log.writeToLog('XTEX-070', [fName(fTarget)])
+                    fTarget = os.path.join(self.projMacPackFolder, f)
+                    if not os.path.isfile(fTarget) :
+                        shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
+                        mCopy = True
+                        self.project.log.writeToLog('XTEX-070', [fName(fTarget)])
 
             return mCopy
         else :
-            self.project.log.writeToLog('XTEX-075', [cType])
+            self.project.log.writeToLog('XTEX-075', [self.cType])
 
 
     def displayPdfOutput (self, pdfFile) :
@@ -355,7 +352,7 @@ class Xetex (Manager) :
 ############################# DEPENDENCY FUNCTIONS ############################
 ###############################################################################
 
-    def makeDepMacLink (self) :
+    def makeMacLinkFile (self) :
         '''Check for the exsistance of or the age of the macLink dependent file.
         Create or refresh if needed. If there are any problems, report and die.'''
 
@@ -369,24 +366,24 @@ class Xetex (Manager) :
 
         # Check to see if our macros are there
         if not os.path.isdir(self.projMacPackFolder) :
-            self.copyInMacros(self.cType)
+            self.copyInMacros()
 
         # Check for existance and age. List any files in this next list that
         # could require the rebuilding of the link file
         makeLinkFile = False
         dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.projConfFile]
-        if not os.path.isfile(self.macLink) :
+        if not os.path.isfile(self.macLinkFile) :
             makeLinkFile = True
-            self.project.log.writeToLog('XTEX-065', [fName(self.macLink)])
+            self.project.log.writeToLog('XTEX-065', [fName(self.macLinkFile)])
         else :
             for f in dep :
-                if isOlder(self.macLink, f) :
+                if isOlder(self.macLinkFile, f) :
                     makeLinkFile = True
-                    self.project.log.writeToLog('XTEX-060', [fName(f),fName(self.macLink)])
+                    self.project.log.writeToLog('XTEX-060', [fName(f),fName(self.macLinkFile)])
 
         if makeLinkFile :
-            with codecs.open(self.macLink, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.texFileHeader(fName(self.macLink)))
+            with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.texFileHeader(fName(self.macLinkFile)))
                 writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
                 # If we are using marginal verses then we will need this
                 if self.useMarginalVerses :
@@ -398,7 +395,7 @@ class Xetex (Manager) :
         return True
 
 
-    def makeDepSetFile (self) :
+    def makeSetTexFile (self) :
         '''Create the main settings file that XeTeX will use in gidTex to render 
         gidPdf. This is a required file so it will run every time. However, it
         may not need to be remade. We will look for its exsistance and then compare 
@@ -410,9 +407,9 @@ class Xetex (Manager) :
 
         # Check for existance and age
 #        import pdb; pdb.set_trace()
-        if os.path.isfile(self.setFile) :
+        if os.path.isfile(self.setTexFile) :
             for f in dep :
-                if isOlder(self.setFile, f) :
+                if isOlder(self.setTexFile, f) :
                     # Something changed in a conf file this is dependent on
                     makeIt = True
                     break
@@ -426,8 +423,8 @@ class Xetex (Manager) :
             # Otherwise make/remake the file
             macTexVals = dict(self.makeTexSettingsDict(self.layoutXmlFile))
 
-            writeObject = codecs.open(self.setFile, "w", encoding='utf_8')
-            writeObject.write(self.texFileHeader(fName(self.setFile)))
+            writeObject = codecs.open(self.setTexFile, "w", encoding='utf_8')
+            writeObject.write(self.texFileHeader(fName(self.setTexFile)))
 
             # Bring in the settings from the layoutConfig
             for section in self.layoutConfig.keys() :
@@ -577,27 +574,43 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            self.project.log.writeToLog('XTEX-040', [fName(self.setFile)])
+            self.project.log.writeToLog('XTEX-040', [fName(self.setTexFile)])
             return True
 
 
-    def makeDepSetExtFile (self) :
-        '''Create/copy a TeX extentions file that has custom code for this project.'''
+    def makeGrpExtTexFile (self) :
+        '''Create/copy a group TeX extentions file to the project for specified group.'''
 
-        rapumaExtFile = os.path.join(self.rapumaMacrosFolder, self.macroPackage, self.extFileName)
-        userExtFile = os.path.join(self.project.userConfig['Resources']['macros'], self.extFileName)
-        # First look for a user file, if not, then one 
-        # from Rapuma, worse case, make a blank one
-        if not os.path.isfile(self.extFile) :
-            if os.path.isfile(userExtFile) :
-                shutil.copy(userExtFile, self.extFile)
-            elif os.path.isfile(rapumaExtFile) :
-                shutil.copy(rapumaExtFile, self.extFile)
+        # First look for a user file, if not, then make a blank one
+        if not os.path.isfile(self.grpExtTexFile) :
+            if os.path.isfile(self.usrGrpExtTexFile) :
+                shutil.copy(self.usrGrpExtTexFile, self.grpExtTexFile)
             else :
                 # Create a blank file
-                with codecs.open(self.extFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(self.texFileHeader(self.extFileName))
-                self.project.log.writeToLog('XTEX-040', [fName(self.extFile)])
+                with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
+                    writeObject.write(self.texFileHeader(self.grpExtTexFile))
+                self.project.log.writeToLog('XTEX-040', [fName(self.grpExtTexFile)])
+
+        # Need to return true here even if nothing was done
+        return True
+
+
+    def makeExtTexFile (self) :
+        '''Create/copy a TeX extentions file that has custom code for this project group.
+        This will go in before the group extentions file.'''
+
+        # First look for a user file, if not, then one 
+        # from Rapuma, worse case, make a blank one
+        if not os.path.isfile(self.extTexFile) :
+            if os.path.isfile(self.usrExtTexFile) :
+                shutil.copy(self.usrExtTexFile, self.extTexFile)
+            elif os.path.isfile(self.rpmExtTexFile) :
+                shutil.copy(self.rpmExtTexFile, self.extTexFile)
+            else :
+                # Create a blank file
+                with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
+                    writeObject.write(self.texFileHeader(self.extTexFileName))
+                self.project.log.writeToLog('XTEX-040', [fName(self.extTexFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -648,38 +661,16 @@ class Xetex (Manager) :
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(gidTex, "w", encoding='utf_8') as gidTexObject :
             gidTexObject.write(self.texFileHeader(fName(gidTex)))
-            if self.makeDepMacLink() :
-                gidTexObject.write('\\input \"' + self.macLink + '\"\n')
-            if self.makeDepSetFile() :
-                gidTexObject.write('\\input \"' + self.setFile + '\"\n')
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Work on custom group TeX input here (do we want to move those files?)
-
-            if self.makeDepSetExtFile() :
-                gidTexObject.write('\\input \"' + self.extFile + '\"\n')
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+            if self.makeMacLinkFile() :
+                gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
+            if self.makeSetTexFile() :
+                gidTexObject.write('\\input \"' + self.setTexFile + '\"\n')
+            if self.makeExtTexFile() :
+                gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
+            if self.makeGrpExtTexFile() :
+                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
             if self.checkDepGlobStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.globSty + '}\n')
+                gidTexObject.write('\\stylesheet{' + self.styFile + '}\n')
             # Custom sty file at the global level is optional as is hyphenation
             if self.useGroupStyles(gid) :
                 groupStyles = self.getGroupStyleFile(gid)
@@ -715,18 +706,11 @@ class Xetex (Manager) :
         it is not found. This should have been installed when the components
         were brought in. To late to recover now if it is not there.'''
 
-# FIXME: This needs to link to exsisting functions to install/create a
-# global style file.
-        if not os.path.isfile(self.globSty) :
-            self.project.log.writeToLog('XTEX-120', [fName(self.globSty)])
+        if not os.path.isfile(self.styFile) :
+            self.project.log.writeToLog('XTEX-120', [fName(self.styFile)])
             dieNow()
         else :
             return True
-
-
-
-
-
 
 
     def checkDepHyphenFile (self) :
@@ -735,12 +719,12 @@ class Xetex (Manager) :
         make it.'''
 
         if self.useHyphenation :
-            if not os.path.isfile(self.hyphenTex) or isOlder(self.hyphenTex, self.compHyphen):
+            if not os.path.isfile(self.hyphExcepTexFile) or isOlder(self.hyphExcepTexFile, self.compHyphFile) :
                 if self.makeHyphenExceptionFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphenTex)])
+                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphExcepTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphenTex)])
+                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphExcepTexFile)])
                     return False
 
 
@@ -749,12 +733,12 @@ class Xetex (Manager) :
 
 
 # FIXME: Need a dependency filter here
-            if not os.path.isfile(self.lccodeTex) :
+            if isOlder(self.lccodeFile, self.hyphExcepTexFile) :
                 if self.makeLccodeFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTex)])
+                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeTex)])
+                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeFile)])
                     return False
             return True
         else :
@@ -833,15 +817,22 @@ class Xetex (Manager) :
         # Create, if necessary, the gid.tex file
         gidTex = os.path.join(gidFolder, gid + '.tex')
         # First, go through and make/update any dependency files
-        self.makeDepMacLink()
-        self.makeDepSetFile()
-        self.makeDepSetExtFile()
+        self.makeMacLinkFile()
+        self.makeSetTexFile()
+
+
+
+        self.makeExtTexFile()
+
+
+
+
         self.checkDepHyphenFile()
         # Now make the gid main setting file
         self.makeGidTexFile(gid, cidList, gidTex)
 
         # Dynamically create a dependency list for the render process
-        dep = [gidTex, self.extFile]
+        dep = [gidTex, self.extTexFile]
         for cid in cidList :
             cType = self.projConfig['Groups'][gid]['cType']
 #            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)

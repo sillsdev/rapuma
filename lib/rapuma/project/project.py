@@ -55,7 +55,9 @@ class Project (object) :
         self.projectMediaIDCode     = self.projConfig['ProjectInfo']['projectMediaIDCode']
         self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
         self.projectName            = self.projConfig['ProjectInfo']['projectName']
-
+        # The gid cannot generally be set yet but we will make a placeholder
+        # for it here and the functions below will set it. (I'm just say'n)
+        self.gid                    = ''
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -213,6 +215,9 @@ class Project (object) :
         will contain one or more compoenents. The information for
         each one will be contained in the group object.'''
 
+        # Just in case, set the gid here.
+        self.gid = gid
+
         # If the object already exists just return it
         if gid in self.groups: return self.groups[gid]
 
@@ -220,15 +225,13 @@ class Project (object) :
 
         cType = self.projConfig['Groups'][gid]['cType']
         # Create a special component object if called
-#        self.gid = gid
         cfg = self.projConfig['Groups'][gid]
         module = import_module('rapuma.group.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
-        compobj = ManagerClass(self, cfg)
-        self.groups[gid] = compobj
-        setattr(self.groups[gid], 'gid', gid)
+        groupObj = ManagerClass(self, cfg)
+        self.groups[gid] = groupObj
 
-        return compobj
+        return groupObj
 
 
     def addGroup (self, cType, gid, cidList, newSource = None, force = False) :
@@ -626,50 +629,50 @@ class Project (object) :
 #            writeConfFile(self.projConfig)
 
 
-    def renderComponent (self, cType, cName, force = False) :
-        '''Render a component which includes any subcomponents. If a cid
-        is passed it will first try to find out the real component name,
-        then render that. A valid cType must be passed to it to work.'''
+#    def renderComponent (self, cType, cName, force = False) :
+#        '''Render a component which includes any subcomponents. If a cid
+#        is passed it will first try to find out the real component name,
+#        then render that. A valid cType must be passed to it to work.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        # Create the component object now
-        self.createComponent(cName)
+#        # Create the component object now
+#        self.createComponent(cName)
 
-        # Initialize some vars
-        validCName = ''
-        testCid = ''
+#        # Initialize some vars
+#        validCName = ''
+#        testCid = ''
 
-        # Render by types
-        if cType == 'usfm' :
-            # It may be that a valid ID was used and needs to be
-            # translated to a valid component name. Before giving up
-            # try to do that first. This would be for cases where a
-            # single (atomic) component is being rendered and the
-            # user only gave its cid. Do a look up to find the
-            # actual component name.
-            if self.components[cName].isCompleteComponent(cName) :
-                validCName = cName
-            else :
-                cName = self.components[cName].getRapumaCName(cName)
-                if self.components[cName].hasCNameEntry(cName) :
-                    validCName = cName
-                else :
-                    # Well, we did try
-                    self.log.writeToLog('COMP-010', [cName])
-                    return False
-        else :
-            self.log.writeToLog('COMP-005', [self.cType])
-            return False
-        
-        # Reset the session cName
-        self.cName = validCName
+#        # Render by types
+#        if cType == 'usfm' :
+#            # It may be that a valid ID was used and needs to be
+#            # translated to a valid component name. Before giving up
+#            # try to do that first. This would be for cases where a
+#            # single (atomic) component is being rendered and the
+#            # user only gave its cid. Do a look up to find the
+#            # actual component name.
+#            if self.components[cName].isCompleteComponent(cName) :
+#                validCName = cName
+#            else :
+#                cName = self.components[cName].getRapumaCName(cName)
+#                if self.components[cName].hasCNameEntry(cName) :
+#                    validCName = cName
+#                else :
+#                    # Well, we did try
+#                    self.log.writeToLog('COMP-010', [cName])
+#                    return False
+#        else :
+#            self.log.writeToLog('COMP-005', [self.cType])
+#            return False
+#        
+#        # Reset the session cName
+#        self.cName = validCName
 
-        # If we made it this far, try rendering
-        if validCName :
-            self.createComponent(validCName).render(force)
-            self.setCidCurrent(cType, cName)
-            return True
+#        # If we made it this far, try rendering
+#        if validCName :
+#            self.createComponent(validCName).render(force)
+#            self.setCidCurrent(cType, cName)
+#            return True
 
 
 #    def createComponent (self, cName) :
