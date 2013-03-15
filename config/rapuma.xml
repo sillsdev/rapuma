@@ -130,6 +130,13 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Custom Styles Collection Path</name>
+            <key>styles</key>
+            <description>The full path to where styles are kept on this system that the user would like to access.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Archived Projects Path</name>
             <key>archives</key>
             <description>The full path to where archives are kept on this system that the user will need access.</description>

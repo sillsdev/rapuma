@@ -31,6 +31,35 @@ from configobj import ConfigObj, Section
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+def makeFileHeader (fName, desc = None, noEditWarn = True) :
+    '''Create a header for project files which may or may not be editable.'''
+
+#        import pdb; pdb.set_trace()
+
+    # Set the comment marker to '%' for .tex files
+    if fName.find('.tex') > 0 :
+        comMark = '%'
+    else :
+        comMark = '#'
+    # Create a warning if needed
+    if noEditWarn :
+        editWarn = comMark + ' This file is auto-generated, do not bother editing it\n\n'
+    else :
+        editWarn = None
+    # Build the output
+    output = comMark + ' ' + fName + ' created: ' + tStamp() + '\n'
+    if desc :
+        # Strip out extra spaces from description
+        desc = re.sub('\s+', ' ', desc)
+        output = output + commentWordWrap(comMark + ' Description: ' + desc, 70, comMark) + '\n'
+    if editWarn :
+        output = output + editWarn
+    else :
+        output = output + '\n\n'
+
+    return output
+
+
 def dieNow (msg = '') :
     '''When something bad happens we don't want undue embarrasment by letting
     the system find its own place to crash.  We'll take it down with this
@@ -494,6 +523,25 @@ def wordWrap (text, width) :
         n = len(line) - line.rfind('\n') - 1 + len(nextword)
         if n >= width:
             sep = "\n"
+        else:
+            sep = " "
+        return '%s%s%s' % (line, sep, word)
+    text = text.split(" ")
+    while len(text) > 1:
+        text[0] = func(text.pop(0), text[0])
+    return text[0]
+
+
+def commentWordWrap (text, width, commentMarker) :
+    '''A word-wrap function that preserves existing line breaks
+        and most spaces in the text. Expects that existing line
+        breaks are linux style newlines (\n).'''
+
+    def func(line, word) :
+        nextword = word.split("\n", 1)[0]
+        n = len(line) - line.rfind('\n') - 1 + len(nextword)
+        if n >= width:
+            sep = "\n" + commentMarker + '\t'
         else:
             sep = " "
         return '%s%s%s' % (line, sep, word)

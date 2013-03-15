@@ -64,6 +64,9 @@ class Xetex (Manager) :
         if self.cType + '_Font' not in self.managers :
             self.project.createManager(self.cType, 'font')
         self.font = self.managers[self.cType + '_Font']
+        if self.cType + '_Style' not in self.managers :
+            self.project.createManager(self.cType, 'style')
+        self.style = self.managers[self.cType + '_Style']
         # Get config objs
         self.projConfig             = project.projConfig
         self.layoutConfig           = self.layout.layoutConfig
@@ -87,22 +90,29 @@ class Xetex (Manager) :
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
-        self.useIllustrations       = self.layoutConfig['Illustrations']['useIllustrations']
+        self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
+        self.useGroupStyles         = str2bool(self.projConfig['Groups'][self.gid]['useStyles'])
+        self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
+        self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
 
         # File names
         # Some of these file names will only be used once but for consitency
         # we will create them all in one place.
-        self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
+        self.gidTexFileName         = self.gid + '.tex'
+        self.gidPdfFileName         = self.gid + '.pdf'
         self.macLinkFileName        = self.cType + '_macLink.tex'
         self.setTexFileName         = self.cType + '_set.tex'
         self.extTexFileName         = self.cType + '_set-ext.tex'
         self.grpExtTexFileName      = self.gid + '_' + self.cType + '-ext.tex'
-        self.styFileName            = self.cType + '.sty'
-        self.extStyFileName         = self.cType + '-ext.sty'
-        self.grpExtStyFileName      = self.gid + '_' + self.cType + '-ext.sty'
+        self.styFileName            = self.style.styFileName
+        self.extStyFileName         = self.style.extStyFileName
+        self.grpExtStyFileName      = self.style.grpExtStyFileName
         self.lccodeFileName         = self.hyphenation.compLccodeFileName
         self.compHyphFileName       = self.hyphenation.compHyphenFileName
         self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
+        self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
+        self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
+        self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.rapumaMacPackFolder    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
@@ -111,12 +121,13 @@ class Xetex (Manager) :
         self.projComponentsFolder   = self.local.projComponentsFolder
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         self.projHyphenationFolder  = self.local.projHyphenationFolder
+        self.projIllustrationsFolder = self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
-        self.projStylesFolder       = self.local.projStylesFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         # Set file names with full path 
-        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
+        self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
+        self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
         self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
         self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
@@ -127,14 +138,18 @@ class Xetex (Manager) :
         self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
         self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
-        self.styFile                = os.path.join(self.projStylesFolder, self.styFileName)
-        self.extStyFile             = os.path.join(self.projStylesFolder, self.extStyFileName)
-        self.grpExtStyFile          = os.path.join(self.projStylesFolder, self.grpExtStyFileName)
+        self.styFile                = self.style.styFile
+        self.extStyFile             = self.style.extStyFile
+        self.grpExtStyFile          = self.style.grpExtStyFile
+        self.usrGrpExtStyFile       = self.style.usrGrpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
         self.lccodeFile             = os.path.join(self.projHyphenationFolder, self.lccodeFileName)
         self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
         self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
+        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
+        self.watermarkFile          = os.path.join(self.projIllustrationsFolder, self.watermarkFileName)
+        self.linesFile              = os.path.join(self.projIllustrationsFolder, self.linesFileName)
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
@@ -188,13 +203,6 @@ class Xetex (Manager) :
                 if holderType == 'self' :
                     secB = self.configTools.insertValue(secB, getattr(self, holderKey))
             return cfg[secA][secB][key]
-
-
-    def texFileHeader (self, fName) :
-        '''Create a generic file header for a non-editable .tex file.'''
-
-        return '% ' + fName + ' created: ' + tStamp() + '\n' \
-            + '% This file is auto-generated, do not bother editing it\n\n'
 
 
     def copyInMargVerse (self) :
@@ -356,6 +364,10 @@ class Xetex (Manager) :
         '''Check for the exsistance of or the age of the macLink dependent file.
         Create or refresh if needed. If there are any problems, report and die.'''
 
+        description = 'This file provides a link between XeTeX and the project macro \
+            package. It should be one of the first TeX files to be read when XeTeX \
+            starts the rendering process.'
+
         # Set some file names
         if self.macroPackage == 'usfmTex' :
             mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
@@ -383,7 +395,7 @@ class Xetex (Manager) :
 
         if makeLinkFile :
             with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.texFileHeader(fName(self.macLinkFile)))
+                writeObject.write(makeFileHeader(fName(self.macLinkFile), description))
                 writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
                 # If we are using marginal verses then we will need this
                 if self.useMarginalVerses :
@@ -400,6 +412,10 @@ class Xetex (Manager) :
         gidPdf. This is a required file so it will run every time. However, it
         may not need to be remade. We will look for its exsistance and then compare 
         it to its primary dependents to see if we actually need to do anything.'''
+
+        description = 'This is the main settings file that XeTeX will use to configure \
+            the rendered output. It can be overridden by other TeX macro files that \
+            are added in down-stream.'
 
         # Set vals
         dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile]
@@ -424,7 +440,7 @@ class Xetex (Manager) :
             macTexVals = dict(self.makeTexSettingsDict(self.layoutXmlFile))
 
             writeObject = codecs.open(self.setTexFile, "w", encoding='utf_8')
-            writeObject.write(self.texFileHeader(fName(self.setTexFile)))
+            writeObject.write(makeFileHeader(fName(self.setTexFile), description))
 
             # Bring in the settings from the layoutConfig
             for section in self.layoutConfig.keys() :
@@ -581,6 +597,9 @@ class Xetex (Manager) :
     def makeGrpExtTexFile (self) :
         '''Create/copy a group TeX extentions file to the project for specified group.'''
 
+        description = 'This is the group extention file which overrides settings in \
+        the main TeX settings files and the component TeX settings.'
+
         # First look for a user file, if not, then make a blank one
         if not os.path.isfile(self.grpExtTexFile) :
             if os.path.isfile(self.usrGrpExtTexFile) :
@@ -588,7 +607,7 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(self.texFileHeader(self.grpExtTexFile))
+                    writeObject.write(makeFileHeader(fName(self.grpExtTexFile), description, False))
                 self.project.log.writeToLog('XTEX-040', [fName(self.grpExtTexFile)])
 
         # Need to return true here even if nothing was done
@@ -596,8 +615,12 @@ class Xetex (Manager) :
 
 
     def makeExtTexFile (self) :
-        '''Create/copy a TeX extentions file that has custom code for this project group.
-        This will go in before the group extentions file.'''
+        '''Create/copy a TeX extentions file that has custom code for a project component
+        type. This will go in before the group extentions file.'''
+
+        description = 'This the component TeX macro settings file. The settings \
+            in this file can override the main TeX settings and these settings \
+            can be overridden by the group-level settings file.'
 
         # First look for a user file, if not, then one 
         # from Rapuma, worse case, make a blank one
@@ -609,58 +632,30 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(self.texFileHeader(self.extTexFileName))
+                    writeObject.write(makeFileHeader(fName(self.extTexFileName), description, False))
                 self.project.log.writeToLog('XTEX-040', [fName(self.extTexFile)])
 
         # Need to return true here even if nothing was done
         return True
 
 
-    def makeCidTexFile (self, cid) :
-        '''Create the TeX control file for a subcomponent. The component control
-        file will call this to process the working text.'''
-
-        print 'makeCidTexFile', cid
-
-        # Build necessary file names
-        cidFolder   = os.path.join(self.projComponentsFolder, cid)
-        cidTex      = os.path.join(cidFolder, cid + '.tex')
-        cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
-        cidTexExt   = os.path.join(cidFolder, cid + '-ext.tex')
-        cidSty      = os.path.join(cidFolder, cid + '.sty')
-
-
-        # Write out the cidTex file
-        with codecs.open(cidTex, "w", encoding='utf_8') as cidTexObject :
-            cidTexObject.write(self.texFileHeader(fName(cidTex)))
-            # User sty and macro extentions are optional at the cid level
-            if os.path.isfile(os.path.join(cidTexExt)) :
-                cidTexObject.write('\\input \"' + cidTexExt + '\"\n')
-            if os.path.isfile(os.path.join(cidSty)) :
-                cidTexObject.write('\\stylesheet{' + cidSty + '}\n')
-            # The cid is not optional!
-            if self.checkDepCidUsfm(cidUsfm) :
-                cidTexObject.write('\\ptxfile{' + cidUsfm + '}\n')
-            else :
-                self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
-                dieNow()
-
-        return True
-
-
-    def makeGidTexFile (self, gid, cidList, gidTex) :
+    def makeGidTexFile (self, cidList) :
         '''Create the main gid TeX control file.'''
+
+        description = 'This is the group TeX control file. XeTeX will \
+            read this file to get all of links to other instructions (macros) \
+            needed to render the group, or a component of a group.'
 
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
         # for dependency checking
-        if os.path.exists(gidTex) :
-            os.remove(gidTex)
+        if os.path.exists(self.gidTexFile) :
+            os.remove(self.gidTexFile)
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
-        with codecs.open(gidTex, "w", encoding='utf_8') as gidTexObject :
-            gidTexObject.write(self.texFileHeader(fName(gidTex)))
+        with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
+            gidTexObject.write(makeFileHeader(self.gidTexFileName, description))
             if self.makeMacLinkFile() :
                 gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
             if self.makeSetTexFile() :
@@ -669,48 +664,19 @@ class Xetex (Manager) :
                 gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
             if self.makeGrpExtTexFile() :
                 gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
-            if self.checkDepGlobStyFile() :
+            if self.style.checkDepGlobStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.styFile + '}\n')
-            # Custom sty file at the global level is optional as is hyphenation
-            if self.useGroupStyles(gid) :
-                groupStyles = self.getGroupStyleFile(gid)
-                if groupStyles :
-                    gidTexObject.write('\\stylesheet{' + groupStyles + '}\n')
+            # Custom sty file at the group level is optional as is hyphenation
+            if self.useGroupStyles :
+                if self.style.checkDepGrpExtStyFile() :
+                    gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             for cid in cidList :
-                cidTex = os.path.join(self.projComponentsFolder, cid, cid + '.tex')
-                if self.checkDepCidTex(cid) :
-                    gidTexObject.write('\\input \"' + cidTex + '\"\n')
+                cidSource = os.path.join(self.projComponentsFolder, cid, cid + '.' + self.cType)
+                gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
 
         return True
-
-
-    def getGroupStyleFile (self, gid) :
-        '''Check to see if a group style file (as named in the config)
-        exists. if it does, return that file handle.'''
-
-        sty = self.projConfig['Groups'][gid]['styleFile']
-        if os.path.exists(os.path.join(self.local.projStylesFolder, sty)) :
-            return os.path.join(self.local.projStylesFolder, sty)
-
-
-    def useGroupStyles (self, gid) :
-        '''Check to see if styles have been turned on for this group.'''
-
-        return self.projConfig['Groups'][gid]['useStyles']
-
-
-    def checkDepGlobStyFile (self) :
-        '''Check for the exsistance of the Global Sty file. We need to die if 
-        it is not found. This should have been installed when the components
-        were brought in. To late to recover now if it is not there.'''
-
-        if not os.path.isfile(self.styFile) :
-            self.project.log.writeToLog('XTEX-120', [fName(self.styFile)])
-            dieNow()
-        else :
-            return True
 
 
     def checkDepHyphenFile (self) :
@@ -746,56 +712,6 @@ class Xetex (Manager) :
             return True
 
 
-    def checkDepCidTex (self, cid) :
-        '''Check for the exsistance of the cidTex dependent file. Request one to
-        be made if it is not there and Return True.'''
-
-        # Build necessary file names
-        cidFolder   = os.path.join(self.projComponentsFolder, cid)
-        cidTex      = os.path.join(cidFolder, cid + '.tex')
-        cidUsfm     = os.path.join(cidFolder, cid + '.usfm')
-        cidTexExt   = os.path.join(cidFolder, cid + '-ext.tex')
-        cidSty      = os.path.join(cidFolder, cid + '.sty')
-
-        print 'checkDepCidTex', cid
-
-        # Must be a cidUsfm file to continue
-        if not os.path.isfile(cidUsfm) :
-            self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
-            dieNow()
-
-        # Just make it if it is not there
-        if not os.path.isfile(cidTex) :
-            if self.makeCidTexFile(cid) :
-                self.project.log.writeToLog('XTEX-065', [fName(cidTex)])
-                return True
-        else :
-            # Do not (re)make it unless a dependent has changed
-            dep = [cidTexExt, cidSty, cidUsfm]
-            for f in dep :
-                # Weed out unused files
-                if not os.path.isfile(f) :
-                    continue
-
-                if isOlder(cidTex, f) :
-                    if self.makeCidTexFile(cid) :
-                        self.project.log.writeToLog('XTEX-065', [fName(cidTex)])
-            # Not sure if returning True here is good or not
-            return True
-
-
-    def checkDepCidUsfm (self, cidUsfm) :
-        '''Check for the exsistance of the cidUsfm dependent file. Return
-
-        True if it is there or report and die if it is not.'''
-
-        if not os.path.isfile(cidUsfm) :
-            self.project.log.writeToLog('XTEX-050', [fName(cidUsfm)])
-            dieNow()
-        else :
-            return True
-
-
 ###############################################################################
 ################################# Main Function ###############################
 ###############################################################################
@@ -804,41 +720,27 @@ class Xetex (Manager) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
-        gid = renderParams['gid']
-        force = renderParams['force']
         cidList = renderParams['cidList']
-        gidFolder = os.path.join(self.local.projComponentsFolder, gid)
         # This is the file we will make. If force is set, delete the old one.
-        gidPdf = os.path.join(gidFolder, gid + '.pdf')
-        if force :
-            if os.path.isfile(gidPdf) :
-                os.remove(gidPdf)
+        if renderParams['force'] :
+            if os.path.isfile(self.gidPdfFile) :
+                os.remove(self.gidPdfFile)
 
         # Create, if necessary, the gid.tex file
-        gidTex = os.path.join(gidFolder, gid + '.tex')
         # First, go through and make/update any dependency files
         self.makeMacLinkFile()
         self.makeSetTexFile()
-
-
-
         self.makeExtTexFile()
-
-
-
-
         self.checkDepHyphenFile()
         # Now make the gid main setting file
-        self.makeGidTexFile(gid, cidList, gidTex)
+        self.makeGidTexFile(cidList)
 
         # Dynamically create a dependency list for the render process
-        dep = [gidTex, self.extTexFile]
+        dep = [self.gidTexFile, self.extTexFile]
         for cid in cidList :
-            cType = self.projConfig['Groups'][gid]['cType']
-#            cidUsfm = self.managers[cType + '_Text'].getCompWorkingTextPath(cid)
-            cidUsfm = self.project.groups[gid].getCidPath(cid)
-            cidAdj = self.project.groups[gid].getCidAdjPath(cid)
-            cidIlls = self.project.groups[gid].getCidPiclistPath(cid)
+            cidUsfm = self.project.groups[self.gid].getCidPath(cid)
+            cidAdj = self.project.groups[self.gid].getCidAdjPath(cid)
+            cidIlls = self.project.groups[self.gid].getCidPiclistPath(cid)
             dep.append(cidUsfm)
             if os.path.isfile(cidAdj) :
                 dep.append(cidAdj)
@@ -847,11 +749,11 @@ class Xetex (Manager) :
 
         # Render if gidPdf is older or is missing
         render = False
-        if not os.path.isfile(gidPdf) :
+        if not os.path.isfile(self.gidPdfFile) :
             render = True
         else :
             for d in dep :
-                if isOlder(gidPdf, d) :
+                if isOlder(self.gidPdfFile, d) :
                     render = True
                     break
 
@@ -862,7 +764,7 @@ class Xetex (Manager) :
             texInputsLine = self.project.local.projHome + ':' \
                             + self.projMacPackFolder + ':' \
                             + self.projMacrosFolder + ':' \
-                            + os.path.join(self.projComponentsFolder, gid) + ':.'
+                            + self.gidFolder + ':.'
 
             # Create the environment dictionary that will be fed into subprocess.call()
             envDict = dict(os.environ)
@@ -870,7 +772,7 @@ class Xetex (Manager) :
 
             # Create the XeTeX command argument list that subprocess.call()
             # will run with
-            cmds = ['xetex', '-output-directory=' + gidFolder, gidTex]
+            cmds = ['xetex', '-output-directory=' + self.gidFolder, self.gidTexFile]
 
             # Run the XeTeX and collect the return code for analysis
 #                dieNow()
@@ -878,17 +780,15 @@ class Xetex (Manager) :
 
             # Analyse the return code
             if rCode == int(0) :
-                self.project.log.writeToLog('XTEX-025', [fName(gidTex)])
+                self.project.log.writeToLog('XTEX-025', [fName(self.gidTexFile)])
             elif rCode in self.xetexErrorCodes :
-                self.project.log.writeToLog('XTEX-030', [fName(gidTex), self.xetexErrorCodes[rCode], str(rCode)])
+                self.project.log.writeToLog('XTEX-030', [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
             else :
                 self.project.log.writeToLog('XTEX-035', [str(rCode)])
                 dieNow()
 
         # Add lines background for composition work
-        if str2bool(self.layoutConfig['PageLayout']['useLines']) :
-            linesFileName       = self.layoutConfig['PageLayout']['linesFile']
-            linesFile           = os.path.join(self.local.projIllustrationsFolder, linesFileName)
+        if self.useLines :
             cmd = [self.pdfUtilityCommand, gidPdf, 'background', linesFile, 'output', tempName(gidPdf)]
             try :
                 subprocess.call(cmd)
@@ -901,14 +801,12 @@ class Xetex (Manager) :
                 dieNow()
 
         # Add a watermark if required
-        if str2bool(self.layoutConfig['PageLayout']['useWatermark']) :
-            watermarkFileName   = self.layoutConfig['PageLayout']['watermarkFile']
-            watermarkFile       = os.path.join(self.local.projIllustrationsFolder, watermarkFileName)
-            cmd = [self.pdfUtilityCommand, gidPdf, 'background', watermarkFile, 'output', tempName(gidPdf)]
+        if self.useWatermark :
+            cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.watermarkFile, 'output', tempName(self.gidPdfFile)]
             try :
                 subprocess.call(cmd)
-                shutil.copy(tempName(gidPdf), gidPdf)
-                os.remove(tempName(gidPdf))
+                shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
+                os.remove(tempName(self.gidPdfFile))
                 self.project.log.writeToLog('XTEX-145')
             except Exception as e :
                 # If we don't succeed, we should probably quite here
@@ -916,11 +814,11 @@ class Xetex (Manager) :
                 dieNow()
 
         # Review the results if desired
-        if os.path.isfile(gidPdf) :
-            if self.displayPdfOutput(gidPdf) :
-                self.project.log.writeToLog('XTEX-095', [fName(gidPdf)])
+        if os.path.isfile(self.gidPdfFile) :
+            if self.displayPdfOutput(self.gidPdfFile) :
+                self.project.log.writeToLog('XTEX-095', [fName(self.gidPdfFile)])
             else :
-                self.project.log.writeToLog('XTEX-100', [fName(gidPdf)])
+                self.project.log.writeToLog('XTEX-100', [fName(self.gidPdfFile)])
 
 
 

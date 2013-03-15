@@ -28,20 +28,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Group Style File</name>
-        <key>styleFile</key>
-        <description>The name of the file that contains special format styles for rendering the text of this group.</description>
-        <type>string</type>
-        <value>groupStyles.sty</value>
-    </setting>
-    <setting>
-        <name>Group Macro File</name>
-        <key>macroFile</key>
-        <description>The name of the file that contains special macros for rendering the text of this group.</description>
-        <type>string</type>
-        <value>groupMacros.tex</value>
-    </setting>
-    <setting>
         <name>Group Preprocess Script File</name>
         <key>preprocessScript</key>
         <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>

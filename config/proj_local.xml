@@ -246,6 +246,13 @@ Todo:
             <value>resources,scripts</value>
         </setting>
         <setting>
+            <name>Rapuma Styles Folder</name>
+            <key>rapumaStylesFolder</key>
+            <description>The Rapuma resource styles folder where various Rapuma system resources are kept.</description>
+            <type>list</type>
+            <value>resources,styles</value>
+        </setting>
+        <setting>
             <name>Rapuma Examples Folder</name>
             <key>rapumaExamplesFolder</key>
             <description>The Rapuma resource examples folder where various Rapuma project examples are kept.</description>
