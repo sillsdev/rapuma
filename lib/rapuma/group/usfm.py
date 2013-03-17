@@ -71,7 +71,7 @@ class Usfm (Group) :
             setattr(self, k, v)
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
+        self.usfmManagers = ('component', 'text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -96,11 +96,6 @@ class Usfm (Group) :
                 font = 'DefaultFont'
 
             self.project.managers[self.cType + '_Font'].installFont(font)
-
-#        # To better facilitate rendering that might be happening on this run, we
-#        # will update source file names and other settings used in the usfm_Text
-#        # manager (It might be better to do this elsewhere, but where?)
-#        self.project.managers[self.cType + '_Text'].updateManagerSettings()
 
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
@@ -869,9 +864,15 @@ class PT_HyphenTools (Group) :
         self.Ctype                  = self.cType.capitalize()
         self.project                = project
         self.managers               = project.managers
+        self.gid                    = project.gid
+        self.projectIDCode          = project.projectIDCode
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
         self.hy_tools               = self.managers[self.cType + '_Hyphenation']
+        # Bring in some manager objects we will need
+        if self.cType + '_Hyphenation' not in self.managers :
+            self.project.createManager(self.cType, 'hyphenation')
+        self.hyphenation = self.managers[self.cType + '_Hyphenation']
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
@@ -886,14 +887,16 @@ class PT_HyphenTools (Group) :
         self.softHyphenWords        = set()
         self.nonHyphenWords         = set()
         # File Names
-        self.ptHyphErrFileName      = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-        self.ptHyphenFileName       = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        # Paths
+        self.ptProjHyphErrFileName  = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
+        self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        self.sourcePath             = self.userConfig['Projects'][self.projectIDCode][self.gid + '_sourcePath']
+        # Folder paths
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
-#        self.ptHyphenFile           = os.path.join(self.sourcePath, self.ptHyphenFileName)
-        self.ptProjHyphenFile       = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
-        self.ptProjHyphenFileBak    = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
-        self.ptHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptHyphErrFileName)
+        # Set file names with full path 
+        self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
+        self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
+        self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
+        self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
 
 
 ###############################################################################
@@ -902,25 +905,25 @@ class PT_HyphenTools (Group) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
         We will also create a backup as well to be used for comparison or fallback.'''
 
-        if os.path.isfile(self.ptHyphenFile) :
+        if os.path.isfile(self.ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(self.ptHyphenFile, self.ptProjHyphenFile)
+            utf8Copy(self.ptHyphFile, self.ptProjHyphFile)
             # Once copied, check if any preprocessing is needed
-            self.hy_tools.preprocessSource()
+            self.hyphenation.preprocessSource()
         else :
-            self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
+            self.project.log.writeToLog('USFM-040', [self.ptHyphFile])
             dieNow()
 
 
     def backupPtHyphenWords (self) :
         '''Backup the ParaTExt project hyphenation words list to the project.'''
 
-        if os.path.isfile(self.ptHyphenFile) :
+        if os.path.isfile(self.ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(self.ptHyphenFile, self.ptProjHyphenFileBak)
-            makeReadOnly(self.ptProjHyphenFileBak)
+            utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
+            makeReadOnly(self.ptProjHyphBakFile)
         else :
-            self.project.log.writeToLog('USFM-040', [self.ptHyphenFile])
+            self.project.log.writeToLog('USFM-040', [self.ptHyphFile])
             dieNow()
 
 
@@ -934,20 +937,27 @@ class PT_HyphenTools (Group) :
         # The project source files are protected but if force is used
         # we need to delete them here.
         if force :
-            if os.path.isfile(self.ptProjHyphenFile) :
-                os.remove(self.ptProjHyphenFile)
-            if os.path.isfile(self.ptProjHyphenFileBak) :
-                os.remove(self.ptProjHyphenFileBak)
+            if os.path.exists(self.ptProjHyphFile) :
+                os.remove(self.ptProjHyphFile)
+            if os.path.exists(self.ptProjHyphBakFile) :
+                os.remove(self.ptProjHyphBakFile)
             self.project.log.writeToLog('USFM-060')
 
         # These calls may be order-sensitive, update local project source
         # copy only if there has been a change in the PT source
-        if not os.path.isfile(self.ptProjHyphenFile) or isOlder(self.ptProjHyphenFile, self.ptHyphenFile) :
+#        if not os.path.isfile(self.ptHyphFile) or isOlder(self.ptHyphFile, self.ptHyphFile) :
+
+# FIXME: What are we looking for, why are they the same?
+
+# Not seeing a pt source file mentioned yet
+
+
+        if not os.path.isfile(self.ptProjHyphFile) or isOlder(self.ptProjHyphFile, self.ptHyphFile) :
             self.copyPtHyphenWords()
             self.backupPtHyphenWords()
-            self.project.log.writeToLog('USFM-050', [fName(self.ptProjHyphenFile)])
+            self.project.log.writeToLog('USFM-050', [fName(self.ptHyphFile)])
         else :
-            self.project.log.writeToLog('USFM-055', [fName(self.ptProjHyphenFile)])
+            self.project.log.writeToLog('USFM-055', [fName(self.ptHyphFile)])
 
         # Continue by processing the files located in the project
         self.getAllPtHyphenWords()
@@ -960,14 +970,13 @@ class PT_HyphenTools (Group) :
     def getAllPtHyphenWords (self) :
         '''Return a data set of all the words found in a ParaTExt project
         hyphated words text file. The Py set() method is used for moving
-
         the data because some lists can get really big. This will return the
         entire wordlist as it is found in the ptHyphenFile. That can be used
         for other processing.'''
 
         # Go get the file if it is to be had
-        if os.path.isfile(self.ptProjHyphenFile) :
-            with codecs.open(self.ptProjHyphenFile, "r", encoding='utf_8') as hyphenWords :
+        if os.path.isfile(self.ptProjHyphFile) :
+            with codecs.open(self.ptProjHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for line in hyphenWords :
                     # Using the logic that there can only be one word in a line
                     # if the line contains more than one word it is not wanted
@@ -1041,14 +1050,14 @@ class PT_HyphenTools (Group) :
         if len(self.badWords) :
             errWords = list(self.badWords)
             errWords.sort()
-            with codecs.open(self.ptHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
-                wordErrorsObject.write('# ' + fName(self.ptHyphErrFile) + '\n')
+            with codecs.open(self.ptProjHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
+                wordErrorsObject.write('# ' + fName(self.ptProjHyphErrFile) + '\n')
                 wordErrorsObject.write('# This is an auto-generated file which contains errors in the hyphenation words file.\n')
                 for word in errWords :
                     wordErrorsObject.write(word + '\n')
 
             # Report the problem to the user
-            self.project.log.writeToLog('USFM-030', [self.ptHyphErrFile])
+            self.project.log.writeToLog('USFM-030', [self.ptProjHyphErrFile])
 
 
     def wordTotals (self) :
@@ -1111,6 +1120,7 @@ class PT_Tools (Group) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.project                = project
+        self.gid                    = project.gid
         self.managers               = project.managers
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
@@ -1272,10 +1282,10 @@ class PT_Tools (Group) :
         return os.path.join(ptPath, ssfFileName)
 
 
-    def getPTSettings (self, gid) :
+    def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
-        sourcePath = self.getGroupSourcePath(gid)
+        sourcePath = self.getGroupSourcePath(self.gid)
 
         # Return the dictionary
         if os.path.isdir(sourcePath) :

@@ -193,6 +193,9 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # Just in case, set the gid here.
+        self.gid = gid
+
         # Do a basic test for exsistance
         if isConfSection(self.projConfig['Groups'], gid) :
             # Check for cidList, use std group if it isn't there
@@ -203,7 +206,9 @@ class Project (object) :
                 cidList = self.projConfig['Groups'][gid]['cidList']
 
             # Make a dictionary of the rendering params for this run
-            renderParams = {'gid' : gid, 'cidList' : cidList, 'force' : force}
+            # We do this to both protect the params and perhaps expand
+            # them in the future
+            renderParams = {'cidList' : cidList, 'force' : force}
             # Now create the group and pass the param on
             self.createGroup(gid).render(renderParams)
             return True

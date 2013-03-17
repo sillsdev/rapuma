@@ -24,7 +24,6 @@ import os, shutil
 
 # Load the local classes
 from rapuma.core.tools import *
-#from rapuma.component.usfm import PT_Tools
 from rapuma.project.manager import Manager
 
 

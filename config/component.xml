@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: component.xml
+Description:
+This is a component type description for the component manager. It contains default
+information for the component manager and acts as a template for managers created
+in a type of publication. This information goes in the project configuration.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Component Sources</name>
+        <key>csid</key>
+        <description>The component source ID.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+</root>
+

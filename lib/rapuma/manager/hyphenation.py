@@ -44,40 +44,44 @@ class Hyphenation (Manager) :
         super(Hyphenation, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.cfg                        = cfg
-        self.cType                      = cType
-        self.Ctype                      = cType.capitalize()
-        self.project                    = project
-        self.manager                    = self.cType + '_Hyphenation'
-        self.managers                   = project.managers
-        self.configTools                = ConfigTools(project)
+        self.cfg                    = cfg
+        self.cType                  = cType
+        self.Ctype                  = cType.capitalize()
+        self.project                = project
+        self.local                  = project.local
+        self.manager                = self.cType + '_Hyphenation'
+        self.managers               = project.managers
+        self.configTools            = ConfigTools(project)
         # Necessary config objects
-        self.projConfig                 = project.projConfig
+        self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
-        self.layoutConfig               = self.managers[self.cType + '_Layout'].layoutConfig
-        # Paths
-        self.projScriptsFolder          = project.local.projScriptsFolder
-        self.projHyphenationFolder      = project.local.projHyphenationFolder
-        self.rapumaScriptsFolder        = project.local.rapumaScriptsFolder
+        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
         # File Names
-        self.sourcePreProcessScriptName = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
-        self.ptHyphenFileName           = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.rapumaPreProcessScript     = os.path.join(self.rapumaScriptsFolder, self.sourcePreProcessScriptName)
-        self.projPreProcessScript       = os.path.join(self.projScriptsFolder, self.cType + '_' + self.sourcePreProcessScriptName)
-        self.ptProjHyphenFile           = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName)
-        self.ptProjHyphenFileBak        = os.path.join(self.projHyphenationFolder, self.ptHyphenFileName + '.bak')
-        compHyphenValue                 = self.layoutConfig['Hyphenation']['compHyphenFile']
-        self.compHyphenFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
-        self.compHyphenFile             = os.path.join(self.projHyphenationFolder, self.compHyphenFileName)
-        compLccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
-        self.compLccodeFileName         = self.configTools.processLinePlaceholders(compHyphenValue, compHyphenValue)
-        self.compLccodeFile             = os.path.join(self.projHyphenationFolder, self.compLccodeFileName)
+        self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
+        self.preProcessFileName     = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
+        self.lccodeTexFileName      = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
+        compHyphValue               = self.layoutConfig['Hyphenation']['compHyphenFile']
+        self.compHyphFileName       = self.configTools.processLinePlaceholders(compHyphValue, compHyphValue)
+        # Folder Paths
+        self.projScriptsFolder      = project.local.projScriptsFolder
+        self.projHyphenationFolder  = project.local.projHyphenationFolder
+        self.rapumaScriptsFolder    = project.local.rapumaScriptsFolder
+        # Set file names with full path 
+        self.lccodeTexFile          = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
+        self.preProcessFile         = os.path.join(self.projScriptsFolder, self.cType + '_' + self.preProcessFileName)
+        self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.preProcessFileName)
+        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
+        self.ptHyphFile             = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
+        self.ptHyphBakFile          = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
         # Misc Settings
-        self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.useHyphenSourcePreprocess  = self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']
+        self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        self.useSourcePreprocess    = str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess'])
         # Data containers for this module
-        self.allHyphenWords             = set()
+        self.allHyphenWords         = set()
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
@@ -87,14 +91,14 @@ class Hyphenation (Manager) :
         '''Run a hyphenation preprocess script on the project's source hyphenation
         file. This happens when the component type import processes are happening.'''
 
-        if str2bool(self.useHyphenSourcePreprocess) :
-            if not os.path.isfile(self.projPreProcessScript) :
-                shutil.copy(self.rapumaPreProcessScript, self.projPreProcessScript)
-                makeExecutable(self.projPreProcessScript)
+        if str2bool(self.useSourcePreprocess) :
+            if not os.path.isfile(self.preProcessFile) :
+                shutil.copy(self.rapumaPreProcessFile, self.preProcessFile)
+                makeExecutable(self.preProcessFile)
                 self.project.log.writeToLog('HYPH-080')
                 dieNow()
             else :
-                err = subprocess.call([self.projPreProcessScript, self.ptProjHyphenFile])
+                err = subprocess.call([self.preProcessFile, self.ptHyphFile])
                 if err == 0 :
                     self.project.log.writeToLog('HYPH-090')
                     return True
@@ -109,14 +113,14 @@ class Hyphenation (Manager) :
         changes were made (if changes where made) when it was imported into the
         project. '''
 
-        self.project.compare(self.ptProjHyphenFile, self.ptProjHyphenFileBak)
+        self.project.compare(self.ptHyphFile, self.ptHyphBakFile)
 
 
     def turnOnHyphenation (self) :
         '''Turn on hyphenation to a project for a specified component type.'''
 
         # Make sure we turn it on if it isn't already
-        if not str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation']) :
+        if not self.useHyphenation :
             self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = True
             writeConfFile(self.projConfig)
             self.project.log.writeToLog('HYPH-050', [self.cType])
@@ -130,7 +134,7 @@ class Hyphenation (Manager) :
         to false.'''
 
         # Make sure we turn it on if it isn't already
-        if str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation']) :
+        if self.useHyphenation :
             self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = False
             writeConfFile(self.projConfig)
             self.project.log.writeToLog('HYPH-060', [self.cType])
@@ -142,23 +146,25 @@ class Hyphenation (Manager) :
         '''Update critical hyphenation control files for a specified component type.'''
 
         # Clean out the previous version of the component hyphenation file
-        if os.path.isfile(self.compHyphenFile) :
-            os.remove(self.compHyphenFile)
+        if os.path.isfile(self.compHyphFile) :
+            os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
-        if self.useHyphenSourcePreprocess :
+        if self.useSourcePreprocess :
             self.preprocessSource()
         # Create a new version
         self.harvestSource(force)
         self.makeHyphenatedWords()
         # Quick sanity test
-        if not os.path.isfile(self.compHyphenFile) :
-            dieNow('Failed to create: ' + self.compHyphenFile)
+        if not os.path.isfile(self.compHyphFile) :
+            dieNow('Failed to create: ' + self.compHyphFile)
         self.project.log.writeToLog('HYPH-070', [self.cType])
 
 
     def harvestSource (self, force = None) :
         '''Call on the component type to harvest sets of hyphenation words
         from its source list. These will be combined to form the master set.'''
+
+#        import pdb; pdb.set_trace()
 
         # Break our source down into the following sets:
         # allWords          All words from the master hyphen list
@@ -169,7 +175,7 @@ class Hyphenation (Manager) :
 
         # Process according to sourceEditor (PT is all we can support right now)
         if self.sourceEditor == 'paratext' :
-            from rapuma.component.usfm import PT_HyphenTools
+            from rapuma.group.usfm import PT_HyphenTools
             pt_hyTools = PT_HyphenTools(self.project)
             pt_hyTools.processHyphens(force)
             # Report the word harvest to the log
@@ -197,14 +203,16 @@ class Hyphenation (Manager) :
 
 #        import pdb; pdb.set_trace()
 
+        description = 'This file contains a sorted list of hyphenated words \
+            for a single component type.'
+
         # Turn set into list
         self.finalList = list(self.allHyphenWords)
         # Sort the list
         self.finalList.sort()
         # Output to the project storage file for other processes
-        with codecs.open(self.compHyphenFile, "w", encoding='utf_8') as compHyphObject :
-            compHyphObject.write('# ' + fName(self.compHyphenFile) + '\n')
-            compHyphObject.write('# This is an auto-generated file which contains hyphenation words for the ' + self.cType + ' component.\n')
+        with codecs.open(self.compHyphFile, "w", encoding='utf_8') as compHyphObject :
+            compHyphObject.write(makeFileHeader(fName(self.compHyphFile), description))
             for word in self.finalList :
                 compHyphObject.write(word + '\n')
 

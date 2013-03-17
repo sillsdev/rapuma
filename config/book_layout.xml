@@ -616,7 +616,7 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\newlanguage\[v]</usfmTex>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -626,7 +626,7 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\language=\[v]</usfmTex>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -636,7 +636,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\defaulthyphenchar=[v]</usfmTex>
         </setting>
         <setting>
@@ -645,7 +645,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -654,7 +654,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\exhyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -663,7 +663,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependFalse>
+            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -672,7 +672,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\pretolerance=[v]</usfmTex>
         </setting>
         <setting>
@@ -680,7 +680,7 @@ Todo:
             <description>With some TeX input files it matters greatly what the order is in wich they are inputed. This field specifies this order.</description>
             <key>inputsOrder</key>
             <type>list</type>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <value>inputLccodeFile,inputHyphenExceptionsFile</value>
         </setting>
         <setting>
@@ -689,7 +689,7 @@ Todo:
             <key>inputLccodeFile</key>
             <type>string</type>
             <value>[Hyphenation:lccodeFile]</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
@@ -699,7 +699,7 @@ Todo:
             <key>inputHyphenExceptionsFile</key>
             <type>string</type>
             <value>[Hyphenation:hyphenExceptionsFile]</value>
-            <boolDependTrue>projConfig:Managers:[self.cType]_Hyphenation:useHyphenation</boolDependTrue>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>

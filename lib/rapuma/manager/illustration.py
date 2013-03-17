@@ -50,7 +50,6 @@ class Illustration (Manager) :
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
         self.illustrationConfig         = ConfigObj(encoding='utf-8')
-        self.project                    = project
         self.projConfig                 = self.project.projConfig
         self.userConfig                 = self.project.userConfig
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder

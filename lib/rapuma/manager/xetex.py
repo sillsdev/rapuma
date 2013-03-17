@@ -88,7 +88,7 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
         self.useGroupStyles         = str2bool(self.projConfig['Groups'][self.gid]['useStyles'])
@@ -107,8 +107,8 @@ class Xetex (Manager) :
         self.styFileName            = self.style.styFileName
         self.extStyFileName         = self.style.extStyFileName
         self.grpExtStyFileName      = self.style.grpExtStyFileName
-        self.lccodeFileName         = self.hyphenation.compLccodeFileName
-        self.compHyphFileName       = self.hyphenation.compHyphenFileName
+        self.lccodeTexFileName      = self.hyphenation.lccodeTexFileName
+        self.compHyphFileName       = self.hyphenation.compHyphFileName
         self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
         self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
         self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
@@ -144,7 +144,7 @@ class Xetex (Manager) :
         self.usrGrpExtStyFile       = self.style.usrGrpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
-        self.lccodeFile             = os.path.join(self.projHyphenationFolder, self.lccodeFileName)
+        self.lccodeTexFile          = self.hyphenation.lccodeTexFile
         self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
         self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
@@ -208,15 +208,12 @@ class Xetex (Manager) :
     def copyInMargVerse (self) :
         '''Copy in the marginalverse macro package.'''
 
-        macrosTarget    = os.path.join(self.local.projMacrosFolder, self.macroPackage)
-        macrosSource    = os.path.join(self.local.rapumaMacrosFolder, self.macroPackage)
-
         # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(macrosTarget) :
-            os.makedirs(macrosTarget)
+        if not os.path.isdir(self.projMacPackFolder) :
+            os.makedirs(self.projMacPackFolder)
 
         if not os.path.isfile(self.ptxMargVerseFile) :
-            shutil.copy(os.path.join(macrosSource, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            shutil.copy(os.path.join(self.rapumaMacPackFolder, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
             self.project.log.writeToLog('XTEX-070', [fName(self.ptxMargVerseFile)])
             return True
 
@@ -287,13 +284,13 @@ class Xetex (Manager) :
             self.project.log.writeToLog('XTEX-075', [self.cType])
 
 
-    def displayPdfOutput (self, pdfFile) :
+    def displayPdfOutput (self) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
 #        import pdb; pdb.set_trace()
         if self.usePdfViewer :
             # Build the viewer command
-            self.pdfViewer.append(pdfFile)
+            self.pdfViewer.append(self.gidPdfFile)
             # Run the XeTeX and collect the return code for analysis
             try :
                 subprocess.Popen(self.pdfViewer)
@@ -310,18 +307,20 @@ class Xetex (Manager) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
 
+        description = 'This is an auto-generated hyphenation rules file for this project. \
+             Please refer to the documentation for details on how to make changes.'
+
+        # Try to get dependent files in place
+        if not os.path.isfile(self.compHyphFile) :
+            # Call the Hyphenation manager to create a sorted file of hyphenated words
+            self.hyphenation.updateHyphenation()
+
+
         # Create the output file here
-        with codecs.open(self.hyphenTex, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write('% ' + fName(self.hyphenTex) + '\n')
-            hyphenTexObject.write('% This is an auto-generated hyphenation rules file for this project.\n')
-            hyphenTexObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
+        with codecs.open(self.hyphExcepTexFile, "w", encoding='utf_8') as hyphenTexObject :
+            hyphenTexObject.write(makeFileHeader(fName(self.hyphExcepTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
-            # Look for the intermediate component hyphenation file, remake if needed
-            # Go get the file if it is to be had
-            if not os.path.isfile(self.compHyphen) :
-                # Call the Hyphenation manager to create a sorted file of hyphenated words
-                self.hy_tools.updateHyphenation(self.cType)
-            with codecs.open(self.compHyphen, "r", encoding='utf_8') as hyphenWords :
+            with codecs.open(self.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
                     # Strip out commented lines/words
                     if word[:1] != '#' and word != '' :
@@ -333,14 +332,15 @@ class Xetex (Manager) :
         return True
 
 
-    def makeLccodeFile (self) :
+    def makeLccodeTexFile (self) :
         '''Make a simple starter lccode file to be used with TeX hyphenation.'''
 
+        description = 'This is an auto-generated lccode rules file for this project. \
+            Please refer to the documentation for details on how to make changes.'
+
         # Create the file and put default settings in it
-        with codecs.open(self.lccodeTex, "w", encoding='utf_8') as lccodeObject :
-            lccodeObject.write('% ' + fName(self.lccodeTex) + '\n')
-            lccodeObject.write('% This is an auto-generated lccode rules file for this project.\n')
-            lccodeObject.write('% Please refer to the documentation for details on how to make changes.\n\n')
+        with codecs.open(self.lccodeTexFile, "w", encoding='utf_8') as lccodeObject :
+            lccodeObject.write(makeFileHeader(fName(self.lccodeTexFile), description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
             for c in self.pt_tools.getNWFChars() :
@@ -685,6 +685,7 @@ class Xetex (Manager) :
         make it.'''
 
         if self.useHyphenation :
+            # The TeX hyphen exceptions file
             if not os.path.isfile(self.hyphExcepTexFile) or isOlder(self.hyphExcepTexFile, self.compHyphFile) :
                 if self.makeHyphenExceptionFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.hyphExcepTexFile)])
@@ -692,19 +693,13 @@ class Xetex (Manager) :
                     # If we can't make it, we return False
                     self.project.log.writeToLog('XTEX-170', [fName(self.hyphExcepTexFile)])
                     return False
-
-
-
-
-
-
-# FIXME: Need a dependency filter here
-            if isOlder(self.lccodeFile, self.hyphExcepTexFile) :
-                if self.makeLccodeFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeFile)])
+            # The TeX lccode file
+            if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.hyphExcepTexFile) :
+                if self.makeLccodeTexFile() :
+                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeFile)])
+                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeTexFile)])
                     return False
             return True
         else :
@@ -815,7 +810,7 @@ class Xetex (Manager) :
 
         # Review the results if desired
         if os.path.isfile(self.gidPdfFile) :
-            if self.displayPdfOutput(self.gidPdfFile) :
+            if self.displayPdfOutput() :
                 self.project.log.writeToLog('XTEX-095', [fName(self.gidPdfFile)])
             else :
                 self.project.log.writeToLog('XTEX-100', [fName(self.gidPdfFile)])
