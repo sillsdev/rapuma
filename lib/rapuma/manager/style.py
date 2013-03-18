@@ -59,19 +59,21 @@ class Style (Manager) :
         # Needed boolean settings
         self.useGroupStyles         = str2bool(self.projConfig['Groups'][self.gid]['useStyles'])
         # File names
-        self.styFileName            = self.cType + '.sty'
-        self.extStyFileName         = self.cType + '-ext.sty'
-        self.grpExtStyFileName      = self.gid + '_' + self.cType + '-ext.sty'
+        self.defaultStyFileName     = self.cType + '.sty'
+        self.defaultExtStyFileName  = self.cType + '-ext.sty'
+        self.grpExtStyFileName      = self.cType + '-ext.sty'
         self.rapumaCmpStyFileName   = self.cType + '.sty'
         # Folder paths
+        self.projComponentsFolder   = self.local.projComponentsFolder
+        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         self.projStylesFolder       = self.local.projStylesFolder
         self.rapumaStyFolder        = self.local.rapumaStylesFolder
         self.rapumaCmpStyFolder     = os.path.join(self.rapumaStyFolder, self.cType)
         # Files with paths
-        self.styFile                = os.path.join(self.projStylesFolder, self.styFileName)
-        self.extStyFile             = os.path.join(self.projStylesFolder, self.extStyFileName)
-        self.grpExtStyFile          = os.path.join(self.projStylesFolder, self.grpExtStyFileName)
-        self.usrGrpExtStyFile       = os.path.join(self.project.userConfig['Resources']['styles'], self.grpExtStyFileName)
+        self.defaultStyFile         = os.path.join(self.projStylesFolder, self.defaultStyFileName)
+        self.defaultExtStyFile      = os.path.join(self.projStylesFolder, self.defaultExtStyFileName)
+        self.grpExtStyFile          = os.path.join(self.gidFolder, self.grpExtStyFileName)
+        self.usrDefaultExtStyFile       = os.path.join(self.project.userConfig['Resources']['styles'], self.defaultExtStyFileName)
         self.rapumaCmpStyFile       = os.path.join(self.rapumaCmpStyFolder, self.rapumaCmpStyFileName)
         # Get persistant values from the config if there are any
         manager = self.cType + '_Style'
@@ -89,58 +91,60 @@ class Style (Manager) :
 ###############################################################################
 
 
+
+
 # FIXME: Log messages need to be transfered over to this module
 
 
 
-    def checkDepGlobStyFile (self) :
+    def checkDefaultStyFile (self) :
         '''Check for the exsistance of the Global Sty file. We need to die if 
         it is not found. This should have been installed when the components
         were brought in. To late to recover now if it is not there.'''
 
-        if not os.path.isfile(self.styFile) :
-            self.makeStyFile()
+        if not os.path.exists(self.defaultStyFile) :
+            self.makeDefaultStyFile()
             # FIXME: we will need to expand this so it we can get the actual project sty file
             self.project.log.writeToLog('XTEX-120', [fName(self.styFile)])
         else :
             return True
 
 
-    def checkDepGrpExtStyFile (self) :
+    def checkDefaultExtStyFile (self) :
         '''Check for the exsistance of the group extention Sty file. We need
         to throw a stern warning if it is not there and create a blank one.'''
 
-        if not os.path.isfile(self.grpExtStyFile) :
+        if not os.path.isfile(self.defaultExtStyFile) :
             self.project.log.writeToLog('XTEX-120', [fName(self.grpExtStyFile)])
-            self.makeGrpExtStyFile()
+            self.makeDefaultExtStyFile()
 
         return True
 
 
-    def makeStyFile (self) :
+    def makeDefaultStyFile (self) :
         '''Create or copy in a default global style file for the current component type.'''
 
         if os.path.isfile(self.rapumaCmpStyFile) :
             # No news is good news
-            if not shutil.copy(self.rapumaCmpStyFile, self.styFile) :
+            if not shutil.copy(self.rapumaCmpStyFile, self.defaultStyFile) :
                 return True
 
 
-    def makeGrpExtStyFile (self) :
+    def makeDefaultExtStyFile (self) :
         '''Create/copy a group Style extentions file to the project for specified group.'''
 
         description = 'This is the group style extention file which overrides settings in \
         the main component style settings file.'
 
         # First look for a user file, if not, then make a blank one
-        if not os.path.isfile(self.grpExtStyFile) :
-            if os.path.isfile(self.usrGrpExtStyFile) :
-                shutil.copy(self.usrGrpExtStyFile, self.grpExtStyFile)
+        if not os.path.isfile(self.defaultExtStyFile) :
+            if os.path.isfile(self.usrDefaultExtStyFile) :
+                shutil.copy(self.usrDefaultExtStyFile, self.defaultExtStyFile)
             else :
                 # Create a blank file
-                with codecs.open(self.grpExtStyFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(makeFileHeader(fName(self.grpExtStyFile), description, False))
-                self.project.log.writeToLog('XTEX-040', [fName(self.grpExtStyFile)])
+                with codecs.open(self.defaultExtStyFile, "w", encoding='utf_8') as writeObject :
+                    writeObject.write(makeFileHeader(fName(self.defaultExtStyFile), description, False))
+                self.project.log.writeToLog('XTEX-040', [fName(self.defaultExtStyFile)])
 
         # Need to return true here even if nothing was done
         return True

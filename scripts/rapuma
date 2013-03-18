@@ -861,8 +861,12 @@ def userArguments (args) :
                 sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
             elif not args['component_type'] :
                 sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
+            elif not args['source_id'] :
+                sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
+            elif not resolvePath(args['source']) and aProject.hasValidSourcePath(args['group_id'], args['source_id']) :
+                sys.exit('\nERROR: No source path found. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             else :
-                aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source'], args['force'])
+                aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source_id'], args['source'], args['force'])
         # Remove a group from the project
         elif args['remove'] :
             aProject.removeGroup(args['group_id'].lower(), args['force'])
@@ -1143,6 +1147,7 @@ groupCommand.add_argument('-c', '--component_type', help='The group component ty
 groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component group to this project.')
 groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component group from this project.')
 groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
+groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
 groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific group in this project.')

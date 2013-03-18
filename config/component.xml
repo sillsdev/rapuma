@@ -15,9 +15,9 @@ Todo:
 
 <root>
     <setting>
-        <name>Component Sources</name>
-        <key>csid</key>
-        <description>The component source ID.</description>
+        <name>Place Holder Setting</name>
+        <key>placeHolderSetting</key>
+        <description>Just hold this spot until we think of something to put in it.</description>
         <type>string</type>
         <value></value>
     </setting>

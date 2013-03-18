@@ -64,7 +64,7 @@ class ProjLog (object) :
             'GRUP-030' : ['ERR', 'Component group source path not found. Use -s (source) to indicate where source files are to be found. Process halted!'],
             'GRUP-040' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             'GRUP-050' : ['ERR', 'Component group [<<1>>] not found. Cannot remove component.'],
-            'GRUP-060' : ['ERR', 'Sorry, cannot delete from the [<<1>>] group. This component is shared by another group group.'],
+            'GRUP-060' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
             'GRUP-070' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
             'GRUP-080' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             'GRUP-090' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],

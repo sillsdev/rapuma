@@ -49,7 +49,9 @@ class Usfm (Group) :
 
         # Set values for this manager
         self.project                = project
-        self.cName                  = ''
+        self.projConfig             = project.projConfig
+        self.local                  = project.local
+        self.log                    = project.log
         self.cfg                    = cfg
         self.gid                    = project.gid
         self.cType                  = 'usfm'
@@ -63,9 +65,9 @@ class Usfm (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
-        if newSectionSettings != self.project.projConfig['CompTypes'][self.Ctype] :
-            self.project.projConfig['CompTypes'][self.Ctype] = newSectionSettings
+        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
+            self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
         # Set them here
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -75,27 +77,37 @@ class Usfm (Group) :
 
         # Init the general managers
         for mType in self.usfmManagers :
+#            if mType == 'component' :
+#                import pdb; pdb.set_trace()
             self.project.createManager(self.cType, mType)
 
+        # Create the internal ref names we use in this module
+        self.font                   = self.project.managers[self.cType + '_Font']
+        self.component              = self.project.managers[self.cType + '_Component']
+        self.layout                 = self.project.managers[self.cType + '_Layout']
+        self.illustration           = self.project.managers[self.cType + '_Illustration']
+        self.text                   = self.project.managers[self.cType + '_Text']
+        self.style                  = self.project.managers[self.cType + '_Style']
+
         # Pick up some init settings that come after the managers have been installed
-        self.macroPackage           = self.project.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
-        self.layoutConfig           = self.project.managers[self.cType + '_Layout'].layoutConfig
+        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
+        self.layoutConfig           = self.layout.layoutConfig
         if not os.path.isfile(self.adjustmentConfFile) :
             if self.createProjAdjustmentConfFile(self.cType) :
-                self.project.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
+                self.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
         # Now get the adj config
         self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
 
         # Check if there is a font installed
-        self.project.createManager(self.cType, 'font')
-        if not self.project.managers[self.cType + '_Font'].varifyFont() :
+#        self.project.createManager(self.cType, 'font')
+        if not self.font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.project.managers[self.cType + '_Font'].installFont(font)
+            self.font.installFont(font)
 
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
@@ -109,21 +121,21 @@ class Usfm (Group) :
         '''Return the full path of the cName working text file. This assumes
         the cName is valid.'''
 
-        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.' + self.cType)
+        return os.path.join(self.local.projComponentsFolder, cid, cid + '.' + self.cType)
 
 
     def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.adj')
+        return os.path.join(self.local.projComponentsFolder, cid, cid + '.adj')
 
 
     def getCidPiclistPath (self, cid) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.project.local.projComponentsFolder, cid, cid + '.piclist')
+        return os.path.join(self.local.projComponentsFolder, cid, cid + '.piclist')
 
 
     def render(self, renderParams) :
@@ -154,10 +166,10 @@ class Usfm (Group) :
         # Get some relevant settings
         useIllustrations        = str2bool(self.cfg['useIllustrations'])
         useHyphenation          = str2bool(self.cfg['useHyphenation'])
-        useWatermark            = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useWatermark'])
-        useLines                = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['useLines'])
-        usePageBorder           = str2bool(self.project.managers[self.cType + '_Layout'].layoutConfig['PageLayout']['usePageBorder'])
-        useManualAdjustments    = str2bool(self.project.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
+        useWatermark            = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        useLines                = str2bool(self.layoutConfig['PageLayout']['useLines'])
+        usePageBorder           = str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
+        useManualAdjustments    = str2bool(self.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
@@ -184,23 +196,23 @@ class Usfm (Group) :
                 cidPiclist = self.project.groups[self.gid].getCidPiclistPath(cid)
                 if useIllustrations :
 #                        import pdb; pdb.set_trace()
-                    if self.project.managers[cType + '_Illustration'].hasIllustrations(cidCName) :
+                    if self.illustration.hasIllustrations(cidCName) :
                         if not os.path.isfile(cidPiclist) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
-                            self.project.managers[cType + '_Illustration'].getPics(cid)
+                            self.illustration.getPics(cid)
                             # Now make a fresh version of the piclist file
-                            self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                            self.project.log.writeToLog('ILUS-065', [cid])
+                            self.illustration.createPiclistFile(cName, cid)
+                            self.log.writeToLog('ILUS-065', [cid])
                         else :
-                            for f in [self.project.local.layoutConfFile, self.project.local.illustrationConfFile] :
+                            for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
                                 if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
                                     # Remake the piclist file
-                                    self.project.managers[cType + '_Illustration'].createPiclistFile(cName, cid)
-                                    self.project.log.writeToLog('ILUS-065', [cid])
+                                    self.illustration.createPiclistFile(cName, cid)
+                                    self.log.writeToLog('ILUS-065', [cid])
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
-                        self.project.managers[cType + '_Illustration'].getPics(cid)
+                        self.illustration.getPics(cid)
                     else :
                         # Do a little clean up and remove the auto-generated piclist file
                         if os.path.isfile(cidPiclist) :
@@ -210,9 +222,9 @@ class Usfm (Group) :
                     # If we are not using illustrations then any existing piclist file will be removed
                     if os.path.isfile(cidPiclist) :
                         os.remove(cidPiclist)
-                        self.project.log.writeToLog('ILUS-055', [cName])
+                        self.log.writeToLog('ILUS-055', [cName])
             else :
-                self.project.log.writeToLog('COMP-220', [self.macroPackage])
+                self.log.writeToLog('COMP-220', [self.macroPackage])
 
         # FIXME: This may not be needed here as it is called during the setup file checks
         # Check to see if everything is good with hyphenation, die if it is not
@@ -223,13 +235,13 @@ class Usfm (Group) :
         # installed if watermark is turned on (True). Fallback on the
         # the default if needed.
         if useWatermark :
-            if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('watermark') :
-                self.project.managers[cType + '_Illustration'].installBackgroundFile('watermark', 'watermark_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+            if not self.illustration.hasBackgroundFile('watermark') :
+                self.illustration.installBackgroundFile('watermark', 'watermark_default.pdf', self.local.rapumaIllustrationsFolder, True)
 
         # Same for lines background file used for composition
         if useLines :
-            if not self.project.managers[cType + '_Illustration'].hasBackgroundFile('lines') :
-                self.project.managers[cType + '_Illustration'].installBackgroundFile('lines', 'lines_default.pdf', self.project.local.rapumaIllustrationsFolder, True)
+            if not self.illustration.hasBackgroundFile('lines') :
+                self.illustration.installBackgroundFile('lines', 'lines_default.pdf', self.local.rapumaIllustrationsFolder, True)
 
         # Any more stuff to run?
 
@@ -278,7 +290,7 @@ class Usfm (Group) :
                                     adj = '+' + str(v)
                                 writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
 
-                            self.project.log.writeToLog('COMP-230', [fName(adjFile)])
+                            self.log.writeToLog('COMP-230', [fName(adjFile)])
                 return True
 
 
@@ -288,7 +300,7 @@ class Usfm (Group) :
         run but after the first time it will only add a section for the current
         cid that is being run.'''
 
-        adjustmentConfFile = self.project.local.adjustmentConfFile
+        adjustmentConfFile = self.local.adjustmentConfFile
         if not os.path.isfile(adjustmentConfFile) :
             with codecs.open(adjustmentConfFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('# This is the master manual adjustment file for the ' + cType.capitalize() + ' component type.\n')
@@ -332,17 +344,17 @@ class Usfm (Group) :
 #        import pdb; pdb.set_trace()
 
         sourcePath = self.project.getGroupSourcePath(gid)
+        csid = self.projConfig['Groups'][gid]['csid']
 
         # Check if there is a font installed
-        self.project.createManager(self.cType, 'font')
-        if not self.project.managers[self.cType + '_Font'].varifyFont() :
+        if not self.font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+                font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.project.managers[self.cType + '_Font'].installFont(font)
+            self.font.installFont(font)
 
         # Build the file name
         thisFile = ''
@@ -351,28 +363,17 @@ class Usfm (Group) :
         elif self.sourceEditor.lower() == 'generic' :
             thisFile = self.pt_tools.formGenericName(cid)
         else :
-            self.project.log.writeToLog('USFM-100', [self.sourceEditor])
+            self.log.writeToLog('USFM-100', [self.sourceEditor])
 
         # Test, no name = no success
         if not thisFile :
-            self.project.log.writeToLog('USFM-110', [cid])
+            self.log.writeToLog('USFM-110', [cid])
             dieNow()
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
-        self.project.createManager(self.cType, 'style')
-        projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-        if projStyName == '' :
-            self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)
-            projStyName = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-        # If for some reason the name isn't there yet, assign the default
-        # name for a USFM style file
-        if not projStyName :
-            projStyName = 'usfm.sty'
-        projSty = os.path.join(self.project.local.projStylesFolder, projStyName)
-        if not os.path.isfile(projSty) :
-            # Forcing style file creation possible if -f was used for component creation
-            self.project.managers[self.cType + '_Style'].addStyleFile('main', '', force)
+        self.style.checkDefaultStyFile()
+        self.style.checkDefaultExtStyFile()
 
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part
@@ -385,10 +386,10 @@ class Usfm (Group) :
         if sourcePath :
             source      = os.path.join(sourcePath, thisFile)
         else :
-            source      = os.path.join(os.path.dirname(self.project.local.projHome), thisFile)
+            source      = os.path.join(os.path.dirname(self.local.projHome), thisFile)
 
-        targetFolder    = os.path.join(self.project.local.projComponentsFolder, cid)
-        target          = os.path.join(targetFolder, cid + '.' + self.cType)
+        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        target          = os.path.join(targetFolder, self.component.makeFileName(cid))
         targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
         # Copy the source to the working text folder. We do not want to do
@@ -404,7 +405,7 @@ class Usfm (Group) :
             if os.path.isfile(targetSource) :
                 source = targetSource
             else :
-                self.project.log.writeToLog('USFM-120', [source])
+                self.log.writeToLog('USFM-120', [source])
                 dieNow()
 
         # Now do the age checks and copy if source is newer than target
@@ -431,12 +432,12 @@ class Usfm (Group) :
             # backup file.
             if self.usfmCopy(targetSource, target, projSty) :
                 # Run any working text preprocesses on the new component text
-                if str2bool(self.project.projConfig['Groups'][gid]['usePreprocessScript']) :
-                    preprocessScript = os.path.join(self.project.local.projScriptsFolder, self.project.projConfig['Groups'][gid]['preprocessScript'])
+                if str2bool(self.projConfig['Groups'][gid]['usePreprocessScript']) :
+                    preprocessScript = os.path.join(self.local.projScriptsFolder, self.projConfig['Groups'][gid]['preprocessScript'])
                     if not os.path.isfile(preprocessScript) :
                         self.project.installPreprocess(gid)
                     if not self.project.runProcessScript(gid, cid, preprocessScript) :
-                        self.project.log.writeToLog('USFM-130', [cid])
+                        self.log.writeToLog('USFM-130', [cid])
 
                 # If this is a USFM component type we need to remove any \fig markers,
                 # and record them in the illustration.conf file for later use
@@ -455,10 +456,10 @@ class Usfm (Group) :
 
                 # If the text is there, we should return True so do a last check to see
                 if os.path.isfile(target) :
-                    self.project.log.writeToLog('USFM-140', [cid])
+                    self.log.writeToLog('USFM-140', [cid])
                     return True
             else :
-                self.project.log.writeToLog('USFM-150', [source,fName(target)])
+                self.log.writeToLog('USFM-150', [source,fName(target)])
                 return False
         else :
             return True
@@ -469,16 +470,16 @@ class Usfm (Group) :
         normalize. With the text in place, validate unless that is False.'''
 
         # Bring in our source text
-        if self.project.managers[self.cType + '_Text'].sourceEncode == self.project.managers[self.cType + '_Text'].workEncode :
+        if self.text.sourceEncode == self.text.workEncode :
             contents = codecs.open(source, 'rt', 'utf_8_sig')
             lines = contents.read()
         else :
             # Lets try to change the encoding.
-            lines = self.project.managers[self.cType + '_Text'].decodeText(source)
+            lines = self.text.decodeText(source)
 
         # Normalize the text
-        normal = unicodedata.normalize(self.project.managers[self.cType + '_Text'].unicodeNormalForm, lines)
-        self.project.log.writeToLog('USFM-080', [self.project.managers[self.cType + '_Text'].unicodeNormalForm])
+        normal = unicodedata.normalize(self.text.unicodeNormalForm, lines)
+        self.log.writeToLog('USFM-080', [self.text.unicodeNormalForm])
 
         # Write out the text to the target
         writeout = codecs.open(target, "wt", "utf_8_sig")
@@ -488,10 +489,10 @@ class Usfm (Group) :
         # Validate the target USFM text (Defalt is True)
         if str2bool(self.validateUsfm) :
             if not self.usfmTextFileIsValid(target, projSty) :
-                self.project.log.writeToLog('USFM-090', [source,fName(target)])
+                self.log.writeToLog('USFM-090', [source,fName(target)])
                 return False
         else :
-            self.project.log.writeToLog('USFM-095', [fName(target)])
+            self.log.writeToLog('USFM-095', [fName(target)])
 
         return True
 
@@ -527,7 +528,7 @@ class Usfm (Group) :
         except Exception as e :
             # If the text is not good, I think we should die here an now.
             # We may want to rethink this later but for now, it feels right.
-            self.project.log.writeToLog('USFM-070', [source,str(e)])
+            self.log.writeToLog('USFM-070', [source,str(e)])
             return False
 
 
@@ -577,7 +578,7 @@ class Usfm (Group) :
         if not figDict['location'] :
             figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
 
-        illustrationConfig = self.project.managers[self.cType + '_Illustration'].illustrationConfig
+        illustrationConfig = self.illustration.illustrationConfig
         if not testForSetting(illustrationConfig, 'Illustrations') :
             buildConfSection(illustrationConfig, 'Illustrations')
         # Put the dictionary info into the illustration conf file
@@ -593,7 +594,7 @@ class Usfm (Group) :
         # allow for that. However, default behavior is to strip them
         # because usfmTex does not handle \fig markers. By returning
         # them here, they will not be removed from the working text.
-        if str2bool(self.project.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+        if str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
             return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
@@ -603,10 +604,10 @@ class Usfm (Group) :
 #        import pdb; pdb.set_trace()
 
         try :
-            cType = self.project.projConfig['Groups'][gid]['cType']
+            cType = self.projConfig['Groups'][gid]['cType']
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.project.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
+            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
             dieNow()
 
         return cType
@@ -639,8 +640,8 @@ class Usfm (Group) :
         '''Return True or False depending on if a working file exists 
         for a given cName.'''
 
-        cType = self.project.projConfig['Groups'][gid]['cType']
-        return os.path.isfile(os.path.join(self.project.local.projComponentsFolder, cid, cid + '.' + cType))
+        cType = self.projConfig['Groups'][gid]['cType']
+        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType))
 
 
     def getUsfmCidInfo (self, cid) :
@@ -911,7 +912,7 @@ class PT_HyphenTools (Group) :
             # Once copied, check if any preprocessing is needed
             self.hyphenation.preprocessSource()
         else :
-            self.project.log.writeToLog('USFM-040', [self.ptHyphFile])
+            self.log.writeToLog('USFM-040', [self.ptHyphFile])
             dieNow()
 
 
@@ -923,7 +924,7 @@ class PT_HyphenTools (Group) :
             utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
             makeReadOnly(self.ptProjHyphBakFile)
         else :
-            self.project.log.writeToLog('USFM-040', [self.ptHyphFile])
+            self.log.writeToLog('USFM-040', [self.ptHyphFile])
             dieNow()
 
 
@@ -941,7 +942,7 @@ class PT_HyphenTools (Group) :
                 os.remove(self.ptProjHyphFile)
             if os.path.exists(self.ptProjHyphBakFile) :
                 os.remove(self.ptProjHyphBakFile)
-            self.project.log.writeToLog('USFM-060')
+            self.log.writeToLog('USFM-060')
 
         # These calls may be order-sensitive, update local project source
         # copy only if there has been a change in the PT source
@@ -955,9 +956,9 @@ class PT_HyphenTools (Group) :
         if not os.path.isfile(self.ptProjHyphFile) or isOlder(self.ptProjHyphFile, self.ptHyphFile) :
             self.copyPtHyphenWords()
             self.backupPtHyphenWords()
-            self.project.log.writeToLog('USFM-050', [fName(self.ptHyphFile)])
+            self.log.writeToLog('USFM-050', [fName(self.ptHyphFile)])
         else :
-            self.project.log.writeToLog('USFM-055', [fName(self.ptHyphFile)])
+            self.log.writeToLog('USFM-055', [fName(self.ptHyphFile)])
 
         # Continue by processing the files located in the project
         self.getAllPtHyphenWords()
@@ -1057,7 +1058,7 @@ class PT_HyphenTools (Group) :
                     wordErrorsObject.write(word + '\n')
 
             # Report the problem to the user
-            self.project.log.writeToLog('USFM-030', [self.ptProjHyphErrFile])
+            self.log.writeToLog('USFM-030', [self.ptProjHyphErrFile])
 
 
     def wordTotals (self) :
@@ -1144,14 +1145,14 @@ class PT_Tools (Group) :
                             chars.append(c.replace('_', ''))
                     except Exception as e :
                         # If we don't succeed, we should probably quite here
-                        self.project.log.writeToLog('USFM-010', [str(e)])
+                        self.log.writeToLog('USFM-010', [str(e)])
                         dieNow()
                 else :
                     # Something really strange happened
-                    self.project.log.writeToLog('USFM-020', [c])
+                    self.log.writeToLog('USFM-020', [c])
                     dieNow()
         else :
-            self.project.log.writeToLog('USFM-025')
+            self.log.writeToLog('USFM-025')
         return chars
 
 

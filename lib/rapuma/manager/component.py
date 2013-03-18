@@ -50,12 +50,13 @@ class Component (Manager) :
         self.projConfig                 = self.project.projConfig
         self.userConfig                 = self.project.userConfig
         self.manager                    = self.cType + '_Component'
+        self.csid                       = self.projConfig['Groups'][self.gid]['csid']
         # File names
         # Folder path
         # File names with folder paths
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
+        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.projConfig['Managers'][self.manager] :
             self.projConfig['Managers'][self.manager] = newSectionSettings
 
@@ -68,5 +69,12 @@ class Component (Manager) :
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
+
+    def makeFileName(self, cid) :
+        '''From what we know, return the full file name.'''
+
+        return cid + '_' + self.csid + '.' + self.cType
+
+
 
 

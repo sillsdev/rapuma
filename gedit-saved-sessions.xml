@@ -4,24 +4,20 @@
   <file path="file:///home/dennis/Projects/rapuma/dev_setup.sh"/>
   <file path="file:///home/dennis/Projects/rapuma/setup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
-  <file path="file:///home/dennis/Projects/rapuma/config/rapuma.xml"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/project.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/group.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_log.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/tools.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_local.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_config.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/group.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/component.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/text.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/font.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/illustration.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/layout.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/style.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/binding.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/text.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/config/usfm.xml"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/binding.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/tools.py"/>
 </session>
 </saved-sessions>

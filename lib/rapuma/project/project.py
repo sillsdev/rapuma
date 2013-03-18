@@ -126,7 +126,8 @@ class Project (object) :
     def loadManager (self, cType, mType) :
         '''Do basic load on a manager.'''
 
-#        import pdb; pdb.set_trace()
+#        if mType == 'component' :
+#            import pdb; pdb.set_trace()
 
         fullName = cType + '_' + mType.capitalize()
         cfg = self.projConfig['Managers'][fullName]
@@ -176,15 +177,16 @@ class Project (object) :
     def getGroupSourcePath (self, gid) :
         '''Get the source path for a specified group.'''
 
+#        import pdb; pdb.set_trace()
+        csid = self.projConfig['Groups'][gid]['csid']
+
         try :
-            sourcePath = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
+            return self.userConfig['Projects'][self.projectIDCode][gid + '_' + csid + '_sourcePath']
         except Exception as e :
             # If we don't succeed, we should probably quite here
             terminal('No source path found for: [' + str(e) + ']')
             terminal('Please add a source path for this component type.')
-
-        return sourcePath
-
+            dieNow()
 
 
     def renderGroup (self, gid, cidList = None, force = False) :
@@ -239,8 +241,10 @@ class Project (object) :
         return groupObj
 
 
-    def addGroup (self, cType, gid, cidList, newSource = None, force = False) :
-        '''This handels adding a group which can contain one or more components.'''
+    def addGroup (self, cType, gid, cidList, csid, sourcePath = None, force = False) :
+        '''This handels adding a group which can contain one or more components. 
+        Most of the prechecking was done in the calling script so we can assume that
+        the vars here are pretty good.'''
 
         # Do not want to add this group, non-force, if it already exsists.
         buildConfSection(self.projConfig, 'Groups')
@@ -248,31 +252,25 @@ class Project (object) :
             self.log.writeToLog('GRUP-010', [gid])
             dieNow()
 
-        # Work out the source path to components used in this group
-        oldSource = ''
-        if newSource :
-            newSource = resolvePath(newSource)
-            if not os.path.isdir(newSource) :
-                self.log.writeToLog('GRUP-020', [newSource])
-                dieNow()
+        sourceKey = gid + '_' + csid
 
-        if self.hasSourcePath(gid) :
-            if os.path.isdir(self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']) :
-                oldSource = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
+#        # Work out the source path to components used in this group
+#        oldSource = ''
+#        if newSource :
+#            newSource = resolvePath(newSource)
+#            if not os.path.isdir(newSource) :
+#                self.log.writeToLog('GRUP-020', [newSource])
+#                dieNow()
+
+#        if self.hasSourcePath(gid) :
+#            if os.path.isdir(self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']) :
+#                oldSource = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
 
         # If the new source is valid, we will add that to the config now
         # so that processes to follow will have that setting available.
-        if newSource :
-            source = newSource
-            self.addCompGroupSourcePath(gid, source)
-            setattr(self, gid + '_sourcePath', source)
-        # If there is no newSource, then the status quo will work okay
-        elif oldSource :
-            source = oldSource
-        # No new or old source means we are hossed
-        else :
-            self.log.writeToLog('GRUP-030')
-            dieNow()
+        if sourcePath :
+            self.addCompGroupSourcePath(gid + '_' + csid, sourcePath)
+            setattr(self, sourceKey, sourcePath)
 
         # The cList can be one or more valid component IDs
         # It is expected that the data for this list is in
@@ -301,14 +299,15 @@ class Project (object) :
             self.projConfig['Groups'][gid] = newSectionSettings
 
         # Add/Modify the info to the group config info
-        ppsBase = self.projConfig['Groups'][gid]['preprocessScript']
-        styBase = self.projConfig['Groups'][gid]['styleFile']
-        macBase = self.projConfig['Groups'][gid]['macroFile']
+#        ppsBase = self.projConfig['Groups'][gid]['preprocessScript']
+#        styBase = self.projConfig['Groups'][gid]['styleFile']
+#        macBase = self.projConfig['Groups'][gid]['macroFile']
         self.projConfig['Groups'][gid]['cType']                 = cType
+        self.projConfig['Groups'][gid]['csid']                  = csid
         self.projConfig['Groups'][gid]['cidList']               = cidList
-        self.projConfig['Groups'][gid]['preprocessScript']      = gid + '_' + ppsBase
-        self.projConfig['Groups'][gid]['styleFile']             = gid + '_' + styBase
-        self.projConfig['Groups'][gid]['macroFile']             = gid + '_' + macBase
+        self.projConfig['Groups'][gid]['preprocessScript']      = ''
+        self.projConfig['Groups'][gid]['styleFile']             = ''
+        self.projConfig['Groups'][gid]['macroFile']             = ''
 
         # Create the group object now that we have an entry in the config
         self.createGroup(gid)
@@ -336,7 +335,8 @@ class Project (object) :
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
         cidList     = self.projConfig['Groups'][gid]['cidList']
-        sourcePath  = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
+        csid        = self.projConfig['Groups'][gid]['csid']
+        sourcePath  = self.userConfig['Projects'][self.projectIDCode][gid + '_' + csid + '_sourcePath']
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -474,22 +474,31 @@ class Project (object) :
         self.lockUnlock(gid, True)
 
 
-    def hasSourcePath (self, gid) :
+#    def hasSourcePath (self, gid) :
 
-        '''Check to see if there is a pre-exsisting path.'''
+#        '''Check to see if there is a pre-exsisting path.'''
 
-        if testForSetting(self.userConfig['Projects'][self.projectIDCode], gid + '_sourcePath') :
-            if self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath'] != '' :
-                return True
+#        if testForSetting(self.userConfig['Projects'][self.projectIDCode], gid + '_sourcePath') :
+#            if self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath'] != '' :
+#                return True
 
 
-    def sourceIsSame (self, gid, source) :
-        '''Check to see if the existing path is the same as the
-        new proposed path.'''
+#    def sourceIsSame (self, gid, source) :
+#        '''Check to see if the existing path is the same as the
+#        new proposed path.'''
 
-        curPath = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
-        if curPath == source :
-            return True
+#        curPath = self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath']
+#        if curPath == source :
+#            return True
+
+
+    def hasValidSourcePath (self, gid, csid) :
+        '''Check if there is one, see if it is valid.'''
+
+        try :
+            return os.path.isdir(resolvePath(self.userConfig['Projects'][self.pid][gid + '_' + csid]))
+        except :
+            return False
 
 
     def addCompGroupSourcePath (self, gid, source) :
@@ -574,16 +583,19 @@ class Project (object) :
        This does not return anything. We trust it worked.'''
 
         cType       = self.projConfig['Groups'][gid]['cType']
+        csid        = self.projConfig['Groups'][gid]['csid']
+        fileHandle  = cid + '_' + csid
+        fileName    = fileHandle + '.' + cType
 
         # Test to see if it is shared
-        if self.isSharedComponent(gid, cid) :
-            self.log.writeToLog('GRUP-060', [gid])
+        if self.isSharedComponent(gid, fileHandle) :
+            self.log.writeToLog('GRUP-060', [fileHandle,gid])
             dieNow()
 
         # Remove the files
         if force :
             targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-            source          = os.path.join(targetFolder, cid + '.' + cType)
+            source          = os.path.join(targetFolder, fileName)
             targetComp      = os.path.join(source + '.cv1')
             if os.path.isfile(source) :
                 # First a comparison backup needs to be made of the working text

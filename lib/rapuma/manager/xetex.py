@@ -55,17 +55,20 @@ class Xetex (Manager) :
         self.pt_tools               = PT_Tools(project)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
-        if self.cType + '_Hyphenation' not in self.manager :
-            self.project.createManager(self.cType, 'hyphenation')
+#        if self.cType + '_Component' not in self.manager :
+#            self.project.createManager(self.cType, 'component')
+        self.component = self.managers[self.cType + '_Component']
+#        if self.cType + '_Hyphenation' not in self.manager :
+#            self.project.createManager(self.cType, 'hyphenation')
         self.hyphenation = self.managers[self.cType + '_Hyphenation']
-        if self.cType + '_Layout' not in self.managers :
-            self.project.createManager(self.cType, 'layout')
+#        if self.cType + '_Layout' not in self.managers :
+#            self.project.createManager(self.cType, 'layout')
         self.layout = self.managers[self.cType + '_Layout']
-        if self.cType + '_Font' not in self.managers :
-            self.project.createManager(self.cType, 'font')
+#        if self.cType + '_Font' not in self.managers :
+#            self.project.createManager(self.cType, 'font')
         self.font = self.managers[self.cType + '_Font']
-        if self.cType + '_Style' not in self.managers :
-            self.project.createManager(self.cType, 'style')
+#        if self.cType + '_Style' not in self.managers :
+#            self.project.createManager(self.cType, 'style')
         self.style = self.managers[self.cType + '_Style']
         # Get config objs
         self.projConfig             = project.projConfig
@@ -103,10 +106,17 @@ class Xetex (Manager) :
         self.macLinkFileName        = self.cType + '_macLink.tex'
         self.setTexFileName         = self.cType + '_set.tex'
         self.extTexFileName         = self.cType + '_set-ext.tex'
-        self.grpExtTexFileName      = self.gid + '_' + self.cType + '-ext.tex'
+#        self.grpExtTexFileName      = self.gid + '_' + self.cType + '-ext.tex'
+        self.grpExtTexFileName      = self.cType + '-ext.tex'
+
+# FIXME: Fix these names
+
         self.styFileName            = self.style.styFileName
         self.extStyFileName         = self.style.extStyFileName
         self.grpExtStyFileName      = self.style.grpExtStyFileName
+
+
+
         self.lccodeTexFileName      = self.hyphenation.lccodeTexFileName
         self.compHyphFileName       = self.hyphenation.compHyphFileName
         self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
@@ -133,10 +143,14 @@ class Xetex (Manager) :
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
         self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
-        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
-        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
-        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
-        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
+#        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
+#        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
+#        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
+#        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
+        self.macLinkFile            = os.path.join(self.gidFolder, self.macLinkFileName)
+        self.setTexFile             = os.path.join(self.gidFolder, self.setTexFileName)
+        self.extTexFile             = os.path.join(self.gidFolder, self.extTexFileName)
+        self.grpExtTexFile          = os.path.join(self.gidFolder, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
         self.styFile                = self.style.styFile
         self.extStyFile             = self.style.extStyFile
@@ -671,7 +685,7 @@ class Xetex (Manager) :
                 if self.style.checkDepGrpExtStyFile() :
                     gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             for cid in cidList :
-                cidSource = os.path.join(self.projComponentsFolder, cid, cid + '.' + self.cType)
+                cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileName(cid))
                 gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
