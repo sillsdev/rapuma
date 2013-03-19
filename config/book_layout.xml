@@ -604,11 +604,11 @@ Todo:
             <value>[self.cType]_hyphenation.txt</value>
         </setting>
         <setting>
-            <name>TeX Hyphen Exceptions File</name>
-            <description>Allow TeX to break words according to a list of words which declare the break point for each word in the document. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation. This field is dependent on the [hyphenExceptionFile] setting and should be left blank.</description>
-            <key>hyphenExceptionsFile</key>
+            <name>TeX Group Hyphen Exceptions File</name>
+            <description>Allow TeX to break words according to a list of words which declare the break point for each word in the group. In TeX this is called a hyphen exceptions list. This is the current default method in Rapuma for providing hyphenation.</description>
+            <key>grpHyphenExceptionsFile</key>
             <type>string</type>
-            <value>[self.cType]_hyphenation.tex</value>
+            <value>[self.csid]_[self.cType]_hyphenation.tex</value>
         </setting>
         <setting>
             <name>Create New TeX Hyphen Language Name</name>
@@ -681,7 +681,7 @@ Todo:
             <key>inputsOrder</key>
             <type>list</type>
             <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <value>inputLccodeFile,inputHyphenExceptionsFile</value>
+            <value>inputLccodeFile,inputGrpHyphenExceptionsFile</value>
         </setting>
         <setting>
             <name>Input TeX lccode File</name>
@@ -694,13 +694,13 @@ Todo:
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
         <setting>
-            <name>Input TeX Hyphen Exceptions File</name>
+            <name>Input TeX Group Hyphen Exceptions File</name>
             <description>Insert a setting that will input (connect) the project TeX hyphen exceptions file to the TeX renderer.</description>
-            <key>inputHyphenExceptionsFile</key>
+            <key>inputGrpHyphenExceptionsFile</key>
             <type>string</type>
-            <value>[Hyphenation:hyphenExceptionsFile]</value>
+            <value>[Hyphenation:grpHyphenExceptionsFile]</value>
             <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
+            <usfmTex>\input "[path:projComponentsFolder][pathSep][self.gid][pathSep][v]"</usfmTex>
             <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
         </setting>
     </section>

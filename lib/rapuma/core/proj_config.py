@@ -65,10 +65,10 @@ class ConfigTools (object) :
         self.project                = project
         self.managers               = project.managers
         self.projConfig             = project.projConfig
-        # FIXME, at some point...
-        # Prob the managers in projConfig to find the cType.
-        # Note this will not work if we ever go to multi-
-        # component-type projects. :-(
+        self.gid                    = project.gid
+        self.pid                    = project.projectIDCode
+        self.csid                   = self.projConfig['Groups'][self.gid]['csid']
+
         for manager in self.projConfig['Managers'].keys() :
             # We will use 'Layout' as our hook
             if 'Layout' in manager :
@@ -77,8 +77,11 @@ class ConfigTools (object) :
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
-#        self.userConfig             = project.userConfig
 
+
+###############################################################################
+############################ Module Level Functions ###########################
+###############################################################################
 
     def processLinePlaceholders (self, line, value) :
         '''Search a string (or line) for a type of Rapuma placeholder and
@@ -106,6 +109,8 @@ class ConfigTools (object) :
                 pathSep = os.sep
                 line = self.insertValue(line, pathSep)
             # A value that contains a system delclaired value
+            # Note this only works if the value we are looking for has
+            # been declaired above in the module init
             elif holderType == 'self' :
                 line = self.insertValue(line, getattr(self, holderKey))
 

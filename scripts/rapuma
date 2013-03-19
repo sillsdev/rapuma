@@ -815,7 +815,7 @@ def userArguments (args) :
         elif args['scripts'] :
             makeProjectScripts(uc, pid)
         # Update (get rained on) from the cloud
-        elif args['pull'] :
+        elif args['cloud'] :
             pullFromCloud(pid)
         # Creating a new project from a template, archive, or scratch
         else :
@@ -863,10 +863,14 @@ def userArguments (args) :
                 sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
             elif not args['source_id'] :
                 sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
-            elif not resolvePath(args['source']) and aProject.hasValidSourcePath(args['group_id'], args['source_id']) :
-                sys.exit('\nERROR: No source path found. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-            else :
-                aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source_id'], args['source'], args['force'])
+            elif args['source'] :
+                if not resolvePath(args['source']) :
+                    sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+            elif args['source_id'] :
+                if not aProject.hasValidSourcePath(args['group_id'], args['source_id']) :
+                    sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+            # Having sorted through any potential problems, try adding the group
+            aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source_id'], args['source'], args['force'])
         # Remove a group from the project
         elif args['remove'] :
             aProject.removeGroup(args['group_id'].lower(), args['force'])
@@ -877,7 +881,10 @@ def userArguments (args) :
             aProject.updateGroup(args['group_id'].lower(), args['force'])
         # Execute/render a group of components
         elif args['execute'] :
-            aProject.renderGroup(args['group_id'], args['cid_list'], args['force'])
+            if aProject.isGroup(args['group_id']) :
+                aProject.renderGroup(args['group_id'], args['cid_list'], args['force'])
+            else :
+                sys.exit('\nERROR: The group ID given is not found in this project. Must provide a valid group ID. Process halted!\n')
         # Get a whole list of component IDs and names
         elif args['output_list'] :
             aProject.listAllComponents(args['component_type'])

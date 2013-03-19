@@ -94,7 +94,6 @@ class Xetex (Manager) :
         self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
-        self.useGroupStyles         = str2bool(self.projConfig['Groups'][self.gid]['useStyles'])
         self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
         self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
 
@@ -106,20 +105,7 @@ class Xetex (Manager) :
         self.macLinkFileName        = self.cType + '_macLink.tex'
         self.setTexFileName         = self.cType + '_set.tex'
         self.extTexFileName         = self.cType + '_set-ext.tex'
-#        self.grpExtTexFileName      = self.gid + '_' + self.cType + '-ext.tex'
-        self.grpExtTexFileName      = self.cType + '-ext.tex'
-
-# FIXME: Fix these names
-
-        self.styFileName            = self.style.styFileName
-        self.extStyFileName         = self.style.extStyFileName
-        self.grpExtStyFileName      = self.style.grpExtStyFileName
-
-
-
-        self.lccodeTexFileName      = self.hyphenation.lccodeTexFileName
-        self.compHyphFileName       = self.hyphenation.compHyphFileName
-        self.hyphExcepTexFileName   = self.cType + '_hyphenation.tex'
+        self.grpExtTexFileName      = self.gid + '-ext.tex'
         self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
         self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
         self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
@@ -143,24 +129,22 @@ class Xetex (Manager) :
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
         self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
-#        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
-#        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
-#        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
-#        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
-        self.macLinkFile            = os.path.join(self.gidFolder, self.macLinkFileName)
-        self.setTexFile             = os.path.join(self.gidFolder, self.setTexFileName)
-        self.extTexFile             = os.path.join(self.gidFolder, self.extTexFileName)
+        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
+        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
+        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
         self.grpExtTexFile          = os.path.join(self.gidFolder, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
-        self.styFile                = self.style.styFile
-        self.extStyFile             = self.style.extStyFile
+        self.defaultStyFile         = self.style.defaultStyFile
+        self.defaultExtStyFile      = self.style.defaultExtStyFile
         self.grpExtStyFile          = self.style.grpExtStyFile
-        self.usrGrpExtStyFile       = self.style.usrGrpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
         self.lccodeTexFile          = self.hyphenation.lccodeTexFile
-        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
-        self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
+        self.compHyphFile           = self.hyphenation.compHyphFile
+        self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
+#        self.hyphExcepTexFile       = self.hyphenation.hyphExcepTexFileName
+#        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
+#        self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         self.watermarkFile          = os.path.join(self.projIllustrationsFolder, self.watermarkFileName)
         self.linesFile              = os.path.join(self.projIllustrationsFolder, self.linesFileName)
@@ -317,11 +301,11 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-105', [str(e)])
 
 
-    def makeHyphenExceptionFile (self) :
+    def makeGrpHyphExcTexFile (self) :
         '''Create a TeX hyphenation file. There must be a texWordList for this
         to work properly.'''
 
-        description = 'This is an auto-generated hyphenation rules file for this project. \
+        description = 'This is an auto-generated hyphenation exceptions word list for this group. \
              Please refer to the documentation for details on how to make changes.'
 
         # Try to get dependent files in place
@@ -329,10 +313,9 @@ class Xetex (Manager) :
             # Call the Hyphenation manager to create a sorted file of hyphenated words
             self.hyphenation.updateHyphenation()
 
-
         # Create the output file here
-        with codecs.open(self.hyphExcepTexFile, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write(makeFileHeader(fName(self.hyphExcepTexFile), description))
+        with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
+            hyphenTexObject.write(makeFileHeader(fName(self.grpHyphExcTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
             with codecs.open(self.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
@@ -678,12 +661,14 @@ class Xetex (Manager) :
                 gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
             if self.makeGrpExtTexFile() :
                 gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
-            if self.style.checkDepGlobStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.styFile + '}\n')
-            # Custom sty file at the group level is optional as is hyphenation
-            if self.useGroupStyles :
-                if self.style.checkDepGrpExtStyFile() :
-                    gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+            if self.hyphenation.checkGrpHyphExcTexFile() :
+                gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
+            if self.style.checkDefaultStyFile() :
+                gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+            if self.style.checkDefaultExtStyFile() :
+                gidTexObject.write('\\stylesheet{' + self.defaultExtStyFile + '}\n')
+            if self.style.checkGrpExtStyFile() :
+                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             for cid in cidList :
                 cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileName(cid))
                 gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
@@ -693,22 +678,21 @@ class Xetex (Manager) :
         return True
 
 
-    def checkDepHyphenFile (self) :
-        '''If hyphenation is used, check for the exsistance of the TeX Hyphenation 
-        files. If one of them is not found, kindly ask the appropreate function to
-        make it.'''
+    def checkGrpHyphExcTexFile (self) :
+        '''If hyphenation is used, check for the exsistance of the group TeX Hyphenation 
+        exception file. If not found, kindly ask the appropreate function to make it.'''
 
         if self.useHyphenation :
-            # The TeX hyphen exceptions file
-            if not os.path.isfile(self.hyphExcepTexFile) or isOlder(self.hyphExcepTexFile, self.compHyphFile) :
-                if self.makeHyphenExceptionFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.hyphExcepTexFile)])
+            # The TeX group hyphen exceptions file
+            if not os.path.isfile(self.grpHyphExcTexFile) or isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
+                if self.makeGrpHyphExcTexFile() :
+                    self.project.log.writeToLog('XTEX-130', [fName(self.grpHyphExcTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.hyphExcepTexFile)])
+                    self.project.log.writeToLog('XTEX-170', [fName(self.grpHyphExcTexFile)])
                     return False
             # The TeX lccode file
-            if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.hyphExcepTexFile) :
+            if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
                 if self.makeLccodeTexFile() :
                     self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTexFile)])
                 else :
@@ -740,7 +724,7 @@ class Xetex (Manager) :
         self.makeMacLinkFile()
         self.makeSetTexFile()
         self.makeExtTexFile()
-        self.checkDepHyphenFile()
+        self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
         self.makeGidTexFile(cidList)
 

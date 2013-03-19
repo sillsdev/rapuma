@@ -57,20 +57,18 @@ class Usfm (Group) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.mType                  = project.projectMediaIDCode
-        self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+
+
+
+# FIXME: This next stuff is a problem for new project, what to do?
+
+
+
+
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.adjustmentConfFile     = project.local.adjustmentConfFile
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
-
-        # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
-        if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
-            self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
-        # Set them here
-        for k, v in self.compSettings.iteritems() :
-            setattr(self, k, v)
 
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('component', 'text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
@@ -89,6 +87,16 @@ class Usfm (Group) :
         self.text                   = self.project.managers[self.cType + '_Text']
         self.style                  = self.project.managers[self.cType + '_Style']
 
+        # File names
+        self.adjustmentConfFile     = project.local.adjustmentConfFile
+        # Folder paths
+        self.projScriptsFolder      = self.local.projScriptsFolder
+        self.projComponentsFolder   = self.local.projComponentsFolder
+        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
+        # File names with folder paths
+        self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.grpPreprocessFile      = self.text.grpPreprocessFile
+
         # Pick up some init settings that come after the managers have been installed
         self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
         self.layoutConfig           = self.layout.layoutConfig
@@ -98,8 +106,16 @@ class Usfm (Group) :
         # Now get the adj config
         self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
 
+        # Get persistant values from the config if there are any
+        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
+            self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
+        # Set them here
+        for k, v in self.compSettings.iteritems() :
+            setattr(self, k, v)
+
+
         # Check if there is a font installed
-#        self.project.createManager(self.cType, 'font')
         if not self.font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
@@ -429,14 +445,13 @@ class Usfm (Group) :
                 makeReadOnly(targetSource)
 
             # To be sure nothing happens, copy from our project source
-            # backup file.
-            if self.usfmCopy(targetSource, target, projSty) :
+            # backup file. (Is self.style.defaultStyFile the best thing?)
+            if self.usfmCopy(targetSource, target, self.style.defaultStyFile) :
                 # Run any working text preprocesses on the new component text
                 if str2bool(self.projConfig['Groups'][gid]['usePreprocessScript']) :
-                    preprocessScript = os.path.join(self.local.projScriptsFolder, self.projConfig['Groups'][gid]['preprocessScript'])
-                    if not os.path.isfile(preprocessScript) :
-                        self.project.installPreprocess(gid)
-                    if not self.project.runProcessScript(gid, cid, preprocessScript) :
+                    if not os.path.isfile(self.grpPreprocessFile) :
+                        self.text.installPreprocess()
+                    if not self.text.runProcessScript(target, self.grpPreprocessFile) :
                         self.log.writeToLog('USFM-130', [cid])
 
                 # If this is a USFM component type we need to remove any \fig markers,
@@ -864,6 +879,7 @@ class PT_HyphenTools (Group) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.project                = project
+        self.log                    = project.log
         self.managers               = project.managers
         self.gid                    = project.gid
         self.projectIDCode          = project.projectIDCode
@@ -1125,6 +1141,7 @@ class PT_Tools (Group) :
         self.managers               = project.managers
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
+        self.sourcePath             = self.project.getGroupSourcePath(self.gid)
 
     def getNWFChars (self) :
         '''Return a list of non-word-forming characters from the PT settings
@@ -1240,7 +1257,7 @@ class PT_Tools (Group) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = sourcePath
+        parentFolder = self.sourcePath
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -1286,7 +1303,7 @@ class PT_Tools (Group) :
     def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
-        sourcePath = self.getGroupSourcePath(self.gid)
+        sourcePath = self.project.getGroupSourcePath(self.gid)
 
         # Return the dictionary
         if os.path.isdir(sourcePath) :

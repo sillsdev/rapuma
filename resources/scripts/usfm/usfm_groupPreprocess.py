@@ -25,7 +25,7 @@ contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
 
 # Do stuff here
 
-terminal('\nThe preprocessScript has not been modified for this project yet. Nothing has been done.\n')
+terminal('\nThe group preprocess script has not been modified yet. It is in its defaul form. Nothing has been done to the component data.\n')
 
 
 # Write out a temp file so we can do some checks
