@@ -73,7 +73,14 @@ class Component (Manager) :
     def makeFileName(self, cid) :
         '''From what we know, return the full file name.'''
 
-        return cid + '_' + self.csid + '.' + self.cType
+        return cid + '_' + self.csid
+
+
+    def makeFileNameWithExt(self, cid) :
+        '''From what we know, return the full file name.'''
+
+        return self.makeFileName(cid) + '.' + self.cType
+
 
 
 

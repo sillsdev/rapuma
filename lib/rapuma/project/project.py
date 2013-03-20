@@ -49,7 +49,7 @@ class Project (object) :
         self.log                    = log
         self.systemVersion          = systemVersion
         self.groups                 = {}
-#        self.components             = {}
+        self.components             = {}
 #        self.componentType          = {}
         self.managers               = {}
         self.projectMediaIDCode     = self.projConfig['ProjectInfo']['projectMediaIDCode']
@@ -179,7 +179,7 @@ class Project (object) :
         csid = self.projConfig['Groups'][gid]['csid']
 
         try :
-            return self.userConfig['Projects'][self.projectIDCode][gid + '_' + csid + '_sourcePath']
+            return self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
         except Exception as e :
             # If we don't succeed, we should probably quite here
             terminal('No source path found for: [' + str(e) + ']')
@@ -256,12 +256,12 @@ class Project (object) :
             self.log.writeToLog('GRUP-010', [gid])
             dieNow()
 
-        sourceKey = gid + '_' + csid
+        sourceKey = csid + '_sourcePath'
 
         # If the new source is valid, we will add that to the config now
         # so that processes to follow will have that setting available.
         if sourcePath :
-            self.addCompGroupSourcePath(gid + '_' + csid, sourcePath)
+            self.addCompGroupSourcePath(csid, sourcePath)
             setattr(self, sourceKey, sourcePath)
 
         # The cList can be one or more valid component IDs
@@ -291,16 +291,14 @@ class Project (object) :
             self.projConfig['Groups'][gid] = newSectionSettings
 
         # Add/Modify the info to the group config info
-#        ppsBase = self.projConfig['Groups'][gid]['preprocessScript']
-#        styBase = self.projConfig['Groups'][gid]['styleFile']
-#        macBase = self.projConfig['Groups'][gid]['macroFile']
         self.projConfig['Groups'][gid]['cType']                 = cType
         self.projConfig['Groups'][gid]['csid']                  = csid
         self.projConfig['Groups'][gid]['cidList']               = cidList
-#        self.projConfig['Groups'][gid]['preprocessScript']      = ''
-#        self.projConfig['Groups'][gid]['styleFile']             = ''
-#        self.projConfig['Groups'][gid]['macroFile']             = ''
 
+        # Here we need to "inject" cType information into the config
+        # If we don't createGroup() will fail badly.
+        self.cType = cType
+        self.addComponentType(cType)
         # Create the group object now that we have an entry in the config
         self.createGroup(gid)
         # Install the group's components
@@ -328,7 +326,7 @@ class Project (object) :
         cType       = self.projConfig['Groups'][gid]['cType']
         cidList     = self.projConfig['Groups'][gid]['cidList']
         csid        = self.projConfig['Groups'][gid]['csid']
-        sourcePath  = self.userConfig['Projects'][self.projectIDCode][gid + '_' + csid + '_sourcePath']
+        sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -421,7 +419,8 @@ class Project (object) :
         '''Check if there is one, see if it is valid.'''
 
         try :
-            return os.path.isdir(resolvePath(self.userConfig['Projects'][self.pid][gid + '_' + csid]))
+            path = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+            return os.path.isdir(resolvePath(path))
         except :
             return False
 
@@ -509,9 +508,9 @@ class Project (object) :
 
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
-        fileHandle  = cid + '_' + csid
+        fileHandle  = self.managers[cType + '_Component'].makeFileName(cid)
         self.createManager(cType, 'component')
-        fileName    = self.managers[cType + '_Component'].makeFileName(cid)
+        fileName    = self.managers[cType + '_Component'].makeFileNameWithExt(cid)
 
         # Test to see if it is shared
         if self.isSharedComponent(gid, fileHandle) :

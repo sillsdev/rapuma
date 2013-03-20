@@ -41,12 +41,5 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
-    <setting>
-        <name>Use Manual Adjustments</name>
-        <key>useManualAdjustments</key>
-        <description>Use manual paragraph adjustments.</description>
-        <type>boolean</type>
-        <value>True</value>
-    </setting>
 </root>
 

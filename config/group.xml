@@ -69,5 +69,12 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
+    <setting>
+        <name>Use Manual Adjustments</name>
+        <key>useManualAdjustments</key>
+        <description>Use manual paragraph adjustments.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
 </root>
 

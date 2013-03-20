@@ -124,10 +124,11 @@ class Style (Manager) :
         to throw a stern warning if it is not there and create a blank one.'''
 
         if not os.path.isfile(self.grpExtStyFile) :
-            self.project.log.writeToLog('XTEX-120', [fName(self.grpExtStyFile)])
-            self.makeGrpExtStyFile()
-
-        return True
+            if not self.makeGrpExtStyFile() :
+                self.project.log.writeToLog('XTEX-120', [fName(self.grpExtStyFile)])
+                return False
+        else :
+            return True
 
 
     def makeDefaultStyFile (self) :

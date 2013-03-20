@@ -57,14 +57,6 @@ class Usfm (Group) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.mType                  = project.projectMediaIDCode
-
-
-
-# FIXME: This next stuff is a problem for new project, what to do?
-
-
-
-
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         # Get the comp settings
@@ -75,8 +67,6 @@ class Usfm (Group) :
 
         # Init the general managers
         for mType in self.usfmManagers :
-#            if mType == 'component' :
-#                import pdb; pdb.set_trace()
             self.project.createManager(self.cType, mType)
 
         # Create the internal ref names we use in this module
@@ -101,8 +91,11 @@ class Usfm (Group) :
         self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
         self.layoutConfig           = self.layout.layoutConfig
         if not os.path.isfile(self.adjustmentConfFile) :
-            if self.createProjAdjustmentConfFile(self.cType) :
+            if self.createProjAdjustmentConfFile() :
                 self.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
+            else :
+                print 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
+                self.updateCompAdjustmentConf()
         # Now get the adj config
         self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
 
@@ -135,23 +128,23 @@ class Usfm (Group) :
 
     def getCidPath (self, cid) :
         '''Return the full path of the cName working text file. This assumes
-        the cName is valid.'''
+        the cid is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, cid + '.' + self.cType)
+        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
 
 
     def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, cid + '.adj')
+        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.adj')
 
 
     def getCidPiclistPath (self, cid) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, cid + '.piclist')
+        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
 
 
     def render(self, renderParams) :
@@ -185,7 +178,7 @@ class Usfm (Group) :
         useWatermark            = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
-        useManualAdjustments    = str2bool(self.projConfig['CompTypes'][self.Ctype]['useManualAdjustments'])
+        useManualAdjustments    = str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
@@ -198,20 +191,18 @@ class Usfm (Group) :
             # Add/manage the dependent files for this cid
             if self.macroPackage == 'usfmTex' :
                 # Component adjustment file
+                cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
-                    cidAdjFile = self.getCidAdjPath(cid)
-#                        if isOlder(cidAdjFile, self.adjustmentConfFile) or not os.path.isfile(cidAdjFile) :
                     if not os.path.isfile(cidAdjFile) or isOlder(cidAdjFile, self.adjustmentConfFile) :
                         # Remake the adjustment file (if needed)
-                        if not self.createCompAdjustmentFile(cid) :
-                            # If no adjustments, remove any exsiting file
-                            if os.path.isfile(cidAdjFile) :
-                                os.remove(cidAdjFile)
+                        self.createCompAdjustmentFile(cid)
+                else :
+                    # If no adjustments, remove any exsiting file
+                    if os.path.isfile(cidAdjFile) :
+                        os.remove(cidAdjFile)
                 # Component piclist file
-#                self.project.buildComponentObject(self.cType, cidCName)
-                cidPiclist = self.project.groups[self.gid].getCidPiclistPath(cid)
+                cidPiclist = self.getCidPiclistPath(cid)
                 if useIllustrations :
-#                        import pdb; pdb.set_trace()
                     if self.illustration.hasIllustrations(cidCName) :
                         if not os.path.isfile(cidPiclist) :
                             # First check if we have the illustrations we think we need
@@ -229,11 +220,6 @@ class Usfm (Group) :
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
                         self.illustration.getPics(cid)
-                    else :
-                        # Do a little clean up and remove the auto-generated piclist file
-                        if os.path.isfile(cidPiclist) :
-                            os.remove(cidPiclist)
-                        
                 else :
                     # If we are not using illustrations then any existing piclist file will be removed
                     if os.path.isfile(cidPiclist) :
@@ -242,106 +228,103 @@ class Usfm (Group) :
             else :
                 self.log.writeToLog('COMP-220', [self.macroPackage])
 
-        # FIXME: This may not be needed here as it is called during the setup file checks
-        # Check to see if everything is good with hyphenation, die if it is not
-#            if not self.project.managers[cType + '_Xetex'].checkDepHyphenFile() :
-#                dieNow('Cannot continue. Hyphenation dependencies failed during check in usfm.py preProcessComponent()')
-
         # Be sure there is a watermark file listed in the conf and
         # installed if watermark is turned on (True). Fallback on the
         # the default if needed.
         if useWatermark :
-            if not self.illustration.hasBackgroundFile('watermark') :
-                self.illustration.installBackgroundFile('watermark', 'watermark_default.pdf', self.local.rapumaIllustrationsFolder, True)
+            self.illustration.installDefaultWatermarkFile()
 
         # Same for lines background file used for composition
         if useLines :
-            if not self.illustration.hasBackgroundFile('lines') :
-                self.illustration.installBackgroundFile('lines', 'lines_default.pdf', self.local.rapumaIllustrationsFolder, True)
+            self.illustration.installLinesFile()
 
         # Any more stuff to run?
 
         return True
 
 
-    def hasAdjustments (self, cType, cid) :
-        '''Check for exsiting adjustments under a book section in
-        the adjustment.conf file. Return True if found.'''
+#    def hasAdjustments (self, cType, cid) :
+#        '''Check for exsiting adjustments under a book section in
+#        the adjustment.conf file. Return True if found.'''
 
-        try :
-            if self.adjustmentConfig[cType.upper() + ':' + cid.upper()].keys() :
-                return True
-        except  :
-            return False
+#        try :
+#            if self.adjustmentConfig[cType.upper() + ':' + cid.upper()].keys() :
+#                return True
+#        except  :
+#            return False
 
 
     def createCompAdjustmentFile (self, cid) :
         '''Create an adjustment file for this cid. If entries exsist in
         the adjustment.conf file.'''
 
+        description = 'Auto-generated text adjustments file for: ' + cid + '\n'
+
 #        import pdb; pdb.set_trace()
 
-        if self.hasAdjustments(self.cType, cid) :
-            # Check for a master adj conf file
-            if os.path.isfile(self.adjustmentConfFile) :
-                adjFile = self.getCidAdjPath(cid)
-                for c in self.adjustmentConfig.keys() :
-                    try :
-                        if c == 'GeneralSettings' :
-                            continue
-                        if c.lower().split(':')[0] != 'usfm' :
-                            continue
-                        comp = c.lower().split(':')[1]
-                    except Exception as e :
-                        # If this doesn't work, we should probably quite here
-                        dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
-                    if  comp == cid and len(self.adjustmentConfig[c].keys()) > 0 :
-                        with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                            writeObject.write('% Auto-generated text adjustments file for: ' + cid + '\n')
-                            writeObject.write('% Do not edit. To make adjustments refer to: ' + fName(self.project.local.adjustmentConfFile) + ' \n\n')
-                            # Output like this: JAS 1.13 +1
-                            for k, v in self.adjustmentConfig[c].iteritems() :
-                                adj = v
-                                if int(v) > 0 : 
-                                    adj = '+' + str(v)
-                                writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
+#        if self.hasAdjustments(self.cType, cid) :
+        # Check for a master adj conf file
+        if os.path.exists(self.adjustmentConfFile) :
+            adjFile = self.getCidAdjPath(cid)
+            
+            
+            
+            
+            
+            
+            
+            # FIXME: Why does it fail here?
+            
+            
+            
+            for c in self.adjustmentConfig[self.gid].keys() :
+                try :
+                    if c == 'GeneralSettings' :
+                        continue
+                    else :
+                        comp = c.lower()
+                except Exception as e :
+                    # If this doesn't work, we should probably quite here
+                    dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+                if  comp == cid and len(self.adjustmentConfig[self.gid][c].keys()) > 0 :
+                    with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
+                        writeObject.write(makeFileHeader(adjFile, description, True))
+                        # Output like this: JAS 1.13 +1
+                        for k, v in self.adjustmentConfig[self.gid][c].iteritems() :
+                            if k[0] == '%' :
+                                continue
+                            adj = v
+                            if int(v) > 0 : 
+                                adj = '+' + str(v)
+                            writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
 
-                            self.log.writeToLog('COMP-230', [fName(adjFile)])
-                return True
+                        self.log.writeToLog('COMP-230', [fName(adjFile)])
+            return True
 
 
-    def createProjAdjustmentConfFile (self, cType, cid = None) :
-        '''Create a project master component adjustment file that cid piclist
-        files will be created from. This will run every time preprocess is
-        run but after the first time it will only add a section for the current
-        cid that is being run.'''
+    def createProjAdjustmentConfFile (self) :
+        '''Create a project master component adjustment file that group component
+        ajustment files will be created automatically from. This will run every 
+        time preprocess is run but after the first time it will only add a sections
+        for new groups or components.'''
 
-        adjustmentConfFile = self.local.adjustmentConfFile
-        if not os.path.isfile(adjustmentConfFile) :
-            with codecs.open(adjustmentConfFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write('# This is the master manual adjustment file for the ' + cType.capitalize() + ' component type.\n')
-                writeObject.write('# Adjustments are layed out in a section/key/value arrangment as follows:\n')
-                writeObject.write('# \t[CTYPE:COMPONENT]\n')
-                writeObject.write('# \t\t3.4 = 1\n')
-                writeObject.write('# \t\t5.8 = 2\n')
-                writeObject.write('# \t\t8.3 = -1\n')
-                writeObject.write('# Whereas CTYPE is the component type code (upper case) and \n')
-                writeObject.write('# COMPONENT is the component the adjustments to follow are for.\n')
-                writeObject.write('# Key is the chapter and verse and value is the number of lines\n')
-                writeObject.write('# to be added or removed from a specified paragraph.\n\n\n')
-        # Now add a section for a cid if needed
-        if not cid :
-            return
-        if not self.adjustmentConfig :
+        if not os.path.exists(self.adjustmentConfFile) :
             self.adjustmentConfig = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
+            self.adjustmentConfig.filename = self.adjustmentConfFile
+            self.updateCompAdjustmentConf()
+        return True
 
-        section = cType.upper() + ':' + cid.upper()
-        if section not in self.adjustmentConfig.keys() :
-            buildConfSection(self.adjustmentConfig, section)
-# FIXME: It would be nice if we could write out a commented config line as an example
-#            self.adjustmentConfig[section]['#1.1'] = 1
-            writeConfFile(self.adjustmentConfig)
 
+    def updateCompAdjustmentConf (self) :
+        '''Update an adjustmentConfig based on changes in the projConfig.'''
+
+        for gid in self.projConfig['Groups'].keys() :
+            if gid not in self.adjustmentConfig.keys() :
+                buildConfSection(self.adjustmentConfig, gid)
+                for comp in self.projConfig['Groups'][gid]['cidList'] :
+                    buildConfSection(self.adjustmentConfig[gid], comp)
+                    self.adjustmentConfig[gid][comp]['%1.1'] = '1'
+        writeConfFile(self.adjustmentConfig)
         return True
 
 
@@ -377,7 +360,7 @@ class Usfm (Group) :
         if self.sourceEditor.lower() == 'paratext' :
             thisFile = self.pt_tools.formPTName(gid, cid)
         elif self.sourceEditor.lower() == 'generic' :
-            thisFile = self.pt_tools.formGenericName(cid)
+            thisFile = self.pt_tools.formGenericName(gid, cid)
         else :
             self.log.writeToLog('USFM-100', [self.sourceEditor])
 
@@ -405,7 +388,7 @@ class Usfm (Group) :
             source      = os.path.join(os.path.dirname(self.local.projHome), thisFile)
 
         targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-        target          = os.path.join(targetFolder, self.component.makeFileName(cid))
+        target          = os.path.join(targetFolder, self.component.makeFileNameWithExt(cid))
         targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
         # Copy the source to the working text folder. We do not want to do
@@ -666,46 +649,6 @@ class Usfm (Group) :
             return self.usfmCidInfo()[cid]
         except :
             return False
-
-
-#    def getUsfmName (self, cid) :
-#        '''Look up and return the actual name for a valid cid.'''
-
-#        if self.hasUsfmCidInfo(cid) :
-#            return self.getUsfmCidInfo(cid)[0]
-
-
-#    def getRapumaCName (self, cid) :
-#        '''Look up and return the Rapuma component name for a valid cid.
-#        But if the cid happens to be a cName already, that will be returned.'''
-
-#        if self.hasUsfmCidInfo(cid) :
-#            return self.getUsfmCidInfo(cid)[1]
-#        else :
-#            # FIXME: This seems a little weak. What if the cid is an invalid cName?
-#            return cid
-
-
-#    def getUsfmCid (self, cName) :
-#        '''Find the cid by using the cName to look.'''
-
-#        info = self.usfmCidInfo()
-#        for k, v in info.iteritems() :
-#            if info[k][1] == cName :
-#                return k
-
-
-#    def getSubcomponentList (self, cName) :
-#        '''Return the list of subcomponents for a cName.'''
-
-#        try :
-#            cidList = self.project.projConfig['Components'][cName]['cidList']
-#        except Exception as e :
-#            # If we don't succeed, we should probably quite here
-#            self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
-#            dieNow()
-
-#        return cidList
 
 
     def usfmCidInfo (self) :
@@ -1196,13 +1139,16 @@ class PT_Tools (Group) :
             return False
 
 
-    def formGenericName (self, cid) :
+    def formGenericName (self, gid, cid) :
         '''Figure out the best way to form a valid file name given the
-        source is not coming from a PT project.'''
-
-    # FIXME: This will be expanded as we find more use cases
+        source is not coming from a PT project. In the end, this is almost
+        impossible to do because of all the different possibilities. We
+        will just try to make our best guess. A better way will be needed.'''
 
         postPart = self.projConfig['Managers']['usfm_Text']['postPart']
+        if postPart == '' :
+            postPart = self.projConfig['Groups'][gid]['cType']
+
         return cid + '.' + postPart
 
 

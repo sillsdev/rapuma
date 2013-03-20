@@ -55,21 +55,13 @@ class Xetex (Manager) :
         self.pt_tools               = PT_Tools(project)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
-#        if self.cType + '_Component' not in self.manager :
-#            self.project.createManager(self.cType, 'component')
-        self.component = self.managers[self.cType + '_Component']
-#        if self.cType + '_Hyphenation' not in self.manager :
-#            self.project.createManager(self.cType, 'hyphenation')
-        self.hyphenation = self.managers[self.cType + '_Hyphenation']
-#        if self.cType + '_Layout' not in self.managers :
-#            self.project.createManager(self.cType, 'layout')
-        self.layout = self.managers[self.cType + '_Layout']
-#        if self.cType + '_Font' not in self.managers :
-#            self.project.createManager(self.cType, 'font')
-        self.font = self.managers[self.cType + '_Font']
-#        if self.cType + '_Style' not in self.managers :
-#            self.project.createManager(self.cType, 'style')
-        self.style = self.managers[self.cType + '_Style']
+        self.component              = self.managers[self.cType + '_Component']
+        self.hyphenation            = self.managers[self.cType + '_Hyphenation']
+        self.layout                 = self.managers[self.cType + '_Layout']
+        self.font                   = self.managers[self.cType + '_Font']
+        self.style                  = self.managers[self.cType + '_Style']
+#        print dir(self.project.groups[self.gid])
+#        self.group                  = self.project.groups[self.gid]
         # Get config objs
         self.projConfig             = project.projConfig
         self.layoutConfig           = self.layout.layoutConfig
@@ -670,7 +662,7 @@ class Xetex (Manager) :
             if self.style.checkGrpExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             for cid in cidList :
-                cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileName(cid))
+                cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
                 gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
@@ -729,16 +721,18 @@ class Xetex (Manager) :
         self.makeGidTexFile(cidList)
 
         # Dynamically create a dependency list for the render process
-        dep = [self.gidTexFile, self.extTexFile]
+        # Note: gidTexFile is remade on every run, do not test against that file
+        dep = [self.extTexFile, self.project.local.projConfFile, 
+                self.project.local.layoutConfFile, self.project.local.fontConfFile, 
+                    self.project.local.adjustmentConfFile, self.project.local.illustrationConfFile, ]
+        # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[self.gid].getCidPath(cid)
             cidAdj = self.project.groups[self.gid].getCidAdjPath(cid)
             cidIlls = self.project.groups[self.gid].getCidPiclistPath(cid)
-            dep.append(cidUsfm)
-            if os.path.isfile(cidAdj) :
-                dep.append(cidAdj)
-            if os.path.isfile(cidIlls) :
-                dep.append(cidIlls)
+            for f in [cidUsfm, cidAdj, cidIlls] :
+                if os.path.exists(f) :
+                    dep.append(f)
 
         # Render if gidPdf is older or is missing
         render = False
@@ -780,31 +774,33 @@ class Xetex (Manager) :
                 self.project.log.writeToLog('XTEX-035', [str(rCode)])
                 dieNow()
 
-        # Add lines background for composition work
-        if self.useLines :
-            cmd = [self.pdfUtilityCommand, gidPdf, 'background', linesFile, 'output', tempName(gidPdf)]
-            try :
-                subprocess.call(cmd)
-                shutil.copy(tempName(gidPdf), gidPdf)
-                os.remove(tempName(gidPdf))
-                self.project.log.writeToLog('XTEX-165')
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                self.project.log.writeToLog('XTEX-160', [str(e)])
-                dieNow()
+            # Add lines background for composition work
+            if self.useLines :
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.linesFile, 'output', tempName(self.gidPdfFile)]
+                try :
+                    subprocess.call(cmd)
+                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(tempName(self.gidPdfFile))
+                    self.project.log.writeToLog('XTEX-165')
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.project.log.writeToLog('XTEX-160', [str(e)])
+                    dieNow()
 
-        # Add a watermark if required
-        if self.useWatermark :
-            cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.watermarkFile, 'output', tempName(self.gidPdfFile)]
-            try :
-                subprocess.call(cmd)
-                shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
-                os.remove(tempName(self.gidPdfFile))
-                self.project.log.writeToLog('XTEX-145')
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                self.project.log.writeToLog('XTEX-140', [str(e)])
-                dieNow()
+            # Add a watermark if required
+            if self.useWatermark :
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.watermarkFile, 'output', tempName(self.gidPdfFile)]
+                try :
+                    subprocess.call(cmd)
+                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(tempName(self.gidPdfFile))
+                    self.project.log.writeToLog('XTEX-145')
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.project.log.writeToLog('XTEX-140', [str(e)])
+                    dieNow()
+        else :
+            self.project.log.writeToLog('XTEX-090', [fName(self.gidPdfFile)])
 
         # Review the results if desired
         if os.path.isfile(self.gidPdfFile) :

@@ -129,7 +129,7 @@ class ProjLog (object) :
             'XTEX-075' : ['ERR', 'No macro package for : <<1>>'],
             'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],
             'XTEX-085' : ['MSG', 'The file: <<1>> was not found, XeTeX will now try to render it.'],
-            'XTEX-090' : ['LOG', 'No changes to dependent files found, [<<1>>] does not need to be rerendered at this time.'],
+            'XTEX-090' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             'XTEX-095' : ['MSG', 'Routing <<1>> to PDF viewer.'],
             'XTEX-100' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             'XTEX-105' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],

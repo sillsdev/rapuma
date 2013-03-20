@@ -31,13 +31,13 @@ from configobj import ConfigObj, Section
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-def makeFileHeader (fName, desc = None, noEditWarn = True) :
+def makeFileHeader (fileName, desc = None, noEditWarn = True) :
     '''Create a header for project files which may or may not be editable.'''
 
 #        import pdb; pdb.set_trace()
 
     # Set the comment marker to '%' for .tex files
-    if fName.find('.tex') > 0 :
+    if fileName.find('.tex') > 0 or fileName.find('.adj') > 0 or fileName.find('.piclist') > 0 :
         comMark = '%'
     else :
         comMark = '#'
@@ -47,7 +47,7 @@ def makeFileHeader (fName, desc = None, noEditWarn = True) :
     else :
         editWarn = None
     # Build the output
-    output = comMark + ' ' + fName + ' created: ' + tStamp() + '\n'
+    output = comMark + ' ' + fName(fileName) + ' created: ' + tStamp() + '\n'
     if desc :
         # Strip out extra spaces from description
         desc = re.sub('\s+', ' ', desc)

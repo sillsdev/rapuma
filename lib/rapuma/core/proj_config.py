@@ -68,12 +68,9 @@ class ConfigTools (object) :
         self.gid                    = project.gid
         self.pid                    = project.projectIDCode
         self.csid                   = self.projConfig['Groups'][self.gid]['csid']
-
-        for manager in self.projConfig['Managers'].keys() :
-            # We will use 'Layout' as our hook
-            if 'Layout' in manager :
-                self.cType          = manager.split('_')[0]
+        self.cType                  = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
+        # Load the managers we will need
         if self.cType + '_Layout' not in self.managers :
             self.project.createManager(self.cType, 'layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig

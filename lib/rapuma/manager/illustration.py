@@ -49,23 +49,40 @@ class Illustration (Manager) :
         self.cfg                        = cfg
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
+        self.managers                   = project.managers
+        self.backgroundTypes            = ['watermark', 'lines']
+        # Bring in some manager objects we will need
+        self.layout                     = self.managers[self.cType + '_Layout']
+        # Get config objs
         self.illustrationConfig         = ConfigObj(encoding='utf-8')
-        self.projConfig                 = self.project.projConfig
-        self.userConfig                 = self.project.userConfig
-        self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
+        self.projConfig                 = project.projConfig
+        self.layoutConfig               = self.layout.layoutConfig
+        self.userConfig                 = project.userConfig
+        # Get some config settings
         self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']
+
+        # File names
+        self.projWatermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
+        self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
+        self.projLinesFileName          = self.layoutConfig['PageLayout']['linesFile']
+        self.rpmDefLinesFileName        = 'lines_default.pdf'
+        # Folder paths
+        self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
+        self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
+        self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
+        self.rpmIllustrationsFolder     = self.project.local.rapumaIllustrationsFolder
+        # File names with folder paths
+        self.projWatermarkFile          = os.path.join(self.projIllustrationsFolder, self.projWatermarkFileName)
+        self.rpmDefWatermarkFile        = os.path.join(self.rpmIllustrationsFolder, self.rpmDefWatermarkFileName)
+        self.projLinesFile              = os.path.join(self.projIllustrationsFolder, self.projLinesFileName)
+        self.rpmDefLinesFile            = os.path.join(self.rpmIllustrationsFolder, self.rpmDefLinesFileName)
+
         # If we have nothing in the project for pointing to an illustrations
         # lib, put the default in here
         if not self.userIllustrationsLibName :
             self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
             self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName'] = self.userIllustrationsLibName
             writeConfFile(self.projConfig)
-
-        self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
-        self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
-        self.rapumaIllustrationsFolder  = self.project.local.rapumaIllustrationsFolder
-        self.layoutConfig               = self.project.managers[self.cType + '_Layout'].layoutConfig
-        self.backgroundTypes            = ['watermark', 'lines']
 
         # Create an empty default Illustration config file if needed
         if not os.path.isfile(self.project.local.illustrationConfFile) :
@@ -91,44 +108,56 @@ class Illustration (Manager) :
 ############################ Manager Level Functions ##########################
 ###############################################################################
 
-    def hasBackgroundFile (self, bType) :
-        '''Return True if this project has a valid background file installed.'''
-
-        if bType in self.backgroundTypes :
-            if testForSetting(self.layoutConfig['PageLayout'], bType + 'File') :
-                if self.layoutConfig['PageLayout'][bType + 'File'] != '' :
-                    backgroundFileName = self.layoutConfig['PageLayout'][bType + 'File']
-                    backgroundFile = os.path.join(self.project.local.projIllustrationsFolder, backgroundFileName)
-                    if os.path.isfile(backgroundFile) :
-                        return True
-        else :
-            self.project.log.writeToLog('ILUS-100', [bType])
-            dieNow()
 
 
-    def installBackgroundFile (self, bType, fileName, path = None, force = False) :
-        '''Install into the project the specified background file.
-        It will use installIllustrationFile() to do the heavy lifting.
-        Then it will register the file with the conf as the appropreate
-        type of background file.'''
 
-        if bType in self.backgroundTypes :
-            # Resolve path
-            if not path :
-                path = self.rapumaIllustrationsFolder
+## FIXME: Working here!
 
-            backgroundFile = os.path.join(path, fileName)
-            if os.path.isfile(backgroundFile) :
-                if not self.installIllustrationFile(fileName, path, force) :
-                    self.project.log.writeToLog('ILUS-080', [fileName])
+#    def hasBackgroundFile (self, bType) :
+#        '''Return True if this project has a valid background file installed.'''
 
-            if fileName != self.layoutConfig['PageLayout'][bType + 'File'] :
-                self.layoutConfig['PageLayout'][bType + 'File'] = fileName
-                writeConfFile(self.layoutConfig)
-                self.project.log.writeToLog('ILUS-090', [fileName])
-        else :
-            self.project.log.writeToLog('ILUS-100', [bType])
-            dieNow()
+#        if bType in self.backgroundTypes :
+#            if testForSetting(self.layoutConfig['PageLayout'], bType + 'File') :
+#                if self.layoutConfig['PageLayout'][bType + 'File'] != '' :
+#                    backgroundFileName = self.layoutConfig['PageLayout'][bType + 'File']
+#                    backgroundFile = os.path.join(self.project.local.projIllustrationsFolder, backgroundFileName)
+#                    if os.path.isfile(backgroundFile) :
+#                        return True
+#        else :
+#            self.project.log.writeToLog('ILUS-100', [bType])
+#            dieNow()
+
+
+    def changeWatermarkFile (self) :
+        '''Change the current watermark file.'''
+
+# FIXME: This is a place holder function
+
+        terminal('This does not work yet.')
+
+
+    def installDefaultWatermarkFile (self) :
+        '''Install a default Rapuma watermark file into the project.'''
+
+        if not os.path.exists(self.projWatermarkFile) :
+            try :
+                shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
+                self.project.log.writeToLog('ILUS-080', [fName(self.projWatermarkFile)])
+            except Exception as e :
+                # If this doesn't work, we should probably quite here
+                dieNow('Error: Failed to install default watermark background file with this error: ' + str(e) + '\n')
+
+
+    def installLinesFile (self) :
+        '''Install a background lines file into the project.'''
+
+        if not os.path.exists(self.projLinesFile) :
+            try :
+                shutil.copy(self.rpmDefLinesFile, self.projLinesFile)
+                self.project.log.writeToLog('ILUS-080', [fName(self.projLinesFile)])
+            except Exception as e :
+                # If this doesn't work, we should probably quite here
+                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
 
 
     def installIllustrationFile (self, fileName, path = None, force = False) :
