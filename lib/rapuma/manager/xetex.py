@@ -705,7 +705,9 @@ class Xetex (Manager) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
+        # Get our list of cids
         cidList = renderParams['cidList']
+
         # This is the file we will make. If force is set, delete the old one.
         if renderParams['force'] :
             if os.path.isfile(self.gidPdfFile) :

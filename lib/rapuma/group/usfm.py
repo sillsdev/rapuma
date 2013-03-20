@@ -266,17 +266,6 @@ class Usfm (Group) :
         # Check for a master adj conf file
         if os.path.exists(self.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
-            
-            
-            
-            
-            
-            
-            
-            # FIXME: Why does it fail here?
-            
-            
-            
             for c in self.adjustmentConfig[self.gid].keys() :
                 try :
                     if c == 'GeneralSettings' :
@@ -291,7 +280,7 @@ class Usfm (Group) :
                         writeObject.write(makeFileHeader(adjFile, description, True))
                         # Output like this: JAS 1.13 +1
                         for k, v in self.adjustmentConfig[self.gid][c].iteritems() :
-                            if k[0] == '%' :
+                            if k[0] in ['%', '#'] :
                                 continue
                             adj = v
                             if int(v) > 0 : 
@@ -321,9 +310,10 @@ class Usfm (Group) :
         for gid in self.projConfig['Groups'].keys() :
             if gid not in self.adjustmentConfig.keys() :
                 buildConfSection(self.adjustmentConfig, gid)
-                for comp in self.projConfig['Groups'][gid]['cidList'] :
+            for comp in self.projConfig['Groups'][gid]['cidList'] :
+                if not testForSetting(self.adjustmentConfig[gid], comp) :
                     buildConfSection(self.adjustmentConfig[gid], comp)
-                    self.adjustmentConfig[gid][comp]['%1.1'] = '1'
+                self.adjustmentConfig[gid][comp]['%1.1'] = '1'
         writeConfFile(self.adjustmentConfig)
         return True
 

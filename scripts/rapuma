@@ -881,6 +881,9 @@ def userArguments (args) :
             aProject.updateGroup(args['group_id'].lower(), args['force'])
         # Execute/render a group of components
         elif args['execute'] :
+            if args['cid_list'] :
+                if not aProject.isValidCidList(args['group_id'], args['cid_list']) :
+                    sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
             if aProject.isGroup(args['group_id']) :
                 aProject.renderGroup(args['group_id'], args['cid_list'], args['force'])
             else :

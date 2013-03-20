@@ -308,6 +308,8 @@ class Project (object) :
         if not os.path.exists(groupFolder) :
             os.makedirs(groupFolder)
             self.log.writeToLog('GRUP-110', [gid])
+        # Update the components adjustment files
+        self.groups[gid].updateCompAdjustmentConf()
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
         if writeConfFile(self.projConfig) :
@@ -423,6 +425,17 @@ class Project (object) :
             return os.path.isdir(resolvePath(path))
         except :
             return False
+
+
+    def isValidCidList (self, gid, thisCidlist) :
+        '''Check to see if all the components in the list are in the group.'''
+
+        thisCidlist = thisCidlist.split()
+        cidList = self.projConfig['Groups'][gid]['cidList']
+        for cid in thisCidlist :
+            if not cid in cidList :
+                return False
+        return True
 
 
     def addCompGroupSourcePath (self, gid, source) :
