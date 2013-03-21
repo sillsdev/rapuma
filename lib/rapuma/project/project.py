@@ -438,7 +438,7 @@ class Project (object) :
         return True
 
 
-    def addCompGroupSourcePath (self, gid, source) :
+    def addCompGroupSourcePath (self, csid, source) :
         '''Add a source path for components used in a group if none
         exsist. If one exists, replace anyway. Last in wins! The 
         assumption is only one path per component group.'''
@@ -447,9 +447,9 @@ class Project (object) :
         # But it could be a full file name. We need to sort that out.
         try :
             if os.path.isdir(source) :
-                self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath'] = source
+                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = source
             else :
-                self.userConfig['Projects'][self.projectIDCode][gid + '_sourcePath'] = os.path.split(source)[0]
+                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = os.path.split(source)[0]
 
             writeConfFile(self.userConfig)
         except Exception as e :
@@ -605,80 +605,80 @@ class Project (object) :
             return False
 
 
-    def updateComponent (self, cName, source = None, force = False) :
-        '''Update a component, --source is optional but if given it will
-        overwrite the current setting. The use of this function implies
-        that this is forced so no force setting is used.'''
+#    def updateComponent (self, cName, source = None, force = False) :
+#        '''Update a component, --source is optional but if given it will
+#        overwrite the current setting. The use of this function implies
+#        that this is forced so no force setting is used.'''
 
-        # Create the component object now
-        self.createComponent(cName)
+#        # Create the component object now
+#        self.createComponent(cName)
 
-        # Check to be sure the component exsits
-        if not self.components[cName] :
-            self.log.writeToLog('COMP-210', [cName])
-            dieNow()
+#        # Check to be sure the component exsits
+#        if not self.components[cName] :
+#            self.log.writeToLog('COMP-210', [cName])
+#            dieNow()
 
-        # If force is used, just unlock by default
-        if force :
-            self.lockUnlock(cName, False, force)
+#        # If force is used, just unlock by default
+#        if force :
+#            self.lockUnlock(cName, False, force)
 
-        # Be sure the component (and subcomponents) are unlocked
-        if self.isLocked(cName) :
-            self.log.writeToLog('COMP-110', [cName])
-            dieNow()
+#        # Be sure the component (and subcomponents) are unlocked
+#        if self.isLocked(cName) :
+#            self.log.writeToLog('COMP-110', [cName])
+#            dieNow()
 
-        # Here we essentially re-add the component
-        cType = self.groups[gid].getComponentType(gid)
-        cidList = self.groups[gid].getSubcomponentList(gid)
-        if not source :
-            source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
-#        self.addComponent(cType, cName, cidList, source, force)
-        installUsfmWorkingText (self, gid, cid, force = False)        
+#        # Here we essentially re-add the component
+#        cType = self.groups[gid].getComponentType(gid)
+#        cidList = self.groups[gid].getSubcomponentList(gid)
+#        if not source :
+#            source = self.userConfig['Projects'][self.projectIDCode][cType + '_sourcePath']
+##        self.addComponent(cType, cName, cidList, source, force)
+#        installUsfmWorkingText (self, gid, cid, force = False)        
 
-        # Now do a compare between the old component and the new one
-        if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
-            self.compareComponent(cName, 'working')
+#        # Now do a compare between the old component and the new one
+#        if str2bool(self.projConfig['Managers'][cType + '_Text']['useAutoCompare']) :
+#            self.compareComponent(cName, 'working')
 
 
-    def compareComponent (self, cName, test) :
-        '''Compare a component with its source which was copied into the project
-        when the component was created. This will pull up the user's differential
-        viewer and compare the two files.'''
+#    def compareComponent (self, cName, test) :
+#        '''Compare a component with its source which was copied into the project
+#        when the component was created. This will pull up the user's differential
+#        viewer and compare the two files.'''
 
-        # Create the component object now (if there is not one)
-        self.createComponent(cName)
-        # First check to see if it is a valid component and get the cid
-        if self.components[cName].hasCNameEntry(cName) :
-            if self.components[cName].getUsfmCid(cName) :
-                cid = self.components[cName].getUsfmCid(cName)
-            else :
-                self.log.writeToLog('COMP-185', [cName])
-                dieNow()
-        else :
-            # Might the cName be a cid?
-            cid = cName
-            if self.components[cName].getRapumaCName(cid) :
-                cName = self.components[cName].getRapumaCName(cid)
-            else :
-                self.log.writeToLog('COMP-185', [cName])
-                dieNow()
+#        # Create the component object now (if there is not one)
+#        self.createComponent(cName)
+#        # First check to see if it is a valid component and get the cid
+#        if self.components[cName].hasCNameEntry(cName) :
+#            if self.components[cName].getUsfmCid(cName) :
+#                cid = self.components[cName].getUsfmCid(cName)
+#            else :
+#                self.log.writeToLog('COMP-185', [cName])
+#                dieNow()
+#        else :
+#            # Might the cName be a cid?
+#            cid = cName
+#            if self.components[cName].getRapumaCName(cid) :
+#                cName = self.components[cName].getRapumaCName(cid)
+#            else :
+#                self.log.writeToLog('COMP-185', [cName])
+#                dieNow()
 
-        # What kind of test is this
-        cType = self.projConfig['Components'][cName]['type']
-        if test == 'working' :
-            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
-        elif test == 'source' :
-            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
-                if files.find('.source') > 0 :
-                    old = os.path.join(self.local.projComponentsFolder, cName, files)
-                    break
-        else :
-            self.log.writeToLog('COMP-190', [test])
+#        # What kind of test is this
+#        cType = self.projConfig['Components'][cName]['type']
+#        if test == 'working' :
+#            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+#            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
+#        elif test == 'source' :
+#            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+#            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
+#                if files.find('.source') > 0 :
+#                    old = os.path.join(self.local.projComponentsFolder, cName, files)
+#                    break
+#        else :
+#            self.log.writeToLog('COMP-190', [test])
 
-        # Turn it over to the generic compare tool
-        self.compare(new, old)
+#        # Turn it over to the generic compare tool
+#        self.compare(new, old)
 
 
 ###############################################################################
@@ -686,82 +686,82 @@ class Project (object) :
 ###############################################################################
 
 
-    def export (self, cType, cName, path = None, script = None, bundle = False, force = False) :
-        '''Facilitate the exporting of project text. It is assumed that the
-        text is clean and ready to go and if any extraneous publishing info
-        has been injected into the text, it will be removed by an appropreate
-        post-process that can be applied by this function. No validation
-        will be initiated by this function.'''
-        
-        # FIXME - Todo: add post processing script feature
+#    def export (self, cType, cName, path = None, script = None, bundle = False, force = False) :
+#        '''Facilitate the exporting of project text. It is assumed that the
+#        text is clean and ready to go and if any extraneous publishing info
+#        has been injected into the text, it will be removed by an appropreate
+#        post-process that can be applied by this function. No validation
+#        will be initiated by this function.'''
+#        
+#        # FIXME - Todo: add post processing script feature
 
-        # Probably need to create the component object now
-        self.createComponent(cName)
+#        # Probably need to create the component object now
+#        self.createComponent(cName)
 
-        # Figure out target path
-        if path :
-            path = resolvePath(path)
-        else :
-            parentFolder = os.path.dirname(self.local.projHome)
-            path = os.path.join(parentFolder, 'Export')
+#        # Figure out target path
+#        if path :
+#            path = resolvePath(path)
+#        else :
+#            parentFolder = os.path.dirname(self.local.projHome)
+#            path = os.path.join(parentFolder, 'Export')
 
-        # Make target folder if needed
-        if not os.path.isdir(path) :
-            os.makedirs(path)
+#        # Make target folder if needed
+#        if not os.path.isdir(path) :
+#            os.makedirs(path)
 
-        # Start a list for one or more files we will process
-        fList = []
+#        # Start a list for one or more files we will process
+#        fList = []
 
-        # Will need the stylesheet for copy
-        projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
-        projSty = os.path.join(self.local.projStylesFolder, projSty)
-        # Process as list of components
+#        # Will need the stylesheet for copy
+#        projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
+#        projSty = os.path.join(self.local.projStylesFolder, projSty)
+#        # Process as list of components
 
-        self.log.writeToLog('XPRT-040')
-        for cid in self.components[cName].getSubcomponentList(cName) :
-            cidCName = self.components[cName].getRapumaCName(cid)
-            ptName = PT_Tools(self).formPTName(cName, cid)
-            # Test, no name = no success
-            if not ptName :
-                self.log.writeToLog('XPRT-010')
-                dieNow()
+#        self.log.writeToLog('XPRT-040')
+#        for cid in self.components[cName].getSubcomponentList(cName) :
+#            cidCName = self.components[cName].getRapumaCName(cid)
+#            ptName = PT_Tools(self).formPTName(cName, cid)
+#            # Test, no name = no success
+#            if not ptName :
+#                self.log.writeToLog('XPRT-010')
+#                dieNow()
 
-            target = os.path.join(path, ptName)
-            source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
-            # If shutil.copy() spits anything back its bad news
-            if shutil.copy(source, target) :
-                self.log.writeToLog('XPRT-020', [fName(target)])
-            else :
-                fList.append(target)
+#            target = os.path.join(path, ptName)
+#            source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
+#            # If shutil.copy() spits anything back its bad news
+#            if shutil.copy(source, target) :
+#                self.log.writeToLog('XPRT-020', [fName(target)])
+#            else :
+#                fList.append(target)
 
-        # Start the main process here
-        if bundle :
-            archFile = os.path.join(path, cName + '_' + ymd() + '.zip')
-            # Hopefully, this is a one time operation but if force is not True,
-            # we will expand the file name so nothing is lost.
-            if not force :
-                if os.path.isfile(archFile) :
-                    archFile = os.path.join(path, cName + '_' + fullFileTimeStamp() + '.zip')
+#        # Start the main process here
+#        if bundle :
+#            archFile = os.path.join(path, cName + '_' + ymd() + '.zip')
+#            # Hopefully, this is a one time operation but if force is not True,
+#            # we will expand the file name so nothing is lost.
+#            if not force :
+#                if os.path.isfile(archFile) :
+#                    archFile = os.path.join(path, cName + '_' + fullFileTimeStamp() + '.zip')
 
-            myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
-            for f in fList :
-                # Create a string object from the contents of the file
-                strObj = StringIO.StringIO()
-                for l in open(f, "rb") :
-                    strObj.write(l)
-                # Write out string object to zip
-                myzip.writestr(fName(f), strObj.getvalue())
-                strObj.close()
-            # Close out the zip and report
-            myzip.close()
-            # Clean out the folder
-            for f in fList :
-                os.remove(f)
-            self.log.writeToLog('XPRT-030', [fName(archFile)])
-        else :
-            self.log.writeToLog('XPRT-030', [path])
+#            myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
+#            for f in fList :
+#                # Create a string object from the contents of the file
+#                strObj = StringIO.StringIO()
+#                for l in open(f, "rb") :
+#                    strObj.write(l)
+#                # Write out string object to zip
+#                myzip.writestr(fName(f), strObj.getvalue())
+#                strObj.close()
+#            # Close out the zip and report
+#            myzip.close()
+#            # Clean out the folder
+#            for f in fList :
+#                os.remove(f)
+#            self.log.writeToLog('XPRT-030', [fName(archFile)])
+#        else :
+#            self.log.writeToLog('XPRT-030', [path])
 
-        return True
+#        return True
 
 
 ###############################################################################
@@ -825,6 +825,8 @@ class Project (object) :
         changes to take place in the current session. This is currently
         designed to work more as a single call to Rapuma.'''
 
+#        import pdb; pdb.set_trace()
+
         oldValue = ''
         if config.lower() == 'rapuma' :
             confFile = os.path.join(self.local.userHome, 'rapuma.conf')
@@ -858,7 +860,7 @@ class Project (object) :
         # has the change in it, then report what we did
         outConfObj.filename = confFile
         if writeConfFile(outConfObj) :
-            self.log.writeToLog('PROJ-030', [config, section, key, str(oldValue), str(newValue)])
+            self.log.writeToLog('PROJ-030', [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
     def installFile (self, source, path, force) :

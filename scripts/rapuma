@@ -19,6 +19,7 @@
 # set the base path
 
 import os, sys
+from functools import partial
 
 # Set the Rapuma base program paths
 rapumaHome = os.environ.get('RAPUMA_BASE')
@@ -66,7 +67,7 @@ log             = ProjLog(local, uc)
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130309193115'
+systemVersion   = '0.1.20130321125503'
 
 # Give a welcome message
 terminal('\n\t\tWelcome to ' + systemName)
@@ -786,16 +787,6 @@ def userArguments (args) :
         isProject(args['project_id'])
         # Now setup the project and look for and test the component type if needed
         aProject = initProject(args['project_id'])
-        # Test component type if used
-#        if 'component_type' in args :
-#            exclude = ['settings', 'locking', 'install', 'macro', 'archive', 'edit']
-#            if not sys.argv[1].lower() in exclude :
-#                if not testForSetting(aProject.projConfig, 'CompTypes', args['component_type'].capitalize()) :
-#                    if args['component_type'] in uc.userConfig['System']['recognizedComponentTypes'] :
-#                        if not aProject.addComponentType(args['component_type']) :
-#                            sys.exit('\nERROR: Not able to add component type: ' + args['component_type'] + ' Process halted!\n')
-#                    else :
-#                        sys.exit('\nERROR: Component type given: ' + args['component_type'] + ' Is not valid in Rapuma. Process halted!\n')
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -870,15 +861,15 @@ def userArguments (args) :
                 if not aProject.hasValidSourcePath(args['group_id'], args['source_id']) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             # Having sorted through any potential problems, try adding the group
-            aProject.addGroup(args['component_type'], args['group_id'].lower(), args['cid_list'], args['source_id'], args['source'], args['force'])
+            aProject.addGroup(args['component_type'], args['group_id'], args['cid_list'], args['source_id'], resolvePath(args['source']), args['force'])
         # Remove a group from the project
         elif args['remove'] :
-            aProject.removeGroup(args['group_id'].lower(), args['force'])
+            aProject.removeGroup(args['group_id'], args['force'])
         # Update a component, --source is optional but if given it will
         elif args['update'] :
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateGroup(args['group_id'].lower(), args['force'])
+            aProject.updateGroup(args['group_id'], args['force'])
         # Execute/render a group of components
         elif args['execute'] :
             if args['cid_list'] :
@@ -894,12 +885,12 @@ def userArguments (args) :
         # Turn on or off preprocessing on import or updating (specific for cType)
         elif args['preprocess'] :
             aProject.turnOnOffPreprocess(args['group_id'], args['preprocess'])
-        # Lock component
+        # Lock group
         if args['lock'] :
-            aProject.lockUnlock(args['group_id'].lower())
-        # Unlock component
+            aProject.lockUnlock(args['group_id'])
+        # Unlock group
         elif args['unlock'] :
-            aProject.lockUnlock(args['group_id'].lower())
+            aProject.lockUnlock(args['group_id'])
         # Assign/unassign Style
         elif args['style'] :
             aProject.createManager(args['component_type'], 'style')
@@ -1110,6 +1101,11 @@ def userArguments (args) :
 ############################### Argparser Setup ###############################
 ###############################################################################
 
+# The following is applied to certain inputs to garentee input to be Unicode
+# and not ascii or whatever the default file system encoding is.
+# (Note: See the settings section for an example.)
+fsunicode = partial(unicode, encoding=sys.getfilesystemencoding())
+
 # We will try to maintain a common syntax in all the subparsers Some common
 # argument options are:
 #   -a = add something
@@ -1238,7 +1234,7 @@ settingsCommand.add_argument('project_id', help='Project ID (a positional argume
 settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
 settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
 settingsCommand.add_argument('key', help='The key which has the value to be changed.')
-settingsCommand.add_argument('value', help='A new value to add or change to the specified key.')
+settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
 
 # Add Project exporting subprocess arguments
 exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')
@@ -1277,6 +1273,8 @@ preserveCommand.add_argument('-t', '--template', help='Supply a template ID for 
 preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back project data to cloud storage.')
 
 # Send the collected arguments to the handler
+# FIXME: If "vars" is removed, we should be able to parse the args as regular
+# objects, rather than dictionary objects
 userArguments(vars(parser.parse_args()))
 
 

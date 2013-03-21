@@ -105,12 +105,14 @@ class Text (Manager) :
     def updateManagerSettings (self, gid) :
         '''Update the settings for this manager if needed.'''
 
+#        import pdb; pdb.set_trace()
+
         # If the source editor is PT, then a lot of information can be
         # gleaned from the .ssf file. Otherwise we will go pretty much with
         # the defaults and hope for the best.
         if self.sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
-            ptSet = self.pt_tools.getPTSettings(gid)
+            ptSet = self.pt_tools.getPTSettings()
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.

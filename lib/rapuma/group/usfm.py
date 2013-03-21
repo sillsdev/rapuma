@@ -94,7 +94,6 @@ class Usfm (Group) :
             if self.createProjAdjustmentConfFile() :
                 self.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
             else :
-                print 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
                 self.updateCompAdjustmentConf()
         # Now get the adj config
         self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
@@ -117,6 +116,9 @@ class Usfm (Group) :
                 font = 'DefaultFont'
 
             self.font.installFont(font)
+
+        # manager (It might be better to do this elsewhere, but where?)
+        self.project.managers[self.cType + '_Text'].updateManagerSettings(self.gid)
 
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
@@ -815,6 +817,7 @@ class PT_HyphenTools (Group) :
         self.log                    = project.log
         self.managers               = project.managers
         self.gid                    = project.gid
+        self.csid                   = project.csid
         self.projectIDCode          = project.projectIDCode
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
@@ -839,7 +842,7 @@ class PT_HyphenTools (Group) :
         # File Names
         self.ptProjHyphErrFileName  = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
         self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.sourcePath             = self.userConfig['Projects'][self.projectIDCode][self.gid + '_sourcePath']
+        self.sourcePath             = self.userConfig['Projects'][self.projectIDCode][self.csid + '_sourcePath']
         # Folder paths
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
         # Set file names with full path 
@@ -1074,7 +1077,6 @@ class PT_Tools (Group) :
         self.managers               = project.managers
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
-        self.sourcePath             = self.project.getGroupSourcePath(self.gid)
 
     def getNWFChars (self) :
         '''Return a list of non-word-forming characters from the PT settings
@@ -1174,7 +1176,7 @@ class PT_Tools (Group) :
         return sysSet
 
 
-    def findSsfFile (self) :
+    def findSsfFile (self, gid) :
         '''Look for the ParaTExt project settings file. The immediat PT project
         is the parent folder and the PT environment that the PT projet is found
         in, if any, is the grandparent folder. the .ssf (settings) file in the
@@ -1193,7 +1195,7 @@ class PT_Tools (Group) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = self.sourcePath
+        parentFolder = self.project.getGroupSourcePath(gid)
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -1236,10 +1238,10 @@ class PT_Tools (Group) :
         return os.path.join(ptPath, ssfFileName)
 
 
-    def getPTSettings (self) :
+    def getPTSettings (self, gid) :
         '''Return the data into a dictionary for the system to use.'''
 
-        sourcePath = self.project.getGroupSourcePath(self.gid)
+        sourcePath = self.project.getGroupSourcePath(gid)
 
         # Return the dictionary
         if os.path.isdir(sourcePath) :

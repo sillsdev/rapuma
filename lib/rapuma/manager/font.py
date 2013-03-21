@@ -48,6 +48,7 @@ class Font (Manager) :
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
+        self.gid                    = project.gid
         self.fontConfig             = ConfigObj(encoding='utf-8')
         self.project                = project
         self.manager                = self.cType + '_Font'
@@ -309,6 +310,8 @@ class Font (Manager) :
         '''It is a two step process to install a font. This will both 
         copy in a font and record a font in one call. Do not try to
         install a substitute font.'''
+
+#        import pdb; pdb.set_trace()
 
         font = self.checkForSubFont(font)
         cRes = self.copyInFont(font, force)

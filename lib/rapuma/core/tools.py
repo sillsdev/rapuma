@@ -376,8 +376,9 @@ def writeConfFile (config) :
         # Recover now
         if os.path.isfile(config.filename + '~') :
             shutil.copy(config.filename + '~', config.filename)
-        # We did all we could, quite while we are ahead
-        dieNow()
+        # Use raise to send out a stack trace. An error at this point
+        # is like a kernel panic. Not good at all.
+        raise
 
     # To track when a conf file was saved as well as other general
     # housekeeping we will create a GeneralSettings section with
@@ -503,7 +504,7 @@ def terminal (msg) :
     look nicer.'''
 
     # Output the message and wrap it if it is over 60 chars long.
-    print wordWrap(msg, 60)
+    print wordWrap(msg, 60).encode(sys.getfilesystemencoding())
 
 
 def terminalError (msg) :
@@ -511,7 +512,7 @@ def terminalError (msg) :
     look nicer.'''
 
     # Output the message and wrap it if it is over 60 chars long.
-    print '\n' + wordWrap('\tError: ' + msg, 60) + '\n'
+    print '\n' + wordWrap('\tError: ' + msg, 60).encode(sys.getfilesystemencoding()) + '\n'
 
 
 def wordWrap (text, width) :
