@@ -75,10 +75,10 @@ class Font (Manager) :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = self.pt_tools.getSourceEditor()
+        self.sourceEditor = self.pt_tools.getSourceEditor(self.gid)
 
         if not self.ptDefaultFont :
-            ptSet = self.pt_tools.getPTSettings()
+            ptSet = self.pt_tools.getPTSettings(self.gid)
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont

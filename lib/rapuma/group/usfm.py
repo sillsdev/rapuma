@@ -1082,7 +1082,7 @@ class PT_Tools (Group) :
         '''Return a list of non-word-forming characters from the PT settings
         field [ValidPunctuation] in the translation project.'''
 
-        ptSet = self.getPTSettings()
+        ptSet = self.getPTSettings(self.gid)
         chars = []
         if testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
             for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
@@ -1245,13 +1245,13 @@ class PT_Tools (Group) :
 
         # Return the dictionary
         if os.path.isdir(sourcePath) :
-            ssfFile = self.findSsfFile()
+            ssfFile = self.findSsfFile(gid)
             if ssfFile :
                 if os.path.isfile(ssfFile) :
                     return xmlFileToDict(ssfFile)
 
 
-    def getSourceEditor (self) :
+    def getSourceEditor (self, gid) :
         '''Return the sourceEditor if it is set. If not try to
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
@@ -1262,7 +1262,7 @@ class PT_Tools (Group) :
         if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
             se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
-            if self.findSsfFile() :
+            if self.findSsfFile(gid) :
                 se = 'paratext'
 
         return se

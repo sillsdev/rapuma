@@ -258,37 +258,6 @@ def makeExcludeFileList (aProject) :
     return excludeFiles
 
 
-def backupProject (pid) :
-    '''Backup a project. Send the compressed backup file to the user-specified
-    backup folder. If none is specified, put the archive in cwd. If a valid
-    path is specified, send it to that location. This is a very simplified
-    backup so it will only keep one copy in any given location. If another
-    copy exists, it will overwrite it.'''
-
-    # Check to see if the pid is valid in the system (it has to be)
-    isProject(pid)
-    projHome = uc.userConfig['Projects'][pid]['projectPath']
-    aProject = initProject(pid)
-
-    # Set some paths and file names
-    backupName = pid + '.zip'
-    userBackups = uc.userConfig['Resources']['backups']
-    backupTarget = ''
-    if os.path.isdir(userBackups) :
-        backupTarget = os.path.join(userBackups, backupName)
-    else :
-        terminal('\nError: User backup storage path not yet configured!\n')
-        dieNow()
-
-    # Get a list of files we don't want
-    excludeFiles = makeExcludeFileList(aProject)
-
-    zipUpProject(projHome, backupTarget, excludeFiles)
-
-    # Finish here
-    terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget + '\n')
-
-
 def archiveProject (pid, path = None) :
     '''Archive a project. Send the compressed archive file to the user-specified
     archive folder. If none is specified, put the archive in cwd. If a valid
@@ -430,6 +399,41 @@ def restoreArchive (pid, targetPath, sourcePath = None) :
     terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
 
+###############################################################################
+########################### Backup Project Functions ##########################
+###############################################################################
+
+def backupProject (pid) :
+    '''Backup a project. Send the compressed backup file to the user-specified
+    backup folder. If none is specified, put the archive in cwd. If a valid
+    path is specified, send it to that location. This is a very simplified
+    backup so it will only keep one copy in any given location. If another
+    copy exists, it will overwrite it.'''
+
+    # Check to see if the pid is valid in the system (it has to be)
+    isProject(pid)
+    projHome = uc.userConfig['Projects'][pid]['projectPath']
+    aProject = initProject(pid)
+
+    # Set some paths and file names
+    backupName = pid + '.zip'
+    userBackups = uc.userConfig['Resources']['backups']
+    backupTarget = ''
+    if os.path.isdir(userBackups) :
+        backupTarget = os.path.join(userBackups, backupName)
+    else :
+        terminal('\nError: User backup storage path not yet configured!\n')
+        dieNow()
+
+    # Get a list of files we don't want
+    excludeFiles = makeExcludeFileList(aProject)
+
+    zipUpProject(projHome, backupTarget, excludeFiles)
+
+    # Finish here
+    terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget + '\n')
+
+
 def restoreBackup (pid) :
     '''Restore a project from the user specified storage area. If that
     is not set, it will look for the backup (pid.zip) in cwd. Use path to
@@ -475,6 +479,10 @@ def restoreBackup (pid) :
     # Finish here (We will leave the backup-backup in place)
     terminal('\nRapuma backup [' + pid + '] has been restored to: ' + projHome + '\n')
 
+
+###############################################################################
+######################### Template Project Functions ##########################
+###############################################################################
 
 def projectToTemplate (pid, tid) :
     '''Preserve critical project information in a template. The pid is the project
@@ -573,6 +581,10 @@ def templateToProject (uc, projHome, pid, tid, pname, source = None) :
     terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
+###############################################################################
+############################ Cloud Backup Functions ###########################
+###############################################################################
+
 def pullFromCloud (pid) :
     '''Pull data from cloud storage and merge/replace local data.
     Do a full backup first before starting the actual pull operation.'''
@@ -665,17 +677,22 @@ def pushToCloud (pid) :
             terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
 
-def getProjectScripInfo (pid) :
-    '''Create a dictionary of all the auxillary script information used in
+###############################################################################
+########################### Helper Script Functions ###########################
+###############################################################################
+
+def makeScriptHeader (desc) :
+    '''Make a helper script header.'''
+
+    return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\n'
+
+
+def getStaticScripInfo () :
+    '''Create a dictionary of all the static auxillary script information used in
     most projects.'''
 
-    aProject = initProject(pid)
-    projHome            = uc.userConfig['Projects'][pid]['projectPath']
-    local               = ProjLocal(rapumaHome, userHome, projHome)
-    cType = 'usfm'
-
     return {
-            'add'           : ['Add all a Scripture component\(s\).',                 'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
+            'add'           : ['Add a group.',                                      'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
             'addBible'      : ['Add all the Scripture components for a Bible.',     'rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addNT'         : ['Add all the Scripture components for an NT.',       'rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
             'addOT'         : ['Add all the Scripture components for an OT.',       'rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
@@ -683,11 +700,8 @@ def getProjectScripInfo (pid) :
             'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
             'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -u '], 
             'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p '], 
-            'compare'       : ['Compare component working text with start point.',  'rapuma component ' + pid + ' ' + cType + ' $1 -c working'], 
             'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False '], 
             'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks True '], 
-            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' -c $1 -g -s'], 
-            'export'        : ['Export working text from component or group.',      'rapuma export ' + pid + ' ' + cType + ' $1 -e -f  '], 
             'hyphenCompare' : ['Compare working hyphen file with source.',          'rapuma hyphen ' + pid + ' ' + cType + ' -c  '], 
             'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 
             'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
@@ -698,39 +712,40 @@ def getProjectScripInfo (pid) :
             'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False '], 
             'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True '], 
             'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
-            'render'        : ['Render a component.',                               'rapuma component ' + pid + ' ' + cType + ' $1 -e -f '], 
             'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
             'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
-            'update'        : ['Update a component from its source.',               'rapuma component ' + pid + ' ' + cType + ' $1 -u -f '], 
             'updateRapuma'  : ['Update Rapuma and the project scripts.',            'rapuma system -u \n\nrapuma project ' + pid + ' -s '], 
-            'view'          : ['View a component.',                                 'rapuma component ' + pid + ' ' + cType + ' $1 -e '], 
             'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark False '], 
             'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark True \n\n']
         }
 
 
-def makeProjectScripts (uc, pid) :
-    '''Create helper scripts for a project to help with repetitive tasks.
-    If any scripts are present with the same name they will be overwritten.
-    Note: This is only for temporary use due to the lack of an interface at
-    this time (20130306140636). It assumes the cType is usfm which, at some point
-    may not be the case.'''
+def getGrpScripInfo () :
+    '''Create a dictionary of the auxillary group script information used in
+    most projects.'''
 
-    aProject = initProject(pid)
-    projHome            = uc.userConfig['Projects'][pid]['projectPath']
-    local               = ProjLocal(rapumaHome, userHome, projHome)
-    cType = 'usfm'
-    if not os.path.isdir(local.projScriptsFolder) :
-        os.mkdir(local.projScriptsFolder)
+    return {
+            'add'           : ['Add all a Scripture component group.',              'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
+            'compare'       : ['Compare component working text with start point.',  'rapuma component ' + pid + ' ' + cType + ' $1 -c working'], 
+            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' -c $1 -g -s'], 
+            'export'        : ['Export working text from a group.',                 'rapuma export ' + pid + ' ' + cType + ' $1 -e -f  '], 
+            'render'        : ['Render a component.',                               'rapuma component ' + pid + ' ' + cType + ' $1 -e -f '], 
+            'update'        : ['Update a component from its source.',               'rapuma component ' + pid + ' ' + cType + ' $1 -u -f '], 
+            'view'          : ['View a component.',                                 'rapuma component ' + pid + ' ' + cType + ' $1 -e ']
+        }
+
+
+def makeGrpScripts (project) :
+    '''Create scripts that process specific group components.'''
+
+    if not os.path.isdir(project.local.projScriptsFolder) :
+        os.mkdir(project.local.projScriptsFolder)
     # Output the scripts
-    allScripts = getProjectScripInfo(pid)
+    allScripts = getGrpScripInfo()
     for key in allScripts.keys() :
-        fullFile = os.path.join(local.projScriptsFolder, key)
+        fullFile = os.path.join(project.local.projScriptsFolder, key)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write('#!/bin/sh\n\n')
-            writeObject.write('# Description: ' + allScripts[key][0] + '\n\n')
-            writeObject.write('echo \n')
-            writeObject.write('echo Rapuma helper script: ' + allScripts[key][0] + '\n\n')
+            writeObject.write(makeScriptHeader(allScripts[key][0]))
             writeObject.write(allScripts[key][1] + '\n\n')
 
         # Make the script executable
@@ -739,7 +754,44 @@ def makeProjectScripts (uc, pid) :
     # Outpu scripts for project groups
     # FIXME: write the code for this
 
-    terminal('\nCompleted creating/recreating helper scripts.\n')
+    terminal('\nCompleted creating/recreating group helper scripts.\n')
+
+
+def makeStaticScripts (project) :
+    '''Create helper scripts for a project to help with repetitive tasks.
+    If any scripts are present with the same name they will be overwritten.
+    Note: This is only for temporary use due to the lack of an interface at
+    this time (20130306140636). It assumes the cType is usfm which, at some point
+    may not be the case.'''
+
+    if not os.path.isdir(project.local.projScriptsFolder) :
+        os.mkdir(project.local.projScriptsFolder)
+    # Output the scripts
+    allScripts = project.getStaticScripInfo()
+    for key in allScripts.keys() :
+        fullFile = os.path.join(project.local.projScriptsFolder, key)
+        with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write(makeScriptHeader(allScripts[key][0]))
+            writeObject.write(allScripts[key][1] + '\n\n')
+
+        # Make the script executable
+        makeExecutable(fullFile)
+
+    # Outpu scripts for project groups
+    # FIXME: write the code for this
+
+    terminal('\nCompleted creating/recreating static helper scripts.\n')
+
+
+def updateScripts (uc, pid) :
+
+    aProject = initProject(pid)
+    projHome            = uc.userConfig['Projects'][pid]['projectPath']
+    local               = ProjLocal(rapumaHome, userHome, projHome)
+    cType = 'usfm'
+
+    makeStaticScripts()
+    makeGrpScripts()
 
 
 def updateRapuma () :
@@ -842,7 +894,7 @@ def userArguments (args) :
                 newProject(uc, pc, args['project_id'], args['name'], args['template'], args['media'])
                 # Create helper scripts if desired
                 if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                    makeProjectScripts(uc, args['project_id'])
+                    updateScripts(uc, args['project_id'])
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -862,9 +914,13 @@ def userArguments (args) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             # Having sorted through any potential problems, try adding the group
             aProject.addGroup(args['component_type'], args['group_id'], args['cid_list'], args['source_id'], resolvePath(args['source']), args['force'])
+            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                updateScripts(uc, args['project_id'])
         # Remove a group from the project
         elif args['remove'] :
             aProject.removeGroup(args['group_id'], args['force'])
+            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                updateScripts(uc, args['project_id'])
         # Update a component, --source is optional but if given it will
         elif args['update'] :
             # overwrite the current setting. The --force setting will be needed

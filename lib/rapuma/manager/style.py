@@ -309,7 +309,7 @@ class Style (Manager) :
         project styles too.'''
 
         # First pick up our PT settings
-        ptConf = self.pt_tools.getPTSettings()
+        ptConf = self.pt_tools.getPTSettings(self.gid)
         if not ptConf :
             return False
 
