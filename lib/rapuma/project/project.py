@@ -302,7 +302,7 @@ class Project (object) :
         # Create the group object now that we have an entry in the config
         self.createGroup(gid)
         # Install the group's components
-        self.installGroupComps(gid, force)
+        self.installGroupComps(gid, cidList, force)
         # Create an empty component group folder if needed
         groupFolder = os.path.join(self.local.projComponentsFolder, gid)
         if not os.path.exists(groupFolder) :
@@ -316,7 +316,7 @@ class Project (object) :
             self.log.writeToLog('GRUP-040', [gid])
 
 
-    def installGroupComps (self, gid, force = False) :
+    def installGroupComps (self, gid, cidList, force = False) :
         '''This will install components to the group we created above in createGroup().
         If a component is already installed in the project it will not proceed unless
         force is set to True. Then it will remove the component files so a fresh copy
@@ -326,7 +326,7 @@ class Project (object) :
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
-        cidList     = self.projConfig['Groups'][gid]['cidList']
+#        cidList     = self.projConfig['Groups'][gid]['cidList']
         csid        = self.projConfig['Groups'][gid]['csid']
         sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
 
@@ -389,7 +389,7 @@ class Project (object) :
             self.log.writeToLog('GRUP-120', [gid])
 
 
-    def updateGroup (self, gid, force = False) :
+    def updateGroup (self, gid, cidList = None, force = False) :
         '''Update a group, --source is optional but if given it will
         overwrite the current setting. The use of this function implies
         that this is forced so no force setting is used.'''
@@ -401,6 +401,13 @@ class Project (object) :
         if not self.groups[gid] :
             self.log.writeToLog('COMP-210', [gid])
             dieNow()
+        
+        # Sort out the list
+        if not cidList :
+            cidList = self.projConfig['Groups'][gid]['cidList']
+        else :
+            if type(cidList) != list :
+                 cidList = cidList.split()
 
         # If force is used, just unlock by default
         if force :
@@ -411,8 +418,8 @@ class Project (object) :
             self.log.writeToLog('COMP-110', [gid])
             dieNow()
 
-        # Here we essentially re-add the components of the group
-        self.installGroupComps(gid, force)
+        # Here we essentially re-add the component(s) of the group
+        self.installGroupComps(gid, cidList, force)
         # Now lock it down
         self.lockUnlock(gid, True)
 

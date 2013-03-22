@@ -644,8 +644,17 @@ Todo:
             <description>The bigger the number the harder it is to break a word in the hyphen list (\hyphenpenalty). This setting is active when useHyphenation is set to True.  Default = 0</description>
             <key>setHyphenPenalty</key>
             <type>integer</type>
-            <value>0</value>
+            <value>50</value>
             <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <usfmTex>\hyphenpenalty=[v]</usfmTex>
+        </setting>
+        <setting>
+            <name>TeX Hyphenation Penalty Off</name>
+            <description>If useHyphenation is set to False, this will automatically set the TeX \hyphenpenalty setting to 10000 which effectivly turns off hyphenation. If useHyphenation is set to True, this setting should be overwritten with the necessary settings to make hyphenation work. (In theory.)</description>
+            <key>texHyphenOff</key>
+            <type>integer</type>
+            <value>10000</value>
+            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
             <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
@@ -656,15 +665,6 @@ Todo:
             <value>50</value>
             <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\exhyphenpenalty=[v]</usfmTex>
-        </setting>
-        <setting>
-            <name>TeX Hyphenation Penalty</name>
-            <description>If useHyphenation is set to False, this will automatically set the TeX \hyphenpenalty setting to 10000 which effectivly turns off hyphenation. If useHyphenation is set to True, this setting should be overwritten with the necessary settings to make hyphenation work. (In theory.)</description>
-            <key>texHyphenOff</key>
-            <type>integer</type>
-            <value>10000</value>
-            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
-            <usfmTex>\hyphenpenalty=[v]</usfmTex>
         </setting>
         <setting>
             <name>TeX Pretolerance</name>

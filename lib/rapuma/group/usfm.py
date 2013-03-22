@@ -817,7 +817,6 @@ class PT_HyphenTools (Group) :
         self.log                    = project.log
         self.managers               = project.managers
         self.gid                    = project.gid
-        self.csid                   = project.csid
         self.projectIDCode          = project.projectIDCode
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
@@ -842,7 +841,7 @@ class PT_HyphenTools (Group) :
         # File Names
         self.ptProjHyphErrFileName  = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
         self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.sourcePath             = self.userConfig['Projects'][self.projectIDCode][self.csid + '_sourcePath']
+        self.sourcePath             = self.userConfig['Projects'][self.projectIDCode][self.projConfig['Groups'][self.gid]['csid'] + '_sourcePath']
         # Folder paths
         self.projHyphenationFolder  = self.project.local.projHyphenationFolder
         # Set file names with full path 

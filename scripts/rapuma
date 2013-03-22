@@ -687,69 +687,76 @@ def makeScriptHeader (desc) :
     return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\n'
 
 
-def getStaticScripInfo () :
+def getStaticScripInfo (aProject) :
     '''Create a dictionary of all the static auxillary script information used in
     most projects.'''
 
+    pid = aProject.projectIDCode
+    gid = aProject.gid
+    cType = aProject.cType
+    mid = aProject.projectMediaIDCode
+
     return {
-            'add'           : ['Add a group.',                                      'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
-            'addBible'      : ['Add all the Scripture components for a Bible.',     'rapuma component ' + pid + ' ' + cType + ' Bible -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-            'addNT'         : ['Add all the Scripture components for an NT.',       'rapuma component ' + pid + ' ' + cType + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-            'addOT'         : ['Add all the Scripture components for an OT.',       'rapuma component ' + pid + ' ' + cType + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+            'add'           : ['Add a group.',                                      'rapuma group ' + pid + ' ' + gid + ' $1 -a -s $2 -i $3 '], 
+            'addBible'      : ['Add Scripture components for a Bible group.',       'rapuma group ' + pid + ' Bible -c ' + cType + '-a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+            'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' ' + gid + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+            'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' ' + gid + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
             'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
             'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
             'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -u '], 
             'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p '], 
-            'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False '], 
-            'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks True '], 
+            'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False '], 
+            'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks True '], 
             'hyphenCompare' : ['Compare working hyphen file with source.',          'rapuma hyphen ' + pid + ' ' + cType + ' -c  '], 
             'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 
             'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
             'hyphenUpdate'  : ['Update hyphenation working files.',                 'rapuma hyphen ' + pid + ' ' + cType + ' -u $1 '], 
-            'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines False '], 
-            'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useLines True '], 
-            'listComps'     : ['List all USFM components.',                         'rapuma component ' + pid + ' ' + cType + ' usfm_internal_caller -l '], 
-            'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders False '], 
-            'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout Illustrations useFigurePlaceHolders True '], 
+            'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False '], 
+            'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines True '], 
+            'listComps'     : ['List all USFM components.',                         'rapuma group ' + pid + ' ' + gid + ' -o '], 
+            'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
+            'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
             'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
             'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
             'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
             'updateRapuma'  : ['Update Rapuma and the project scripts.',            'rapuma system -u \n\nrapuma project ' + pid + ' -s '], 
-            'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark False '], 
-            'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + aProject.projectMediaIDCode + '_layout PageLayout useWatermark True \n\n']
+            'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark False '], 
+            'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark True \n\n']
         }
 
 
-def getGrpScripInfo () :
+def getGrpScripInfo (aProject, gid) :
     '''Create a dictionary of the auxillary group script information used in
     most projects.'''
 
+    pid = aProject.projectIDCode
+    cType = aProject.cType
+    mid = aProject.projectMediaIDCode
+
     return {
-            'add'           : ['Add all a Scripture component group.',              'rapuma component ' + pid + ' ' + cType + ' $1 -a -s $2 -i $3 '], 
-            'compare'       : ['Compare component working text with start point.',  'rapuma component ' + pid + ' ' + cType + ' $1 -c working'], 
-            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' -c $1 -g -s'], 
-            'export'        : ['Export working text from a group.',                 'rapuma export ' + pid + ' ' + cType + ' $1 -e -f  '], 
-            'render'        : ['Render a component.',                               'rapuma component ' + pid + ' ' + cType + ' $1 -e -f '], 
-            'update'        : ['Update a component from its source.',               'rapuma component ' + pid + ' ' + cType + ' $1 -u -f '], 
-            'view'          : ['View a component.',                                 'rapuma component ' + pid + ' ' + cType + ' $1 -e ']
+            'compare'       : ['Compare component working text with start point.',  'rapuma group ' + pid + ' ' + gid + ' $1 -c working'], 
+            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' ' + gid + ' -c $1 -g -s'], 
+            'export'        : ['Export working text from the ' + gid + ' group.',   'rapuma export ' + pid + ' ' + gid + ' $1 -e -f  '], 
+            'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e -f '], 
+            'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u -f '], 
+            'view'          : ['View the ' + gid + ' group PDF file.',              'rapuma group ' + pid + ' ' + gid + ' -e ']
         }
 
 
-def makeGrpScripts (project) :
+def makeGrpScripts (aProject) :
     '''Create scripts that process specific group components.'''
 
-    if not os.path.isdir(project.local.projScriptsFolder) :
-        os.mkdir(project.local.projScriptsFolder)
     # Output the scripts
-    allScripts = getGrpScripInfo()
-    for key in allScripts.keys() :
-        fullFile = os.path.join(project.local.projScriptsFolder, key)
-        with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write(makeScriptHeader(allScripts[key][0]))
-            writeObject.write(allScripts[key][1] + '\n\n')
+    for group in aProject.projConfig['Groups'].keys() :
+        allScripts = getGrpScripInfo(aProject, group)
+        for key in allScripts.keys() :
+            fullFile = os.path.join(aProject.local.projScriptsFolder, key) + group.capitalize()
+            with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(makeScriptHeader(allScripts[key][0]))
+                writeObject.write(allScripts[key][1] + '\n\n')
 
-        # Make the script executable
-        makeExecutable(fullFile)
+            # Make the script executable
+            makeExecutable(fullFile)
 
     # Outpu scripts for project groups
     # FIXME: write the code for this
@@ -757,19 +764,17 @@ def makeGrpScripts (project) :
     terminal('\nCompleted creating/recreating group helper scripts.\n')
 
 
-def makeStaticScripts (project) :
+def makeStaticScripts (aProject) :
     '''Create helper scripts for a project to help with repetitive tasks.
     If any scripts are present with the same name they will be overwritten.
     Note: This is only for temporary use due to the lack of an interface at
     this time (20130306140636). It assumes the cType is usfm which, at some point
     may not be the case.'''
 
-    if not os.path.isdir(project.local.projScriptsFolder) :
-        os.mkdir(project.local.projScriptsFolder)
     # Output the scripts
-    allScripts = project.getStaticScripInfo()
+    allScripts = getStaticScripInfo(aProject)
     for key in allScripts.keys() :
-        fullFile = os.path.join(project.local.projScriptsFolder, key)
+        fullFile = os.path.join(aProject.local.projScriptsFolder, key)
         with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(makeScriptHeader(allScripts[key][0]))
             writeObject.write(allScripts[key][1] + '\n\n')
@@ -788,10 +793,13 @@ def updateScripts (uc, pid) :
     aProject = initProject(pid)
     projHome            = uc.userConfig['Projects'][pid]['projectPath']
     local               = ProjLocal(rapumaHome, userHome, projHome)
-    cType = 'usfm'
+    aProject.cType      = 'usfm'
 
-    makeStaticScripts()
-    makeGrpScripts()
+    if not os.path.isdir(aProject.local.projScriptsFolder) :
+        os.mkdir(aProject.local.projScriptsFolder)
+
+    makeStaticScripts(aProject)
+    makeGrpScripts(aProject)
 
 
 def updateRapuma () :
@@ -856,7 +864,7 @@ def userArguments (args) :
             restoreBackup(pid)
         # Create/refresh helper scripts
         elif args['scripts'] :
-            makeProjectScripts(uc, pid)
+            updateScripts(uc, pid)
         # Update (get rained on) from the cloud
         elif args['cloud'] :
             pullFromCloud(pid)
@@ -925,7 +933,7 @@ def userArguments (args) :
         elif args['update'] :
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateGroup(args['group_id'], args['force'])
+            aProject.updateGroup(args['group_id'], args['cid_list'], args['force'])
         # Execute/render a group of components
         elif args['execute'] :
             if args['cid_list'] :
@@ -1330,7 +1338,8 @@ preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back pr
 
 # Send the collected arguments to the handler
 # FIXME: If "vars" is removed, we should be able to parse the args as regular
-# objects, rather than dictionary objects
+# objects, rather than dictionary objects. For more info on how to make the
+# arg parsing better read Python docs on argpars 15.4.3.
 userArguments(vars(parser.parse_args()))
 
 
@@ -1339,8 +1348,7 @@ userArguments(vars(parser.parse_args()))
 ###############################################################################
 
 # In case there are any Canadians using this, politely say good bye
-if not sys.argv[1].lower() == 'example' :
-    terminal('\n\t\tThank you, please come again!\n')
+terminal('\n\t\tThank you, please come again!\n')
 
 
 
