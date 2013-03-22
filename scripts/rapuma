@@ -232,6 +232,11 @@ def makeExcludeFileList (aProject) :
     excludeFiles = []
     excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex', '.piclist', '.adj']
 
+    # This is one of those operations that do not require a gid directly
+    # however, there are operations downstream that do. As such we will go
+    # get one now and hope all goes well later on...
+    aProject.gid = aProject.projConfig['Groups'].keys()[0]
+
     # Work out from the component type what the settings file names are
     for cType in aProject.projConfig['CompTypes'].keys() :
         rndr = aProject.projConfig['CompTypes'][cType]['renderer']
@@ -704,7 +709,7 @@ def getStaticScripInfo (aProject) :
             'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
             'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
             'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -u '], 
-            'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p '], 
+            'cloudPush'     : ['Push data from this project to the cloud',          'rapuma preserve ' + pid + ' -c '], 
             'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False '], 
             'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks True '], 
             'hyphenCompare' : ['Compare working hyphen file with source.',          'rapuma hyphen ' + pid + ' ' + cType + ' -c  '], 

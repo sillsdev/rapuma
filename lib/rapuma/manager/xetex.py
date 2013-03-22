@@ -40,7 +40,7 @@ class Xetex (Manager) :
         '''Do the primary initialization for this manager.'''
 
         super(Xetex, self).__init__(project, cfg)
-
+        print 'zzzzzzzzzzzzzz', cfg
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
         self.project                = project
