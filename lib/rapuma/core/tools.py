@@ -66,6 +66,8 @@ def dieNow (msg = '') :
     command and will have hopefully provided the user with a useful message as
     to why this happened.'''
 
+# FIXME: Need to add a debug switch in here
+
     if msg :
         '\n' + msg + ' Rapuma halting now!\n'
     else :

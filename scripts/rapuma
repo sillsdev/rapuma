@@ -31,12 +31,6 @@ if not rapumaHome :
             os.environ['RAPUMA_BASE'] = rapumaHome
             break
 
-# Set the Rapuma program resources path
-#rapumaResources = os.environ.get('RAPUMA_RESOURCES')
-#if not rapumaResources :
-#    rapumaResources = os.path.join(rapumaHome, 'resources')
-#    os.environ['RAPUMA_RESOURCES'] = rapumaResources
-
 # Set the user environment path
 userHome = os.environ.get('RAPUMA_USER')
 if not userHome :
@@ -62,10 +56,8 @@ from rapuma.project.project import Project
 
 # Instantiate User classes
 local           = ProjLocal(rapumaHome, userHome, projHome)
-uc              = UserConfig(local)
+uc              = UserConfig(rapumaHome, userHome)
 log             = ProjLog(local, uc)
-
-print 'Hi there'
 
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
@@ -77,7 +69,7 @@ terminal('\n\t\tWelcome to ' + systemName)
 terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 
 ###########################################################################
-############################## Rapuma Functions ##############################
+########################### Rapuma Functions ##############################
 ###########################################################################
 
 
@@ -292,22 +284,22 @@ def getGrpScripInfo (aProject, gid) :
 def makeGrpScripts (aProject) :
     '''Create scripts that process specific group components.'''
 
-    # Output the scripts
-    for group in aProject.projConfig['Groups'].keys() :
-        allScripts = getGrpScripInfo(aProject, group)
-        for key in allScripts.keys() :
-            fullFile = os.path.join(aProject.local.projScriptsFolder, key) + group.capitalize()
-            with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(makeScriptHeader(allScripts[key][0]))
-                writeObject.write(allScripts[key][1] + '\n\n')
+    # Output the scripts (If this is a new project we need to pass)
+    if isConfSection(aProject.projConfig, 'Groups') :
+        for group in aProject.projConfig['Groups'].keys() :
+            allScripts = getGrpScripInfo(aProject, group)
+            for key in allScripts.keys() :
+                fullFile = os.path.join(aProject.local.projScriptsFolder, key) + group.capitalize()
+                with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+                    writeObject.write(makeScriptHeader(allScripts[key][0]))
+                    writeObject.write(allScripts[key][1] + '\n\n')
 
-            # Make the script executable
-            makeExecutable(fullFile)
-
-    # Outpu scripts for project groups
-    # FIXME: write the code for this
-
-    terminal('\nCompleted creating/recreating group helper scripts.\n')
+                # Make the script executable
+                makeExecutable(fullFile)
+        
+        terminal('\nCompleted creating/recreating group helper scripts.\n')
+    else :
+        pass
 
 
 def makeStaticScripts (aProject) :
@@ -373,28 +365,28 @@ def userArguments (args, local) :
 
     # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
-        if args['about'] :
+        if args.about :
             terminal('\n' + systemName + ' version ' + systemVersion + '\n')
             terminal('About: ' + systemAbout + '\n')
             return
-        if args['basic'] :
+        if args.basic :
             accessHtmlHelp()
             return
 
     # Pre-command process: System level commands
     if sys.argv[1].lower() == 'system' :
-        if args['user_name'] :
-            uc.setSystemSettings('userName', args['user_name'])
-        elif args['resources'] :
-            uc.setSystemSettings('resources', args['resources'])
-        elif args['update'] :
+        if args.user_name :
+            uc.setSystemSettings('userName', args.user_name)
+        elif args.resources :
+            uc.setSystemSettings('resources', args.resources)
+        elif args.update :
             updateRapuma()
 
     # Test project ID, intercept if it is a special command
     elif sys.argv[1].lower() != 'project' :
-        isProject(args['project_id'])
+        isProject(args.project_id)
         # Now setup the project and look for and test the component type if needed
-        aProject = initProject(args['project_id'])
+        aProject = initProject(args.project_id)
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -403,114 +395,114 @@ def userArguments (args, local) :
 
     # Project level commands
     elif sys.argv[1].lower() == 'project' :
-        pid = args['project_id']
+        pid = args.project_id
         # Remove an exsisting project
-        if args['remove'] :
+        if args.remove :
             deleteProject(uc, pid)
         # Restore (or revert to) the last backup
-        elif args['revert'] :
+        elif args.revert :
             restoreBackup(pid)
         # Create/refresh helper scripts
-        elif args['scripts'] :
+        elif args.scripts :
             updateScripts(uc, pid)
         # Update (get rained on) from the cloud
-        elif args['cloud'] :
+        elif args.cloud :
             pullFromCloud(pid)
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
-            if not args['targetPath'] :
+            if not args.targetPath :
                 # A path must be given
                 sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
             else :
                 # If a targetPath is given we need to resolve it
-                targetPath = resolvePath(args['targetPath'])
+                targetPath = resolvePath(args.targetPath)
                 if not os.path.isdir(targetPath) :
                     sys.exit('\nERROR: Cannot resolve the given path [' + targetPath + ']. Process halting.\n')
                 else :
                     projFolder = os.path.join(targetPath, pid)
             # Source path is optional but if given, resolve it
             if 'sourcePath' in args :
-                    sourcePath = resolvePath(args['sourcePath'])
+                    sourcePath = resolvePath(args.sourcePath)
             # New project from template
-            if args['template'] :
-                tid = args['template']
+            if args.template :
+                tid = args.template
                 templateSource = ''
                 if sourcePath :
                     templateSource = os.path.join(sourcePath, tid + '.zip')
-                templateToProject(uc, projFolder, pid, tid, args['name'], templateSource)
+                templateToProject(uc, projFolder, pid, tid, args.name, templateSource)
             # New (to current system) project from archive
-            elif args['archive'] :
+            elif args.archive :
                 restoreArchive(pid, targetPath, sourcePath)
             # Just creating from scratch
             else :
                 # Create a new project
                 local   = ProjLocal(rapumaHome, userHome, projFolder)
                 pc      = ProjConfig(local)
-                newProject(uc, pc, args['project_id'], args['name'], args['template'], args['media'])
+                newProject(uc, pc, args.project_id, args.name, args.template, args.media)
                 # Create helper scripts if desired
                 if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                    updateScripts(uc, args['project_id'])
+                    updateScripts(uc, args.project_id)
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
         # Add a new group
-        if args['add'] :
-            if not args['cid_list'] :
+        if args.add :
+            if not args.cid_list :
                 sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
-            elif not args['component_type'] :
+            elif not args.component_type :
                 sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-            elif not args['source_id'] :
+            elif not args.source_id :
                 sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
-            elif args['source'] :
-                if not resolvePath(args['source']) :
+            elif args.source :
+                if not resolvePath(args.source) :
                     sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-            elif args['source_id'] :
-                if not aProject.hasValidSourcePath(args['group_id'], args['source_id']) :
+            elif args.source_id :
+                if not aProject.hasValidSourcePath(args.group_id, args.source_id) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             # Having sorted through any potential problems, try adding the group
-            aProject.addGroup(args['component_type'], args['group_id'], args['cid_list'], args['source_id'], resolvePath(args['source']), args['force'])
+            aProject.addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                updateScripts(uc, args['project_id'])
+                updateScripts(uc, args.project_id)
         # Remove a group from the project
-        elif args['remove'] :
-            aProject.removeGroup(args['group_id'], args['force'])
+        elif args.remove :
+            aProject.removeGroup(args.group_id, args.force)
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                updateScripts(uc, args['project_id'])
+                updateScripts(uc, args.project_id)
         # Update a component, --source is optional but if given it will
-        elif args['update'] :
+        elif args.update :
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateGroup(args['group_id'], args['cid_list'], args['force'])
+            aProject.updateGroup(args.group_id, args.cid_list, args.force)
         # Execute/render a group of components
-        elif args['execute'] :
-            if args['cid_list'] :
-                if not aProject.isValidCidList(args['group_id'], args['cid_list']) :
+        elif args.execute :
+            if args.cid_list :
+                if not aProject.isValidCidList(args.group_id, args.cid_list) :
                     sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-            if aProject.isGroup(args['group_id']) :
-                aProject.renderGroup(args['group_id'], args['cid_list'], args['force'])
+            if aProject.isGroup(args.group_id) :
+                aProject.renderGroup(args.group_id, args.cid_list, args.force)
             else :
                 sys.exit('\nERROR: The group ID given is not found in this project. Must provide a valid group ID. Process halted!\n')
         # Get a whole list of component IDs and names
-        elif args['output_list'] :
-            aProject.listAllComponents(args['component_type'])
+        elif args.output_list :
+            aProject.listAllComponents(args.component_type)
         # Turn on or off preprocessing on import or updating (specific for cType)
-        elif args['preprocess'] :
-            aProject.turnOnOffPreprocess(args['group_id'], args['preprocess'])
+        elif args.preprocess :
+            aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
         # Lock group
-        if args['lock'] :
-            aProject.lockUnlock(args['group_id'])
+        if args.lock :
+            aProject.lockUnlock(args.group_id)
         # Unlock group
-        elif args['unlock'] :
-            aProject.lockUnlock(args['group_id'])
+        elif args.unlock :
+            aProject.lockUnlock(args.group_id)
         # Assign/unassign Style
-        elif args['style'] :
-            aProject.createManager(args['component_type'], 'style')
-            manager = args['component_type'] + '_Style'
-            if args['add'] :
-                aProject.managers[manager].addStyleFile(args['component_type'], args['path'], args['force'])
-            elif args['remove'] :
-                aProject.managers[manager].removeStyleFile(args['component_type'], args['force'])
+        elif args.style :
+            aProject.createManager(args.component_type, 'style')
+            manager = args.component_type + '_Style'
+            if args.add :
+                aProject.managers[manager].addStyleFile(args.component_type, args.path, args.force)
+            elif args.remove :
+                aProject.managers[manager].removeStyleFile(args.component_type, args.force)
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -518,72 +510,72 @@ def userArguments (args, local) :
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
-        if args['execute'] :
-            aProject.renderComponent(args['component_id'].lower(), args['force'])
+        if args.execute :
+            aProject.renderComponent(args.component_id.lower(), args.force)
         # Update a single component
-        elif args['update'] :
-            aProject.updateComponent(args['component_id'].lower(), args['force'])
+        elif args.update :
+            aProject.updateComponent(args.component_id.lower(), args.force)
         # Validate a single component
-        elif args['validate'] :
+        elif args.validate :
             sys.exit('\nERROR: Validate not working yet (usfm_Text.testCompTextFile())\n')
         # Compare a component with backups of working or source text
-        elif args['compare'] :
-            aProject.compareComponent(args['component_id'].lower(), args['compare'])
+        elif args.compare :
+            aProject.compareComponent(args.component_id.lower(), args.compare)
         # Commands for editing project files
-        elif args['edit'] :
-                aProject.edit(args['component_id'])
+        elif args.edit :
+                aProject.edit(args.component_id)
 
     # Binding level commands
     elif sys.argv[1].lower() == 'binding' :
         aProject.createManager(aProject.projectMediaIDCode, 'binding')
         manager = aProject.projectMediaIDCode + '_Binding'
         # Add a new binding group
-        if args['add'] :
-            aProject.managers[manager].addBindingGroup(args['group_id'], args['id_list'], args['force'])
-        elif args['remove'] :
-            aProject.managers[manager].removeBindingGroup(args['group_id'])
-        elif args['execute'] :
-            aProject.managers[manager].bindComponents(args['group_id'])
+        if args.add :
+            aProject.managers[manager].addBindingGroup(args.group_id, args.id_list, args.force)
+        elif args.remove :
+            aProject.managers[manager].removeBindingGroup(args.group_id)
+        elif args.execute :
+            aProject.managers[manager].bindComponents(args.group_id)
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
-        aProject.createManager(args['component_type'], 'font')
-        font = aProject.managers[args['component_type'] + '_Font'].checkForSubFont(args['font_id'])
-        manager = args['component_type'] + '_Font'
-        if args['component_type'] :
-            if args['add'] :
+        aProject.createManager(args.component_type, 'font')
+        font = aProject.managers[args.component_type + '_Font'].checkForSubFont(args.font_id)
+        manager = args.component_type + '_Font'
+        if args.component_type :
+            if args.add :
                 # Physically install the font files
-                aProject.managers[manager].installFont(font, args['force'])
-            elif args['remove'] :
-                aProject.managers[manager].removeFont(args['component_type'], font, args['force'])
-            elif args['main'] :
-                aProject.managers[manager].setPrimaryFont(args['component_type'].capitalize(), font, args['force'])
+                aProject.managers[manager].installFont(font, args.force)
+            elif args.remove :
+                aProject.managers[manager].removeFont(args.component_type, font, args.force)
+            elif args.main :
+                aProject.managers[manager].setPrimaryFont(args.component_type.capitalize(), font, args.force)
         else :
             sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
 
     # Hyphenation level commands
     elif sys.argv[1].lower() == 'hyphen' :
-        aProject.createManager(args['component_type'], 'hyphenation')
-        manager = args['component_type'] + '_Hyphenation'
-        if args['add'] :
+        aProject.createManager(args.component_type, 'hyphenation')
+        manager = args.component_type + '_Hyphenation'
+        if args.add :
             aProject.managers[manager].turnOnHyphenation()
-        elif args['remove'] :
+        elif args.remove :
             aProject.managers[manager].turnOffHyphenation()
-        elif args['update'] :
-            aProject.managers[manager].updateHyphenation(args['force'])
-        elif args['compare'] :
+        elif args.update :
+            aProject.managers[manager].updateHyphenation(args.force)
+        elif args.compare :
             aProject.managers[manager].compareWithSource()
 
     # Illustration level commands
     elif sys.argv[1].lower() == 'illustration' :
-        aProject.createManager(args['component_type'], 'illustration')
-        manager = args['component_type'] + '_Illustration'
-        if args['add'] :
-            aProject.managers[manager].installIllustrationFile(args['add'], args['path'], args['force'])
-        elif args['watermark'] :
-            aProject.managers[manager].installWatermarkFile(args['watermark'], args['path'], args['force'])
-        elif args['remove'] :
-            aProject.managers[manager].removeIllustrationFile(args['remove'])
+        aProject.createManager(args.component_type, 'illustration')
+        manager = args.component_type + '_Illustration'
+        if args.add :
+            aProject.managers[manager].installIllustrationFile(args.add, args.path, args.force)
+        elif args.watermark :
+            aProject.managers[manager].installWatermarkFile(args.watermark, args.path, args.force)
+        elif args.remove :
+            aProject.managers[manager].removeIllustrationFile(args.remove)
 
     # Post processing commands
     elif sys.argv[1].lower() == 'postprocess' :
@@ -592,32 +584,32 @@ def userArguments (args, local) :
         # to be used here. If a component name is given it will only run on that
         # component which includes all listed sub-components. Otherwise, all 
         # components of the specified type will be acted on by the postprocess.
-        if args['execute'] :
-            if not args['script'] :
+        if args.execute :
+            if not args.script :
                 sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
-            elif not args['component_name'].lower() :
+            elif not args.component_name.lower() :
                 sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
             else :
-                aProject.runProcessScript(args['component_name'].lower(), args['script'])
+                aProject.runProcessScript(args.component_name.lower(), args.script)
         # Install a custom or a default post process script, force to overwrite what is there
-        elif args['add'] :
+        elif args.add :
             filePath = ''
-            if args['path'] :
-                filePath = resolvePath(args['path'])
+            if args.path :
+                filePath = resolvePath(args.path)
                 if not os.path.isfile(filePath) :
                     sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
-            aProject.installPostProcess(args['component_type'], filePath, args['force'])
+            aProject.installPostProcess(args.component_type, filePath, args.force)
         # Disconnect a post process script from the component type (This does not
         # physically remove it unless -f is used.)
-        elif args['remove'] :
-            aProject.removePostProcess(args['component_type'], force)
+        elif args.remove :
+            aProject.removePostProcess(args.component_type, force)
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
-        aProject = initProject(args['project_id'])
-        if args['configuration'] :
-            if (args['section'] or args['key'] or args['value']) :
-                aProject.changeConfigSetting(args['configuration'], args['section'], args['key'], args['value'])
+        aProject = initProject(args.project_id)
+        if args.configuration :
+            if (args.section or args.key or args.value) :
+                aProject.changeConfigSetting(args.configuration, args.section, args.key, args.value)
             else :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
@@ -626,101 +618,58 @@ def userArguments (args, local) :
     # Exporting commands
     elif sys.argv[1].lower() == 'export' :
         # Check further for required args
-        if not args['component_name'].lower() :
+        if not args.component_name.lower() :
             sys.exit('\nERROR: Component ID is missing from command argument. Process halted!\n')
         else :
-            aProject.createManager(args['component_type'], 'text')
+            aProject.createManager(args.component_type, 'text')
         # Execute an export
-        if args['execute'] :
-            aProject.export(args['component_type'], args['component_name'].lower(), args['path'], args['script'], args['bundle'], args['force'])
+        if args.execute :
+            aProject.export(args.component_type, args.component_name.lower(), args.path, args.script, args.bundle, args.force)
 
     # Install file commands
     elif sys.argv[1].lower() == 'install' :
         # Check further for required args
-        if not args['file'] :
+        if not args.file :
             sys.exit('\nERROR: File was not specified in the command argument. Process halted!\n')
-        elif not args['path'] :
+        elif not args.path :
             sys.exit('\nERROR: Path to the project folder where file is to be installed. Process halted!\n')
         else :
             # Install the file
-            aProject.installFile(args['file'], args['path'], args['force'])
+            aProject.installFile(args.file, args.path, args.force)
 
     # User Macro commands
     elif sys.argv[1].lower() == 'macro' :
         # Check further for required args
-        if not args['name'] :
+        if not args.name :
             sys.exit('\nERROR: Macro was not specified in the command argument. Process halted!\n')
-        if args['add'] :
-            aProject.addMacro(args['name'], args['command'], args['path'], args['force'])
-        elif args['execute'] :
-            aProject.runMacro(args['name'])
+        if args.add :
+            aProject.addMacro(args.name, args.command, args.path, args.force)
+        elif args.execute :
+            aProject.runMacro(args.name)
         else :
             # Bad command
             sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
-        isProject(args['project_id'])
+        isProject(args.project_id)
         # Archive the project
-        if args['archive'] :
-            archiveProject(args['project_id'])
+        if args.archive :
+            archiveProject(args.project_id)
         # Backup the project (simple)
-        elif args['backup'] :
-            backupProject(args['project_id'])
+        elif args.backup :
+            backupProject(args.project_id)
         # Create a template of the current project
-        elif args['template'] :
-            if isTemplate(args['template']) :
-                sys.exit('\nError: This template [' + args['template'] + '] already exsists. Process halted.\n')
-            projectToTemplate(args['project_id'], args['template'])
+        elif args.template :
+            if isTemplate(args.template) :
+                sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
+            projectToTemplate(args.project_id, args.template)
         # Backup (evaporate) to cloud
-
-
-# FIXME: Need to pass "local" on to the backup module
-
-
-        elif args['cloud'] :
-            local   = ProjLocal(rapumaHome, userHome, 'here')
-            ProjBackup(local).pushToCloud(args['project_id'])
-#            pass
-        # Handle bad commands
+        elif args.cloud :
+            ProjBackup(args.project_id).pushToCloud()
         else :
             # Bad command
             sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -c (--cloud). Process halted!\n')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # Totally lost
     else:

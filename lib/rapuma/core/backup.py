@@ -19,52 +19,49 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools          import *
+from rapuma.core.proj_config    import ProjConfig
+from rapuma.core.user_config    import UserConfig
+from rapuma.core.proj_local     import ProjLocal
+from rapuma.core.proj_log       import ProjLog
 
 
 class ProjBackup (object) :
 
-    def __init__(self, local) :
+    def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.local          = local
-        print dir(local)
+        self.rapumaHome     = os.environ.get('RAPUMA_BASE')
+        self.userHome       = os.environ.get('RAPUMA_USER')
+        self.user           = UserConfig(self.rapumaHome, self.userHome)
+        self.userConfig     = self.user.userConfig
+        self.pid            = pid
+        self.projHome       = self.userConfig['Projects'][pid]['projectPath']
+        self.local          = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+        self.projConfig     = ProjConfig(self.local).projConfig
+        self.log            = ProjLog(self.local, self.user)
 
 
-    ###############################################################################
-    ########################## Archive Project Functions ##########################
-    ###############################################################################
+###############################################################################
+########################## Archive Project Functions ##########################
+###############################################################################
 
     def makeExcludeFileList (self) :
         '''Return a list of files that are not necessary to be included in a backup
         template or an archive. These will be all auto-generated files that containe system-
         specific paths, etc.'''
 
-        excludeFiles = []
-        excludeTypes = ['.delayed', '.log', '.parlocs', '.pdf', '.tex', '.piclist', '.adj']
+        excludeFiles        = []
+        excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj']
 
-        # Work out from the component type what the settings file names are
-        for cType in aProject.projConfig['CompTypes'].keys() :
-            rndr = aProject.projConfig['CompTypes'][cType]['renderer']
-            aProject.createManager(cType.lower(), rndr)
-            excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].macLinkFile)
-            excludeFiles.append(aProject.managers[cType.lower() + '_' + rndr.capitalize()].setFileName)
-
-        # Now add to the list all the .tex files that are associated with components
-        for cName in aProject.projConfig['Components'].keys() :
-            # Need to create component obj. (Is there a better way?)
-            aProject.createComponent(cName)
-            # Sort out cid types
-            if aProject.components[cName].getUsfmCid(cName) :
-                for t in excludeTypes :
-                    cidFile = os.path.join(aProject.local.projComponentsFolder, cName, aProject.components[cName].getUsfmCid(cName) + t)
-                    if os.path.isfile(cidFile) :
-                        excludeFiles.append(aProject.components[cName].getUsfmCid(cName) + t)
-            # Sort out cName types
-            for t in excludeTypes :
-                cNameFile = os.path.join(aProject.local.projComponentsFolder, cName, cName + t)
-                if os.path.isfile(cNameFile) :
-                    excludeFiles.append(cName + t)
+        for root, dirs, files in os.walk(self.local.projComponentsFolder) :
+            for fileName in files:
+                ext = os.path.splitext(fileName)[1][1:]
+                if ext in excludeTypes :
+                    if fileName.find('-ext.tex') > 0 :
+                        continue
+                    else :
+                        excludeFiles.append(os.path.join(root, fileName))
 
         return excludeFiles
 
@@ -100,9 +97,9 @@ class ProjBackup (object) :
             dieNow()
 
         # Get a list of files we don't want
-        excludeFiles = makeExcludeFileList(aProject)
+        excludeFiles = self.makeExcludeFileList()
 
-        zipUpProject(aProject.local.projHome, archTarget, excludeFiles)
+        self.zipUpProject(archTarget, excludeFiles)
 
         # Rename the source dir to indicate it was archived
         bakArchProjDir = aProject.local.projHome + '(archived)'
@@ -124,7 +121,7 @@ class ProjBackup (object) :
         terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
 
-    def zipUpProject (self, source, target = None, excludeFiles = None) :
+    def zipUpProject (self, target = None, excludeFiles = None) :
         '''Zip up a project and deposit it to target location. Be sure to strip
         out all all auto-created, user-specific files that could mess up a
         transfer to another system. This goes for archives and backups'''
@@ -138,10 +135,10 @@ class ProjBackup (object) :
     #    excludeException = ['rapuma.log']
         root_len = len(source)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
-            for root, dirs, files in os.walk(source):
+            for root, dirs, files in os.walk(source) :
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
-                for f in files:
+                for f in files :
                     if f in excludeFiles :
                         continue
                     if not f[-1] == '~' :
@@ -210,9 +207,9 @@ class ProjBackup (object) :
         terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
 
-    ###############################################################################
-    ########################### Backup Project Functions ##########################
-    ###############################################################################
+###############################################################################
+########################### Backup Project Functions ##########################
+###############################################################################
 
     def backupProject (self, pid) :
         '''Backup a project. Send the compressed backup file to the user-specified
@@ -239,7 +236,7 @@ class ProjBackup (object) :
         # Get a list of files we don't want
         excludeFiles = makeExcludeFileList(aProject)
 
-        zipUpProject(projHome, backupTarget, excludeFiles)
+        self.zipUpProject(backupTarget, excludeFiles)
 
         # Finish here
         terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget + '\n')
@@ -291,9 +288,9 @@ class ProjBackup (object) :
         terminal('\nRapuma backup [' + pid + '] has been restored to: ' + projHome + '\n')
 
 
-    ###############################################################################
-    ######################### Template Project Functions ##########################
-    ###############################################################################
+###############################################################################
+######################### Template Project Functions ##########################
+###############################################################################
 
     def projectToTemplate (self, pid, tid) :
         '''Preserve critical project information in a template. The pid is the project
@@ -392,9 +389,9 @@ class ProjBackup (object) :
         terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
-    ###############################################################################
-    ############################ Cloud Backup Functions ###########################
-    ###############################################################################
+###############################################################################
+############################ Cloud Backup Functions ###########################
+###############################################################################
 
     def pullFromCloud (self, pid) :
         '''Pull data from cloud storage and merge/replace local data.
@@ -440,34 +437,35 @@ class ProjBackup (object) :
                 terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
 
-    def pushToCloud (self, pid) :
+    def pushToCloud (self) :
         '''Push local project data to the cloud. If a file in the cloud is
         older than the project file, it will be sent. Otherwise, it will
         be skipped.'''
 
-        aProject            = initProject(pid)
-        projHome            = uc.userConfig['Projects'][pid]['projectPath']
-        local               = ProjLocal(rapumaHome, userHome, projHome)
-        cloud               = os.path.join(uc.userConfig['Resources']['cloud'], pid)
+        cloud               = os.path.join(self.userConfig['Resources']['cloud'], self.pid)
 
         # Make a cloud
         if not os.path.isdir(cloud) :
             os.makedirs(cloud)
 
         # Get a list of files we do not want
-        excludeFiles        = makeExcludeFileList(aProject)
+        excludeFiles        = self.makeExcludeFileList()
 
         # Get a total list of files from the project
         cn = 0
         cr = 0
-        for folder, subs, files in os.walk(projHome):
+        for folder, subs, files in os.walk(self.projHome):
             for fileName in files:
-                if fileName not in excludeFiles :
-                    if not os.path.isdir(folder.replace(projHome, cloud)) :
-                        os.makedirs(folder.replace(projHome, cloud))
-                    cFile = os.path.join(folder, fileName).replace(projHome, cloud)
+                if os.path.join(folder, fileName) not in excludeFiles :
+                    if not os.path.isdir(folder.replace(self.projHome, cloud)) :
+                        os.makedirs(folder.replace(self.projHome, cloud))
+                    cFile = os.path.join(folder, fileName).replace(self.projHome, cloud)
                     pFile = os.path.join(folder, fileName)
                     if fileName[-1] == '~' :
+                        continue
+                    elif fileName.find('macLink.tex') > 0 :
+                        continue
+                    elif fileName.find('_set.tex') > 0 :
                         continue
                     elif not os.path.isfile(cFile) :
                         shutil.copy(pFile, cFile)
