@@ -102,67 +102,74 @@ Todo:
         <sectionID>Resources</sectionID>
         <description>This section contains the location of addition resources the user may wish to access. Note resources in these specified locations will override any in the system of the same name.</description>
         <setting>
+            <name>Default Projects Path</name>
+            <key>projects</key>
+            <description>The full path to where projects might be kept. They can go any where but if it is not specified, Rapuma will look here first.</description>
+            <type>string</type>
+            <value>~/Publishing</value>
+        </setting>
+        <setting>
             <name>Fonts Collection Path</name>
             <key>fonts</key>
             <description>The full path to where fonts are kept on this system that the user would like to access. Note that there must be a valid XML description file for each font family.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/fonts</value>
         </setting>
         <setting>
             <name>Illustrations Collection Path</name>
             <key>illustrations</key>
             <description>The full path to where illustrations are kept on this system that the user would like to access. Note that there must be a valid XML description file for each illustration collection.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/illustrations</value>
         </setting>
         <setting>
             <name>Custom Macros Collection Path</name>
             <key>macros</key>
             <description>The full path to where macros are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/macros</value>
         </setting>
         <setting>
             <name>Custom Scripts Collection Path</name>
             <key>scripts</key>
             <description>The full path to where scripts are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/scripts</value>
         </setting>
         <setting>
             <name>Custom Styles Collection Path</name>
             <key>styles</key>
             <description>The full path to where styles are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/styles</value>
         </setting>
         <setting>
             <name>Archived Projects Path</name>
             <key>archives</key>
             <description>The full path to where archives are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/archives</value>
         </setting>
         <setting>
             <name>Backup Projects Path</name>
             <key>backups</key>
             <description>The full path to where backups are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/backups</value>
         </setting>
         <setting>
             <name>Project Templates Path</name>
             <key>templates</key>
             <description>The full path to where templates are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value></value>
+            <value>templates</value>
         </setting>
         <setting>
             <name>Project Cloud Path</name>
             <key>cloud</key>
             <description>The full path to where cloud backups are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value></value>
+            <value>~/Publishing/Rapuma/cloud</value>
         </setting>
         <setting>
             <name>Default Illustrations Library Name</name>

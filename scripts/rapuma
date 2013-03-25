@@ -282,13 +282,13 @@ def userArguments (args, local) :
             deleteProject(uc, pid)
         # Restore (or revert to) the last backup
         elif args.revert :
-            restoreBackup(pid)
+            ProjBackup(args.project_id).restoreBackup()
         # Create/refresh helper scripts
         elif args.scripts :
             Commander(args.project_id).updateScripts()
         # Update (get rained on) from the cloud
         elif args.cloud :
-            pullFromCloud(pid)
+            ProjBackup(args.project_id).pullFromCloud()
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
@@ -311,10 +311,10 @@ def userArguments (args, local) :
                 templateSource = ''
                 if sourcePath :
                     templateSource = os.path.join(sourcePath, tid + '.zip')
-                templateToProject(uc, projFolder, pid, tid, args.name, templateSource)
+                ProjBackup(args.project_id).templateToProject(args.name, templateSource)
             # New (to current system) project from archive
             elif args.archive :
-                restoreArchive(pid, targetPath, sourcePath)
+                ProjBackup(args.project_id).restoreArchive(targetPath, sourcePath)
             # Just creating from scratch
             else :
                 # Create a new project
@@ -533,18 +533,17 @@ def userArguments (args, local) :
 
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
-        isProject(args.project_id)
         # Archive the project
         if args.archive :
-            archiveProject(args.project_id)
+            ProjBackup(args.project_id).archiveProject()
         # Backup the project (simple)
         elif args.backup :
-            backupProject(args.project_id)
+            ProjBackup(args.project_id).backupProject()
         # Create a template of the current project
         elif args.template :
             if isTemplate(args.template) :
                 sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
-            projectToTemplate(args.project_id, args.template)
+            ProjBackup(args.project_id).projectToTemplate(args.template)
         # Backup (evaporate) to cloud
         elif args.cloud :
             ProjBackup(args.project_id).pushToCloud()
@@ -625,7 +624,7 @@ projCommand.add_argument('-m', '--media', help='If creating a new project, give 
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
-projCommand.add_argument('-v', '--revert', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
+projCommand.add_argument('-v', '--revert', action='store_true', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
 projCommand.add_argument('-a', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
 projCommand.add_argument('-c', '--cloud', action='store_true', help='Pull from cloud storage to your local data. Any data in the cloud that is newer than your project data will overwrite files in your project. A backup will be made just before the actual pull operation begins. If the project is not found in your local data set, the cloud function will copy it to the default project location (unless --targetPath is specified) and make an entry for it in your system configuration.')
 

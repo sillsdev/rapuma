@@ -36,6 +36,7 @@ class ProjBackup (object) :
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
         self.pid            = pid
+        self.projects       = self.userConfig['Resources']['projects']
         self.projHome       = self.userConfig['Projects'][pid]['projectPath']
         self.local          = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
         self.projConfig     = ProjConfig(self.local).projConfig
@@ -54,13 +55,36 @@ class ProjBackup (object) :
         excludeFiles        = []
         excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj']
 
+        # Process the components folder
         for root, dirs, files in os.walk(self.local.projComponentsFolder) :
-            for fileName in files:
+            for fileName in files :
+                # Get rid of backup files
+                if fileName[-1] == '~' :
+                    excludeFiles.append(os.path.join(root, fileName))
+                    continue
                 ext = os.path.splitext(fileName)[1][1:]
                 if ext in excludeTypes :
-                    if fileName.find('-ext.tex') > 0 :
+                    # A special indicator for file we want to keep
+                    if fileName.find('-ext.') > 0 :
                         continue
-                    else :
+                    excludeFiles.append(os.path.join(root, fileName))
+
+        # Special processing of the Macros folder (in this case we
+        # want to keep most of the .tex files.)
+        for root, dirs, files in os.walk(self.local.projMacrosFolder) :
+            for fileName in files :
+                # Get rid of backup files
+                if fileName[-1] == '~' :
+                    excludeFiles.append(os.path.join(root, fileName))
+                    continue
+                ext = os.path.splitext(fileName)[1][1:]
+                if ext in excludeTypes :
+                    # A special indicator for file we want to keep
+                    if fileName.find('-ext.') > 0 :
+                        continue
+                    elif fileName.find('macLink.tex') > 0 :
+                        excludeFiles.append(os.path.join(root, fileName))
+                    elif fileName.find('_set.tex') > 0 :
                         excludeFiles.append(os.path.join(root, fileName))
 
         return excludeFiles
@@ -121,29 +145,26 @@ class ProjBackup (object) :
         terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
 
-    def zipUpProject (self, target = None, excludeFiles = None) :
+    def zipUpProject (self, target, excludeFiles = None) :
         '''Zip up a project and deposit it to target location. Be sure to strip
         out all all auto-created, user-specific files that could mess up a
         transfer to another system. This goes for archives and backups'''
 
-        # Do the zip magic here
-        # First list some types we don't want to include in our archive
+        # In case an exclude list is not given
         if not excludeFiles :
             excludeFiles = []
-    #    excludeType = ['.delayed', '.log', '.parlocs', '.pdf']
-    #    # Now list the full file names of any excptions to the above type exclusions
-    #    excludeException = ['rapuma.log']
-        root_len = len(source)
+
+        # Do the zip magic here
+        root_len = len(self.projHome)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
-            for root, dirs, files in os.walk(source) :
+            for root, dirs, files in os.walk(self.projHome) :
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
                 for f in files :
-                    if f in excludeFiles :
+                    if os.path.join(root, f) in excludeFiles :
                         continue
                     if not f[-1] == '~' :
                         fn, fx = os.path.splitext(f)
-    #                    if not fx in excludeType or f in excludeException :
                         fullpath = os.path.join(root, f)
                         zip_name = os.path.join(zip_root, f)
                         myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
@@ -211,21 +232,16 @@ class ProjBackup (object) :
 ########################### Backup Project Functions ##########################
 ###############################################################################
 
-    def backupProject (self, pid) :
+    def backupProject (self) :
         '''Backup a project. Send the compressed backup file to the user-specified
         backup folder. If none is specified, put the archive in cwd. If a valid
         path is specified, send it to that location. This is a very simplified
         backup so it will only keep one copy in any given location. If another
         copy exists, it will overwrite it.'''
 
-        # Check to see if the pid is valid in the system (it has to be)
-        isProject(pid)
-        projHome = uc.userConfig['Projects'][pid]['projectPath']
-        aProject = initProject(pid)
-
         # Set some paths and file names
-        backupName = pid + '.zip'
-        userBackups = uc.userConfig['Resources']['backups']
+        backupName = self.pid + '.zip'
+        userBackups = resolvePath(self.userConfig['Resources']['backups'])
         backupTarget = ''
         if os.path.isdir(userBackups) :
             backupTarget = os.path.join(userBackups, backupName)
@@ -233,59 +249,59 @@ class ProjBackup (object) :
             terminal('\nError: User backup storage path not yet configured!\n')
             dieNow()
 
-        # Get a list of files we don't want
-        excludeFiles = makeExcludeFileList(aProject)
-
-        self.zipUpProject(backupTarget, excludeFiles)
+        # Zip up but use a list of files we don't want
+        self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
         # Finish here
-        terminal('Backup for [' + pid + '] created and saved to: ' + backupTarget + '\n')
+        terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
 
 
-    def restoreBackup (self, pid) :
+    def restoreBackup (self) :
         '''Restore a project from the user specified storage area. If that
-        is not set, it will look for the backup (pid.zip) in cwd. Use path to
-        specify where the project will be restored. Rapuma will register the project
-        there. Otherwise, it will restore to cwd and register it there.'''
+        is not set, it will fail. The project will be restored to the default
+        project area as specified in the Rapuma config. Rapuma will register 
+        the project there.'''
 
-        # Check to see if the user included the extention
-        try :
-            pid.split('.')[1] == 'zip'
-            backName = pid
-            pid = pid.split('.')[0]
-        except :
-            backName = pid + '.zip'
-
-        # Check to see if the pid is valid in the system (it has to be)
-        isProject(pid)
-        projHome = uc.userConfig['Projects'][pid]['projectPath']
-
+        # Assuming the above, this will be the archive file name
         # Check to see if the archive exsists
-        try :
-            if os.path.isdir(uc.userConfig['Resources']['backups']) :
-                backup = os.path.join(uc.userConfig['Resources']['backups'], backName)
-        except :
+        backup = os.path.join(resolvePath(self.userConfig['Resources']['backups']), self.pid + '.zip')
+        if not os.path.exists(resolvePath(self.userConfig['Resources']['backups'])) :
             terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
             dieNow()
 
-        # Make the exsiting project a temp backup in case something goes wrong
-        if os.path.isdir(projHome) :
+#        import pdb; pdb.set_trace()
+
+        # If there is an exsiting project make a temp backup in 
+        # case something goes dreadfully wrong
+        if os.path.exists(self.projHome) :
             # Remove old backup-backup
-            if os.path.isdir(projHome + '.bak') :
-                shutil.rmtree(projHome + '.bak')
+            if os.path.exists(self.projHome + '.bak') :
+                shutil.rmtree(self.projHome + '.bak')
             # Make a fresh copy of the backup-backup
-            shutil.copytree(projHome, projHome + '.bak')
+            shutil.copytree(self.projHome, self.projHome + '.bak')
+            # For succeful extraction we need to delete the target
+            if os.path.exists(self.projHome) :
+                shutil.rmtree(self.projHome)
 
         # If we made it this far, extract the archive
         with zipfile.ZipFile(backup, 'r') as myzip :
-            myzip.extractall(projHome)
+            myzip.extractall(self.projHome)
 
-        # Permission for executables is lost in the zip, fix it here
-        for folder in ['Scripts', os.path.join('Macros', 'User')] :
-            fixExecutables(os.path.join(projHome, folder))
+        # Permission for executables is lost in the zip, fix them here
+        fixExecutables(self.projHome)
+
+
+
+
+
+# FIXME: Maybe here we want to register this if it isn't already?
+
+
+
+
 
         # Finish here (We will leave the backup-backup in place)
-        terminal('\nRapuma backup [' + pid + '] has been restored to: ' + projHome + '\n')
+        terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
 
 
 ###############################################################################
@@ -325,7 +341,7 @@ class ProjBackup (object) :
         os.remove(os.path.join(targetDir, 'rapuma.log'))
 
         # Exclude files
-        excludeFiles = makeExcludeFileList(aProject)
+        excludeFiles = makeExcludeFileList()
 
         # Zip it up using the above params
         root_len = len(targetDir)
@@ -442,7 +458,7 @@ class ProjBackup (object) :
         older than the project file, it will be sent. Otherwise, it will
         be skipped.'''
 
-        cloud               = os.path.join(self.userConfig['Resources']['cloud'], self.pid)
+        cloud = os.path.join(resolvePath(self.userConfig['Resources']['cloud']), self.pid)
 
         # Make a cloud
         if not os.path.isdir(cloud) :
@@ -456,21 +472,20 @@ class ProjBackup (object) :
         cr = 0
         for folder, subs, files in os.walk(self.projHome):
             for fileName in files:
+                # Do not include any backup files we find
+                if fileName[-1] == '~' :
+                    continue
                 if os.path.join(folder, fileName) not in excludeFiles :
                     if not os.path.isdir(folder.replace(self.projHome, cloud)) :
                         os.makedirs(folder.replace(self.projHome, cloud))
                     cFile = os.path.join(folder, fileName).replace(self.projHome, cloud)
                     pFile = os.path.join(folder, fileName)
-                    if fileName[-1] == '~' :
-                        continue
-                    elif fileName.find('macLink.tex') > 0 :
-                        continue
-                    elif fileName.find('_set.tex') > 0 :
-                        continue
-                    elif not os.path.isfile(cFile) :
+                    if not os.path.isfile(cFile) :
                         shutil.copy(pFile, cFile)
                         cn +=1
-                    elif isOlder(pFile, cFile) :
+                    # Otherwise if the cloud file is older than
+                    # the project file, refresh it
+                    elif isOlder(cFile, pFile) :
                         if os.path.isfile(cFile) :
                             os.remove(cFile)
                         shutil.copy(pFile, cFile)
