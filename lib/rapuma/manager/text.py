@@ -102,6 +102,21 @@ class Text (Manager) :
             writeConfFile(self.project.projConfig)
 
 
+
+
+
+# FIXME: updateManagerSettings is not being called right now. Might be 
+# good to call this when an update is done. We have to have a source path
+# Whenever that happens, that is where this chokes
+
+
+
+
+
+
+
+
+
     def updateManagerSettings (self, gid) :
         '''Update the settings for this manager if needed.'''
 

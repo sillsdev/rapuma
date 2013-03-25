@@ -175,13 +175,13 @@ def deleteProject (uc, pid = None) :
 
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.
-    If it is not, stop the process.'''
+    Return False if it is not.'''
 
     try :
         if pid in uc.userConfig['Projects'].keys() :
-            pass
+            return True
     except :
-        sys.exit('\nERROR: Project ID [' + pid + '] is not valid! Process halted.\n')
+        return False
 
 
 def isTemplate (tid) :
@@ -282,7 +282,16 @@ def userArguments (args, local) :
             deleteProject(uc, pid)
         # Restore (or revert to) the last backup
         elif args.revert :
-            ProjBackup(args.project_id).restoreBackup()
+            if isProject(args.project_id) :
+                ProjBackup(args.project_id).restoreBackup()
+            else :
+                if args.targetPath :
+                    if os.path.exists(resolvePath(args.targetPath)) :
+                        ProjBackup(args.project_id).restoreBackup(os.path.join(resolvePath(args.targetPath), args.project_id))
+                    else :
+                        sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                else :
+                    sys.exit('\nERROR: To restore this backup, a path must be provided with -g. Process halting.\n')
         # Create/refresh helper scripts
         elif args.scripts :
             Commander(args.project_id).updateScripts()

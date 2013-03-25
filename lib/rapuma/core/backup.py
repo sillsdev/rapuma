@@ -36,11 +36,59 @@ class ProjBackup (object) :
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
         self.pid            = pid
-        self.projects       = self.userConfig['Resources']['projects']
-        self.projHome       = self.userConfig['Projects'][pid]['projectPath']
-        self.local          = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-        self.projConfig     = ProjConfig(self.local).projConfig
-        self.log            = ProjLog(self.local, self.user)
+        self.projHome       = None
+        self.local          = None
+        self.projConfig     = None
+        self.finishInit()
+
+
+    def finishInit (self, projHome = None) :
+        '''Finishing collecting settings that would be needed for most
+        functions in this module.'''
+
+        # Look for an existing project home path
+        try :
+            localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
+        except :
+            localProjHome   = ''
+        # Testing: The local project home wins over a user provided one
+        if localProjHome and not projHome :
+            self.projHome   = localProjHome
+        elif projHome :
+            self.projHome   = projHome
+        
+        # If a projHome was succefully found, we can go on
+        if self.projHome : 
+            self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.projConfig = ProjConfig(self.local).projConfig
+
+
+    def registerProject (self) :
+        '''Do a basic project registration with information available in a
+        project backup.'''
+
+        # If this is a new project to the system, we should have a projHome
+        # by now so we can try to get the projConfig now
+        self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+        self.projConfig = ProjConfig(self.local).projConfig
+
+        if len(self.projConfig) :
+            pName = self.projConfig['ProjectInfo']['projectName']
+            pid = self.projConfig['ProjectInfo']['projectIDCode']
+            pmid = self.projConfig['ProjectInfo']['projectMediaIDCode']
+            pCreate = self.projConfig['ProjectInfo']['projectCreateDate']
+            if not isConfSection(self.userConfig['Projects'], pid) :
+                buildConfSection(self.userConfig['Projects'], pid)
+                self.userConfig['Projects'][pid]['projectName']         = pName
+                self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
+                self.userConfig['Projects'][pid]['projectPath']         = self.projHome
+                self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
+                writeConfFile(self.userConfig)
+            else :
+                dieNow('Project already registered in the system.\n\n')
+        else :
+            dieNow('Error: Could not find/open the Project configuration file. Project could not be registered!\n\n')
+
 
 
 ###############################################################################
@@ -256,11 +304,14 @@ class ProjBackup (object) :
         terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
 
 
-    def restoreBackup (self) :
+    def restoreBackup (self, projHome = None) :
         '''Restore a project from the user specified storage area. If that
         is not set, it will fail. The project will be restored to the default
         project area as specified in the Rapuma config. Rapuma will register 
         the project there.'''
+
+        if projHome :
+            self.finishInit(projHome)
 
         # Assuming the above, this will be the archive file name
         # Check to see if the archive exsists
@@ -269,11 +320,10 @@ class ProjBackup (object) :
             terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
             dieNow()
 
-#        import pdb; pdb.set_trace()
 
         # If there is an exsiting project make a temp backup in 
         # case something goes dreadfully wrong
-        if os.path.exists(self.projHome) :
+        if os.path.isdir(self.projHome) :
             # Remove old backup-backup
             if os.path.exists(self.projHome + '.bak') :
                 shutil.rmtree(self.projHome + '.bak')
@@ -283,6 +333,8 @@ class ProjBackup (object) :
             if os.path.exists(self.projHome) :
                 shutil.rmtree(self.projHome)
 
+#        import pdb; pdb.set_trace()
+
         # If we made it this far, extract the archive
         with zipfile.ZipFile(backup, 'r') as myzip :
             myzip.extractall(self.projHome)
@@ -290,15 +342,8 @@ class ProjBackup (object) :
         # Permission for executables is lost in the zip, fix them here
         fixExecutables(self.projHome)
 
-
-
-
-
-# FIXME: Maybe here we want to register this if it isn't already?
-
-
-
-
+        # If this is a new project we will need to register it now
+        self.registerProject()
 
         # Finish here (We will leave the backup-backup in place)
         terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')

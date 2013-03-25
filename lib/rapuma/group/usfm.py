@@ -117,8 +117,44 @@ class Usfm (Group) :
 
             self.font.installFont(font)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# FIXME: Updating the manager here is not a good idea, especially when the group
+# source path is missing. This is commented out for now until this can be figured out
+# However, this is not being called at all so there is no way to update the text
+# manager at this point.
+
         # manager (It might be better to do this elsewhere, but where?)
-        self.project.managers[self.cType + '_Text'].updateManagerSettings(self.gid)
+#        self.project.managers[self.cType + '_Text'].updateManagerSettings(self.gid)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
