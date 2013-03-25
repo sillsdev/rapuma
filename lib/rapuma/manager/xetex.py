@@ -86,8 +86,9 @@ class Xetex (Manager) :
         self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
-        self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
         self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
+        self.useBoxBoarder          = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
 
         # File names
         # Some of these file names will only be used once but for consitency
@@ -101,6 +102,7 @@ class Xetex (Manager) :
         self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
         self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
         self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
+        self.boxBoarderFileName     = self.layoutConfig['PageLayout']['boxBoarderFile']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.rapumaMacPackFolder    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
@@ -140,7 +142,7 @@ class Xetex (Manager) :
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         self.watermarkFile          = os.path.join(self.projIllustrationsFolder, self.watermarkFileName)
         self.linesFile              = os.path.join(self.projIllustrationsFolder, self.linesFileName)
-
+        self.boxBoarderFile         = os.path.join(self.projIllustrationsFolder, self.boxBoarderFileName)
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -801,6 +803,20 @@ class Xetex (Manager) :
                     # If we don't succeed, we should probably quite here
                     self.project.log.writeToLog('XTEX-140', [str(e)])
                     dieNow()
+
+            # Add a box around the page (for proof reading)
+            if self.useBoxBoarder :
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.boxBoarderFile, 'output', tempName(self.gidPdfFile)]
+                try :
+                    subprocess.call(cmd)
+                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(tempName(self.gidPdfFile))
+                    self.project.log.writeToLog('XTEX-145')
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.project.log.writeToLog('XTEX-140', [str(e)])
+                    dieNow()
+
         else :
             self.project.log.writeToLog('XTEX-090', [fName(self.gidPdfFile)])
 

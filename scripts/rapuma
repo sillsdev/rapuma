@@ -52,6 +52,7 @@ from rapuma.core.tools import *
 from rapuma.core.user_config import UserConfig
 from rapuma.core.proj_config import ProjConfig
 from rapuma.core.backup import ProjBackup
+from rapuma.core.commander import Commander
 from rapuma.project.project import Project
 
 # Instantiate User classes
@@ -219,126 +220,6 @@ def accessHtmlHelp () :
 ########################### Helper Script Functions ###########################
 ###############################################################################
 
-def makeScriptHeader (desc) :
-    '''Make a helper script header.'''
-
-    return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\n'
-
-
-def getStaticScripInfo (aProject) :
-    '''Create a dictionary of all the static auxillary script information used in
-    most projects.'''
-
-    pid = aProject.projectIDCode
-    gid = aProject.gid
-    cType = aProject.cType
-    mid = aProject.projectMediaIDCode
-
-    return {
-            'add'           : ['Add a group.',                                      'rapuma group ' + pid + ' ' + gid + ' $1 -a -s $2 -i $3 '], 
-            'addBible'      : ['Add Scripture components for a Bible group.',       'rapuma group ' + pid + ' Bible -c ' + cType + '-a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-            'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' ' + gid + ' NT -a -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-            'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' ' + gid + ' OT -a -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
-            'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
-            'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
-            'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -u '], 
-            'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p '], 
-            'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False '], 
-            'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks True '], 
-            'hyphenCompare' : ['Compare working hyphen file with source.',          'rapuma hyphen ' + pid + ' ' + cType + ' -c  '], 
-            'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 
-            'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
-            'hyphenUpdate'  : ['Update hyphenation working files.',                 'rapuma hyphen ' + pid + ' ' + cType + ' -u $1 '], 
-            'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False '], 
-            'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines True '], 
-            'listComps'     : ['List all USFM components.',                         'rapuma group ' + pid + ' ' + gid + ' -o '], 
-            'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
-            'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
-            'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
-            'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
-            'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
-            'updateRapuma'  : ['Update Rapuma and the project scripts.',            'rapuma system -u \n\nrapuma project ' + pid + ' -s '], 
-            'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark False '], 
-            'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark True \n\n']
-        }
-
-
-def getGrpScripInfo (aProject, gid) :
-    '''Create a dictionary of the auxillary group script information used in
-    most projects.'''
-
-    pid = aProject.projectIDCode
-    cType = aProject.cType
-    mid = aProject.projectMediaIDCode
-
-    return {
-            'compare'       : ['Compare component working text with start point.',  'rapuma group ' + pid + ' ' + gid + ' $1 -c working'], 
-            'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' ' + gid + ' -c $1 -g -s'], 
-            'export'        : ['Export working text from the ' + gid + ' group.',   'rapuma export ' + pid + ' ' + gid + ' $1 -e -f  '], 
-            'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e -f '], 
-            'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u -f '], 
-            'view'          : ['View the ' + gid + ' group PDF file.',              'rapuma group ' + pid + ' ' + gid + ' -e ']
-        }
-
-
-def makeGrpScripts (aProject) :
-    '''Create scripts that process specific group components.'''
-
-    # Output the scripts (If this is a new project we need to pass)
-    if isConfSection(aProject.projConfig, 'Groups') :
-        for group in aProject.projConfig['Groups'].keys() :
-            allScripts = getGrpScripInfo(aProject, group)
-            for key in allScripts.keys() :
-                fullFile = os.path.join(aProject.local.projScriptsFolder, key) + group.capitalize()
-                with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(makeScriptHeader(allScripts[key][0]))
-                    writeObject.write(allScripts[key][1] + '\n\n')
-
-                # Make the script executable
-                makeExecutable(fullFile)
-        
-        terminal('\nCompleted creating/recreating group helper scripts.\n')
-    else :
-        pass
-
-
-def makeStaticScripts (aProject) :
-    '''Create helper scripts for a project to help with repetitive tasks.
-    If any scripts are present with the same name they will be overwritten.
-    Note: This is only for temporary use due to the lack of an interface at
-    this time (20130306140636). It assumes the cType is usfm which, at some point
-    may not be the case.'''
-
-    # Output the scripts
-    allScripts = getStaticScripInfo(aProject)
-    for key in allScripts.keys() :
-        fullFile = os.path.join(aProject.local.projScriptsFolder, key)
-        with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write(makeScriptHeader(allScripts[key][0]))
-            writeObject.write(allScripts[key][1] + '\n\n')
-
-        # Make the script executable
-        makeExecutable(fullFile)
-
-    # Outpu scripts for project groups
-    # FIXME: write the code for this
-
-    terminal('\nCompleted creating/recreating static helper scripts.\n')
-
-
-def updateScripts (uc, pid) :
-
-    aProject = initProject(pid)
-    projHome            = uc.userConfig['Projects'][pid]['projectPath']
-    local               = ProjLocal(rapumaHome, userHome, projHome)
-    aProject.cType      = 'usfm'
-
-    if not os.path.isdir(aProject.local.projScriptsFolder) :
-        os.mkdir(aProject.local.projScriptsFolder)
-
-    makeStaticScripts(aProject)
-    makeGrpScripts(aProject)
-
 
 def updateRapuma () :
     '''Run the general update script that will pull down the latest version
@@ -404,7 +285,7 @@ def userArguments (args, local) :
             restoreBackup(pid)
         # Create/refresh helper scripts
         elif args.scripts :
-            updateScripts(uc, pid)
+            Commander(args.project_id).updateScripts()
         # Update (get rained on) from the cloud
         elif args.cloud :
             pullFromCloud(pid)
@@ -442,7 +323,7 @@ def userArguments (args, local) :
                 newProject(uc, pc, args.project_id, args.name, args.template, args.media)
                 # Create helper scripts if desired
                 if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                    updateScripts(uc, args.project_id)
+                    Commander(args.project_id).updateScripts()
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -463,12 +344,12 @@ def userArguments (args, local) :
             # Having sorted through any potential problems, try adding the group
             aProject.addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                updateScripts(uc, args.project_id)
+                Commander(args.project_id).updateScripts()
         # Remove a group from the project
         elif args.remove :
             aProject.removeGroup(args.group_id, args.force)
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                updateScripts(uc, args.project_id)
+                Commander(args.project_id).updateScripts()
         # Update a component, --source is optional but if given it will
         elif args.update :
             # overwrite the current setting. The --force setting will be needed

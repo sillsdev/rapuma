@@ -66,6 +66,8 @@ class Illustration (Manager) :
         self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
         self.projLinesFileName          = self.layoutConfig['PageLayout']['linesFile']
         self.rpmDefLinesFileName        = 'lines_default.pdf'
+        self.boxBoarderFileName         = self.layoutConfig['PageLayout']['boxBoarderFile']
+        self.rpmBoxBoarderFileName      = 'box_background.pdf'
         # Folder paths
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
@@ -76,6 +78,8 @@ class Illustration (Manager) :
         self.rpmDefWatermarkFile        = os.path.join(self.rpmIllustrationsFolder, self.rpmDefWatermarkFileName)
         self.projLinesFile              = os.path.join(self.projIllustrationsFolder, self.projLinesFileName)
         self.rpmDefLinesFile            = os.path.join(self.rpmIllustrationsFolder, self.rpmDefLinesFileName)
+        self.boxBoarderFile             = os.path.join(self.projIllustrationsFolder, self.boxBoarderFileName)
+        self.rpmBoxBoarderFile          = os.path.join(self.rpmIllustrationsFolder, self.rpmBoxBoarderFileName)
 
         # If we have nothing in the project for pointing to an illustrations
         # lib, put the default in here
@@ -156,6 +160,20 @@ class Illustration (Manager) :
                 shutil.copy(self.rpmDefLinesFile, self.projLinesFile)
                 self.project.log.writeToLog('ILUS-080', [fName(self.projLinesFile)])
             except Exception as e :
+
+                # If this doesn't work, we should probably quite here
+                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
+
+
+    def installBoxBoarderFile (self) :
+        '''Install a background lines file into the project.'''
+
+        if not os.path.exists(self.boxBoarderFile) :
+            try :
+                shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
+                self.project.log.writeToLog('ILUS-080', [fName(self.boxBoarderFile)])
+            except Exception as e :
+
                 # If this doesn't work, we should probably quite here
                 dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
 

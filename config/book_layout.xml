@@ -848,6 +848,20 @@ Todo:
             <value>lines_background.pdf</value>
         </setting>
         <setting>
+            <name>Use Box Boarder</name>
+            <key>useBoxBoarder</key>
+            <description>Turn on (or off) the use of a page sized box in the background to show the reader the actual page size. This helps with proof reading and format discovery.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Box Boarder Background File</name>
+            <description>The default background file used to display a box behind the text, if that feature is selected.</description>
+            <key>boxBoarderFile</key>
+            <type>string</type>
+            <value>box_background.pdf</value>
+        </setting>
+        <setting>
             <name>USFM TeX Page Height</name>
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>

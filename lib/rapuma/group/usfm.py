@@ -180,6 +180,7 @@ class Usfm (Group) :
         useWatermark            = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
+        useBoxBoarder           = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         useManualAdjustments    = str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
 
         # See if the working text is present for each subcomponent in the
@@ -239,6 +240,10 @@ class Usfm (Group) :
         # Same for lines background file used for composition
         if useLines :
             self.illustration.installLinesFile()
+
+        # Same for box background file used for composition
+        if useBoxBoarder :
+            self.illustration.installBoxBoarderFile()
 
         # Any more stuff to run?
 
