@@ -388,10 +388,32 @@ class Project (object) :
             self.log.writeToLog('GRUP-120', [gid])
 
 
-    def updateGroup (self, gid, cidList = None, force = False) :
+    def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
         '''Update a group, --source is optional but if given it will
         overwrite the current setting. The use of this function implies
         that this is forced so no force setting is used.'''
+
+        # Just in case there are any problems with the source path
+        # resolve it here before going on.
+        csid = self.projConfig['Groups'][gid]['csid']
+        if not sourcePath :
+            try :
+                sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+                if not os.path.exists(sourcePath) :
+                    self.log.writeToLog('GRUP-020', [csid])
+                    dieNow()
+            except :
+                self.log.writeToLog('GRUP-025', [csid])
+                dieNow()
+        else :
+            sourcePath = resolvePath(sourcePath)
+            if not os.path.exists(sourcePath) :
+                self.log.writeToLog('GRUP-030')
+                dieNow()
+
+            # Reset the source path for this csid
+            self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = sourcePath
+            writeConfFile(self.userConfig)
 
         # Create the group object now
         self.createGroup(gid)

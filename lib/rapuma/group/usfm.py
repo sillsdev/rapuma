@@ -675,15 +675,6 @@ class Usfm (Group) :
         return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType))
 
 
-    def getUsfmCidInfo (self, cid) :
-        '''Return a list of info about a specific cid used in the PT context.'''
-
-        try :
-            return self.usfmCidInfo()[cid]
-        except :
-            return False
-
-
 ###############################################################################
 ###############################################################################
 ############################## ParaTExt Classes ###############################
@@ -986,6 +977,16 @@ class PT_Tools (Group) :
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
 
+
+    def getUsfmCidInfo (self, cid) :
+        '''Return a list of info about a specific cid used in the PT context.'''
+
+        try :
+            return self.usfmCidInfo()[cid]
+        except :
+            return False
+
+
     def getNWFChars (self) :
         '''Return a list of non-word-forming characters from the PT settings
         field [ValidPunctuation] in the translation project.'''
@@ -1029,7 +1030,7 @@ class PT_Tools (Group) :
             prePart = self.projConfig['Managers']['usfm_Text']['prePart']
 
             if nameFormID == '41MAT' :
-                mainName = self.project.groups[gid].getUsfmCidInfo(cid)[2] + cid.upper()
+                mainName = self.getUsfmCidInfo(cid)[2] + cid.upper()
                 if prePart and prePart != 'None' :
                     thisFile = prePart + mainName + postPart
                 else :
