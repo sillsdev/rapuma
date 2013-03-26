@@ -37,6 +37,13 @@ Todo:
         <sectionID>ChapterVerse</sectionID>
         <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
         <setting>
+            <name>Omit Chapter Number On Single Chapter Book</name>
+            <description>Setting this to True will prevent the chapter number 1 from being displayed single chapter books.  Default = True</description>
+            <key>omitChapterNumberOnSingleChapterBook</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
             <name>Omit Verse Number One</name>
             <description>Setting this to True will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Default = True</description>
             <key>omitVerseNumberOne</key>

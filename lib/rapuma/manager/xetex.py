@@ -60,8 +60,6 @@ class Xetex (Manager) :
         self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
         self.style                  = self.managers[self.cType + '_Style']
-#        print dir(self.project.groups[self.gid])
-#        self.group                  = self.project.groups[self.gid]
         # Get config objs
         self.projConfig             = project.projConfig
         self.layoutConfig           = self.layout.layoutConfig
@@ -85,6 +83,7 @@ class Xetex (Manager) :
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
+        self.chapNumOffSingChap     = str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
         self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
         self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
         self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
@@ -136,9 +135,6 @@ class Xetex (Manager) :
         self.lccodeTexFile          = self.hyphenation.lccodeTexFile
         self.compHyphFile           = self.hyphenation.compHyphFile
         self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
-#        self.hyphExcepTexFile       = self.hyphenation.hyphExcepTexFileName
-#        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
-#        self.hyphExcepTexFile       = os.path.join(self.projHyphenationFolder, self.hyphExcepTexFileName)
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         self.watermarkFile          = os.path.join(self.projIllustrationsFolder, self.watermarkFileName)
         self.linesFile              = os.path.join(self.projIllustrationsFolder, self.linesFileName)
@@ -637,6 +633,9 @@ class Xetex (Manager) :
             read this file to get all of links to other instructions (macros) \
             needed to render the group, or a component of a group.'
 
+        # Get some cid info we will need below
+        cidInfo = self.pt_tools.usfmCidInfo()
+
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
         # for dependency checking
@@ -665,7 +664,12 @@ class Xetex (Manager) :
                 gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             for cid in cidList :
                 cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
-                gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                    gidTexObject.write('\\OmitChapterNumbertrue\n') 
+                    gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    gidTexObject.write('\\OmitChapterNumberfalse\n') 
+                else :
+                    gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
 

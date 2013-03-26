@@ -326,7 +326,6 @@ class Project (object) :
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
-#        cidList     = self.projConfig['Groups'][gid]['cidList']
         csid        = self.projConfig['Groups'][gid]['csid']
         sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
 
