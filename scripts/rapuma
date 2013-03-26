@@ -297,7 +297,16 @@ def userArguments (args, local) :
             Commander(args.project_id).updateScripts()
         # Update (get rained on) from the cloud
         elif args.cloud :
-            ProjBackup(args.project_id).pullFromCloud()
+            if isProject(args.project_id) :
+                ProjBackup(args.project_id).pullFromCloud()
+            else :
+                if args.targetPath :
+                    if os.path.exists(resolvePath(args.targetPath)) :
+                        ProjBackup(args.project_id).pullFromCloud(os.path.join(resolvePath(args.targetPath), args.project_id))
+                    else :
+                        sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                else :
+                    sys.exit('\nERROR: To get rain from this cloud, a path must be provided with -g. Process halting.\n')
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params

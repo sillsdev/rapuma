@@ -47,9 +47,9 @@ class ProjBackup (object) :
         functions in this module.'''
 
         # Look for an existing project home path
-        try :
+        if self.isProject(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
-        except :
+        else :
             localProjHome   = ''
         # Testing: The local project home wins over a user provided one
         if localProjHome and not projHome :
@@ -61,6 +61,16 @@ class ProjBackup (object) :
         if self.projHome : 
             self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
             self.projConfig = ProjConfig(self.local).projConfig
+
+
+    def isProject (self, pid) :
+        '''Simple test to see if a project is registered in the Rapuma config.'''
+
+        try :
+            projHome = self.userConfig['Projects'][pid]['projectPath']
+            return True
+        except :
+            return False
 
 
     def registerProject (self) :
@@ -287,6 +297,10 @@ class ProjBackup (object) :
         backup so it will only keep one copy in any given location. If another
         copy exists, it will overwrite it.'''
 
+        if not self.isProject(self.pid) :
+            terminal('\nThe ' + self.pid + ' project is not registered. No backup was done.')
+            return False
+
         # Set some paths and file names
         backupName = self.pid + '.zip'
         userBackups = resolvePath(self.userConfig['Resources']['backups'])
@@ -302,6 +316,8 @@ class ProjBackup (object) :
 
         # Finish here
         terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
+        
+        return True
 
 
     def restoreBackup (self, projHome = None) :
@@ -454,35 +470,33 @@ class ProjBackup (object) :
 ############################ Cloud Backup Functions ###########################
 ###############################################################################
 
-    def pullFromCloud (self, pid) :
+    def pullFromCloud (self, projHome = None) :
         '''Pull data from cloud storage and merge/replace local data.
         Do a full backup first before starting the actual pull operation.'''
 
-
-    # FIXME: Need to add project addition to this for projects that are not
-    # registered with the local system.
-
+        # In case there was not enough info at init time
+        if projHome :
+            self.finishInit(projHome)
 
         # Do not do anything until we have done a backup
-        backupProject(pid)
+        self.backupProject()
 
         # Get the paths we need
-        cloud               = os.path.join(uc.userConfig['Resources']['cloud'], pid)
-        projHome            = uc.userConfig['Projects'][pid]['projectPath']
+        cloud               = os.path.join(resolvePath(self.userConfig['Resources']['cloud']), self.pid)
 
         # Get a total list of files from the project
         cn = 0
         cr = 0
         for folder, subs, files in os.walk(cloud):
             for fileName in files:
-                if not os.path.isdir(folder.replace(cloud, projHome)) :
-                    os.makedirs(folder.replace(cloud, projHome))
+                if not os.path.isdir(folder.replace(cloud, self.projHome)) :
+                    os.makedirs(folder.replace(cloud, self.projHome))
                 cFile = os.path.join(folder, fileName)
-                pFile = os.path.join(folder, fileName).replace(cloud, projHome)
+                pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
                 if not os.path.isfile(pFile) :
                     shutil.copy(cFile, pFile)
                     cn +=1
-                elif isOlder(cFile, pFile) :
+                elif isOlder(pFile, cFile) :
                     if os.path.isfile(pFile) :
                         os.remove(pFile)
                     shutil.copy(cFile, pFile)
@@ -496,6 +510,9 @@ class ProjBackup (object) :
                 terminal('\tAdded: ' + str(cn) + ' file(s).\n')
             if cr > 0 :
                 terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
+
+        # If this is a new project we will need to register it now
+        self.registerProject()
 
 
     def pushToCloud (self) :
