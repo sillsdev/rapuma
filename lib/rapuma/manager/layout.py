@@ -21,7 +21,6 @@
 
 import os, shutil
 
-
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
@@ -33,16 +32,12 @@ from rapuma.project.manager import Manager
 
 class Layout (Manager) :
 
-    # Shared values
-    xmlConfFile     = 'layout_default.xml'
-
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
 
         super(Layout, self).__init__(project, cfg)
 
         # List the renderers this manager supports
-#        self.pt_tools                       = PT_Tools(project)
         self.cType                          = cType
         self.Ctype                          = cType.capitalize()
         self.manager                        = self.cType + '_Layout'
@@ -51,45 +46,21 @@ class Layout (Manager) :
         self.projConfig                     = self.project.projConfig
         self.projMediaType                  = self.project.projectMediaIDCode
         # File names
-        self.layoutDefaultXmlConfFileName   = self.project.projectMediaIDCode + '_layout.xml'
-        self.layoutDefaultConfFileName   = self.project.projectMediaIDCode + '_layout.conf'
-        self.layoutConfFile                 = os.path.join(self.project.local.projConfFolder, self.layoutDefaultConfFileName)
+        self.defaultXmlConfFileName         = self.project.projectMediaIDCode + '_layout.xml'
+        self.layoutConfFileName             = self.project.projectMediaIDCode + '_layout.conf'
+        # Paths
+        self.projConfFolder                 = self.project.local.projConfFolder
+        self.rapumaConfigFolder             = self.project.local.rapumaConfigFolder
+        # Files with paths
+        self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
+        self.defaultXmlConfFile             = os.path.join(self.rapumaConfigFolder, self.defaultXmlConfFileName)
         # Set local var and override in project object (if needed)
         self.project.local.layoutConfFile   = self.layoutConfFile
-        self.layoutDefaultXmlConfFile       = os.path.join(self.project.local.rapumaConfigFolder, self.layoutDefaultXmlConfFileName)
+        # Load the config object
+        self.layoutConfig = initConfig(self.layoutConfFile, self.defaultXmlConfFile)
         # Grab the projConfig settings for this manager
-        self.compSettings = self.project.projConfig['Managers'][self.manager]
-        for k, v in self.compSettings.iteritems() :
+        for k, v in self.project.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)
-
-        # Load the layoutConfFile
-        # At this point, on a new project, only default settings will be
-        # in the layoutConfFile. The renderer manager my have more settings
-        # to add when it gets there
-        if not os.path.isfile(self.layoutConfFile) :
-            self.layoutConfig           = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
-            self.layoutConfig.filename  = self.layoutConfFile
-            writeConfFile(self.layoutConfig)
-            self.project.log.writeToLog('LYOT-010')
-        else :
-            # But check against the default for possible new settings
-            self.layoutConfig           = ConfigObj(encoding='utf-8')
-            orgLayoutConfig             = ConfigObj(self.layoutConfFile, encoding='utf-8')
-            orgFileName                 = orgLayoutConfig.filename
-            layoutDefault               = ConfigObj(getXMLSettings(self.layoutDefaultXmlConfFile), encoding='utf-8')
-            layoutDefault.merge(orgLayoutConfig)
-            # A key comparison should be enough to tell if it is the same or not
-            if orgLayoutConfig.keys() == layoutDefault.keys() :
-                self.layoutConfig = orgLayoutConfig
-                self.layoutConfig.filename = orgFileName
-# Probably not needed to report as it should be normal
-#                self.project.log.writeToLog('LYOT-020')
-            else :
-                self.layoutConfig = layoutDefault
-                self.layoutConfig.filename = orgFileName
-                writeConfFile(self.layoutConfig)
-                self.project.log.writeToLog('LYOT-030')
-
 
 ###############################################################################
 ############################ Manager Level Functions ##########################

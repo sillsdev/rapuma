@@ -269,6 +269,38 @@ def rtnUnicodeValue(char) :
 ########################## Config/Dictionary routines #########################
 ###############################################################################
 
+def initConfig (confFile, defaultFile) :
+    '''Initialize or load a config file. This will load a config file if an
+    existing one is there and update it with any new system default settings
+    If one does not exist a new one will be created based on system default
+    settings.'''
+
+
+    projConfFolder = os.path.split(confFile)[0]
+
+    if not os.path.isfile(confFile) :
+        configObj           = ConfigObj(getXMLSettings(defaultFile), encoding='utf-8')
+        configObj.filename  = confFile
+        writeConfFile(configObj)
+    else :
+        # But check against the default for possible new settings
+        configObj               = ConfigObj(encoding='utf-8')
+        orgConfigObj             = ConfigObj(confFile, encoding='utf-8')
+        orgFileName                 = orgConfigObj.filename
+        defaultObj               = ConfigObj(getXMLSettings(defaultFile), encoding='utf-8')
+        defaultObj.merge(orgConfigObj)
+        # A key comparison should be enough to tell if it is the same or not
+        if confObjCompare(defaultObj, orgConfigObj, projConfFolder) :
+            configObj = orgConfigObj
+            configObj.filename = orgFileName
+        else :
+            configObj = defaultObj
+            configObj.filename = orgFileName
+            writeConfFile(configObj)
+
+    return configObj
+
+
 def confObjCompare (objA, objB, path) :
     '''Do a simple compare on two ConfigObj objects.'''
 

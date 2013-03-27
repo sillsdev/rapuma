@@ -33,9 +33,6 @@ from rapuma.project.manager import Manager
 
 class Illustration (Manager) :
 
-    # Shared values
-    xmlConfFile     = 'illustration.xml'
-
     def __init__(self, project, cfg, cType) :
         '''Initialize the Illustration manager.'''
 
@@ -49,12 +46,12 @@ class Illustration (Manager) :
         self.cfg                        = cfg
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
+        self.manager                    = self.cType + '_Illustration'
         self.managers                   = project.managers
         self.backgroundTypes            = ['watermark', 'lines']
         # Bring in some manager objects we will need
         self.layout                     = self.managers[self.cType + '_Layout']
         # Get config objs
-        self.illustrationConfig         = ConfigObj(encoding='utf-8')
         self.projConfig                 = project.projConfig
         self.layoutConfig               = self.layout.layoutConfig
         self.userConfig                 = project.userConfig
@@ -62,6 +59,8 @@ class Illustration (Manager) :
         self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']
 
         # File names
+        self.illustrationConfFileName   = self.project.projectMediaIDCode + '_illustration.conf'
+        self.defaultXmlConfFileName     = 'illustration.xml'
         self.projWatermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
         self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
         self.projLinesFileName          = self.layoutConfig['PageLayout']['linesFile']
@@ -73,7 +72,11 @@ class Illustration (Manager) :
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
         self.rpmIllustrationsFolder     = self.project.local.rapumaIllustrationsFolder
+        self.projConfFolder             = self.project.local.projConfFolder
+        self.rpmRapumaConfigFolder      = self.project.local.rapumaConfigFolder
         # File names with folder paths
+        self.illustrationConfFile       = os.path.join(self.projConfFolder, self.illustrationConfFileName)
+        self.defaultXmlConfFile         = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
         self.projWatermarkFile          = os.path.join(self.projIllustrationsFolder, self.projWatermarkFileName)
         self.rpmDefWatermarkFile        = os.path.join(self.rpmIllustrationsFolder, self.rpmDefWatermarkFileName)
         self.projLinesFile              = os.path.join(self.projIllustrationsFolder, self.projLinesFileName)
@@ -88,25 +91,11 @@ class Illustration (Manager) :
             self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName'] = self.userIllustrationsLibName
             writeConfFile(self.projConfig)
 
-        # Create an empty default Illustration config file if needed
-        if not os.path.isfile(self.project.local.illustrationConfFile) :
-            self.illustrationConfig.filename = self.project.local.illustrationConfFile
-            writeConfFile(self.illustrationConfig)
-            self.project.log.writeToLog('ILUS-010')
-        else :
-            self.illustrationConfig = ConfigObj(self.project.local.illustrationConfFile, encoding='utf-8')
-
-        # Get persistant values from the config if there are any
-        manager = self.cType + '_Illustration'
-        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.projConfig['Managers'][manager] :
-            self.projConfig['Managers'][manager] = newSectionSettings
-
-        self.compSettings = self.projConfig['Managers'][manager]
-
-        for k, v in self.compSettings.iteritems() :
+        # Load the config object
+        self.illustrationConfig = initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
+        # Load settings from the manager config
+        for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)
-
 
 ###############################################################################
 ############################ Manager Level Functions ##########################

@@ -132,11 +132,13 @@ class Style (Manager) :
 
 
     def makeDefaultStyFile (self) :
-        '''Create or copy in a default global style file for the current component type.'''
+        '''Create or copy in a default global style file for the current component type.
+        And while we are at it, make it read-only.'''
 
         if os.path.isfile(self.rapumaCmpStyFile) :
             # No news is good news
             if not shutil.copy(self.rapumaCmpStyFile, self.defaultStyFile) :
+                makeReadOnly(self.defaultStyFile)
                 return True
 
 
