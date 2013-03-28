@@ -59,7 +59,6 @@ class ProjSetup (object) :
             'GRUP-070' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
             'GRUP-080' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             'GRUP-090' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
-            'GRUP-100' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
             'GRUP-110' : ['LOG', 'Created the [<<1>>] component group folder.'],
             'GRUP-120' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
             '000' : ['MSG', 'Project module messages'],
@@ -72,11 +71,12 @@ class ProjSetup (object) :
             '080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
             '090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
 
+            '100' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
             '210' : ['WRN', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
             '240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             '410' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
-            '440' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
-            '460' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            '440' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            '460' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
         }
 
 
@@ -138,7 +138,7 @@ class ProjSetup (object) :
             writeConfFile(self.userConfig)
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.log.writeToLog('GRUP-100', [str(e)])
+            self.log.writeToLog(self.errorCodes['200'], [str(e)])
             dieNow()
 
 
@@ -205,19 +205,18 @@ class ProjSetup (object) :
         if str2bool(self.userConfig['System']['autoHelperScripts']) :
             Commander(self.pid).updateScripts()
 
-
-# FIXME: Working here, explain this!
-
-
+        # Initialize the project now to get settings into the project config
+        # This might help to overcome other module initialization problems.
         aProject = Project(self.userConfig, self.projConfig, self.local, self.log, 'Testing here in proj_setup', gid)
         aProject.createGroup(gid)
         if cType == 'usfm' :
             aProject.managers['usfm_Text'].updateManagerSettings(gid)
 
 
-
 ###############################################################################
 ########################### Project Setup Functions ###########################
+###############################################################################
+######################## Error Code Block Series = 300 ########################
 ###############################################################################
 
     def newProject (self, projHome, pmid, pname, systemVersion, tid = None) :
