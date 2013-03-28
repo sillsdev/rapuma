@@ -117,48 +117,33 @@ class Usfm (Group) :
 
             self.font.installFont(font)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Updating the manager here is not a good idea, especially when the group
-# source path is missing. This is commented out for now until this can be figured out
-# However, this is not being called at all so there is no way to update the text
-# manager at this point.
-
-        # manager (It might be better to do this elsewhere, but where?)
-#        self.project.managers[self.cType + '_Text'].updateManagerSettings(self.gid)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # Connect to the PT tools class
         self.pt_tools = PT_Tools(self.project)
 
+        # Module Error Codes
+        self.errorCodes     = {
+            '000' : ['MSG', 'Messages for the USFM module.'],
+            '005' : ['MSG', 'Unassigned error message ID.'],
+            '010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            '020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            '025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
+            '030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
+            '040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
+            '050' : ['LOG', 'Updated project file: [<<1>>]'],
+            '055' : ['LOG', 'Did not update project file: [<<1>>]'],
+            '060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
+            '070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
+            '080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
+            '090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
+            '095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
+            '100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
+            '120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
+            '130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
+            '140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
+            '150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+
+            '210' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
+        }
 
 ###############################################################################
 ############################ Functions Begin Here #############################
@@ -364,6 +349,8 @@ class Usfm (Group) :
 ###############################################################################
 ######################## USFM Component Text Functions ########################
 ###############################################################################
+######################## Error Code Block Series = 200 ########################
+###############################################################################
 
 
     def installUsfmWorkingText (self, gid, cid, force = False) :
@@ -399,7 +386,7 @@ class Usfm (Group) :
 
         # Test, no name = no success
         if not thisFile :
-            self.log.writeToLog('USFM-110', [cid])
+            self.log.writeToLog(self.errorCodes['210'], [cid])
             dieNow()
 
         # Will need the stylesheet for copy if that has not been added
@@ -1023,25 +1010,36 @@ class PT_Tools (Group) :
         '''Using valid PT project settings from the project configuration, form
         a valid PT file name that can be used for a number of operations.'''
 
-        # FIXME: Currently very simplistic, will need to be more refined for
-        #           number of use cases.
+        # Assumed that this is for a ParaTExt USFM file, there should be
+        # a nameFormID setting. If not, try updating the manager. If there
+        # still is not a nameFormID, die in a very spectacular way.
+        if not self.projConfig['Managers']['usfm_Text']['nameFormID'] :
+            self.project.managers['usfm_Text'].updateManagerSettings(gid)
 
-        try :
-            nameFormID = self.projConfig['Managers']['usfm_Text']['nameFormID']
-            postPart = self.projConfig['Managers']['usfm_Text']['postPart']
-            prePart = self.projConfig['Managers']['usfm_Text']['prePart']
+        # Hopefully all is well now
+        nameFormID = self.projConfig['Managers']['usfm_Text']['nameFormID']
+        postPart = self.projConfig['Managers']['usfm_Text']['postPart']
+        prePart = self.projConfig['Managers']['usfm_Text']['prePart']
 
-#            import pdb; pdb.set_trace()
+        # Sanity test
+        if not nameFormID :
+            dieNow('ERROR: usfm.PT_Tools.formPTName() could not determine the nameFormID. All is lost! Please crawl under your desk and wait for a large explosion. (Just kidding!)')
 
-            if nameFormID == '41MAT' :
-                mainName = self.getUsfmCidInfo(cid)[2] + cid.upper()
-                if prePart and prePart != 'None' :
-                    thisFile = prePart + mainName + postPart
-                else :
-                    thisFile = mainName + postPart
+#        import pdb; pdb.set_trace()
+
+        thisFile = ''
+
+        if nameFormID == '41MAT' :
+            mainName = self.getUsfmCidInfo(cid)[2] + cid.upper()
+            if prePart and prePart != 'None' :
+                thisFile = prePart + mainName + postPart
+            else :
+                thisFile = mainName + postPart
+                
+        if thisFile != '' :
             return thisFile
-        except :
-            return False
+        else :
+            return None
 
 
     def formGenericName (self, gid, cid) :

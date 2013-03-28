@@ -97,14 +97,14 @@ def isTemplate (tid) :
         return False
 
 
-def initProject (pid) :
+def initProject (pid, gid) :
     '''Initialize an existing project according to the project ID given.'''
 
     local   = ProjLocal(rapumaHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
     pc      = ProjConfig(local)
     log     = ProjLog(local, uc)
     if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-        aProject = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
+        aProject = Project(uc.userConfig, pc.projConfig, local, log, systemVersion, gid)
         return aProject
 
 
@@ -149,12 +149,9 @@ def userArguments (args, local) :
             uc.setSystemSettings('userName', args.user_name)
         elif args.resources :
             uc.setSystemSettings('resources', args.resources)
-
-    # Test project ID, intercept if it is a special command
+    # Test for valid project ID
     elif sys.argv[1].lower() != 'project' :
         isProject(args.project_id)
-        # Now setup the project and look for and test the component type if needed
-        aProject = initProject(args.project_id)
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -261,6 +258,8 @@ def userArguments (args, local) :
             aProject.updateGroup(args.group_id, args.cid_list, args.source, args.force)
         # Execute/render a group of components
         elif args.execute :
+#            import pdb; pdb.set_trace()
+            aProject = initProject(args.project_id, args.group_id)
             if args.cid_list :
                 if not aProject.isValidCidList(args.group_id, args.cid_list) :
                     sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
@@ -383,10 +382,9 @@ def userArguments (args, local) :
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
-        aProject = initProject(args.project_id)
         if args.configuration :
             if (args.section or args.key or args.value) :
-                aProject.changeConfigSetting(args.configuration, args.section, args.key, args.value)
+                ProjSetup(args.project_id).changeConfigSetting(args.configuration, args.section, args.key, args.value)
             else :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
@@ -566,6 +564,7 @@ bindCommand.add_argument('-f', '--force', action='store_true', help='Force an ac
 # Add font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+fontCommand.add_argument('group_id', help='The group ID this font is a part of.')
 fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
 fontCommand.add_argument('font_id', help='The font family name ID. The ID given has to be a valid system font.')
 fontCommand.add_argument('-a', '--add', action='store_true', help='Add a new font for a specific comonent type.')

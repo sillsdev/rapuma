@@ -8,14 +8,12 @@ unzip -o ~/Publishing/testArea/KYUM.zip -d ~/Publishing/testArea
 rapuma project KYU-MYMR-MRKA -r
 # Create the project
 rapuma project KYU-MYMR-MRKA -g ~/Publishing/testArea -m book -n 'Kayah Book of Mark example in the Burmese script'
-# Install a component to render
+# Install a group to render
 rapuma group KYU-MYMR-MRKA Mark -c usfm -a -i mrk -d MYMR -s ~/Publishing/testArea/KYUM/pt_environ
 # Set the font to the right one
-rapuma font KYU-MYMR-MRKA usfm Padauk -m -f
-# Install additional files
-rapuma style KYU-MYMR-MRKA usfm custom -a -p ~/Publishing/testArea/KYUM/resources/custom.sty 
+rapuma font KYU-MYMR-MRKA Mark usfm Padauk -m -f
 # Turn on hyphenation
-rapuma hyphen KYU-MYMR-MRKA usfm -a
+rapuma hyphen KYU-MYMR-MRKA Mark -a
 # Adjust the publication format
 rapuma settings KYU-MYMR-MRKA book_layout Columns bodyColumns 2
 # Install and switch font

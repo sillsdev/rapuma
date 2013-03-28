@@ -38,7 +38,7 @@ from importlib import import_module
 
 class Project (object) :
 
-    def __init__(self, userConfig, projConfig, local, log, systemVersion) :
+    def __init__(self, userConfig, projConfig, local, log, systemVersion, gid = None) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
@@ -57,7 +57,7 @@ class Project (object) :
         self.projectName            = self.projConfig['ProjectInfo']['projectName']
         # The gid cannot generally be set yet but we will make a placeholder
         # for it here and the functions below will set it. (I'm just say'n)
-        self.gid                    = ''
+        self.gid                    = gid
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -703,51 +703,6 @@ class Project (object) :
                 pass
         except :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
-
-
-    def changeConfigSetting (self, config, section, key, newValue) :
-        '''Change a value in a specified config/section/key.  This will 
-        write out changes immediately. If this is called internally, the
-        calling function will need to reload to the config for the
-        changes to take place in the current session. This is currently
-        designed to work more as a single call to Rapuma.'''
-
-#        import pdb; pdb.set_trace()
-
-        oldValue = ''
-        if config.lower() == 'rapuma' :
-            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
-        else :
-            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
-
-        confObj = ConfigObj(confFile, encoding='utf-8')
-        outConfObj = confObj
-        try :
-            # Walk our confObj to get to the section we want
-            for s in section.split('/') :
-                confObj = confObj[s]
-        except :
-            self.log.writeToLog('PROJ-040', [section])
-            return
-
-        # Get the old value, if there is one, for reporting
-        try :
-            oldValue = confObj[key]
-        except :
-            pass
-
-        # Insert the new value in its proper form
-        if type(oldValue) == list :
-            newValue = newValue.split(',')
-            confObj[key] = newValue
-        else :
-            confObj[key] = newValue
-
-        # Write out the original copy of the confObj which now 
-        # has the change in it, then report what we did
-        outConfObj.filename = confFile
-        if writeConfFile(outConfObj) :
-            self.log.writeToLog('PROJ-030', [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
     def installFile (self, source, path, force) :

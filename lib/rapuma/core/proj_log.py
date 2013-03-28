@@ -379,13 +379,13 @@ class ProjLog (object) :
         else :
             mod = ''
 
-        # Get the message from the code
-        if errCode in self.errorCodes.keys() :
-            msg = self.errorCodes[errCode][1]
-            code = self.errorCodes[errCode][0]
+        # Get the message from the errorCode list the module sent
+        if type(errCode) == list :
+            msg = errCode[1]
+            code = errCode[0]
         else :
             terminal('\nThe code: [' + errCode + '] is not recognized by the Rapuma system.')
-            dieNow()
+            return
 
         # If args were given, do s/r on them and add 
         # args info that needs to be added to msg.

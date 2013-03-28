@@ -26,6 +26,7 @@ from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_commander import Commander
 from rapuma.core.proj_log       import ProjLog
+from rapuma.project.project import Project
 
 
 class ProjSetup (object) :
@@ -45,6 +46,38 @@ class ProjSetup (object) :
         self.log                = None
         self.groups             = {}
         self.finishInit()
+
+        self.errorCodes     = {
+            'GRUP-000' : ['MSG', 'Group processing messages'],
+            'GRUP-005' : ['WRN', 'Unassigned message ID.'],
+            'GRUP-020' : ['ERR', 'Source path given for source ID [<<1>>] group not valid! Use -s (source) to indicate where the source files are for this component source ID.'],
+            'GRUP-025' : ['ERR', 'No source path found for source ID [<<1>>]. Use -s (source) to indicate where the source files are for this component source ID.'],
+            'GRUP-030' : ['ERR', 'Component group source path not valid. Use -s (source) to provide a valid source path.'],
+            'GRUP-040' : ['MSG', 'Added the [<<1>>] component group to the project.'],
+            'GRUP-050' : ['ERR', 'Component group [<<1>>] not found. Cannot remove component.'],
+            'GRUP-060' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
+            'GRUP-070' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
+            'GRUP-080' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
+            'GRUP-090' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
+            'GRUP-100' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
+            'GRUP-110' : ['LOG', 'Created the [<<1>>] component group folder.'],
+            'GRUP-120' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
+            '000' : ['MSG', 'Project module messages'],
+            '005' : ['LOG', 'Created the [<<1>>] manager object.'],
+            '010' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
+            '011' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
+            '050' : ['ERR', 'Component [<<1>>] working text file was not found in the project configuration.'],
+            '060' : ['ERR', 'Component [<<1>>] was not found in the project configuration.'],
+            '070' : ['ERR', 'Source file not found: [<<1>>].'],
+            '080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
+            '090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
+
+            '210' : ['WRN', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
+            '240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
+            '410' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
+            '440' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
+            '460' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+        }
 
 
     def finishInit (self) :
@@ -67,6 +100,8 @@ class ProjSetup (object) :
 
 ###############################################################################
 ############################ Group Setup Functions ############################
+###############################################################################
+######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
 
@@ -115,7 +150,7 @@ class ProjSetup (object) :
         # Do not want to add this group, non-force, if it already exsists.
         buildConfSection(self.projConfig, 'Groups')
         if testForSetting(self.projConfig['Groups'], gid) and not force :
-            self.log.writeToLog('GRUP-010', [gid])
+            self.log.writeToLog(self.errorCodes['210'], [gid])
             dieNow()
 
         sourceKey = csid + '_sourcePath'
@@ -164,11 +199,20 @@ class ProjSetup (object) :
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-040', [gid])
+            self.log.writeToLog(self.errorCodes['240'], [gid])
 
         # Update helper scripts
         if str2bool(self.userConfig['System']['autoHelperScripts']) :
             Commander(self.pid).updateScripts()
+
+
+# FIXME: Working here, explain this!
+
+
+        aProject = Project(self.userConfig, self.projConfig, self.local, self.log, 'Testing here in proj_setup', gid)
+        aProject.createGroup(gid)
+        if cType == 'usfm' :
+            aProject.managers['usfm_Text'].updateManagerSettings(gid)
 
 
 
@@ -267,6 +311,64 @@ class ProjSetup (object) :
         # Report the process is done
         terminal('Removal process for [' + self.pid + '] is completed.')
         return True
+
+
+###############################################################################
+########################## Config Setting Functions ###########################
+###############################################################################
+######################## Error Code Block Series = 400 ########################
+###############################################################################
+
+    def changeConfigSetting (self, config, section, key, newValue) :
+        '''Change a value in a specified config/section/key.  This will 
+        write out changes immediately. If this is called internally, the
+        calling function will need to reload to the config for the
+        changes to take place in the current session. This is currently
+        designed to work more as a single call to Rapuma.'''
+
+#        import pdb; pdb.set_trace()
+
+        oldValue = ''
+        if config.lower() == 'rapuma' :
+            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
+        else :
+            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+            
+        # Test for existance
+        if not os.path.exists(confFile) :
+            self.log.writeToLog(self.errorCodes['410'], [fName(confFile)])
+            return
+
+        # Load the file and make the change
+        confObj = ConfigObj(confFile, encoding='utf-8')
+        outConfObj = confObj
+        try :
+            # Walk our confObj to get to the section we want
+            for s in section.split('/') :
+                confObj = confObj[s]
+        except :
+            self.log.writeToLog(self.errorCodes['440'], [section])
+            return
+
+        # Get the old value, if there is one, for reporting
+        try :
+            oldValue = confObj[key]
+        except :
+            pass
+
+        # Insert the new value in its proper form
+        if type(oldValue) == list :
+            newValue = newValue.split(',')
+            confObj[key] = newValue
+        else :
+            confObj[key] = newValue
+
+        # Write out the original copy of the confObj which now 
+        # has the change in it, then report what we did
+        outConfObj.filename = confFile
+        if writeConfFile(outConfObj) :
+            self.log.writeToLog(self.errorCodes['460'], [config, section, key, unicode(oldValue), unicode(newValue)])
+
 
 
 
