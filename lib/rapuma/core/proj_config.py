@@ -33,7 +33,6 @@ class ProjConfig (object) :
 
         self.local          = local
         self.projConfig     = ConfigObj(encoding='utf-8')
-#        self.projHome       = ''
 
         # Create a fresh projConfig object
         if os.path.isfile(self.local.projConfFile) :
@@ -54,7 +53,6 @@ class ProjConfig (object) :
         self.projConfig['ProjectInfo']['projectIDCode']             = pid
         self.projConfig.filename                                    = local.projConfFile
         self.projConfig.write()
-
 
 
 class ConfigTools (object) :

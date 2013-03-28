@@ -41,7 +41,7 @@ if not userHome :
 projHome = os.getcwd()
 
 # Load standard Python modules
-import codecs, shutil, operator, argparse, subprocess, zipfile
+import codecs, shutil, operator, argparse, subprocess, zipfile, tempfile
 from datetime import *
 from configobj import ConfigObj
 
@@ -51,8 +51,9 @@ from rapuma.core.proj_log import ProjLog
 from rapuma.core.tools import *
 from rapuma.core.user_config import UserConfig
 from rapuma.core.proj_config import ProjConfig
-from rapuma.core.backup import ProjBackup
-from rapuma.core.commander import Commander
+from rapuma.core.proj_setup import ProjSetup
+from rapuma.core.proj_backup import ProjBackup
+from rapuma.core.proj_commander import Commander
 from rapuma.project.project import Project
 
 # Instantiate User classes
@@ -72,106 +73,6 @@ terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 ###########################################################################
 ########################### Rapuma Functions ##############################
 ###########################################################################
-
-
-def newProject (uc, pc, pid, pname = None, tid = None, pmid = None) :
-    '''Create a new publishing project.'''
-
-    # Because the location of where a project is to be created could be
-    # different than the cwd, we will count on pc.local to have all the
-    # correct information. 
-    
-    # Check the pmid
-    if not pmid :
-        pmid = 'book'
-    else :
-        pmid = pmid.lower()
-
-    # Check the pname, make one up if there isn't any
-    if not pname :
-        pname = 'The ' + pid + ' project'
-
-    # Run some basic tests to see if this project can be created
-    # Look for project in current folder
-    if not os.path.isfile(pc.local.projConfFile) :
-        # Look for locked project in current folder
-        if os.path.isfile(pc.local.projConfFile + pc.local.lockExt) :
-            terminal('ERR: Halt! Locked project already defined in target folder')
-            return
-        # Look for project in parent folder (don't want project in project)
-        elif os.path.isfile(os.path.join(os.path.dirname(pc.local.projHome), pc.local.projConfFileName)) :
-            terminal('ERR: Halt! Live project already defined in parent folder')
-            return
-        # Look for locked project in parent folder (prevent project in project)
-        elif os.path.isfile(os.path.join(os.path.dirname(pc.local.projHome), pc.local.projConfFileName + pc.local.lockExt)) :
-            terminal('ERR: Halt! Locked project already defined in parent folder')
-            return
-        # Check if path to parent is valid
-        elif not os.path.isdir(os.path.dirname(pc.local.projHome)) :
-            terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(pc.local.projHome))
-            return
-        # Test if this project already exists in the user's config file.
-        elif uc.isRegisteredProject(pid) :
-            terminal('ERR: Halt! ID [' + pid + '] already defined for another project')
-            return
-    else :
-        terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
-        return
-
-    # If we made it to this point, we need to make a new project folder
-    if not os.path.exists(pc.local.projConfFolder) :
-        os.makedirs(pc.local.projConfFolder)
-
-    # Create the project depeding on if it is from a template or not
-    if tid :
-        templateToProject(uc, pc.local.projHome, pid, tid, pname)
-    else :
-        # If not from a template, just create a new version of the project config file
-        pc.makeNewProjConf(pc.local, pid, pmid, pname, systemVersion)
-
-    # Add project to local Rapuma project registry
-    uc.registerProject(pid, pname, pmid, pc.local.projHome)
-
-    # Report what we did
-    terminal('Created new project [' + pid + ']')
-    return True
-
-
-def deleteProject (uc, pid = None) :
-    '''Delete a project fromthe Rapuma system registry and from the hard drive.'''
-
-    global local
-
-    # If no pid was given this fails
-    if not pid :
-        terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
-        return
-
-    # Check if project is registered with Rapuma and get real path and reinit local paths
-    if not testForSetting(uc.userConfig, 'Projects', pid) :
-        terminal('\nERROR: [' + pid + '] not a valid registered project, cannot continue with delete operation.\n')
-        return
-    else :
-        local = ProjLocal(rapumaHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
-
-    # Remove references from user rapuma.conf
-    if uc.unregisterProject(pid) :
-        terminal('Removed [' + pid + '] from user configuration.')
-    else :
-        terminal('Failed to remove [' + pid + '] from user configuration.')
-
-    # Delete everything in the project path
-    if os.path.isdir(local.projHome) :
-        shutil.rmtree(local.projHome)
-        terminal('Removed project files for [' + pid + '] from hard drive.')
-    else :
-        terminal('Warning: [' + pid + '] project could not be found, unable to delete project files.')
-        return
-
-    # Report the process is done
-    terminal('Removal process for [' + pid + '] is completed.')
-    return True
-
 
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.
@@ -217,19 +118,6 @@ def accessHtmlHelp () :
 
 
 ###############################################################################
-########################### Helper Script Functions ###########################
-###############################################################################
-
-
-def updateRapuma () :
-    '''Run the general update script that will pull down the latest version
-    from the Rapuma repo, then build and install it.'''
-
-    os.system(os.path.join(rapumaHome, 'update.sh'))
-
-
-
-###############################################################################
 ########################### Rapuma Command Center #############################
 ###############################################################################
 
@@ -260,8 +148,6 @@ def userArguments (args, local) :
             uc.setSystemSettings('userName', args.user_name)
         elif args.resources :
             uc.setSystemSettings('resources', args.resources)
-        elif args.update :
-            updateRapuma()
 
     # Test project ID, intercept if it is a special command
     elif sys.argv[1].lower() != 'project' :
@@ -279,7 +165,7 @@ def userArguments (args, local) :
         pid = args.project_id
         # Remove an exsisting project
         if args.remove :
-            deleteProject(uc, pid)
+            ProjSetup(args.project_id).deleteProject()
         # Restore (or revert to) the last backup
         elif args.revert :
             if isProject(args.project_id) :
@@ -336,12 +222,12 @@ def userArguments (args, local) :
             # Just creating from scratch
             else :
                 # Create a new project
-                local   = ProjLocal(rapumaHome, userHome, projFolder)
-                pc      = ProjConfig(local)
-                newProject(uc, pc, args.project_id, args.name, args.template, args.media)
-                # Create helper scripts if desired
-                if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                    Commander(args.project_id).updateScripts()
+                if not args.media in ['book'] :
+                    sys.exit('\nERROR: Media type given: [' + args.media + '] is not valid. Process halting.\n')
+                if not args.name :
+                    sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
+                nProjPath = os.path.join(targetPath, args.project_id)
+                ProjSetup(args.project_id).newProject(nProjPath, args.media, args.name, systemVersion, args.template)
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -359,10 +245,13 @@ def userArguments (args, local) :
             elif args.source_id :
                 if not aProject.hasValidSourcePath(args.group_id, args.source_id) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+
+
             # Having sorted through any potential problems, try adding the group
-            aProject.addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
-            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                Commander(args.project_id).updateScripts()
+            ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
+
+
+
         # Remove a group from the project
         elif args.remove :
             aProject.removeGroup(args.group_id, args.force)
@@ -394,14 +283,6 @@ def userArguments (args, local) :
         # Unlock group
         elif args.unlock :
             aProject.lockUnlock(args.group_id)
-        # Assign/unassign Style
-        elif args.style :
-            aProject.createManager(args.component_type, 'style')
-            manager = args.component_type + '_Style'
-            if args.add :
-                aProject.managers[manager].addStyleFile(args.component_type, args.path, args.force)
-            elif args.remove :
-                aProject.managers[manager].removeStyleFile(args.component_type, args.force)
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -630,7 +511,6 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma h
 sysCommand = subparsers.add_parser('system', help='General system management commands help')
 sysCommand.add_argument('-n', '--user_name', help='Proved a name of the user who will be using this system.')
 sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
-sysCommand.add_argument('-u', '--update', action='store_true', help='Update the Rapuma publishing system.')
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
@@ -663,7 +543,6 @@ groupCommand.add_argument('-p', '--preprocess', help='Turn on or off preprocessi
 groupCommand.add_argument('-o', '--output_list', action='store_true', help='Generate a list of valid component IDs with their names for the specified component type.')
 groupCommand.add_argument('-l', '--lock', action='store_true', help='Lock a component group.')
 groupCommand.add_argument('-n', '--unlock', action='store_true', help='Unlock a component group.')
-groupCommand.add_argument('-y', '--style', action='store_true', help='Add/assign or Remove/unassign an override style file for a component group. Use along with -a, -r, and -f.')
 
 # Add component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')

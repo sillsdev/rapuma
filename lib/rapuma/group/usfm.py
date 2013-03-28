@@ -981,6 +981,8 @@ class PT_Tools (Group) :
     def getUsfmCidInfo (self, cid) :
         '''Return a list of info about a specific cid used in the PT context.'''
 
+#        import pdb; pdb.set_trace()
+
         try :
             return self.usfmCidInfo()[cid]
         except :
@@ -1028,6 +1030,8 @@ class PT_Tools (Group) :
             nameFormID = self.projConfig['Managers']['usfm_Text']['nameFormID']
             postPart = self.projConfig['Managers']['usfm_Text']['postPart']
             prePart = self.projConfig['Managers']['usfm_Text']['prePart']
+
+#            import pdb; pdb.set_trace()
 
             if nameFormID == '41MAT' :
                 mainName = self.getUsfmCidInfo(cid)[2] + cid.upper()

@@ -9,7 +9,7 @@ rapuma project KYU-MYMR-MRKA -r
 # Create the project
 rapuma project KYU-MYMR-MRKA -g ~/Publishing/testArea -m book -n 'Kayah Book of Mark example in the Burmese script'
 # Install a component to render
-rapuma component KYU-MYMR-MRKA usfm mark -a -i mrk -s ~/Publishing/testArea/KYUM/pt_environ
+rapuma group KYU-MYMR-MRKA Mark -c usfm -a -i mrk -d MYMR -s ~/Publishing/testArea/KYUM/pt_environ
 # Set the font to the right one
 rapuma font KYU-MYMR-MRKA usfm Padauk -m -f
 # Install additional files
@@ -22,7 +22,7 @@ rapuma settings KYU-MYMR-MRKA book_layout Columns bodyColumns 2
 rapuma font KYU-MYMR-MRKA usfm -a Padauk_2.701
 rapuma font KYU-MYMR-MRKA usfm -m -f Padauk_2.701
 # Render the component
-rapuma component KYU-MYMR-MRKA usfm mark -e
+rapuma group KYU-MYMR-MRKA Mark -e
 
 
 

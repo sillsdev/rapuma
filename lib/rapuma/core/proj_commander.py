@@ -35,10 +35,25 @@ class Commander (object) :
         self.user               = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig         = self.user.userConfig
         self.pid                = pid
-        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
-        self.projectMediaIDCode = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-        self.projConfig         = ProjConfig(self.local).projConfig
+        self.projHome           = None
+        self.projectMediaIDCode = None
+        self.local              = None
+        self.projConfig         = None
+        self.finishInit()
+
+
+    def finishInit (self) :
+        '''Some times not all the information is available that is needed
+        but that may not be a problem for some functions. We will atempt to
+        finish the init here.'''
+
+        try :
+            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.projConfig         = ProjConfig(self.local).projConfig
+        except :
+            pass
 
 
 ###############################################################################

@@ -110,11 +110,6 @@ class UserConfig (object) :
         self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
         self.userConfig['Projects'][pid]['projectPath']         = projHome
         self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
-        # To hopefully prevent "Key not found" issues we will add a
-        # blanked out source path setting for each component type
-        # This may need to be changed at some point
-        for cType in self.userConfig['System']['recognizedComponentTypes'] :
-            self.userConfig['Projects'][pid][cType + '_sourcePath'] = None
 
         self.userConfig.write()
         return True

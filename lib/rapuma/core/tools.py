@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat, tempfile
 from datetime import *
 from xml.etree import ElementTree
 #import xml.etree.ElementTree as ElementTree
@@ -276,7 +276,7 @@ def initConfig (confFile, defaultFile) :
     settings.'''
 
 
-    projConfFolder = os.path.split(confFile)[0]
+#    projConfFolder = os.path.split(confFile)[0]
 
     if not os.path.isfile(confFile) :
         configObj           = ConfigObj(getXMLSettings(defaultFile), encoding='utf-8')
@@ -290,7 +290,8 @@ def initConfig (confFile, defaultFile) :
         defaultObj               = ConfigObj(getXMLSettings(defaultFile), encoding='utf-8')
         defaultObj.merge(orgConfigObj)
         # A key comparison should be enough to tell if it is the same or not
-        if confObjCompare(defaultObj, orgConfigObj, projConfFolder) :
+#        if confObjCompare(defaultObj, orgConfigObj, projConfFolder) :
+        if confObjCompare(defaultObj, orgConfigObj) :
             configObj = orgConfigObj
             configObj.filename = orgFileName
         else :
@@ -301,16 +302,20 @@ def initConfig (confFile, defaultFile) :
     return configObj
 
 
-def confObjCompare (objA, objB, path) :
+#def confObjCompare (objA, objB, path) :
+def confObjCompare (objA, objB) :
     '''Do a simple compare on two ConfigObj objects.'''
 
+    # Make a temp dir for the test files
+    tmp_dir = tempfile.mkdtemp()
+
     # There must be a better way to do this but this will work for now
-    objA.filename = os.path.join(path, '.confA')
+    objA.filename = os.path.join(tmp_dir, 'tmpconfA')
     objA.write()
-    objB.filename = os.path.join(path, '.confB')
+    objB.filename = os.path.join(tmp_dir, 'tmpconfB')
     objB.write()
-    reObjA = ConfigObj(os.path.join(path, '.confA'), encoding='utf-8')
-    reObjB = ConfigObj(os.path.join(path, '.confB'), encoding='utf-8')
+    reObjA = ConfigObj(os.path.join(tmp_dir, 'tmpconfA'), encoding='utf-8')
+    reObjB = ConfigObj(os.path.join(tmp_dir, 'tmpconfB'), encoding='utf-8')
     return reObjA.__eq__(reObjB)
 
 

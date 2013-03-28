@@ -245,77 +245,6 @@ class Project (object) :
         return groupObj
 
 
-    def addGroup (self, cType, gid, cidList, csid, sourcePath = None, force = False) :
-        '''This handels adding a group which can contain one or more components. 
-        Most of the prechecking was done in the calling script so we can assume that
-        the vars here are pretty good.'''
-
-        # Do not want to add this group, non-force, if it already exsists.
-        buildConfSection(self.projConfig, 'Groups')
-        if testForSetting(self.projConfig['Groups'], gid) and not force :
-            self.log.writeToLog('GRUP-010', [gid])
-            dieNow()
-
-        sourceKey = csid + '_sourcePath'
-
-        # If the new source is valid, we will add that to the config now
-        # so that processes to follow will have that setting available.
-        if sourcePath :
-            self.addCompGroupSourcePath(csid, sourcePath)
-            setattr(self, sourceKey, sourcePath)
-
-        # The cList can be one or more valid component IDs
-        # It is expected that the data for this list is in
-        # this format: "id1 id2 id3 ect", unless it is coming
-        # internally which means it might alread be a proper
-        # list. We'll check first.
-        if type(cidList) != list :
-            cidList = cidList.split()
-
-#        import pdb; pdb.set_trace()
-
-        # The assumption is that the conf needs to be
-        # reset incase there is any residual stuff from 
-        # a previous attempt to add the same group. But if
-        # it is new, we can just pass
-        try :
-            del self.projConfig['Groups'][gid]
-        except :
-            pass
-
-        # Get persistant values from the config
-        buildConfSection(self.projConfig, 'Groups')
-        buildConfSection(self.projConfig['Groups'], gid)
-        newSectionSettings = getPersistantSettings(self.projConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
-        if newSectionSettings != self.projConfig['Groups'][gid] :
-            self.projConfig['Groups'][gid] = newSectionSettings
-
-        # Add/Modify the info to the group config info
-        self.projConfig['Groups'][gid]['cType']                 = cType
-        self.projConfig['Groups'][gid]['csid']                  = csid
-        self.projConfig['Groups'][gid]['cidList']               = cidList
-
-        # Here we need to "inject" cType information into the config
-        # If we don't createGroup() will fail badly.
-        self.cType = cType
-        self.addComponentType(cType)
-        # Create the group object now that we have an entry in the config
-        self.createGroup(gid)
-        # Install the group's components
-        self.installGroupComps(gid, cidList, force)
-        # Create an empty component group folder if needed
-        groupFolder = os.path.join(self.local.projComponentsFolder, gid)
-        if not os.path.exists(groupFolder) :
-            os.makedirs(groupFolder)
-            self.log.writeToLog('GRUP-110', [gid])
-        # Update the components adjustment files
-        self.groups[gid].updateCompAdjustmentConf()
-        # Lock and save our config settings
-        self.projConfig['Groups'][gid]['isLocked']  = True
-        if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-040', [gid])
-
-
     def installGroupComps (self, gid, cidList, force = False) :
         '''This will install components to the group we created above in createGroup().
         If a component is already installed in the project it will not proceed unless
@@ -466,24 +395,24 @@ class Project (object) :
         return True
 
 
-    def addCompGroupSourcePath (self, csid, source) :
-        '''Add a source path for components used in a group if none
-        exsist. If one exists, replace anyway. Last in wins! The 
-        assumption is only one path per component group.'''
+#    def addCompGroupSourcePath (self, csid, source) :
+#        '''Add a source path for components used in a group if none
+#        exsist. If one exists, replace anyway. Last in wins! The 
+#        assumption is only one path per component group.'''
 
-        # Path has been resolved in Rapuma, we assume it should be valid.
-        # But it could be a full file name. We need to sort that out.
-        try :
-            if os.path.isdir(source) :
-                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = source
-            else :
-                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = os.path.split(source)[0]
+#        # Path has been resolved in Rapuma, we assume it should be valid.
+#        # But it could be a full file name. We need to sort that out.
+#        try :
+#            if os.path.isdir(source) :
+#                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = source
+#            else :
+#                self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = os.path.split(source)[0]
 
-            writeConfFile(self.userConfig)
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog('GRUP-100', [str(e)])
-            dieNow()
+#            writeConfFile(self.userConfig)
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            self.log.writeToLog('GRUP-100', [str(e)])
+#            dieNow()
 
 
     def isLocked (self, gid) :
@@ -603,34 +532,34 @@ class Project (object) :
             writeConfFile(self.userConfig)
 
 
-    def addComponentType (self, cType) :
-        '''Add (register) a component type to the config if it 
-        is not there already.'''
+#    def addComponentType (self, cType) :
+#        '''Add (register) a component type to the config if it 
+#        is not there already.'''
 
-        Ctype = cType.capitalize()
-        if cType not in self.components :
-            # Build the comp type config section
-            buildConfSection(self.projConfig, 'CompTypes')
-            buildConfSection(self.projConfig['CompTypes'], Ctype)
+#        Ctype = cType.capitalize()
+#        if cType not in self.components :
+#            # Build the comp type config section
+#            buildConfSection(self.projConfig, 'CompTypes')
+#            buildConfSection(self.projConfig['CompTypes'], Ctype)
 
-            # Get persistant values from the config if there are any
-            newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
-            if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
-                self.projConfig['CompTypes'][Ctype] = newSectionSettings
-                # Save the setting rightaway
-#                import pdb; pdb.set_trace()
-                writeConfFile(self.projConfig)
+#            # Get persistant values from the config if there are any
+#            newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
+#            if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
+#                self.projConfig['CompTypes'][Ctype] = newSectionSettings
+#                # Save the setting rightaway
+##                import pdb; pdb.set_trace()
+#                writeConfFile(self.projConfig)
 
-            # Sanity check
-            if cType not in self.components :
-                self.log.writeToLog('COMP-060', [cType])
-                return True
-            else :
-                self.log.writeToLog('COMP-065', [cType])
-                return False
-        else :
-            # Bow out gracefully
-            return False
+#            # Sanity check
+#            if cType not in self.components :
+#                self.log.writeToLog('COMP-060', [cType])
+#                return True
+#            else :
+#                self.log.writeToLog('COMP-065', [cType])
+#                return False
+#        else :
+#            # Bow out gracefully
+#            return False
 
 
 #    def updateComponent (self, cName, source = None, force = False) :
@@ -668,45 +597,34 @@ class Project (object) :
 #            self.compareComponent(cName, 'working')
 
 
-#    def compareComponent (self, cName, test) :
-#        '''Compare a component with its source which was copied into the project
-#        when the component was created. This will pull up the user's differential
-#        viewer and compare the two files.'''
 
-#        # Create the component object now (if there is not one)
-#        self.createComponent(cName)
-#        # First check to see if it is a valid component and get the cid
-#        if self.components[cName].hasCNameEntry(cName) :
-#            if self.components[cName].getUsfmCid(cName) :
-#                cid = self.components[cName].getUsfmCid(cName)
-#            else :
-#                self.log.writeToLog('COMP-185', [cName])
-#                dieNow()
-#        else :
-#            # Might the cName be a cid?
-#            cid = cName
-#            if self.components[cName].getRapumaCName(cid) :
-#                cName = self.components[cName].getRapumaCName(cid)
-#            else :
-#                self.log.writeToLog('COMP-185', [cName])
-#                dieNow()
+# FIXME: Lots needed here to get this going again
 
-#        # What kind of test is this
-#        cType = self.projConfig['Components'][cName]['type']
-#        if test == 'working' :
-#            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-#            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
-#        elif test == 'source' :
-#            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-#            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
-#                if files.find('.source') > 0 :
-#                    old = os.path.join(self.local.projComponentsFolder, cName, files)
-#                    break
-#        else :
-#            self.log.writeToLog('COMP-190', [test])
 
-#        # Turn it over to the generic compare tool
-#        self.compare(new, old)
+    def compareComponent (self, cid, test) :
+        '''Compare a component with its source which was copied into the project
+        when the component was created. This will pull up the user's differential
+        viewer and compare the two files.'''
+
+        # Create the component object now (if there is not one)
+        self.createComponent(cid)
+
+        # What kind of test is this
+        cType = self.projConfig['Components'][cName]['type']
+        if test == 'working' :
+            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
+        elif test == 'source' :
+            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
+            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
+                if files.find('.source') > 0 :
+                    old = os.path.join(self.local.projComponentsFolder, cName, files)
+                    break
+        else :
+            self.log.writeToLog('COMP-190', [test])
+
+        # Turn it over to the generic compare tool
+        self.compare(new, old)
 
 
 ###############################################################################
