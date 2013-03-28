@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO, filecmp, difflib
+import codecs, os, sys, shutil, imp, subprocess, zipfile, StringIO, filecmp
 from configobj import ConfigObj, Section
 
 
@@ -598,35 +598,6 @@ class Project (object) :
 
 
 
-# FIXME: Lots needed here to get this going again
-
-
-    def compareComponent (self, cid, test) :
-        '''Compare a component with its source which was copied into the project
-        when the component was created. This will pull up the user's differential
-        viewer and compare the two files.'''
-
-        # Create the component object now (if there is not one)
-        self.createComponent(cid)
-
-        # What kind of test is this
-        cType = self.projConfig['Components'][cName]['type']
-        if test == 'working' :
-            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-            old = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType + '.cv1')
-        elif test == 'source' :
-            new = os.path.join(self.local.projComponentsFolder, cName, cid + '.' + cType)
-            for files in os.listdir(os.path.join(self.local.projComponentsFolder, cName)) :
-                if files.find('.source') > 0 :
-                    old = os.path.join(self.local.projComponentsFolder, cName, files)
-                    break
-        else :
-            self.log.writeToLog('COMP-190', [test])
-
-        # Turn it over to the generic compare tool
-        self.compare(new, old)
-
-
 ###############################################################################
 ############################## Exporting Functions ############################
 ###############################################################################
@@ -713,36 +684,6 @@ class Project (object) :
 ###############################################################################
 ############################ System Level Functions ###########################
 ###############################################################################
-
-    def isDifferent (self, new, old) :
-        '''Return True if the contents of the files are different.'''
-
-        # Inside of diffl() open both files with universial line endings then
-        # check each line for differences.
-        diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())
-        comp = False
-        for d in diff :
-            if d[:1] == '+' or d[:1] == '-' :
-                return True
-
-
-    def compare (self, new, old) :
-        '''Run a compare on two files. Do not open in viewer unless it is different.'''
-
-        # If there are any differences, open the diff viewer
-        if self.isDifferent(new, old) :
-            # Get diff viewer
-            diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
-            try :
-                self.log.writeToLog('COMP-195', [fName(new),fName(old)])
-                subprocess.call([diffViewer, new, old])
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                self.log.writeToLog('COMP-180', [str(e)])
-                dieNow()
-        else :
-            self.log.writeToLog('COMP-198')
-
 
     def run (self, command, opts, userConfig) :
         '''Run a command'''

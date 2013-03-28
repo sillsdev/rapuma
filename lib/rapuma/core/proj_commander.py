@@ -80,7 +80,7 @@ class Commander (object) :
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projScriptsFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-                        writeObject.write(self.makeScriptHeader(allScripts[key][0]))
+                        writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
                         writeObject.write(allScripts[key][1] + '\n\n')
 
                     # Make the script executable
@@ -103,7 +103,7 @@ class Commander (object) :
         for key in allScripts.keys() :
             fullFile = os.path.join(self.local.projScriptsFolder, key)
             with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.makeScriptHeader(allScripts[key][0]))
+                writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
                 writeObject.write(allScripts[key][1] + '\n\n')
 
             # Make the script executable
@@ -115,10 +115,10 @@ class Commander (object) :
         terminal('\nCompleted creating/recreating static helper scripts.\n')
 
 
-    def makeScriptHeader (self, desc) :
+    def makeScriptHeader (self, desc, cmd) :
         '''Make a helper script header.'''
 
-        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\n'
+        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\necho \necho command: ' + cmd + '\n\n'
 
 
     def getStaticScripInfo (self) :
@@ -146,7 +146,7 @@ class Commander (object) :
                 'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
                 'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
                 'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
-                'updateRapuma'  : ['Update Rapuma and the project scripts.',            'rapuma system -u \n\nrapuma project ' + pid + ' -s '], 
+                'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -s '], 
                 'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark False '], 
                 'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark True \n\n']
             }

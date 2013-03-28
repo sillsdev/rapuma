@@ -54,6 +54,7 @@ from rapuma.core.proj_config import ProjConfig
 from rapuma.core.proj_setup import ProjSetup
 from rapuma.core.proj_backup import ProjBackup
 from rapuma.core.proj_commander import Commander
+from rapuma.core.proj_compare import Compare
 from rapuma.project.project import Project
 
 # Instantiate User classes
@@ -245,12 +246,8 @@ def userArguments (args, local) :
             elif args.source_id :
                 if not aProject.hasValidSourcePath(args.group_id, args.source_id) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-
-
             # Having sorted through any potential problems, try adding the group
             ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
-
-
 
         # Remove a group from the project
         elif args.remove :
@@ -300,7 +297,7 @@ def userArguments (args, local) :
             sys.exit('\nERROR: Validate not working yet (usfm_Text.testCompTextFile())\n')
         # Compare a component with backups of working or source text
         elif args.compare :
-            aProject.compareComponent(args.component_id.lower(), args.compare)
+            Compare(args.project_id).compareComponent(args.group_id, args.component_id.lower(), args.compare)
         # Commands for editing project files
         elif args.edit :
                 aProject.edit(args.component_id)
