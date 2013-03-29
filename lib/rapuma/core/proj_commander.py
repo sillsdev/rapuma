@@ -161,7 +161,8 @@ class Commander (object) :
         mid     = self.projectMediaIDCode
 
         return {
-                'compareWork'   : ['Compare component working text with start point.',  'rapuma component ' + pid + ' ' + gid + ' $1 -c working'], 
+                'compareSource' : ['Compare component working text with source.',       'rapuma component ' + pid + ' ' + gid + ' $1 -c source'], 
+                'compareWork'   : ['Compare working text with previous working text.',  'rapuma component ' + pid + ' ' + gid + ' $1 -c working'], 
                 'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' ' + gid + ' -c $1 -g -s'], 
                 'export'        : ['Export working text from the ' + gid + ' group.',   'rapuma export ' + pid + ' ' + gid + ' $1 -e -f  '], 
                 'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 

@@ -69,7 +69,7 @@ def dieNow (msg = '') :
 # FIXME: Need to add a debug switch in here
 
     if msg :
-        '\n' + msg + ' Rapuma halting now!\n'
+        msg = '\n' + msg + ' Rapuma halting now!\n'
     else :
         msg = '\nRapuma halting now!\n'
 

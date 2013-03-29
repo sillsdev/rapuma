@@ -80,4 +80,15 @@ class ProjLocal (object) :
 
         # Add some additional necessary params
         self.lockExt = '.lock'
+        
+        # Do some cleanup like getting rid of the last sessions error log file.
+        try :
+            if os.path.isfile(self.projErrorLogFile) :
+                os.remove(self.projErrorLogFile)
+        except :
+            pass
+
+        
+        
+        
 

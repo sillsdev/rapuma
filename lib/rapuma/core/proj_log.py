@@ -353,7 +353,7 @@ class ProjLog (object) :
 # depending on what has happened, they are classed in three levels:
 #   1) [MSG] - Common event going to log and terminal
 #   2) [WRN] - Warning event going to log and terminal if debugging is turned on
-#   3) [ERR] - Error event going to the log and terminal
+#   3) [ERR] - Error event going to the log and terminal and kills the process
 #   4) [LOG] - Messages that go only to the log file to help with debugging
 # FIXME: Following not implemented yet
 #   5) [TOD] - To do list. Output to a file that helps guide the user.
@@ -433,8 +433,15 @@ class ProjLog (object) :
                 if code == 'ERR' :
                     self.writeToErrorLog(self.local.projErrorLogFile, eventLine)
 
-            except :
+            except Exception as e :
+                # If we don't succeed, we should probably quite here
                 terminal("Failed to write message to log file: " + msg)
+                terminal('Internal error: [' + str(e) + ']')
+                dieNow()
+            
+            # Halt the process if this was an 'ERR' level type code
+            if code == 'ERR' :
+                dieNow('Unrecoverable error.')
 
         return
 

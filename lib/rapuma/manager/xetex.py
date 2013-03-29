@@ -157,9 +157,47 @@ class Xetex (Manager) :
             256 : 'Something really awful happened.'
                                 }
 
+        # Log messages for this module
+        self.errorCodes     = {
+            'XTEX-000' : ['MSG', 'XeTeX module messages'],
+            'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
+            'XTEX-010' : ['LOG', 'Version number: [<<1>>], was found. Assumed persistent values have been merged.'],
+            'XTEX-015' : ['LOG', 'Version number present, not running persistant values.'],
+            'XTEX-020' : ['LOG', 'Wrote out new layout configuration file.'],
+            'XTEX-040' : ['LOG', 'Created: <<1>>'],
+            'XTEX-045' : ['TOD', 'File <<1>> is missing. Check the error log for an import error for this required file. The system cannot render without it.'],
+            'XTEX-050' : ['ERR', 'USFM working text not found: <<1>>. This is required in order to render.'],
+            'XTEX-055' : ['ERR', 'make<<1>>() failed to properly create: <<2>>. This is a required file in order to render.'],
+            'XTEX-060' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
+            'XTEX-065' : ['LOG', 'File: [<<1>>] missing, created a new one.'],
+            'XTEX-070' : ['LOG', 'Copied macro: <<1>>'],
+            'XTEX-075' : ['ERR', 'No macro package for : <<1>>'],
+            'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],
+            'XTEX-085' : ['MSG', 'The file: <<1>> was not found, XeTeX will now try to render it.'],
+            'XTEX-105' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
+            'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
+            'XTEX-115' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
+            'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
+            'XTEX-130' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
+
+            '625' : ['MSG', 'Rendering of [<<1>>] successful.'],
+            '630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
+            '635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
+            '640' : ['ERR', 'Failed to add watermark to [<<1>>].'],
+            '645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
+            'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
+            '660' : ['ERR', 'Failed to add lines background to [<<1>>].'],
+            '665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
+            '690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
+            '695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
+            '600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
+        }
+
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
+###############################################################################
+######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
     def rtnBoolDepend (self, bdep) :
@@ -345,6 +383,8 @@ class Xetex (Manager) :
 
 ###############################################################################
 ############################# DEPENDENCY FUNCTIONS ############################
+###############################################################################
+######################## Error Code Block Series = 400 ########################
 ###############################################################################
 
     def makeMacLinkFile (self) :
@@ -706,6 +746,8 @@ class Xetex (Manager) :
 ###############################################################################
 ################################# Main Function ###############################
 ###############################################################################
+######################## Error Code Block Series = 600 ########################
+###############################################################################
 
     def run (self, renderParams) :
         '''This will check all the dependencies for a group and then
@@ -775,11 +817,11 @@ class Xetex (Manager) :
 
             # Analyse the return code
             if rCode == int(0) :
-                self.project.log.writeToLog('XTEX-025', [fName(self.gidTexFile)])
+                self.project.log.writeToLog(self.errorCodes['625'], [fName(self.gidTexFile)])
             elif rCode in self.xetexErrorCodes :
-                self.project.log.writeToLog('XTEX-030', [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
+                self.project.log.writeToLog(self.errorCodes['630'], [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
             else :
-                self.project.log.writeToLog('XTEX-035', [str(rCode)])
+                self.project.log.writeToLog(self.errorCodes['635'], [str(rCode)])
                 dieNow()
 
             # Add lines background for composition work
@@ -789,10 +831,10 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog('XTEX-165')
+                    self.project.log.writeToLog(self.errorCodes['665'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog('XTEX-160', [str(e)])
+                    self.project.log.writeToLog(self.errorCodes['660'], [str(e)])
                     dieNow()
 
             # Add a watermark if required
@@ -802,10 +844,10 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog('XTEX-145')
+                    self.project.log.writeToLog(self.errorCodes['645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog('XTEX-140', [str(e)])
+                    self.project.log.writeToLog(self.errorCodes['640'], [str(e)])
                     dieNow()
 
             # Add a box around the page (for proof reading)
@@ -815,21 +857,21 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog('XTEX-145')
+                    self.project.log.writeToLog(self.errorCodes['645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog('XTEX-140', [str(e)])
+                    self.project.log.writeToLog(self.errorCodes['640'], [str(e)])
                     dieNow()
 
         else :
-            self.project.log.writeToLog('XTEX-090', [fName(self.gidPdfFile)])
+            self.project.log.writeToLog(self.errorCodes['690'], [fName(self.gidPdfFile)])
 
         # Review the results if desired
         if os.path.isfile(self.gidPdfFile) :
             if self.displayPdfOutput() :
-                self.project.log.writeToLog('XTEX-095', [fName(self.gidPdfFile)])
+                self.project.log.writeToLog(self.errorCodes['695'], [fName(self.gidPdfFile)])
             else :
-                self.project.log.writeToLog('XTEX-100', [fName(self.gidPdfFile)])
+                self.project.log.writeToLog(self.errorCodes['600'], [fName(self.gidPdfFile)])
 
 
 

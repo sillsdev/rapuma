@@ -229,6 +229,7 @@ def userArguments (args, local) :
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
+        aProject = initProject(args.project_id, args.group_id)
         # Add a new group
         if args.add :
             if not args.cid_list :

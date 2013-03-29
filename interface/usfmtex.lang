@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!--
+
+ This file is part of GtkSourceView
+
+ Author: Dennis Drescher <dennis_drescher@sil.org>
+
+ This will provide color syntax for editing USFM files.
+
+ History:
+
+	20130329	Intial creation of description set. Much more
+			work needed. (djd)
+ 
+ In Ubuntu this file gets copied to:
+ 
+	sudo cp usfmtex.lang /usr/share/gtksourceview-3.0/language-specs
+
+-->
+
+
+<language id="usfmtex" _name="UsfmTeX" version="2.0" _section="Markup">
+  <metadata>
+    <property name="mimetypes">text/x-python</property>
+    <property name="globs">*.usfm;*.sfm;*.sty;*.USFM;*.SFM;*.STY</property>
+    <property name="line-comment-start">%</property>
+  </metadata>
+
+  <styles>
+    <style id="comment"          _name="Comment"      map-to="def:comment"/>
+    <style id="ltgreen"          _name="LightGreen"   map-to="def:builtin"/>
+    <style id="ltblue"           _name="LightBlue"    map-to="def:special-char"/>
+    <style id="blue"             _name="Blue"         map-to="def:comment"/>
+    <style id="red"              _name="Red"          map-to="def:keyword"/>
+    <style id="green"            _name="Green"        map-to="def:type"/>
+    <style id="purple"           _name="Purple"       map-to="def:character"/>
+  </styles>
+
+  <definitions>
+
+         <context id="custom-commands" style-ref="red" class="no-spell-check">
+            <prefix>\\</prefix>
+            <keyword>eject</keyword>
+            <keyword>break</keyword>
+            <keyword>skipline</keyword>
+            <keyword>skiphalfline</keyword>
+            <keyword>skipqline</keyword>
+            <keyword>suckupline</keyword>
+            <keyword>suckuphalfline</keyword>
+            <keyword>suckupqline</keyword>
+            <keyword>nbsp</keyword>
+            <keyword>zwsp</keyword>
+            <keyword>zwj</keyword>
+        </context>
+
+        <context id="usfm-markers" style-ref="ltgreen" class="no-spell-check">
+            <prefix>\\</prefix>
+            <keyword>id</keyword>
+            <keyword>h</keyword>
+            <keyword>rem</keyword>
+            <keyword>m[t]?[0-4]?</keyword>
+            <keyword>s[0-4]?</keyword>
+            <keyword>r</keyword>
+            <keyword>p</keyword>
+            <keyword>v\s[0-9]+</keyword>
+            <keyword>f[r|t|q]?</keyword>
+            <keyword>x[o|t]?</keyword>
+            <keyword>q[0-4]?</keyword>
+            <keyword>b</keyword>
+        </context>
+
+        <context id="usfm-chapter" style-ref="blue" class="no-spell-check">
+            <match>\\c\s[0-9]+</match>
+        </context>
+
+        <context id="usfm-custom" style-ref="purple" class="no-spell-check">
+            <match>\\z_[a-zA-Z0-9]+</match>
+        </context>
+
+        <context id="usfmtex">
+            <include>
+
+                <context id="comment" style-ref="blue">
+                    <start>%</start>
+                    <end>$</end>
+                    <include>
+                        <context ref="def:in-comment"/>
+                    </include>
+                </context>
+
+                <context ref="usfm-markers"/>
+                <context ref="usfm-chapter"/>
+                <context ref="usfm-custom"/>
+                <context ref="custom-commands"/>
+
+           </include>
+        </context>
+  </definitions>
+</language>

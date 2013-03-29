@@ -59,13 +59,6 @@ class Project (object) :
         # for it here and the functions below will set it. (I'm just say'n)
         self.gid                    = gid
 
-        # Do some cleanup like getting rid of the last sessions error log file.
-        try :
-            if os.path.isfile(self.local.projErrorLogFile) :
-                os.remove(self.local.projErrorLogFile)
-        except :
-            pass
-
 #        import pdb; pdb.set_trace()
 
         m = import_module('rapuma.project.' + self.projectMediaIDCode)
@@ -105,9 +98,26 @@ class Project (object) :
         # Go ahead and set this as the current project
         self.setProjCurrent(self.projectIDCode)
 
+        # Log messages for this module
+        self.errorCodes     = {
+            'PROJ-000' : ['MSG', 'Project module messages'],
+            'PROJ-010' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
+            'PROJ-011' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
+            'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
+            'PROJ-040' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            'PROJ-050' : ['ERR', 'Component [<<1>>] working text file was not found in the project configuration.'],
+            'PROJ-060' : ['ERR', 'Component [<<1>>] was not found in the project configuration.'],
+            'PROJ-070' : ['ERR', 'Source file not found: [<<1>>].'],
+            'PROJ-080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
+            'PROJ-090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
+
+            '205' : ['LOG', 'Created the [<<1>>] manager object.'],
+        }
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
+###############################################################################
+######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
     def createManager (self, cType, mType) :
@@ -118,7 +128,7 @@ class Project (object) :
         if fullName not in self.managers :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
-            self.log.writeToLog('PROJ-005', [fullName])
+            self.log.writeToLog(self.errorCodes['205'], [fullName])
 
 
     def loadManager (self, cType, mType) :

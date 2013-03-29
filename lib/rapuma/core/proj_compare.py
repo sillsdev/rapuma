@@ -41,7 +41,15 @@ class Compare (object) :
         self.local              = None
         self.projConfig         = None
         self.finishInit()
-
+        # Log messages for this module
+        self.errorCodes     = {
+            '210' : ['ERR', 'File does not exist: [<<1>>]'],
+            '280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
+            '285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
+            '290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
+            '295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
+            '220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
+        }
 
     def finishInit (self, projHome = None) :
         '''Finishing collecting settings that would be needed for most
@@ -59,6 +67,8 @@ class Compare (object) :
 
 ###############################################################################
 ############################## Compare Functions ##############################
+###############################################################################
+######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
     def compareComponent (self, gid, cid, test) :
@@ -81,7 +91,13 @@ class Compare (object) :
                     old = os.path.join(self.local.projComponentsFolder, cid, f)
                     break
         else :
-            self.log.writeToLog('COMP-190', [test])
+            self.log.writeToLog(self.errorCodes['290'], [test])
+
+        # Test to be sure the files are valid
+        if not os.path.exists(new) :
+            self.log.writeToLog(self.errorCodes['210'], [new])
+        elif not os.path.exists(old) :
+            self.log.writeToLog(self.errorCodes['210'], [old])
 
         # Turn it over to the generic compare tool
         self.compare(new, old)
@@ -107,14 +123,13 @@ class Compare (object) :
             # Get diff viewer
             diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
             try :
-                self.log.writeToLog('COMP-195', [fName(new),fName(old)])
+                self.log.writeToLog(self.errorCodes['295'], [fName(new),fName(old)])
                 subprocess.call([diffViewer, new, old])
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.log.writeToLog('COMP-180', [str(e)])
-                dieNow()
+                self.log.writeToLog(self.errorCodes['280'], [str(e)])
         else :
-            self.log.writeToLog('COMP-198')
+            self.log.writeToLog(self.errorCodes['220'])
 
 
 

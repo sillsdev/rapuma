@@ -84,8 +84,45 @@ class Font (Manager) :
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
                 writeConfFile(self.project.projConfig)
 
+        # Log messages for this module
+        self.errorCodes     = {
+            'FONT-000' : ['MSG', 'Font module messages'],
+            'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
+            'FONT-010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
+            'FONT-015' : ['MSG', 'FONT-015 - Unassigned error message ID.'],
+            'FONT-020' : ['ERR', 'Failed to find font setting in ParaTExt project (.ssf file). A primary font must be set before this component can be successfully rendered.'],
+            'FONT-025' : ['ERR', 'No source editor was found for this project. Please enter this setting before continuing.'],
+            'FONT-032' : ['MSG', 'Force switch was set (-f). Forced font [<<1>>] to be the primary font for the [<<2>>] component type.'],
+            'FONT-035' : ['MSG', 'The primary font for component type [<<1>>] has been set to [<<2>>]'],
+            'FONT-037' : ['MSG', 'The font [<<1>>] is already set for component type [<<2>>]. Use -f to force change it to another font.'],
+            'FONT-040' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.checkForSubFont() or recordFont)'],
+            'FONT-041' : ['ERR', 'Font bundle [<<1>>] not found. Process halted. (font.checkForSubFont())'],
+            'FONT-042' : ['MSG', 'Force switch was set (-f). [<<1>>] font setup information was force added to project config'],
+            'FONT-050' : ['ERR', 'Halt! [<<1>>] not found. - font.copyInFont()'],
+            'FONT-060' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - font.installFont()'],
+            'FONT-065' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed. - font.installFont()'],
+            'FONT-067' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - font.installFont()'],
+            'FONT-070' : ['LOG', 'Copied the [<<1>>] font file into the project. - font.copyInFont()'],
+            'FONT-080' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - font.removeFont()'],
+            'FONT-082' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - font.removeFont()'],
+            'FONT-085' : ['ERR', 'Could not remove! The [<<1>>] font was not listed in the [<<2>>] component type settings. - font.removeFont()'],
+            'FONT-090' : ['WRN', 'No replacement for primary font found.  - font.removeFont()'],
+            'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
+            'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
+            'FONT-120' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
+            'FONT-130' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+
+            '230' : ['ERR', 'Font [<<1>>] is already the primary font for the [<<2>>] component type.'],
+            '245' : ['LOG', '<<1>> font setup information added to project config'],
+            '247' : ['LOG', 'The [<<1>>] font already has a listing in the configuration.'],
+            '262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - font.installFont()'],
+
+        }
+
 ###############################################################################
 ############################ Project Level Functions ##########################
+###############################################################################
+######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
 
@@ -118,7 +155,7 @@ class Font (Manager) :
             self.project.log.writeToLog('FONT-037', [self.project.projConfig['Managers'][self.manager]['primaryFont'],Ctype])
             return True
         else :
-            self.project.log.writeToLog('FONT-030', [font,Ctype])
+            self.project.log.writeToLog(self.errorCodes['230'], [font,Ctype])
             return True
 
         return False
@@ -215,7 +252,7 @@ class Font (Manager) :
 
         else :
             if testForSetting(self.fontConfig['Fonts'], font) :
-                self.project.log.writeToLog('FONT-047', [font])
+                self.project.log.writeToLog(self.errorCodes['247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
                 try :
@@ -224,7 +261,7 @@ class Font (Manager) :
                     fInfo = getXMLSettings(metaDataSource)
                     self.fontConfig['Fonts'][font] = fInfo.dict()
                     writeConfFile(self.fontConfig)
-                    self.project.log.writeToLog('FONT-045', [font])
+                    self.project.log.writeToLog(self.errorCodes['245'], [font])
 
             # Adjust installed fonts list if needed
             if len(self.project.projConfig['Managers'][self.manager]['installedFonts']) == 0 :
@@ -238,7 +275,7 @@ class Font (Manager) :
             if primFont != font and (primFont == '' or primFont == 'None') :
                 self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
 
-            self.project.log.writeToLog('FONT-045', [font])
+            self.project.log.writeToLog(self.errorCodes['245'], [font])
             writeConfFile(self.project.projConfig)
             return True
 
@@ -294,7 +331,7 @@ class Font (Manager) :
         else :
             # With nothing done yet, check for meta data file
             if os.path.isfile(confXml) :
-                self.project.log.writeToLog('FONT-062', [fName(source)])
+                self.project.log.writeToLog(self.errorCodes['262'], [fName(source)])
                 return True
             else :
                 if extract(source, confXml) :
