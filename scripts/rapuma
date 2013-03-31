@@ -46,16 +46,17 @@ from datetime import *
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.proj_local import ProjLocal
-from rapuma.core.proj_log import ProjLog
-from rapuma.core.tools import *
-from rapuma.core.user_config import UserConfig
-from rapuma.core.proj_config import ProjConfig
-from rapuma.core.proj_setup import ProjSetup
-from rapuma.core.proj_backup import ProjBackup
-from rapuma.core.proj_commander import Commander
-from rapuma.core.proj_compare import Compare
-from rapuma.project.project import Project
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.core.tools              import *
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.proj_setup         import ProjSetup
+from rapuma.core.proj_backup        import ProjBackup
+from rapuma.core.proj_commander     import Commander
+from rapuma.core.proj_compare       import Compare
+from rapuma.core.page_background    import PageBackground
+from rapuma.project.project         import Project
 
 # Instantiate User classes
 local           = ProjLocal(rapumaHome, userHome, projHome)
@@ -447,6 +448,13 @@ def userArguments (args, local) :
             # Bad command
             sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -c (--cloud). Process halted!\n')
 
+    # Commands for setting the page background
+    elif sys.argv[1].lower() == 'background' :
+        if args.add :
+            PageBackground(args.project_id).addBackground(args.add)
+        elif args.remove :
+            PageBackground(args.project_id).removeBackground(args.remove)
+
     # Totally lost
     else:
         sys.exit('\nERROR: Command not recognized: [' + sys.argv[1] + ']\n')
@@ -650,11 +658,19 @@ preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup
 preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
 preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back project data to cloud storage.')
 
+# Add Project preserve subprocess arguments
+backgrounds = ['watermark', 'lines', 'boarder', 'cropmarks']
+backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
+backgroundCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
+backgroundCommand.add_argument('-a', '--add', choices=backgrounds, help='')
+backgroundCommand.add_argument('-r', '--remove', choices=backgrounds, help='')
+#backgroundCommand.add_argument('-w', '--watermark', action='store_true', help='')
+#backgroundCommand.add_argument('-l', '--lines', action='store_true', help='')
+#backgroundCommand.add_argument('-b', '--border', action='store_true', help='')
+#backgroundCommand.add_argument('-c', '--cropmarks', action='store_true', help='')
+
+
 # Send the collected arguments to the handler
-# FIXME: If "vars" is removed, we should be able to parse the args as regular
-# objects, rather than dictionary objects. For more info on how to make the
-# arg parsing better read Python docs on argpars 15.4.3.
-#userArguments(vars(parser.parse_args()), local)
 userArguments(parser.parse_args(), local)
 
 

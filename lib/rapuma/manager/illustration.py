@@ -61,28 +61,15 @@ class Illustration (Manager) :
         # File names
         self.illustrationConfFileName   = self.project.projectMediaIDCode + '_illustration.conf'
         self.defaultXmlConfFileName     = 'illustration.xml'
-        self.projWatermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
-        self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
-        self.projLinesFileName          = self.layoutConfig['PageLayout']['linesFile']
-        self.rpmDefLinesFileName        = 'lines_default.pdf'
-        self.boxBoarderFileName         = self.layoutConfig['PageLayout']['boxBoarderFile']
-        self.rpmBoxBoarderFileName      = 'box_background.pdf'
         # Folder paths
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
-        self.rpmIllustrationsFolder     = self.project.local.rapumaIllustrationsFolder
         self.projConfFolder             = self.project.local.projConfFolder
         self.rpmRapumaConfigFolder      = self.project.local.rapumaConfigFolder
         # File names with folder paths
         self.illustrationConfFile       = os.path.join(self.projConfFolder, self.illustrationConfFileName)
         self.defaultXmlConfFile         = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
-        self.projWatermarkFile          = os.path.join(self.projIllustrationsFolder, self.projWatermarkFileName)
-        self.rpmDefWatermarkFile        = os.path.join(self.rpmIllustrationsFolder, self.rpmDefWatermarkFileName)
-        self.projLinesFile              = os.path.join(self.projIllustrationsFolder, self.projLinesFileName)
-        self.rpmDefLinesFile            = os.path.join(self.rpmIllustrationsFolder, self.rpmDefLinesFileName)
-        self.boxBoarderFile             = os.path.join(self.projIllustrationsFolder, self.boxBoarderFileName)
-        self.rpmBoxBoarderFile          = os.path.join(self.rpmIllustrationsFolder, self.rpmBoxBoarderFileName)
 
         # If we have nothing in the project for pointing to an illustrations
         # lib, put the default in here
@@ -119,52 +106,6 @@ class Illustration (Manager) :
 #        else :
 #            self.project.log.writeToLog('ILUS-100', [bType])
 #            dieNow()
-
-
-    def changeWatermarkFile (self) :
-        '''Change the current watermark file.'''
-
-# FIXME: This is a place holder function
-
-        terminal('This does not work yet.')
-
-
-    def installDefaultWatermarkFile (self) :
-        '''Install a default Rapuma watermark file into the project.'''
-
-        if not os.path.exists(self.projWatermarkFile) :
-            try :
-                shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.projWatermarkFile)])
-            except Exception as e :
-                # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install default watermark background file with this error: ' + str(e) + '\n')
-
-
-    def installLinesFile (self) :
-        '''Install a background lines file into the project.'''
-
-        if not os.path.exists(self.projLinesFile) :
-            try :
-                shutil.copy(self.rpmDefLinesFile, self.projLinesFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.projLinesFile)])
-            except Exception as e :
-
-                # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
-
-
-    def installBoxBoarderFile (self) :
-        '''Install a background lines file into the project.'''
-
-        if not os.path.exists(self.boxBoarderFile) :
-            try :
-                shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.boxBoarderFile)])
-            except Exception as e :
-
-                # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
 
 
     def installIllustrationFile (self, fileName, path = None, force = False) :

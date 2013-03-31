@@ -21,10 +21,11 @@ import os, shutil, re
 import subprocess
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.project.manager import Manager
-from rapuma.group.usfm import PT_Tools
-from rapuma.core.proj_config import ConfigTools
+from rapuma.core.tools              import *
+from rapuma.project.manager         import Manager
+from rapuma.group.usfm              import PT_Tools
+from rapuma.core.proj_config        import ConfigTools
+from rapuma.core.page_background    import PageBackground
 
 
 ###############################################################################
@@ -46,6 +47,7 @@ class Xetex (Manager) :
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg
+        self.pid                    = project.projectIDCode
         self.gid                    = project.gid
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
@@ -53,6 +55,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = PT_Tools(project)
+        self.pg_back                = PageBackground(project.projectIDCode)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
         self.component              = self.managers[self.cType + '_Component']
@@ -99,9 +102,6 @@ class Xetex (Manager) :
         self.extTexFileName         = self.cType + '_set-ext.tex'
         self.grpExtTexFileName      = self.gid + '-ext.tex'
         self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
-        self.watermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
-        self.linesFileName          = self.layoutConfig['PageLayout']['linesFile']
-        self.boxBoarderFileName     = self.layoutConfig['PageLayout']['boxBoarderFile']
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
         self.rapumaMacPackFolder    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
@@ -110,7 +110,6 @@ class Xetex (Manager) :
         self.projComponentsFolder   = self.local.projComponentsFolder
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         self.projHyphenationFolder  = self.local.projHyphenationFolder
-        self.projIllustrationsFolder = self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
@@ -136,9 +135,9 @@ class Xetex (Manager) :
         self.compHyphFile           = self.hyphenation.compHyphFile
         self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
-        self.watermarkFile          = os.path.join(self.projIllustrationsFolder, self.watermarkFileName)
-        self.linesFile              = os.path.join(self.projIllustrationsFolder, self.linesFileName)
-        self.boxBoarderFile         = os.path.join(self.projIllustrationsFolder, self.boxBoarderFileName)
+        self.projWatermarkFile      = self.pg_back.projWatermarkFile
+        self.linesFile              = self.pg_back.projIllustrationsFolder
+        self.boxBoarderFile         = self.pg_back.projIllustrationsFolder
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -839,7 +838,7 @@ class Xetex (Manager) :
 
             # Add a watermark if required
             if self.useWatermark :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.watermarkFile, 'output', tempName(self.gidPdfFile)]
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.projWatermarkFile, 'output', tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)

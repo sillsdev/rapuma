@@ -255,16 +255,16 @@ class Usfm (Group) :
         # Be sure there is a watermark file listed in the conf and
         # installed if watermark is turned on (True). Fallback on the
         # the default if needed.
-        if useWatermark :
-            self.illustration.installDefaultWatermarkFile()
+#        if useWatermark :
+#            self.illustration.installDefaultWatermarkFile()
 
         # Same for lines background file used for composition
-        if useLines :
-            self.illustration.installLinesFile()
+#        if useLines :
+#            self.illustration.installLinesFile()
 
         # Same for box background file used for composition
-        if useBoxBoarder :
-            self.illustration.installBoxBoarderFile()
+#        if useBoxBoarder :
+#            self.illustration.installBoxBoarderFile()
 
         # Any more stuff to run?
 
