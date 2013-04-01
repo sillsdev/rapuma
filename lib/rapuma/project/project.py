@@ -182,19 +182,19 @@ class Project (object) :
 ############################ Group Level Functions ############################
 ###############################################################################
 
-    def getGroupSourcePath (self, gid) :
-        '''Get the source path for a specified group.'''
+#    def getGroupSourcePath (self, gid) :
+#        '''Get the source path for a specified group.'''
 
-#        import pdb; pdb.set_trace()
-        csid = self.projConfig['Groups'][gid]['csid']
+##        import pdb; pdb.set_trace()
+#        csid = self.projConfig['Groups'][gid]['csid']
 
-        try :
-            return self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            terminal('No source path found for: [' + str(e) + ']')
-            terminal('Please add a source path for this component type.')
-            dieNow()
+#        try :
+#            return self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            terminal('No source path found for: [' + str(e) + ']')
+#            terminal('Please add a source path for this component type.')
+#            dieNow()
 
 
     def renderGroup (self, gid, cidList = None, force = False) :
@@ -255,143 +255,112 @@ class Project (object) :
         return groupObj
 
 
-    def installGroupComps (self, gid, cidList, force = False) :
-        '''This will install components to the group we created above in createGroup().
-        If a component is already installed in the project it will not proceed unless
-        force is set to True. Then it will remove the component files so a fresh copy
-        can be added to the project.'''
+#    def installGroupComps (self, gid, cidList, force = False) :
+#        '''This will install components to the group we created above in createGroup().
+#        If a component is already installed in the project it will not proceed unless
+#        force is set to True. Then it will remove the component files so a fresh copy
+#        can be added to the project.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        # Get some group settings
-        cType       = self.projConfig['Groups'][gid]['cType']
-        csid        = self.projConfig['Groups'][gid]['csid']
-        sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+#        # Get some group settings
+#        cType       = self.projConfig['Groups'][gid]['cType']
+#        csid        = self.projConfig['Groups'][gid]['csid']
+#        sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
 
-        for cid in cidList :
-            # See if the working text is present, quite if it is not
-            if cType == 'usfm' :
-                # Force on add always means we delete the component first
-                # before we do anything else
-                if force :
-                    self.uninstallGroupComponent(gid, cid, force)
+#        for cid in cidList :
+#            # See if the working text is present, quite if it is not
+#            if cType == 'usfm' :
+#                # Force on add always means we delete the component first
+#                # before we do anything else
+#                if force :
+#                    self.uninstallGroupComponent(gid, cid, force)
 
-                # Install our working text files
-                self.createManager(cType, 'text')
-                if self.groups[gid].installUsfmWorkingText(gid, cid, force) :
-                    # Report in context to force use or not
-                    if force :
-                        self.log.writeToLog('COMP-022', [cid])
-                    else :
-                        self.log.writeToLog('COMP-020', [cid])
+#                # Install our working text files
+#                self.createManager(cType, 'text')
+#                if self.groups[gid].installUsfmWorkingText(gid, cid, force) :
+#                    # Report in context to force use or not
+#                    if force :
+#                        self.log.writeToLog('COMP-022', [cid])
+#                    else :
+#                        self.log.writeToLog('COMP-020', [cid])
 
-                else :
-                    self.log.writeToLog('TEXT-160', [cid])
-                    return False
-            else :
-                self.log.writeToLog('COMP-005', [cType])
-                dieNow()
+#                else :
+#                    self.log.writeToLog('TEXT-160', [cid])
+#                    return False
+#            else :
+#                self.log.writeToLog('COMP-005', [cType])
+#                dieNow()
 
-        # If we got this far it must be okay to leave
-        return True
-
-
-    def removeGroup (self, gid, force = False) :
-        '''Handler to remove a group. If it is not found return True anyway.'''
-
-        cidList     = self.projConfig['Groups'][gid]['cidList']
-        cType     = self.projConfig['Groups'][gid]['cType']
-        groupFolder = os.path.join(self.local.projComponentsFolder, gid)
-        # Create the group object now
-        self.createGroup(gid)
-
-        # First test for lock
-        if self.isLocked(gid) and force == False :
-            self.log.writeToLog('COMP-110', [gid])
-            dieNow()
-
-        # Remove subcomponents from the target if there are any
-        buildConfSection(self.projConfig, 'Groups')
-        if isConfSection(self.projConfig['Groups'], gid) :
-            for cid in cidList :
-                self.uninstallGroupComponent(gid, cid, force)
-            if os.path.exists(groupFolder) :
-                shutil.rmtree(groupFolder)
-                self.log.writeToLog('GRUP-090', [gid])
-        else :
-            self.log.writeToLog('GRUP-050', [gid])
-            
-        # Now remove the config entry
-        del self.projConfig['Groups'][gid]
-        if writeConfFile(self.projConfig) :
-            self.log.writeToLog('GRUP-120', [gid])
+#        # If we got this far it must be okay to leave
+#        return True
 
 
-    def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
-        '''Update a group, --source is optional but if given it will
-        overwrite the current setting. The use of this function implies
-        that this is forced so no force setting is used.'''
+#    def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
+#        '''Update a group, --source is optional but if given it will
+#        overwrite the current setting. The use of this function implies
+#        that this is forced so no force setting is used.'''
 
-        # Just in case there are any problems with the source path
-        # resolve it here before going on.
-        csid = self.projConfig['Groups'][gid]['csid']
-        if not sourcePath :
-            try :
-                sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
-                if not os.path.exists(sourcePath) :
-                    self.log.writeToLog('GRUP-020', [csid])
-                    dieNow()
-            except :
-                self.log.writeToLog('GRUP-025', [csid])
-                dieNow()
-        else :
-            sourcePath = resolvePath(sourcePath)
-            if not os.path.exists(sourcePath) :
-                self.log.writeToLog('GRUP-030')
-                dieNow()
+#        # Just in case there are any problems with the source path
+#        # resolve it here before going on.
+#        csid = self.projConfig['Groups'][gid]['csid']
+#        if not sourcePath :
+#            try :
+#                sourcePath  = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+#                if not os.path.exists(sourcePath) :
+#                    self.log.writeToLog('GRUP-020', [csid])
+#                    dieNow()
+#            except :
+#                self.log.writeToLog('GRUP-025', [csid])
+#                dieNow()
+#        else :
+#            sourcePath = resolvePath(sourcePath)
+#            if not os.path.exists(sourcePath) :
+#                self.log.writeToLog('GRUP-030')
+#                dieNow()
 
-            # Reset the source path for this csid
-            self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = sourcePath
-            writeConfFile(self.userConfig)
+#            # Reset the source path for this csid
+#            self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath'] = sourcePath
+#            writeConfFile(self.userConfig)
 
-        # Create the group object now
-        self.createGroup(gid)
+#        # Create the group object now
+#        self.createGroup(gid)
 
-        # Check to be sure the group exsits
-        if not self.groups[gid] :
-            self.log.writeToLog('COMP-210', [gid])
-            dieNow()
-        
-        # Sort out the list
-        if not cidList :
-            cidList = self.projConfig['Groups'][gid]['cidList']
-        else :
-            if type(cidList) != list :
-                 cidList = cidList.split()
+#        # Check to be sure the group exsits
+#        if not self.groups[gid] :
+#            self.log.writeToLog('COMP-210', [gid])
+#            dieNow()
+#        
+#        # Sort out the list
+#        if not cidList :
+#            cidList = self.projConfig['Groups'][gid]['cidList']
+#        else :
+#            if type(cidList) != list :
+#                 cidList = cidList.split()
 
-        # If force is used, just unlock by default
-        if force :
-            self.lockUnlock(gid, False)
+#        # If force is used, just unlock by default
+#        if force :
+#            self.lockUnlock(gid, False)
 
-        # Be sure the group is unlocked
-        if self.isLocked(gid) :
-            self.log.writeToLog('COMP-110', [gid])
-            dieNow()
+#        # Be sure the group is unlocked
+#        if self.isLocked(gid) :
+#            self.log.writeToLog('COMP-110', [gid])
+#            dieNow()
 
-        # Here we essentially re-add the component(s) of the group
-        self.installGroupComps(gid, cidList, force)
-        # Now lock it down
-        self.lockUnlock(gid, True)
+#        # Here we essentially re-add the component(s) of the group
+#        self.installGroupComps(gid, cidList, force)
+#        # Now lock it down
+#        self.lockUnlock(gid, True)
 
 
-    def hasValidSourcePath (self, gid, csid) :
-        '''Check if there is one, see if it is valid.'''
+#    def hasValidSourcePath (self, gid, csid) :
+#        '''Check if there is one, see if it is valid.'''
 
-        try :
-            path = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
-            return os.path.isdir(resolvePath(path))
-        except :
-            return False
+#        try :
+#            path = self.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+#            return os.path.isdir(resolvePath(path))
+#        except :
+#            return False
 
 
     def isValidCidList (self, gid, thisCidlist) :
@@ -425,44 +394,44 @@ class Project (object) :
 #            dieNow()
 
 
-    def isLocked (self, gid) :
-        '''Test to see if a group is locked. Return True if the group is 
-        locked. However, if the group doesn't even exsist, it is assumed
-        that it is unlocked and return False. :-)'''
+#    def isLocked (self, gid) :
+#        '''Test to see if a group is locked. Return True if the group is 
+#        locked. However, if the group doesn't even exsist, it is assumed
+#        that it is unlocked and return False. :-)'''
 
-        if not testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
-            return False
-        elif str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
-            return True
-        else :
-            return False
-
-
-    def lockUnlock (self, gid, lock = True) :
-        '''Lock or unlock to enable or disable actions to be taken on a group.'''
-
-        # First be sure this is a valid component
-        if not self.groups[gid] :
-            self.log.writeToLog('LOCK-010', [gid])
-            dieNow()
-        else :
-            self.setLock(gid, lock)
-            return True
+#        if not testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
+#            return False
+#        elif str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
+#            return True
+#        else :
+#            return False
 
 
-    def setLock (self, gid, lock) :
-        '''Set a group lock to True or False.'''
+#    def lockUnlock (self, gid, lock = True) :
+#        '''Lock or unlock to enable or disable actions to be taken on a group.'''
 
-        if testForSetting(self.projConfig['Groups'], gid) :
-            self.projConfig['Groups'][gid]['isLocked'] = lock
-            # Update the projConfig
-            if writeConfFile(self.projConfig) :
-                # Report back
-                self.log.writeToLog('LOCK-020', [gid, str(lock)])
-                return True
-        else :
-            self.log.writeToLog('LOCK-030', [gid, str(lock)])
-            return False
+#        # First be sure this is a valid component
+#        if not self.groups[gid] :
+#            self.log.writeToLog('LOCK-010', [gid])
+#            dieNow()
+#        else :
+#            self.setLock(gid, lock)
+#            return True
+
+
+#    def setLock (self, gid, lock) :
+#        '''Set a group lock to True or False.'''
+
+#        if testForSetting(self.projConfig['Groups'], gid) :
+#            self.projConfig['Groups'][gid]['isLocked'] = lock
+#            # Update the projConfig
+#            if writeConfFile(self.projConfig) :
+#                # Report back
+#                self.log.writeToLog('LOCK-020', [gid, str(lock)])
+#                return True
+#        else :
+#            self.log.writeToLog('LOCK-030', [gid, str(lock)])
+#            return False
 
 
     def listAllComponents (self, cType) :
@@ -481,51 +450,51 @@ class Project (object) :
                 print c, comps[c][1]
 
 
-    def uninstallGroupComponent (self, gid, cid, force = False) :
-        '''This will remove a component (files) from a group in the project.
-        However, a backup will be made of the working text for comparison purposes. 
-       This does not return anything. We trust it worked.'''
+#    def uninstallGroupComponent (self, gid, cid, force = False) :
+#        '''This will remove a component (files) from a group in the project.
+#        However, a backup will be made of the working text for comparison purposes. 
+#       This does not return anything. We trust it worked.'''
 
-        cType       = self.projConfig['Groups'][gid]['cType']
-        csid        = self.projConfig['Groups'][gid]['csid']
-        fileHandle  = self.managers[cType + '_Component'].makeFileName(cid)
-        self.createManager(cType, 'component')
-        fileName    = self.managers[cType + '_Component'].makeFileNameWithExt(cid)
+#        cType       = self.projConfig['Groups'][gid]['cType']
+#        csid        = self.projConfig['Groups'][gid]['csid']
+#        fileHandle  = self.managers[cType + '_Component'].makeFileName(cid)
+#        self.createManager(cType, 'component')
+#        fileName    = self.managers[cType + '_Component'].makeFileNameWithExt(cid)
 
-        # Test to see if it is shared
-        if self.isSharedComponent(gid, fileHandle) :
-            self.log.writeToLog('GRUP-060', [fileHandle,gid])
-            dieNow()
+#        # Test to see if it is shared
+#        if self.isSharedComponent(gid, fileHandle) :
+#            self.log.writeToLog('GRUP-060', [fileHandle,gid])
+#            dieNow()
 
-        # Remove the files
-        if force :
-            targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-            source          = os.path.join(targetFolder, fileName)
-            targetComp      = os.path.join(source + '.cv1')
-            if os.path.isfile(source) :
-                # First a comparison backup needs to be made of the working text
-                if os.path.isfile(targetComp) :
-                    makeWriteable(targetComp)
-                shutil.copy(source, targetComp)
-                makeReadOnly(targetComp)
-                self.log.writeToLog('GRUP-070', [fName(targetComp), cid])
-                for fn in os.listdir(targetFolder) :
-                    f = os.path.join(targetFolder, fn)
-                    if f != targetComp :
-                        os.remove(f)
-                        self.log.writeToLog('GRUP-080', [fName(f), cid])
+#        # Remove the files
+#        if force :
+#            targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+#            source          = os.path.join(targetFolder, fileName)
+#            targetComp      = os.path.join(source + '.cv1')
+#            if os.path.isfile(source) :
+#                # First a comparison backup needs to be made of the working text
+#                if os.path.isfile(targetComp) :
+#                    makeWriteable(targetComp)
+#                shutil.copy(source, targetComp)
+#                makeReadOnly(targetComp)
+#                self.log.writeToLog('GRUP-070', [fName(targetComp), cid])
+#                for fn in os.listdir(targetFolder) :
+#                    f = os.path.join(targetFolder, fn)
+#                    if f != targetComp :
+#                        os.remove(f)
+#                        self.log.writeToLog('GRUP-080', [fName(f), cid])
 
 
-    def isSharedComponent (self, gid, cid) :
-        '''If the cid is shared by any other groups, return True.'''
+#    def isSharedComponent (self, gid, cid) :
+#        '''If the cid is shared by any other groups, return True.'''
 
-        try :
-            for g in self.projConfig['Groups'].keys() :
-                if g != gid :
-                    if cid in self.projConfig['Groups'][g]['cidList'] :
-                        return True
-        except :
-            return False
+#        try :
+#            for g in self.projConfig['Groups'].keys() :
+#                if g != gid :
+#                    if cid in self.projConfig['Groups'][g]['cidList'] :
+#                        return True
+#        except :
+#            return False
 
 
 ###############################################################################

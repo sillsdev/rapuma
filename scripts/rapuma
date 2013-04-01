@@ -76,6 +76,16 @@ terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 ########################### Rapuma Functions ##############################
 ###########################################################################
 
+def hasValidSourcePath (gid, csid) :
+    '''Check if there is one, see if it is valid.'''
+
+    try :
+        path = uc.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
+        return os.path.isdir(resolvePath(path))
+    except :
+        return False
+
+
 def isProject (pid) :
     '''Look up in the user config to see if a project is registered.
     Return False if it is not.'''
@@ -243,21 +253,20 @@ def userArguments (args, local) :
                 if not resolvePath(args.source) :
                     sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             elif args.source_id :
-                if not aProject.hasValidSourcePath(args.group_id, args.source_id) :
+                if not hasValidSourcePath(args.group_id, args.source_id) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             # Having sorted through any potential problems, try adding the group
             ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
-
         # Remove a group from the project
         elif args.remove :
-            aProject.removeGroup(args.group_id, args.force)
+            ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
             if str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                Commander(args.project_id).updateScripts()
+                Commander(args.project_id).removeScripts()
         # Update a component, --source is optional but if given it will
         elif args.update :
             # overwrite the current setting. The --force setting will be needed
             # to unlock the component
-            aProject.updateGroup(args.group_id, args.cid_list, args.source, args.force)
+            ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
         # Execute/render a group of components
         elif args.execute :
 #            import pdb; pdb.set_trace()
@@ -277,10 +286,10 @@ def userArguments (args, local) :
             aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
         # Lock group
         if args.lock :
-            aProject.lockUnlock(args.group_id)
+            ProjSetup(args.project_id).lockUnlock(args.group_id)
         # Unlock group
         elif args.unlock :
-            aProject.lockUnlock(args.group_id)
+            ProjSetup(args.project_id).lockUnlock(args.group_id)
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -508,6 +517,23 @@ subparsers = parser.add_subparsers(help='sub-command help')
 # Add help subprocess arguments
 helpCommand = subparsers.add_parser('help', help='General system help')
 
+# Available choices
+mediaTypes =        ['book']
+componentTypes =    ['usfm']
+fontPackages =      ['', '']
+usfmBooks =         ['gen', 'exo', 'lev', 'num', 'deu', 'jos', 'jdg', 'rut', '1sa', '2sa', '1ki', '2ki', \
+                        '1ch', '2ch', 'ezr', 'neh', 'est', 'job', 'psa', 'pro', 'ecc', 'sng', 'isa', 'jer', \
+                        'lam', 'ezk', 'dan', 'hos', 'jol', 'amo', 'oba', 'jon', 'mic', 'nam', 'hab', 'zep', \
+                        'hag', 'zec', 'mal', 'mat', 'mrk', 'luk', 'jhn', 'act', 'rom', '1co', '2co', 'gal', \
+                        'eph', 'php', 'col', '1th', '2th', '1ti', '2ti', 'tit', 'phm', 'heb', 'jas', '1pe', \
+                        '2pe', '1jn', '2jn', '3jn', 'jud', 'rev', 'tob', 'jdt', 'esg', 'wis', 'sir', 'bar', \
+                        'lje', 's3y', 'sus', 'bel', '1ma', '2ma', '3ma', '4ma', '1es', '2es', 'man', 'ps2', \
+                        'oda', 'pss', 'jsa', 'jdb', 'tbs', 'sst', 'dnt', 'blt', 'frt', 'int', 'bak', 'cnc', \
+                        'glo', 'tdx', 'ndx', 'xxa', 'xxb', 'xxc', 'xxd', 'xxe', 'xxf', 'xxg', 'oth', 'eza', \
+                        '5ez', '6ez', 'dag', 'ps3', '2ba', 'lba', 'jub', 'eno', '1mq', '2mq', '3mq', 'rep', \
+                        '4ba', 'lao'] 
+backgrounds =       ['watermark', 'lines', 'boarder', 'cropmarks']
+
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
 parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
@@ -523,7 +549,7 @@ projCommand.add_argument('project_id', help='Project ID (a positional argument r
 projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
 projCommand.add_argument('-o', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
 projCommand.add_argument('-g', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
-projCommand.add_argument('-m', '--media', help='If creating a new project, give a valid project media type code.')
+projCommand.add_argument('-m', '--media', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
@@ -535,7 +561,7 @@ projCommand.add_argument('-c', '--cloud', action='store_true', help='Pull from c
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
 groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 groupCommand.add_argument('group_id', help='The component type is needed for creating a new component.')
-groupCommand.add_argument('-c', '--component_type', help='The group component type is needed for creating a new group.')
+groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
 groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component group to this project.')
 groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component group from this project.')
 groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
@@ -576,7 +602,7 @@ fontCommand = subparsers.add_parser('font', help='General font handling commands
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 fontCommand.add_argument('group_id', help='The group ID this font is a part of.')
 fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-fontCommand.add_argument('font_id', help='The font family name ID. The ID given has to be a valid system font.')
+fontCommand.add_argument('font_id', choices=fontPackages, help='The font family name ID. The ID given has to be a valid system font.')
 fontCommand.add_argument('-a', '--add', action='store_true', help='Add a new font for a specific comonent type.')
 fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the font of a specified ID from this project.')
 fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
@@ -597,7 +623,6 @@ illustrationCommand = subparsers.add_parser('illustration', help='General projec
 illustrationCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 illustrationCommand.add_argument('component_type', help='The component type is needed when adding an illustration to a project. (This is a required positional argument.)')
 illustrationCommand.add_argument('-a', '--add', help='Provide a file name for the illustration you wish to add to the project.')
-illustrationCommand.add_argument('-w', '--watermark', help='Provide a file name for an illustration, normally a PDF file, you wish to add to the project for use as a page watermark.')
 illustrationCommand.add_argument('-r', '--remove', help='Provide a file name for an illustration you wish to remove from the project.')
 illustrationCommand.add_argument('-p', '--path', help='If the illustration is in a unknown location, provide a valid path to where the illustration that is specified with -a.')
 illustrationCommand.add_argument('-f', '--force', action='store_true', help='Force (overwrite) an illustration of the same name in the specified project.')
@@ -659,16 +684,10 @@ preserveCommand.add_argument('-t', '--template', help='Supply a template ID for 
 preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back project data to cloud storage.')
 
 # Add Project preserve subprocess arguments
-backgrounds = ['watermark', 'lines', 'boarder', 'cropmarks']
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
 backgroundCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
 backgroundCommand.add_argument('-a', '--add', choices=backgrounds, help='')
 backgroundCommand.add_argument('-r', '--remove', choices=backgrounds, help='')
-#backgroundCommand.add_argument('-w', '--watermark', action='store_true', help='')
-#backgroundCommand.add_argument('-l', '--lines', action='store_true', help='')
-#backgroundCommand.add_argument('-b', '--border', action='store_true', help='')
-#backgroundCommand.add_argument('-c', '--cropmarks', action='store_true', help='')
-
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args(), local)

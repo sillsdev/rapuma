@@ -60,6 +60,12 @@ class Commander (object) :
 ########################## Command Creation Functions #########################
 ###############################################################################
 
+    def removeScripts (self) :
+        '''Remove any unnecessary group control scripts from the project.'''
+
+        dieNow('removeScripts() not implemented yet.')
+
+
     def updateScripts (self) :
         '''Update all the helper command scripts in a project.'''
 
