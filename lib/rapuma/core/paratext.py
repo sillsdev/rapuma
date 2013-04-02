@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, dircache
 from configobj import ConfigObj
 from importlib import import_module
 
@@ -34,22 +34,23 @@ class Paratext (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
-        self.user               = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig         = self.user.userConfig
-        self.pid                = pid
-        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
-        self.projectMediaIDCode = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-        self.projConfig         = ProjConfig(self.local).projConfig
-        self.log                = ProjLog(self.local, self.user)
+        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
+        self.userHome               = os.environ.get('RAPUMA_USER')
+        self.user                   = UserConfig(self.rapumaHome, self.userHome)
+        self.userConfig             = self.user.userConfig
+        self.pid                    = pid
+        self.projHome               = self.userConfig['Projects'][pid]['projectPath']
+        self.projectMediaIDCode     = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.local                  = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+        self.projConfig             = ProjConfig(self.local).projConfig
+        self.log                    = ProjLog(self.local, self.user)
 
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
 
-        self.layoutConfig           = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
-        self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        self.useHyphenation         = False
+        # Folder paths
+        self.projHyphenationFolder  = self.local.projHyphenationFolder
         # Some hyphenation handling settings and data that might work
         # better if they were more global
         self.allPtHyphenWords       = set()
@@ -60,24 +61,9 @@ class Paratext (object) :
 
         self.softHyphenWords        = set()
         self.nonHyphenWords         = set()
-        # File Names
-        self.ptProjHyphErrFileName  = 'usfm_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-        self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.sourcePath             = self.userConfig['Projects'][self.pid][self.projConfig['Groups'][self.gid]['csid'] + '_sourcePath']
-        # Folder paths
-        self.projHyphenationFolder  = self.project.local.projHyphenationFolder
-        # Set file names with full path 
-        self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
-        self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
-        self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
-        self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
-
-
-###############################################################################
-
-
 
         self.finishInit()
+
 
         self.errorCodes     = {
         
@@ -85,6 +71,19 @@ class Paratext (object) :
 
         }
 
+
+    def finishInit (self) :
+        '''Some times not all the information is available that is needed
+        but that may not be a problem for some functions. We will atempt to
+        finish the init here but will fail silently, which may not be a good
+        idea in the long run.'''
+
+#        import pdb; pdb.set_trace()
+
+        try :
+            self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+        except :
+            pass
 
 ###############################################################################
 ############################# General PT Functions ############################
@@ -234,7 +233,7 @@ class Paratext (object) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = self.project.getGroupSourcePath(gid)
+        parentFolder = self.getGroupSourcePath(gid)
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -280,7 +279,7 @@ class Paratext (object) :
     def getPTSettings (self, gid) :
         '''Return the data into a dictionary for the system to use.'''
 
-        sourcePath = self.project.getGroupSourcePath(gid)
+        sourcePath = self.getGroupSourcePath(gid)
 
         # Return the dictionary
         if os.path.isdir(sourcePath) :
@@ -305,6 +304,21 @@ class Paratext (object) :
                 se = 'paratext'
 
         return se
+
+
+    def getGroupSourcePath (self, gid) :
+        '''Get the source path for a specified group.'''
+
+#        import pdb; pdb.set_trace()
+        csid = self.projConfig['Groups'][gid]['csid']
+
+        try :
+            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            terminal('No source path found for: [' + str(e) + ']')
+            terminal('Please add a source path for this component type.')
+            dieNow()
 
 
     def usfmCidInfo (self) :
@@ -439,11 +453,6 @@ class Paratext (object) :
                }
 
 
-
-
-
-
-
 ###############################################################################
 ################### ParaTExt Hyphenation Handling Functions ###################
 ###############################################################################
@@ -472,73 +481,80 @@ class Paratext (object) :
 #   1) mixed syntax is illegal (abc-efg=hij)
 
 
-    def copyPtHyphenWords (self) :
+    def copyPtHyphenWords (self, ptHyphFile, ptProjHyphFile) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
         We will also create a backup as well to be used for comparison or fallback.'''
 
-        if os.path.isfile(self.ptHyphFile) :
+        if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(self.ptHyphFile, self.ptProjHyphFile)
+            utf8Copy(ptHyphFile, ptProjHyphFile)
             # Once copied, check if any preprocessing is needed
             self.hyphenation.preprocessSource()
         else :
-            self.log.writeToLog('USFM-040', [self.ptHyphFile])
+            self.log.writeToLog('USFM-040', [ptHyphFile])
             dieNow()
 
 
-    def backupPtHyphenWords (self) :
+    def backupPtHyphenWords (self, ptHyphFile, ptProjHyphBakFile) :
         '''Backup the ParaTExt project hyphenation words list to the project.'''
 
-        if os.path.isfile(self.ptHyphFile) :
+        if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
-            makeReadOnly(self.ptProjHyphBakFile)
+            utf8Copy(ptHyphFile, ptProjHyphBakFile)
+            makeReadOnly(ptProjHyphBakFile)
         else :
-            self.log.writeToLog('USFM-040', [self.ptHyphFile])
+            self.log.writeToLog('USFM-040', [ptHyphFile])
             dieNow()
 
 
-    def processHyphens(self, force = False) :
+    def processHyphens(self, gid, force = False) :
         '''This controls the processing of the master PT hyphenation file. The end
         result are four data sets that are ready to be handed off to the next part
         of the process. It is assumed that at this point we have a valid PT hyphen
         file that came out of PT that way or it was fixed during copy by a preprocess
         script that was made to fix specific problems.'''
 
+        # Get group setting vars
+        csid = self.projConfig['Groups'][gid]['csid']
+
+        # File Names
+        ptProjHyphErrFileName  = csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
+        ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        sourcePath             = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        # Set file names with full path 
+        ptHyphFile             = os.path.join(self.sourcePath, ptHyphFileName)
+        ptProjHyphFile         = os.path.join(self.projHyphenationFolder, ptHyphFileName)
+        ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, ptHyphFileName + '.bak')
+        ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, ptProjHyphErrFileName)
+
+
+
         # The project source files are protected but if force is used
         # we need to delete them here.
         if force :
-            if os.path.exists(self.ptProjHyphFile) :
-                os.remove(self.ptProjHyphFile)
-            if os.path.exists(self.ptProjHyphBakFile) :
-                os.remove(self.ptProjHyphBakFile)
+            if os.path.exists(ptProjHyphFile) :
+                os.remove(ptProjHyphFile)
+            if os.path.exists(ptProjHyphBakFile) :
+                os.remove(ptProjHyphBakFile)
             self.log.writeToLog('USFM-060')
 
         # These calls may be order-sensitive, update local project source
-        # copy only if there has been a change in the PT source
-#        if not os.path.isfile(self.ptHyphFile) or isOlder(self.ptHyphFile, self.ptHyphFile) :
-
-# FIXME: What are we looking for, why are they the same?
-
-# Not seeing a pt source file mentioned yet
-
-
-        if not os.path.isfile(self.ptProjHyphFile) or isOlder(self.ptProjHyphFile, self.ptHyphFile) :
-            self.copyPtHyphenWords()
-            self.backupPtHyphenWords()
-            self.log.writeToLog('USFM-050', [fName(self.ptHyphFile)])
+        if not os.path.isfile(ptProjHyphFile) or isOlder(ptProjHyphFile, ptHyphFile) :
+            self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile)
+            self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
+            self.log.writeToLog('USFM-050', [fName(ptHyphFile)])
         else :
-            self.log.writeToLog('USFM-055', [fName(self.ptHyphFile)])
+            self.log.writeToLog('USFM-055', [fName(ptHyphFile)])
 
         # Continue by processing the files located in the project
-        self.getAllPtHyphenWords()
+        self.getAllPtHyphenWords(ptProjHyphFile)
         self.getApprovedWords()
         self.getHyphenWords()
         self.getSoftHyphenWords()
         self.getNonHyhpenWords()
 
 
-    def getAllPtHyphenWords (self) :
+    def getAllPtHyphenWords (self, ptProjHyphFile) :
         '''Return a data set of all the words found in a ParaTExt project
         hyphated words text file. The Py set() method is used for moving
         the data because some lists can get really big. This will return the
@@ -546,8 +562,8 @@ class Paratext (object) :
         for other processing.'''
 
         # Go get the file if it is to be had
-        if os.path.isfile(self.ptProjHyphFile) :
-            with codecs.open(self.ptProjHyphFile, "r", encoding='utf_8') as hyphenWords :
+        if os.path.isfile(ptProjHyphFile) :
+            with codecs.open(ptProjHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for line in hyphenWords :
                     # Using the logic that there can only be one word in a line
                     # if the line contains more than one word it is not wanted
@@ -606,7 +622,7 @@ class Paratext (object) :
         self.nonHyphenWords.difference_update(self.hyphenWords)
 
 
-    def checkForBadWords (self) :
+    def checkForBadWords (self, ptProjHyphErrFile) :
         '''Check the words in the master list for bad syntax. Remove them
         and put them in a hyphen error words file in the project and give
         a warning to the user.'''
@@ -621,14 +637,14 @@ class Paratext (object) :
         if len(self.badWords) :
             errWords = list(self.badWords)
             errWords.sort()
-            with codecs.open(self.ptProjHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
-                wordErrorsObject.write('# ' + fName(self.ptProjHyphErrFile) + '\n')
+            with codecs.open(ptProjHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
+                wordErrorsObject.write('# ' + fName(ptProjHyphErrFile) + '\n')
                 wordErrorsObject.write('# This is an auto-generated file which contains errors in the hyphenation words file.\n')
                 for word in errWords :
                     wordErrorsObject.write(word + '\n')
 
             # Report the problem to the user
-            self.log.writeToLog('USFM-030', [self.ptProjHyphErrFile])
+            self.log.writeToLog('USFM-030', [ptProjHyphErrFile])
 
 
     def wordTotals (self) :
@@ -676,5 +692,76 @@ class Paratext (object) :
                 hyphenWords.remove(word)
 
         return hyphenWords
+
+
+###############################################################################
+################### ParaTExt Illustration Handling Functions ##################
+###############################################################################
+####################### Error Code Block Series = 0600 ########################
+###############################################################################
+
+
+    def logFigure (self, cid, figConts) :
+        '''Log the figure data in the illustration.conf. If nothing is returned, the
+        existing \fig markers with their contents will be removed. That is the default
+        behavior.'''
+
+        # Get config objects unique to this function
+        layoutConfig            = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
+        illustrationConfig      = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_illustration.conf'), encoding='utf-8')
+        # Description of figKeys (in order found in \fig)
+            # description = A brief description of what the illustration is about
+            # file = The file name of the illustration (only the file name)
+            # caption = The caption that will be used with the illustration (if turned on)
+            # width = The width or span the illustration will have (span/col)
+            # location = Location information that could be printed in the caption reference
+            # copyright = Copyright information for the illustration
+            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
+
+        fig = figConts.group(1).split('|')
+        figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
+        figDict = {}
+        cvSep = layoutConfig['Illustrations']['chapterVerseSeperator']
+
+        # Add all the figure info to the dictionary
+        c = 0
+        for value in fig :
+            figDict[figKeys[c]] = value
+            c +=1
+
+        # Add additional information, get rid of stuff we don't need
+        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
+        figDict['useThisIllustration'] = True
+        figDict['useThisCaption'] = True
+        figDict['useThisCaptionRef'] = True
+        figDict['bid'] = cid.lower()
+        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
+        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
+        figDict['scale'] = '1.0'
+        if figDict['width'] == 'col' :
+            figDict['position'] = 'tl'
+        else :
+            figDict['position'] = 't'
+        if not figDict['location'] :
+            figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
+
+        if not testForSetting(illustrationConfig, 'Illustrations') :
+            buildConfSection(illustrationConfig, 'Illustrations')
+        # Put the dictionary info into the illustration conf file
+        if not testForSetting(illustrationConfig['Illustrations'], figDict['illustrationID'].upper()) :
+            buildConfSection(illustrationConfig['Illustrations'], figDict['illustrationID'].upper())
+        for k in figDict.keys() :
+            illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
+
+        # Write out the conf file to preserve the data found
+        writeConfFile(illustrationConfig)
+
+        # Just incase we need to keep the fig markers intact this will
+        # allow for that. However, default behavior is to strip them
+        # because usfmTex does not handle \fig markers. By returning
+        # them here, they will not be removed from the working text.
+        if str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+            return '\\fig ' + figConts.group(1) + '\\fig*'
+
 
 

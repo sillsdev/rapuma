@@ -15,9 +15,13 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, unicodedata, subprocess
 from configobj import ConfigObj
 from importlib import import_module
+from functools import partial
+
+import palaso.sfm as sfm
+from palaso.sfm import usfm, style, element, text
 
 # Load the local classes
 from rapuma.core.tools          import *
@@ -40,14 +44,15 @@ class ProjSetup (object) :
         self.user               = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig         = self.user.userConfig
         self.pid                = pid
-        self.paratext           = Paratext(pid)
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
         self.projConfig         = None
         self.log                = None
         self.groups             = {}
+        # Finish the init now if possible
         self.finishInit()
+
 
         self.errorCodes     = {
             'GRUP-000' : ['MSG', 'Group processing messages'],
@@ -56,10 +61,7 @@ class ProjSetup (object) :
             'GRUP-110' : ['LOG', 'Created the [<<1>>] component group folder.'],
 
             'COMP-000' : ['MSG', 'Component processing messages'],
-            'COMP-005' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
             'COMP-010' : ['ERR', 'The component ID: [<<1>>] is not a valid for this component type. It cannot be processed by the system.'],
-            'COMP-020' : ['MSG', 'Added the [<<1>>] component to the project.'],
-            'COMP-022' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             'COMP-025' : ['WRN', 'The [<<1>>] component is already listed in the Rapuma project configuration and is locked. Please unlock or use the force switch (-f) to cause the sytem to install new working text or overwrite the existing working text.'],
             'COMP-040' : ['WRN', 'There is no listing in the configuration file for [<<1>>]. Please add this component to render it.'],
             'COMP-050' : ['LOG', 'Doing the preprocessing on the [<<1>>] component.'],
@@ -93,31 +95,36 @@ class ProjSetup (object) :
             'USFM-050' : ['LOG', 'Updated project file: [<<1>>]'],
             'USFM-055' : ['LOG', 'Did not update project file: [<<1>>]'],
             'USFM-060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
-            'USFM-070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
-            'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
-            'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
-            'USFM-095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
-            'USFM-120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            'USFM-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
-            'USFM-140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
-            'USFM-150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+
+            'PROC-000' : ['MSG', 'Messages for preprocessing issues (mainly found in project.py)'],
+            'PROC-010' : ['MSG', 'Processes completed successfully on: [<<1>>] by [<<2>>]'],
+            'PROC-020' : ['ERR', 'Processes for [<<1>>] failed. Script [<<2>>] returned this error: [<<3>>]'],
+            'PROC-030' : ['ERR', 'Processes for the file [<<1>>] cannot be completed because the file [<<2>>] cannot be found.'],
+            'PROC-050' : ['WRN', 'The component [<<1>>] is locked and cannot be processed by [<<2>>]'],
+            'PROC-110' : ['ERR', 'The component specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
+            'PROC-120' : ['ERR', 'Could not run preprocess, file not found: [<<1>>].'],
+            'PROC-130' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
+            'PROC-140' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
 
 
 
 
-
+            'TEXT-160' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
 
 
             '0201' : ['ERR', 'Source path given for source ID [<<1>>] group not valid! Use -s (source) to indicate where the source files are for this component source ID.'],
-            '0202' : ['ERR', 'No source path found for source ID [<<1>>]. Use -s (source) to indicate where the source files are for this component source ID.'],
             '0203' : ['ERR', 'Component group source path not valid. Use -s (source) to provide a valid source path.'],
+            '0205' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
             '0210' : ['ERR', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
             '0212' : ['ERR', 'Component [<<1>>] not found.'],
             '0215' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
             '0220' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
+            '0230' : ['MSG', 'Added the [<<1>>] component to the project.'],
+            '0232' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             '0240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             '0250' : ['ERR', 'Component group [<<1>>] not found. Cannot remove component.'],
             '0260' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
+            '0260' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
             '0270' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
             '0280' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
@@ -133,11 +140,22 @@ class ProjSetup (object) :
             '0860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
             '0870' : ['ERR', 'No source path found for: [<<1>>], returned this error: [<<2>>]'],
 
+            '1010' : ['MSG', 'Processes completed successfully on: [<<1>>] by [<<2>>]'],
+            '1020' : ['ERR', 'Processes for [<<1>>] failed. Script [<<2>>] returned this error: [<<3>>]'],
+            '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
+            '1080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
+            '1090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
+            '1095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
             '1100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             '1110' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
+            '1120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
+            '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
+            '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
+            '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+            '1160' : ['WRN', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
+            '1165' : ['LOG', 'Component preprocessing script is already installed.'],
 
         }
-
 
     def finishInit (self) :
         '''Some times not all the information is available that is needed
@@ -153,8 +171,10 @@ class ProjSetup (object) :
             self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
             self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.local, self.user)
-        except :
-            pass
+            self.paratext           = Paratext(self.pid)
+        except Exception as e :
+            # If we don't succeed, we give a warning in case it is important
+            terminal('Warning: proj_setup.finishInit() failed with: ' + str(e))
 
 
 ###############################################################################
@@ -173,16 +193,13 @@ class ProjSetup (object) :
         # resolve it here before going on.
         csid = self.projConfig['Groups'][gid]['csid']
         if not sourcePath :
-#            try :
             sourcePath  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
             if not os.path.exists(sourcePath) :
-                self.log.writeToLog(self.errorCodes['201'], [csid])
-#            except :
-#                self.log.writeToLog(self.errorCodes['202'], [csid])
+                self.log.writeToLog(self.errorCodes['0201'], [csid])
         else :
             sourcePath = resolvePath(sourcePath)
             if not os.path.exists(sourcePath) :
-                self.log.writeToLog(self.errorCodes['203'])
+                self.log.writeToLog(self.errorCodes['0203'])
 
             # Reset the source path for this csid
             self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = sourcePath
@@ -201,10 +218,11 @@ class ProjSetup (object) :
 
         # Be sure the group is unlocked
         if self.isLocked(gid) :
-            self.log.writeToLog(self.errorCodes['210'], [gid])
+            self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Here we essentially re-add the component(s) of the group
         self.installGroupComps(gid, cidList, force)
+        
         # Now lock it down
         self.lockUnlock(gid, True)
 
@@ -217,7 +235,7 @@ class ProjSetup (object) :
         # Do not want to add this group, non-force, if it already exsists.
         buildConfSection(self.projConfig, 'Groups')
         if testForSetting(self.projConfig['Groups'], gid) and not force :
-            self.log.writeToLog(self.errorCodes['210'], [gid])
+            self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         sourceKey = csid + '_sourcePath'
 
@@ -265,7 +283,7 @@ class ProjSetup (object) :
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog(self.errorCodes['240'], [gid])
+            self.log.writeToLog(self.errorCodes['0240'], [gid])
 
         # Update helper scripts
         if str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -278,6 +296,11 @@ class ProjSetup (object) :
         if cType == 'usfm' :
             aProject.managers['usfm_Text'].updateManagerSettings(gid)
 
+        self.finishInit()
+
+        self.installGroupComps(gid, cidList, force)
+
+
 
     def removeGroup (self, gid, force = False) :
         '''Handler to remove a group. If it is not found return True anyway.'''
@@ -288,7 +311,7 @@ class ProjSetup (object) :
 
         # First test for lock
         if self.isLocked(gid) and force == False :
-            self.log.writeToLog(self.errorCodes['210'], [gid])
+            self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Remove subcomponents from the target if there are any
         buildConfSection(self.projConfig, 'Groups')
@@ -297,14 +320,14 @@ class ProjSetup (object) :
                 self.uninstallGroupComponent(gid, cid, force)
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
-                self.log.writeToLog(self.errorCodes['290'], [gid])
+                self.log.writeToLog(self.errorCodes['0290'], [gid])
         else :
-            self.log.writeToLog(self.errorCodes['250'], [gid])
+            self.log.writeToLog(self.errorCodes['0250'], [gid])
             
         # Now remove the config entry
         del self.projConfig['Groups'][gid]
         if writeConfFile(self.projConfig) :
-            self.log.writeToLog(self.errorCodes['220'], [gid])
+            self.log.writeToLog(self.errorCodes['0220'], [gid])
 
 
     def uninstallGroupComponent (self, gid, cid, force = False) :
@@ -312,14 +335,16 @@ class ProjSetup (object) :
         However, a backup will be made of the working text for comparison purposes. 
        This does not return anything. We trust it worked.'''
 
+#       import pdb; pdb.set_trace()
+
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
-        fileHandle  = csid + '_' + cid
+        fileHandle  = cid + '_' + csid
         fileName    = fileHandle + '.' + cType
 
         # Test to see if it is shared
         if self.isSharedComponent(gid, fileHandle) :
-            self.log.writeToLog(self.errorCodes['260'], [fileHandle,gid])
+            self.log.writeToLog(self.errorCodes['0260'], [fileHandle,gid])
 
         # Remove the files
         if force :
@@ -332,12 +357,12 @@ class ProjSetup (object) :
                     makeWriteable(targetComp)
                 shutil.copy(source, targetComp)
                 makeReadOnly(targetComp)
-                self.log.writeToLog(self.errorCodes['270'], [fName(targetComp), cid])
+                self.log.writeToLog(self.errorCodes['0270'], [fName(targetComp), cid])
                 for fn in os.listdir(targetFolder) :
                     f = os.path.join(targetFolder, fn)
                     if f != targetComp :
                         os.remove(f)
-                        self.log.writeToLog(self.errorCodes['280'], [fName(f), cid])
+                        self.log.writeToLog(self.errorCodes['0280'], [fName(f), cid])
 
 
     def isSharedComponent (self, gid, cid) :
@@ -360,6 +385,10 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # Make sure our group folder is there
+        if not os.path.exists(os.path.join(self.local.projComponentsFolder, gid)) :
+            os.makedirs(os.path.join(self.local.projComponentsFolder, gid))
+
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
@@ -377,16 +406,15 @@ class ProjSetup (object) :
                 if self.installUsfmWorkingText(gid, cid, force) :
                     # Report in context to force use or not
                     if force :
-                        self.log.writeToLog('COMP-022', [cid])
+                        self.log.writeToLog(self.errorCodes['0232'], [cid])
                     else :
-                        self.log.writeToLog('COMP-020', [cid])
+                        self.log.writeToLog(self.errorCodes['0230'], [cid])
 
                 else :
-                    self.log.writeToLog('TEXT-160', [cid])
+                    self.log.writeToLog(self.errorCodes['0260'], [cid])
                     return False
             else :
-                self.log.writeToLog('COMP-005', [cType])
-                dieNow()
+                self.log.writeToLog(self.errorCodes['0205'], [cType])
 
         # If we got this far it must be okay to leave
         return True
@@ -664,10 +692,42 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        sourcePath      = self.getGroupSourcePath(gid)
-        csid            = self.projConfig['Groups'][gid]['csid']
-        cType           = self.projConfig['Groups'][gid]['cType']
-        sourceEditor    = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        sourcePath          = self.getGroupSourcePath(gid)
+        csid                = self.projConfig['Groups'][gid]['csid']
+        cType               = self.projConfig['Groups'][gid]['cType']
+        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        usePreprocessScript = str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
+        grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
+        rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType, cType + '_groupPreprocess.py')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # FIXME: This will break first time the style file is not 
+        # where we need it to be. Need to find a low-cost way to get it there
+        defaultStyFile  = os.path.join(self.local.projStylesFolder, 'usfm.sty')
+
+
+
+
+
+
+
+
+
+
+
 
 
         # Build the file name
@@ -683,11 +743,6 @@ class ProjSetup (object) :
         if not thisFile :
             self.log.writeToLog(self.errorCodes['1110'], [cid])
 
-        # Will need the stylesheet for copy if that has not been added
-        # to the project yet, we will do that now
-        self.style.checkDefaultStyFile()
-        self.style.checkDefaultExtStyFile()
-
         # Start the process by building paths and file names, if we made it this far.
         # Note the file name for the preprocess is hard coded. This will become a part
         # of the total system and this file will be copied in when the user requests to
@@ -702,7 +757,7 @@ class ProjSetup (object) :
             source      = os.path.join(os.path.dirname(self.local.projHome), thisFile)
 
         targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-        target          = os.path.join(targetFolder, self.component.makeFileNameWithExt(cid))
+        target          = os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
         targetSource    = os.path.join(targetFolder, thisFile + '.source')
 
         # Copy the source to the working text folder. We do not want to do
@@ -718,8 +773,7 @@ class ProjSetup (object) :
             if os.path.isfile(targetSource) :
                 source = targetSource
             else :
-                self.log.writeToLog('USFM-120', [source])
-                dieNow()
+                self.log.writeToLog(self.errorCodes['1120'], [source])
 
         # Now do the age checks and copy if source is newer than target
         if force or not os.path.isfile(target) or isOlder(target, source) :
@@ -743,23 +797,23 @@ class ProjSetup (object) :
 
             # To be sure nothing happens, copy from our project source
             # backup file. (Is self.style.defaultStyFile the best thing?)
-            if self.usfmCopy(targetSource, target, self.style.defaultStyFile) :
+            if self.usfmCopy(targetSource, target, defaultStyFile) :
                 # Run any working text preprocesses on the new component text
-                if str2bool(self.projConfig['Groups'][gid]['usePreprocessScript']) :
-                    if not os.path.isfile(self.grpPreprocessFile) :
-                        self.text.installPreprocess()
-                    if not self.text.runProcessScript(target, self.grpPreprocessFile) :
-                        self.log.writeToLog('USFM-130', [cid])
+                if usePreprocessScript :
+                    if not os.path.isfile(grpPreprocessFile) :
+                        self.installPreprocess(grpPreprocessFile, rpmPreprocessFile)
+                    if not self.runProcessScript(target, grpPreprocessFile) :
+                        self.log.writeToLog(self.errorCodes['1130'], [cid])
 
                 # If this is a USFM component type we need to remove any \fig markers,
                 # and record them in the illustration.conf file for later use
-                if self.cType == 'usfm' :
+                if cType == 'usfm' :
                     tempFile = target + '.tmp'
                     contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
                     # logUsfmFigure() logs the fig data and strips it from the working text
                     # Note: Using partial() to allows the passing of the cid param 
                     # into logUsfmFigure()
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.groups[gid].logFigure, cid), contents)
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, cid), contents)
                     codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                     # Finish by copying the tempFile to the source
                     if not shutil.copy(tempFile, target) :
@@ -768,10 +822,10 @@ class ProjSetup (object) :
 
                 # If the text is there, we should return True so do a last check to see
                 if os.path.isfile(target) :
-                    self.log.writeToLog('USFM-140', [cid])
+                    self.log.writeToLog(self.errorCodes['1140'], [cid])
                     return True
             else :
-                self.log.writeToLog('USFM-150', [source,fName(target)])
+                self.log.writeToLog(self.errorCodes['1150'], [source,fName(target)])
                 return False
         else :
             return True
@@ -781,17 +835,22 @@ class ProjSetup (object) :
         '''Copy USFM text from source to target. Decode if necessary, then
         normalize. With the text in place, validate unless that is False.'''
 
+        sourceEncode        = self.projConfig['Managers']['usfm_Text']['sourceEncode']
+        workEncode          = self.projConfig['Managers']['usfm_Text']['workEncode']
+        unicodeNormalForm   = self.projConfig['Managers']['usfm_Text']['unicodeNormalForm']
+        validateUsfm        = str2bool(self.projConfig['CompTypes']['Usfm']['validateUsfm'])
+
         # Bring in our source text
-        if self.text.sourceEncode == self.text.workEncode :
+        if sourceEncode == workEncode :
             contents = codecs.open(source, 'rt', 'utf_8_sig')
             lines = contents.read()
         else :
             # Lets try to change the encoding.
-            lines = self.text.decodeText(source)
+            lines = decodeText(source, sourceEncode)
 
         # Normalize the text
-        normal = unicodedata.normalize(self.text.unicodeNormalForm, lines)
-        self.log.writeToLog('USFM-080', [self.text.unicodeNormalForm])
+        normal = unicodedata.normalize(unicodeNormalForm, lines)
+        self.log.writeToLog(self.errorCodes['1080'], [unicodeNormalForm])
 
         # Write out the text to the target
         writeout = codecs.open(target, "wt", "utf_8_sig")
@@ -799,12 +858,12 @@ class ProjSetup (object) :
         writeout.close
 
         # Validate the target USFM text (Defalt is True)
-        if str2bool(self.validateUsfm) :
+        if validateUsfm :
             if not self.usfmTextFileIsValid(target, projSty) :
-                self.log.writeToLog('USFM-090', [source,fName(target)])
+                self.log.writeToLog(self.errorCodes['1090'], [source,fName(target)])
                 return False
         else :
-            self.log.writeToLog('USFM-095', [fName(target)])
+            self.log.writeToLog(self.errorCodes['1095'], [fName(target)])
 
         return True
 
@@ -841,9 +900,164 @@ class ProjSetup (object) :
         except Exception as e :
             # If the text is not good, I think we should die here an now.
             # We may want to rethink this later but for now, it feels right.
-            self.log.writeToLog('USFM-070', [source,str(e)])
+            self.log.writeToLog(self.errorCodes['1070'], [source,str(e)], 'proj_setup.usfmTextFileIsValid():1070')
             return False
 
+
+###############################################################################
+########################## Text Processing Functions ##########################
+###############################################################################
+
+    def turnOnOffPreprocess (self, gid, onOff) :
+        '''Turn on or off preprocessing on incoming component text.'''
+
+        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff.capitalize()
+        writeConfFile(self.projConfig)
+        self.log.writeToLog('PROC-140', [onOff, gid])
+
+
+    def installPreprocess (self, grpPreprocessFile, rpmPreprocessFile) :
+        '''Check to see if a preprocess script is installed. If not, install the
+        default script and give a warning that the script is not complete.'''
+
+        # Check and copy if needed
+        if not os.path.isfile(grpPreprocessFile) :
+            shutil.copy(rpmPreprocessFile, grpPreprocessFile)
+            makeExecutable(grpPreprocessFile)
+            self.log.writeToLog(self.errorCodes['1160'])
+            dieNow()
+        else :
+            self.log.writeToLog(self.errorCodes['1165'])
+
+
+    def runProcessScript (self, target, scriptFile) :
+        '''Run a text processing script on a component. This assumes the 
+        component and the script are valid and the component lock is turned 
+        off. If not, you cannot expect any good to come of this.'''
+
+        # subprocess will fail if permissions are not set on the
+        # script we want to run. The correct permission should have
+        # been set when we did the installation.
+        err = subprocess.call([scriptFile, target])
+        if err == 0 :
+            self.log.writeToLog(self.errorCodes['1010'], [fName(target), fName(scriptFile)])
+        else :
+            self.log.writeToLog(self.errorCodes['1020'], [fName(target), fName(scriptFile), str(err)])
+            return False
+
+        return True
+
+
+    def scriptInstall (self, source, target) :
+        '''Install a script. A script can be a collection of items in
+        a zip file or a single .py script file.'''
+
+        scriptTargetFolder, fileName = os.path.split(target)
+        if isExecutable(source) :
+            shutil.copy(source, target)
+            makeExecutable(target)
+        elif fName(source).split('.')[1].lower() == 'zip' :
+            myZip = zipfile.ZipFile(source, 'r')
+            for f in myZip.namelist() :
+                data = myZip.read(f, source)
+                # Pretty sure zip represents directory separator char as "/" regardless of OS
+                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
+                try :
+                    myFile = open(myPath, "wb")
+                    myFile.write(data)
+                    myFile.close()
+                except :
+                    pass
+            myZip.close()
+            return True
+        else :
+            dieNow('Script is an unrecognized type: ' + fName(source) + ' Cannot continue with installation.')
+
+
+    def installPostProcess (self, cType, script, force = None) :
+        '''Install a post process script into the main components processing
+        folder for a specified component type. This script will be run on 
+        every file of that type that is imported into the project. Some
+        projects will have their own specially developed post process
+        script. Use the "script" var to specify a process (which should be
+        bundled in a system compatable way). If "script" is not specified
+        we will copy in a default script that the user can modify. This is
+        currently limited to Python scripts only which do in-place processes
+        on the target files. The script needs to have the same name as the
+        zip file it is bundled in, except the extention is .py instead of
+        the bundle .zip extention.'''
+
+        # Define some internal vars
+        Ctype               = cType.capitalize()
+        oldScript           = ''
+        scriptName          = os.path.split(script)[1]
+        scriptSourceFolder  = os.path.split(script)[0]
+        scriptTarget        = os.path.join(self.local.projScriptsFolder, fName(script).split('.')[0] + '.py')
+        if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
+            oldScript = scriptName
+
+        # First check for prexsisting script record
+        if not force :
+            if oldScript :
+                self.log.writeToLog('POST-080', [oldScript])
+                return False
+
+        # In case this is a new project we may need to install a component
+        # type and make a process (components) folder
+        if not self.components[cType] :
+            self.addComponentType(cType)
+
+        # Make the target folder if needed
+        if not os.path.isdir(self.local.projScriptsFolder) :
+            os.makedirs(self.local.projScriptsFolder)
+
+        # First check to see if there already is a script file, return if there is
+        if os.path.isfile(scriptTarget) and not force :
+            self.log.writeToLog('POST-082', [fName(scriptTarget)])
+            return False
+
+        # No script found, we can proceed
+        if not os.path.isfile(scriptTarget) :
+            self.scriptInstall(script, scriptTarget)
+            if not os.path.isfile(scriptTarget) :
+                dieNow('Failed to install script!: ' + fName(scriptTarget))
+            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+        elif force :
+            self.scriptInstall(script, scriptTarget)
+            if not os.path.isfile(scriptTarget) :
+                dieNow('Failed to install script!: ' + fName(scriptTarget))
+            self.log.writeToLog('POST-115', [fName(scriptTarget)])
+
+        # Record the script with the cType post process scripts list
+        scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
+        if fName(scriptTarget) not in scriptList :
+            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = addToList(scriptList, fName(scriptTarget))
+            writeConfFile(self.projConfig)
+
+        return True
+
+
+    def removePostProcess (self, cType) :
+        '''Remove (actually disconnect) a preprocess script from a
+
+        component type. This will not actually remove the script. That
+        would need to be done manually. Rather, this will remove the
+        script name entry from the component type so the process cannot
+        be accessed for this specific component type.'''
+
+        Ctype = cType.capitalize()
+        # Get old setting
+        old = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
+        # Reset the field to ''
+        if old != '' :
+            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
+            writeConfFile(self.projConfig)
+            self.log.writeToLog('POST-130', [old,Ctype])
+
+        else :
+            self.log.writeToLog('POST-135', [cType.capitalize()])
+
+        return True
 
 
 

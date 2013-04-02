@@ -23,8 +23,8 @@ import os, shutil, zipfile
 
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.group.usfm import PT_Tools
+from rapuma.core.tools      import *
+from rapuma.core.paratext   import Paratext
 from rapuma.project.manager import Manager
 
 
@@ -43,7 +43,7 @@ class Font (Manager) :
         super(Font, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.pt_tools               = PT_Tools(project)
+        self.pt_tools               = Paratext(project.projectIDCode)
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
@@ -53,14 +53,6 @@ class Font (Manager) :
         self.project                = project
         self.manager                = self.cType + '_Font'
         self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-
-        # Create an empty default font config file if needed
-        if not os.path.isfile(self.project.local.fontConfFile) :
-            self.fontConfig.filename = self.project.local.fontConfFile
-            writeConfFile(self.fontConfig)
-            self.project.log.writeToLog('FONT-010')
-        else :
-            self.fontConfig = ConfigObj(self.project.local.fontConfFile, encoding='utf-8')
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
@@ -88,41 +80,52 @@ class Font (Manager) :
         self.errorCodes     = {
             'FONT-000' : ['MSG', 'Font module messages'],
             'FONT-005' : ['MSG', 'FONT-005 - Unassigned error message ID.'],
-            'FONT-010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
             'FONT-015' : ['MSG', 'FONT-015 - Unassigned error message ID.'],
             'FONT-020' : ['ERR', 'Failed to find font setting in ParaTExt project (.ssf file). A primary font must be set before this component can be successfully rendered.'],
             'FONT-025' : ['ERR', 'No source editor was found for this project. Please enter this setting before continuing.'],
-            'FONT-032' : ['MSG', 'Force switch was set (-f). Forced font [<<1>>] to be the primary font for the [<<2>>] component type.'],
-            'FONT-035' : ['MSG', 'The primary font for component type [<<1>>] has been set to [<<2>>]'],
-            'FONT-037' : ['MSG', 'The font [<<1>>] is already set for component type [<<2>>]. Use -f to force change it to another font.'],
             'FONT-040' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.checkForSubFont() or recordFont)'],
             'FONT-041' : ['ERR', 'Font bundle [<<1>>] not found. Process halted. (font.checkForSubFont())'],
             'FONT-042' : ['MSG', 'Force switch was set (-f). [<<1>>] font setup information was force added to project config'],
             'FONT-050' : ['ERR', 'Halt! [<<1>>] not found. - font.copyInFont()'],
-            'FONT-060' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - font.installFont()'],
-            'FONT-065' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed. - font.installFont()'],
-            'FONT-067' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - font.installFont()'],
             'FONT-070' : ['LOG', 'Copied the [<<1>>] font file into the project. - font.copyInFont()'],
             'FONT-080' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - font.removeFont()'],
             'FONT-082' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - font.removeFont()'],
             'FONT-085' : ['ERR', 'Could not remove! The [<<1>>] font was not listed in the [<<2>>] component type settings. - font.removeFont()'],
             'FONT-090' : ['WRN', 'No replacement for primary font found.  - font.removeFont()'],
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
-            'FONT-110' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
-            'FONT-120' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
-            'FONT-130' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
 
-            '230' : ['ERR', 'Font [<<1>>] is already the primary font for the [<<2>>] component type.'],
-            '245' : ['LOG', '<<1>> font setup information added to project config'],
-            '247' : ['LOG', 'The [<<1>>] font already has a listing in the configuration.'],
-            '262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - font.installFont()'],
 
+            '0010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
+
+            '0210' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
+            '0220' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
+            '0235' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+            '0245' : ['LOG', '<<1>> font setup information added to project config'],
+            '0247' : ['LOG', 'The [<<1>>] font already has a listing in the configuration.'],
+            '0260' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - font.installFont()'],
+            '0262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - font.installFont()'],
+            '0265' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed. - font.installFont()'],
+            '0267' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - font.installFont()'],
+
+            '0430' : ['ERR', 'Font [<<1>>] is already the primary font for the [<<2>>] component type.'],
+            '0432' : ['MSG', 'Force switch was set (-f). Forced font [<<1>>] to be the primary font for the [<<2>>] component type.'],
+            '0435' : ['MSG', 'The primary font for component type [<<1>>] has been set to [<<2>>]'],
+            '0437' : ['MSG', 'The font [<<1>>] is already set for component type [<<2>>]. Use -f to force change it to another font.'],
         }
+
+        # Create an empty default font config file if needed
+        if not os.path.isfile(self.project.local.fontConfFile) :
+            self.fontConfig.filename = self.project.local.fontConfFile
+            writeConfFile(self.fontConfig)
+            self.project.log.writeToLog(self.errorCodes['0010'])
+        else :
+            self.fontConfig = ConfigObj(self.project.local.fontConfFile, encoding='utf-8')
+
 
 ###############################################################################
 ############################ Project Level Functions ##########################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
 
@@ -130,35 +133,6 @@ class Font (Manager) :
         '''If needed, set the glyph map used for this component type font.'''
 
         self.project.log.writeToLog('FONT-100')
-
-    def setPrimaryFont (self, cType, font, force = None) :
-        '''Set the primary font for the project.'''
-
-        def setIt (Ctype, font) :
-            self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
-            writeConfFile(self.project.projConfig)
-            # Sanity check
-            if self.project.projConfig['Managers'][self.manager]['primaryFont'] == font :
-                return True
-
-        Ctype = cType.capitalize()
-        # First check to see if it is already has a primary font set
-        if self.project.projConfig['Managers'][self.manager]['primaryFont'] == '' :
-            if setIt(Ctype, font) :
-                self.project.log.writeToLog('FONT-035', [Ctype,font])
-                return True
-        elif force :
-            if setIt(Ctype, font) :
-                self.project.log.writeToLog('FONT-032', [font,Ctype])
-                return True
-        elif self.project.projConfig['Managers'][self.manager]['primaryFont'] :
-            self.project.log.writeToLog('FONT-037', [self.project.projConfig['Managers'][self.manager]['primaryFont'],Ctype])
-            return True
-        else :
-            self.project.log.writeToLog(self.errorCodes['230'], [font,Ctype])
-            return True
-
-        return False
 
 
     def checkForSubFont (self, font) :
@@ -174,7 +148,7 @@ class Font (Manager) :
         elif os.path.isfile(rapumaSource) :
             source = rapumaSource
         else :
-            self.project.log.writeToLog('FONT-120', [font + '.zip'])
+            self.project.log.writeToLog(self.errorCodes['0220'], [font + '.zip'])
             dieNow()
 
         if not os.path.isfile(source) :
@@ -252,7 +226,7 @@ class Font (Manager) :
 
         else :
             if testForSetting(self.fontConfig['Fonts'], font) :
-                self.project.log.writeToLog(self.errorCodes['247'], [font])
+                self.project.log.writeToLog(self.errorCodes['0247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
                 try :
@@ -261,7 +235,7 @@ class Font (Manager) :
                     fInfo = getXMLSettings(metaDataSource)
                     self.fontConfig['Fonts'][font] = fInfo.dict()
                     writeConfFile(self.fontConfig)
-                    self.project.log.writeToLog(self.errorCodes['245'], [font])
+                    self.project.log.writeToLog(self.errorCodes['0245'], [font])
 
             # Adjust installed fonts list if needed
             if len(self.project.projConfig['Managers'][self.manager]['installedFonts']) == 0 :
@@ -275,7 +249,7 @@ class Font (Manager) :
             if primFont != font and (primFont == '' or primFont == 'None') :
                 self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
 
-            self.project.log.writeToLog(self.errorCodes['245'], [font])
+            self.project.log.writeToLog(self.errorCodes['0245'], [font])
             writeConfFile(self.project.projConfig)
             return True
 
@@ -300,9 +274,6 @@ class Font (Manager) :
                 if os.path.isfile(confXml) :
                     return True
 
-
-# FIXME: Something is wrong here, font didn't install when called by text.py
-
 #        import pdb; pdb.set_trace()
 
         # Look in user resources first
@@ -314,7 +285,7 @@ class Font (Manager) :
         elif os.path.isfile(rapumaSource) :
             source = rapumaSource
         else :
-            self.project.log.writeToLog('FONT-120', [source])
+            self.project.log.writeToLog(self.errorCodes['0220'], [source])
 
         # When is force is used, delete the existing font to ensure a clean copy
         if force :
@@ -323,23 +294,23 @@ class Font (Manager) :
             except :
                 pass
             if extract(source, confXml) :
-                self.project.log.writeToLog('FONT-060', [fName(source)])
+                self.project.log.writeToLog(self.errorCodes['0260'], [fName(source)])
                 return True
             else :
-                self.project.log.writeToLog('FONT-065', [font])
+                self.project.log.writeToLog(self.errorCodes['0265'], [font])
                 return False
         else :
             # With nothing done yet, check for meta data file
             if os.path.isfile(confXml) :
-                self.project.log.writeToLog(self.errorCodes['262'], [fName(source)])
+                self.project.log.writeToLog(self.errorCodes['0262'], [fName(source)])
                 return True
             else :
                 if extract(source, confXml) :
-                    self.project.log.writeToLog('FONT-067', [fName(source)])
+                    self.project.log.writeToLog(self.errorCodes['0267'], [fName(source)])
                     return True
                 else :
 
-                    self.project.log.writeToLog('FONT-065', [font])
+                    self.project.log.writeToLog(self.errorCodes['0265'], [font])
                     return False
 
 
@@ -354,7 +325,7 @@ class Font (Manager) :
         cRes = self.copyInFont(font, force)
         rRes = self.recordFont(self.cType, font, force)
         if cRes and rRes :
-            self.project.log.writeToLog('FONT-130', [font])
+            self.project.log.writeToLog(self.errorCodes['0235'], [font])
             return True
 
 
@@ -426,10 +397,48 @@ class Font (Manager) :
             else :
                 font = self.checkForSubFont('DefaultFont')
         else :
-            self.project.log.writeToLog('FONT-110', [self.sourceEditor])
+            self.project.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor])
 
         if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
             return True
+
+
+###############################################################################
+############################ Font Settings Functions ##########################
+###############################################################################
+######################## Error Code Block Series = 0400 #######################
+###############################################################################
+
+
+    def setPrimaryFont (self, cType, font, force = None) :
+        '''Set the primary font for the project.'''
+
+        def setIt (Ctype, font) :
+            self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
+            writeConfFile(self.project.projConfig)
+            # Sanity check
+            if self.project.projConfig['Managers'][self.manager]['primaryFont'] == font :
+                return True
+
+        Ctype = cType.capitalize()
+        # First check to see if it is already has a primary font set
+        if self.project.projConfig['Managers'][self.manager]['primaryFont'] == '' :
+            if setIt(Ctype, font) :
+                self.project.log.writeToLog(self.errorCodes['0435'], [Ctype,font])
+                return True
+        elif force :
+            if setIt(Ctype, font) :
+                self.project.log.writeToLog(self.errorCodes['0432'], [font,Ctype])
+
+                return True
+        elif self.project.projConfig['Managers'][self.manager]['primaryFont'] :
+            self.project.log.writeToLog(self.errorCodes['0437'], [self.project.projConfig['Managers'][self.manager]['primaryFont'],Ctype])
+            return True
+        else :
+            self.project.log.writeToLog(self.errorCodes['0430'], [font,Ctype])
+            return True
+
+        return False
 
 
 

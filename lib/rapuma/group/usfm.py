@@ -16,16 +16,13 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, dircache, unicodedata
+import os
 from configobj import ConfigObj, Section
-from functools import partial
+#from functools import partial
 
 # Load the local classes
 from rapuma.core.tools import *
-#from rapuma.component.component import Component
 from rapuma.group.group import Group
-import palaso.sfm as sfm
-from palaso.sfm import usfm, style, element, text
 
 
 ###############################################################################
@@ -85,18 +82,7 @@ class Usfm (Group) :
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         # File names with folder paths
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.grpPreprocessFile      = self.text.grpPreprocessFile
-
-        # Pick up some init settings that come after the managers have been installed
-        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
-        self.layoutConfig           = self.layout.layoutConfig
-        if not os.path.isfile(self.adjustmentConfFile) :
-            if self.createProjAdjustmentConfFile() :
-                self.log.writeToLog('COMP-240', [fName(self.adjustmentConfFile)])
-            else :
-                self.updateCompAdjustmentConf()
-        # Now get the adj config
-        self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
+#        self.grpPreprocessFile      = self.text.grpPreprocessFile
 
         # Get persistant values from the config if there are any
         newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
@@ -118,32 +104,30 @@ class Usfm (Group) :
             self.font.installFont(font)
 
         # Connect to the PT tools class
-        self.pt_tools = PT_Tools(self.project)
+#        self.pt_tools = PT_Tools(self.project)
 
         # Module Error Codes
         self.errorCodes     = {
-            '000' : ['MSG', 'Messages for the USFM module.'],
-            '005' : ['MSG', 'Unassigned error message ID.'],
-            '010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
-            '020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
-            '025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
-            '030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
-            '040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
-            '050' : ['LOG', 'Updated project file: [<<1>>]'],
-            '055' : ['LOG', 'Did not update project file: [<<1>>]'],
-            '060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
-            '070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
-            '080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
-            '090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
-            '095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
-            '100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
-            '120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            '130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
-            '140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
-            '150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
 
-            '220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
+            '055' : ['LOG', 'Did not update project file: [<<1>>]'],
+
+            '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
+
+
+            '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
         }
+
+        # Pick up some init settings that come after the managers have been installed
+        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
+        self.layoutConfig           = self.layout.layoutConfig
+        if not os.path.isfile(self.adjustmentConfFile) :
+            if self.createProjAdjustmentConfFile() :
+                self.log.writeToLog(self.errorCodes['0010'], [fName(self.adjustmentConfFile)])
+            else :
+                self.updateCompAdjustmentConf()
+        # Now get the adj config
+        self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
+
 
 ###############################################################################
 ############################ Functions Begin Here #############################
@@ -216,6 +200,11 @@ class Usfm (Group) :
 
             self.font.installFont(font)
 
+        # Will need the stylesheet for copy if that has not been added
+        # to the project yet, we will do that now
+        self.style.checkDefaultStyFile()
+        self.style.checkDefaultExtStyFile()
+
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
         for cid in self.cfg['cidList'] :
@@ -223,7 +212,7 @@ class Usfm (Group) :
             cidUsfm = self.getCidPath(cid)
             # Test for source here and die if it isn't there
             if not os.path.isfile(cidUsfm) :
-                self.log.writeToLog(self.errorCodes['220'], [cid])
+                self.log.writeToLog(self.errorCodes['0220'], [cid], 'usfm.preProcessGroup():0220')
 
             # Add/manage the dependent files for this cid
             if self.macroPackage == 'usfmTex' :
@@ -263,7 +252,7 @@ class Usfm (Group) :
                         os.remove(cidPiclist)
                         self.log.writeToLog('ILUS-055', [cName])
             else :
-                self.log.writeToLog('COMP-220', [self.macroPackage])
+                self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
 
         # Be sure there is a watermark file listed in the conf and
         # installed if watermark is turned on (True). Fallback on the
@@ -566,67 +555,6 @@ class Usfm (Group) :
 ###############################################################################
 ########################## USFM Component Functions ###########################
 ###############################################################################
-
-
-    def logFigure (self, cid, figConts) :
-        '''Log the figure data in the illustration.conf. If nothing is returned, the
-        existing \fig markers with their contents will be removed. That is the default
-        behavior.'''
-
-        # Description of figKeys (in order found in \fig)
-            # description = A brief description of what the illustration is about
-            # file = The file name of the illustration (only the file name)
-            # caption = The caption that will be used with the illustration (if turned on)
-            # width = The width or span the illustration will have (span/col)
-            # location = Location information that could be printed in the caption reference
-            # copyright = Copyright information for the illustration
-            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
-
-        fig = figConts.group(1).split('|')
-        figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
-        figDict = {}
-        cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
-
-        # Add all the figure info to the dictionary
-        c = 0
-        for value in fig :
-            figDict[figKeys[c]] = value
-            c +=1
-
-        # Add additional information, get rid of stuff we don't need
-        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
-        figDict['useThisIllustration'] = True
-        figDict['useThisCaption'] = True
-        figDict['useThisCaptionRef'] = True
-        figDict['bid'] = cid.lower()
-        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
-        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
-        figDict['scale'] = '1.0'
-        if figDict['width'] == 'col' :
-            figDict['position'] = 'tl'
-        else :
-            figDict['position'] = 't'
-        if not figDict['location'] :
-            figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
-
-        illustrationConfig = self.illustration.illustrationConfig
-        if not testForSetting(illustrationConfig, 'Illustrations') :
-            buildConfSection(illustrationConfig, 'Illustrations')
-        # Put the dictionary info into the illustration conf file
-        if not testForSetting(illustrationConfig['Illustrations'], figDict['illustrationID'].upper()) :
-            buildConfSection(illustrationConfig['Illustrations'], figDict['illustrationID'].upper())
-        for k in figDict.keys() :
-            illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
-
-        # Write out the conf file to preserve the data found
-        writeConfFile(illustrationConfig)
-
-        # Just incase we need to keep the fig markers intact this will
-        # allow for that. However, default behavior is to strip them
-        # because usfmTex does not handle \fig markers. By returning
-        # them here, they will not be removed from the working text.
-        if str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
-            return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
     def getComponentType (self, gid) :

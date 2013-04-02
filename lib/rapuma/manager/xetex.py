@@ -23,7 +23,7 @@ import subprocess
 # Load the local classes
 from rapuma.core.tools              import *
 from rapuma.project.manager         import Manager
-from rapuma.group.usfm              import PT_Tools
+from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
 from rapuma.core.page_background    import PageBackground
 
@@ -54,7 +54,7 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
-        self.pt_tools               = PT_Tools(project)
+        self.pt_tools               = Paratext(project.projectIDCode)
         self.pg_back                = PageBackground(project.projectIDCode)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need

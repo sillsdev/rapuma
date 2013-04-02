@@ -22,9 +22,9 @@
 import os, shutil, warnings
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools      import *
+from rapuma.core.paratext   import Paratext
 from rapuma.project.manager import Manager
-from rapuma.group.usfm import PT_Tools
 
 
 ###############################################################################
@@ -42,7 +42,7 @@ class Style (Manager) :
         super(Style, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.pt_tools               = PT_Tools(project)
+        self.pt_tools               = Paratext(project.projectIDCode)
         self.project                = project
         self.local                  = project.local
         self.cfg                    = cfg

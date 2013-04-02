@@ -359,7 +359,7 @@ class ProjLog (object) :
 #   5) [TOD] - To do list. Output to a file that helps guide the user.
 
 
-    def writeToLog (self, errCode, args=None, mod=None) :
+    def writeToLog (self, errCode, args=None, location=None) :
         '''Send an event to one of the log files or the terminal if specified.
         Everything gets written to a log.  Where a message gets written to
         depends on what type code it is.  The type code is in with the error
@@ -373,15 +373,12 @@ class ProjLog (object) :
         file. The args parameter can contain extra information like file names
         to help the user better figure out what happened.'''
 
-        # Build the mod line
-        if mod :
-            mod = mod + ': '
-        else :
-            mod = ''
-
         # Get the message from the errorCode list the module sent
         if type(errCode) == list :
-            msg = errCode[1]
+            if location :
+                msg = errCode[1] + ' : (' + location + ')'
+            else :
+                msg = errCode[1]
             code = errCode[0]
         else :
             terminal('\nThe code: [' + errCode + '] is not recognized by the Rapuma system.')
@@ -407,10 +404,6 @@ class ProjLog (object) :
 
             # Build the event line
             eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
-#            if code == 'ERR' :
-#                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + mod + msg + '\"'
-#            else :
-#                eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
 
             # Do we need a log file made?
 

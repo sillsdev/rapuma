@@ -264,6 +264,28 @@ def rtnUnicodeValue(char) :
     return "{:04X}".format(n)
 
 
+###############################################################################
+########################## Config/Dictionary routines #########################
+###############################################################################
+
+def decodeText (fileName, sourceEncoded) :
+    '''In case an encoding conversion is needed. This function will try
+    to do that and if it fails, it should return a meaningful error msg.'''
+
+    # First, test so see if we can even read the file
+    try:
+        fileObj = open(fileName, 'r').read()
+    except Exception as e :
+        terminal('decodeText() failed with the following error: ' + str(e))
+        dieNow()
+    # Now try to run the decode() function
+    try:
+        return fileObj.decode(sourceEncode)
+
+    except Exception:
+        terminal('decodeText() could not decode: [' + fileName + ']\n')
+        dieNow()
+
 
 ###############################################################################
 ########################## Config/Dictionary routines #########################

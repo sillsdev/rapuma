@@ -28,13 +28,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Group Preprocess Script File</name>
-        <key>preprocessScript</key>
-        <description>The name of a script (only one) that will be used for preprocessing this type of component.</description>
-        <type>string</type>
-        <value>[self.gid]_groupPreprocess.py</value>
-    </setting>
-    <setting>
         <name>Group Post Process Scripts</name>
         <key>postprocessScripts</key>
         <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>

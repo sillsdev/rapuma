@@ -520,7 +520,7 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Available choices
 mediaTypes =        ['book']
 componentTypes =    ['usfm']
-fontPackages =      ['', '']
+#fontPackages =      ['', '']
 usfmBooks =         ['gen', 'exo', 'lev', 'num', 'deu', 'jos', 'jdg', 'rut', '1sa', '2sa', '1ki', '2ki', \
                         '1ch', '2ch', 'ezr', 'neh', 'est', 'job', 'psa', 'pro', 'ecc', 'sng', 'isa', 'jer', \
                         'lam', 'ezk', 'dan', 'hos', 'jol', 'amo', 'oba', 'jon', 'mic', 'nam', 'hab', 'zep', \
@@ -602,7 +602,7 @@ fontCommand = subparsers.add_parser('font', help='General font handling commands
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 fontCommand.add_argument('group_id', help='The group ID this font is a part of.')
 fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-fontCommand.add_argument('font_id', choices=fontPackages, help='The font family name ID. The ID given has to be a valid system font.')
+fontCommand.add_argument('font_id', help='The font family name ID. The ID given has to be a valid system font.')
 fontCommand.add_argument('-a', '--add', action='store_true', help='Add a new font for a specific comonent type.')
 fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the font of a specified ID from this project.')
 fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')

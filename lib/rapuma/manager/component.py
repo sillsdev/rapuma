@@ -22,7 +22,6 @@ import os, shutil
 # Load the local classes
 from rapuma.core.tools import *
 from rapuma.project.manager import Manager
-from rapuma.group.usfm import PT_Tools
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -41,7 +40,6 @@ class Component (Manager) :
         super(Component, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.pt_tools                   = PT_Tools(project)
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType

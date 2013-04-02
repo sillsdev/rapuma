@@ -28,8 +28,6 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools import *
 import rapuma.project.manager as mngr
 import rapuma.core.user_config as userConfig
-#from rapuma.component.usfm import PT_Tools
-from rapuma.group.usfm import PT_Tools
 from importlib import import_module
 
 ###############################################################################
@@ -42,7 +40,6 @@ class Project (object) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
-#        self.pt_tools               = PT_Tools(self)
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
@@ -101,8 +98,6 @@ class Project (object) :
         # Log messages for this module
         self.errorCodes     = {
             'PROJ-000' : ['MSG', 'Project module messages'],
-            'PROJ-010' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
-            'PROJ-011' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
             'PROJ-030' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
             'PROJ-040' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
             'PROJ-050' : ['ERR', 'Component [<<1>>] working text file was not found in the project configuration.'],
@@ -111,7 +106,9 @@ class Project (object) :
             'PROJ-080' : ['MSG', 'Successful copy of [<<1>>] to [<<2>>].'],
             'PROJ-090' : ['ERR', 'Target file [<<1>>] already exists. Use force (-f) to overwrite.'],
 
-            '205' : ['LOG', 'Created the [<<1>>] manager object.'],
+            '0205' : ['LOG', 'Created the [<<1>>] manager object.'],
+            '0210' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
+            '0211' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
         }
 
 ###############################################################################
@@ -128,7 +125,7 @@ class Project (object) :
         if fullName not in self.managers :
             self.addManager(cType, mType)
             self.loadManager(cType, mType)
-            self.log.writeToLog(self.errorCodes['205'], [fullName])
+            self.log.writeToLog(self.errorCodes['0205'], [fullName])
 
 
     def loadManager (self, cType, mType) :
@@ -173,9 +170,9 @@ class Project (object) :
         # Update the conf if one or more settings were changed
         if update :
             if writeConfFile(self.projConfig) :
-                self.log.writeToLog('PROJ-010',[fullName])
+                self.log.writeToLog(self.errorCodes['0210'],[fullName])
             else :
-                self.log.writeToLog('PROJ-011',[fullName])
+                self.log.writeToLog(self.errorCodes['0211'],[fullName])
 
 
 ###############################################################################
