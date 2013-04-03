@@ -67,6 +67,11 @@ class UserConfig (object) :
             self.userConfig.filename = self.userConfFile
             self.userConfig.write()
 
+        # Log messages for this module
+        self.errorCodes     = {
+            '0000' : ['MSG', 'Placeholder message'],
+        }
+
 ###############################################################################
 ############################ User Config Functions ############################
 ###############################################################################

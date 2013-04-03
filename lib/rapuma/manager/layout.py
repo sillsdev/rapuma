@@ -22,8 +22,8 @@
 import os, shutil
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.project.manager import Manager
+from rapuma.core.tools          import *
+from rapuma.project.manager     import Manager
 
 
 ###############################################################################
@@ -61,6 +61,16 @@ class Layout (Manager) :
         # Grab the projConfig settings for this manager
         for k, v in self.project.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)
+
+        # Log messages for this module
+        self.errorCodes     = {
+            'LYOT-000' : ['MSG', 'Layout module messages'],
+            'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
+            'LYOT-020' : ['LOG', 'Loaded exsisting layout configuration file. (layout.__init__())'],
+            'LYOT-030' : ['LOG', 'Changes found in the default layout config model. These were merged into the exsisting layout configuration file. (layout.__init__())'],
+
+            '0000' : ['MSG', 'Placeholder message'],
+        }
 
 ###############################################################################
 ############################ Manager Level Functions ##########################

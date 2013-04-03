@@ -23,9 +23,9 @@ import os, re, shutil, subprocess
 
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.project.manager import Manager
-from rapuma.core.proj_config import ConfigTools
+from rapuma.core.tools          import *
+from rapuma.project.manager     import Manager
+from rapuma.core.proj_config    import ConfigTools
 
 
 ###############################################################################
@@ -89,6 +89,25 @@ class Hyphenation (Manager) :
         # Data containers for this module
         self.allHyphenWords         = set()
 
+        # Log messages for this module
+        self.errorCodes     = {
+            '0000' : ['MSG', 'Placeholder message'],
+            'HYPH-000' : ['MSG', 'Hyphenation module messages'],
+            'HYPH-010' : ['ERR', 'TeX hyphenation dependent file [<<1>>] is missing! This is a required file when hyphenation is turned on.'],
+            'HYPH-020' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
+            'HYPH-030' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
+            'HYPH-040' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
+            'HYPH-050' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
+            'HYPH-055' : ['MSG', 'Hyphenation is already on for component type: [<<1>>]'],
+            'HYPH-060' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
+            'HYPH-065' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
+            'HYPH-070' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
+            'HYPH-080' : ['ERR', 'New default hyphen preprocess script copied into the project. Please edit before using.'],
+            'HYPH-090' : ['MSG', 'Ran hyphen preprocess script on project hyphenation source file.'],
+            'HYPH-095' : ['ERR', 'Preprocess script failed to run on source file.'],
+            'HYPH-100' : ['ERR', 'Failed to run preprocess script on project hyphenation source file.'],
+        }
+
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
@@ -100,9 +119,6 @@ class Hyphenation (Manager) :
         # Bail out here if hyphenation isn't even turned on
         if not self.useHyphenation :
             return False
-
-
-
 
 
     def preprocessSource (self) :

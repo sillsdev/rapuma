@@ -107,13 +107,30 @@ class Usfm (Group) :
 
         # Module Error Codes
         self.errorCodes     = {
+            'USFM-000' : ['MSG', 'Messages for the USFM module.'],
+            'USFM-005' : ['MSG', 'Unassigned error message ID.'],
+            'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            'USFM-025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
+            'USFM-030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
+            'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
+            'USFM-050' : ['LOG', 'Updated project file: [<<1>>]'],
+            'USFM-055' : ['LOG', 'Did not update project file: [<<1>>]'],
+            'USFM-060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
+            'USFM-070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
+            'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
+            'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
+            'USFM-095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
+            'USFM-100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
+            'USFM-110' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
+            'USFM-120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
+            'USFM-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
+            'USFM-140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
+            'USFM-150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
 
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
-
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
-
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
-
         }
 
         # Pick up some init settings that come after the managers have been installed
@@ -278,17 +295,6 @@ class Usfm (Group) :
         return True
 
 
-#    def hasAdjustments (self, cType, cid) :
-#        '''Check for exsiting adjustments under a book section in
-#        the adjustment.conf file. Return True if found.'''
-
-#        try :
-#            if self.adjustmentConfig[cType.upper() + ':' + cid.upper()].keys() :
-#                return True
-#        except  :
-#            return False
-
-
     def createCompAdjustmentFile (self, cid) :
         '''Create an adjustment file for this cid. If entries exsist in
         the adjustment.conf file.'''
@@ -360,208 +366,6 @@ class Usfm (Group) :
 ###############################################################################
 
 
-#    def installUsfmWorkingText (self, gid, cid, force = False) :
-#        '''Find the USFM source text and install it into the working text
-#        folder of the project with the proper name. If a USFM text file
-#        is not located in a PT project folder, the editor cannot be set
-#        to paratext, it must be set to generic. This assumes lock checking
-#        was done previous to the call.'''
-
-##        import pdb; pdb.set_trace()
-
-#        sourcePath = self.project.getGroupSourcePath(gid)
-#        csid = self.projConfig['Groups'][gid]['csid']
-
-#        # Check if there is a font installed
-#        if not self.font.varifyFont() :
-#            # If a PT project, use that font, otherwise, install default
-#            if self.sourceEditor.lower() == 'paratext' :
-#                font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
-#            else :
-#                font = 'DefaultFont'
-
-#            self.font.installFont(font)
-
-#        # Build the file name
-#        thisFile = ''
-#        if self.sourceEditor.lower() == 'paratext' :
-#            thisFile = self.pt_tools.formPTName(gid, cid)
-#        elif self.sourceEditor.lower() == 'generic' :
-#            thisFile = self.pt_tools.formGenericName(gid, cid)
-#        else :
-#            self.log.writeToLog('USFM-100', [self.sourceEditor])
-
-#        # Test, no name = no success
-#        if not thisFile :
-#            self.log.writeToLog(self.errorCodes['210'], [cid])
-#            dieNow()
-
-#        # Will need the stylesheet for copy if that has not been added
-#        # to the project yet, we will do that now
-#        self.style.checkDefaultStyFile()
-#        self.style.checkDefaultExtStyFile()
-
-#        # Start the process by building paths and file names, if we made it this far.
-#        # Note the file name for the preprocess is hard coded. This will become a part
-#        # of the total system and this file will be copied in when the user requests to
-#        # preprocessing.
-
-#        # Current assuption is that source text is located in a directory above the
-#        # that is the default. In case that is not the case, we can override that and
-#        # specify a path to the source. If that exists, then we will use that instead.
-#        if sourcePath :
-#            source      = os.path.join(sourcePath, thisFile)
-#        else :
-#            source      = os.path.join(os.path.dirname(self.local.projHome), thisFile)
-
-#        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-#        target          = os.path.join(targetFolder, self.component.makeFileNameWithExt(cid))
-#        targetSource    = os.path.join(targetFolder, thisFile + '.source')
-
-#        # Copy the source to the working text folder. We do not want to do
-#        # this if the there already is a target and it is newer than the 
-#        # source text, that would indicate some edits have been done and we
-#        # do not want to loose the work. However, if it is older that would
-#        # indicate the source has been updated so unless the folder is locked
-#        # we will want to update the target.
-
-#        # Look for the source now, if not found, fallback on the targetSource
-#        # backup file. But if that isn't there die.
-#        if not os.path.isfile(source) :
-#            if os.path.isfile(targetSource) :
-#                source = targetSource
-#            else :
-#                self.log.writeToLog('USFM-120', [source])
-#                dieNow()
-
-#        # Now do the age checks and copy if source is newer than target
-#        if force or not os.path.isfile(target) or isOlder(target, source) :
-
-#            # Make target folder if needed
-#            if not os.path.isdir(targetFolder) :
-#                os.makedirs(targetFolder)
-
-#            # Always save an untouched copy of the source and set to
-#            # read only. We may need this to restore/reset later.
-#            if os.path.isfile(targetSource) :
-#                # Don't bother if we copied from it in the first place
-#                if targetSource != source :
-#                    # Reset permissions to overwrite
-#                    makeWriteable(targetSource)
-#                    shutil.copy(source, targetSource)
-#                    makeReadOnly(targetSource)
-#            else :
-#                shutil.copy(source, targetSource)
-#                makeReadOnly(targetSource)
-
-#            # To be sure nothing happens, copy from our project source
-#            # backup file. (Is self.style.defaultStyFile the best thing?)
-#            if self.usfmCopy(targetSource, target, self.style.defaultStyFile) :
-#                # Run any working text preprocesses on the new component text
-#                if str2bool(self.projConfig['Groups'][gid]['usePreprocessScript']) :
-#                    if not os.path.isfile(self.grpPreprocessFile) :
-#                        self.text.installPreprocess()
-#                    if not self.text.runProcessScript(target, self.grpPreprocessFile) :
-#                        self.log.writeToLog('USFM-130', [cid])
-
-#                # If this is a USFM component type we need to remove any \fig markers,
-#                # and record them in the illustration.conf file for later use
-#                if self.cType == 'usfm' :
-#                    tempFile = target + '.tmp'
-#                    contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-#                    # logUsfmFigure() logs the fig data and strips it from the working text
-#                    # Note: Using partial() to allows the passing of the cid param 
-#                    # into logUsfmFigure()
-#                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.project.groups[gid].logFigure, cid), contents)
-#                    codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
-#                    # Finish by copying the tempFile to the source
-#                    if not shutil.copy(tempFile, target) :
-#                        # Take out the trash
-#                        os.remove(tempFile)
-
-#                # If the text is there, we should return True so do a last check to see
-#                if os.path.isfile(target) :
-#                    self.log.writeToLog('USFM-140', [cid])
-#                    return True
-#            else :
-#                self.log.writeToLog('USFM-150', [source,fName(target)])
-#                return False
-#        else :
-#            return True
-
-
-#    def usfmCopy (self, source, target, projSty = None) :
-#        '''Copy USFM text from source to target. Decode if necessary, then
-#        normalize. With the text in place, validate unless that is False.'''
-
-#        # Bring in our source text
-#        if self.text.sourceEncode == self.text.workEncode :
-#            contents = codecs.open(source, 'rt', 'utf_8_sig')
-#            lines = contents.read()
-#        else :
-#            # Lets try to change the encoding.
-#            lines = self.text.decodeText(source)
-
-#        # Normalize the text
-#        normal = unicodedata.normalize(self.text.unicodeNormalForm, lines)
-#        self.log.writeToLog('USFM-080', [self.text.unicodeNormalForm])
-
-#        # Write out the text to the target
-#        writeout = codecs.open(target, "wt", "utf_8_sig")
-#        writeout.write(normal)
-#        writeout.close
-
-#        # Validate the target USFM text (Defalt is True)
-#        if str2bool(self.validateUsfm) :
-#            if not self.usfmTextFileIsValid(target, projSty) :
-#                self.log.writeToLog('USFM-090', [source,fName(target)])
-#                return False
-#        else :
-#            self.log.writeToLog('USFM-095', [fName(target)])
-
-#        return True
-
-
-#    def usfmTextFileIsValid (self, source, projSty) :
-#        '''Use the USFM parser to validate a style file. For now,
-#        if a file fails, we'll just quite right away, otherwise,
-#        return True.'''
-
-#        # Note: Error level reporting is possible with the usfm.parser.
-#        # The following are the errors it can report:
-#        # Note            = -1    Just give output warning, do not stop
-#        # Marker          =  0    Stop on any out of place marker
-#        # Content         =  1    Stop on mal-formed content
-#        # Structure       =  2    Stop on ???
-#        # Unrecoverable   =  100  Stop on most anything that is wrong
-#        # For future reference, the sfm parser will fail if TeX style
-#        # comment markers "%" are used to comment text rather than "#".
-
-#        try :
-#            fh = codecs.open(source, 'rt', 'utf_8_sig')
-#            stylesheet = usfm.default_stylesheet.copy()
-#            if projSty :
-#                stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-#                stylesheet.update(stylesheet_extra)
-#            doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Structure)
-#            # With the doc text loaded up, we run a list across it
-#            # so the parser will either pass or fail
-#            testlist = list(doc)
-#            # Good to go
-#            return True
-
-#        except Exception as e :
-#            # If the text is not good, I think we should die here an now.
-#            # We may want to rethink this later but for now, it feels right.
-#            self.log.writeToLog('USFM-070', [source,str(e)])
-#            return False
-
-
-###############################################################################
-########################## USFM Component Functions ###########################
-###############################################################################
-
-
     def getComponentType (self, gid) :
         '''Return the cType for a component.'''
 
@@ -582,15 +386,6 @@ class Usfm (Group) :
 
         if self.hasCidFile(gid, cid) :
             return True
-
-
-#    def hasCNameEntry (self, cName) :
-#        '''Check for a config component entry.'''
-
-#        buildConfSection(self.project.projConfig, 'Components')
-
-#        if testForSetting(self.project.projConfig['Components'], cName) :
-#            return True
 
 
     def hasUsfmCidInfo (self, cid) :

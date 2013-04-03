@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -9,7 +8,6 @@
 
 # This class will handle binding component groups in book projects.
 
-# Created: Fri Mar 08 10:34:34 2013 
 
 ###############################################################################
 ################################# Project Class ###############################
@@ -18,11 +16,11 @@
 # this process
 
 import os, shutil, codecs, re, subprocess
-from configobj import ConfigObj, Section
+from configobj                  import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.project.manager import Manager
+from rapuma.core.tools          import *
+from rapuma.project.manager     import Manager
 
 
 ###############################################################################
@@ -63,6 +61,21 @@ class Binding (Manager) :
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
+
+        # Log messages for this module
+        self.errorCodes     = {
+            'BIND-000' : ['MSG', 'XeTeX module messages'],
+            'BIND-005' : ['MSG', 'Unassigned message.'],
+            'BIND-010' : ['MSG', 'Created the [<<1>>] binding group.'],
+            'BIND-012' : ['WRN', 'The [<<1>>] binding group already exists. Use force to replace.'],
+            'BIND-015' : ['ERR', 'Failed to create the [<<1>>] binding group. Got error: [<<2>>]'],
+            'BIND-020' : ['MSG', 'Removed the [<<1>>] binding group.'],
+            'BIND-025' : ['ERR', 'The [<<1>>] binding group was not found.'],
+            'BIND-030' : ['MSG', 'Completed proccessing on the [<<1>>] binding group.'],
+            'BIND-035' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding group.'],
+
+            '0000' : ['MSG', 'Placeholder message'],
+        }
 
 
 ###############################################################################

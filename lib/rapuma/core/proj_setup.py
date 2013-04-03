@@ -723,27 +723,6 @@ class ProjSetup (object) :
         grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
         rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType, cType + '_groupPreprocess.py')
 
-
-
-
-
-
-
-
-# FIXME: Should add a number of default system file names to the local settings so these names
-# are fixed and easily accessable.
-
-
-
-
-
-
-
-
-
-
-
-
         # Build the file name
         thisFile = ''
         if sourceEditor.lower() == 'paratext' :

@@ -440,29 +440,28 @@ def userArguments (args, local) :
     # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
     elif sys.argv[1].lower() == 'preserve' :
         # Archive the project
-        if args.archive :
+        if args.preserve_type == 'archive' :
             ProjBackup(args.project_id).archiveProject()
         # Backup the project (simple)
-        elif args.backup :
+        elif args.preserve_type == 'backup' :
             ProjBackup(args.project_id).backupProject()
         # Create a template of the current project
-        elif args.template :
+        elif args.preserve_type == 'template' :
             if isTemplate(args.template) :
                 sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
             ProjBackup(args.project_id).projectToTemplate(args.template)
         # Backup (evaporate) to cloud
-        elif args.cloud :
+        elif args.preserve_type == 'cloud' :
             ProjBackup(args.project_id).pushToCloud()
-        else :
-            # Bad command
-            sys.exit('\nERROR: Must provide -a (--archive), -b (--backup), -t (--template), -c (--cloud). Process halted!\n')
 
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
         if args.add :
-            PageBackground(args.project_id).addBackground(args.add)
+            PageBackground(args.project_id).addBackground(args.background_type)
         elif args.remove :
-            PageBackground(args.project_id).removeBackground(args.remove)
+            PageBackground(args.project_id).removeBackground(args.background_type)
+        elif args.background_type == 'none' :
+            PageBackground(args.project_id).backgroundOff()
 
     # Totally lost
     else:
@@ -520,19 +519,8 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Available choices
 mediaTypes =        ['book']
 componentTypes =    ['usfm']
-#fontPackages =      ['', '']
-usfmBooks =         ['gen', 'exo', 'lev', 'num', 'deu', 'jos', 'jdg', 'rut', '1sa', '2sa', '1ki', '2ki', \
-                        '1ch', '2ch', 'ezr', 'neh', 'est', 'job', 'psa', 'pro', 'ecc', 'sng', 'isa', 'jer', \
-                        'lam', 'ezk', 'dan', 'hos', 'jol', 'amo', 'oba', 'jon', 'mic', 'nam', 'hab', 'zep', \
-                        'hag', 'zec', 'mal', 'mat', 'mrk', 'luk', 'jhn', 'act', 'rom', '1co', '2co', 'gal', \
-                        'eph', 'php', 'col', '1th', '2th', '1ti', '2ti', 'tit', 'phm', 'heb', 'jas', '1pe', \
-                        '2pe', '1jn', '2jn', '3jn', 'jud', 'rev', 'tob', 'jdt', 'esg', 'wis', 'sir', 'bar', \
-                        'lje', 's3y', 'sus', 'bel', '1ma', '2ma', '3ma', '4ma', '1es', '2es', 'man', 'ps2', \
-                        'oda', 'pss', 'jsa', 'jdb', 'tbs', 'sst', 'dnt', 'blt', 'frt', 'int', 'bak', 'cnc', \
-                        'glo', 'tdx', 'ndx', 'xxa', 'xxb', 'xxc', 'xxd', 'xxe', 'xxf', 'xxg', 'oth', 'eza', \
-                        '5ez', '6ez', 'dag', 'ps3', '2ba', 'lba', 'jub', 'eno', '1mq', '2mq', '3mq', 'rep', \
-                        '4ba', 'lao'] 
-backgrounds =       ['watermark', 'lines', 'boarder', 'cropmarks']
+backupTypes =       ['archive', 'backup', 'cloud', 'template']
+backgrounds =       ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -678,16 +666,14 @@ macroCommand.add_argument('-f', '--force', action='store_true', help='Force over
 # Add Project preserve subprocess arguments
 preserveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
 preserveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-preserveCommand.add_argument('-a', '--archive', action='store_true', help='Archive the specified project to the archive storage area specified in the user configuration.')
-preserveCommand.add_argument('-b', '--backup', action='store_true', help='Backup the specified project to the backup storage area specified in the user configuration.')
-preserveCommand.add_argument('-t', '--template', help='Supply a template ID for creating a template of a specified project. It will save it to the template storage area specified in the user configuration. This must be a unique ID when creating a new template.')
-preserveCommand.add_argument('-c', '--cloud', action='store_true', help='Back project data to cloud storage.')
+preserveCommand.add_argument('preserve_type', choices=backupTypes, help='The type of output desired. This can be an archive, backup, cloud, or template.')
 
 # Add Project preserve subprocess arguments
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
-backgroundCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-backgroundCommand.add_argument('-a', '--add', choices=backgrounds, help='')
-backgroundCommand.add_argument('-r', '--remove', choices=backgrounds, help='')
+backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
+backgroundCommand.add_argument('background_type', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
+backgroundCommand.add_argument('-a', '--add', action='store_true', help='Add a background type.')
+backgroundCommand.add_argument('-r', '--remove', action='store_true', help='Remove background type.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args(), local)

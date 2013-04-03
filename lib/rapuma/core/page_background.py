@@ -59,6 +59,8 @@ class PageBackground (object) :
             '0000' : ['MSG', 'Placeholder message'],
             '0220' : ['MSG', 'Set [<<1>>] background to True.'],
             '0230' : ['MSG', 'Set [<<1>>] background to False.'],
+            '0240' : ['MSG', 'No change to [<<1>>] background.'],
+            '0250' : ['MSG', 'All backgrounds have been turned off.'],
             '0280' : ['LOG', 'Installed background file [<<1>>] into the project.'],
             '0290' : ['ERR', 'Failed to install background file [<<1>>]. It ended with this error: [<<2>>]'],
         }
@@ -107,6 +109,17 @@ class PageBackground (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
+    def backgroundOff (self) :
+        '''Turn off all page backgrounds.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = False
+        self.layoutConfig['PageLayout']['useLines'] = False
+        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        self.layoutConfig['PageLayout']['useCropmarks'] = False
+        if writeConfFile(self.layoutConfig) :
+            self.log.writeToLog(self.errorCodes['0250'])
+
+
     def addBackground (self, bType) :
         '''Add a page background type to a project. In some cases, there can
         be more than one. This function will determine what is allowed.'''
@@ -115,19 +128,39 @@ class PageBackground (object) :
         if bType == 'watermark' :
             # Turn on watermark and make sure there is a file to use
             if self.useWatermark == False :
+                if not os.path.exists(self.projWatermarkFile) :
+                    self.installDefaultWatermarkFile()
                 self.layoutConfig['PageLayout']['useWatermark'] = True
-                # FIXME: Need to check to see if there is a watermark file, etc so this works
                 change = True
         elif bType == 'lines' :
-            print bType
+            # Turn on lines and make sure there is a file to use
+            if self.useLines == False :
+                if not os.path.exists(self.projLinesFile) :
+                    self.installLinesFile()
+                self.layoutConfig['PageLayout']['useLines'] = True
+                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+                self.layoutConfig['PageLayout']['useCropmarks'] = False
+                change = True
         elif bType == 'boarder' :
-            print bType
+            # Turn on lines and make sure there is a file to use
+            if self.useLines == False :
+                if not os.path.exists(self.boxBoarderFile) :
+                    self.installBoxBoarderFile()
+                self.layoutConfig['PageLayout']['useBoxBoarder'] = True
+                self.layoutConfig['PageLayout']['useLines'] = False
+                self.layoutConfig['PageLayout']['useCropmarks'] = False
+                change = True
         elif bType == 'cropmarks' :
-            print bType
+                self.layoutConfig['PageLayout']['useCropmarks'] = True
+                self.layoutConfig['PageLayout']['useLines'] = False
+                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+                change = True
 
         if change :
             if writeConfFile(self.layoutConfig) :
                 self.log.writeToLog(self.errorCodes['0220'], [bType])
+        else :
+            self.log.writeToLog(self.errorCodes['0240'], [bType])
 
 
     def removeBackground (self, bType) :
@@ -140,15 +173,21 @@ class PageBackground (object) :
                 self.layoutConfig['PageLayout']['useWatermark'] = False
                 change = True
         elif bType == 'lines' :
-            print bType
+            if self.useLines == True :
+                self.layoutConfig['PageLayout']['useLines'] = False
+                change = True
         elif bType == 'boarder' :
-            print bType
+                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+                change = True
         elif bType == 'cropmarks' :
-            print bType
+                self.layoutConfig['PageLayout']['useCropmarks'] = False
+                change = True
 
         if change :
             if writeConfFile(self.layoutConfig) :
                 self.log.writeToLog(self.errorCodes['0230'], [bType])
+        else :
+            self.log.writeToLog(self.errorCodes['0240'], [bType])
 
 
     def changeWatermarkFile (self) :

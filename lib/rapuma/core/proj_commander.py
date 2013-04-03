@@ -40,6 +40,11 @@ class Commander (object) :
         self.local              = None
         self.projConfig         = None
         self.finishInit()
+        # Log messages for this module
+        self.errorCodes     = {
+            '0000' : ['MSG', 'Placeholder message'],
+        }
+
 
 
     def finishInit (self) :
@@ -139,22 +144,23 @@ class Commander (object) :
                 'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' NT -c usfm -a -d base -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
                 'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' OT -c usfm -a -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
                 'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
+                'backgroundOff' : ['Turn off all backgounds on output page.',           'rapuma background ' + pid + ' none'], 
                 'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
                 'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -c '], 
                 'cloudPush'     : ['Push data from this project to the cloud',          'rapuma preserve ' + pid + ' -c '], 
-                'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False '], 
-                'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks True '], 
-                'linesOff'      : ['Turn off line background.',                         'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines False '], 
-                'linesOn'       : ['Turn on line background.',                          'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useLines True '], 
-                'pageBoxOff'    : ['Turn off page box on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useBoxBoarder False '], 
-                'pageBoxOn'     : ['Turn on page box on output page.',                  'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useCropmarks False \n\nrapuma settings ' + pid + ' ' + mid + '_layout PageLayout useBoxBoarder True '], 
+                'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma background ' + pid + ' cropmarks -r'], 
+                'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma background ' + pid + ' cropmarks -a'], 
+                'linesOff'      : ['Turn off line background.',                         'rapuma background ' + pid + ' lines -r'], 
+                'linesOn'       : ['Turn on line background.',                          'rapuma background ' + pid + ' lines -a'], 
+                'pageBoarderOff': ['Turn off page box on output page.',                 'rapuma background ' + pid + ' boarder -r'], 
+                'pageBoarderOn' : ['Turn on page box on output page.',                  'rapuma background ' + pid + ' boarder -a'], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
                 'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
                 'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
                 'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -s '], 
-                'watermarkOff'  : ['Turn off watermark on output page.',                'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark False '], 
-                'watermarkOn'   : ['Turn on watermark on output page.',                 'rapuma settings ' + pid + ' ' + mid + '_layout PageLayout useWatermark True \n\n']
+                'watermarkOff'  : ['Turn off watermark background.',                    'rapuma background ' + pid + ' watermark -r'], 
+                'watermarkOn'   : ['Turn on watermark background.',                     'rapuma background ' + pid + ' watermark -a']
             }
 
 

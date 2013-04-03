@@ -40,6 +40,11 @@ class ProjBackup (object) :
         self.local          = None
         self.projConfig     = None
         self.finishInit()
+        # Log messages for this module
+        self.errorCodes     = {
+            '0000' : ['MSG', 'Placeholder message'],
+        }
+
 
 
     def finishInit (self, projHome = None) :

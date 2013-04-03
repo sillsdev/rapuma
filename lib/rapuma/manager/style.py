@@ -81,6 +81,22 @@ class Style (Manager) :
 
         # Log messages for this module
         self.errorCodes     = {
+            'STYL-000' : ['MSG', 'Style module messages'],
+            'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],
+            'STYL-007' : ['ERR', 'The [<<1>>] component type source text editor [<<2>>] is not supported by the style manager.'],
+            'STYL-010' : ['MSG', 'The style file [<<1>>] was set as the [<<2>>] style file for the [<<3>>] component type.'],
+            'STYL-020' : ['ERR', 'Style file: [<<1>>] was not found. Operation failed.'],
+            'STYL-030' : ['WRN', 'Style file: [<<1>>] already exsits. Use (-f) force to replace it.'],
+            'STYL-060' : ['LOG', 'The file [<<1>>] was validated and copied to the project styles folder.'],
+            'STYL-065' : ['LOG', 'The file [<<1>>] was copied to the project styles folder.'],
+            'STYL-070' : ['ERR', 'Style file: [<<1>>] is not valid. Copy operation failed!'],
+            'STYL-075' : ['LOG', 'Style file: [<<1>>] is not valid. Will attempt to find a valid one from another source.'],
+            'STYL-090' : ['LOG', 'Style file: [<<1>>] was not found.'],
+            'STYL-100' : ['LOG', 'No style file setting was found for the [<<1>>] component type. Nothing has been done.'],
+            'STYL-110' : ['MSG', 'Force switch was set (-f). Style file: [<<1>>] was removed from the project and references removed from the [<<2>>] settings.'],
+            'STYL-120' : ['MSG', 'Style file: [<<1>>] was removed from the [<<2>>] settings.'],
+            'STYL-150' : ['MSG', 'Style file: [<<1>>] is valid.'],
+            'STYL-155' : ['ERR', 'Style file: [<<1>>] did NOT pass the validation test.'],
 
             '0010' : ['ERR', 'Style file [<<1>>] could not be created.'],
 
@@ -127,226 +143,6 @@ class Style (Manager) :
                 return False
         else :
             return True
-
-
-#    def makeDefaultStyFile (self) :
-#        '''Create or copy in a default global style file for the current component type.
-#        And while we are at it, make it read-only.'''
-
-#        if os.path.isfile(self.rapumaCmpStyFile) :
-#            # No news is good news
-#            if not shutil.copy(self.rapumaCmpStyFile, self.defaultStyFile) :
-#                makeReadOnly(self.defaultStyFile)
-#                return True
-
-
-#    def makeDefaultExtStyFile (self) :
-#        '''Create/copy a component Style extentions file to the project for specified group.'''
-
-#        description = 'This is the component extention style file which overrides settings in \
-#        the main default component style settings file.'
-
-#        # First look for a user file, if not, then make a blank one
-#        if not os.path.isfile(self.defaultExtStyFile) :
-#            if os.path.isfile(self.usrDefaultExtStyFile) :
-#                shutil.copy(self.usrDefaultExtStyFile, self.defaultExtStyFile)
-#            else :
-#                # Create a blank file
-#                with codecs.open(self.defaultExtStyFile, "w", encoding='utf_8') as writeObject :
-#                    writeObject.write(makeFileHeader(fName(self.defaultExtStyFile), description, False))
-#                self.project.log.writeToLog('XTEX-040', [fName(self.defaultExtStyFile)])
-
-#        # Need to return true here even if nothing was done
-#        return True
-
-
-#    def makeGrpExtStyFile (self) :
-#        '''Create/copy a group Style extentions file to a specified group.'''
-
-#        description = 'This is the group style extention file which overrides settings in \
-#        the main default component extentions settings style file.'
-
-#        # Create a blank file
-#        with codecs.open(self.grpExtStyFile, "w", encoding='utf_8') as writeObject :
-#            writeObject.write(makeFileHeader(fName(self.grpExtStyFile), description, False))
-#        self.project.log.writeToLog('XTEX-040', [fName(self.grpExtStyFile)])
-
-#        # Need to return true here even if nothing was done
-#        return True
-
-
-
-###############################################################################
-############################ General Style Functions ##########################
-###############################################################################
-
-#    def removeStyleFile (self, sType, force = False) :
-#        '''Direct a request to remove a style file from a project.'''
-#        if self.cType == 'usfm' :
-#            self.removeUsfmStyFile(sType, force)
-#        else :
-#            self.project.log.writeToLog('STYL-005', [self.cType])
-#            dieNow()
-
-
-#    def recordStyleFile (self, fileName, sType) :
-#        '''Record in the project conf file the style file being used.'''
-
-#        self.project.projConfig['Managers'][self.cType + '_Style'][sType + 'StyleFile'] = fName(fileName)
-#        writeConfFile(self.project.projConfig)
-#        self.project.log.writeToLog('STYL-010', [fName(fileName),sType,self.cType])
-#        return True
-
-
-#    def testStyleFile (self, path) :
-#        '''This is a basic validity test of a style file. If it
-#        does not validate the errors will be reported in the
-#        terminal for the user to examine.'''
-
-#        if self.cType == 'usfm' :
-#            if self.usfmStyleFileIsValid(path) :
-#                self.project.log.writeToLog('STYL-150', [path])
-#                return True
-#            else :
-#                stylesheet_extra = ''
-#                stylesheet = usfm.default_stylesheet.copy()
-#                stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Unrecoverable)
-#                self.project.log.writeToLog('STYL-155', [path])
-#                return False
-#        else :
-#            self.project.log.writeToLog('STYL-005', [self.cType])
-#            dieNow()
-
-###############################################################################
-########################### ParaTExt Style Functions ##########################
-###############################################################################
-
-#    def usfmStyleFileIsValid (self, path) :
-#        '''Use the USFM parser to validate a style file. This is meant to
-#        be just a simple test so only return True or False.'''
-
-#        try :
-#            stylesheet = usfm.default_stylesheet.copy()
-#            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
-#            return True
-#        except Exception as e :
-#            return False
-
-
-#    def removeUsfmStyFile (self, sType, force) :
-#        '''This would be useful for a style reset. Remove a style setting
-#        from the config for a component type and if force is used, remove
-#        the file from the project as well.'''
-
-#        sType = sType.lower()
-
-#        # Make sure there is something to do
-#        if sType == 'main' :
-#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-#        elif sType == 'custom' :
-#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-
-#        if not oldStyle :
-#            self.project.log.writeToLog('STYL-100', [self.cType])
-#            return
-#        else :
-#            if sType == 'main' :
-#                self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] = ''
-#                self.mainStyleFile = ''
-#            elif sType == 'custom' :
-#                self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
-#                self.customStyleFile = ''
-
-#            writeConfFile(self.project.projConfig)
-
-#            if force :
-#                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
-#                if os.path.isfile(target) :
-#                    os.remove(target)
-
-#                self.project.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
-#            else :
-#                self.project.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
-
-#            return True
-
-
-#    def addExsitingUsfmStyFile (self, sFile, sType, force) :
-#        '''Add a specific style file that is on the local system.'''
-
-#        sFile = resolvePath(sFile)
-#        target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
-
-#        if not force and os.path.isfile(target) :
-#            self.project.log.writeToLog('STYL-030', [fName(sFile)])
-#            return False
-#        elif os.path.isfile(sFile) :
-#            # It's there? Good, we're done!
-#            # If this is not an Rapuma custom style file we will validate it
-#            if sType.lower() == 'main' :
-#                if self.usfmStyleFileIsValid(sFile) :
-#                    shutil.copy(sFile, target)
-#                    self.project.log.writeToLog('STYL-060', [fName(sFile)])
-#                    return True
-#                else :
-#                    # We die if it does not validate
-#                    self.project.log.writeToLog('STYL-070', [fName(sFile)])
-#                    dieNow()
-#            else :
-#                # Assuming a custom style file we can grab most anything
-#                # without validating it
-#                shutil.copy(sFile, target)
-#                self.project.log.writeToLog('STYL-065', [fName(sFile)])
-#                return True
-#        else :
-#            # Not finding the file may not be the end of the world 
-#            self.project.log.writeToLog('STYL-020', [fName(sFile)])
-#            return False
-
-
-#    def addPtUsfmStyFile (self) :
-#        '''Install a PT project style file. Merg in any custom
-#        project styles too.'''
-
-#        # First pick up our PT settings
-#        ptConf = self.pt_tools.getPTSettings(self.gid)
-#        if not ptConf :
-#            return False
-
-#        # If nothing is set, give it a default to start off
-#        if not self.mainStyleFile :
-#            self.mainStyleFile = 'usfm.sty'
-#        # Now, override default styleFile name if we found something in the PT conf
-#        if ptConf['ScriptureText']['StyleSheet'] :
-#            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-
-
-#        # Set the target destination
-#        target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
-#        # As this is call is for a PT based project, it is certain the style
-#        # file should be found in the source or parent folder. If that
-#        # exact file is not found in either place, a substitute will be
-#        # copied in from Rapuma and given the designated name.
-#        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-#        parent                  = os.path.dirname(self.sourcePath)
-#        # If there is a "gather" folder, assume the style file is there
-#        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
-#            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
-#        else :
-#            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-#        ptStyle                     = os.path.join(parent, self.mainStyleFile)
-#        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
-#        # We will start by searching in order from the inside out and stop
-#        # as soon as we find one.
-#        for sFile in searchOrder :
-#            if os.path.isfile(sFile) :
-#                if self.usfmStyleFileIsValid(sFile) :
-#                    if not shutil.copy(sFile, target) :
-#                        return fName(target)
-#                else :
-#                    self.project.log.writeToLog('STYL-075', [sFile,self.cType])
-#            else : 
-#                self.project.log.writeToLog('STYL-090', [sFile])
 
 
 

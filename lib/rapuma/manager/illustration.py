@@ -21,11 +21,9 @@
 
 import os, shutil
 
-
 # Load the local classes
-from rapuma.core.tools import *
-#from rapuma.component.usfm import PT_Tools
-from rapuma.project.manager import Manager
+from rapuma.core.tools          import *
+from rapuma.project.manager     import Manager
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -41,7 +39,6 @@ class Illustration (Manager) :
         super(Illustration, self).__init__(project, cfg)
 
         # Set values for this manager
-#        self.pt_tools                   = PT_Tools(project)
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType
@@ -84,28 +81,27 @@ class Illustration (Manager) :
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)
 
+        # Log messages for this module
+        self.errorCodes     = {
+            '0000' : ['MSG', 'Placeholder message'],
+            'ILUS-000' : ['MSG', 'Illustration module messages'],
+            'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
+            'ILUS-020' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
+            'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
+            'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
+            'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
+            'ILUS-055' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] component folder.'],
+            'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
+            'ILUS-065' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+            'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustrations folder. Will try to revert to default watermark.'],
+            'ILUS-080' : ['LOG', 'Installed watermark file [<<1>>] into the project.'],
+            'ILUS-090' : ['LOG', 'Changed watermark config file name to [<<1>>].'],
+            'ILUS-100' : ['ERR', 'Unknown background file type: [<<1>>]'],
+        }
+
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
-
-
-
-
-## FIXME: Working here!
-
-#    def hasBackgroundFile (self, bType) :
-#        '''Return True if this project has a valid background file installed.'''
-
-#        if bType in self.backgroundTypes :
-#            if testForSetting(self.layoutConfig['PageLayout'], bType + 'File') :
-#                if self.layoutConfig['PageLayout'][bType + 'File'] != '' :
-#                    backgroundFileName = self.layoutConfig['PageLayout'][bType + 'File']
-#                    backgroundFile = os.path.join(self.project.local.projIllustrationsFolder, backgroundFileName)
-#                    if os.path.isfile(backgroundFile) :
-#                        return True
-#        else :
-#            self.project.log.writeToLog('ILUS-100', [bType])
-#            dieNow()
 
 
     def installIllustrationFile (self, fileName, path = None, force = False) :

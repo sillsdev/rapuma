@@ -21,7 +21,6 @@
 
 import os, shutil, zipfile
 
-
 # Load the local classes
 from rapuma.core.tools      import *
 from rapuma.core.paratext   import Paratext
