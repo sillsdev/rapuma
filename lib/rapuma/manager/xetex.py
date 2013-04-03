@@ -46,6 +46,7 @@ class Xetex (Manager) :
         # Others will be created at run time when we know the cid.
         self.project                = project
         self.local                  = project.local
+        self.log                    = project.log
         self.cfg                    = cfg
         self.pid                    = project.projectIDCode
         self.gid                    = project.gid
@@ -136,8 +137,8 @@ class Xetex (Manager) :
         self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         self.projWatermarkFile      = self.pg_back.projWatermarkFile
-        self.linesFile              = self.pg_back.projIllustrationsFolder
-        self.boxBoarderFile         = self.pg_back.projIllustrationsFolder
+        self.linesFile              = self.pg_back.projLinesFile
+        self.boxBoarderFile         = self.pg_back.boxBoarderFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -184,10 +185,9 @@ class Xetex (Manager) :
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
             '0635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
-            '0640' : ['ERR', 'Failed to add watermark to [<<1>>].'],
+            '0640' : ['ERR', 'Failed to add background to [<<1>>]. Ended with error: [<<2>>]'],
             '0645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
             'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
-            '0660' : ['ERR', 'Failed to add lines background to [<<1>>].'],
             '0665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
@@ -241,7 +241,7 @@ class Xetex (Manager) :
 
         if not os.path.isfile(self.ptxMargVerseFile) :
             shutil.copy(os.path.join(self.rapumaMacPackFolder, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
-            self.project.log.writeToLog(self.errorCodes['0270'], [fName(self.ptxMargVerseFile)])
+            self.log.writeToLog(self.errorCodes['0270'], [fName(self.ptxMargVerseFile)])
             return True
 
 
@@ -304,11 +304,11 @@ class Xetex (Manager) :
                     if not os.path.isfile(fTarget) :
                         shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
                         mCopy = True
-                        self.project.log.writeToLog(self.errorCodes['0270'], [fName(fTarget)])
+                        self.log.writeToLog(self.errorCodes['0270'], [fName(fTarget)])
 
             return mCopy
         else :
-            self.project.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
+            self.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
 
 
     def displayPdfOutput (self) :
@@ -327,7 +327,7 @@ class Xetex (Manager) :
                 return True
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.project.log.writeToLog('XTEX-105', [str(e)])
+                self.log.writeToLog('XTEX-105', [str(e)])
 
 
     def makeGrpHyphExcTexFile (self) :
@@ -402,7 +402,7 @@ class Xetex (Manager) :
         elif self.macroPackage == 'usfmTex-auto' :
             mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
         else :
-            self.project.log.writeToLog(self.errorCodes['0470'], [self.macroPackage], 'xetex.makeMacLinkFile():0470')
+            self.log.writeToLog(self.errorCodes['0470'], [self.macroPackage], 'xetex.makeMacLinkFile():0470')
 
         # Check to see if our macros are there
         if not os.path.isdir(self.projMacPackFolder) :
@@ -414,12 +414,12 @@ class Xetex (Manager) :
         dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.projConfFile]
         if not os.path.isfile(self.macLinkFile) :
             makeLinkFile = True
-            self.project.log.writeToLog(self.errorCodes['0465'], [fName(self.macLinkFile)])
+            self.log.writeToLog(self.errorCodes['0465'], [fName(self.macLinkFile)])
         else :
             for f in dep :
                 if isOlder(self.macLinkFile, f) :
                     makeLinkFile = True
-                    self.project.log.writeToLog(self.errorCodes['0460'], [fName(f),fName(self.macLinkFile)])
+                    self.log.writeToLog(self.errorCodes['0460'], [fName(f),fName(self.macLinkFile)])
 
         if makeLinkFile :
             with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
@@ -618,7 +618,7 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            self.project.log.writeToLog(self.errorCodes['0440'], [fName(self.setTexFile)])
+            self.log.writeToLog(self.errorCodes['0440'], [fName(self.setTexFile)])
             return True
 
 
@@ -636,7 +636,7 @@ class Xetex (Manager) :
                 # Create a blank file
                 with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
                     writeObject.write(makeFileHeader(fName(self.grpExtTexFile), description, False))
-                self.project.log.writeToLog(self.errorCodes['0440'], [fName(self.grpExtTexFile)])
+                self.log.writeToLog(self.errorCodes['0440'], [fName(self.grpExtTexFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -661,7 +661,7 @@ class Xetex (Manager) :
                 # Create a blank file
                 with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
                     writeObject.write(makeFileHeader(fName(self.extTexFileName), description, False))
-                self.project.log.writeToLog(self.errorCodes['0440'], [fName(self.extTexFile)])
+                self.log.writeToLog(self.errorCodes['0440'], [fName(self.extTexFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -725,18 +725,18 @@ class Xetex (Manager) :
             # The TeX group hyphen exceptions file
             if not os.path.isfile(self.grpHyphExcTexFile) or isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
                 if self.makeGrpHyphExcTexFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog('XTEX-130', [fName(self.grpHyphExcTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog('XTEX-170', [fName(self.grpHyphExcTexFile)])
                     return False
             # The TeX lccode file
             if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
                 if self.makeLccodeTexFile() :
-                    self.project.log.writeToLog('XTEX-130', [fName(self.lccodeTexFile)])
+                    self.log.writeToLog('XTEX-130', [fName(self.lccodeTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.project.log.writeToLog('XTEX-170', [fName(self.lccodeTexFile)])
+                    self.log.writeToLog('XTEX-170', [fName(self.lccodeTexFile)])
                     return False
             return True
         else :
@@ -826,12 +826,11 @@ class Xetex (Manager) :
 
             # Analyse the return code
             if rCode == int(0) :
-                self.project.log.writeToLog(self.errorCodes['0625'], [fName(self.gidTexFile)])
+                self.log.writeToLog(self.errorCodes['0625'], [fName(self.gidTexFile)])
             elif rCode in self.xetexErrorCodes :
-                self.project.log.writeToLog(self.errorCodes['0630'], [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
+                self.log.writeToLog(self.errorCodes['0630'], [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
             else :
-                self.project.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
-                dieNow()
+                self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
             # Add lines background for composition work
             if self.useLines :
@@ -840,11 +839,10 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog(self.errorCodes['0665'])
+                    self.log.writeToLog(self.errorCodes['0665'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog(self.errorCodes['0660'], [str(e)])
-                    dieNow()
+                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Add a watermark if required
             if self.useWatermark :
@@ -853,11 +851,10 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog(self.errorCodes['0645'])
+                    self.log.writeToLog(self.errorCodes['0645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog(self.errorCodes['0640'], [str(e)])
-                    dieNow()
+                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Add a box around the page (for proof reading)
             if self.useBoxBoarder :
@@ -866,11 +863,10 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
                     os.remove(tempName(self.gidPdfFile))
-                    self.project.log.writeToLog(self.errorCodes['0645'])
+                    self.log.writeToLog(self.errorCodes['0645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.project.log.writeToLog(self.errorCodes['0640'], [str(e)])
-                    dieNow()
+                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Process alternate name if needed
             if PdfSubName :
@@ -879,14 +875,14 @@ class Xetex (Manager) :
                 self.gidPdfFile = PdfSubName
 
         else :
-            self.project.log.writeToLog(self.errorCodes['0690'], [fName(self.gidPdfFile)])
+            self.log.writeToLog(self.errorCodes['0690'], [fName(self.gidPdfFile)])
 
         # Review the results if desired
         if os.path.isfile(self.gidPdfFile) :
             if self.displayPdfOutput() :
-                self.project.log.writeToLog(self.errorCodes['0695'], [fName(self.gidPdfFile)])
+                self.log.writeToLog(self.errorCodes['0695'], [fName(self.gidPdfFile)])
             else :
-                self.project.log.writeToLog(self.errorCodes['0600'], [fName(self.gidPdfFile)])
+                self.log.writeToLog(self.errorCodes['0600'], [fName(self.gidPdfFile)])
 
 
 
