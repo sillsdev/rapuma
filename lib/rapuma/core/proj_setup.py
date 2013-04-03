@@ -16,12 +16,12 @@
 # this process
 
 import codecs, os, unicodedata, subprocess
-from configobj import ConfigObj
-from importlib import import_module
-from functools import partial
+from configobj                  import ConfigObj
+from importlib                  import import_module
+from functools                  import partial
 
 import palaso.sfm as sfm
-from palaso.sfm import usfm, style, element, text
+from palaso.sfm                 import usfm, style, element, text
 
 # Load the local classes
 from rapuma.core.tools          import *
@@ -106,6 +106,22 @@ class ProjSetup (object) :
             'PROC-130' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
             'PROC-140' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
 
+            'STYL-000' : ['MSG', 'Style module messages'],
+            'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],
+            'STYL-007' : ['ERR', 'The [<<1>>] component type source text editor [<<2>>] is not supported by the style manager.'],
+            'STYL-010' : ['MSG', 'The style file [<<1>>] was set as the [<<2>>] style file for the [<<3>>] component type.'],
+            'STYL-020' : ['ERR', 'Style file: [<<1>>] was not found. Operation failed.'],
+            'STYL-030' : ['WRN', 'Style file: [<<1>>] already exsits. Use (-f) force to replace it.'],
+            'STYL-060' : ['LOG', 'The file [<<1>>] was validated and copied to the project styles folder.'],
+            'STYL-065' : ['LOG', 'The file [<<1>>] was copied to the project styles folder.'],
+            'STYL-070' : ['ERR', 'Style file: [<<1>>] is not valid. Copy operation failed!'],
+            'STYL-075' : ['LOG', 'Style file: [<<1>>] is not valid. Will attempt to find a valid one from another source.'],
+            'STYL-090' : ['LOG', 'Style file: [<<1>>] was not found.'],
+            'STYL-100' : ['LOG', 'No style file setting was found for the [<<1>>] component type. Nothing has been done.'],
+            'STYL-110' : ['MSG', 'Force switch was set (-f). Style file: [<<1>>] was removed from the project and references removed from the [<<2>>] settings.'],
+            'STYL-120' : ['MSG', 'Style file: [<<1>>] was removed from the [<<2>>] settings.'],
+            'STYL-150' : ['MSG', 'Style file: [<<1>>] is valid.'],
+            'STYL-155' : ['ERR', 'Style file: [<<1>>] did NOT pass the validation test.'],
 
 
 
@@ -154,6 +170,9 @@ class ProjSetup (object) :
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
             '1160' : ['WRN', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
             '1165' : ['LOG', 'Component preprocessing script is already installed.'],
+
+            '2020' : ['LOG', 'Default style file already exists in the project. Will not replace with a new copy.'],
+            '2040' : ['LOG', 'Created: [<<1>>]'],
 
         }
 
@@ -296,10 +315,14 @@ class ProjSetup (object) :
         if cType == 'usfm' :
             aProject.managers['usfm_Text'].updateManagerSettings(gid)
 
+        # In case all the vars are not set
         self.finishInit()
 
-        self.installGroupComps(gid, cidList, force)
+        # Add the default style sheet now so components can be installed
+        self.makeDefaultStyFile(gid)
 
+        # Install the components
+        self.installGroupComps(gid, cidList, force)
 
 
     def removeGroup (self, gid, force = False) :
@@ -707,17 +730,8 @@ class ProjSetup (object) :
 
 
 
-
-
-
-
-
-
-
-        # FIXME: This will break first time the style file is not 
-        # where we need it to be. Need to find a low-cost way to get it there
-        defaultStyFile  = os.path.join(self.local.projStylesFolder, 'usfm.sty')
-
+# FIXME: Should add a number of default system file names to the local settings so these names
+# are fixed and easily accessable.
 
 
 
@@ -797,7 +811,7 @@ class ProjSetup (object) :
 
             # To be sure nothing happens, copy from our project source
             # backup file. (Is self.style.defaultStyFile the best thing?)
-            if self.usfmCopy(targetSource, target, defaultStyFile) :
+            if self.usfmCopy(targetSource, target) :
                 # Run any working text preprocesses on the new component text
                 if usePreprocessScript :
                     if not os.path.isfile(grpPreprocessFile) :
@@ -831,7 +845,7 @@ class ProjSetup (object) :
             return True
 
 
-    def usfmCopy (self, source, target, projSty = None) :
+    def usfmCopy (self, source, target) :
         '''Copy USFM text from source to target. Decode if necessary, then
         normalize. With the text in place, validate unless that is False.'''
 
@@ -859,7 +873,7 @@ class ProjSetup (object) :
 
         # Validate the target USFM text (Defalt is True)
         if validateUsfm :
-            if not self.usfmTextFileIsValid(target, projSty) :
+            if not self.usfmTextFileIsValid(target) :
                 self.log.writeToLog(self.errorCodes['1090'], [source,fName(target)])
                 return False
         else :
@@ -868,7 +882,7 @@ class ProjSetup (object) :
         return True
 
 
-    def usfmTextFileIsValid (self, source, projSty) :
+    def usfmTextFileIsValid (self, source) :
         '''Use the USFM parser to validate a style file. For now,
         if a file fails, we'll just quite right away, otherwise,
 
@@ -884,12 +898,13 @@ class ProjSetup (object) :
         # For future reference, the sfm parser will fail if TeX style
         # comment markers "%" are used to comment text rather than "#".
 
+        defaultStyFile      = os.path.join(self.local.projStylesFolder, 'usfm.sty')
+
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()
-            if projSty :
-                stylesheet_extra = style.parse(open(os.path.expanduser(projSty),'r'))
-                stylesheet.update(stylesheet_extra)
+            stylesheet_extra = style.parse(open(os.path.expanduser(defaultStyFile),'r'))
+            stylesheet.update(stylesheet_extra)
             doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Structure)
             # With the doc text loaded up, we run a list across it
             # so the parser will either pass or fail
@@ -1059,5 +1074,121 @@ class ProjSetup (object) :
 
         return True
 
+
+###############################################################################
+############################ Style Setup Functions ############################
+###############################################################################
+####################### Error Code Block Series = 2000 ########################
+###############################################################################
+
+
+    def makeDefaultStyFile (self, gid) :
+        '''Create or copy in a default global style file for the current component type.
+        And while we are at it, make it read-only. But do not do it if one is already there.'''
+
+        # Set file names
+        cType                   = self.projConfig['Groups'][gid]['cType']
+        defaultStyFileName      = self.projConfig['Managers'][cType + '_Style']['defaultStyFile']
+        defaultStyFile          = os.path.join(self.local.projStylesFolder, defaultStyFileName)
+        rapumaCmpStyFile        = os.path.join(self.local.rapumaStylesFolder, defaultStyFileName)
+
+        if not os.path.exists(defaultStyFile) :
+            if os.path.exists(rapumaCmpStyFile) :
+                # No news is good news
+                if not shutil.copy(rapumaCmpStyFile, defaultStyFile) :
+                    makeReadOnly(defaultStyFile)
+                    self.log.writeToLog(self.errorCodes['2040'], [fName(defaultStyFile)])
+                    return True
+                else :
+                    return False
+        else :
+            self.log.writeToLog(self.errorCodes['2020'])
+            return True
+
+
+    def makeDefaultExtStyFile (self, gid) :
+        '''Create/copy a component Style extentions file to the project for specified group.'''
+
+        description = 'This is the component extention style file which overrides settings in \
+        the main default component style settings file.'
+
+        cType                   = self.projConfig['Groups'][gid]['cType']
+        defaultExtStyFileName   = self.projConfig['Managers'][cType + '_Style']['defaultExtStyFile']
+        defaultExtStyFile       = os.path.join(self.local.projStylesFolder, defaultExtStyFileName)
+        usrDefaultExtStyFile    = os.path.join(self.userConfig['Resources']['styles'], defaultExtStyFileName)
+
+        # First look for a user file, if not, then make a blank one
+        if not os.path.isfile(defaultExtStyFile) :
+            if os.path.isfile(usrDefaultExtStyFile) :
+                shutil.copy(usrDefaultExtStyFile, defaultExtStyFile)
+            else :
+                # Create a blank file
+                with codecs.open(defaultExtStyFile, "w", encoding='utf_8') as writeObject :
+                    writeObject.write(makeFileHeader(fName(defaultExtStyFile), description, False))
+                self.log.writeToLog(self.errorCodes['2040'], [fName(defaultExtStyFile)])
+
+        # Need to return true here even if nothing was done
+        return True
+
+
+    def makeGrpExtStyFile (self, gid) :
+        '''Create a group Style extentions file to a specified group.'''
+
+        description = 'This is the group style extention file which overrides settings in \
+        the main default component extentions settings style file.'
+
+        cType                   = self.projConfig['Groups'][gid]['cType']
+        grpExtStyFileName       = self.projConfig['Managers'][cType + '_Style']['grpExtStyFile']
+        grpExtStyFile           = os.path.join(self.local.projComponentsFolder, gid, grpExtStyFileName)
+
+        # Create a blank file (only if there is none)
+        if not os.path.exists(grpExtStyFile) :
+            with codecs.open(grpExtStyFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(makeFileHeader(fName(grpExtStyFile), description, False))
+            self.log.writeToLog(self.errorCodes['2040'], [fName(grpExtStyFile)])
+
+        # Need to return true here even if nothing was done
+        return True
+
+
+    def removeStyleFile (self, gid, sType, force = False) :
+        '''Direct a request to remove a style file from a project.'''
+        
+        cType = self.projConfig['Groups'][gid]['cType']
+        if cType == 'usfm' :
+            self.removeUsfmStyFile(sType, force)
+        else :
+            self.project.log.writeToLog('STYL-005', [cType])
+            dieNow()
+
+
+    def recordStyleFile (self, gid, fileName, sType) :
+        '''Record in the project conf file the style file being used.'''
+
+        cType = self.projConfig['Groups'][gid]['cType']
+        self.project.projConfig['Managers'][cType + '_Style'][sType + 'StyleFile'] = fName(fileName)
+        writeConfFile(self.project.projConfig)
+        self.project.log.writeToLog('STYL-010', [fName(fileName),sType,cType])
+        return True
+
+
+    def testStyleFile (self, path) :
+        '''This is a basic validity test of a style file. If it
+        does not validate the errors will be reported in the
+        terminal for the user to examine.'''
+
+        if self.cType == 'usfm' :
+            if self.usfmStyleFileIsValid(path) :
+                self.project.log.writeToLog('STYL-150', [path])
+                return True
+            else :
+                stylesheet_extra = ''
+                stylesheet = usfm.default_stylesheet.copy()
+                stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Unrecoverable)
+                self.project.log.writeToLog('STYL-155', [path])
+                return False
+        else :
+            self.project.log.writeToLog('STYL-005', [self.cType])
+            dieNow()
 
 

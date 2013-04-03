@@ -47,5 +47,33 @@ Todo:
             <type>string</type>
             <value>pdftk</value>
         </setting>
+    <setting>
+        <name>TeX Macro Link File</name>
+        <key>macLinkTexFile</key>
+        <description>The name of the TeX macro link file.</description>
+        <type>string</type>
+        <value>macLink.tex</value>
+    </setting>
+    <setting>
+        <name>Default TeX Macro Settings File</name>
+        <key>defaultSetTexFile</key>
+        <description>The name of the default TeX macro settings file.</description>
+        <type>string</type>
+        <value>settings.tex</value>
+    </setting>
+    <setting>
+        <name>Default TeX Macro Extensions File</name>
+        <key>defaultExtTexFile</key>
+        <description>The name of the override TeX macro settings file.</description>
+        <type>string</type>
+        <value>extentions.tex</value>
+    </setting>
+    <setting>
+        <name>Group TeX Macro Extensions File</name>
+        <key>grpExtTexFile</key>
+        <description>The name of the group TeX macro extentions settings file.</description>
+        <type>string</type>
+        <value>grp-extentions.tex</value>
+    </setting>
 </root>
 

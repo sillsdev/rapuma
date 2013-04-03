@@ -205,19 +205,9 @@ class Project (object) :
 
         # Do a basic test for exsistance
         if isConfSection(self.projConfig['Groups'], gid) :
-            # Check for cidList, use std group if it isn't there
-            if cidList :
-                if isinstance(cidList, str) :
-                    cidList = cidList.split()
-            else :
-                cidList = self.projConfig['Groups'][gid]['cidList']
 
-            # Make a dictionary of the rendering params for this run
-            # We do this to both protect the params and perhaps expand
-            # them in the future
-            renderParams = {'cidList' : cidList, 'force' : force}
-            # Now create the group and pass the param on
-            self.createGroup(gid).render(renderParams)
+            # Now create the group and pass the params on
+            self.createGroup(gid).render(cidList, force)
             return True
 
 

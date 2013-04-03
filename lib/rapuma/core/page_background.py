@@ -56,9 +56,11 @@ class PageBackground (object) :
         self.finishInit()
         # Log messages for this module
         self.errorCodes     = {
-            '000' : ['MSG', 'Placeholder message'],
-            '220' : ['MSG', 'Set [<<1>>] background to True.'],
-            '230' : ['MSG', 'Set [<<1>>] background to False.'],
+            '0000' : ['MSG', 'Placeholder message'],
+            '0220' : ['MSG', 'Set [<<1>>] background to True.'],
+            '0230' : ['MSG', 'Set [<<1>>] background to False.'],
+            '0280' : ['LOG', 'Installed background file [<<1>>] into the project.'],
+            '0290' : ['ERR', 'Failed to install background file [<<1>>]. It ended with this error: [<<2>>]'],
         }
 
 
@@ -102,7 +104,7 @@ class PageBackground (object) :
 ###############################################################################
 ############################## Compare Functions ##############################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
     def addBackground (self, bType) :
@@ -125,7 +127,7 @@ class PageBackground (object) :
 
         if change :
             if writeConfFile(self.layoutConfig) :
-                self.log.writeToLog(self.errorCodes['220'], [bType])
+                self.log.writeToLog(self.errorCodes['0220'], [bType])
 
 
     def removeBackground (self, bType) :
@@ -146,7 +148,7 @@ class PageBackground (object) :
 
         if change :
             if writeConfFile(self.layoutConfig) :
-                self.log.writeToLog(self.errorCodes['230'], [bType])
+                self.log.writeToLog(self.errorCodes['0230'], [bType])
 
 
     def changeWatermarkFile (self) :
@@ -163,10 +165,10 @@ class PageBackground (object) :
         if not os.path.exists(self.projWatermarkFile) :
             try :
                 shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.projWatermarkFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [fName(self.projWatermarkFile)])
             except Exception as e :
                 # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install default watermark background file with this error: ' + str(e) + '\n')
+                self.log.writeToLog(self.errorCodes['0290'], [fName(self.projWatermarkFile),str(e)])
 
 
     def installLinesFile (self) :
@@ -175,11 +177,10 @@ class PageBackground (object) :
         if not os.path.exists(self.projLinesFile) :
             try :
                 shutil.copy(self.rpmDefLinesFile, self.projLinesFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.projLinesFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [fName(self.projLinesFile)])
             except Exception as e :
-
                 # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
+                self.log.writeToLog(self.errorCodes['0290'], [fName(self.projLinesFile),str(e)])
 
 
     def installBoxBoarderFile (self) :
@@ -188,11 +189,10 @@ class PageBackground (object) :
         if not os.path.exists(self.boxBoarderFile) :
             try :
                 shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
-                self.project.log.writeToLog('ILUS-080', [fName(self.boxBoarderFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [fName(self.boxBoarderFile)])
             except Exception as e :
-
                 # If this doesn't work, we should probably quite here
-                dieNow('Error: Failed to install lines background file with this error: ' + str(e) + '\n')
+                self.log.writeToLog(self.errorCodes['0290'], [fName(self.boxBoarderFile),str(e)])
 
 
 

@@ -21,8 +21,9 @@ from configobj import ConfigObj, Section
 #from functools import partial
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.group.group import Group
+from rapuma.core.tools              import *
+from rapuma.core.page_background    import PageBackground
+from rapuma.group.group             import Group
 
 
 ###############################################################################
@@ -45,6 +46,7 @@ class Usfm (Group) :
         super(Usfm, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.pg_background          = PageBackground(project.projectIDCode)
         self.project                = project
         self.projConfig             = project.projConfig
         self.local                  = project.local
@@ -103,18 +105,15 @@ class Usfm (Group) :
 
             self.font.installFont(font)
 
-        # Connect to the PT tools class
-#        self.pt_tools = PT_Tools(self.project)
-
         # Module Error Codes
         self.errorCodes     = {
 
-            '055' : ['LOG', 'Did not update project file: [<<1>>]'],
-
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
 
-
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
+
+            '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
+
         }
 
         # Pick up some init settings that come after the managers have been installed
@@ -132,7 +131,7 @@ class Usfm (Group) :
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
     def getCidPath (self, cid) :
@@ -156,23 +155,28 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
 
 
-    def render(self, renderParams) :
+    def render(self, cidList, force) :
         '''Does USFM specific rendering of a USFM component'''
 
 #        import pdb; pdb.set_trace()
 
+        # If the whole group is being rendered, we need to preprocess it
+        cids = []
+        if not cidList :
+            cids = self.projConfig['Groups'][self.gid]['cidList']
+        else :
+            cids = cidList
+
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
-        for cid in renderParams['cidList'] :
+        for cid in cids :
             if not self.preProcessGroup() :
                 return False
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
-        # One problem we try to get around here is that some group params are not
-        # in the manager object. We get around that by passing the group object (self)
-        # to the renderer run() command. This may not be the best way to do this.
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(renderParams)
+        # Note: We pass the cidList straight through
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(cidList, force)
 
         return True
 
@@ -204,6 +208,7 @@ class Usfm (Group) :
         # to the project yet, we will do that now
         self.style.checkDefaultStyFile()
         self.style.checkDefaultExtStyFile()
+        self.style.checkGrpExtStyFile()
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
@@ -257,16 +262,16 @@ class Usfm (Group) :
         # Be sure there is a watermark file listed in the conf and
         # installed if watermark is turned on (True). Fallback on the
         # the default if needed.
-#        if useWatermark :
-#            self.illustration.installDefaultWatermarkFile()
+        if useWatermark :
+            self.pg_background.installDefaultWatermarkFile()
 
         # Same for lines background file used for composition
-#        if useLines :
-#            self.illustration.installLinesFile()
+        if useLines :
+            self.pg_background.installLinesFile()
 
         # Same for box background file used for composition
-#        if useBoxBoarder :
-#            self.illustration.installBoxBoarderFile()
+        if useBoxBoarder :
+            self.pg_background.installBoxBoarderFile()
 
         # Any more stuff to run?
 
@@ -317,7 +322,7 @@ class Usfm (Group) :
                                 adj = '+' + str(v)
                             writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
 
-                        self.log.writeToLog('COMP-230', [fName(adjFile)])
+                        self.log.writeToLog(self.errorCodes['0230'], [fName(adjFile)])
             return True
 
 

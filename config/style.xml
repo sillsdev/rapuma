@@ -13,18 +13,25 @@ Todo:
 
 <root>
     <setting>
-        <name>Main Style File</name>
-        <key>mainStyleFile</key>
-        <description>The main style file for this project.</description>
+        <name>Default Style File</name>
+        <key>defaultStyFile</key>
+        <description>The name of the default style file.</description>
         <type>string</type>
-        <value></value>
+        <value>usfm.sty</value>
     </setting>
     <setting>
-        <name>Custom Style File</name>
-        <key>customStyleFile</key>
-        <description>The custom style file, if needed, for this project.</description>
+        <name>Default Style Extensions File</name>
+        <key>defaultExtStyFile</key>
+        <description>The name of the override style file.</description>
         <type>string</type>
-        <value></value>
+        <value>usfm-ext.sty</value>
+    </setting>
+    <setting>
+        <name>Group Style Extensions File</name>
+        <key>grpExtStyFile</key>
+        <description>The name of the group override style file.</description>
+        <type>string</type>
+        <value>usfm-grp-ext.sty</value>
     </setting>
 </root>
 

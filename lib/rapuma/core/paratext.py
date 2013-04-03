@@ -764,4 +764,139 @@ class Paratext (object) :
             return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
+###############################################################################
+########################### ParaTExt Style Functions ##########################
+###############################################################################
+####################### Error Code Block Series = 0800 ########################
+###############################################################################
+
+
+    def usfmStyleFileIsValid (self, path) :
+        '''Use the USFM parser to validate a style file. This is meant to
+        be just a simple test so only return True or False.'''
+
+        try :
+            stylesheet = usfm.default_stylesheet.copy()
+            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
+            return True
+        except Exception as e :
+            return False
+
+
+    def removeUsfmStyFile (self, sType, force) :
+        '''This would be useful for a style reset. Remove a style setting
+        from the config for a component type and if force is used, remove
+        the file from the project as well.'''
+
+        sType = sType.lower()
+
+        # Make sure there is something to do
+        if sType == 'main' :
+            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
+        elif sType == 'custom' :
+            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
+
+        if not oldStyle :
+            self.project.log.writeToLog('STYL-100', [self.cType])
+            return
+        else :
+            if sType == 'main' :
+                self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] = ''
+                self.mainStyleFile = ''
+            elif sType == 'custom' :
+                self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
+                self.customStyleFile = ''
+
+            writeConfFile(self.project.projConfig)
+
+            if force :
+                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
+                if os.path.isfile(target) :
+                    os.remove(target)
+
+                self.project.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
+            else :
+                self.project.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
+
+            return True
+
+
+    def addExsitingUsfmStyFile (self, sFile, sType, force) :
+        '''Add a specific style file that is on the local system.'''
+
+        sFile = resolvePath(sFile)
+        target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
+
+        if not force and os.path.isfile(target) :
+            self.project.log.writeToLog('STYL-030', [fName(sFile)])
+            return False
+        elif os.path.isfile(sFile) :
+            # It's there? Good, we're done!
+            # If this is not an Rapuma custom style file we will validate it
+            if sType.lower() == 'main' :
+                if self.usfmStyleFileIsValid(sFile) :
+                    shutil.copy(sFile, target)
+                    self.project.log.writeToLog('STYL-060', [fName(sFile)])
+                    return True
+                else :
+                    # We die if it does not validate
+                    self.project.log.writeToLog('STYL-070', [fName(sFile)])
+                    dieNow()
+            else :
+                # Assuming a custom style file we can grab most anything
+                # without validating it
+                shutil.copy(sFile, target)
+                self.project.log.writeToLog('STYL-065', [fName(sFile)])
+                return True
+        else :
+            # Not finding the file may not be the end of the world 
+            self.project.log.writeToLog('STYL-020', [fName(sFile)])
+            return False
+
+
+    def addPtUsfmStyFile (self) :
+        '''Install a PT project style file. Merg in any custom
+        project styles too.'''
+
+        # First pick up our PT settings
+        ptConf = self.pt_tools.getPTSettings(self.gid)
+        if not ptConf :
+            return False
+
+        # If nothing is set, give it a default to start off
+        if not self.mainStyleFile :
+            self.mainStyleFile = 'usfm.sty'
+        # Now, override default styleFile name if we found something in the PT conf
+        if ptConf['ScriptureText']['StyleSheet'] :
+            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+
+
+        # Set the target destination
+        target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+        # As this is call is for a PT based project, it is certain the style
+        # file should be found in the source or parent folder. If that
+        # exact file is not found in either place, a substitute will be
+        # copied in from Rapuma and given the designated name.
+        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
+        parent                  = os.path.dirname(self.sourcePath)
+        # If there is a "gather" folder, assume the style file is there
+        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
+            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
+        else :
+            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
+        ptStyle                     = os.path.join(parent, self.mainStyleFile)
+        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
+        # We will start by searching in order from the inside out and stop
+        # as soon as we find one.
+        for sFile in searchOrder :
+            if os.path.isfile(sFile) :
+                if self.usfmStyleFileIsValid(sFile) :
+                    if not shutil.copy(sFile, target) :
+                        return fName(target)
+                else :
+                    self.project.log.writeToLog('STYL-075', [sFile,self.cType])
+            else : 
+                self.project.log.writeToLog('STYL-090', [sFile])
+
+
 
