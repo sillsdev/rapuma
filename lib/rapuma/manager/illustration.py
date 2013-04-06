@@ -45,6 +45,7 @@ class Illustration (Manager) :
         self.Ctype                      = cType.capitalize()
         self.manager                    = self.cType + '_Illustration'
         self.managers                   = project.managers
+        self.log                        = project.log
         self.backgroundTypes            = ['watermark', 'lines']
         # Bring in some manager objects we will need
         self.layout                     = self.managers[self.cType + '_Layout']
@@ -84,15 +85,16 @@ class Illustration (Manager) :
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
+            '0240' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
+            '0220' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
+            '0230' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
+            '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
-            'ILUS-020' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
-            'ILUS-030' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
-            'ILUS-040' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
             'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
             'ILUS-055' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] component folder.'],
             'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
-            'ILUS-065' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
             'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustrations folder. Will try to revert to default watermark.'],
             'ILUS-080' : ['LOG', 'Installed watermark file [<<1>>] into the project.'],
             'ILUS-090' : ['LOG', 'Changed watermark config file name to [<<1>>].'],
@@ -100,7 +102,9 @@ class Illustration (Manager) :
         }
 
 ###############################################################################
-############################ Manager Level Functions ##########################
+############################ Illustration Functions ###########################
+###############################################################################
+######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
 
@@ -118,38 +122,37 @@ class Illustration (Manager) :
         places = []
         if path :
             places.append(os.path.join(path, fileName))
-        places.append(os.path.join(self.userIllustrationsLib, fileName))
+        places.append(os.path.join(resolvePath(self.userIllustrationsLib), fileName))
         target = os.path.join(self.projIllustrationsFolder, fileName)
         # See if the file is there or not
         for p in places :
             if os.path.isfile(p) :
                 if force :
                     if not shutil.copy(p, target) :
-                        self.project.log.writeToLog('ILUS-020', [fName(p),'True'])
+                        self.log.writeToLog(self.errorCodes['0220'], [fName(p),'True'])
                         return True
                 else :
                     if not os.path.isfile(target) :
                         if not shutil.copy(p, target) :
-                            self.project.log.writeToLog('ILUS-020', [fName(p),'False'])
+                            self.log.writeToLog(self.errorCodes['0220'], [fName(p),'False'])
                             return True
                     else :
-                        self.project.log.writeToLog('ILUS-030', [fName(p)])
+                        self.log.writeToLog(self.errorCodes['0230'], [fName(p)])
                         return True
 
         # No joy, we're hosed
-        self.project.log.writeToLog('ILUS-040', [fName(p)])
-        dieNow()
+        self.log.writeToLog(self.errorCodes['0240'], [fName(p)])
 
 
-    def getPics (self, cid) :
+    def getPics (self, gid, cid) :
         '''Figure out what pics/illustrations we need for a given
         component and install them. It is assumed that this was 
         called because the user wants illustrations. Therefore, 
         this will kill the current session if it fails.'''
 
-        for i in self.illustrationConfig['Illustrations'].keys() :
-            if self.illustrationConfig['Illustrations'][i]['bid'] == cid :
-                fileName = self.illustrationConfig['Illustrations'][i]['fileName']
+        for i in self.illustrationConfig[gid].keys() :
+            if self.illustrationConfig[gid][i]['bid'] == cid :
+                fileName = self.illustrationConfig[gid][i]['fileName']
                 if not os.path.isfile(os.path.join(self.projIllustrationsFolder, fileName)) :
                     self.installIllustrationFile (fileName, '', False)
 
@@ -161,7 +164,7 @@ class Illustration (Manager) :
         projIll = os.path.join(self.projIllustrationsFolder, fileName)
         if os.path.isfile(projIll) :
             os.remove(projIll)
-            self.project.log.writeToLog('ILUS-050', [fileName])
+            self.log.writeToLog('ILUS-050', [fileName])
 
         # Check to see if this is a watermark file, if it is, remove config setting
         if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
@@ -171,22 +174,21 @@ class Illustration (Manager) :
                 writeConfFile(self.projConfig)
 
 
-    def hasIllustrations (self, cName) :
+    def hasIllustrations (self, gid, bid) :
         '''Return True if this component as any illustrations associated with it.'''
 
-        thisBid = self.project.components[cName].getUsfmCid(cName)
-        for i in self.illustrationConfig['Illustrations'].keys() :
-            if self.illustrationConfig['Illustrations'][i]['bid'] == thisBid :
+        for i in self.illustrationConfig[gid].keys() :
+            if self.illustrationConfig[gid][i]['bid'] == bid :
                 return True
 
 
-    def createPiclistFile (self, cName, cid) :
+    def createPiclistFile (self, gid, cid) :
         '''Look in the cid for \fig data. Extract it from the cid and
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
         # Check for a .piclist file
-        piclistFile = self.project.components[cName].getCidPiclistPath(cid)
+        piclistFile = self.project.groups[gid].getCidPiclistPath(cid)
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         obj = {}
@@ -195,23 +197,23 @@ class Illustration (Manager) :
             with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
                 writeObject.write('% Do not bother editing this file.\n\n')
-                for i in self.illustrationConfig['Illustrations'].keys() :
-                    obj = self.illustrationConfig['Illustrations'][i]
+                for i in self.illustrationConfig[gid].keys() :
+                    obj = self.illustrationConfig[gid][i]
                     thisRef = ''
                     # Filter out if needed with this
                     if not str2bool(obj['useThisIllustration']) :
                         continue
                     # Is a caption going to be used on this illustration?
                     caption = ''
-                    if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
+                    if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
                         if str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
-                            and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaption']) :
+                            and str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
                             if obj['caption'] :
                                 caption = obj['caption']
                     # Work out if we want a caption reference or not for this illustration
-                    if self.illustrationConfig['Illustrations'][i]['bid'] == cid.lower() :
+                    if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
                         if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
-                            and str2bool(self.illustrationConfig['Illustrations'][i]['useThisCaptionRef']) :
+                            and str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
                             if obj['location'] :
                                 thisRef = obj['location']
                             else :
@@ -221,7 +223,7 @@ class Illustration (Manager) :
                             ' |' + obj['fileName'] + '|' + obj['width'] + '|' + obj['position'] + \
                                 '|' + obj['scale'] + '|' + obj['copyright'] + '|' + caption + '|' + thisRef + ' \n')
             # Report to log
-            self.project.log.writeToLog('ILUS-065', [cid])
+            self.log.writeToLog(self.errorCodes['0265'], [cid])
             return True
         except Exception as e :
             # If this doesn't work, we should probably quite here

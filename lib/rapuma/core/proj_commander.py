@@ -158,7 +158,7 @@ class Commander (object) :
                 'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
                 'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
                 'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
-                'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -s '], 
+                'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -c '], 
                 'watermarkOff'  : ['Turn off watermark background.',                    'rapuma background ' + pid + ' watermark -r'], 
                 'watermarkOn'   : ['Turn on watermark background.',                     'rapuma background ' + pid + ' watermark -a']
             }

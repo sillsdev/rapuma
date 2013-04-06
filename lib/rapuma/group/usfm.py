@@ -114,9 +114,6 @@ class Usfm (Group) :
             'USFM-025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
             'USFM-030' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - usfm.pt_tools.checkForBadWords()'],
             'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
-            'USFM-050' : ['LOG', 'Updated project file: [<<1>>]'],
-            'USFM-055' : ['LOG', 'Did not update project file: [<<1>>]'],
-            'USFM-060' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
             'USFM-070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
             'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
@@ -131,6 +128,8 @@ class Usfm (Group) :
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
+            '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
+            '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
         }
 
         # Pick up some init settings that come after the managers have been installed
@@ -203,8 +202,8 @@ class Usfm (Group) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        useIllustrations        = str2bool(self.cfg['useIllustrations'])
-        useHyphenation          = str2bool(self.cfg['useHyphenation'])
+        useIllustrations        = str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
+        useHyphenation          = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
         useWatermark            = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
         useLines                = str2bool(self.layoutConfig['PageLayout']['useLines'])
         usePageBorder           = str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
@@ -251,28 +250,28 @@ class Usfm (Group) :
                 # Component piclist file
                 cidPiclist = self.getCidPiclistPath(cid)
                 if useIllustrations :
-                    if self.illustration.hasIllustrations(cidCName) :
+                    if self.illustration.hasIllustrations(self.gid, cid) :
                         if not os.path.isfile(cidPiclist) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
-                            self.illustration.getPics(cid)
+                            self.illustration.getPics(self.gid, cid)
                             # Now make a fresh version of the piclist file
-                            self.illustration.createPiclistFile(cName, cid)
-                            self.log.writeToLog('ILUS-065', [cid])
+                            self.illustration.createPiclistFile(self.gid, cid)
+                            self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
                             for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
                                 if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
                                     # Remake the piclist file
-                                    self.illustration.createPiclistFile(cName, cid)
-                                    self.log.writeToLog('ILUS-065', [cid])
+                                    self.illustration.createPiclistFile(self.gid, cid)
+                                    self.log.writeToLog(self.errorCodes['0265'], [cid])
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
-                        self.illustration.getPics(cid)
+                        self.illustration.getPics(self.gid, cid)
                 else :
                     # If we are not using illustrations then any existing piclist file will be removed
                     if os.path.isfile(cidPiclist) :
                         os.remove(cidPiclist)
-                        self.log.writeToLog('ILUS-055', [cName])
+                        self.log.writeToLog(self.errorCodes['0255'], [cid])
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
 
@@ -362,7 +361,7 @@ class Usfm (Group) :
 ###############################################################################
 ######################## USFM Component Text Functions ########################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 0400 #######################
 ###############################################################################
 
 

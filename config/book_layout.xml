@@ -746,13 +746,12 @@ Todo:
             <value>True</value>
         </setting>
         <setting>
-            <name>Use Illustrations</name>
-            <description>If set to true this will allow the system to put in place all the files necessary to have illustrations used in this publication. However, the original illustration files must be present in the user's illustration library and that library must be declared to the system. Please note that the system expects all installed illustration files to be only in the project's Illustration folder. Default = False</description>
-            <key>useIllustrations</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>layoutConfig:Illustrations:useIllustrations</boolDependTrue>
-            <usfmTex>\PicPath={[path:projIllustrationsFolder]/}</usfmTex>
+            <name>Path To Illustrations</name>
+            <description>This is the path to the project illustrations that TeX will use.</description>
+            <key>texPicPath</key>
+            <type>string</type>
+            <value>[path:projIllustrationsFolder]/</value>
+            <usfmTex>\PicPath={[v]}</usfmTex>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>

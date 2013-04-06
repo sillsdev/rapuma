@@ -1,9 +1,12 @@
 #!/bin/sh
 
-rapuma project ENG-LATN-JAS -r
+cp ~/Projects/rapuma/resources/examples/MBJAS.zip ~/Publishing/testArea
+unzip -o ~/Publishing/testArea/MBJAS.zip -d ~/Publishing/testArea
 
-rapuma project ENG-LATN-JAS -m book -n "The Book of James in English" -g ~/Publishing/testArea
+rpm project ENG-LATN-JAS -d
 
-rapuma group ENG-LATN-JAS james -c usfm -a -i jas -d mb -s ~/Publishing/testArea/MBJAS
+rpm project ENG-LATN-JAS -m book -n "The Book of James in English" -t ~/Publishing/testArea
 
-rapuma group ENG-LATN-JAS james -e
+rpm group ENG-LATN-JAS james -c usfm -a -i jas -d mb -s ~/Publishing/testArea/MBJAS
+
+rpm group ENG-LATN-JAS james -e

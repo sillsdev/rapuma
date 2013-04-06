@@ -172,36 +172,60 @@ def userArguments (args, local) :
     # Project level commands
     elif sys.argv[1].lower() == 'project' :
         pid = args.project_id
+        # Source path is optional but if given, resolve it
+        if args.sourcePath :
+            sourcePath = resolvePath(args.sourcePath)
+            if not os.path.exists(sourcePath) :
+                sys.exit('\nERROR: Path is not valid. Process halting.\n')
+        # Target path is optional also but if given, resolve it
+        if args.targetPath :
+            targetPath = resolvePath(args.targetPath)
+            if not os.path.exists(targetPath) :
+                sys.exit('\nERROR: Path is not valid. Process halting.\n')
+
         # Remove an exsisting project
-        if args.remove :
-            ProjSetup(args.project_id).deleteProject()
+        if args.delete :
+            ProjSetup(pid).deleteProject()
+            return True
+
         # Restore (or revert to) the last backup
-        elif args.revert :
-            if isProject(args.project_id) :
-                ProjBackup(args.project_id).restoreBackup()
+        if args.restore == 'backup' :
+            if isProject(pid) :
+                ProjBackup(pid).restoreBackup(pid)
             else :
                 if args.targetPath :
-                    if os.path.exists(resolvePath(args.targetPath)) :
-                        ProjBackup(args.project_id).restoreBackup(os.path.join(resolvePath(args.targetPath), args.project_id))
-                    else :
-                        sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                    ProjBackup(pid).restoreBackup(os.path.join(targetPath, pid))
                 else :
                     sys.exit('\nERROR: To restore this backup, a path must be provided with -g. Process halting.\n')
-        # Create/refresh helper scripts
-        elif args.scripts :
-            Commander(args.project_id).updateScripts()
         # Update (get rained on) from the cloud
-        elif args.cloud :
-            if isProject(args.project_id) :
-                ProjBackup(args.project_id).pullFromCloud()
+        elif args.restore == 'cloud' :
+            if isProject(pid) :
+                ProjBackup(pid).pullFromCloud()
             else :
                 if args.targetPath :
                     if os.path.exists(resolvePath(args.targetPath)) :
-                        ProjBackup(args.project_id).pullFromCloud(os.path.join(resolvePath(args.targetPath), args.project_id))
+                        ProjBackup(pid).pullFromCloud(os.path.join(resolvePath(args.targetPath), pid))
                     else :
                         sys.exit('\nERROR: Path is not valid. Process halting.\n')
                 else :
                     sys.exit('\nERROR: To get rain from this cloud, a path must be provided with -g. Process halting.\n')
+
+        # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
+        # Archive the project
+        elif args.preserve == 'archive' :
+            ProjBackup(pid).archiveProject()
+        # Backup the project (simple)
+        elif args.preserve == 'backup' :
+            ProjBackup(pid).backupProject()
+        # Create a template of the current project
+        elif args.preserve == 'template' :
+            if isTemplate(args.template) :
+                sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
+            ProjBackup(pid).projectToTemplate(args.template)
+        # Backup (evaporate) to cloud
+        elif args.preserve == 'cloud' :
+            ProjBackup(pid).pushToCloud()
+
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
@@ -209,25 +233,17 @@ def userArguments (args, local) :
                 # A path must be given
                 sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
             else :
-                # If a targetPath is given we need to resolve it
-                targetPath = resolvePath(args.targetPath)
-                if not os.path.isdir(targetPath) :
-                    sys.exit('\nERROR: Cannot resolve the given path [' + targetPath + ']. Process halting.\n')
-                else :
-                    projFolder = os.path.join(targetPath, pid)
-            # Source path is optional but if given, resolve it
-            if 'sourcePath' in args :
-                    sourcePath = resolvePath(args.sourcePath)
+                projFolder = os.path.join(targetPath, pid)
+
+            # New (to current system) project from archive
+            if args.restore == 'archive' :
+                ProjBackup(pid).restoreArchive(targetPath, sourcePath)
             # New project from template
-            if args.template :
-                tid = args.template
+            if args.restore == 'template' :
                 templateSource = ''
                 if sourcePath :
-                    templateSource = os.path.join(sourcePath, tid + '.zip')
-                ProjBackup(args.project_id).templateToProject(args.name, templateSource)
-            # New (to current system) project from archive
-            elif args.archive :
-                ProjBackup(args.project_id).restoreArchive(targetPath, sourcePath)
+                    templateSource = os.path.join(sourcePath, pid + '.zip')
+                ProjBackup(pid).templateToProject(args.name, templateSource)
             # Just creating from scratch
             else :
                 # Create a new project
@@ -235,8 +251,11 @@ def userArguments (args, local) :
                     sys.exit('\nERROR: Media type given: [' + args.media + '] is not valid. Process halting.\n')
                 if not args.name :
                     sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
-                nProjPath = os.path.join(targetPath, args.project_id)
-                ProjSetup(args.project_id).newProject(nProjPath, args.media, args.name, systemVersion, args.template)
+                nProjPath = os.path.join(targetPath, pid)
+                ProjSetup(pid).newProject(nProjPath, args.media, args.name, systemVersion, '')
+        # Create/refresh helper scripts
+        if args.scripts :
+            Commander(pid).updateScripts()
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -437,23 +456,6 @@ def userArguments (args, local) :
             # Bad command
             sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
-    # Commands to preserve project data. (Check PID and if necessary TID before passing it on)
-    elif sys.argv[1].lower() == 'preserve' :
-        # Archive the project
-        if args.preserve_type == 'archive' :
-            ProjBackup(args.project_id).archiveProject()
-        # Backup the project (simple)
-        elif args.preserve_type == 'backup' :
-            ProjBackup(args.project_id).backupProject()
-        # Create a template of the current project
-        elif args.preserve_type == 'template' :
-            if isTemplate(args.template) :
-                sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
-            ProjBackup(args.project_id).projectToTemplate(args.template)
-        # Backup (evaporate) to cloud
-        elif args.preserve_type == 'cloud' :
-            ProjBackup(args.project_id).pushToCloud()
-
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
         if args.add :
@@ -534,16 +536,14 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-projCommand.add_argument('-r', '--remove', action='store_true', help='Remove a project permanently from the system. This will do just what is says. Be careful!')
-projCommand.add_argument('-o', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
-projCommand.add_argument('-g', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
+projCommand.add_argument('-d', '--delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
+projCommand.add_argument('-p', '--preserve', choices=backupTypes, help='If creating a new project, give a human readable name to describe this project.')
+projCommand.add_argument('-r', '--restore', choices=backupTypes, help='This will restore a project from a backup or archive, Pull in data from a cloud backup. Or, create a new project from a template found in the Rapuma resouces folder.')
+projCommand.add_argument('-s', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+projCommand.add_argument('-t', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
 projCommand.add_argument('-m', '--media', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
-projCommand.add_argument('-s', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
-projCommand.add_argument('-t', '--template', help='Specify a template to base a new project on. If not specified, you must use -m to specify a media type.')
-projCommand.add_argument('-v', '--revert', action='store_true', help='This will revert the project to the last backup, if one exists. Project backups are found in the users Rapuma resouces folder.')
-projCommand.add_argument('-a', '--archive', action='store_true', help='Restore the given project ID from an archive. Archives are normally stored in the users Rapuma resouces folder. If the archive is not there, use -o (--sourcePath) to specify where the project archive file can be found.')
-projCommand.add_argument('-c', '--cloud', action='store_true', help='Pull from cloud storage to your local data. Any data in the cloud that is newer than your project data will overwrite files in your project. A backup will be made just before the actual pull operation begins. If the project is not found in your local data set, the cloud function will copy it to the default project location (unless --targetPath is specified) and make an entry for it in your system configuration.')
+projCommand.add_argument('-c', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 
 # Add group subprocess arguments
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
@@ -662,11 +662,6 @@ macroCommand.add_argument('-e', '--execute', action='store_true', help='Execute 
 macroCommand.add_argument('-c', '--command', help='Add a list (\'[rapuma 1, rapuma 2, etc.]\') of Rapuma commands to a macro file. This would be used along with the -a command.')
 macroCommand.add_argument('-p', '--path', help='If the macro you are adding already exsists, specify the path to it and include the name of the file. This would be used with the -a command and instead of -c command.')
 macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
-
-# Add Project preserve subprocess arguments
-preserveCommand = subparsers.add_parser('preserve', help='Commands for preserving project data projects and project data.')
-preserveCommand.add_argument('project_id', help=' A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-preserveCommand.add_argument('preserve_type', choices=backupTypes, help='The type of output desired. This can be an archive, backup, cloud, or template.')
 
 # Add Project preserve subprocess arguments
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')

@@ -281,23 +281,23 @@ class Project (object) :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
 
 
-    def installFile (self, source, path, force) :
-        '''Install a file into a project. Overwrite if force is set to True.'''
+#    def installFile (self, source, path, force) :
+#        '''Install a file into a project. Overwrite if force is set to True.'''
 
-        source = resolvePath(source)
-        target = os.path.join(resolvePath(path), fName(source))
-        if not os.path.isfile(source) :
-            self.log.writeToLog('PROJ-070', [source])
+#        source = resolvePath(source)
+#        target = os.path.join(resolvePath(path), fName(source))
+#        if not os.path.isfile(source) :
+#            self.log.writeToLog('PROJ-070', [source])
 
-        if os.path.isfile(target) :
-            if force :
-                if not shutil.copy(source, target) :
-                    self.log.writeToLog('PROJ-080', [source,target])
-            else :
-                self.log.writeToLog('PROJ-090', [source,target])
-        else :
-            if not shutil.copy(source, target) :
-                self.log.writeToLog('PROJ-080', [source,target])
+#        if os.path.isfile(target) :
+#            if force :
+#                if not shutil.copy(source, target) :
+#                    self.log.writeToLog('PROJ-080', [source,target])
+#            else :
+#                self.log.writeToLog('PROJ-090', [source,target])
+#        else :
+#            if not shutil.copy(source, target) :
+#                self.log.writeToLog('PROJ-080', [source,target])
 
 
 

@@ -26,6 +26,8 @@ import os, re, shutil, subprocess
 from rapuma.core.tools          import *
 from rapuma.project.manager     import Manager
 from rapuma.core.proj_config    import ConfigTools
+from rapuma.core.proj_compare   import Compare
+from rapuma.core.paratext       import Paratext
 
 
 ###############################################################################
@@ -53,6 +55,7 @@ class Hyphenation (Manager) :
         self.manager                = self.cType + '_Hyphenation'
         self.managers               = project.managers
         self.configTools            = ConfigTools(project)
+        self.paratext               = Paratext(project.projectIDCode)
         # Necessary config objects
         self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
@@ -60,7 +63,7 @@ class Hyphenation (Manager) :
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
-        self.preProcessFileName     = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        self.preProcessFileName     = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
         self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
         lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
         self.lccodeTexFileName      = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
@@ -78,7 +81,7 @@ class Hyphenation (Manager) :
         self.lccodeTexFile          = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
         self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
         self.grpHyphExcTexFile      = os.path.join(self.gidFolder, self.grpHyphExcTexFileName)
-        self.preProcessFile         = os.path.join(self.projScriptsFolder, self.cType + '_' + self.preProcessFileName)
+        self.preProcessFile         = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
         self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.preProcessFileName)
         self.ptHyphFile             = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
         self.ptHyphBakFile          = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
@@ -92,16 +95,17 @@ class Hyphenation (Manager) :
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
+            '0240' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
+            '0250' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
+            '0255' : ['MSG', 'Hyphenation is already on for component type: [<<1>>]'],
+            '0260' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
+            '0265' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
+            '0270' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
+
             'HYPH-000' : ['MSG', 'Hyphenation module messages'],
             'HYPH-010' : ['ERR', 'TeX hyphenation dependent file [<<1>>] is missing! This is a required file when hyphenation is turned on.'],
             'HYPH-020' : ['ERR', 'Unable to harvest words from ParaTExt project. This is required when hyphenation is turned on.'],
             'HYPH-030' : ['ERR', 'Unable to convert hyphated words from ParaTExt to formate needed for use with TeX. This is required when hyphenation is turned on.'],
-            'HYPH-040' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
-            'HYPH-050' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
-            'HYPH-055' : ['MSG', 'Hyphenation is already on for component type: [<<1>>]'],
-            'HYPH-060' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
-            'HYPH-065' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
-            'HYPH-070' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
             'HYPH-080' : ['ERR', 'New default hyphen preprocess script copied into the project. Please edit before using.'],
             'HYPH-090' : ['MSG', 'Ran hyphen preprocess script on project hyphenation source file.'],
             'HYPH-095' : ['ERR', 'Preprocess script failed to run on source file.'],
@@ -121,59 +125,40 @@ class Hyphenation (Manager) :
             return False
 
 
-    def preprocessSource (self) :
-        '''Run a hyphenation preprocess script on the project's source hyphenation
-        file. This happens when the component type import processes are happening.'''
-
-        if self.useSourcePreprocess :
-            if not os.path.isfile(self.preProcessFile) :
-                shutil.copy(self.rapumaPreProcessFile, self.preProcessFile)
-                makeExecutable(self.preProcessFile)
-                self.project.log.writeToLog('HYPH-080')
-                dieNow()
-            else :
-                err = subprocess.call([self.preProcessFile, self.ptHyphFile])
-                if err == 0 :
-                    self.project.log.writeToLog('HYPH-090')
-                    return True
-                else :
-                    self.project.log.writeToLog('HYPH-095')
-                    return False
-
-
     def compareWithSource (self) :
         '''Compare working hyphenation file with the original copied read-only
         source file found in the project. This will help to konw what preprocess
         changes were made (if changes where made) when it was imported into the
         project. '''
 
-        self.project.compare(self.ptHyphFile, self.ptHyphBakFile)
+        # This is the only time we call a compare in the module (so far)
+        Compare(self.project.projectIDCode).compare(self.ptHyphFile, self.ptHyphBakFile)
 
 
-    def turnOnHyphenation (self) :
+    def turnOnHyphenation (self, gid) :
         '''Turn on hyphenation to a project for a specified component type.'''
 
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
-            self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = True
+            self.projConfig['Groups'][gid]['useHyphenation'] = True
             writeConfFile(self.projConfig)
-            self.project.log.writeToLog('HYPH-050', [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0250'], [self.cType])
         else :
-            self.project.log.writeToLog('HYPH-055', [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0255'], [self.cType])
 
 
-    def turnOffHyphenation (self) :
+    def turnOffHyphenation (self, gid) :
         '''Turn off hyphenation from a project for a specified component type.
         No removal of files will occure, only the useHyphenation will be set 
         to false.'''
 
         # Make sure we turn it on if it isn't already
         if self.useHyphenation :
-            self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'] = False
+            self.projConfig['Groups'][gid]['useHyphenation'] = False
             writeConfFile(self.projConfig)
-            self.project.log.writeToLog('HYPH-060', [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0260'], [self.cType])
         else :
-            self.project.log.writeToLog('HYPH-065', [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0265'], [self.cType])
 
 
     def updateHyphenation (self, force = False) :
@@ -184,14 +169,14 @@ class Hyphenation (Manager) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
-            self.preprocessSource()
+            self.paratext.preprocessSource(self.ptHyphFile, self.preProcessFile, self.rapumaPreProcessFile)
         # Create a new version
         self.harvestSource(force)
         self.makeHyphenatedWords()
         # Quick sanity test
         if not os.path.isfile(self.compHyphFile) :
             dieNow('Failed to create: ' + self.compHyphFile)
-        self.project.log.writeToLog('HYPH-070', [self.cType])
+        self.project.log.writeToLog(self.errorCodes['0270'], [self.cType])
 
 
     def harvestSource (self, force = None) :
@@ -209,26 +194,24 @@ class Hyphenation (Manager) :
 
         # Process according to sourceEditor (PT is all we can support right now)
         if self.sourceEditor == 'paratext' :
-            from rapuma.group.usfm import PT_HyphenTools
-            pt_hyTools = PT_HyphenTools(self.project)
-            pt_hyTools.processHyphens(force)
+            self.paratext.processHyphens(self.gid, force)
             # Report the word harvest to the log
-            rpt = pt_hyTools.wordTotals()
+            rpt = self.paratext.wordTotals()
             for c in rpt :
-                self.project.log.writeToLog('HYPH-040', [c[0], c[1]])
+                self.project.log.writeToLog(self.errorCodes['0240'], [c[0], c[1]])
             # Change to gneric hyphens
-            pt_hyTools.pt2GenHyphens(pt_hyTools.approvedWords)
-            pt_hyTools.pt2GenHyphens(pt_hyTools.hyphenWords)
-            pt_hyTools.pt2GenHyphens(pt_hyTools.softHyphenWords)
+            self.paratext.pt2GenHyphens(self.paratext.approvedWords)
+            self.paratext.pt2GenHyphens(self.paratext.hyphenWords)
+            self.paratext.pt2GenHyphens(self.paratext.softHyphenWords)
         else :
             dieNow('Error: Editor not supported: ' + self.sourceEditor)
 
         # Pull together all the words that will be in our final list.
-        self.allHyphenWords.update(pt_hyTools.approvedWords)
-        self.allHyphenWords.update(pt_hyTools.hyphenWords)
-        self.allHyphenWords.update(pt_hyTools.softHyphenWords)
+        self.allHyphenWords.update(self.paratext.approvedWords)
+        self.allHyphenWords.update(self.paratext.hyphenWords)
+        self.allHyphenWords.update(self.paratext.softHyphenWords)
         # Add nonHyphenWords because they are exceptions
-        self.allHyphenWords.update(pt_hyTools.nonHyphenWords)
+        self.allHyphenWords.update(self.paratext.nonHyphenWords)
 
 
     def makeHyphenatedWords (self) :

@@ -86,9 +86,9 @@ class Xetex (Manager) :
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        self.useIllustrations       = str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
         self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.chapNumOffSingChap     = str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-        self.useIllustrations       = str2bool(self.layoutConfig['Illustrations']['useIllustrations'])
         self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
         self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
         self.useBoxBoarder          = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
@@ -172,15 +172,16 @@ class Xetex (Manager) :
             'XTEX-105' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
-            'XTEX-130' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
 
             '0270' : ['LOG', 'Copied macro: <<1>>'],
             '0275' : ['ERR', 'No macro package for : <<1>>'],
 
+            '0430' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
             '0440' : ['LOG', 'Created: [<<1>>]'],
             '0460' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
             '0465' : ['LOG', 'File: [<<1>>] missing, created a new one.'],
             '0470' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
+            '0480' : ['ERR', 'Cannot create critical hyphenation file: [<<1>>]'],
 
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
@@ -369,7 +370,7 @@ class Xetex (Manager) :
             lccodeObject.write(makeFileHeader(fName(self.lccodeTexFile), description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
-            for c in self.pt_tools.getNWFChars() :
+            for c in self.pt_tools.getNWFChars(self.gid) :
                 uv = rtnUnicodeValue(c)
                 # We handel these chars special in this context
                 if not uv in ['2011', '002D'] :
@@ -725,18 +726,18 @@ class Xetex (Manager) :
             # The TeX group hyphen exceptions file
             if not os.path.isfile(self.grpHyphExcTexFile) or isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
                 if self.makeGrpHyphExcTexFile() :
-                    self.log.writeToLog('XTEX-130', [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [fName(self.grpHyphExcTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog('XTEX-170', [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [fName(self.grpHyphExcTexFile)])
                     return False
             # The TeX lccode file
             if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
                 if self.makeLccodeTexFile() :
-                    self.log.writeToLog('XTEX-130', [fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [fName(self.lccodeTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog('XTEX-170', [fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [fName(self.lccodeTexFile)])
                     return False
             return True
         else :

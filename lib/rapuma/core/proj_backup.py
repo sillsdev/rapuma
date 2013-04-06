@@ -39,10 +39,13 @@ class ProjBackup (object) :
         self.projHome       = None
         self.local          = None
         self.projConfig     = None
+        self.log            = None
         self.finishInit()
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
+            '0220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
+            '0240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!']
         }
 
 
@@ -51,13 +54,15 @@ class ProjBackup (object) :
         '''Finishing collecting settings that would be needed for most
         functions in this module.'''
 
+#        import pdb; pdb.set_trace()
+
         # Look for an existing project home path
         if self.isProject(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :
             localProjHome   = ''
         # Testing: The local project home wins over a user provided one
-        if localProjHome and not projHome :
+        if localProjHome :
             self.projHome   = localProjHome
         elif projHome :
             self.projHome   = projHome
@@ -66,6 +71,14 @@ class ProjBackup (object) :
         if self.projHome : 
             self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
             self.projConfig = ProjConfig(self.local).projConfig
+            self.log        = ProjLog(self.local, self.user)
+
+
+###############################################################################
+############################## General Functions ##############################
+###############################################################################
+####################### Error Code Block Series = 0200 ########################
+###############################################################################
 
 
     def isProject (self, pid) :
@@ -100,9 +113,9 @@ class ProjBackup (object) :
                 self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
                 writeConfFile(self.userConfig)
             else :
-                dieNow('Project already registered in the system.\n\n')
+                self.log.writeToLog(self.errorCodes['0220'], [pid])
         else :
-            dieNow('Error: Could not find/open the Project configuration file. Project could not be registered!\n\n')
+            self.log.writeToLog(self.errorCodes['0240'], [pid])
 
 
 
@@ -341,7 +354,7 @@ class ProjBackup (object) :
             terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
             dieNow()
 
-
+#        import pdb; pdb.set_trace()
         # If there is an exsiting project make a temp backup in 
         # case something goes dreadfully wrong
         if os.path.isdir(self.projHome) :

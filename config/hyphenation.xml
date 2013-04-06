@@ -15,13 +15,6 @@ Todo:
 
 <root>
     <setting>
-        <name>Use Hyphenation</name>
-        <description>Set to true to use hyphenation in the project.  Hyphenation is important to any project but it needs to be setup before it can be used.  Therefore the default is false Default = False</description>
-        <key>useHyphenation</key>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
-    <setting>
         <name>Use Hyphenation Source Preprocess</name>
         <description>Set to true to use hyphenation source preprocessing. However, a hyphenation preprocess script will need to be present for it to work.</description>
         <key>useHyphenSourcePreprocess</key>

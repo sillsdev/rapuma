@@ -5,7 +5,6 @@
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/project.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_log.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/text.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/font.py"/>
@@ -15,11 +14,9 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/style.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/binding.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/tools.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_backup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_setup.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_commander.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_compare.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py"/>
 </session>
 </saved-sessions>

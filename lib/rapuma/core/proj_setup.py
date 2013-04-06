@@ -191,9 +191,11 @@ class ProjSetup (object) :
             self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.local, self.user)
             self.paratext           = Paratext(self.pid)
-        except Exception as e :
-            # If we don't succeed, we give a warning in case it is important
-            terminal('Warning: proj_setup.finishInit() failed with: ' + str(e))
+        except :
+            pass
+#        except Exception as e :
+#            # If we don't succeed, we give a warning in case it is important
+#            terminal('Warning: proj_setup.finishInit() failed with: ' + str(e))
 
 
 ###############################################################################
@@ -721,7 +723,7 @@ class ProjSetup (object) :
         sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         usePreprocessScript = str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
         grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
-        rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType, cType + '_groupPreprocess.py')
+        rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
 
         # Build the file name
         thisFile = ''
@@ -806,7 +808,7 @@ class ProjSetup (object) :
                     # logUsfmFigure() logs the fig data and strips it from the working text
                     # Note: Using partial() to allows the passing of the cid param 
                     # into logUsfmFigure()
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, cid), contents)
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
                     codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
                     # Finish by copying the tempFile to the source
                     if not shutil.copy(tempFile, target) :

@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, dircache
+import codecs, os, dircache, subprocess
 from configobj import ConfigObj
 from importlib import import_module
 
@@ -26,7 +26,7 @@ from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_commander import Commander
 from rapuma.core.proj_log       import ProjLog
-from rapuma.project.project import Project
+#from rapuma.project.project     import Project
 
 
 class Paratext (object) :
@@ -44,10 +44,8 @@ class Paratext (object) :
         self.local                  = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
         self.projConfig             = ProjConfig(self.local).projConfig
         self.log                    = ProjLog(self.local, self.user)
-
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
-
         self.useHyphenation         = False
         # Folder paths
         self.projHyphenationFolder  = self.local.projHyphenationFolder
@@ -66,8 +64,14 @@ class Paratext (object) :
 
 
         self.errorCodes     = {
-        
             '0000' : ['MSG', 'Group processing messages'],
+
+            '0250' : ['LOG', 'Updated project file: [<<1>>]'],
+            '0255' : ['LOG', 'Did not update project file: [<<1>>]'],
+            '0260' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
+            '0280' : ['WRN', 'New default hyphen preprocess script copied into the project. Please edit before using.'],
+            '0290' : ['MSG', 'Ran hyphen preprocess script on project hyphenation source file.'],
+            '0295' : ['ERR', 'Preprocess script failed to run on source file.'],
 
         }
 
@@ -103,11 +107,11 @@ class Paratext (object) :
             return False
 
 
-    def getNWFChars (self) :
+    def getNWFChars (self, gid) :
         '''Return a list of non-word-forming characters from the PT settings
         field [ValidPunctuation] in the translation project.'''
 
-        ptSet = self.getPTSettings(self.gid)
+        ptSet = self.getPTSettings(gid)
         chars = []
         if testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
             for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
@@ -123,11 +127,9 @@ class Paratext (object) :
                     except Exception as e :
                         # If we don't succeed, we should probably quite here
                         self.log.writeToLog('USFM-010', [str(e)])
-                        dieNow()
                 else :
                     # Something really strange happened
                     self.log.writeToLog('USFM-020', [c])
-                    dieNow()
         else :
             self.log.writeToLog('USFM-025')
         return chars
@@ -481,7 +483,26 @@ class Paratext (object) :
 #   1) mixed syntax is illegal (abc-efg=hij)
 
 
-    def copyPtHyphenWords (self, ptHyphFile, ptProjHyphFile) :
+    def preprocessSource (self, ptHyphFile, preProcessFile, rapumaPreProcessFile) :
+        '''Run a hyphenation preprocess script on the project's source hyphenation
+        file. This happens when the component type import processes are happening.'''
+
+        if str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
+            if not os.path.isfile(preProcessFile) :
+                shutil.copy(rapumaPreProcessFile, preProcessFile)
+                makeExecutable(preProcessFile)
+                self.log.writeToLog(self.errorCodes['0280'])
+            else :
+                err = subprocess.call([preProcessFile, ptHyphFile])
+                if err == 0 :
+                    self.log.writeToLog(self.errorCodes['0290'])
+                    return True
+                else :
+                    self.log.writeToLog(self.errorCodes['0295'])
+                    return False
+
+
+    def copyPtHyphenWords (self, ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
         We will also create a backup as well to be used for comparison or fallback.'''
 
@@ -489,10 +510,9 @@ class Paratext (object) :
             # Use a special kind of copy to prevent problems with BOMs
             utf8Copy(ptHyphFile, ptProjHyphFile)
             # Once copied, check if any preprocessing is needed
-            self.hyphenation.preprocessSource()
+            self.preprocessSource(ptHyphFile, preProcessFile, rapumaPreProcessFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
-            dieNow()
 
 
     def backupPtHyphenWords (self, ptHyphFile, ptProjHyphBakFile) :
@@ -504,7 +524,6 @@ class Paratext (object) :
             makeReadOnly(ptProjHyphBakFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
-            dieNow()
 
 
     def processHyphens(self, gid, force = False) :
@@ -516,18 +535,20 @@ class Paratext (object) :
 
         # Get group setting vars
         csid = self.projConfig['Groups'][gid]['csid']
+        cType = self.projConfig['Groups'][gid]['cType']
 
         # File Names
-        ptProjHyphErrFileName  = csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-        ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        sourcePath             = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        preProcessFileName          = cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        ptProjHyphErrFileName       = csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
+        ptHyphFileName              = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        sourcePath                  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
         # Set file names with full path 
-        ptHyphFile             = os.path.join(self.sourcePath, ptHyphFileName)
-        ptProjHyphFile         = os.path.join(self.projHyphenationFolder, ptHyphFileName)
-        ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, ptHyphFileName + '.bak')
-        ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, ptProjHyphErrFileName)
-
-
+        ptHyphFile                  = os.path.join(sourcePath, ptHyphFileName)
+        ptProjHyphFile              = os.path.join(self.projHyphenationFolder, ptHyphFileName)
+        ptProjHyphBakFile           = os.path.join(self.projHyphenationFolder, ptHyphFileName + '.bak')
+        ptProjHyphErrFile           = os.path.join(self.projHyphenationFolder, ptProjHyphErrFileName)
+        preProcessFile              = os.path.join(self.local.projHyphenationFolder, preProcessFileName)
+        rapumaPreProcessFile        = os.path.join(self.local.rapumaScriptsFolder, preProcessFileName)
 
         # The project source files are protected but if force is used
         # we need to delete them here.
@@ -536,25 +557,25 @@ class Paratext (object) :
                 os.remove(ptProjHyphFile)
             if os.path.exists(ptProjHyphBakFile) :
                 os.remove(ptProjHyphBakFile)
-            self.log.writeToLog('USFM-060')
+            self.log.writeToLog(self.errorCodes['0260'])
 
         # These calls may be order-sensitive, update local project source
         if not os.path.isfile(ptProjHyphFile) or isOlder(ptProjHyphFile, ptHyphFile) :
-            self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile)
+            self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
             self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
-            self.log.writeToLog('USFM-050', [fName(ptHyphFile)])
+            self.log.writeToLog(self.errorCodes['0250'], [fName(ptHyphFile)])
         else :
-            self.log.writeToLog('USFM-055', [fName(ptHyphFile)])
+            self.log.writeToLog(self.errorCodes['0255'], [fName(ptHyphFile)])
 
         # Continue by processing the files located in the project
-        self.getAllPtHyphenWords(ptProjHyphFile)
+        self.getAllPtHyphenWords(ptProjHyphFile, ptProjHyphErrFile)
         self.getApprovedWords()
         self.getHyphenWords()
         self.getSoftHyphenWords()
         self.getNonHyhpenWords()
 
 
-    def getAllPtHyphenWords (self, ptProjHyphFile) :
+    def getAllPtHyphenWords (self, ptProjHyphFile, ptProjHyphErrFile) :
         '''Return a data set of all the words found in a ParaTExt project
         hyphated words text file. The Py set() method is used for moving
         the data because some lists can get really big. This will return the
@@ -572,7 +593,7 @@ class Paratext (object) :
                         self.allPtHyphenWords.add(word[0])
 
             # Now remove any bad/mal-formed words
-            self.checkForBadWords()
+            self.checkForBadWords(ptProjHyphErrFile)
 
 
     def getApprovedWords (self) :
@@ -701,7 +722,7 @@ class Paratext (object) :
 ###############################################################################
 
 
-    def logFigure (self, cid, figConts) :
+    def logFigure (self, gid, cid, figConts) :
         '''Log the figure data in the illustration.conf. If nothing is returned, the
         existing \fig markers with their contents will be removed. That is the default
         behavior.'''
@@ -735,8 +756,8 @@ class Paratext (object) :
         figDict['useThisCaption'] = True
         figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()
-        figDict['chapter'] = re.sub(ur'[A-Z]+\s([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
-        figDict['verse'] = re.sub(ur'[A-Z]+\s[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
+        figDict['chapter'] = re.sub(ur'([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
+        figDict['verse'] = re.sub(ur'[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
         figDict['scale'] = '1.0'
         if figDict['width'] == 'col' :
             figDict['position'] = 'tl'
@@ -744,14 +765,13 @@ class Paratext (object) :
             figDict['position'] = 't'
         if not figDict['location'] :
             figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
-
-        if not testForSetting(illustrationConfig, 'Illustrations') :
-            buildConfSection(illustrationConfig, 'Illustrations')
+        if not testForSetting(illustrationConfig, gid) :
+            buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not testForSetting(illustrationConfig['Illustrations'], figDict['illustrationID'].upper()) :
-            buildConfSection(illustrationConfig['Illustrations'], figDict['illustrationID'].upper())
+        if not testForSetting(illustrationConfig[gid], figDict['illustrationID'].upper()) :
+            buildConfSection(illustrationConfig[gid], figDict['illustrationID'].upper())
         for k in figDict.keys() :
-            illustrationConfig['Illustrations'][figDict['illustrationID'].upper()][k] = figDict[k]
+            illustrationConfig[gid][figDict['illustrationID'].upper()][k] = figDict[k]
 
         # Write out the conf file to preserve the data found
         writeConfFile(illustrationConfig)
@@ -797,7 +817,7 @@ class Paratext (object) :
             oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
 
         if not oldStyle :
-            self.project.log.writeToLog('STYL-100', [self.cType])
+            self.log.writeToLog('STYL-100', [self.cType])
             return
         else :
             if sType == 'main' :
@@ -814,9 +834,9 @@ class Paratext (object) :
                 if os.path.isfile(target) :
                     os.remove(target)
 
-                self.project.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
+                self.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
             else :
-                self.project.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
+                self.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
 
             return True
 
@@ -828,7 +848,7 @@ class Paratext (object) :
         target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
 
         if not force and os.path.isfile(target) :
-            self.project.log.writeToLog('STYL-030', [fName(sFile)])
+            self.log.writeToLog('STYL-030', [fName(sFile)])
             return False
         elif os.path.isfile(sFile) :
             # It's there? Good, we're done!
@@ -836,21 +856,20 @@ class Paratext (object) :
             if sType.lower() == 'main' :
                 if self.usfmStyleFileIsValid(sFile) :
                     shutil.copy(sFile, target)
-                    self.project.log.writeToLog('STYL-060', [fName(sFile)])
+                    self.log.writeToLog('STYL-060', [fName(sFile)])
                     return True
                 else :
                     # We die if it does not validate
-                    self.project.log.writeToLog('STYL-070', [fName(sFile)])
-                    dieNow()
+                    self.log.writeToLog('STYL-070', [fName(sFile)])
             else :
                 # Assuming a custom style file we can grab most anything
                 # without validating it
                 shutil.copy(sFile, target)
-                self.project.log.writeToLog('STYL-065', [fName(sFile)])
+                self.log.writeToLog('STYL-065', [fName(sFile)])
                 return True
         else :
             # Not finding the file may not be the end of the world 
-            self.project.log.writeToLog('STYL-020', [fName(sFile)])
+            self.log.writeToLog('STYL-020', [fName(sFile)])
             return False
 
 
@@ -894,9 +913,9 @@ class Paratext (object) :
                     if not shutil.copy(sFile, target) :
                         return fName(target)
                 else :
-                    self.project.log.writeToLog('STYL-075', [sFile,self.cType])
+                    self.log.writeToLog('STYL-075', [sFile,self.cType])
             else : 
-                self.project.log.writeToLog('STYL-090', [sFile])
+                self.log.writeToLog('STYL-090', [sFile])
 
 
 

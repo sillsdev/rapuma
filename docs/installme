@@ -44,8 +44,9 @@ following the install proceedure. It can be cloned from here:
 
 This needs to be installed before you can use it. To install run:
 
-    ~/Projects/palaso-python/setu5p.py --nokmn build
-    sudo ~/Projects/palaso-python/setup.py --nokmn install
+    cd ~/Projects/palaso-python
+    ./setup.py --nokmn build
+    sudo ./setup.py --nokmn install
 
 (Note: need to add simple test for install of palaso-python)
 
