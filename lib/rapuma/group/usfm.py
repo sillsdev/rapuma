@@ -128,6 +128,7 @@ class Usfm (Group) :
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
+            '0240' : ['WRN', 'Could not find adjustments for [<<1>>]'],
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
         }
@@ -306,6 +307,9 @@ class Usfm (Group) :
         # Check for a master adj conf file
         if os.path.exists(self.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
+            if not testForSetting(self.adjustmentConfig, self.gid) :
+                self.log.writeToLog(self.errorCodes['0240'], [self.gid])
+                return False
             for c in self.adjustmentConfig[self.gid].keys() :
                 try :
                     if c == 'GeneralSettings' :

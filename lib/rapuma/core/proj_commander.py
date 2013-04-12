@@ -79,6 +79,7 @@ class Commander (object) :
 
         self.makeStaticScripts()
         self.makeGrpScripts()
+        self.makeBndScripts()
 
 
     def makeGrpScripts (self) :
@@ -98,6 +99,27 @@ class Commander (object) :
                     makeExecutable(fullFile)
             
             terminal('\nCompleted creating/recreating group helper scripts.\n')
+        else :
+            pass
+
+
+    def makeBndScripts (self) :
+        '''Create scripts that process specific group components.'''
+
+        # Output the scripts (If this is a new project we need to pass)
+        if isConfSection(self.projConfig, 'Binding') :
+            for bid in self.projConfig['Binding'].keys() :
+                allScripts = self.getBndScripInfo(bid)
+                for key in allScripts.keys() :
+                    fullFile = os.path.join(self.local.projScriptsFolder, key) + bid
+                    with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
+                        writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
+                        writeObject.write(allScripts[key][1] + '\n\n')
+
+                    # Make the script executable
+                    makeExecutable(fullFile)
+            
+            terminal('\nCompleted creating/recreating binding helper scripts.\n')
         else :
             pass
 
@@ -183,6 +205,17 @@ class Commander (object) :
                 'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e -f '], 
                 'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u -f '], 
                 'view'          : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e '], 
+            }
+
+
+    def getBndScripInfo (self, bid) :
+        '''Create a dictionary of the group binding script information used in
+        most projects.'''
+
+        pid     = self.pid
+
+        return {
+                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma bind ' + pid + ' ' + bid + ' -e '] 
             }
 
 

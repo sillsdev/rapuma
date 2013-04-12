@@ -53,6 +53,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.proj_setup         import ProjSetup
 from rapuma.core.proj_backup        import ProjBackup
+from rapuma.core.proj_binding       import Binding
 from rapuma.core.proj_commander     import Commander
 from rapuma.core.proj_compare       import Compare
 from rapuma.core.page_background    import PageBackground
@@ -183,6 +184,11 @@ def userArguments (args, local) :
             if not os.path.exists(targetPath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
 
+        # Create/refresh helper scripts
+        if args.scripts :
+            Commander(pid).updateScripts()
+            return True
+
         # Remove an exsisting project
         if args.delete :
             ProjSetup(pid).deleteProject()
@@ -253,9 +259,6 @@ def userArguments (args, local) :
                     sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
                 nProjPath = os.path.join(targetPath, pid)
                 ProjSetup(pid).newProject(nProjPath, args.media, args.name, systemVersion, '')
-        # Create/refresh helper scripts
-        if args.scripts :
-            Commander(pid).updateScripts()
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -333,15 +336,13 @@ def userArguments (args, local) :
 
     # Binding level commands
     elif sys.argv[1].lower() == 'binding' :
-        aProject.createManager(aProject.projectMediaIDCode, 'binding')
-        manager = aProject.projectMediaIDCode + '_Binding'
         # Add a new binding group
         if args.add :
-            aProject.managers[manager].addBindingGroup(args.group_id, args.id_list, args.force)
+            Binding(args.project_id).addBindingGroup(args.bind_id, args.id_list, args.force)
         elif args.remove :
-            aProject.managers[manager].removeBindingGroup(args.group_id)
+            Binding(args.project_id).removeBindingGroup(args.bind_id)
         elif args.execute :
-            aProject.managers[manager].bindComponents(args.group_id)
+            Binding(args.project_id).bindComponents(args.bind_id)
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -578,10 +579,10 @@ compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a speci
 # Add binding subprocess arguments
 bindCommand = subparsers.add_parser('binding', help='General project binding management commands help')
 bindCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-bindCommand.add_argument('group_id', help='Binding group ID (a positional argument required for all actions with this subprocess)')
+bindCommand.add_argument('bind_id', help='Binding group ID (a positional argument required for all actions with this subprocess)')
 bindCommand.add_argument('-a', '--add', action='store_true', help='Add a new binding group to this project.')
 bindCommand.add_argument('-r', '--remove', action='store_true', help='Remove an exsisting binding group from this project.')
-bindCommand.add_argument('-i', '--id_list', help='A list of components or groups of components to be bound together.')
+bindCommand.add_argument('-i', '--id_list', help='A list of groups that are to be bound together.')
 bindCommand.add_argument('-e', '--execute', action='store_true', help='Execute the binding process for a specific binding group in this project.')
 bindCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 

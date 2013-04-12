@@ -26,6 +26,7 @@ from rapuma.project.manager         import Manager
 from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
 from rapuma.core.page_background    import PageBackground
+from rapuma.core.proj_binding       import Binding
 
 
 ###############################################################################
@@ -183,6 +184,8 @@ class Xetex (Manager) :
             '0470' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
             '0480' : ['ERR', 'Cannot create critical hyphenation file: [<<1>>]'],
 
+            '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
+            '0610' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] group.'],
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
             '0635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
@@ -192,7 +195,6 @@ class Xetex (Manager) :
             '0665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
-            '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
         }
 
 
@@ -874,6 +876,19 @@ class Xetex (Manager) :
                 shutil.copy(self.gidPdfFile, PdfSubName)
                 os.remove(self.gidPdfFile)
                 self.gidPdfFile = PdfSubName
+
+            # Collect the page count and record in group
+            newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
+            if testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
+                oldPages = int(self.projConfig['Groups'][self.gid]['totalPages'])
+                if oldPages != newPages or oldPages == 'None' :
+                    self.projConfig['Groups'][self.gid]['totalPages'] = newPages
+                    writeConfFile(self.projConfig)
+                    self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
+            else :
+                self.projConfig['Groups'][self.gid]['totalPages'] = newPages
+                writeConfFile(self.projConfig)
+                self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
 
         else :
             self.log.writeToLog(self.errorCodes['0690'], [fName(self.gidPdfFile)])

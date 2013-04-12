@@ -82,8 +82,6 @@ class Font (Manager) :
             'FONT-015' : ['MSG', 'FONT-015 - Unassigned error message ID.'],
             'FONT-020' : ['ERR', 'Failed to find font setting in ParaTExt project (.ssf file). A primary font must be set before this component can be successfully rendered.'],
             'FONT-025' : ['ERR', 'No source editor was found for this project. Please enter this setting before continuing.'],
-            'FONT-040' : ['ERR', 'Font bundle file [<<1>>] not found. Process halted. (font.checkForSubFont() or recordFont)'],
-            'FONT-041' : ['ERR', 'Font bundle [<<1>>] not found. Process halted. (font.checkForSubFont())'],
             'FONT-042' : ['MSG', 'Force switch was set (-f). [<<1>>] font setup information was force added to project config'],
             'FONT-050' : ['ERR', 'Halt! [<<1>>] not found. - font.copyInFont()'],
             'FONT-070' : ['LOG', 'Copied the [<<1>>] font file into the project. - font.copyInFont()'],
@@ -96,9 +94,11 @@ class Font (Manager) :
 
             '0010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
 
-            '0210' : ['ERR', 'This editor: [<<1>>] is not recognized by the system. System halted.  - font.varifyFont()'],
-            '0220' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted. (font.copyInFont())'],
+            '0210' : ['ERR', 'This editor: [<<1>>] is not recognized by the system.'],
+            '0220' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted.'],
             '0235' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+            '0240' : ['ERR', 'Font bundle file [<<1>>] not found.'],
+            '0241' : ['ERR', 'Font bundle [<<1>>] not found.'],
             '0245' : ['LOG', '<<1>> font setup information added to project config'],
             '0247' : ['LOG', 'The [<<1>>] font already has a listing in the configuration.'],
             '0260' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - font.installFont()'],
@@ -138,8 +138,10 @@ class Font (Manager) :
         '''Return the true name of the font to be used if the one given
         is pointing to a substitute font in the same font family.'''
 
+#        import pdb; pdb.set_trace()
+
         # Check for the font family bundle, look in user resources first
-        userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
+        userSource = os.path.join(resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
         rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         source = ''
         if os.path.isfile(userSource) :
@@ -147,12 +149,10 @@ class Font (Manager) :
         elif os.path.isfile(rapumaSource) :
             source = rapumaSource
         else :
-            self.project.log.writeToLog(self.errorCodes['0220'], [font + '.zip'])
-            dieNow()
-
+            self.project.log.writeToLog(self.errorCodes['0220'], [userSource], 'font.checkForSubFont():0220')
+        # Double check
         if not os.path.isfile(source) :
-            self.project.log.writeToLog('FONT-041', [fName(source)])
-            dieNow()
+            self.project.log.writeToLog(self.errorCodes['0241'], [source], 'font.checkForSubFont():0241')
 
         if isInZip(font + '.xml', source) :
             xmlFile = font + '/' + font + '.xml'
@@ -173,8 +173,7 @@ class Font (Manager) :
             else :
                 return font
         else :
-            self.project.log.writeToLog('FONT-040', [font + '.xml'])
-            dieNow()
+            self.project.log.writeToLog(self.errorCodes['0240'], [font + '.xml'], 'font.checkForSubFont():0240')
 
 
     def recordFont (self, cType, font, force = None) :
@@ -219,7 +218,7 @@ class Font (Manager) :
             if primFont != font and (primFont == '' or primFont == 'None') :
                 self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
 
-            self.project.log.writeToLog('FONT-045', [font])
+            self.project.log.writeToLog(self.errorCodes['0245'], [font])
             writeConfFile(self.project.projConfig)
             return True
 
@@ -276,7 +275,7 @@ class Font (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Look in user resources first
-        userSource = os.path.join(self.project.userConfig['Resources']['fonts'], font + '.zip')
+        userSource = os.path.join(resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
         rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
         if os.path.isfile(userSource) :
@@ -396,7 +395,7 @@ class Font (Manager) :
             else :
                 font = self.checkForSubFont('DefaultFont')
         else :
-            self.project.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor])
+            self.project.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor], 'font.varifyFont():0210')
 
         if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
             return True

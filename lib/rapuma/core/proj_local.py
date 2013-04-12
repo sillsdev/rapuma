@@ -20,7 +20,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, tempfile
 
 # Load the local classes
 from rapuma.core.tools import *
@@ -80,6 +80,9 @@ class ProjLocal (object) :
 
         # Add some additional necessary params
         self.lockExt = '.lock'
+        
+        # Add a disposable temp folder to use for this project
+        self.projTempFolder = tempfile.mkdtemp()
         
         # Do some cleanup like getting rid of the last sessions error log file.
         try :

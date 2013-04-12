@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
