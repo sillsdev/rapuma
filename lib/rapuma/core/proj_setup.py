@@ -30,6 +30,7 @@ from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_commander import Commander
 from rapuma.core.proj_log       import ProjLog
+from rapuma.core.proj_compare   import Compare
 from rapuma.core.paratext       import Paratext
 from rapuma.project.project     import Project
 
@@ -148,7 +149,7 @@ class ProjSetup (object) :
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
             '0410' : ['ERR', 'The group lock/unlock function failed with this error: [<<1>>]'],
-            '0420' : ['MSG', 'The lock setting on the [<<1>>] group has been set to [<<2>>].'],
+            '0420' : ['LOG', 'The lock setting on the [<<1>>] group has been set to [<<2>>].'],
             '0430' : ['WRN', 'The [<<1>>] group is not found. Lock NOT set to [<<2>>].'],
 
             '0810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
@@ -207,8 +208,10 @@ class ProjSetup (object) :
 
     def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
         '''Update a group, --source is optional but if given it will
-        overwrite the current setting. The use of this function implies
-        that this is forced so no force setting is used.'''
+        overwrite the current setting. Normal behavior is to have it 
+        check if there is any difference between the cid project backup
+        copy and the proposed source. If there is, then it will perform
+        the update. If not, it will require force to do the update.'''
 
         # Just in case there are any problems with the source path
         # resolve it here before going on.
@@ -233,18 +236,17 @@ class ProjSetup (object) :
             if type(cidList) != list :
                  cidList = cidList.split()
 
-        # If force is used, just unlock by default
-        if force :
-            self.lockUnlock(gid, False)
+        # Process each cid
+        for cid in cidList :
+            target          = self.getTargetFile(gid, cid)
+            targetSource    = self.getTargetSourceFile(gid, cid)
+            source          = self.getSourceFile(gid, cid)
+            
+            if Compare(self.pid).isDifferent(source, targetSource) or force :
+                self.lockUnlock(gid, False)
+                self.installUsfmWorkingText(gid, cid, force)
 
-        # Be sure the group is unlocked
-        if self.isLocked(gid) :
-            self.log.writeToLog(self.errorCodes['0210'], [gid])
-
-        # Here we essentially re-add the component(s) of the group
-        self.installGroupComps(gid, cidList, force)
-        
-        # Now lock it down
+        # Now be sure it is locked down
         self.lockUnlock(gid, True)
 
 
@@ -707,53 +709,58 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
+    def getSourceFile (self, gid, cid) :
+        '''Get the source file name with path.'''
+
+        sourcePath          = self.getGroupSourcePath(gid)
+        cType               = self.projConfig['Groups'][gid]['cType']
+        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        # Build the file name
+        if sourceEditor.lower() == 'paratext' :
+            sName = self.paratext.formPTName(gid, cid)
+        elif sourceEditor.lower() == 'generic' :
+            sName = self.paratext.formGenericName(gid, cid)
+        else :
+            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
+
+        return os.path.join(sourcePath, sName)
+
+
+    def getTargetFile (self, gid, cid) :
+        '''Get the target file name with path.'''
+
+        csid            = self.projConfig['Groups'][gid]['csid']
+        cType           = self.projConfig['Groups'][gid]['cType']
+        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+
+
+    def getTargetSourceFile (self, gid, cid) :
+        '''Get the target source file name with path.'''
+
+        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        source          = self.getSourceFile(gid, cid)
+        sName           = os.path.split(source)[1]
+        return os.path.join(targetFolder, sName + '.source')
+
+
     def installUsfmWorkingText (self, gid, cid, force = False) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name. If a USFM text file
         is not located in a PT project folder, the editor cannot be set
-
         to paratext, it must be set to generic. This assumes lock checking
         was done previous to the call.'''
 
 #        import pdb; pdb.set_trace()
 
-        sourcePath          = self.getGroupSourcePath(gid)
-        csid                = self.projConfig['Groups'][gid]['csid']
         cType               = self.projConfig['Groups'][gid]['cType']
-        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         usePreprocessScript = str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
         grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
         rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
-
-        # Build the file name
-        thisFile = ''
-        if sourceEditor.lower() == 'paratext' :
-            thisFile = self.paratext.formPTName(gid, cid)
-        elif sourceEditor.lower() == 'generic' :
-            thisFile = self.paratext.formGenericName(gid, cid)
-        else :
-            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
-
-        # Test, no name = no success
-        if not thisFile :
-            self.log.writeToLog(self.errorCodes['1110'], [cid])
-
-        # Start the process by building paths and file names, if we made it this far.
-        # Note the file name for the preprocess is hard coded. This will become a part
-        # of the total system and this file will be copied in when the user requests to
-        # preprocessing.
-
-        # Current assuption is that source text is located in a directory above the
-        # that is the default. In case that is not the case, we can override that and
-        # specify a path to the source. If that exists, then we will use that instead.
-        if sourcePath :
-            source      = os.path.join(sourcePath, thisFile)
-        else :
-            source      = os.path.join(os.path.dirname(self.local.projHome), thisFile)
-
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-        target          = os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
-        targetSource    = os.path.join(targetFolder, thisFile + '.source')
+        targetFolder        = os.path.join(self.local.projComponentsFolder, cid)
+        target              = self.getTargetFile(gid, cid)
+        targetSource        = self.getTargetSourceFile(gid, cid)
+        source              = self.getSourceFile(gid, cid)
 
         # Copy the source to the working text folder. We do not want to do
         # this if the there already is a target and it is newer than the 

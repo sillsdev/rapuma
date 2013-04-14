@@ -28,6 +28,20 @@ Todo:
         <value></value>
     </setting>
     <setting>
+        <name>Group Component Source ID</name>
+        <key>csid</key>
+        <description>The source ID for this group.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Group Lock Setting</name>
+        <key>isLocked</key>
+        <description>Lock setting for this group. When locked, no modifications can be made to group components.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
         <name>Group Post Process Scripts</name>
         <key>postprocessScripts</key>
         <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>
@@ -68,6 +82,27 @@ Todo:
         <description>Use manual paragraph adjustments.</description>
         <type>boolean</type>
         <value>True</value>
+    </setting>
+    <setting>
+        <name>Starting Page Number</name>
+        <key>startPageNumber</key>
+        <description>If page numbers are used, this will tell the renderer what page number to begin with. This is incase this group follows another group.</description>
+        <type>string</type>
+        <value>1</value>
+    </setting>
+    <setting>
+        <name>Total Pages in Group</name>
+        <key>totalPages</key>
+        <description>Each time a group is rendered Rapuma will record the total pages.</description>
+        <type>string</type>
+        <value>1</value>
+    </setting>
+    <setting>
+        <name>Preceding Group</name>
+        <key>precedingGroup</key>
+        <description>The group that precedes this one. This information is needed for setting page numbers.</description>
+        <type>string</type>
+        <value>None</value>
     </setting>
 </root>
 

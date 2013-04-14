@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
 # version: 20110823
+
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -9,9 +11,6 @@
 
 # This module will hold all the miscellaneous functions that are shared with
 # many other scripts in the system.
-
-# History:
-# 20111202 - djd - Start over with manager-centric model
 
 
 ###############################################################################
@@ -422,8 +421,11 @@ def writeConfFile (config) :
     if not os.path.exists(os.path.split(config.filename)[0]) :
         os.makedirs(os.path.split(config.filename)[0])
 
-    # Make a backup in case something goes dreadfully wrong
+    # Make a backup in our temp dir case something goes dreadfully wrong
     if os.path.isfile(config.filename) :
+# FIXME: Need to make this its own class so that we can pull 
+# in local to make this next line work
+#        bak = os.path.join(self.local.projTempFolder, config.filename)
         shutil.copy(config.filename, config.filename + '~')
 
     # Let's try to write it out

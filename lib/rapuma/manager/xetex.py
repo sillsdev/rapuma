@@ -706,6 +706,9 @@ class Xetex (Manager) :
                 gidTexObject.write('\\stylesheet{' + self.defaultExtStyFile + '}\n')
             if self.style.checkGrpExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+            startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
+            if startPageNumber > 1 :
+                gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
             for cid in cidList :
                 cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
                 if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :

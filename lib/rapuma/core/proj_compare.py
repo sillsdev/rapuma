@@ -109,7 +109,6 @@ class Compare (object) :
         # Inside of diffl() open both files with universial line endings then
         # check each line for differences.
         diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())
-        comp = False
         for d in diff :
             if d[:1] == '+' or d[:1] == '-' :
                 return True

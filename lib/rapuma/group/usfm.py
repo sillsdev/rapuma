@@ -128,7 +128,7 @@ class Usfm (Group) :
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
-            '0240' : ['WRN', 'Could not find adjustments for [<<1>>]'],
+            '0240' : ['LOG', 'Could not find adjustments for [<<1>>], created place holder setting.'],
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
         }
@@ -227,6 +227,9 @@ class Usfm (Group) :
         self.style.checkDefaultExtStyFile()
         self.style.checkGrpExtStyFile()
 
+        # Adjust the page number if necessary
+        self.checkStartPageNumber()
+
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
         for cid in self.cfg['cidList'] :
@@ -295,6 +298,22 @@ class Usfm (Group) :
         return True
 
 
+    def checkStartPageNumber (self) :
+        '''Adjust page number for the current group.'''
+
+        pGrp        = str(self.projConfig['Groups'][self.gid]['precedingGroup'])
+        # If none, that means it hasn't been set or it is first
+        if pGrp == 'None' :
+            return False
+        cStrPgNo    = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
+        pGrpStrPgNo = int(self.projConfig['Groups'][pGrp]['startPageNumber'])
+        pGrpPgs     = int(self.projConfig['Groups'][pGrp]['totalPages'])
+        nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
+        if cStrPgNo != nStrPgNo :
+            self.projConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
+            writeConfFile(self.projConfig)
+
+
     def createCompAdjustmentFile (self, cid) :
         '''Create an adjustment file for this cid. If entries exsist in
         the adjustment.conf file.'''
@@ -303,11 +322,14 @@ class Usfm (Group) :
 
 #        import pdb; pdb.set_trace()
 
-#        if self.hasAdjustments(self.cType, cid) :
         # Check for a master adj conf file
         if os.path.exists(self.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
             if not testForSetting(self.adjustmentConfig, self.gid) :
+                buildConfSection(self.adjustmentConfig, self.gid)
+                buildConfSection(self.adjustmentConfig[self.gid], cid)
+                self.adjustmentConfig[self.gid][cid]['%1.1'] = '1'
+                writeConfFile(self.adjustmentConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [self.gid])
                 return False
             for c in self.adjustmentConfig[self.gid].keys() :

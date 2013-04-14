@@ -161,6 +161,18 @@ class Binding (object) :
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
 
 
+
+
+
+# FIXME: Add a view feature here once the viewer can be moved to the reworked tools module
+
+
+
+
+
+
+
+
     def getPdfPages (self, pdfFile) :
         '''Get the total number of pages in a PDF file.'''
 
