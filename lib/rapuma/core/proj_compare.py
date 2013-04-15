@@ -19,7 +19,7 @@ import codecs, os, difflib, subprocess
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -31,16 +31,16 @@ class Compare (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
-        self.user               = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig         = self.user.userConfig
         self.pid                = pid
+        self.tools              = Tools()
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
         self.projConfig         = None
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
             '210' : ['ERR', 'File does not exist: [<<1>>]'],
@@ -58,9 +58,9 @@ class Compare (object) :
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
-            self.log                = ProjLog(self.local, self.user)
+            self.log                = ProjLog(self.pid)
         except :
             pass
 
@@ -76,20 +76,18 @@ class Compare (object) :
         when the component was created. This will pull up the user's differential
         viewer and compare the two files.'''
 
-        # What kind of test is this
-        cType       = self.projConfig['Groups'][gid]['cType']
-        csid        = self.projConfig['Groups'][gid]['csid']
-        fileWork    = cid + '_' + csid + '.' + cType
-        fileCv1     = cid + '_' + csid + '.' + cType + '.cv1'
-        if test == 'working' :
-            new = os.path.join(self.local.projComponentsFolder, cid, fileWork)
-            old = os.path.join(self.local.projComponentsFolder, cid, fileCv1)
-        elif test == 'source' :
-            for f in os.listdir(os.path.join(self.local.projComponentsFolder, cid)) :
-                if f.find('.source') > 0 :
-                    new = os.path.join(self.local.projComponentsFolder, cid, fileWork)
-                    old = os.path.join(self.local.projComponentsFolder, cid, f)
-                    break
+        # Comare between real source and copied (backup) working source
+        if test == 'source' :
+            new = self.local.getSourceFile(gid, cid)
+            old = self.local.getWorkingSourceFile(gid, cid)
+        # Comare between working text and the last backup of that text
+        elif test == 'working' :
+            new = self.local.getWorkingFile(gid, cid)
+            old = self.local.getWorkCompareFile(gid, cid)
+        # Comare between working text and the copied (backup) source
+        elif test == 'source-working' :
+            new = self.local.getWorkingFile(gid, cid)
+            old = self.local.getWorkingSourceFile(gid, cid)
         else :
             self.log.writeToLog(self.errorCodes['290'], [test])
 
@@ -122,7 +120,7 @@ class Compare (object) :
             # Get diff viewer
             diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
             try :
-                self.log.writeToLog(self.errorCodes['295'], [fName(new),fName(old)])
+                self.log.writeToLog(self.errorCodes['295'], [self.tools.fName(new),self.tools.fName(old)])
                 subprocess.call([diffViewer, new, old])
             except Exception as e :
                 # If we don't succeed, we should probably quite here

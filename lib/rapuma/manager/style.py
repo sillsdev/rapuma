@@ -19,7 +19,7 @@
 import os, shutil, warnings
 
 # Load the local classes
-from rapuma.core.tools      import *
+from rapuma.core.tools      import Tools
 from rapuma.core.paratext   import Paratext
 from rapuma.core.proj_setup import ProjSetup
 from rapuma.project.manager import Manager
@@ -37,6 +37,7 @@ class Style (Manager) :
         super(Style, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode)
         self.setup                  = ProjSetup(project.projectIDCode)
         self.project                = project
@@ -51,7 +52,7 @@ class Style (Manager) :
         self.projConfig             = project.projConfig
         self.userConfig             = project.userConfig
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][manager], self.rapumaXmlStyleConfig)
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Managers'][manager], self.rapumaXmlStyleConfig)
         if newSectionSettings != self.projConfig['Managers'][manager] :
             self.projConfig['Managers'][manager] = newSectionSettings
         self.compSettings = self.projConfig['Managers'][manager]
@@ -112,7 +113,7 @@ class Style (Manager) :
 
         if not os.path.exists(self.defaultStyFile) :
             if not self.setup.makeDefaultStyFile(self.gid) :
-                self.project.log.writeToLog(self.errorCodes['0010'], [fName(self.defaultStyFile)], 'style.checkDefaultStyFile():0010')
+                self.project.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.defaultStyFile)], 'style.checkDefaultStyFile():0010')
                 return False
         else :
             return True
@@ -124,7 +125,7 @@ class Style (Manager) :
 
         if not os.path.isfile(self.defaultExtStyFile) :
             if not self.setup.makeDefaultExtStyFile(self.gid) :
-                self.project.log.writeToLog(self.errorCodes['0010'], [fName(self.defaultExtStyFile)], 'style.checkDefaultExtStyFile():0010')
+                self.project.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.defaultExtStyFile)], 'style.checkDefaultExtStyFile():0010')
                 return False
         else :
             return True
@@ -136,7 +137,7 @@ class Style (Manager) :
 
         if not os.path.isfile(self.grpExtStyFile) :
             if not self.setup.makeGrpExtStyFile(self.gid) :
-                self.project.log.writeToLog(self.errorCodes['0010'], [fName(self.grpExtStyFile)], 'style.checkGrpExtStyFile():0010')
+                self.project.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.grpExtStyFile)], 'style.checkGrpExtStyFile():0010')
                 return False
         else :
             return True

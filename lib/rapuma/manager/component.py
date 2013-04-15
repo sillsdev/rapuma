@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -20,8 +20,8 @@ import os, shutil
 
 
 # Load the local classes
-from rapuma.core.tools import *
-from rapuma.project.manager import Manager
+from rapuma.core.tools          import Tools
+from rapuma.project.manager     import Manager
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -40,6 +40,7 @@ class Component (Manager) :
         super(Component, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                      = Tools()
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType
@@ -54,7 +55,7 @@ class Component (Manager) :
         # File names with folder paths
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.projConfig['Managers'][self.manager] :
             self.projConfig['Managers'][self.manager] = newSectionSettings
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,18 +10,17 @@
 # This manager class will handle component rendering with XeTeX.
 
 
-
 ###############################################################################
 ################################# Project Class ###############################
 ###############################################################################
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil, re
-import subprocess
+import os, shutil, re, codecs, subprocess
+from xml.etree import ElementTree
 
 # Load the local classes
-from rapuma.core.tools              import *
+from rapuma.core.tools              import Tools
 from rapuma.project.manager         import Manager
 from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
@@ -45,6 +44,7 @@ class Xetex (Manager) :
 
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
+        self.tools                  = Tools()
         self.project                = project
         self.local                  = project.local
         self.log                    = project.log
@@ -80,19 +80,19 @@ class Xetex (Manager) :
         self.managerSettings = self.projConfig['Managers'][self.manager]
         for k, v in self.managerSettings.iteritems() :
             if v == 'True' or v == 'False' :
-                setattr(self, k, str2bool(v))
+                setattr(self, k, self.tools.str2bool(v))
             else :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
-        self.usePdfViewer           = str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        self.useIllustrations       = str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
-        self.useMarginalVerses      = str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
-        self.chapNumOffSingChap     = str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-        self.useWatermark           = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        self.useLines               = str2bool(self.layoutConfig['PageLayout']['useLines'])
-        self.useBoxBoarder          = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
+        self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
+        self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        self.useIllustrations       = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
+        self.useMarginalVerses      = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
+        self.chapNumOffSingChap     = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
+        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
 
         # File names
         # Some of these file names will only be used once but for consitency
@@ -149,7 +149,7 @@ class Xetex (Manager) :
             defaultViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
             self.pdfViewer = defaultViewer
             self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = defaultViewer
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
 
         # Record some error codes
         # FIXME: much more needs to be done with this
@@ -243,8 +243,8 @@ class Xetex (Manager) :
             os.makedirs(self.projMacPackFolder)
 
         if not os.path.isfile(self.ptxMargVerseFile) :
-            shutil.copy(os.path.join(self.rapumaMacPackFolder, fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
-            self.log.writeToLog(self.errorCodes['0270'], [fName(self.ptxMargVerseFile)])
+            shutil.copy(os.path.join(self.rapumaMacPackFolder, self.tools.fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+            self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(self.ptxMargVerseFile)])
             return True
 
 
@@ -307,7 +307,7 @@ class Xetex (Manager) :
                     if not os.path.isfile(fTarget) :
                         shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
                         mCopy = True
-                        self.log.writeToLog(self.errorCodes['0270'], [fName(fTarget)])
+                        self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(fTarget)])
 
             return mCopy
         else :
@@ -347,7 +347,7 @@ class Xetex (Manager) :
 
         # Create the output file here
         with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write(makeFileHeader(fName(self.grpHyphExcTexFile), description))
+            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpHyphExcTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
             with codecs.open(self.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
@@ -369,7 +369,7 @@ class Xetex (Manager) :
 
         # Create the file and put default settings in it
         with codecs.open(self.lccodeTexFile, "w", encoding='utf_8') as lccodeObject :
-            lccodeObject.write(makeFileHeader(fName(self.lccodeTexFile), description))
+            lccodeObject.write(self.tools.makeFileHeader(self.tools.fName(self.lccodeTexFile), description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
             for c in self.pt_tools.getNWFChars(self.gid) :
@@ -417,21 +417,21 @@ class Xetex (Manager) :
         dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.projConfFile]
         if not os.path.isfile(self.macLinkFile) :
             makeLinkFile = True
-            self.log.writeToLog(self.errorCodes['0465'], [fName(self.macLinkFile)])
+            self.log.writeToLog(self.errorCodes['0465'], [self.tools.fName(self.macLinkFile)])
         else :
             for f in dep :
-                if isOlder(self.macLinkFile, f) :
+                if self.tools.isOlder(self.macLinkFile, f) :
                     makeLinkFile = True
-                    self.log.writeToLog(self.errorCodes['0460'], [fName(f),fName(self.macLinkFile)])
+                    self.log.writeToLog(self.errorCodes['0460'], [self.tools.fName(f),self.tools.fName(self.macLinkFile)])
 
         if makeLinkFile :
             with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(makeFileHeader(fName(self.macLinkFile), description))
-                writeObject.write('\\input ' + quotePath(mainMacroFile) + '\n')
+                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macLinkFile), description))
+                writeObject.write('\\input ' + self.tools.quotePath(mainMacroFile) + '\n')
                 # If we are using marginal verses then we will need this
                 if self.useMarginalVerses :
                     self.copyInMargVerse()
-                    writeObject.write('\\input ' + quotePath(self.ptxMargVerseFile) + '\n')
+                    writeObject.write('\\input ' + self.tools.quotePath(self.ptxMargVerseFile) + '\n')
                 else :
                     self.removeMargVerse()
 
@@ -456,7 +456,7 @@ class Xetex (Manager) :
 #        import pdb; pdb.set_trace()
         if os.path.isfile(self.setTexFile) :
             for f in dep :
-                if isOlder(self.setTexFile, f) :
+                if self.tools.isOlder(self.setTexFile, f) :
                     # Something changed in a conf file this is dependent on
                     makeIt = True
                     break
@@ -471,7 +471,7 @@ class Xetex (Manager) :
             macTexVals = dict(self.makeTexSettingsDict(self.layoutXmlFile))
 
             writeObject = codecs.open(self.setTexFile, "w", encoding='utf_8')
-            writeObject.write(makeFileHeader(fName(self.setTexFile), description))
+            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.setTexFile), description))
 
             # Bring in the settings from the layoutConfig
             for section in self.layoutConfig.keys() :
@@ -484,7 +484,7 @@ class Xetex (Manager) :
                 # base for our inputsOrder list used for output
                 try :
                     # This setting must have a boolDepend, check what it is here
-                    if str2bool(self.rtnBoolDepend(macTexVals['inputsOrder']['boolDependTrue'])) :
+                    if self.tools.str2bool(self.rtnBoolDepend(macTexVals['inputsOrder']['boolDependTrue'])) :
                         inputsOrder = self.layoutConfig[section]['inputsOrder']
                     else :
                         inputsOrder = []
@@ -498,7 +498,7 @@ class Xetex (Manager) :
                     if not v :
                         continue
                     # Gather each macro package line we need to output
-                    if testForSetting(macTexVals, k, self.macroPackage) :
+                    if self.tools.testForSetting(macTexVals, k, self.macroPackage) :
                         macVal = (macTexVals[k][self.macroPackage])
                         # Test for boolDepend True and False. If there is a boolDepend
                         # then we don't need to output just yet. These next two if/elif
@@ -506,9 +506,9 @@ class Xetex (Manager) :
                         # In some cases we want output only if a certain bool is set to
                         # true, but in a few rare cases we want output when a certain
                         # bool is set to false. These will screen for both cases.
-                        if testForSetting(macTexVals, k, 'boolDependTrue') and not str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
+                        if self.tools.testForSetting(macTexVals, k, 'boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
                             continue
-                        elif testForSetting(macTexVals, k, 'boolDependFalse') and not str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
+                        elif self.tools.testForSetting(macTexVals, k, 'boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
@@ -621,7 +621,7 @@ class Xetex (Manager) :
 
             # End here
             writeObject.close()
-            self.log.writeToLog(self.errorCodes['0440'], [fName(self.setTexFile)])
+            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.setTexFile)])
             return True
 
 
@@ -638,8 +638,8 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(makeFileHeader(fName(self.grpExtTexFile), description, False))
-                self.log.writeToLog(self.errorCodes['0440'], [fName(self.grpExtTexFile)])
+                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
+                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -663,8 +663,8 @@ class Xetex (Manager) :
             else :
                 # Create a blank file
                 with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(makeFileHeader(fName(self.extTexFileName), description, False))
-                self.log.writeToLog(self.errorCodes['0440'], [fName(self.extTexFile)])
+                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.extTexFileName), description, False))
+                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.extTexFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -689,7 +689,7 @@ class Xetex (Manager) :
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
-            gidTexObject.write(makeFileHeader(self.gidTexFileName, description))
+            gidTexObject.write(self.tools.makeFileHeader(self.gidTexFileName, description))
             if self.makeMacLinkFile() :
                 gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
             if self.makeSetTexFile() :
@@ -729,20 +729,20 @@ class Xetex (Manager) :
 
         if self.useHyphenation :
             # The TeX group hyphen exceptions file
-            if not os.path.isfile(self.grpHyphExcTexFile) or isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
+            if not os.path.isfile(self.grpHyphExcTexFile) or self.tools.isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
                 if self.makeGrpHyphExcTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(self.grpHyphExcTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [self.tools.fName(self.grpHyphExcTexFile)])
                     return False
             # The TeX lccode file
-            if not os.path.exists(self.lccodeTexFile) or isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
+            if not os.path.exists(self.lccodeTexFile) or self.tools.isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
                 if self.makeLccodeTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(self.lccodeTexFile)])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [self.tools.fName(self.lccodeTexFile)])
                     return False
             return True
         else :
@@ -805,7 +805,7 @@ class Xetex (Manager) :
             render = True
         else :
             for d in dep :
-                if isOlder(self.gidPdfFile, d) :
+                if self.tools.isOlder(self.gidPdfFile, d) :
                     render = True
                     break
 
@@ -827,24 +827,24 @@ class Xetex (Manager) :
             cmds = ['xetex', '-output-directory=' + self.gidFolder, self.gidTexFile]
 
             # Run the XeTeX and collect the return code for analysis
-#                dieNow()
+#                self.tools.dieNow()
             rCode = subprocess.call(cmds, env = envDict)
 
             # Analyse the return code
             if rCode == int(0) :
-                self.log.writeToLog(self.errorCodes['0625'], [fName(self.gidTexFile)])
+                self.log.writeToLog(self.errorCodes['0625'], [self.tools.fName(self.gidTexFile)])
             elif rCode in self.xetexErrorCodes :
-                self.log.writeToLog(self.errorCodes['0630'], [fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
+                self.log.writeToLog(self.errorCodes['0630'], [self.tools.fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
             else :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
             # Add lines background for composition work
             if self.useLines :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.linesFile, 'output', tempName(self.gidPdfFile)]
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.linesFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
-                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(tempName(self.gidPdfFile))
+                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(self.tools.tempName(self.gidPdfFile))
                     self.log.writeToLog(self.errorCodes['0665'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
@@ -852,11 +852,11 @@ class Xetex (Manager) :
 
             # Add a watermark if required
             if self.useWatermark :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.projWatermarkFile, 'output', tempName(self.gidPdfFile)]
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.projWatermarkFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
-                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(tempName(self.gidPdfFile))
+                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(self.tools.tempName(self.gidPdfFile))
                     self.log.writeToLog(self.errorCodes['0645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
@@ -864,11 +864,11 @@ class Xetex (Manager) :
 
             # Add a box around the page (for proof reading)
             if self.useBoxBoarder :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.boxBoarderFile, 'output', tempName(self.gidPdfFile)]
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.boxBoarderFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
-                    shutil.copy(tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(tempName(self.gidPdfFile))
+                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
+                    os.remove(self.tools.tempName(self.gidPdfFile))
                     self.log.writeToLog(self.errorCodes['0645'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
@@ -882,26 +882,26 @@ class Xetex (Manager) :
 
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
-            if testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
+            if self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
                 oldPages = int(self.projConfig['Groups'][self.gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
                     self.projConfig['Groups'][self.gid]['totalPages'] = newPages
-                    writeConfFile(self.projConfig)
+                    self.tools.writeConfFile(self.projConfig)
                     self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
             else :
                 self.projConfig['Groups'][self.gid]['totalPages'] = newPages
-                writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
 
         else :
-            self.log.writeToLog(self.errorCodes['0690'], [fName(self.gidPdfFile)])
+            self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])
 
         # Review the results if desired
         if os.path.isfile(self.gidPdfFile) :
             if self.displayPdfOutput() :
-                self.log.writeToLog(self.errorCodes['0695'], [fName(self.gidPdfFile)])
+                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(self.gidPdfFile)])
             else :
-                self.log.writeToLog(self.errorCodes['0600'], [fName(self.gidPdfFile)])
+                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(self.gidPdfFile)])
 
 
 

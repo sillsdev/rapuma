@@ -20,7 +20,7 @@ from configobj                  import ConfigObj, Section
 
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from importlib                  import import_module
 import rapuma.core.user_config  as userConfig
 
@@ -34,6 +34,7 @@ class Project (object) :
         '''Instantiate this class.'''
 
 #        import pdb; pdb.set_trace()
+        self.tools                  = Tools()
         self.local                  = local
         self.userConfig             = userConfig
         self.projConfig             = projConfig
@@ -57,7 +58,7 @@ class Project (object) :
         # Update the existing config file with the project type XML file
         # if needed
         newXmlDefaults = os.path.join(self.local.rapumaConfigFolder, self.projectMediaIDCode + '.xml')
-        xmlConfig = getXMLSettings(newXmlDefaults)
+        xmlConfig = self.tools.getXMLSettings(newXmlDefaults)
         newConf = ConfigObj(xmlConfig.dict(), encoding='utf-8').override(self.projConfig)
         for s,v in self.projConfig.items() :
             if s not in newConf :
@@ -70,13 +71,13 @@ class Project (object) :
             self.projConfig.filename = self.local.projConfFile
 
         # Up the creatorVersion on the project if needed
-        if not testForSetting(self.projConfig, 'ProjectInfo', 'projectCreatorVersion') :
+        if not self.tools.testForSetting(self.projConfig, 'ProjectInfo', 'projectCreatorVersion') :
             self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
         else :
             if self.projConfig['ProjectInfo']['projectCreatorVersion'] != self.systemVersion :
                 self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
-                writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
 
         # If this is a valid project we might as well put in the folders
         for folder in self.local.projFolders :
@@ -142,16 +143,16 @@ class Project (object) :
         fullName = cType + '_' + mType.capitalize()
         managerDefaults = None
         # Insert the Manager section if it is not already there
-        buildConfSection(self.projConfig, 'Managers')
-        if not testForSetting(self.projConfig['Managers'], fullName) :
-            buildConfSection(self.projConfig['Managers'], fullName)
+        self.tools.buildConfSection(self.projConfig, 'Managers')
+        if not self.tools.testForSetting(self.projConfig['Managers'], fullName) :
+            self.tools.buildConfSection(self.projConfig['Managers'], fullName)
 
         # Update settings if needed
         update = False
-        managerDefaults = getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
+        managerDefaults = self.tools.getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
         for k, v, in managerDefaults.iteritems() :
             # Do not overwrite if a value is already there
-            if not testForSetting(self.projConfig['Managers'][fullName], k) :
+            if not self.tools.testForSetting(self.projConfig['Managers'][fullName], k) :
                 self.projConfig['Managers'][fullName][k] = v
                 # If we are dealing with an empty string, don't bother writing out
                 # Trying to avoid needless conf updating here. Just in case we are
@@ -160,7 +161,7 @@ class Project (object) :
                     update = True
         # Update the conf if one or more settings were changed
         if update :
-            if writeConfFile(self.projConfig) :
+            if self.tools.writeConfFile(self.projConfig) :
                 self.log.writeToLog(self.errorCodes['0210'],[fullName])
             else :
                 self.log.writeToLog(self.errorCodes['0211'],[fullName])
@@ -181,7 +182,7 @@ class Project (object) :
         self.gid = gid
 
         # Do a basic test for exsistance
-        if isConfSection(self.projConfig['Groups'], gid) :
+        if self.tools.isConfSection(self.projConfig['Groups'], gid) :
 
             # Now create the group and pass the params on
             self.createGroup(gid).render(cidList, force)
@@ -191,7 +192,7 @@ class Project (object) :
     def isGroup (self, gid) :
         '''Return True if this gid is found in the project config.'''
 
-        return isConfSection(self.projConfig['Groups'], gid)
+        return self.tools.isConfSection(self.projConfig['Groups'], gid)
 
 
     def createGroup (self, gid) :
@@ -258,7 +259,7 @@ class Project (object) :
         currentPid = self.userConfig['System']['current']
         if pid != currentPid :
             self.userConfig['System']['current'] = pid
-            writeConfFile(self.userConfig)
+            self.tools.writeConfFile(self.userConfig)
 
 
     def run (self, command, opts, userConfig) :
@@ -267,7 +268,7 @@ class Project (object) :
         if command in self.commands :
             self.commands[command].run(opts, self, userConfig)
         else :
-            terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
+            self.tools.terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
 
 
     def isProject (self, pid) :
@@ -279,25 +280,6 @@ class Project (object) :
                 pass
         except :
             sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
-
-
-#    def installFile (self, source, path, force) :
-#        '''Install a file into a project. Overwrite if force is set to True.'''
-
-#        source = resolvePath(source)
-#        target = os.path.join(resolvePath(path), fName(source))
-#        if not os.path.isfile(source) :
-#            self.log.writeToLog('PROJ-070', [source])
-
-#        if os.path.isfile(target) :
-#            if force :
-#                if not shutil.copy(source, target) :
-#                    self.log.writeToLog('PROJ-080', [source,target])
-#            else :
-#                self.log.writeToLog('PROJ-090', [source,target])
-#        else :
-#            if not shutil.copy(source, target) :
-#                self.log.writeToLog('PROJ-080', [source,target])
 
 
 

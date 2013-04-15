@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, unicodedata, subprocess
+import codecs, os, unicodedata, subprocess, shutil, re
 from configobj                  import ConfigObj
 from importlib                  import import_module
 from functools                  import partial
@@ -24,13 +24,14 @@ import palaso.sfm as sfm
 from palaso.sfm                 import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_commander import Commander
 from rapuma.core.proj_log       import ProjLog
 from rapuma.core.proj_compare   import Compare
+from rapuma.core.proj_backup    import ProjBackup
 from rapuma.core.paratext       import Paratext
 from rapuma.project.project     import Project
 
@@ -40,11 +41,11 @@ class ProjSetup (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
-        self.user               = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig         = self.user.userConfig
         self.pid                = pid
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
+        self.tools              = Tools()
+        self.backup             = ProjBackup(pid)
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -141,14 +142,17 @@ class ProjSetup (object) :
             '0240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             '0250' : ['ERR', 'Component group [<<1>>] not found. Cannot remove component.'],
             '0260' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
-            '0260' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
+            '0265' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
             '0270' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
+            '0272' : ['MSG', 'Update for [<<1>>] component is unnecessary. Source is the same as the group source copy.'],
+            '0273' : ['ERR', 'The compont [<<1>>] is not a part of the [<<2>>] group.'],
+            '0274' : ['MSG', 'Force set to true, component [<<1>>] has been overwritten in the [<<2>>] group.'],
             '0280' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
-            '0410' : ['ERR', 'The group lock/unlock function failed with this error: [<<1>>]'],
+            '0410' : ['ERR', 'The group [<<1>>] lock/unlock function failed with this error: [<<2>>]'],
             '0420' : ['LOG', 'The lock setting on the [<<1>>] group has been set to [<<2>>].'],
             '0430' : ['WRN', 'The [<<1>>] group is not found. Lock NOT set to [<<2>>].'],
 
@@ -169,7 +173,7 @@ class ProjSetup (object) :
             '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
-            '1160' : ['WRN', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
+            '1160' : ['ERR', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
             '1165' : ['LOG', 'Component preprocessing script is already installed.'],
 
             '2020' : ['LOG', 'Default style file already exists in the project. Will not replace with a new copy.'],
@@ -188,10 +192,11 @@ class ProjSetup (object) :
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
-            self.log                = ProjLog(self.local, self.user)
+            self.log                = ProjLog(self.pid)
             self.paratext           = Paratext(self.pid)
+            self.compare            = Compare(self.pid)
         except :
             pass
 #        except Exception as e :
@@ -221,13 +226,13 @@ class ProjSetup (object) :
             if not os.path.exists(sourcePath) :
                 self.log.writeToLog(self.errorCodes['0201'], [csid])
         else :
-            sourcePath = resolvePath(sourcePath)
+            sourcePath = self.tools.resolvePath(sourcePath)
             if not os.path.exists(sourcePath) :
                 self.log.writeToLog(self.errorCodes['0203'])
 
             # Reset the source path for this csid
             self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = sourcePath
-            writeConfFile(self.userConfig)
+            self.tools.writeConfFile(self.userConfig)
 
         # Sort out the list
         if not cidList :
@@ -235,19 +240,30 @@ class ProjSetup (object) :
         else :
             if type(cidList) != list :
                  cidList = cidList.split()
+                 # Do a quick validity test
+                 for cid in cidList :
+                    if not cid in self.projConfig['Groups'][gid]['cidList'] :
+                        self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
 
         # Process each cid
         for cid in cidList :
-            target          = self.getTargetFile(gid, cid)
-            targetSource    = self.getTargetSourceFile(gid, cid)
+            target          = self.getWorkingFile(gid, cid)
+            targetSource    = self.getWorkingSourceFile(gid, cid)
             source          = self.getSourceFile(gid, cid)
-            
-            if Compare(self.pid).isDifferent(source, targetSource) or force :
+            if force :
                 self.lockUnlock(gid, False)
+                self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 self.installUsfmWorkingText(gid, cid, force)
+            # Do a compare to see if we need to do this
+            elif self.compare.isDifferent(source, targetSource) :
+                self.compare.compareComponent(gid, cid, 'source')
+                self.installUsfmWorkingText(gid, cid, force)
+            else :
+                self.log.writeToLog(self.errorCodes['0272'], [cid])
 
-        # Now be sure it is locked down
-        self.lockUnlock(gid, True)
+        # Now be sure the group is locked down before we go
+        if self.projConfig['Groups'][gid]['isLocked'] == 'False' :
+            self.lockUnlock(gid, True)
 
 
     def addGroup (self, cType, gid, cidList, csid, sourcePath = None, force = False) :
@@ -256,8 +272,8 @@ class ProjSetup (object) :
         the vars here are pretty good.'''
 
         # Do not want to add this group, non-force, if it already exsists.
-        buildConfSection(self.projConfig, 'Groups')
-        if testForSetting(self.projConfig['Groups'], gid) and not force :
+        self.tools.buildConfSection(self.projConfig, 'Groups')
+        if self.tools.testForSetting(self.projConfig['Groups'], gid) and not force :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         sourceKey = csid + '_sourcePath'
@@ -288,9 +304,9 @@ class ProjSetup (object) :
             pass
 
         # Get persistant values from the config
-        buildConfSection(self.projConfig, 'Groups')
-        buildConfSection(self.projConfig['Groups'], gid)
-        newSectionSettings = getPersistantSettings(self.projConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
+        self.tools.buildConfSection(self.projConfig, 'Groups')
+        self.tools.buildConfSection(self.projConfig['Groups'], gid)
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
         if newSectionSettings != self.projConfig['Groups'][gid] :
             self.projConfig['Groups'][gid] = newSectionSettings
 
@@ -305,11 +321,11 @@ class ProjSetup (object) :
         self.addComponentType(cType)
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
-        if writeConfFile(self.projConfig) :
+        if self.tools.writeConfFile(self.projConfig) :
             self.log.writeToLog(self.errorCodes['0240'], [gid])
 
         # Update helper scripts
-        if str2bool(self.userConfig['System']['autoHelperScripts']) :
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             Commander(self.pid).updateScripts()
 
         # Initialize the project now to get settings into the project config
@@ -341,7 +357,7 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Remove subcomponents from the target if there are any
-        buildConfSection(self.projConfig, 'Groups')
+        self.tools.buildConfSection(self.projConfig, 'Groups')
         if isConfSection(self.projConfig['Groups'], gid) :
             for cid in cidList :
                 self.uninstallGroupComponent(gid, cid, force)
@@ -353,7 +369,7 @@ class ProjSetup (object) :
             
         # Now remove the config entry
         del self.projConfig['Groups'][gid]
-        if writeConfFile(self.projConfig) :
+        if self.tools.writeConfFile(self.projConfig) :
             self.log.writeToLog(self.errorCodes['0220'], [gid])
 
 
@@ -381,15 +397,15 @@ class ProjSetup (object) :
             if os.path.isfile(source) :
                 # First a comparison backup needs to be made of the working text
                 if os.path.isfile(targetComp) :
-                    makeWriteable(targetComp)
+                    self.tools.makeWriteable(targetComp)
                 shutil.copy(source, targetComp)
-                makeReadOnly(targetComp)
-                self.log.writeToLog(self.errorCodes['0270'], [fName(targetComp), cid])
+                self.tools.makeReadOnly(targetComp)
+                self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(targetComp), cid])
                 for fn in os.listdir(targetFolder) :
                     f = os.path.join(targetFolder, fn)
                     if f != targetComp :
                         os.remove(f)
-                        self.log.writeToLog(self.errorCodes['0280'], [fName(f), cid])
+                        self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
 
 
     def isSharedComponent (self, gid, cid) :
@@ -438,7 +454,7 @@ class ProjSetup (object) :
                         self.log.writeToLog(self.errorCodes['0230'], [cid])
 
                 else :
-                    self.log.writeToLog(self.errorCodes['0260'], [cid])
+                    self.log.writeToLog(self.errorCodes['0265'], [cid])
                     return False
             else :
                 self.log.writeToLog(self.errorCodes['0205'], [cType])
@@ -459,15 +475,15 @@ class ProjSetup (object) :
 
         Ctype = cType.capitalize()
         # Build the comp type config section
-        buildConfSection(self.projConfig, 'CompTypes')
-        buildConfSection(self.projConfig['CompTypes'], Ctype)
+        self.tools.buildConfSection(self.projConfig, 'CompTypes')
+        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
         if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
             self.projConfig['CompTypes'][Ctype] = newSectionSettings
             # Save the setting rightaway
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
 
 
     def addCompGroupSourcePath (self, csid, source) :
@@ -483,7 +499,7 @@ class ProjSetup (object) :
             else :
                 self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = os.path.split(source)[0]
 
-            writeConfFile(self.userConfig)
+            self.tools.writeConfFile(self.userConfig)
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog(self.errorCodes['300'], [str(e)])
@@ -500,9 +516,9 @@ class ProjSetup (object) :
         locked. However, if the group doesn't even exsist, it is assumed
         that it is unlocked and return False. :-)'''
 
-        if not testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
+        if not self.tools.testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
             return False
-        elif str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
+        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
             return True
         else :
             return False
@@ -516,16 +532,16 @@ class ProjSetup (object) :
             return True
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0410'], [gid])
+            self.log.writeToLog(self.errorCodes['0410'], [gid,str(e)])
 
 
     def setLock (self, gid, lock) :
         '''Set a group lock to True or False.'''
 
-        if testForSetting(self.projConfig['Groups'], gid) :
+        if self.tools.testForSetting(self.projConfig['Groups'], gid) :
             self.projConfig['Groups'][gid]['isLocked'] = lock
             # Update the projConfig
-            if writeConfFile(self.projConfig) :
+            if self.tools.writeConfFile(self.projConfig) :
                 # Report back
                 self.log.writeToLog(self.errorCodes['0420'], [gid, str(lock)])
                 return True
@@ -549,7 +565,7 @@ class ProjSetup (object) :
 
         # Test if this project already exists in the user's config file.
         if self.user.isRegisteredProject(self.pid) :
-            terminal('ERR: Halt! ID [' + self.pid + '] already defined for another project.')
+            self.tools.terminal('ERR: Halt! ID [' + self.pid + '] already defined for another project.')
             return
 
         # Add project to local Rapuma project registry
@@ -563,22 +579,22 @@ class ProjSetup (object) :
         if not os.path.isfile(self.local.projConfFile) :
             # Look for locked project in current folder
             if os.path.isfile(self.local.projConfFile + self.local.lockExt) :
-                terminal('ERR: Halt! Locked project already defined in target folder')
+                self.tools.terminal('ERR: Halt! Locked project already defined in target folder')
                 return
             # Look for project in parent folder (don't want project in project)
             elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projConfFileName)) :
-                terminal('ERR: Halt! Live project already defined in parent folder')
+                self.tools.terminal('ERR: Halt! Live project already defined in parent folder')
                 return
             # Look for locked project in parent folder (prevent project in project)
             elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projConfFileName + self.local.lockExt)) :
-                terminal('ERR: Halt! Locked project already defined in parent folder')
+                self.tools.terminal('ERR: Halt! Locked project already defined in parent folder')
                 return
             # Check if path to parent is valid
             elif not os.path.isdir(os.path.dirname(self.local.projHome)) :
-                terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(self.local.projHome))
+                self.tools.terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(self.local.projHome))
                 return
         else :
-            terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
+            self.tools.terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
             return
 
         # If we made it to this point, we need to make a new project folder
@@ -587,17 +603,17 @@ class ProjSetup (object) :
 
         # Create the project depeding on if it is from a template or not
         if tid :
-            templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
+            self.backup.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
         else :
             # If not from a template, just create a new version of the project config file
             ProjConfig(self.local).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
 
         # Add helper scripts if needed
-        if str2bool(self.userConfig['System']['autoHelperScripts']) :
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             Commander(self.pid).updateScripts()
 
         # Report what we did
-        terminal('Created new project [' + self.pid + ']')
+        self.tools.terminal('Created new project [' + self.pid + ']')
         return True
 
 
@@ -606,30 +622,30 @@ class ProjSetup (object) :
 
         # If no pid was given this fails
         if not self.pid :
-            terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
+            self.tools.terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
             return
 
         # Check if project is registered with Rapuma
-        if not testForSetting(self.userConfig, 'Projects', self.pid) :
-            terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
+        if not self.tools.testForSetting(self.userConfig, 'Projects', self.pid) :
+            self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
         else :
             # Remove references from user rapuma.conf
             if self.user.unregisterProject(self.pid) :
-                terminal('Removed [' + self.pid + '] from user configuration.')
+                self.tools.terminal('Removed [' + self.pid + '] from user configuration.')
             else :
-                terminal('Failed to remove [' + self.pid + '] from user configuration.')
+                self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
 
         # Delete everything in the project path
         if self.projHome :
             if os.path.exists(self.projHome) :
                 shutil.rmtree(self.projHome)
-                terminal('Removed project files for [' + self.pid + '] from hard drive.')
+                self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
             else :
-                terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
+                self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
                 return
 
         # Report the process is done
-        terminal('Removal process for [' + self.pid + '] is completed.')
+        self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
         return True
 
 
@@ -656,7 +672,7 @@ class ProjSetup (object) :
             
         # Test for existance
         if not os.path.exists(confFile) :
-            self.log.writeToLog(self.errorCodes['0810'], [fName(confFile)])
+            self.log.writeToLog(self.errorCodes['0810'], [self.tools.fName(confFile)])
             return
 
         # Load the file and make the change
@@ -686,21 +702,8 @@ class ProjSetup (object) :
         # Write out the original copy of the confObj which now 
         # has the change in it, then report what we did
         outConfObj.filename = confFile
-        if writeConfFile(outConfObj) :
+        if self.tools.writeConfFile(outConfObj) :
             self.log.writeToLog(self.errorCodes['0860'], [config, section, key, unicode(oldValue), unicode(newValue)])
-
-
-    def getGroupSourcePath (self, gid) :
-        '''Get the source path for a specified group.'''
-
-#        import pdb; pdb.set_trace()
-        csid = self.projConfig['Groups'][gid]['csid']
-
-        try :
-            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0870'], [gid, str(e)])
 
 
 ###############################################################################
@@ -708,6 +711,19 @@ class ProjSetup (object) :
 ###############################################################################
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
+
+    def getGroupSourcePath (self, gid) :
+        '''Get the source path for a specified group.'''
+
+#        import pdb; pdb.set_trace()
+
+        csid = self.projConfig['Groups'][gid]['csid']
+        try :
+            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.tools.terminal('Could not find the path for group: [' + gid + '], This was the error: ' + str(e))
+
 
     def getSourceFile (self, gid, cid) :
         '''Get the source file name with path.'''
@@ -726,8 +742,8 @@ class ProjSetup (object) :
         return os.path.join(sourcePath, sName)
 
 
-    def getTargetFile (self, gid, cid) :
-        '''Get the target file name with path.'''
+    def getWorkingFile (self, gid, cid) :
+        '''Return the working file name with path.'''
 
         csid            = self.projConfig['Groups'][gid]['csid']
         cType           = self.projConfig['Groups'][gid]['cType']
@@ -735,8 +751,14 @@ class ProjSetup (object) :
         return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
 
 
-    def getTargetSourceFile (self, gid, cid) :
-        '''Get the target source file name with path.'''
+    def getWorkCompareFile (self, gid, cid) :
+        '''Return the working compare file (saved from last update) name with path.'''
+
+        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+    def getWorkingSourceFile (self, gid, cid) :
+        '''Get the working source file name with path.'''
 
         targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
         source          = self.getSourceFile(gid, cid)
@@ -754,12 +776,12 @@ class ProjSetup (object) :
 #        import pdb; pdb.set_trace()
 
         cType               = self.projConfig['Groups'][gid]['cType']
-        usePreprocessScript = str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
+        usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
         grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
         rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
         targetFolder        = os.path.join(self.local.projComponentsFolder, cid)
-        target              = self.getTargetFile(gid, cid)
-        targetSource        = self.getTargetSourceFile(gid, cid)
+        target              = self.getWorkingFile(gid, cid)
+        targetSource        = self.getWorkingSourceFile(gid, cid)
         source              = self.getSourceFile(gid, cid)
 
         # Copy the source to the working text folder. We do not want to do
@@ -778,7 +800,7 @@ class ProjSetup (object) :
                 self.log.writeToLog(self.errorCodes['1120'], [source])
 
         # Now do the age checks and copy if source is newer than target
-        if force or not os.path.isfile(target) or isOlder(target, source) :
+        if force or not os.path.isfile(target) or self.tools.isOlder(target, source) :
 
             # Make target folder if needed
             if not os.path.isdir(targetFolder) :
@@ -790,12 +812,12 @@ class ProjSetup (object) :
                 # Don't bother if we copied from it in the first place
                 if targetSource != source :
                     # Reset permissions to overwrite
-                    makeWriteable(targetSource)
+                    self.tools.makeWriteable(targetSource)
                     shutil.copy(source, targetSource)
-                    makeReadOnly(targetSource)
+                    self.tools.makeReadOnly(targetSource)
             else :
                 shutil.copy(source, targetSource)
-                makeReadOnly(targetSource)
+                self.tools.makeReadOnly(targetSource)
 
             # To be sure nothing happens, copy from our project source
             # backup file. (Is self.style.defaultStyFile the best thing?)
@@ -827,7 +849,7 @@ class ProjSetup (object) :
                     self.log.writeToLog(self.errorCodes['1140'], [cid])
                     return True
             else :
-                self.log.writeToLog(self.errorCodes['1150'], [source,fName(target)])
+                self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
                 return False
         else :
             return True
@@ -840,7 +862,7 @@ class ProjSetup (object) :
         sourceEncode        = self.projConfig['Managers']['usfm_Text']['sourceEncode']
         workEncode          = self.projConfig['Managers']['usfm_Text']['workEncode']
         unicodeNormalForm   = self.projConfig['Managers']['usfm_Text']['unicodeNormalForm']
-        validateUsfm        = str2bool(self.projConfig['CompTypes']['Usfm']['validateUsfm'])
+        validateUsfm        = self.tools.str2bool(self.projConfig['CompTypes']['Usfm']['validateUsfm'])
 
         # Bring in our source text
         if sourceEncode == workEncode :
@@ -848,7 +870,7 @@ class ProjSetup (object) :
             lines = contents.read()
         else :
             # Lets try to change the encoding.
-            lines = decodeText(source, sourceEncode)
+            lines = self.tools.decodeText(source, sourceEncode)
 
         # Normalize the text
         normal = unicodedata.normalize(unicodeNormalForm, lines)
@@ -862,10 +884,10 @@ class ProjSetup (object) :
         # Validate the target USFM text (Defalt is True)
         if validateUsfm :
             if not self.usfmTextFileIsValid(target) :
-                self.log.writeToLog(self.errorCodes['1090'], [source,fName(target)])
+                self.log.writeToLog(self.errorCodes['1090'], [source,self.tools.fName(target)])
                 return False
         else :
-            self.log.writeToLog(self.errorCodes['1095'], [fName(target)])
+            self.log.writeToLog(self.errorCodes['1095'], [self.tools.fName(target)])
 
         return True
 
@@ -893,7 +915,11 @@ class ProjSetup (object) :
             stylesheet = usfm.default_stylesheet.copy()
             stylesheet_extra = style.parse(open(os.path.expanduser(defaultStyFile),'r'))
             stylesheet.update(stylesheet_extra)
-            doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Structure)
+            # FIXME: Keep an eye on this: error_level=sfm.level.Structure
+            # gave less than helpful feedback when a mal-formed verse was
+            # found. Switched to "Content" to get better error feedback
+#            doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Structure)
+            doc = usfm.parser(fh, stylesheet, error_level=sfm.level.Content)
             # With the doc text loaded up, we run a list across it
             # so the parser will either pass or fail
             testlist = list(doc)
@@ -915,7 +941,7 @@ class ProjSetup (object) :
         '''Turn on or off preprocessing on incoming component text.'''
 
         self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff.capitalize()
-        writeConfFile(self.projConfig)
+        self.tools.writeConfFile(self.projConfig)
         self.log.writeToLog('PROC-140', [onOff, gid])
 
 
@@ -926,9 +952,8 @@ class ProjSetup (object) :
         # Check and copy if needed
         if not os.path.isfile(grpPreprocessFile) :
             shutil.copy(rpmPreprocessFile, grpPreprocessFile)
-            makeExecutable(grpPreprocessFile)
+            self.tools.makeExecutable(grpPreprocessFile)
             self.log.writeToLog(self.errorCodes['1160'])
-            dieNow()
         else :
             self.log.writeToLog(self.errorCodes['1165'])
 
@@ -943,9 +968,9 @@ class ProjSetup (object) :
         # been set when we did the installation.
         err = subprocess.call([scriptFile, target])
         if err == 0 :
-            self.log.writeToLog(self.errorCodes['1010'], [fName(target), fName(scriptFile)])
+            self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(target), self.tools.fName(scriptFile)])
         else :
-            self.log.writeToLog(self.errorCodes['1020'], [fName(target), fName(scriptFile), str(err)])
+            self.log.writeToLog(self.errorCodes['1020'], [self.tools.fName(target), self.tools.fName(scriptFile), str(err)])
             return False
 
         return True
@@ -956,10 +981,10 @@ class ProjSetup (object) :
         a zip file or a single .py script file.'''
 
         scriptTargetFolder, fileName = os.path.split(target)
-        if isExecutable(source) :
+        if self.tools.isExecutable(source) :
             shutil.copy(source, target)
-            makeExecutable(target)
-        elif fName(source).split('.')[1].lower() == 'zip' :
+            self.tools.makeExecutable(target)
+        elif self.tools.fName(source).split('.')[1].lower() == 'zip' :
             myZip = zipfile.ZipFile(source, 'r')
             for f in myZip.namelist() :
                 data = myZip.read(f, source)
@@ -974,7 +999,7 @@ class ProjSetup (object) :
             myZip.close()
             return True
         else :
-            dieNow('Script is an unrecognized type: ' + fName(source) + ' Cannot continue with installation.')
+            self.tools.dieNow('Script is an unrecognized type: ' + self.tools.fName(source) + ' Cannot continue with installation.')
 
 
     def installPostProcess (self, cType, script, force = None) :
@@ -995,7 +1020,7 @@ class ProjSetup (object) :
         oldScript           = ''
         scriptName          = os.path.split(script)[1]
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTarget        = os.path.join(self.local.projScriptsFolder, fName(script).split('.')[0] + '.py')
+        scriptTarget        = os.path.join(self.local.projScriptsFolder, self.tools.fName(script).split('.')[0] + '.py')
         if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
             oldScript = scriptName
 
@@ -1016,26 +1041,26 @@ class ProjSetup (object) :
 
         # First check to see if there already is a script file, return if there is
         if os.path.isfile(scriptTarget) and not force :
-            self.log.writeToLog('POST-082', [fName(scriptTarget)])
+            self.log.writeToLog('POST-082', [self.tools.fName(scriptTarget)])
             return False
 
         # No script found, we can proceed
         if not os.path.isfile(scriptTarget) :
             self.scriptInstall(script, scriptTarget)
             if not os.path.isfile(scriptTarget) :
-                dieNow('Failed to install script!: ' + fName(scriptTarget))
-            self.log.writeToLog('POST-110', [fName(scriptTarget)])
+                self.tools.dieNow('Failed to install script!: ' + self.tools.fName(scriptTarget))
+            self.log.writeToLog('POST-110', [self.tools.fName(scriptTarget)])
         elif force :
             self.scriptInstall(script, scriptTarget)
             if not os.path.isfile(scriptTarget) :
-                dieNow('Failed to install script!: ' + fName(scriptTarget))
-            self.log.writeToLog('POST-115', [fName(scriptTarget)])
+                self.tools.dieNow('Failed to install script!: ' + self.tools.fName(scriptTarget))
+            self.log.writeToLog('POST-115', [self.tools.fName(scriptTarget)])
 
         # Record the script with the cType post process scripts list
         scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
-        if fName(scriptTarget) not in scriptList :
-            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = addToList(scriptList, fName(scriptTarget))
-            writeConfFile(self.projConfig)
+        if self.tools.fName(scriptTarget) not in scriptList :
+            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = self.tools.addToList(scriptList, self.tools.fName(scriptTarget))
+            self.tools.writeConfFile(self.projConfig)
 
         return True
 
@@ -1054,7 +1079,7 @@ class ProjSetup (object) :
         # Reset the field to ''
         if old != '' :
             self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog('POST-130', [old,Ctype])
 
         else :
@@ -1084,8 +1109,8 @@ class ProjSetup (object) :
             if os.path.exists(rapumaCmpStyFile) :
                 # No news is good news
                 if not shutil.copy(rapumaCmpStyFile, defaultStyFile) :
-                    makeReadOnly(defaultStyFile)
-                    self.log.writeToLog(self.errorCodes['2040'], [fName(defaultStyFile)])
+                    self.tools.makeReadOnly(defaultStyFile)
+                    self.log.writeToLog(self.errorCodes['2040'], [self.tools.fName(defaultStyFile)])
                     return True
                 else :
                     return False
@@ -1112,8 +1137,8 @@ class ProjSetup (object) :
             else :
                 # Create a blank file
                 with codecs.open(defaultExtStyFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(makeFileHeader(fName(defaultExtStyFile), description, False))
-                self.log.writeToLog(self.errorCodes['2040'], [fName(defaultExtStyFile)])
+                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(defaultExtStyFile), description, False))
+                self.log.writeToLog(self.errorCodes['2040'], [self.tools.fName(defaultExtStyFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -1132,8 +1157,8 @@ class ProjSetup (object) :
         # Create a blank file (only if there is none)
         if not os.path.exists(grpExtStyFile) :
             with codecs.open(grpExtStyFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(makeFileHeader(fName(grpExtStyFile), description, False))
-            self.log.writeToLog(self.errorCodes['2040'], [fName(grpExtStyFile)])
+                writeObject.write(self.tools.makeFileHeader(self.tools.fName(grpExtStyFile), description, False))
+            self.log.writeToLog(self.errorCodes['2040'], [self.tools.fName(grpExtStyFile)])
 
         # Need to return true here even if nothing was done
         return True
@@ -1147,16 +1172,16 @@ class ProjSetup (object) :
             self.removeUsfmStyFile(sType, force)
         else :
             self.project.log.writeToLog('STYL-005', [cType])
-            dieNow()
+            self.tools.dieNow()
 
 
     def recordStyleFile (self, gid, fileName, sType) :
         '''Record in the project conf file the style file being used.'''
 
         cType = self.projConfig['Groups'][gid]['cType']
-        self.project.projConfig['Managers'][cType + '_Style'][sType + 'StyleFile'] = fName(fileName)
-        writeConfFile(self.project.projConfig)
-        self.project.log.writeToLog('STYL-010', [fName(fileName),sType,cType])
+        self.project.projConfig['Managers'][cType + '_Style'][sType + 'StyleFile'] = self.tools.fName(fileName)
+        self.tools.writeConfFile(self.project.projConfig)
+        self.project.log.writeToLog('STYL-010', [self.tools.fName(fileName),sType,cType])
         return True
 
 
@@ -1177,6 +1202,6 @@ class ProjSetup (object) :
                 return False
         else :
             self.project.log.writeToLog('STYL-005', [self.cType])
-            dieNow()
+            self.tools.dieNow()
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -9,9 +9,6 @@
 
 # This class will handle book project tasks.
 
-# History:
-# 20111207 - djd - Started with intial file
-
 
 ###############################################################################
 ################################# Project Class ###############################
@@ -19,10 +16,10 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, codecs
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.project.manager     import Manager
 
 ###############################################################################
@@ -39,6 +36,7 @@ class Illustration (Manager) :
         super(Illustration, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                      = Tools()
         self.project                    = project
         self.cfg                        = cfg
         self.cType                      = cType
@@ -74,10 +72,10 @@ class Illustration (Manager) :
         if not self.userIllustrationsLibName :
             self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
             self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName'] = self.userIllustrationsLibName
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
 
         # Load the config object
-        self.illustrationConfig = initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
+        self.illustrationConfig = self.tools.initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
         # Load settings from the manager config
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)
@@ -122,26 +120,26 @@ class Illustration (Manager) :
         places = []
         if path :
             places.append(os.path.join(path, fileName))
-        places.append(os.path.join(resolvePath(self.userIllustrationsLib), fileName))
+        places.append(os.path.join(self.tools.resolvePath(self.userIllustrationsLib), fileName))
         target = os.path.join(self.projIllustrationsFolder, fileName)
         # See if the file is there or not
         for p in places :
             if os.path.isfile(p) :
                 if force :
                     if not shutil.copy(p, target) :
-                        self.log.writeToLog(self.errorCodes['0220'], [fName(p),'True'])
+                        self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(p),'True'])
                         return True
                 else :
                     if not os.path.isfile(target) :
                         if not shutil.copy(p, target) :
-                            self.log.writeToLog(self.errorCodes['0220'], [fName(p),'False'])
+                            self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(p),'False'])
                             return True
                     else :
-                        self.log.writeToLog(self.errorCodes['0230'], [fName(p)])
+                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(p)])
                         return True
 
         # No joy, we're hosed
-        self.log.writeToLog(self.errorCodes['0240'], [fName(p)])
+        self.log.writeToLog(self.errorCodes['0240'], [self.tools.fName(p)])
 
 
     def getPics (self, gid, cid) :
@@ -167,11 +165,11 @@ class Illustration (Manager) :
             self.log.writeToLog('ILUS-050', [fileName])
 
         # Check to see if this is a watermark file, if it is, remove config setting
-        if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
+        if self.tools.testForSetting(self.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
             org = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
             if org == fileName :
                 self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
-                writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
 
 
     def hasIllustrations (self, gid, bid) :
@@ -201,19 +199,19 @@ class Illustration (Manager) :
                     obj = self.illustrationConfig[gid][i]
                     thisRef = ''
                     # Filter out if needed with this
-                    if not str2bool(obj['useThisIllustration']) :
+                    if not self.tools.str2bool(obj['useThisIllustration']) :
                         continue
                     # Is a caption going to be used on this illustration?
                     caption = ''
                     if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
-                        if str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
-                            and str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
+                        if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
+                            and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
                             if obj['caption'] :
                                 caption = obj['caption']
                     # Work out if we want a caption reference or not for this illustration
                     if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
-                        if str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
-                            and str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
+                        if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
+                            and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
                             if obj['location'] :
                                 thisRef = obj['location']
                             else :
@@ -227,7 +225,7 @@ class Illustration (Manager) :
             return True
         except Exception as e :
             # If this doesn't work, we should probably quite here
-            dieNow('Error: Create piclist file failed with this error: ' + str(e))
+            self.tools.dieNow('Error: Create piclist file failed with this error: ' + str(e))
 
 
 

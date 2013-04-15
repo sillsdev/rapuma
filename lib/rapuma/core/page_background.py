@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -14,11 +15,11 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, difflib, subprocess
+import codecs, os, difflib, subprocess, shutil
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -30,11 +31,12 @@ class PageBackground (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid                    = pid
+        self.tools                  = Tools()
         self.rapumaHome             = os.environ.get('RAPUMA_BASE')
         self.userHome               = os.environ.get('RAPUMA_USER')
-        self.user                   = UserConfig(self.rapumaHome, self.userHome)
+        self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.pid                    = pid
         self.projHome               = None
         self.projectMediaIDCode     = None
         self.local                  = None
@@ -73,14 +75,14 @@ class PageBackground (object) :
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
-            self.log                = ProjLog(self.local, self.user)
+            self.log                = ProjLog(self.pid)
             self.layoutConfig       = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
             # Set booleans
-            self.useWatermark       = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-            self.useLines           = str2bool(self.layoutConfig['PageLayout']['useLines'])
-            self.useBoxBoarder      = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
+            self.useWatermark       = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+            self.useLines           = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+            self.useBoxBoarder      = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
             # File names
             self.projWatermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
             self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
@@ -100,7 +102,7 @@ class PageBackground (object) :
             self.rpmBoxBoarderFile          = os.path.join(self.rpmIllustrationsFolder, self.rpmBoxBoarderFileName)
         except Exception as e :
             # If this doesn't work, we should probably say something
-            terminal('Error: PageBackground() extra init failed because of: ' + str(e))
+            self.tools.terminal('Error: PageBackground() extra init failed because of: ' + str(e))
 
 
 ###############################################################################
@@ -116,7 +118,7 @@ class PageBackground (object) :
         self.layoutConfig['PageLayout']['useLines'] = False
         self.layoutConfig['PageLayout']['useBoxBoarder'] = False
         self.layoutConfig['PageLayout']['useCropmarks'] = False
-        if writeConfFile(self.layoutConfig) :
+        if self.tools.writeConfFile(self.layoutConfig) :
             self.log.writeToLog(self.errorCodes['0250'])
 
 
@@ -157,7 +159,7 @@ class PageBackground (object) :
                 change = True
 
         if change :
-            if writeConfFile(self.layoutConfig) :
+            if self.tools.writeConfFile(self.layoutConfig) :
                 self.log.writeToLog(self.errorCodes['0220'], [bType])
         else :
             self.log.writeToLog(self.errorCodes['0240'], [bType])
@@ -184,7 +186,7 @@ class PageBackground (object) :
                 change = True
 
         if change :
-            if writeConfFile(self.layoutConfig) :
+            if self.tools.writeConfFile(self.layoutConfig) :
                 self.log.writeToLog(self.errorCodes['0230'], [bType])
         else :
             self.log.writeToLog(self.errorCodes['0240'], [bType])
@@ -204,10 +206,10 @@ class PageBackground (object) :
         if not os.path.exists(self.projWatermarkFile) :
             try :
                 shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
-                self.log.writeToLog(self.errorCodes['0280'], [fName(self.projWatermarkFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projWatermarkFile)])
             except Exception as e :
                 # If this doesn't work, we should probably quite here
-                self.log.writeToLog(self.errorCodes['0290'], [fName(self.projWatermarkFile),str(e)])
+                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projWatermarkFile),str(e)])
 
 
     def installLinesFile (self) :
@@ -216,10 +218,10 @@ class PageBackground (object) :
         if not os.path.exists(self.projLinesFile) :
             try :
                 shutil.copy(self.rpmDefLinesFile, self.projLinesFile)
-                self.log.writeToLog(self.errorCodes['0280'], [fName(self.projLinesFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projLinesFile)])
             except Exception as e :
                 # If this doesn't work, we should probably quite here
-                self.log.writeToLog(self.errorCodes['0290'], [fName(self.projLinesFile),str(e)])
+                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projLinesFile),str(e)])
 
 
     def installBoxBoarderFile (self) :
@@ -228,10 +230,10 @@ class PageBackground (object) :
         if not os.path.exists(self.boxBoarderFile) :
             try :
                 shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
-                self.log.writeToLog(self.errorCodes['0280'], [fName(self.boxBoarderFile)])
+                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.boxBoarderFile)])
             except Exception as e :
                 # If this doesn't work, we should probably quite here
-                self.log.writeToLog(self.errorCodes['0290'], [fName(self.boxBoarderFile),str(e)])
+                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.boxBoarderFile),str(e)])
 
 
 

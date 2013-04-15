@@ -15,21 +15,27 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, fileinput, sys
 
 # Load the local classes
-from rapuma.core.tools      import *
+from rapuma.core.tools          import Tools
+from rapuma.core.proj_local     import ProjLocal
+from rapuma.core.user_config    import UserConfig
 
 
 class ProjLog (object) :
 
-    def __init__(self, local, userConf) :
+    def __init__(self, pid) :
         '''Do the primary initialization for this manager.'''
 
-        # Set values for this manager
-        self.local              = local
-        self.userConfig          = userConf.userConfig
-
+        self.tools              = Tools()
+        self.pid                = pid
+        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
+        self.userHome           = os.environ.get('RAPUMA_USER')
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
+        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
+        self.local              = ProjLocal(pid)
 
 
 ###############################################################################
@@ -70,7 +76,7 @@ class ProjLog (object) :
                 msg = errCode[1]
             code = errCode[0]
         else :
-            terminal('\nThe code: [' + errCode + '] is not recognized by the Rapuma system.')
+            self.tools.terminal('\nThe code: [' + errCode + '] is not recognized by the Rapuma system.')
             return
 
         # If args were given, do s/r on them and add 
@@ -85,21 +91,20 @@ class ProjLog (object) :
 
         # Write out everything but LOG messages to the terminal
         if code != 'LOG' and code != 'TOD' :
-            terminal('\n' + code + ' - ' + msg)
+            self.tools.terminal('\n' + code + ' - ' + msg)
 
         # Test to see if this is a live project by seeing if the project conf is
         # there.  If it is, we can write out log files.  Otherwise, why bother?
         if os.path.isfile(self.local.projConfFile) :
 
             # Build the event line
-            eventLine = '\"' + tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
+            eventLine = '\"' + self.tools.tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
 
             # Do we need a log file made?
-
             try :
                 if not os.path.isfile(self.local.projLogFile) or os.path.getsize(self.local.projLogFile) == 0 :
                     writeObject = codecs.open(self.local.projLogFile, "w", encoding='utf_8')
-                    writeObject.write('Rapuma event log file created: ' + tStamp() + '\n')
+                    writeObject.write('Rapuma event log file created: ' + self.tools.tStamp() + '\n')
                     writeObject.close()
 
                 # Now log the event to the top of the log file using preAppend().
@@ -117,13 +122,13 @@ class ProjLog (object) :
 
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                terminal("Failed to write message to log file: " + msg)
-                terminal('Internal error: [' + str(e) + ']')
-                dieNow()
+                self.tools.terminal("Failed to write message to log file: " + msg)
+                self.tools.terminal('Internal error: [' + str(e) + ']')
+                self.tools.dieNow()
             
             # Halt the process if this was an 'ERR' level type code
             if code == 'ERR' :
-                dieNow('Unrecoverable error.')
+                self.tools.dieNow('Unrecoverable error.')
 
         return
 
@@ -146,7 +151,7 @@ class ProjLog (object) :
             writeObject.write(eventLine + '\n')
             writeObject.close()
         except :
-            terminal('Error writing this event to error log: ' + eventLine)
+            self.tools.terminal('Error writing this event to error log: ' + eventLine)
 
         return
 
@@ -154,6 +159,8 @@ class ProjLog (object) :
     def preAppend (self, line, file_name) :
         '''Got the following code out of a Python forum.  This will pre-append a
         line to the beginning of a file.'''
+
+#        import pdb; pdb.set_trace()
 
         fobj = fileinput.FileInput(file_name, inplace=1)
         first_line = fobj.readline()

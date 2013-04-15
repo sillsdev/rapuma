@@ -20,7 +20,7 @@ import os, shutil, codecs, re, subprocess
 from configobj                  import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -36,11 +36,10 @@ class Binding (object) :
     def __init__(self, pid) :
         '''Do the primary initialization for this manager.'''
 
-        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
-        self.user               = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig         = self.user.userConfig
         self.pid                = pid
+        self.tools              = Tools()
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -71,9 +70,9 @@ class Binding (object) :
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
-            self.log                = ProjLog(self.local, self.user)
+            self.log                = ProjLog(self.pid)
         except :
             pass
 
@@ -89,19 +88,19 @@ class Binding (object) :
 
         if force :
             try :
-                if testForSetting(self.projConfig['Binding'], bgID) :
+                if self.tools.testForSetting(self.projConfig['Binding'], bgID) :
                     del self.projConfig['Binding'][bgID]
             except :
                 pass
 
         try :
             # Add the info to the components section
-            if not testForSetting(self.projConfig, 'Binding') :
-                buildConfSection(self.projConfig, 'Binding')
-            if not testForSetting(self.projConfig['Binding'], bgID) :
-                buildConfSection(self.projConfig['Binding'], bgID)
+            if not self.tools.testForSetting(self.projConfig, 'Binding') :
+                self.tools.buildConfSection(self.projConfig, 'Binding')
+            if not self.tools.testForSetting(self.projConfig['Binding'], bgID) :
+                self.tools.buildConfSection(self.projConfig['Binding'], bgID)
                 self.projConfig['Binding'][bgID]['gidList'] = gIDs.split()
-                writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0210'], [bgID])
             else :
                 self.log.writeToLog(self.errorCodes['0212'], [bgID])
@@ -113,9 +112,9 @@ class Binding (object) :
     def removeBindingGroup (self, bgID) :
         '''Remove a binding group from the project config.'''
 
-        if testForSetting(self.projConfig['Binding'], bgID) :
+        if self.tools.testForSetting(self.projConfig['Binding'], bgID) :
             del self.projConfig['Binding'][bgID]
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0220'], [bgID])
         else :
             self.log.writeToLog(self.errorCodes['0225'], [bgID])
@@ -149,15 +148,15 @@ class Binding (object) :
 
         # Collect the page count and record in group
         newPages = self.getPdfPages(output)
-        if testForSetting(self.projConfig['Binding'][bgID], 'totalPages') :
+        if self.tools.testForSetting(self.projConfig['Binding'][bgID], 'totalPages') :
             oldPages = int(self.projConfig['Binding'][bgID]['totalPages'])
             if oldPages != newPages or oldPages == 'None' :
                 self.projConfig['Binding'][bgID]['totalPages'] = newPages
-                writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
         else :
             self.projConfig['Binding'][bgID]['totalPages'] = newPages
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
 
 

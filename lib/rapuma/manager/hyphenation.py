@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -8,9 +8,6 @@
 ###############################################################################
 
 # This class will handle generic project hyphenation tasks.
-
-# History:
-# 20111207 - djd - Started with intial file
 
 
 ###############################################################################
@@ -23,7 +20,7 @@ import os, re, shutil, subprocess
 
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.project.manager     import Manager
 from rapuma.core.proj_config    import ConfigTools
 from rapuma.core.proj_compare   import Compare
@@ -46,6 +43,7 @@ class Hyphenation (Manager) :
         super(Hyphenation, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                  = Tools()
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
@@ -87,8 +85,8 @@ class Hyphenation (Manager) :
         self.ptHyphBakFile          = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
         # Misc Settings
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.useHyphenation         = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        self.useSourcePreprocess    = str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess'])
+        self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        self.useSourcePreprocess    = self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess'])
         # Data containers for this module
         self.allHyphenWords         = set()
 
@@ -141,7 +139,7 @@ class Hyphenation (Manager) :
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
             self.projConfig['Groups'][gid]['useHyphenation'] = True
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
             self.project.log.writeToLog(self.errorCodes['0250'], [self.cType])
         else :
             self.project.log.writeToLog(self.errorCodes['0255'], [self.cType])
@@ -155,7 +153,7 @@ class Hyphenation (Manager) :
         # Make sure we turn it on if it isn't already
         if self.useHyphenation :
             self.projConfig['Groups'][gid]['useHyphenation'] = False
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
             self.project.log.writeToLog(self.errorCodes['0260'], [self.cType])
         else :
             self.project.log.writeToLog(self.errorCodes['0265'], [self.cType])
@@ -175,7 +173,7 @@ class Hyphenation (Manager) :
         self.makeHyphenatedWords()
         # Quick sanity test
         if not os.path.isfile(self.compHyphFile) :
-            dieNow('Failed to create: ' + self.compHyphFile)
+            self.tools.dieNow('Failed to create: ' + self.compHyphFile)
         self.project.log.writeToLog(self.errorCodes['0270'], [self.cType])
 
 
@@ -204,7 +202,7 @@ class Hyphenation (Manager) :
             self.paratext.pt2GenHyphens(self.paratext.hyphenWords)
             self.paratext.pt2GenHyphens(self.paratext.softHyphenWords)
         else :
-            dieNow('Error: Editor not supported: ' + self.sourceEditor)
+            self.tools.dieNow('Error: Editor not supported: ' + self.sourceEditor)
 
         # Pull together all the words that will be in our final list.
         self.allHyphenWords.update(self.paratext.approvedWords)
@@ -229,7 +227,7 @@ class Hyphenation (Manager) :
         self.finalList.sort()
         # Output to the project storage file for other processes
         with codecs.open(self.compHyphFile, "w", encoding='utf_8') as compHyphObject :
-            compHyphObject.write(makeFileHeader(fName(self.compHyphFile), description))
+            compHyphObject.write(self.tools.makeFileHeader(self.tools.fName(self.compHyphFile), description))
             for word in self.finalList :
                 compHyphObject.write(word + '\n')
 

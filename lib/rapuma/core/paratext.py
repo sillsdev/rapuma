@@ -15,12 +15,12 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, dircache, subprocess
+import codecs, os, dircache, subprocess, re
 from configobj import ConfigObj
 from importlib import import_module
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -34,16 +34,15 @@ class Paratext (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
-        self.userHome               = os.environ.get('RAPUMA_USER')
-        self.user                   = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig             = self.user.userConfig
         self.pid                    = pid
+        self.tools                  = Tools()
+        self.user                   = UserConfig()
+        self.userConfig             = self.user.userConfig
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.projectMediaIDCode     = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        self.local                  = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+        self.local                  = ProjLocal(pid)
         self.projConfig             = ProjConfig(self.local).projConfig
-        self.log                    = ProjLog(self.local, self.user)
+        self.log                    = ProjLog(self.pid)
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.useHyphenation         = False
@@ -85,7 +84,7 @@ class Paratext (object) :
 #        import pdb; pdb.set_trace()
 
         try :
-            self.useHyphenation         = str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
+            self.useHyphenation         = self.tools.str2bool(self.projConfig['Managers'][self.cType + '_Hyphenation']['useHyphenation'])
         except :
             pass
 
@@ -113,7 +112,7 @@ class Paratext (object) :
 
         ptSet = self.getPTSettings(gid)
         chars = []
-        if testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
+        if self.tools.testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
             for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
                 # Leave it a lone if it is a single character
                 if len(c) == 1 :
@@ -152,7 +151,7 @@ class Paratext (object) :
 
         # Sanity test
         if not nameFormID :
-            dieNow('ERROR: usfm.PT_Tools.formPTName() could not determine the nameFormID. All is lost! Please crawl under your desk and wait for a large explosion. (Just kidding!)')
+            self.tools.dieNow('ERROR: usfm.PT_Tools.formPTName() could not determine the nameFormID. All is lost! Please crawl under your desk and wait for a large explosion. (Just kidding!)')
 
 #        import pdb; pdb.set_trace()
 
@@ -288,7 +287,7 @@ class Paratext (object) :
             ssfFile = self.findSsfFile(gid)
             if ssfFile :
                 if os.path.isfile(ssfFile) :
-                    return xmlFileToDict(ssfFile)
+                    return self.tools.xmlFileToDict(ssfFile)
 
 
     def getSourceEditor (self, gid) :
@@ -299,7 +298,7 @@ class Paratext (object) :
     #    import pdb; pdb.set_trace()
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+        if self.tools.testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
             se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
             if self.findSsfFile(gid) :
@@ -320,7 +319,7 @@ class Paratext (object) :
             # If we don't succeed, we should probably quite here
             terminal('No source path found for: [' + str(e) + ']')
             terminal('Please add a source path for this component type.')
-            dieNow()
+            self.tools.dieNow()
 
 
     def usfmCidInfo (self) :
@@ -487,7 +486,7 @@ class Paratext (object) :
         '''Run a hyphenation preprocess script on the project's source hyphenation
         file. This happens when the component type import processes are happening.'''
 
-        if str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
+        if self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
             if not os.path.isfile(preProcessFile) :
                 shutil.copy(rapumaPreProcessFile, preProcessFile)
                 makeExecutable(preProcessFile)
@@ -521,7 +520,7 @@ class Paratext (object) :
         if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
             utf8Copy(ptHyphFile, ptProjHyphBakFile)
-            makeReadOnly(ptProjHyphBakFile)
+            self.tools.makeReadOnly(ptProjHyphBakFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
 
@@ -563,9 +562,9 @@ class Paratext (object) :
         if not os.path.isfile(ptProjHyphFile) or isOlder(ptProjHyphFile, ptHyphFile) :
             self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
             self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
-            self.log.writeToLog(self.errorCodes['0250'], [fName(ptHyphFile)])
+            self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(ptHyphFile)])
         else :
-            self.log.writeToLog(self.errorCodes['0255'], [fName(ptHyphFile)])
+            self.log.writeToLog(self.errorCodes['0255'], [self.tools.fName(ptHyphFile)])
 
         # Continue by processing the files located in the project
         self.getAllPtHyphenWords(ptProjHyphFile, ptProjHyphErrFile)
@@ -659,7 +658,7 @@ class Paratext (object) :
             errWords = list(self.badWords)
             errWords.sort()
             with codecs.open(ptProjHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
-                wordErrorsObject.write('# ' + fName(ptProjHyphErrFile) + '\n')
+                wordErrorsObject.write('# ' + self.tools.fName(ptProjHyphErrFile) + '\n')
                 wordErrorsObject.write('# This is an auto-generated file which contains errors in the hyphenation words file.\n')
                 for word in errWords :
                     wordErrorsObject.write(word + '\n')
@@ -692,7 +691,7 @@ class Paratext (object) :
 
         # Die here if the diff is off (not 0)
         if diff != 0 :
-            dieNow('\nWord totals do not balance.\n\n' + rpt + 'Rapuma halted!\n')
+            self.tools.dieNow('\nWord totals do not balance.\n\n' + rpt + 'Rapuma halted!\n')
 
         return [['Total words', str(wrds)], ['Bad words', str(badw)], ['Exception words', str(excp)], ['Soft Hyphen words', str(soft)], ['Hyphen words', str(hyph)], ['Process words', str(pwrd)]]
 
@@ -765,22 +764,22 @@ class Paratext (object) :
             figDict['position'] = 't'
         if not figDict['location'] :
             figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
-        if not testForSetting(illustrationConfig, gid) :
-            buildConfSection(illustrationConfig, gid)
+        if not self.tools.testForSetting(illustrationConfig, gid) :
+            self.tools.buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not testForSetting(illustrationConfig[gid], figDict['illustrationID'].upper()) :
-            buildConfSection(illustrationConfig[gid], figDict['illustrationID'].upper())
+        if not self.tools.testForSetting(illustrationConfig[gid], figDict['illustrationID'].upper()) :
+            self.tools.buildConfSection(illustrationConfig[gid], figDict['illustrationID'].upper())
         for k in figDict.keys() :
             illustrationConfig[gid][figDict['illustrationID'].upper()][k] = figDict[k]
 
         # Write out the conf file to preserve the data found
-        writeConfFile(illustrationConfig)
+        self.tools.writeConfFile(illustrationConfig)
 
         # Just incase we need to keep the fig markers intact this will
         # allow for that. However, default behavior is to strip them
         # because usfmTex does not handle \fig markers. By returning
         # them here, they will not be removed from the working text.
-        if str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+        if self.tools.str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
             return '\\fig ' + figConts.group(1) + '\\fig*'
 
 
@@ -827,16 +826,16 @@ class Paratext (object) :
                 self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
                 self.customStyleFile = ''
 
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
 
             if force :
                 target = os.path.join(self.project.local.projStylesFolder, oldStyle)
                 if os.path.isfile(target) :
                     os.remove(target)
 
-                self.log.writeToLog('STYL-110', [fName(oldStyle),self.cType])
+                self.log.writeToLog('STYL-110', [self.tools.fName(oldStyle),self.cType])
             else :
-                self.log.writeToLog('STYL-120', [fName(oldStyle),self.cType])
+                self.log.writeToLog('STYL-120', [self.tools.fName(oldStyle),self.cType])
 
             return True
 
@@ -844,11 +843,11 @@ class Paratext (object) :
     def addExsitingUsfmStyFile (self, sFile, sType, force) :
         '''Add a specific style file that is on the local system.'''
 
-        sFile = resolvePath(sFile)
-        target = os.path.join(self.project.local.projStylesFolder, fName(sFile))
+        sFile = self.tools.resolvePath(sFile)
+        target = os.path.join(self.project.local.projStylesFolder, self.tools.fName(sFile))
 
         if not force and os.path.isfile(target) :
-            self.log.writeToLog('STYL-030', [fName(sFile)])
+            self.log.writeToLog('STYL-030', [self.tools.fName(sFile)])
             return False
         elif os.path.isfile(sFile) :
             # It's there? Good, we're done!
@@ -856,20 +855,20 @@ class Paratext (object) :
             if sType.lower() == 'main' :
                 if self.usfmStyleFileIsValid(sFile) :
                     shutil.copy(sFile, target)
-                    self.log.writeToLog('STYL-060', [fName(sFile)])
+                    self.log.writeToLog('STYL-060', [self.tools.fName(sFile)])
                     return True
                 else :
                     # We die if it does not validate
-                    self.log.writeToLog('STYL-070', [fName(sFile)])
+                    self.log.writeToLog('STYL-070', [self.tools.fName(sFile)])
             else :
                 # Assuming a custom style file we can grab most anything
                 # without validating it
                 shutil.copy(sFile, target)
-                self.log.writeToLog('STYL-065', [fName(sFile)])
+                self.log.writeToLog('STYL-065', [self.tools.fName(sFile)])
                 return True
         else :
             # Not finding the file may not be the end of the world 
-            self.log.writeToLog('STYL-020', [fName(sFile)])
+            self.log.writeToLog('STYL-020', [self.tools.fName(sFile)])
             return False
 
 
@@ -911,7 +910,7 @@ class Paratext (object) :
             if os.path.isfile(sFile) :
                 if self.usfmStyleFileIsValid(sFile) :
                     if not shutil.copy(sFile, target) :
-                        return fName(target)
+                        return self.tools.fName(target)
                 else :
                     self.log.writeToLog('STYL-075', [sFile,self.cType])
             else : 

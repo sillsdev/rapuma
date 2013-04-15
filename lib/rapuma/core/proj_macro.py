@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -19,7 +19,7 @@ import codecs, os
 from configobj                  import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -31,15 +31,17 @@ class ProjMacro (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid            = pid
+        self.tools          = Tools()
         self.rapumaHome     = os.environ.get('RAPUMA_BASE')
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
-        self.pid            = pid
         self.projHome       = None
         self.local          = None
         self.projConfig     = None
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
             'MCRO-000' : ['MSG', 'Messages for user macro issues (mainly found in project.py)'],
@@ -98,17 +100,17 @@ class ProjMacro (object) :
         oldMacro            = ''
         sourceMacro         = ''
         # FIXME: This needs to support a file extention such as .sh
-        if path and os.path.isfile(os.path.join(resolvePath(path))) :
-            sourceMacro     = os.path.join(resolvePath(path))
+        if path and os.path.isfile(os.path.join(self.tools.resolvePath(path))) :
+            sourceMacro     = os.path.join(self.tools.resolvePath(path))
         macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)
-        if testForSetting(self.projConfig['GeneralSettings'], 'userMacros') and name in self.projConfig['GeneralSettings']['userMacros'] :
+        if self.tools.testForSetting(self.projConfig['GeneralSettings'], 'userMacros') and name in self.projConfig['GeneralSettings']['userMacros'] :
             oldMacro = name
 
         # First check for prexsisting macro record
         if not force :
             if oldMacro :
                 self.log.writeToLog('MCRO-010', [oldMacro])
-                dieNow()
+                self.tools.dieNow()
 
         # Make the target folder if needed (should be there already, though)
         if not os.path.isdir(self.local.projUserMacrosFolder) :
@@ -116,9 +118,8 @@ class ProjMacro (object) :
 
         # First check to see if there already is a macro file, die if there is
         if os.path.isfile(macroTarget) and not force :
-            self.log.writeToLog('MCRO-020', [fName(macroTarget)])
-            dieNow()
-            
+            self.log.writeToLog('MCRO-020', [self.tools.fName(macroTarget)])
+
         # If force, then get rid of the file before going on
         if force :
             if os.path.isfile(macroTarget) :
@@ -141,16 +142,16 @@ class ProjMacro (object) :
         makeExecutable(macroTarget)
 
         # Record the macro with the project
-        if testForSetting(self.projConfig['GeneralSettings'], 'userMacros') :
+        if self.tools.testForSetting(self.projConfig['GeneralSettings'], 'userMacros') :
             macroList = self.projConfig['GeneralSettings']['userMacros']
-            if fName(macroTarget) not in macroList :
-                self.projConfig['GeneralSettings']['userMacros'] = addToList(macroList, fName(macroTarget))
-                writeConfFile(self.projConfig)
+            if self.tools.fName(macroTarget) not in macroList :
+                self.projConfig['GeneralSettings']['userMacros'] = self.tools.addToList(macroList, self.tools.fName(macroTarget))
+                self.tools.writeConfFile(self.projConfig)
         else :
-                self.projConfig['GeneralSettings']['userMacros'] = [fName(macroTarget)]
-                writeConfFile(self.projConfig)
+                self.projConfig['GeneralSettings']['userMacros'] = [self.tools.fName(macroTarget)]
+                self.tools.writeConfFile(self.projConfig)
 
-        self.log.writeToLog('MCRO-030', [fName(macroTarget)])
+        self.log.writeToLog('MCRO-030', [self.tools.fName(macroTarget)])
         return True
 
 
@@ -166,7 +167,7 @@ class ProjMacro (object) :
             if self.macroRunner(macroFile) :
                 return True
         else :
-            self.log.writeToLog('MCRO-060', [fName(macroFile)])
+            self.log.writeToLog('MCRO-060', [self.tools.fName(macroFile)])
 
 
     def macroRunner (self, macroFile) :
@@ -186,6 +187,6 @@ class ProjMacro (object) :
         except Exception as e :
             # If we don't succeed, we should probably quite here
             terminal('Macro failed with the following error: ' + str(e))
-            dieNow()
+            self.tools.dieNow()
 
 

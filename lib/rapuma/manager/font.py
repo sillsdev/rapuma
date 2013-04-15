@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -8,9 +8,6 @@
 ###############################################################################
 
 # This class will handle book project tasks.
-
-# History:
-# 20111207 - djd - Started with intial file
 
 
 ###############################################################################
@@ -20,9 +17,10 @@
 # this process
 
 import os, shutil, zipfile
+from configobj              import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools      import *
+from rapuma.core.tools      import Tools
 from rapuma.core.paratext   import Paratext
 from rapuma.project.manager import Manager
 
@@ -42,6 +40,7 @@ class Font (Manager) :
         super(Font, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode)
         self.project                = project
         self.cfg                    = cfg
@@ -54,11 +53,11 @@ class Font (Manager) :
         self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
+        newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
             # Save the setting rightaway
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
 
         self.compSettings = self.project.projConfig['Managers'][self.manager]
 
@@ -73,7 +72,7 @@ class Font (Manager) :
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
-                writeConfFile(self.project.projConfig)
+                self.tools.writeConfFile(self.project.projConfig)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -115,7 +114,7 @@ class Font (Manager) :
         # Create an empty default font config file if needed
         if not os.path.isfile(self.project.local.fontConfFile) :
             self.fontConfig.filename = self.project.local.fontConfFile
-            writeConfFile(self.fontConfig)
+            self.tools.writeConfFile(self.fontConfig)
             self.project.log.writeToLog(self.errorCodes['0010'])
         else :
             self.fontConfig = ConfigObj(self.project.local.fontConfFile, encoding='utf-8')
@@ -141,7 +140,7 @@ class Font (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Check for the font family bundle, look in user resources first
-        userSource = os.path.join(resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
+        userSource = os.path.join(self.tools.resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
         rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         source = ''
         if os.path.isfile(userSource) :
@@ -154,7 +153,7 @@ class Font (Manager) :
         if not os.path.isfile(source) :
             self.project.log.writeToLog(self.errorCodes['0241'], [source], 'font.checkForSubFont():0241')
 
-        if isInZip(font + '.xml', source) :
+        if self.tools.isInZip(font + '.xml', source) :
             xmlFile = font + '/' + font + '.xml'
             tmpFolder = os.path.join(self.project.local.projConfFolder, font)
             # Extract to a temp file/folder
@@ -162,13 +161,13 @@ class Font (Manager) :
             myzip.extract(xmlFile, self.project.local.projConfFolder)
             metaDataSource = os.path.join(self.project.local.projConfFolder, xmlFile)
             myzip.close()
-            fInfo = getXMLSettings(metaDataSource)
+            fInfo = self.tools.getXMLSettings(metaDataSource)
             # Now kill the temp file and folder
             os.remove(metaDataSource)
             if os.path.isdir(tmpFolder) :
                 shutil.rmtree(tmpFolder)
             # Finally check for a substitute font name
-            if testForSetting(fInfo['FontInformation'], 'substituteFontName') :
+            if self.tools.testForSetting(fInfo['FontInformation'], 'substituteFontName') :
                 return fInfo['FontInformation']['substituteFontName']
             else :
                 return font
@@ -186,12 +185,12 @@ class Font (Manager) :
         metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
         Ctype = cType.capitalize()
         if not os.path.isfile(metaDataSource) :
-            self.project.log.writeToLog('FONT-040', [fName(metaDataSource)])
-            dieNow()
+            self.project.log.writeToLog('FONT-040', [self.tools.fName(metaDataSource)])
+            self.tools.dieNow()
 
         # See if this font is already in the font config file
-        if not testForSetting(self.fontConfig, 'Fonts', font) :
-            buildConfSection(self.fontConfig, 'Fonts')
+        if not self.tools.testForSetting(self.fontConfig, 'Fonts', font) :
+            self.tools.buildConfSection(self.fontConfig, 'Fonts')
 
         # Set as primary for the calling cType if there is none now
         if not self.project.projConfig['Managers'][self.manager]['primaryFont'] :
@@ -204,35 +203,35 @@ class Font (Manager) :
             except :
                 pass
             # (Re)Inject the font info into the project format config file.
-            fInfo = getXMLSettings(metaDataSource)
+            fInfo = self.tools.getXMLSettings(metaDataSource)
             self.fontConfig['Fonts'][font] = fInfo.dict()
-            writeConfFile(self.fontConfig)
+            self.tools.writeConfFile(self.fontConfig)
             # Adjust installed fonts list if needed
             if len(self.project.projConfig['Managers'][self.manager]['installedFonts']) == 0 :
                 self.project.projConfig['Managers'][self.manager]['installedFonts'] = [font]
             else :
                 fontList = self.project.projConfig['Managers'][self.manager]['installedFonts']
                 if fontList != [font] :
-                    self.project.projConfig['Managers'][self.manager]['installedFonts'] = addToList(fontList, font)
+                    self.project.projConfig['Managers'][self.manager]['installedFonts'] = self.tools.addToList(fontList, font)
             primFont = self.project.projConfig['Managers'][self.manager]['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
                 self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
 
             self.project.log.writeToLog(self.errorCodes['0245'], [font])
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
             return True
 
         else :
-            if testForSetting(self.fontConfig['Fonts'], font) :
+            if self.tools.testForSetting(self.fontConfig['Fonts'], font) :
                 self.project.log.writeToLog(self.errorCodes['0247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
                 try :
                     x = self.fontConfig['Fonts'][font]
                 except :
-                    fInfo = getXMLSettings(metaDataSource)
+                    fInfo = self.tools.getXMLSettings(metaDataSource)
                     self.fontConfig['Fonts'][font] = fInfo.dict()
-                    writeConfFile(self.fontConfig)
+                    self.tools.writeConfFile(self.fontConfig)
                     self.project.log.writeToLog(self.errorCodes['0245'], [font])
 
             # Adjust installed fonts list if needed
@@ -241,14 +240,14 @@ class Font (Manager) :
             else :
                 fontList = self.project.projConfig['Managers'][self.manager]['installedFonts']
                 if fontList != [font] :
-                    self.project.projConfig['Managers'][self.manager]['installedFonts'] = addToList(fontList, font)
+                    self.project.projConfig['Managers'][self.manager]['installedFonts'] = self.tools.addToList(fontList, font)
 
             primFont = self.project.projConfig['Managers'][self.manager]['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
                 self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
 
             self.project.log.writeToLog(self.errorCodes['0245'], [font])
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
             return True
 
 
@@ -275,7 +274,7 @@ class Font (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Look in user resources first
-        userSource = os.path.join(resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
+        userSource = os.path.join(self.tools.resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
         rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
         confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
         if os.path.isfile(userSource) :
@@ -292,7 +291,7 @@ class Font (Manager) :
             except :
                 pass
             if extract(source, confXml) :
-                self.project.log.writeToLog(self.errorCodes['0260'], [fName(source)])
+                self.project.log.writeToLog(self.errorCodes['0260'], [self.tools.fName(source)])
                 return True
             else :
                 self.project.log.writeToLog(self.errorCodes['0265'], [font])
@@ -300,11 +299,11 @@ class Font (Manager) :
         else :
             # With nothing done yet, check for meta data file
             if os.path.isfile(confXml) :
-                self.project.log.writeToLog(self.errorCodes['0262'], [fName(source)])
+                self.project.log.writeToLog(self.errorCodes['0262'], [self.tools.fName(source)])
                 return True
             else :
                 if extract(source, confXml) :
-                    self.project.log.writeToLog(self.errorCodes['0267'], [fName(source)])
+                    self.project.log.writeToLog(self.errorCodes['0267'], [self.tools.fName(source)])
                     return True
                 else :
 
@@ -351,7 +350,7 @@ class Font (Manager) :
                     self.project.projConfig['Managers'][self.manager]['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
-            if testForSetting(self.fontConfig['Fonts'], font) :
+            if self.tools.testForSetting(self.fontConfig['Fonts'], font) :
                 del self.fontConfig['Fonts'][font]
                 return True
 
@@ -373,8 +372,8 @@ class Font (Manager) :
                 self.project.log.writeToLog('FONT-082', [font,])
 
             # Write out the new settings files
-            writeConfFile(self.fontConfig)
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.fontConfig)
+            self.tools.writeConfFile(self.project.projConfig)
             return True
         else :
             self.project.log.writeToLog('FONT-085', [font,Ctype])
@@ -413,7 +412,7 @@ class Font (Manager) :
 
         def setIt (Ctype, font) :
             self.project.projConfig['Managers'][self.manager]['primaryFont'] = font
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
             # Sanity check
             if self.project.projConfig['Managers'][self.manager]['primaryFont'] == font :
                 return True

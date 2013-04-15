@@ -48,7 +48,6 @@ from configobj import ConfigObj
 # Load the local classes
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.core.tools              import *
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.proj_setup         import ProjSetup
@@ -58,20 +57,20 @@ from rapuma.core.proj_commander     import Commander
 from rapuma.core.proj_compare       import Compare
 from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
+from rapuma.core.tools              import Tools
 
-# Instantiate User classes
-local           = ProjLocal(rapumaHome, userHome, projHome)
-uc              = UserConfig(rapumaHome, userHome)
-log             = ProjLog(local, uc)
+# Instantiate User config class
+uc              = UserConfig()
+tools           = Tools()
 
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130326200555'
+systemVersion   = '0.1.20130415214624'
 
 # Give a welcome message
-terminal('\n\t\tWelcome to ' + systemName)
-terminal('\n\t\t\tVersion ' + systemVersion + '\n')
+print '\n\t\tWelcome to ' + systemName
+print '\n\t\t\tVersion ' + systemVersion + '\n'
 
 ###########################################################################
 ########################### Rapuma Functions ##############################
@@ -82,7 +81,7 @@ def hasValidSourcePath (gid, csid) :
 
     try :
         path = uc.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
-        return os.path.isdir(resolvePath(path))
+        return os.path.isdir(tools.resolvePath(path))
     except :
         return False
 
@@ -112,22 +111,42 @@ def isTemplate (tid) :
 def initProject (pid, gid) :
     '''Initialize an existing project according to the project ID given.'''
 
-    local   = ProjLocal(rapumaHome, userHome, uc.userConfig['Projects'][pid]['projectPath'])
+    local   = ProjLocal(pid)
     pc      = ProjConfig(local)
-    log     = ProjLog(local, uc)
-    if testForSetting(pc.projConfig, 'ProjectInfo', 'projectIDCode') :
-        aProject = Project(uc.userConfig, pc.projConfig, local, log, systemVersion, gid)
-        return aProject
+    log     = ProjLog(pid)
+    aProject = Project(uc.userConfig, pc.projConfig, local, log, systemVersion, gid)
+    return aProject
 
 
-def accessHtmlHelp () :
-    '''Call on the Rapuma basic HTML help system.'''
+def trimLog (self, logFile, limit = 1000) :
+    '''Trim a log file.  This will take an existing log file and
+    trim it to the amount specified in the system file.'''
 
-    # Build the viewer command
-    cmds = uc.userConfig['System']['htmlHelpViewerCommand']
-    cmds.append(local.rapumaHelpIndexFile)
-    # Run the viewer command
-    rCode = subprocess.call(cmds)
+    # Of course this isn't needed if there isn't even a log file
+    if os.path.isfile(logFile) :
+
+        # Change this to an int()
+        limit = int(limit)
+        
+        # Read in the existing log file
+        readObject = codecs.open(logFile, "r", encoding='utf_8')
+        lines = readObject.readlines()
+        readObject.close()
+
+        # Process only if we have enough lines
+        if len(lines) > limit :
+            writeObject = codecs.open(logFile, "w", encoding='utf_8')
+            lineCount = 0
+            for line in lines :
+                if limit > lineCount :
+                    writeObject.write(line)
+                    lineCount +=1
+
+            writeObject.close()
+
+        return True
+    else :
+        return False
 
 
 ###############################################################################
@@ -140,19 +159,14 @@ def accessHtmlHelp () :
 # the help system will be called. Otherwise, Rapuma will quite.
 
 # The argument handler
-def userArguments (args, local) :
+def userArguments (args) :
     '''Process incoming command arguments.'''
-
-#    global local
 
     # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
         if args.about :
-            terminal('\n' + systemName + ' version ' + systemVersion + '\n')
-            terminal('About: ' + systemAbout + '\n')
-            return
-        if args.basic :
-            accessHtmlHelp()
+            print '\n' + systemName + ' version ' + systemVersion + '\n'
+            print 'About: ' + systemAbout + '\n'
             return
 
     # Pre-command process: System level commands
@@ -175,12 +189,12 @@ def userArguments (args, local) :
         pid = args.project_id
         # Source path is optional but if given, resolve it
         if args.sourcePath :
-            sourcePath = resolvePath(args.sourcePath)
+            sourcePath = tools.resolvePath(args.sourcePath)
             if not os.path.exists(sourcePath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
         # Target path is optional also but if given, resolve it
         if args.targetPath :
-            targetPath = resolvePath(args.targetPath)
+            targetPath = tools.resolvePath(args.targetPath)
             if not os.path.exists(targetPath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
 
@@ -209,8 +223,8 @@ def userArguments (args, local) :
                 ProjBackup(pid).pullFromCloud()
             else :
                 if args.targetPath :
-                    if os.path.exists(resolvePath(args.targetPath)) :
-                        ProjBackup(pid).pullFromCloud(os.path.join(resolvePath(args.targetPath), pid))
+                    if os.path.exists(tools.resolvePath(args.targetPath)) :
+                        ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.targetPath), pid))
                     else :
                         sys.exit('\nERROR: Path is not valid. Process halting.\n')
                 else :
@@ -272,17 +286,17 @@ def userArguments (args, local) :
             elif not args.source_id :
                 sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
             elif args.source :
-                if not resolvePath(args.source) :
+                if not tools.resolvePath(args.source) :
                     sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             elif args.source_id :
                 if not hasValidSourcePath(args.group_id, args.source_id) :
                     sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
             # Having sorted through any potential problems, try adding the group
-            ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, resolvePath(args.source), args.force)
+            ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
         # Remove a group from the project
         elif args.remove :
             ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
-            if str2bool(uc.userConfig['System']['autoHelperScripts']) :
+            if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                 Commander(args.project_id).removeScripts()
         # Update a component, --source is optional but if given it will
         elif args.update :
@@ -315,20 +329,12 @@ def userArguments (args, local) :
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
+        aProject = initProject(args.project_id, args.group_id)
         # Render vs. view command is just a matter of forcing the component
         # to be rendered if render is selected by the user. Otherwise, if
         # only view is requested, if force is set to False and the component
         # will not be rerendered if it already exsists.
-        if args.execute :
-            aProject.renderComponent(args.component_id.lower(), args.force)
-        # Update a single component
-        elif args.update :
-            aProject.updateComponent(args.component_id.lower(), args.force)
-        # Validate a single component
-        elif args.validate :
-            sys.exit('\nERROR: Validate not working yet (usfm_Text.testCompTextFile())\n')
-        # Compare a component with backups of working or source text
-        elif args.compare :
+        if args.compare :
             Compare(args.project_id).compareComponent(args.group_id, args.component_id.lower(), args.compare)
         # Commands for editing project files
         elif args.edit :
@@ -403,7 +409,7 @@ def userArguments (args, local) :
         elif args.add :
             filePath = ''
             if args.path :
-                filePath = resolvePath(args.path)
+                filePath = tools.resolvePath(args.path)
                 if not os.path.isfile(filePath) :
                     sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
             aProject.installPostProcess(args.component_type, filePath, args.force)
@@ -520,10 +526,11 @@ subparsers = parser.add_subparsers(help='sub-command help')
 helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Available choices
-mediaTypes =        ['book']
-componentTypes =    ['usfm']
-backupTypes =       ['archive', 'backup', 'cloud', 'template']
-backgrounds =       ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+mediaTypes          = ['book']
+componentTypes      = ['usfm']
+backupTypes         = ['archive', 'backup', 'cloud', 'template']
+backgrounds         = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+compareTests        = ['source', 'source-working', 'working']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -569,11 +576,7 @@ compCommand = subparsers.add_parser('component', help='General project component
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('group_id', help='The group ID this component is a part of.')
 compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
-compCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a lock is needed.')
-compCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific component in this group.')
-compCommand.add_argument('-v', '--validate', action='store_true', help='[NOT WORKING!] Validate a component file.')
-compCommand.add_argument('-c', '--compare', help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
-compCommand.add_argument('-u', '--update', action='store_true', help='Update a specific component in a specified group.')
+compCommand.add_argument('-c', '--compare', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a specific component from a specified group.')
 
 # Add binding subprocess arguments
@@ -672,7 +675,7 @@ backgroundCommand.add_argument('-a', '--add', action='store_true', help='Add a b
 backgroundCommand.add_argument('-r', '--remove', action='store_true', help='Remove background type.')
 
 # Send the collected arguments to the handler
-userArguments(parser.parse_args(), local)
+userArguments(parser.parse_args())
 
 
 ###############################################################################
@@ -680,7 +683,7 @@ userArguments(parser.parse_args(), local)
 ###############################################################################
 
 # In case there are any Canadians using this, politely say good bye
-terminal('\n\t\tThank you, please come again!\n')
+print '\n\t\tThank you, please come again!\n'
 
 
 

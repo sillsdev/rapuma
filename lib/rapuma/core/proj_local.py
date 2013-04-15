@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -10,9 +10,6 @@
 # This class will create an object that will hold all the general local info
 # for a project.
 
-# History:
-# 20120228 - djd - Start with user_config.py as a model
-
 
 ###############################################################################
 ################################ Component Class ##############################
@@ -21,26 +18,30 @@
 # this process
 
 import codecs, os, tempfile
+from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools          import Tools
+from rapuma.core.user_config    import UserConfig
 
 
 class ProjLocal (object) :
 
-    def __init__(self, rapumaHome, userHome, projHome) :
-        '''Intitate the whole class and create the object.'''
+    def __init__(self, pid) :
+        '''Intitate a class object which contains all the project folder locations.'''
 
-        self.rapumaHome         = rapumaHome
-        self.userHome           = userHome
-        self.projHome           = projHome
-
-# FIXME: Get back to this ASAP, need to write in what rapumaResources connects to
+        self.pid                = pid
+        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
+        self.userHome           = os.environ.get('RAPUMA_USER')
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
+        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
+        self.tools              = Tools()
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
         if os.path.exists(rapumaXMLDefaults) :
-            lc = xml_to_section(rapumaXMLDefaults)
+            lc = self.tools.xml_to_section(rapumaXMLDefaults)
         else :
             raise IOError, "Can't open " + rapumaXMLDefaults
             
@@ -91,7 +92,69 @@ class ProjLocal (object) :
         except :
             pass
 
-        
-        
-        
+        # Load the Rapuma conf file into an object
+        self.localUserConfig = ConfigObj(self.userConfFile, encoding='utf-8')
+
+        # Create a fresh projConfig object
+        if os.path.isfile(self.projConfFile) :
+            self.localProjConfig = ConfigObj(self.projConfFile, encoding='utf-8')
+
+
+###############################################################################
+########################### Project Local Functions ###########################
+###############################################################################
+
+#    def getGroupSourcePath (self, gid) :
+#        '''Get the source path for a specified group.'''
+
+##        import pdb; pdb.set_trace()
+
+#        csid = self.localProjConfig['Groups'][gid]['csid']
+#        try :
+#            return self.localUserConfig['Projects'][self.pid][csid + '_sourcePath']
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            terminal('Could not find the path for group: [' + gid + '], This was the error: ' + str(e))
+
+
+#    def getSourceFile (self, gid, cid) :
+#        '''Get the source file name with path.'''
+
+#        from rapuma.core.paratext       import Paratext
+#        sourcePath          = self.getGroupSourcePath(gid)
+#        cType               = self.localProjConfig['Groups'][gid]['cType']
+#        sourceEditor        = self.localProjConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+#        # Build the file name
+#        if sourceEditor.lower() == 'paratext' :
+#            sName = Paratext(self.pid).formPTName(gid, cid)
+#        elif sourceEditor.lower() == 'generic' :
+#            sName = Paratext(self.pid).formGenericName(gid, cid)
+
+#        return os.path.join(sourcePath, sName)
+
+
+#    def getWorkingFile (self, gid, cid) :
+#        '''Return the working file name with path.'''
+
+#        csid            = self.localProjConfig['Groups'][gid]['csid']
+#        cType           = self.localProjConfig['Groups'][gid]['cType']
+#        targetFolder    = os.path.join(self.projComponentsFolder, cid)
+#        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+
+
+#    def getWorkCompareFile (self, gid, cid) :
+#        '''Return the working compare file (saved from last update) name with path.'''
+
+#        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+#    def getWorkingSourceFile (self, gid, cid) :
+#        '''Get the working source file name with path.'''
+
+#        targetFolder    = os.path.join(self.projComponentsFolder, cid)
+#        source          = self.getSourceFile(gid, cid)
+#        sName           = os.path.split(source)[1]
+#        return os.path.join(targetFolder, sName + '.source')
+
+
 

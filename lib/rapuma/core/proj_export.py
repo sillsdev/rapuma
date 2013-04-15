@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -19,7 +19,7 @@ import codecs, os
 from configobj                  import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -31,15 +31,17 @@ class ProjExport (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid            = pid
+        self.tools          = Tools()
         self.rapumaHome     = os.environ.get('RAPUMA_BASE')
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
-        self.pid            = pid
         self.projHome       = None
         self.local          = None
         self.projConfig     = None
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
@@ -105,7 +107,7 @@ class ProjExport (object) :
 
         # Figure out target path
         if path :
-            path = resolvePath(path)
+            path = self.tools.resolvePath(path)
         else :
             parentFolder = os.path.dirname(self.local.projHome)
             path = os.path.join(parentFolder, 'Export')
@@ -129,13 +131,13 @@ class ProjExport (object) :
             # Test, no name = no success
             if not ptName :
                 self.log.writeToLog('XPRT-010')
-                dieNow()
+                self.tools.dieNow()
 
             target = os.path.join(path, ptName)
             source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
             # If shutil.copy() spits anything back its bad news
             if shutil.copy(source, target) :
-                self.log.writeToLog('XPRT-020', [fName(target)])
+                self.log.writeToLog('XPRT-020', [self.tools.fName(target)])
             else :
                 fList.append(target)
 
@@ -155,14 +157,14 @@ class ProjExport (object) :
                 for l in open(f, "rb") :
                     strObj.write(l)
                 # Write out string object to zip
-                myzip.writestr(fName(f), strObj.getvalue())
+                myzip.writestr(self.tools.fName(f), strObj.getvalue())
                 strObj.close()
             # Close out the zip and report
             myzip.close()
             # Clean out the folder
             for f in fList :
                 os.remove(f)
-            self.log.writeToLog('XPRT-030', [fName(archFile)])
+            self.log.writeToLog('XPRT-030', [self.tools.fName(archFile)])
         else :
             self.log.writeToLog('XPRT-030', [path])
 

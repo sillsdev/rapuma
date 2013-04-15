@@ -18,7 +18,7 @@ import codecs, os
 from configobj                  import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -30,11 +30,12 @@ class ProjEdit (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid            = pid
+        self.tools          = Tools()
         self.rapumaHome     = os.environ.get('RAPUMA_BASE')
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
-        self.pid            = pid
         self.projHome       = None
         self.local          = None
         self.projConfig     = None
@@ -110,7 +111,7 @@ class ProjEdit (object) :
             cidList = self.groups[gid].getSubcomponentList(gid)
             if len(cidList) > 1 :
                 self.log.writeToLog('EDIT-010', [cid])
-                dieNow()
+                self.tools.dieNow()
 
             self.createManager(cType, 'text')
             compWorkText = self.groups[gid].getCidPath(cid)
@@ -123,8 +124,8 @@ class ProjEdit (object) :
                     if os.path.isfile(d) :
                         editDocs.append(d)
             else :
-                self.log.writeToLog('EDIT-020', [fName(compWorkText)])
-                dieNow()
+                self.log.writeToLog('EDIT-020', [self.tools.fName(compWorkText)])
+                self.tools.dieNow()
 
         # Look at project global settings
         if glob :

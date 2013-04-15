@@ -19,7 +19,7 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -30,21 +30,22 @@ class Commander (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
-        self.user               = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig         = self.user.userConfig
         self.pid                = pid
+        self.tools              = Tools()
+#        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
+#        self.userHome           = os.environ.get('RAPUMA_USER')
+        self.user               = UserConfig()
+        self.userConfig         = self.user.userConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
         self.projConfig         = None
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
         }
-
 
 
     def finishInit (self) :
@@ -55,7 +56,7 @@ class Commander (object) :
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
         except :
             pass
@@ -68,7 +69,7 @@ class Commander (object) :
     def removeScripts (self) :
         '''Remove any unnecessary group control scripts from the project.'''
 
-        dieNow('removeScripts() not implemented yet.')
+        self.tools.dieNow('removeScripts() not implemented yet.')
 
 
     def updateScripts (self) :
@@ -86,7 +87,7 @@ class Commander (object) :
         '''Create scripts that process specific group components.'''
 
         # Output the scripts (If this is a new project we need to pass)
-        if isConfSection(self.projConfig, 'Groups') :
+        if self.tools.isConfSection(self.projConfig, 'Groups') :
             for gid in self.projConfig['Groups'].keys() :
                 allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
@@ -96,9 +97,9 @@ class Commander (object) :
                         writeObject.write(allScripts[key][1] + '\n\n')
 
                     # Make the script executable
-                    makeExecutable(fullFile)
+                    self.tools.makeExecutable(fullFile)
             
-            terminal('\nCompleted creating/recreating group helper scripts.\n')
+            self.tools.terminal('\nCompleted creating/recreating group helper scripts.\n')
         else :
             pass
 
@@ -107,7 +108,7 @@ class Commander (object) :
         '''Create scripts that process specific group components.'''
 
         # Output the scripts (If this is a new project we need to pass)
-        if isConfSection(self.projConfig, 'Binding') :
+        if self.tools.isConfSection(self.projConfig, 'Binding') :
             for bid in self.projConfig['Binding'].keys() :
                 allScripts = self.getBndScripInfo(bid)
                 for key in allScripts.keys() :
@@ -117,7 +118,7 @@ class Commander (object) :
                         writeObject.write(allScripts[key][1] + '\n\n')
 
                     # Make the script executable
-                    makeExecutable(fullFile)
+                    self.tools.makeExecutable(fullFile)
             
             terminal('\nCompleted creating/recreating binding helper scripts.\n')
         else :
@@ -140,12 +141,12 @@ class Commander (object) :
                 writeObject.write(allScripts[key][1] + '\n\n')
 
             # Make the script executable
-            makeExecutable(fullFile)
+            self.tools.makeExecutable(fullFile)
 
         # Outpu scripts for project groups
         # FIXME: write the code for this
 
-        terminal('\nCompleted creating/recreating static helper scripts.\n')
+        self.tools.terminal('\nCompleted creating/recreating static helper scripts.\n')
 
 
     def makeScriptHeader (self, desc, cmd) :

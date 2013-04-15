@@ -16,12 +16,12 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os
+import os, codecs
 from configobj import ConfigObj, Section
 #from functools import partial
 
 # Load the local classes
-from rapuma.core.tools              import *
+from rapuma.core.tools              import Tools
 from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
 
@@ -46,6 +46,7 @@ class Usfm (Group) :
         super(Usfm, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                  = Tools()
         self.pg_background          = PageBackground(project.projectIDCode)
         self.project                = project
         self.projConfig             = project.projConfig
@@ -87,7 +88,7 @@ class Usfm (Group) :
 #        self.grpPreprocessFile      = self.text.grpPreprocessFile
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
         if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
             self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
         # Set them here
@@ -138,7 +139,7 @@ class Usfm (Group) :
         self.layoutConfig           = self.layout.layoutConfig
         if not os.path.isfile(self.adjustmentConfFile) :
             if self.createProjAdjustmentConfFile() :
-                self.log.writeToLog(self.errorCodes['0010'], [fName(self.adjustmentConfFile)])
+                self.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.adjustmentConfFile)])
             else :
                 self.updateCompAdjustmentConf()
         # Now get the adj config
@@ -203,13 +204,13 @@ class Usfm (Group) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        useIllustrations        = str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
-        useHyphenation          = str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        useWatermark            = str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        useLines                = str2bool(self.layoutConfig['PageLayout']['useLines'])
-        usePageBorder           = str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
-        useBoxBoarder           = str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
-        useManualAdjustments    = str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
+        useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
+        useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        useWatermark            = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        useLines                = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+        usePageBorder           = self.tools.str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
+        useBoxBoarder           = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
+        useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
 
         # Check if there is a font installed
         if not self.font.varifyFont() :
@@ -244,7 +245,7 @@ class Usfm (Group) :
                 # Component adjustment file
                 cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
-                    if not os.path.isfile(cidAdjFile) or isOlder(cidAdjFile, self.adjustmentConfFile) :
+                    if not os.path.isfile(cidAdjFile) or self.tools.isOlder(cidAdjFile, self.adjustmentConfFile) :
                         # Remake the adjustment file (if needed)
                         self.createCompAdjustmentFile(cid)
                 else :
@@ -264,7 +265,7 @@ class Usfm (Group) :
                             self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
                             for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
-                                if isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
+                                if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
                                     # Remake the piclist file
                                     self.illustration.createPiclistFile(self.gid, cid)
                                     self.log.writeToLog(self.errorCodes['0265'], [cid])
@@ -311,7 +312,7 @@ class Usfm (Group) :
         nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
         if cStrPgNo != nStrPgNo :
             self.projConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
-            writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projConfig)
 
 
     def createCompAdjustmentFile (self, cid) :
@@ -325,11 +326,11 @@ class Usfm (Group) :
         # Check for a master adj conf file
         if os.path.exists(self.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
-            if not testForSetting(self.adjustmentConfig, self.gid) :
-                buildConfSection(self.adjustmentConfig, self.gid)
-                buildConfSection(self.adjustmentConfig[self.gid], cid)
+            if not self.tools.testForSetting(self.adjustmentConfig, self.gid) :
+                self.tools.buildConfSection(self.adjustmentConfig, self.gid)
+                self.tools.buildConfSection(self.adjustmentConfig[self.gid], cid)
                 self.adjustmentConfig[self.gid][cid]['%1.1'] = '1'
-                writeConfFile(self.adjustmentConfig)
+                self.tools.writeConfFile(self.adjustmentConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [self.gid])
                 return False
             for c in self.adjustmentConfig[self.gid].keys() :
@@ -340,10 +341,10 @@ class Usfm (Group) :
                         comp = c.lower()
                 except Exception as e :
                     # If this doesn't work, we should probably quite here
-                    dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
+                    self.tools.dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
                 if  comp == cid and len(self.adjustmentConfig[self.gid][c].keys()) > 0 :
                     with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                        writeObject.write(makeFileHeader(adjFile, description, True))
+                        writeObject.write(self.tools.makeFileHeader(adjFile, description, True))
                         # Output like this: JAS 1.13 +1
                         for k, v in self.adjustmentConfig[self.gid][c].iteritems() :
                             if k[0] in ['%', '#'] :
@@ -353,7 +354,7 @@ class Usfm (Group) :
                                 adj = '+' + str(v)
                             writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
 
-                        self.log.writeToLog(self.errorCodes['0230'], [fName(adjFile)])
+                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(adjFile)])
             return True
 
 
@@ -375,12 +376,12 @@ class Usfm (Group) :
 
         for gid in self.projConfig['Groups'].keys() :
             if gid not in self.adjustmentConfig.keys() :
-                buildConfSection(self.adjustmentConfig, gid)
+                self.tools.buildConfSection(self.adjustmentConfig, gid)
             for comp in self.projConfig['Groups'][gid]['cidList'] :
-                if not testForSetting(self.adjustmentConfig[gid], comp) :
-                    buildConfSection(self.adjustmentConfig[gid], comp)
+                if not self.tools.testForSetting(self.adjustmentConfig[gid], comp) :
+                    self.tools.buildConfSection(self.adjustmentConfig[gid], comp)
                 self.adjustmentConfig[gid][comp]['%1.1'] = '1'
-        writeConfFile(self.adjustmentConfig)
+        self.tools.writeConfFile(self.adjustmentConfig)
         return True
 
 
@@ -401,7 +402,7 @@ class Usfm (Group) :
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
-            dieNow()
+            self.tools.dieNow()
 
         return cType
 

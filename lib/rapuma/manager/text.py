@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -19,7 +19,7 @@
 import os, shutil, codecs, re, subprocess
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.project.manager     import Manager
 from rapuma.core.proj_config    import ConfigTools
 from rapuma.core.paratext       import Paratext
@@ -40,6 +40,7 @@ class Text (Manager) :
         super(Text, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode)
         self.configTools            = ConfigTools(project)
         self.project                = project
@@ -57,10 +58,10 @@ class Text (Manager) :
         self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
+        newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
 
         self.compSettings = self.project.projConfig['Managers'][self.manager]
 
@@ -93,12 +94,12 @@ class Text (Manager) :
         This cannot fail.'''
 
         se = ''
-        if testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+        if self.tools.testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
             se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
         if se != editor :
             self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
-            writeConfFile(self.project.projConfig)
+            self.tools.writeConfFile(self.project.projConfig)
 
 
     def updateManagerSettings (self, gid) :
@@ -122,7 +123,7 @@ class Text (Manager) :
 
             if not newCompSet == oldCompSet :
                 self.compSettings.merge(newCompSet)
-                writeConfFile(self.project.projConfig)
+                self.tools.writeConfFile(self.project.projConfig)
                 # Be sure to update the current session settings
                 for k, v in self.compSettings.iteritems() :
                     setattr(self, k, v)
@@ -134,10 +135,10 @@ class Text (Manager) :
                 self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
                 self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
 
-                writeConfFile(self.project.projConfig)
+                self.tools.writeConfFile(self.project.projConfig)
         else :
             self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
-            dieNow()
+            self.tools.dieNow()
 
         return True
 
@@ -153,6 +154,6 @@ class Text (Manager) :
                 return True
         else :
             self.project.log.writeToLog('TEXT-005', [self.cType])
-            dieNow()
+            self.tools.dieNow()
 
 

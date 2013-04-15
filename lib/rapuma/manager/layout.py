@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20111207
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -8,9 +8,6 @@
 ###############################################################################
 
 # This class will handle book project tasks.
-
-# History:
-# 20120218 - djd - Started with intial format manager file
 
 
 ###############################################################################
@@ -22,7 +19,7 @@
 import os, shutil
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.project.manager     import Manager
 
 
@@ -38,6 +35,7 @@ class Layout (Manager) :
         super(Layout, self).__init__(project, cfg)
 
         # List the renderers this manager supports
+        self.tools                          = Tools()
         self.cType                          = cType
         self.Ctype                          = cType.capitalize()
         self.manager                        = self.cType + '_Layout'
@@ -57,7 +55,7 @@ class Layout (Manager) :
         # Set local var and override in project object (if needed)
         self.project.local.layoutConfFile   = self.layoutConfFile
         # Load the config object
-        self.layoutConfig = initConfig(self.layoutConfFile, self.defaultXmlConfFile)
+        self.layoutConfig = self.tools.initConfig(self.layoutConfFile, self.defaultXmlConfFile)
         # Grab the projConfig settings for this manager
         for k, v in self.project.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

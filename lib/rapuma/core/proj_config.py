@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
+
 # By Dennis Drescher (dennis_drescher at sil.org)
 
 ###############################################################################
@@ -8,9 +8,6 @@
 ###############################################################################
 
 # This class will handle project configuration operations.
-
-# History:
-# 20120228 - djd - Start with user_config.py as a model
 
 
 ###############################################################################
@@ -23,7 +20,7 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools import Tools
 
 
 class ProjConfig (object) :
@@ -31,6 +28,7 @@ class ProjConfig (object) :
     def __init__(self, local) :
         '''Intitate the whole class and create the object.'''
 
+        self.tools          = Tools()
         self.local          = local
         self.projConfig     = ConfigObj(encoding='utf-8')
 
@@ -44,12 +42,12 @@ class ProjConfig (object) :
     def makeNewProjConf (self, local, pid, pmid, pname, cVersion) :
         '''Create a new project configuration file for a new project.'''
 
-        self.projConfig = ConfigObj(getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
+        self.projConfig = ConfigObj(self.tools.getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
         # Insert intitial project settings
         self.projConfig['ProjectInfo']['projectMediaIDCode']        = pmid
         self.projConfig['ProjectInfo']['projectName']               = pname
         self.projConfig['ProjectInfo']['projectCreatorVersion']     = cVersion
-        self.projConfig['ProjectInfo']['projectCreateDate']         = tStamp()
+        self.projConfig['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         self.projConfig['ProjectInfo']['projectIDCode']             = pid
         self.projConfig.filename                                    = local.projConfFile
         self.projConfig.write()

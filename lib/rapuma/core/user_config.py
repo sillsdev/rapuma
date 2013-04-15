@@ -19,23 +19,24 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools          import Tools
 
 
 class UserConfig (object) :
 
-    def __init__(self, rapumaHome, userHome) :
+    def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
-        self.rapumaHome     = rapumaHome
-        self.userHome       = userHome
-        self.userConfFile   = os.path.join(userHome, 'rapuma.conf')
-        
+        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
+        self.userHome           = os.environ.get('RAPUMA_USER')
+        self.userConfFile       = os.path.join(self.userHome, 'rapuma.conf')
+        self.tools              = Tools()
+
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'rapuma.xml')
         if os.path.exists(rapumaXMLDefaults) :
-            sysXmlConfig = xml_to_section(rapumaXMLDefaults)
+            self.tools.sysXmlConfig = self.tools.xml_to_section(rapumaXMLDefaults)
         else :
             raise IOError, "Can't open " + rapumaXMLDefaults
 
@@ -54,7 +55,7 @@ class UserConfig (object) :
 
         # Create a new conf object based on all the XML default settings
         # Then override them with any exsiting user settings.
-        newConfig = ConfigObj(sysXmlConfig.dict(), encoding='utf-8').override(self.userConfig)
+        newConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8').override(self.userConfig)
 
         # Put back the copied data of any project information that we might have
         # lost from the XML/conf file merging.
@@ -90,7 +91,7 @@ class UserConfig (object) :
             self.userConfig.filename = self.userConfFile
             self.userConfig['System'] = {}
             self.userConfig['System']['userName'] = 'Default User'
-            self.userConfig['System']['initDate'] = tStamp()
+            self.userConfig['System']['initDate'] = self.tools.tStamp()
             self.userConfig.write()
 
 
@@ -107,14 +108,14 @@ class UserConfig (object) :
         '''If it is not there, create an entry in the user's
         rapuma.conf located in the user's config folder.'''
 
-        buildConfSection(self.userConfig, 'Projects')
-        buildConfSection(self.userConfig['Projects'], pid)
+        self.tools.buildConfSection(self.userConfig, 'Projects')
+        self.tools.buildConfSection(self.userConfig['Projects'], pid)
 
         # Now add the project data
         self.userConfig['Projects'][pid]['projectName']         = pname
         self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
         self.userConfig['Projects'][pid]['projectPath']         = projHome
-        self.userConfig['Projects'][pid]['projectCreateDate']   = tStamp()
+        self.userConfig['Projects'][pid]['projectCreateDate']   = self.tools.tStamp()
 
         self.userConfig.write()
         return True
@@ -127,7 +128,7 @@ class UserConfig (object) :
         self.userConfig.write()
         
         # Check to see if we were succeful
-        if not isConfSection(self.userConfig['Projects'], pid) :
+        if not self.tools.isConfSection(self.userConfig['Projects'], pid) :
             return True
 
 
@@ -140,13 +141,13 @@ class UserConfig (object) :
                 self.userConfig['System']['userName'] = value
                 # Write out the results
                 self.userConfig.write()
-                terminal('\nRapuma user name setting changed from [' + oldName + '] to [' + value + '].\n\n')
+                self.tools.terminal('\nRapuma user name setting changed from [' + oldName + '] to [' + value + '].\n\n')
             else :
-                terminal('\nSame name given, nothing to changed.\n\n')
+                self.tools.terminal('\nSame name given, nothing to changed.\n\n')
 
         elif cmdType == 'resources' :
             # Before starting, check the path
-            path = resolvePath(value)
+            path = self.tools.resolvePath(value)
             if not os.path.isdir(path) :
                 sys.exit('\nERROR: Invalid path: '  + path + '\n\nProcess halted.\n')
 
@@ -174,7 +175,7 @@ class UserConfig (object) :
 
             # Write out the results
             self.userConfig.write()
-            terminal('\nRapuma resource folder setting created/updated.\n\n')
+            self.tools.terminal('\nRapuma resource folder setting created/updated.\n\n')
 
 
 

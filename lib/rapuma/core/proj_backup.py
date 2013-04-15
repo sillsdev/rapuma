@@ -15,11 +15,11 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, zipfile
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import *
+from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -31,11 +31,12 @@ class ProjBackup (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid            = pid
+        self.tools          = Tools()
         self.rapumaHome     = os.environ.get('RAPUMA_BASE')
         self.userHome       = os.environ.get('RAPUMA_USER')
-        self.user           = UserConfig(self.rapumaHome, self.userHome)
+        self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
-        self.pid            = pid
         self.projHome       = None
         self.local          = None
         self.projConfig     = None
@@ -69,9 +70,9 @@ class ProjBackup (object) :
         
         # If a projHome was succefully found, we can go on
         if self.projHome : 
-            self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local      = ProjLocal(self.pid)
             self.projConfig = ProjConfig(self.local).projConfig
-            self.log        = ProjLog(self.local, self.user)
+            self.log        = ProjLog(self.pid)
 
 
 ###############################################################################
@@ -106,12 +107,12 @@ class ProjBackup (object) :
             pmid = self.projConfig['ProjectInfo']['projectMediaIDCode']
             pCreate = self.projConfig['ProjectInfo']['projectCreateDate']
             if not isConfSection(self.userConfig['Projects'], pid) :
-                buildConfSection(self.userConfig['Projects'], pid)
+                self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
                 self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
                 self.userConfig['Projects'][pid]['projectPath']         = self.projHome
                 self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
-                writeConfFile(self.userConfig)
+                self.tools.writeConfFile(self.userConfig)
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [pid])
         else :
@@ -181,20 +182,20 @@ class ProjBackup (object) :
         userArchives = uc.userConfig['Resources']['archives']
         archTarget = ''
         if path :
-            path = resolvePath(path)
+            path = self.tools.resolvePath(path)
             if os.path.isdir(path) :
                 archTarget = os.path.join(path, archName)
             else :
-                terminal('\nError: The path given is not valid: [' + path + ']\n')
-                dieNow()
+                self.tools.terminal('\nError: The path given is not valid: [' + path + ']\n')
+                self.tools.dieNow()
         elif os.path.isdir(userArchives) :
             archTarget = os.path.join(userArchives, archName)
         elif os.path.isdir(os.path.dirname(aProject.local.projHome)) :
             # Default to the dir just above the project
             archTarget = os.path.dirname(aProject.local.projHome)
         else :
-            terminal('\nError: Cannot resolve a path to create the archive file!\n')
-            dieNow()
+            self.tools.terminal('\nError: Cannot resolve a path to create the archive file!\n')
+            self.tools.dieNow()
 
         # Get a list of files we don't want
         excludeFiles = self.makeExcludeFileList()
@@ -204,21 +205,21 @@ class ProjBackup (object) :
         # Rename the source dir to indicate it was archived
         bakArchProjDir = aProject.local.projHome + '(archived)'
         if os.path.isdir(bakArchProjDir) :
-            terminal('\nError: Cannot complete archival process!\n')
-            terminal('\nAnother archived version of this project exsits with the folder name of: ' + fName(bakArchProjDir) + '\n')
-            terminal('\nPlease remove or rename it and then repete the process.\n')
-            dieNow()
+            self.tools.terminal('\nError: Cannot complete archival process!\n')
+            self.tools.terminal('\nAnother archived version of this project exsits with the folder name of: ' + self.tools.fName(bakArchProjDir) + '\n')
+            self.tools.terminal('\nPlease remove or rename it and then repete the process.\n')
+            self.tools.dieNow()
         else :
             os.rename(aProject.local.projHome, bakArchProjDir)
 
         # Remove references from user rapuma.conf
         if uc.unregisterProject(pid) :
-            terminal('Removed [' + pid + '] from user configuration.\n')
+            self.tools.terminal('Removed [' + pid + '] from user configuration.\n')
         else :
-            terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
+            self.tools.terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
 
         # Finish here
-        terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
+        self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
 
     def zipUpProject (self, target, excludeFiles = None) :
@@ -271,14 +272,14 @@ class ProjBackup (object) :
             userArchives = uc.userConfig['Resources']['archives']
             archSource = os.path.join(userArchives, archName)
         else :
-            terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
-            dieNow()
+            self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
+            self.tools.dieNow()
 
         # Now set the target params
         if targetPath :
             if not os.path.isdir(targetPath) :
-                terminal('\nError: The path given is not valid: [' + targetPath + ']\n')
-                dieNow()
+                self.tools.terminal('\nError: The path given is not valid: [' + targetPath + ']\n')
+                self.tools.dieNow()
             else :
                 archTarget = os.path.join(targetPath, pid)
 
@@ -301,7 +302,7 @@ class ProjBackup (object) :
         uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
-        terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
+        self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
 
 ###############################################################################
@@ -316,24 +317,24 @@ class ProjBackup (object) :
         copy exists, it will overwrite it.'''
 
         if not self.isProject(self.pid) :
-            terminal('\nThe ' + self.pid + ' project is not registered. No backup was done.')
+            self.tools.terminal('\nThe ' + self.pid + ' project is not registered. No backup was done.')
             return False
 
         # Set some paths and file names
         backupName = self.pid + '.zip'
-        userBackups = resolvePath(self.userConfig['Resources']['backups'])
+        userBackups = self.tools.resolvePath(self.userConfig['Resources']['backups'])
         backupTarget = ''
         if os.path.isdir(userBackups) :
             backupTarget = os.path.join(userBackups, backupName)
         else :
-            terminal('\nError: User backup storage path not yet configured!\n')
-            dieNow()
+            self.tools.terminal('\nError: User backup storage path not yet configured!\n')
+            self.tools.dieNow()
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
         # Finish here
-        terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
+        self.tools.terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
         
         return True
 
@@ -349,10 +350,10 @@ class ProjBackup (object) :
 
         # Assuming the above, this will be the archive file name
         # Check to see if the archive exsists
-        backup = os.path.join(resolvePath(self.userConfig['Resources']['backups']), self.pid + '.zip')
-        if not os.path.exists(resolvePath(self.userConfig['Resources']['backups'])) :
-            terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
-            dieNow()
+        backup = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['backups']), self.pid + '.zip')
+        if not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['backups'])) :
+            self.tools.terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
+            self.tools.dieNow()
 
 #        import pdb; pdb.set_trace()
         # If there is an exsiting project make a temp backup in 
@@ -380,7 +381,7 @@ class ProjBackup (object) :
         self.registerProject()
 
         # Finish here (We will leave the backup-backup in place)
-        terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
+        self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
 
 
 ###############################################################################
@@ -440,7 +441,7 @@ class ProjBackup (object) :
 
         # Remove the temp project dir we made
         shutil.rmtree(targetDir)
-        terminal('\nCompleted creating template: ' + fName(target) + '\n')
+        self.tools.terminal('\nCompleted creating template: ' + self.tools.fName(target) + '\n')
 
 
     def templateToProject (self, uc, projHome, pid, tid, pname, source = None) :
@@ -450,16 +451,16 @@ class ProjBackup (object) :
 
         # Test to see if the project is already there
         if os.path.isdir(projHome) :
-            terminal('\nError: Project [' + pid + '] already exsits.')
-            dieNow()
+            self.tools.terminal('\nError: Project [' + pid + '] already exsits.')
+            self.tools.dieNow()
 
         if not source :
             source = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
 
         # Validate template
         if not os.path.isfile(source) :
-            terminal('\nError: Template not found: ' + source)
-            dieNow()
+            self.tools.terminal('\nError: Template not found: ' + source)
+            self.tools.dieNow()
 
         # Unzip the template in place to start the new project
         with zipfile.ZipFile(source, 'r') as myzip :
@@ -469,7 +470,7 @@ class ProjBackup (object) :
         pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
 
         pc['ProjectInfo']['projectName']               = pname
-        pc['ProjectInfo']['projectCreateDate']         = tStamp()
+        pc['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         pc['ProjectInfo']['projectIDCode']             = pid
         pc.filename                                    = os.path.join(projHome, 'Config', 'project.conf')
         pc.write()
@@ -481,7 +482,7 @@ class ProjBackup (object) :
         uc.registerProject(pid, pname, projectMediaIDCode, projHome)
         
         # Report what happened
-        terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
+        self.tools.terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
 
 
 ###############################################################################
@@ -500,7 +501,7 @@ class ProjBackup (object) :
         self.backupProject()
 
         # Get the paths we need
-        cloud               = os.path.join(resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+        cloud               = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
 
         # Get a total list of files from the project
         cn = 0
@@ -514,20 +515,20 @@ class ProjBackup (object) :
                 if not os.path.isfile(pFile) :
                     shutil.copy(cFile, pFile)
                     cn +=1
-                elif isOlder(pFile, cFile) :
+                elif self.tools.isOlder(pFile, cFile) :
                     if os.path.isfile(pFile) :
                         os.remove(pFile)
                     shutil.copy(cFile, pFile)
                     cr +=1
         # Report what happened
-        terminal('\nCompleted pulling data from the cloud.\n')
+        self.tools.terminal('\nCompleted pulling data from the cloud.\n')
         if cn == 0 and cr == 0 :
-            terminal('\tNo files updated.\n')
+            self.tools.terminal('\tNo files updated.\n')
         else :
             if cn > 0 :
-                terminal('\tAdded: ' + str(cn) + ' file(s).\n')
+                self.tools.terminal('\tAdded: ' + str(cn) + ' file(s).\n')
             if cr > 0 :
-                terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
+                self.tools.terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
         # If this is a new project we will need to register it now
         self.registerProject()
@@ -538,7 +539,7 @@ class ProjBackup (object) :
         older than the project file, it will be sent. Otherwise, it will
         be skipped.'''
 
-        cloud = os.path.join(resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+        cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
 
         # Make a cloud
         if not os.path.isdir(cloud) :
@@ -565,20 +566,20 @@ class ProjBackup (object) :
                         cn +=1
                     # Otherwise if the cloud file is older than
                     # the project file, refresh it
-                    elif isOlder(cFile, pFile) :
+                    elif self.tools.isOlder(cFile, pFile) :
                         if os.path.isfile(cFile) :
                             os.remove(cFile)
                         shutil.copy(pFile, cFile)
                         cr +=1
         # Report what happened
-        terminal('\nCompleted pushing/saving data to the cloud.\n')
+        self.tools.terminal('\nCompleted pushing/saving data to the cloud.\n')
         if cn == 0 and cr == 0 :
-            terminal('\tNo files updated.\n')
+            self.tools.terminal('\tNo files updated.\n')
         else :
             if cn > 0 :
-                terminal('\tAdded: ' + str(cn) + ' file(s).\n')
+                self.tools.terminal('\tAdded: ' + str(cn) + ' file(s).\n')
             if cr > 0 :
-                terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
+                self.tools.terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
 
 
