@@ -19,7 +19,7 @@ import codecs, os, difflib, subprocess
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
+from rapuma.core.tools          import Tools, ToolsPath
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
@@ -43,7 +43,7 @@ class Compare (object) :
 
         # Log messages for this module
         self.errorCodes     = {
-            '210' : ['ERR', 'File does not exist: [<<1>>]'],
+            '210' : ['WRN', 'File does not exist: [<<1>>] compare cannot be done.'],
             '280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             '285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
             '290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
@@ -61,6 +61,7 @@ class Compare (object) :
             self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.pid)
+            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
         except :
             pass
 
@@ -78,16 +79,16 @@ class Compare (object) :
 
         # Comare between real source and copied (backup) working source
         if test == 'source' :
-            new = self.local.getSourceFile(gid, cid)
-            old = self.local.getWorkingSourceFile(gid, cid)
+            new = self.tools_path.getSourceFile(gid, cid)
+            old = self.tools_path.getWorkingSourceFile(gid, cid)
         # Comare between working text and the last backup of that text
         elif test == 'working' :
-            new = self.local.getWorkingFile(gid, cid)
-            old = self.local.getWorkCompareFile(gid, cid)
+            new = self.tools_path.getWorkingFile(gid, cid)
+            old = self.tools_path.getWorkCompareFile(gid, cid)
         # Comare between working text and the copied (backup) source
         elif test == 'source-working' :
-            new = self.local.getWorkingFile(gid, cid)
-            old = self.local.getWorkingSourceFile(gid, cid)
+            new = self.tools_path.getWorkingFile(gid, cid)
+            old = self.tools_path.getWorkingSourceFile(gid, cid)
         else :
             self.log.writeToLog(self.errorCodes['290'], [test])
 
@@ -96,9 +97,9 @@ class Compare (object) :
             self.log.writeToLog(self.errorCodes['210'], [new])
         elif not os.path.exists(old) :
             self.log.writeToLog(self.errorCodes['210'], [old])
-
-        # Turn it over to the generic compare tool
-        self.compare(new, old)
+        else :
+            # Turn it over to the generic compare tool
+            self.compare(new, old)
 
 
     def isDifferent (self, new, old) :

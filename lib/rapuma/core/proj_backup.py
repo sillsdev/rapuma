@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, zipfile
+import codecs, os, zipfile, shutil
 from configobj import ConfigObj
 
 # Load the local classes
@@ -92,21 +92,21 @@ class ProjBackup (object) :
             return False
 
 
-    def registerProject (self) :
+    def registerProject (self, pid) :
         '''Do a basic project registration with information available in a
         project backup.'''
 
         # If this is a new project to the system, we should have a projHome
         # by now so we can try to get the projConfig now
-        self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-        self.projConfig = ProjConfig(self.local).projConfig
+        self.local          = ProjLocal(pid)
+        self.projConfig     = ProjConfig(self.local).projConfig
 
         if len(self.projConfig) :
-            pName = self.projConfig['ProjectInfo']['projectName']
-            pid = self.projConfig['ProjectInfo']['projectIDCode']
-            pmid = self.projConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate = self.projConfig['ProjectInfo']['projectCreateDate']
-            if not isConfSection(self.userConfig['Projects'], pid) :
+            pName           = self.projConfig['ProjectInfo']['projectName']
+            pid             = self.projConfig['ProjectInfo']['projectIDCode']
+            pmid            = self.projConfig['ProjectInfo']['projectMediaIDCode']
+            pCreate         = self.projConfig['ProjectInfo']['projectCreateDate']
+            if not self.tools.isConfSection(self.userConfig['Projects'], pid) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
                 self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
@@ -378,7 +378,7 @@ class ProjBackup (object) :
         fixExecutables(self.projHome)
 
         # If this is a new project we will need to register it now
-        self.registerProject()
+        self.registerProject(self.pid)
 
         # Finish here (We will leave the backup-backup in place)
         self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
@@ -531,7 +531,7 @@ class ProjBackup (object) :
                 self.tools.terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
 
         # If this is a new project we will need to register it now
-        self.registerProject()
+        self.registerProject(self.pid)
 
 
     def pushToCloud (self) :

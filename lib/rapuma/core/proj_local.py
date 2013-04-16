@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, tempfile
+import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
@@ -81,9 +81,6 @@ class ProjLocal (object) :
 
         # Add some additional necessary params
         self.lockExt = '.lock'
-        
-        # Add a disposable temp folder to use for this project
-        self.projTempFolder = tempfile.mkdtemp()
         
         # Do some cleanup like getting rid of the last sessions error log file.
         try :

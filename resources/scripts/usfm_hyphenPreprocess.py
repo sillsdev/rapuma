@@ -6,13 +6,15 @@
 ############################## Setup Environment ##############################
 ###############################################################################
 
-import os, sys, shutil, re, codecs
+import os, sys, shutil, re, codecs, subprocess
 
-from rapuma.core.tools import *
+from rapuma.core.tools import Tools
 
 ###############################################################################
 ################################# Process Code ################################
 ###############################################################################
+
+tools = Tools()
 
 source = sys.argv[1]
 tempFile = source + '.tmp'
@@ -31,6 +33,6 @@ if not shutil.copy(tempFile, source) :
     os.remove(tempFile)
     sys.exit(0)
 else :
-    terminal('\nSCRIPT: Error: Failed to copy: [' + tempFile + '] to: [' + source + ']')
+    tools.terminal('\nSCRIPT: Error: Failed to copy: [' + tempFile + '] to: [' + source + ']')
 
 

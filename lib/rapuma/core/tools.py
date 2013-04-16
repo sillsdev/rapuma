@@ -26,7 +26,84 @@ from configobj import ConfigObj, Section
 
 
 ###############################################################################
-################################## Begin Class ################################
+############################ Begin Normal Tools Class #########################
+###############################################################################
+
+class ToolsPath (object) :
+
+    def __init__(self, local, projConfig, userConfig) :
+        '''Do the primary initialization for this manager.'''
+
+        self.local                  = local
+        self.projConfig             = projConfig
+        self.userConfig             = userConfig
+        self.pid                    = projConfig['ProjectInfo']['projectIDCode']
+
+###############################################################################
+############################ Functions Begin Here #############################
+###############################################################################
+
+
+    def getGroupSourcePath (self, gid) :
+        '''Get the source path for a specified group.'''
+
+#        import pdb; pdb.set_trace()
+
+        csid = self.projConfig['Groups'][gid]['csid']
+        try :
+            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            print 'ERROR: Could not find the path for group: [' + gid + '], This was the error: ' + str(e)
+
+
+    def getSourceFile (self, gid, cid) :
+        '''Get the source file name with path.'''
+
+        # At this time, we only need this right here in this function
+        from rapuma.core.paratext           import Paratext
+
+        sourcePath          = self.getGroupSourcePath(gid)
+        cType               = self.projConfig['Groups'][gid]['cType']
+        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        # Build the file name
+        if sourceEditor.lower() == 'paratext' :
+            sName = Paratext(self.pid).formPTName(gid, cid)
+        elif sourceEditor.lower() == 'generic' :
+            sName = Paratext(self.pid).formGenericName(gid, cid)
+        else :
+            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
+
+        return os.path.join(sourcePath, sName)
+
+
+    def getWorkingFile (self, gid, cid) :
+        '''Return the working file name with path.'''
+
+        csid            = self.projConfig['Groups'][gid]['csid']
+        cType           = self.projConfig['Groups'][gid]['cType']
+        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+
+
+    def getWorkCompareFile (self, gid, cid) :
+        '''Return the working compare file (saved from last update) name with path.'''
+
+        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+    def getWorkingSourceFile (self, gid, cid) :
+        '''Get the working source file name with path.'''
+
+        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        source          = self.getSourceFile(gid, cid)
+        sName           = os.path.split(source)[1]
+        return os.path.join(targetFolder, sName + '.source')
+
+
+
+###############################################################################
+############################ Begin Normal Tools Class #########################
 ###############################################################################
 
 class Tools (object) :

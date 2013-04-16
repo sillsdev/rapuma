@@ -53,10 +53,10 @@ from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.proj_setup         import ProjSetup
 from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.proj_binding       import Binding
-from rapuma.core.proj_commander     import Commander
 from rapuma.core.proj_compare       import Compare
 from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
+from rapuma.project.proj_commander  import Commander
 from rapuma.core.tools              import Tools
 
 # Instantiate User config class
@@ -466,7 +466,7 @@ def userArguments (args) :
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
         if args.add :
-            PageBackground(args.project_id).addBackground(args.background_type)
+            PageBackground(args.project_id).addBackground(args.background_type, args.force)
         elif args.remove :
             PageBackground(args.project_id).removeBackground(args.background_type)
         elif args.background_type == 'none' :
@@ -540,6 +540,9 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma h
 sysCommand = subparsers.add_parser('system', help='General system management commands help')
 sysCommand.add_argument('-n', '--user_name', help='Proved a name of the user who will be using this system.')
 sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
+
+# FIXME: Restore from template will not work. The pid is the new project name but we
+# currently do not have any means to specify the template.
 
 # Add project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
@@ -673,6 +676,7 @@ backgroundCommand.add_argument('project_id', help='A project ID for the project 
 backgroundCommand.add_argument('background_type', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
 backgroundCommand.add_argument('-a', '--add', action='store_true', help='Add a background type.')
 backgroundCommand.add_argument('-r', '--remove', action='store_true', help='Remove background type.')
+backgroundCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting background file.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args())

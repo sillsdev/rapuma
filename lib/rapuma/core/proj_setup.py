@@ -16,24 +16,24 @@
 # this process
 
 import codecs, os, unicodedata, subprocess, shutil, re
-from configobj                  import ConfigObj
-from importlib                  import import_module
-from functools                  import partial
+from configobj                      import ConfigObj
+from importlib                      import import_module
+from functools                      import partial
 
 import palaso.sfm as sfm
-from palaso.sfm                 import usfm, style, element, text
+from palaso.sfm                     import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_commander import Commander
-from rapuma.core.proj_log       import ProjLog
-from rapuma.core.proj_compare   import Compare
-from rapuma.core.proj_backup    import ProjBackup
-from rapuma.core.paratext       import Paratext
-from rapuma.project.project     import Project
+from rapuma.core.tools              import Tools, ToolsPath
+from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.core.proj_compare       import Compare
+from rapuma.core.proj_backup        import ProjBackup
+from rapuma.core.paratext           import Paratext
+from rapuma.project.project         import Project
+from rapuma.project.proj_commander  import Commander
 
 
 class ProjSetup (object) :
@@ -41,17 +41,17 @@ class ProjSetup (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.pid                = pid
-        self.user               = UserConfig()
-        self.userConfig         = self.user.userConfig
-        self.tools              = Tools()
-        self.backup             = ProjBackup(pid)
-        self.projHome           = None
-        self.projectMediaIDCode = None
-        self.local              = None
-        self.projConfig         = None
-        self.log                = None
-        self.groups             = {}
+        self.pid                    = pid
+        self.user                   = UserConfig()
+        self.userConfig             = self.user.userConfig
+        self.tools                  = Tools()
+        self.backup                 = ProjBackup(pid)
+        self.projHome               = None
+        self.projectMediaIDCode     = None
+        self.local                  = None
+        self.projConfig             = None
+        self.log                    = None
+        self.groups                 = {}
         # Finish the init now if possible
         self.finishInit()
 
@@ -197,8 +197,10 @@ class ProjSetup (object) :
             self.log                = ProjLog(self.pid)
             self.paratext           = Paratext(self.pid)
             self.compare            = Compare(self.pid)
+            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
         except :
             pass
+
 #        except Exception as e :
 #            # If we don't succeed, we give a warning in case it is important
 #            terminal('Warning: proj_setup.finishInit() failed with: ' + str(e))
@@ -247,17 +249,24 @@ class ProjSetup (object) :
 
         # Process each cid
         for cid in cidList :
-            target          = self.getWorkingFile(gid, cid)
-            targetSource    = self.getWorkingSourceFile(gid, cid)
-            source          = self.getSourceFile(gid, cid)
+            target          = self.tools_path.getWorkingFile(gid, cid)
+            targetSource    = self.tools_path.getWorkingSourceFile(gid, cid)
+            source          = self.tools_path.getSourceFile(gid, cid)
+
+#            import pdb; pdb.set_trace()
+
+# FIXME: Very little difference between these, may need to rework at some point
             if force :
                 self.lockUnlock(gid, False)
-                self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
+                self.uninstallGroupComponent(gid, cid, force)
                 self.installUsfmWorkingText(gid, cid, force)
+                self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
+                self.compare.compareComponent(gid, cid, 'working')
             # Do a compare to see if we need to do this
             elif self.compare.isDifferent(source, targetSource) :
-                self.compare.compareComponent(gid, cid, 'source')
+                self.uninstallGroupComponent(gid, cid, True)
                 self.installUsfmWorkingText(gid, cid, force)
+                self.compare.compareComponent(gid, cid, 'working')
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
@@ -358,7 +367,7 @@ class ProjSetup (object) :
 
         # Remove subcomponents from the target if there are any
         self.tools.buildConfSection(self.projConfig, 'Groups')
-        if isConfSection(self.projConfig['Groups'], gid) :
+        if self.tools.isConfSection(self.projConfig['Groups'], gid) :
             for cid in cidList :
                 self.uninstallGroupComponent(gid, cid, force)
             if os.path.exists(groupFolder) :
@@ -383,7 +392,6 @@ class ProjSetup (object) :
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
         fileHandle  = cid + '_' + csid
-        fileName    = fileHandle + '.' + cType
 
         # Test to see if it is shared
         if self.isSharedComponent(gid, fileHandle) :
@@ -392,18 +400,19 @@ class ProjSetup (object) :
         # Remove the files
         if force :
             targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-            source          = os.path.join(targetFolder, fileName)
-            targetComp      = os.path.join(source + '.cv1')
-            if os.path.isfile(source) :
+            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
+            working         = self.tools_path.getWorkingFile(gid, cid)
+
+            if os.path.isfile(working) :
                 # First a comparison backup needs to be made of the working text
-                if os.path.isfile(targetComp) :
-                    self.tools.makeWriteable(targetComp)
-                shutil.copy(source, targetComp)
-                self.tools.makeReadOnly(targetComp)
-                self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(targetComp), cid])
+                if os.path.isfile(workingComp) :
+                    self.tools.makeWriteable(workingComp)
+                shutil.copy(working, workingComp)
+                self.tools.makeReadOnly(workingComp)
+                self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(workingComp), cid])
                 for fn in os.listdir(targetFolder) :
                     f = os.path.join(targetFolder, fn)
-                    if f != targetComp :
+                    if f != workingComp :
                         os.remove(f)
                         self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
 
@@ -434,8 +443,7 @@ class ProjSetup (object) :
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
-        csid        = self.projConfig['Groups'][gid]['csid']
-        sourcePath  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        sourcePath  = self.tools_path.getGroupSourcePath(gid)
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -712,58 +720,58 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def getGroupSourcePath (self, gid) :
-        '''Get the source path for a specified group.'''
+#    def getGroupSourcePath (self, gid) :
+#        '''Get the source path for a specified group.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        csid = self.projConfig['Groups'][gid]['csid']
-        try :
-            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.tools.terminal('Could not find the path for group: [' + gid + '], This was the error: ' + str(e))
-
-
-    def getSourceFile (self, gid, cid) :
-        '''Get the source file name with path.'''
-
-        sourcePath          = self.getGroupSourcePath(gid)
-        cType               = self.projConfig['Groups'][gid]['cType']
-        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
-        # Build the file name
-        if sourceEditor.lower() == 'paratext' :
-            sName = self.paratext.formPTName(gid, cid)
-        elif sourceEditor.lower() == 'generic' :
-            sName = self.paratext.formGenericName(gid, cid)
-        else :
-            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
-
-        return os.path.join(sourcePath, sName)
+#        csid = self.projConfig['Groups'][gid]['csid']
+#        try :
+#            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            self.tools.terminal('Could not find the path for group: [' + gid + '], This was the error: ' + str(e))
 
 
-    def getWorkingFile (self, gid, cid) :
-        '''Return the working file name with path.'''
+#    def getSourceFile (self, gid, cid) :
+#        '''Get the source file name with path.'''
 
-        csid            = self.projConfig['Groups'][gid]['csid']
-        cType           = self.projConfig['Groups'][gid]['cType']
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+#        sourcePath          = self.getGroupSourcePath(gid)
+#        cType               = self.projConfig['Groups'][gid]['cType']
+#        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+#        # Build the file name
+#        if sourceEditor.lower() == 'paratext' :
+#            sName = self.paratext.formPTName(gid, cid)
+#        elif sourceEditor.lower() == 'generic' :
+#            sName = self.paratext.formGenericName(gid, cid)
+#        else :
+#            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
+
+#        return os.path.join(sourcePath, sName)
 
 
-    def getWorkCompareFile (self, gid, cid) :
-        '''Return the working compare file (saved from last update) name with path.'''
+#    def getWorkingFile (self, gid, cid) :
+#        '''Return the working file name with path.'''
 
-        return self.getWorkingFile(gid, cid) + '.cv1'
+#        csid            = self.projConfig['Groups'][gid]['csid']
+#        cType           = self.projConfig['Groups'][gid]['cType']
+#        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+#        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
 
 
-    def getWorkingSourceFile (self, gid, cid) :
-        '''Get the working source file name with path.'''
+#    def getWorkCompareFile (self, gid, cid) :
+#        '''Return the working compare file (saved from last update) name with path.'''
 
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-        source          = self.getSourceFile(gid, cid)
-        sName           = os.path.split(source)[1]
-        return os.path.join(targetFolder, sName + '.source')
+#        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+#    def getWorkingSourceFile (self, gid, cid) :
+#        '''Get the working source file name with path.'''
+
+#        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+#        source          = self.getSourceFile(gid, cid)
+#        sName           = os.path.split(source)[1]
+#        return os.path.join(targetFolder, sName + '.source')
 
 
     def installUsfmWorkingText (self, gid, cid, force = False) :
@@ -780,16 +788,9 @@ class ProjSetup (object) :
         grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
         rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
         targetFolder        = os.path.join(self.local.projComponentsFolder, cid)
-        target              = self.getWorkingFile(gid, cid)
-        targetSource        = self.getWorkingSourceFile(gid, cid)
-        source              = self.getSourceFile(gid, cid)
-
-        # Copy the source to the working text folder. We do not want to do
-        # this if the there already is a target and it is newer than the 
-        # source text, that would indicate some edits have been done and we
-        # do not want to loose the work. However, if it is older that would
-        # indicate the source has been updated so unless the folder is locked
-        # we will want to update the target.
+        target              = self.tools_path.getWorkingFile(gid, cid)
+        targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
+        source              = self.tools_path.getSourceFile(gid, cid)
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
@@ -799,60 +800,55 @@ class ProjSetup (object) :
             else :
                 self.log.writeToLog(self.errorCodes['1120'], [source])
 
-        # Now do the age checks and copy if source is newer than target
-        if force or not os.path.isfile(target) or self.tools.isOlder(target, source) :
+        # Make target folder if needed
+        if not os.path.isdir(targetFolder) :
+            os.makedirs(targetFolder)
 
-            # Make target folder if needed
-            if not os.path.isdir(targetFolder) :
-                os.makedirs(targetFolder)
-
-            # Always save an untouched copy of the source and set to
-            # read only. We may need this to restore/reset later.
-            if os.path.isfile(targetSource) :
-                # Don't bother if we copied from it in the first place
-                if targetSource != source :
-                    # Reset permissions to overwrite
-                    self.tools.makeWriteable(targetSource)
-                    shutil.copy(source, targetSource)
-                    self.tools.makeReadOnly(targetSource)
-            else :
+        # Always save an untouched copy of the source and set to
+        # read only. We may need this to restore/reset later.
+        if os.path.isfile(targetSource) :
+            # Don't bother if we copied from it in the first place
+            if targetSource != source :
+                # Reset permissions to overwrite
+                self.tools.makeWriteable(targetSource)
                 shutil.copy(source, targetSource)
                 self.tools.makeReadOnly(targetSource)
-
-            # To be sure nothing happens, copy from our project source
-            # backup file. (Is self.style.defaultStyFile the best thing?)
-            if self.usfmCopy(targetSource, target) :
-                # Run any working text preprocesses on the new component text
-                if usePreprocessScript :
-                    if not os.path.isfile(grpPreprocessFile) :
-                        self.installPreprocess(grpPreprocessFile, rpmPreprocessFile)
-                    if not self.runProcessScript(target, grpPreprocessFile) :
-                        self.log.writeToLog(self.errorCodes['1130'], [cid])
-
-                # If this is a USFM component type we need to remove any \fig markers,
-                # and record them in the illustration.conf file for later use
-                if cType == 'usfm' :
-                    tempFile = target + '.tmp'
-                    contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                    # logUsfmFigure() logs the fig data and strips it from the working text
-                    # Note: Using partial() to allows the passing of the cid param 
-                    # into logUsfmFigure()
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
-                    codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
-                    # Finish by copying the tempFile to the source
-                    if not shutil.copy(tempFile, target) :
-                        # Take out the trash
-                        os.remove(tempFile)
-
-                # If the text is there, we should return True so do a last check to see
-                if os.path.isfile(target) :
-                    self.log.writeToLog(self.errorCodes['1140'], [cid])
-                    return True
-            else :
-                self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
-                return False
         else :
-            return True
+            shutil.copy(source, targetSource)
+            self.tools.makeReadOnly(targetSource)
+
+        # To be sure nothing happens, copy from our project source
+        # backup file. (Is self.style.defaultStyFile the best thing?)
+        if self.usfmCopy(targetSource, target) :
+            # Run any working text preprocesses on the new component text
+            if usePreprocessScript :
+                if not os.path.isfile(grpPreprocessFile) :
+                    self.installPreprocess(grpPreprocessFile, rpmPreprocessFile)
+                if not self.runProcessScript(target, grpPreprocessFile) :
+                    self.log.writeToLog(self.errorCodes['1130'], [cid])
+
+            # If this is a USFM component type we need to remove any \fig markers,
+            # and record them in the illustration.conf file for later use
+            if cType == 'usfm' :
+                tempFile = target + '.tmp'
+                contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+                # logUsfmFigure() logs the fig data and strips it from the working text
+                # Note: Using partial() to allows the passing of the cid param 
+                # into logUsfmFigure()
+                contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
+                codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
+                # Finish by copying the tempFile to the source
+                if not shutil.copy(tempFile, target) :
+                    # Take out the trash
+                    os.remove(tempFile)
+
+            # If the text is there, we should return True so do a last check to see
+            if os.path.isfile(target) :
+                self.log.writeToLog(self.errorCodes['1140'], [cid])
+                return True
+        else :
+            self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
+            return False
 
 
     def usfmCopy (self, source, target) :

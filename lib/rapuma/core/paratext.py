@@ -24,7 +24,6 @@ from rapuma.core.tools          import Tools
 from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_commander import Commander
 from rapuma.core.proj_log       import ProjLog
 #from rapuma.project.project     import Project
 

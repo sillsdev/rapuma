@@ -302,16 +302,36 @@ class Usfm (Group) :
     def checkStartPageNumber (self) :
         '''Adjust page number for the current group.'''
 
-        pGrp        = str(self.projConfig['Groups'][self.gid]['precedingGroup'])
+        # Be sure settings are in place
+        self.checkStartPageNumberSettings()
+
+#        import pdb; pdb.set_trace()
+
         # If none, that means it hasn't been set or it is first
+        pGrp = str(self.projConfig['Groups'][self.gid]['precedingGroup'])
         if pGrp == 'None' :
             return False
-        cStrPgNo    = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
+
+        cStrPgNo = str(self.projConfig['Groups'][self.gid]['startPageNumber'])
         pGrpStrPgNo = int(self.projConfig['Groups'][pGrp]['startPageNumber'])
         pGrpPgs     = int(self.projConfig['Groups'][pGrp]['totalPages'])
         nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
         if cStrPgNo != nStrPgNo :
             self.projConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
+            self.tools.writeConfFile(self.projConfig)
+
+
+    def checkStartPageNumberSettings (self) :
+        '''Make sure the page number settings are in place. This may be deprecated later.'''
+
+        change = False
+        if not self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'precedingGroup') :
+            self.projConfig['Groups'][self.gid]['precedingGroup'] = None
+            change = True
+        if not self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'startPageNumber') :
+            self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
+            change = True
+        if change :
             self.tools.writeConfFile(self.projConfig)
 
 

@@ -32,8 +32,6 @@ class Commander (object) :
 
         self.pid                = pid
         self.tools              = Tools()
-#        self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-#        self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.projHome           = None
@@ -166,11 +164,11 @@ class Commander (object) :
                 'addBible'      : ['Add Scripture components for a Bible group.',       'rapuma group ' + pid + ' Bible -c usfm -a -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
                 'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' NT -c usfm -a -d base -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
                 'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' OT -c usfm -a -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
-                'archive'       : ['Archive this project',                              'rapuma preserve ' + pid + ' -a '], 
+                'archive'       : ['Archive this project',                              'rapuma project ' + pid + ' -p archive '], 
                 'backgroundOff' : ['Turn off all backgounds on output page.',           'rapuma background ' + pid + ' none'], 
-                'backup'        : ['Backup this project',                               'rapuma preserve ' + pid + ' -b '], 
-                'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -c '], 
-                'cloudPush'     : ['Push data from this project to the cloud',          'rapuma preserve ' + pid + ' -c '], 
+                'backup'        : ['Backup this project',                               'rapuma project ' + pid + ' -p backup '], 
+                'cloudPull'     : ['Pull data for this project from the cloud',         'rapuma project ' + pid + ' -r cloud '], 
+                'cloudPush'     : ['Push data from this project to the cloud',          'rapuma project ' + pid + ' -p cloud '], 
                 'cropmarksOff'  : ['Turn off cropmarks on output page.',                'rapuma background ' + pid + ' cropmarks -r'], 
                 'cropmarksOn'   : ['Turn on cropmarks on output page.',                 'rapuma background ' + pid + ' cropmarks -a'], 
                 'linesOff'      : ['Turn off line background.',                         'rapuma background ' + pid + ' lines -r'], 
@@ -179,8 +177,8 @@ class Commander (object) :
                 'pageBoarderOn' : ['Turn on page box on output page.',                  'rapuma background ' + pid + ' boarder -a'], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',               'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',                'rapuma settings ' + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
-                'restore'       : ['Restore a backup.',                                 'rapuma preserve ' + pid + ' -b -r '], 
-                'template'      : ['Create a template of the project.',                 'rapuma preserve ' + pid + ' -t $1 '], 
+                'restore'       : ['Restore a backup.',                                 'rapuma project ' + pid + ' -r backup '], 
+                'template'      : ['Create a template of the project.',                 'rapuma project ' + pid + ' -r template $1 '], 
                 'updateScripts' : ['Update the project scripts.',                       'rapuma project ' + pid + ' -c '], 
                 'watermarkOff'  : ['Turn off watermark background.',                    'rapuma background ' + pid + ' watermark -r'], 
                 'watermarkOn'   : ['Turn on watermark background.',                     'rapuma background ' + pid + ' watermark -a']
@@ -204,7 +202,7 @@ class Commander (object) :
                 'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
                 'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
                 'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e -f '], 
-                'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u -f '], 
+                'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u '], 
                 'view'          : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e '], 
             }
 

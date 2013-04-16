@@ -8,11 +8,13 @@
 
 import os, sys, shutil, re, codecs
 
-from rapuma.core.tools import *
+from rapuma.core.tools import Tools
 
 ###############################################################################
 ################################# Process Code ################################
 ###############################################################################
+
+tools = Tools()
 
 source = sys.argv[1]
 tempFile = source + '.tmp'
@@ -25,7 +27,7 @@ contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
 
 # Do stuff here
 
-terminal('\nThe group preprocess script has not been modified yet. It is in its defaul form. Nothing has been done to the component data.\n')
+tools.terminal('\nThe group preprocess script has not been modified yet. It is in its defaul form. Nothing has been done to the component data.\n')
 
 
 # Write out a temp file so we can do some checks
@@ -37,6 +39,6 @@ if not shutil.copy(tempFile, source) :
     os.remove(tempFile)
     sys.exit(0)
 else :
-    terminal('\nSCRIPT: Error: Failed to copy: [' + tempFile + '] to: [' + source + ']')
+    tools.terminal('\nSCRIPT: Error: Failed to copy: [' + tempFile + '] to: [' + source + ']')
 
 
