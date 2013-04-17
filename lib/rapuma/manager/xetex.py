@@ -170,10 +170,10 @@ class Xetex (Manager) :
             'XTEX-055' : ['ERR', 'make<<1>>() failed to properly create: <<2>>. This is a required file in order to render.'],
             'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],
             'XTEX-085' : ['MSG', 'The file: <<1>> was not found, XeTeX will now try to render it.'],
-            'XTEX-105' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
 
+            '0205' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
             '0270' : ['LOG', 'Copied macro: <<1>>'],
             '0275' : ['ERR', 'No macro package for : <<1>>'],
 
@@ -318,19 +318,17 @@ class Xetex (Manager) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
 #        import pdb; pdb.set_trace()
+
         if self.usePdfViewer :
             # Build the viewer command
             self.pdfViewer.append(self.gidPdfFile)
             # Run the XeTeX and collect the return code for analysis
             try :
                 subprocess.Popen(self.pdfViewer)
-                # FIXME: We need to pop() the last item (pdfFile)
-                # to avoid it somehow being writen out to the proj.conf
-                self.pdfViewer.pop()
                 return True
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.log.writeToLog('XTEX-105', [str(e)])
+                self.log.writeToLog(self.errorCodes['0205'], [str(e)])
 
 
     def makeGrpHyphExcTexFile (self) :
@@ -706,9 +704,12 @@ class Xetex (Manager) :
                 gidTexObject.write('\\stylesheet{' + self.defaultExtStyFile + '}\n')
             if self.style.checkGrpExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
-            startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
-            if startPageNumber > 1 :
-                gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
+            # If this is less than a full group render, just go with default pg num (1)
+            if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
+                startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
+                if startPageNumber > 1 :
+                    gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
+            # Now add in each of the components
             for cid in cidList :
                 cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
                 if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :

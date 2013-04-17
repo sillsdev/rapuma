@@ -20,9 +20,13 @@ from configobj                  import ConfigObj, Section
 
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from importlib                  import import_module
-import rapuma.core.user_config  as userConfig
+from rapuma.core.tools              import Tools
+from importlib                      import import_module
+#import rapuma.core.user_config  as userConfig
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -30,16 +34,18 @@ import rapuma.core.user_config  as userConfig
 
 class Project (object) :
 
-    def __init__(self, userConfig, projConfig, local, log, systemVersion, gid = None) :
+    def __init__(self, pid, gid = None) :
         '''Instantiate this class.'''
 
-#        import pdb; pdb.set_trace()
+        self.pid                    = pid
+        self.user                   = UserConfig()
+        self.userConfig             = self.user.userConfig
+        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local                  = ProjLocal(self.pid)
+        self.projConfig             = ProjConfig(self.local).projConfig
+        self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()
-        self.local                  = local
-        self.userConfig             = userConfig
-        self.projConfig             = projConfig
-        self.log                    = log
-        self.systemVersion          = systemVersion
         self.groups                 = {}
         self.components             = {}
         self.managers               = {}
@@ -69,15 +75,6 @@ class Project (object) :
         if self.projConfig != newConf :
             self.projConfig = newConf
             self.projConfig.filename = self.local.projConfFile
-
-        # Up the creatorVersion on the project if needed
-        if not self.tools.testForSetting(self.projConfig, 'ProjectInfo', 'projectCreatorVersion') :
-            self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
-            self.tools.writeConfFile(self.projConfig)
-        else :
-            if self.projConfig['ProjectInfo']['projectCreatorVersion'] != self.systemVersion :
-                self.projConfig['ProjectInfo']['projectCreatorVersion'] = self.systemVersion
-                self.tools.writeConfFile(self.projConfig)
 
         # If this is a valid project we might as well put in the folders
         for folder in self.local.projFolders :

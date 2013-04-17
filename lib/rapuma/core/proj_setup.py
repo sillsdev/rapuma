@@ -339,7 +339,7 @@ class ProjSetup (object) :
 
         # Initialize the project now to get settings into the project config
         # This might help to overcome other module initialization problems.
-        aProject = Project(self.userConfig, self.projConfig, self.local, self.log, 'Testing here in proj_setup', gid)
+        aProject = Project(self.pid, gid)
         aProject.createGroup(gid)
         if cType == 'usfm' :
             aProject.managers['usfm_Text'].updateManagerSettings(gid)

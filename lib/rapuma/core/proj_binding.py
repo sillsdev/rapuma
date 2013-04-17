@@ -17,14 +17,15 @@
 # this process
 
 import os, shutil, codecs, re, subprocess, tempfile
-from configobj                  import ConfigObj, Section
+from configobj                      import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
+from rapuma.core.tools              import Tools
+from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.project.project         import Project
 
 
 ###############################################################################
@@ -59,6 +60,8 @@ class Binding (object) :
             '0230' : ['MSG', 'Completed proccessing on the [<<1>>] binding group.'],
             '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding group.'],
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding group.'],
+            '0250' : ['MSG', 'Binding component [<<1>>] not found. Will create/recreate it now.'],
+            '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
 
         }
 
@@ -124,15 +127,41 @@ class Binding (object) :
         '''Bind a project binding group. Right now this is hard-wired to only work
         with pdftk.'''
 
+
+#        import pdb; pdb.set_trace()
+
+        # Check for components and render any that do not exist
+        for gid in self.projConfig['Binding'][bgID]['gidList'] :
+            gidPdf = os.path.join(self.local.projComponentsFolder, gid, gid + '.pdf')
+            cType = self.projConfig['Groups'][gid]['cType']
+            renderer = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
+            manager = cType + '_' + renderer.capitalize()
+            if not os.path.exists(gidPdf) :
+                self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(gidPdf)])
+                # Seriously!, a bind command should not be called when components
+                # have not been created. However, if that's the case, then we'll
+                # do it this way even though it is not the most efficient.
+                # Suspend the PDF viewer for this operation if needed
+                orgPdfViewerSettings = self.projConfig['Managers'][manager]['usePdfViewer']
+                if orgPdfViewerSettings == 'True' :
+                    self.projConfig['Managers'][manager]['usePdfViewer'] = False
+                    self.tools.writeConfFile(self.projConfig)
+                # Render the group
+                Project(self.pid, gid).renderGroup(gid, '', '')
+                # Turn on the PDF viewer if needed
+                if self.projConfig['Managers'][manager]['usePdfViewer'] != orgPdfViewerSettings :
+                    self.projConfig['Managers'][manager]['usePdfViewer'] = orgPdfViewerSettings
+                    self.tools.writeConfFile(self.projConfig)
+
         # Build the command
         confCommand = ['pdftk']
         outputPath = os.path.join(self.local.projComponentsFolder, bgID)
         if not os.path.exists(outputPath) :
             os.makedirs(outputPath)
         # Append each of the input files
-        for f in self.projConfig['Binding'][bgID]['gidList'] :
-            f = os.path.join(self.local.projComponentsFolder, f, f + '.pdf')
-            confCommand.append(f)
+        for gid in self.projConfig['Binding'][bgID]['gidList'] :
+            gidPdf = os.path.join(self.local.projComponentsFolder, gid, gid + '.pdf')
+            confCommand.append(gidPdf)
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
@@ -159,17 +188,15 @@ class Binding (object) :
             self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
 
-
-
-
-
-# FIXME: Add a view feature here once the viewer can be moved to the reworked tools module
-
-
-
-
-
-
+        # Build the viewer command
+        pdfViewer = self.projConfig['Managers'][manager]['pdfViewerCommand']
+        pdfViewer.append(output)
+        # Run the viewer and collect the return code for analysis
+        try :
+            subprocess.Popen(pdfViewer)
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog(self.errorCodes['0260'], [str(e)])
 
 
     def getPdfPages (self, pdfFile) :

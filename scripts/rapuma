@@ -76,6 +76,18 @@ print '\n\t\t\tVersion ' + systemVersion + '\n'
 ########################### Rapuma Functions ##############################
 ###########################################################################
 
+def checkCreatorVersion (projConfig, systemVersion) :
+    '''Keep track of the version of Rapuma used in the current project.'''
+
+    if not tools.testForSetting(projConfig, 'ProjectInfo', 'projectCreatorVersion') :
+        projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
+        tools.writeConfFile(projConfig)
+    else :
+        if projConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
+            projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
+            tools.writeConfFile(projConfig)
+
+
 def hasValidSourcePath (gid, csid) :
     '''Check if there is one, see if it is valid.'''
 
@@ -114,7 +126,8 @@ def initProject (pid, gid) :
     local   = ProjLocal(pid)
     pc      = ProjConfig(local)
     log     = ProjLog(pid)
-    aProject = Project(uc.userConfig, pc.projConfig, local, log, systemVersion, gid)
+    checkCreatorVersion(pc.projConfig, systemVersion)
+    aProject = Project(pid, gid)
     return aProject
 
 
