@@ -136,7 +136,8 @@ class PageBackground (object) :
                 change = True
         elif bType == 'lines' :
             # Turn on lines and make sure there is a file to use
-            self.installLinesFile(force)
+            if self.installLinesFile(force) :
+                change = True
             if self.useLines == False :
                 self.layoutConfig['PageLayout']['useLines'] = True
                 self.layoutConfig['PageLayout']['useBoxBoarder'] = False
@@ -206,7 +207,7 @@ class PageBackground (object) :
                 shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
                 self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projWatermarkFile)])
             except Exception as e :
-                # If this doesn't work, we should probably quite here
+                # If this doesn't work, we should probably quit here
                 self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projWatermarkFile),str(e)])
 
 
@@ -218,7 +219,7 @@ class PageBackground (object) :
                 shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
                 self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.boxBoarderFile)])
             except Exception as e :
-                # If this doesn't work, we should probably quite here
+                # If this doesn't work, we should probably quit here
                 self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.boxBoarderFile),str(e)])
 
 
@@ -227,10 +228,11 @@ class PageBackground (object) :
 
         if not os.path.exists(self.projLinesFile) or force:
             try :
-                self.createLinesFile()
-                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projLinesFile)])
+                if self.createLinesFile() :
+                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projLinesFile)])
+                    return True
             except Exception as e :
-                # If this doesn't work, we should probably quite here
+                # If this doesn't work, we should probably quit here
                 self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projLinesFile),str(e)])
 
 
@@ -253,6 +255,8 @@ class PageBackground (object) :
         marginUnit          = int(self.layoutConfig['Margins']['marginUnit'])
         topMarginFactor     = int(float(self.layoutConfig['Margins']['topMarginFactor']))
         bottomMarginFactor  = int(float(self.layoutConfig['Margins']['bottomMarginFactor']))
+
+# FIXME: If the fontSizeUnit is less than 1 this will fail and cause the script to hang
 
         # The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
         # The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
@@ -292,7 +296,6 @@ class PageBackground (object) :
 
         # Read in the source file
         contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
-
 
         # Make the changes
 
@@ -342,7 +345,6 @@ class PageBackground (object) :
         # ReplaceText: variable lineSpace
         contents = re.sub(ur'@lS', ur'%r' % lineSpace, contents)
 
-
         # Write out a temp file so we can do some checks
         codecs.open(output, "wt", encoding="utf_8_sig").write(contents)
 
@@ -356,6 +358,6 @@ class PageBackground (object) :
         except Exception as e :
             print 'Error found: ' + str(e)
             
-
+        return True
 
 

@@ -66,11 +66,11 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130415214624'
+systemVersion   = '0.1.20130417221909'
 
 # Give a welcome message
-print '\n\t\tWelcome to ' + systemName
-print '\n\t\t\tVersion ' + systemVersion + '\n'
+tools.terminal('\n\t\tWelcome to ' + systemName)
+tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 
 ###########################################################################
 ########################### Rapuma Functions ##############################
@@ -178,8 +178,8 @@ def userArguments (args) :
     # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
         if args.about :
-            print '\n' + systemName + ' version ' + systemVersion + '\n'
-            print 'About: ' + systemAbout + '\n'
+            tools.terminal('\n' + systemName + ' version ' + systemVersion + '\n')
+            tools.terminal('About: ' + systemAbout + '\n')
             return
 
     # Pre-command process: System level commands
@@ -700,7 +700,7 @@ userArguments(parser.parse_args())
 ###############################################################################
 
 # In case there are any Canadians using this, politely say good bye
-print '\n\t\tThank you, please come again!\n'
+tools.terminal('\n\t\tThank you, please come again!\n')
 
 
 
