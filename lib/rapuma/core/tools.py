@@ -411,16 +411,17 @@ class Tools (object) :
     def confObjCompare (self, objA, objB) :
         '''Do a simple compare on two ConfigObj objects.'''
 
-        # Make a temp dir for the test files
-        tmp_dir = tempfile.mkdtemp()
+        # Make a temp files for testing
+        tmpconfA = tempfile.NamedTemporaryFile()
+        tmpconfB = tempfile.NamedTemporaryFile()
 
         # There must be a better way to do this but this will work for now
-        objA.filename = os.path.join(tmp_dir, 'tmpconfA')
+        objA.filename = tmpconfA.name
         objA.write()
-        objB.filename = os.path.join(tmp_dir, 'tmpconfB')
+        objB.filename = tmpconfB.name
         objB.write()
-        reObjA = ConfigObj(os.path.join(tmp_dir, 'tmpconfA'), encoding='utf-8')
-        reObjB = ConfigObj(os.path.join(tmp_dir, 'tmpconfB'), encoding='utf-8')
+        reObjA = ConfigObj(tmpconfA, encoding='utf-8')
+        reObjB = ConfigObj(tmpconfB, encoding='utf-8')
         return reObjA.__eq__(reObjB)
 
 
@@ -506,34 +507,30 @@ class Tools (object) :
             os.makedirs(os.path.split(config.filename)[0])
 
         # Make a backup in our temp dir case something goes dreadfully wrong
+        confData = tempfile.NamedTemporaryFile()
         if os.path.isfile(config.filename) :
-# FIXME: Need to make this its own class so that we can pull 
-# in local to make this next line work
-#        bak = os.path.join(self.local.projTempFolder, config.filename)
-            shutil.copy(config.filename, config.filename + '~')
+            shutil.copy(config.filename, confData.name)
 
         # Let's try to write it out
         try :
-            # Try to write first
+            # To track when a conf file was saved as well as other general
+            # housekeeping we will create a GeneralSettings section with
+            # a last edit date key/value.
+            self.buildConfSection(config, 'GeneralSettings')
+            # If we got past that, write a time stamp
+            config['GeneralSettings']['lastEdit'] = self.tStamp()
+            # Try to write out the data now
             config.write()
 
         except Exception as e :
             terminal(u'\nERROR: Could not write to: ' + config.filename)
             terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
             # Recover now
-            if os.path.isfile(config.filename + '~') :
-                shutil.copy(config.filename + '~', config.filename)
+            if os.path.isfile(confData) :
+                shutil.copy(confData.name, config.filename)
             # Use raise to send out a stack trace. An error at this point
             # is like a kernel panic. Not good at all.
             raise
-
-        # To track when a conf file was saved as well as other general
-        # housekeeping we will create a GeneralSettings section with
-        # a last edit date key/value.
-        self.buildConfSection(config, 'GeneralSettings')
-        # If we got past that, write a time stamp
-        config['GeneralSettings']['lastEdit'] = self.tStamp()
-        config.write()
 
         # Should be done if we made it this far
         return True
