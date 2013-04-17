@@ -118,7 +118,7 @@ class Commander (object) :
                     # Make the script executable
                     self.tools.makeExecutable(fullFile)
             
-            terminal('\nCompleted creating/recreating binding helper scripts.\n')
+            self.tools.terminal('\nCompleted creating/recreating binding helper scripts.\n')
         else :
             pass
 
