@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil, codecs, re, subprocess
+import os, shutil, codecs, re, subprocess, tempfile
 from configobj                  import ConfigObj, Section
 
 # Load the local classes
@@ -175,9 +175,11 @@ class Binding (object) :
     def getPdfPages (self, pdfFile) :
         '''Get the total number of pages in a PDF file.'''
 
-        rptData = os.path.join(self.local.projTempFolder, 'pdf_data.txt') 
-        rCode = subprocess.call(['pdftk', pdfFile, 'dump_data', 'output', rptData])
-        with codecs.open(rptData, 'rt', 'utf_8_sig') as contents :
+        # Create a temporary file that we will use to hold data.
+        # It should be deleted after the function is done.
+        rptData = tempfile.NamedTemporaryFile()
+        rCode = subprocess.call(['pdftk', pdfFile, 'dump_data', 'output', rptData.name])
+        with codecs.open(rptData.name, 'rt', 'utf_8_sig') as contents :
             for line in contents :
                 if line.split(':')[0] == 'NumberOfPages' :
                     return int(line.split(':')[1].strip())
