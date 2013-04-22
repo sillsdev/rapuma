@@ -250,13 +250,22 @@ class PageBackground (object) :
         # from Rapuma book_layout.conf 
         pageHeight          = int(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = int(self.layoutConfig['PageLayout']['pageWidth'])
-        lineSpacingFactor   = int(float(self.layoutConfig['Fonts']['lineSpacingFactor']))
-        fontSizeUnit        = int(float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', '')))
+        #lineSpacingFactor   = int(float(self.layoutConfig['Fonts']['lineSpacingFactor']))
+        lineSpacingFactor   = float(self.layoutConfig['Fonts']['lineSpacingFactor'])
+        #fontSizeUnit        = int(float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', '')))
+        fontSizeUnit        = float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = int(self.layoutConfig['Margins']['marginUnit'])
-        topMarginFactor     = int(float(self.layoutConfig['Margins']['topMarginFactor']))
-        bottomMarginFactor  = int(float(self.layoutConfig['Margins']['bottomMarginFactor']))
+        #topMarginFactor     = int(float(self.layoutConfig['Margins']['topMarginFactor']))
+        topMarginFactor     = float(self.layoutConfig['Margins']['topMarginFactor'])
+        #bottomMarginFactor  = int(float(self.layoutConfig['Margins']['bottomMarginFactor']))
+        bottomMarginFactor  = float(self.layoutConfig['Margins']['bottomMarginFactor'])
 
 # FIXME: If the fontSizeUnit is less than 1 this will fail and cause the script to hang
+# SOLUTION: 
+        # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
+        # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
+        # causing the script to hang. Changing the values back to floats solves the problem.
+        
 
         # The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
         # The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
@@ -269,33 +278,37 @@ class PageBackground (object) :
         # paper width [pt]
         paperPointsWidth = int(pageWidth*72/25.4)
 
-        # The lineSpace formula is a linear equation (y = m.x + b) generated based on 
-        # [pt] measurements in Inkscape
-        lineSpace = round(((1.1627 * 12 * fontSizeUnit + -0.0021) * lineSpacingFactor),2)
-        print 'Space between lines: ', lineSpace, 'pt'
+        # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
+        # [px] measurements in Inkscape
+        baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
+        print 'Space between lines: ', baselineskip, 'px'
 
         # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
-        # converted to points [pt]
-        topMargin = round((pageHeight - topMarginFactor * marginUnit)*72/25.4, 3)
+        # converted to pixels [px]
+        topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
+        print 'topMargin: ', topMargin, 'px'
 
-        # To determine the position of the firstBaseLine independent of the page size 
-        # the distance topMargin to firstBaseLine. The formula is a linear equation 
-        # based on [pt] measurements in Inkscape 
-        topMarginToBaseLine = round((0.9905 * 12 * fontSizeUnit + 0.0478),3)
+        # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
+        # based on pixel [px] measurements in Inkscape 
+        topskip = round((1.25 * 12 * fontSizeUnit),3)
+        #topskip = round((0.8 * 12 * fontSizeUnit),3)
+        print 'topskipcalc: ', topskip
 
-        # The firstBaseLine is smaller than the topMargin 
-        firstBaseLine = topMargin - topMarginToBaseLine
+        # The firstBaseLine is topMargin minus topskip in [px] 
+        firstBaseLine = topMargin - topskip
+        print 'firstBaseLine: ', firstBaseLine
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
-        # gridlines.   
-        lineGridHeight = round(firstBaseLine - bottomMarginFactor*marginUnit*72/25.40, 3)
+        # gridlines. 
+        lineGridHeight = round(firstBaseLine - bottomMarginFactor * marginUnit*90/25.40, 3)
 
-        lineGridWidth = int((pageWidth-marginUnit*1.5)*72/25.4)
+        lineGridWidth = int((pageWidth-marginUnit*1.5)*90/25.4)
 
-        lineGridMargin = int(marginUnit*54/25.4)
+        lineGridMargin = int(marginUnit*45/25.4)
 
         # Read in the source file
         contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
+
 
         # Make the changes
 
@@ -307,7 +320,7 @@ class PageBackground (object) :
 
         # 02 paper height [pt]
         # SearchText: @pPH
-        # ReplaceText: variable paperHeight
+        # ReplaceText: variable paperPointsHeight
         contents = re.sub(ur'@pPH', ur'%r' % paperPointsHeight, contents)
 
         # 03 paper width [px]
@@ -317,7 +330,7 @@ class PageBackground (object) :
 
         # 04 paper height [pt]
         # SearchText: @pPW
-        # ReplaceText: variable paperHeight
+        # ReplaceText: variable paperPointsWidth
         contents = re.sub(ur'@pPW', ur'%r' % paperPointsWidth, contents)
 
         # 05 Enter the position first base line
@@ -330,20 +343,20 @@ class PageBackground (object) :
         # ReplaceText: variable lineGridHeight
         contents = re.sub(ur'@lGH', ur'%r' % lineGridHeight, contents)
 
-        # 02 Enter the width of the line grid
+        # 07 Enter the width of the line grid
         # SearchText: @lGW
         # ReplaceText: variable lineGridWidth
         contents = re.sub(ur'@lGW', ur'%r' % lineGridWidth, contents)
 
-        # 07 Enter the right margin of the line grid
+        # 08 Enter the right margin of the line grid
         # SearchText: @lGM
-        # ReplaceText: variable lineGridWidth
+        # ReplaceText: variable lineGridMargin
         contents = re.sub(ur'@lGM', ur'%r' % lineGridMargin, contents)
 
-        # 08 enter the linespace value
+        # 09 enter the baselineskip value
         # SearchText: @lS
-        # ReplaceText: variable lineSpace
-        contents = re.sub(ur'@lS', ur'%r' % lineSpace, contents)
+        # ReplaceText: variable baselineskip
+        contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
 
         # Write out a temp file so we can do some checks
         codecs.open(output, "wt", encoding="utf_8_sig").write(contents)

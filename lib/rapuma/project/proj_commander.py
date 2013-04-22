@@ -117,7 +117,7 @@ class Commander (object) :
 
                     # Make the script executable
                     self.tools.makeExecutable(fullFile)
-            
+
             self.tools.terminal('\nCompleted creating/recreating binding helper scripts.\n')
         else :
             pass
@@ -214,7 +214,7 @@ class Commander (object) :
         pid     = self.pid
 
         return {
-                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma bind ' + pid + ' ' + bid + ' -e '] 
+                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma binding ' + pid + ' ' + bid + ' -e '] 
             }
 
 
