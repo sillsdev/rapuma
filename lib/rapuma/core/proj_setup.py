@@ -106,7 +106,6 @@ class ProjSetup (object) :
             'PROC-110' : ['ERR', 'The component specified [<<1>>] is not found. Process halting! - project.runPreprocess()'],
             'PROC-120' : ['ERR', 'Could not run preprocess, file not found: [<<1>>].'],
             'PROC-130' : ['ERR', 'The component type [<<1>>] is locked and cannot be processed.'],
-            'PROC-140' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
 
             'STYL-000' : ['MSG', 'Style module messages'],
             'STYL-005' : ['ERR', 'Component type [<<1>>] is not supported by the style manager.'],
@@ -175,6 +174,8 @@ class ProjSetup (object) :
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
             '1160' : ['ERR', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
             '1165' : ['LOG', 'Component preprocessing script is already installed.'],
+
+            '1240' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
 
             '2020' : ['LOG', 'Default style file already exists in the project. Will not replace with a new copy.'],
             '2040' : ['LOG', 'Created: [<<1>>]'],
@@ -932,13 +933,15 @@ class ProjSetup (object) :
 ###############################################################################
 ########################## Text Processing Functions ##########################
 ###############################################################################
+######################## Error Code Block Series = 1200 #######################
+###############################################################################
 
     def turnOnOffPreprocess (self, gid, onOff) :
         '''Turn on or off preprocessing on incoming component text.'''
 
-        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff.capitalize()
+        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff
         self.tools.writeConfFile(self.projConfig)
-        self.log.writeToLog('PROC-140', [onOff, gid])
+        self.log.writeToLog(self.errorCodes['1240'], [str(onOff), gid])
 
 
     def installPreprocess (self, grpPreprocessFile, rpmPreprocessFile) :

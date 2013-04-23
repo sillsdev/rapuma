@@ -286,6 +286,10 @@ class Usfm (Group) :
         if useWatermark :
             self.pg_background.installDefaultWatermarkFile()
 
+
+# FIXME: Check the age of the existing lines file against the book_layout.conf
+# remake if they are different. Same with box boarder
+
         # Same for lines background file used for composition
         if useLines :
             self.pg_background.installLinesFile()

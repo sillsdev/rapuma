@@ -9,7 +9,7 @@ rpm project KYU-MYMR-MRKA -d
 # Create the project
 rpm project KYU-MYMR-MRKA -t ~/Publishing/testArea -m book -n 'Kayah Book of Mark example in the Burmese script'
 # Install a group to render
-rpm group KYU-MYMR-MRKA Mark -c usfm -a -i mrk -d MYMR -s ~/Publishing/testArea/KYUM/pt_environ
+rpm group KYU-MYMR-MRKA Mark -c usfm -m add -i mrk -d MYMR -s ~/Publishing/testArea/KYUM/pt_environ
 # Set the font to the right one
 rpm font KYU-MYMR-MRKA Mark usfm Padauk -m -f
 # Turn on font features in Padauk & adjust default settings
@@ -32,12 +32,12 @@ cp ~/Publishing/testArea/KYUM/resources/Mark_groupPreprocess.py ~/Publishing/tes
 echo copying: usfm-ext.sty
 cp ~/Publishing/testArea/KYUM/resources/usfm-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Styles/usfm-ext.sty
 # Now update the text so the prprocess is used
-rpm group KYU-MYMR-MRKA Mark -u -f
+rpm group KYU-MYMR-MRKA Mark -m update -f
 # Install and switch font (Padauk 2.95 has a bug)
 rpm font KYU-MYMR-MRKA Mark usfm -a Padauk_2.701
 rpm font KYU-MYMR-MRKA Mark usfm -m -f Padauk_2.701
 # Render the component
-rpm group KYU-MYMR-MRKA Mark -e
+rpm group KYU-MYMR-MRKA Mark -m execute
 # Backup the project
 rpm project KYU-MYMR-MRKA -p backup
 

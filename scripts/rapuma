@@ -229,7 +229,7 @@ def userArguments (args) :
                 if args.targetPath :
                     ProjBackup(pid).restoreBackup(os.path.join(targetPath, pid))
                 else :
-                    sys.exit('\nERROR: To restore this backup, a path must be provided with -g. Process halting.\n')
+                    sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
         # Update (get rained on) from the cloud
         elif args.restore == 'cloud' :
             if isProject(pid) :
@@ -290,55 +290,66 @@ def userArguments (args) :
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
         aProject = initProject(args.project_id, args.group_id)
-        # Add a new group
-        if args.add :
-            if not args.cid_list :
-                sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
-            elif not args.component_type :
-                sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-            elif not args.source_id :
-                sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
-            elif args.source :
-                if not tools.resolvePath(args.source) :
-                    sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-            elif args.source_id :
-                if not hasValidSourcePath(args.group_id, args.source_id) :
-                    sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-            # Having sorted through any potential problems, try adding the group
-            ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
-        # Remove a group from the project
-        elif args.remove :
-            ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
-            if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                Commander(args.project_id).removeScripts()
-        # Update a component, --source is optional but if given it will
-        elif args.update :
-            # overwrite the current setting. The --force setting will be needed
-            # to unlock the component
-            ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
-        # Execute/render a group of components
-        elif args.execute :
-#            import pdb; pdb.set_trace()
-            aProject = initProject(args.project_id, args.group_id)
-            if args.cid_list :
-                if not aProject.isValidCidList(args.group_id, args.cid_list) :
-                    sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-            if aProject.isGroup(args.group_id) :
-                aProject.renderGroup(args.group_id, args.cid_list, args.force)
-            else :
-                sys.exit('\nERROR: The group ID given is not found in this project. Must provide a valid group ID. Process halted!\n')
-        # Get a whole list of component IDs and names
-        elif args.output_list :
-            aProject.listAllComponents(args.component_type)
-        # Turn on or off preprocessing on import or updating (specific for cType)
+        if args.hyphenation :
+            aProject.createManager(args.component_type, 'hyphenation')
+            manager = args.component_type + '_Hyphenation'
+            if args.hyphenation == 'add' :
+                aProject.managers[manager].turnOnHyphenation()
+            elif args.hyphenation == 'remove' :
+                aProject.managers[manager].turnOffHyphenation()
+            elif args.hyphenation == 'update' :
+                aProject.managers[manager].updateHyphenation(args.force)
+        elif args.preprocess :
+            if args.preprocess == 'add' :
+                ProjSetup(args.project_id).turnOnOffPreprocess(args.group_id, True)
+            elif args.preprocess == 'remove' :
+                ProjSetup(args.project_id).turnOnOffPreprocess(args.group_id, False)
+        elif args.illustrations :
+            if args.illustrations == 'on' :
+                sys.exit('\nERROR: Add illustrations on not completed yet')
+            elif args.illustrations == 'off' :
+                sys.exit('\nERROR: Add illustrations off not completed yet')
+        elif args.manage :
+            if args.manage == 'add' :
+                # To add a group we need to do these checks first
+                if not args.cid_list :
+                    sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
+                elif not args.component_type :
+                    sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
+                elif not args.source_id :
+                    sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
+                elif args.source :
+                    if not tools.resolvePath(args.source) :
+                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                elif args.source_id :
+                    if not hasValidSourcePath(args.group_id, args.source_id) :
+                        sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                # Having sorted through any potential problems, try adding the group
+                ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
+            elif args.manage == 'remove' :
+                ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
+                if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                    Commander(args.project_id).removeScripts()
+            elif args.manage == 'update' :
+                ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
+            elif args.manage == 'execute' :
+                aProject = initProject(args.project_id, args.group_id)
+                if args.cid_list :
+                    if not aProject.isValidCidList(args.group_id, args.cid_list) :
+                        sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
+                if aProject.isGroup(args.group_id) :
+                    aProject.renderGroup(args.group_id, args.cid_list, args.force)
+                else :
+                    sys.exit('\nERROR: The group ID given is not found in this project. Must provide a valid group ID. Process halted!\n')
+            elif args.manage == 'lock' :
+                ProjSetup(args.project_id).lockUnlock(args.group_id, True)
+            elif args.manage == 'unlock' :
+                ProjSetup(args.project_id).lockUnlock(args.group_id, False)
+            elif args.manage == 'list' :
+                aProject.listAllComponents(args.component_type)
+
         elif args.preprocess :
             aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
-        # Lock group
-        if args.lock :
-            ProjSetup(args.project_id).lockUnlock(args.group_id)
-        # Unlock group
-        elif args.unlock :
-            ProjSetup(args.project_id).lockUnlock(args.group_id)
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -380,30 +391,6 @@ def userArguments (args) :
         else :
             sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
 
-    # Hyphenation level commands
-    elif sys.argv[1].lower() == 'hyphen' :
-        aProject.createManager(args.component_type, 'hyphenation')
-        manager = args.component_type + '_Hyphenation'
-        if args.add :
-            aProject.managers[manager].turnOnHyphenation()
-        elif args.remove :
-            aProject.managers[manager].turnOffHyphenation()
-        elif args.update :
-            aProject.managers[manager].updateHyphenation(args.force)
-        elif args.compare :
-            aProject.managers[manager].compareWithSource()
-
-    # Illustration level commands
-    elif sys.argv[1].lower() == 'illustration' :
-        aProject.createManager(args.component_type, 'illustration')
-        manager = args.component_type + '_Illustration'
-        if args.add :
-            aProject.managers[manager].installIllustrationFile(args.add, args.path, args.force)
-        elif args.watermark :
-            aProject.managers[manager].installWatermarkFile(args.watermark, args.path, args.force)
-        elif args.remove :
-            aProject.managers[manager].removeIllustrationFile(args.remove)
-
     # Post processing commands
     elif sys.argv[1].lower() == 'postprocess' :
         # Run a post process command on a component or component type
@@ -411,25 +398,25 @@ def userArguments (args) :
         # to be used here. If a component name is given it will only run on that
         # component which includes all listed sub-components. Otherwise, all 
         # components of the specified type will be acted on by the postprocess.
-        if args.execute :
+        if args.manage == 'execute' :
             if not args.script :
                 sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
             elif not args.component_name.lower() :
                 sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
             else :
-                aProject.runProcessScript(args.component_name.lower(), args.script)
+                ProjSetup(args.project_id).runProcessScript(args.component_name.lower(), args.script)
         # Install a custom or a default post process script, force to overwrite what is there
-        elif args.add :
+        elif args.manage == 'add' :
             filePath = ''
             if args.path :
                 filePath = tools.resolvePath(args.path)
                 if not os.path.isfile(filePath) :
                     sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
-            aProject.installPostProcess(args.component_type, filePath, args.force)
+            ProjSetup(args.project_id).installPostProcess(args.component_type, filePath, args.force)
         # Disconnect a post process script from the component type (This does not
         # physically remove it unless -f is used.)
-        elif args.remove :
-            aProject.removePostProcess(args.component_type, force)
+        elif args.manage == 'remove' :
+            ProjSetup(args.project_id).removePostProcess(args.component_type, force)
 
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
@@ -440,41 +427,6 @@ def userArguments (args) :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
             sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
-
-    # Exporting commands
-    elif sys.argv[1].lower() == 'export' :
-        # Check further for required args
-        if not args.component_name.lower() :
-            sys.exit('\nERROR: Component ID is missing from command argument. Process halted!\n')
-        else :
-            aProject.createManager(args.component_type, 'text')
-        # Execute an export
-        if args.execute :
-            aProject.export(args.component_type, args.component_name.lower(), args.path, args.script, args.bundle, args.force)
-
-    # Install file commands
-    elif sys.argv[1].lower() == 'install' :
-        # Check further for required args
-        if not args.file :
-            sys.exit('\nERROR: File was not specified in the command argument. Process halted!\n')
-        elif not args.path :
-            sys.exit('\nERROR: Path to the project folder where file is to be installed. Process halted!\n')
-        else :
-            # Install the file
-            aProject.installFile(args.file, args.path, args.force)
-
-    # User Macro commands
-    elif sys.argv[1].lower() == 'macro' :
-        # Check further for required args
-        if not args.name :
-            sys.exit('\nERROR: Macro was not specified in the command argument. Process halted!\n')
-        if args.add :
-            aProject.addMacro(args.name, args.command, args.path, args.force)
-        elif args.execute :
-            aProject.runMacro(args.name)
-        else :
-            # Bad command
-            sys.exit('\nERROR: Command [' + sys.argv[3] + '] not recognized. Process halted!\n')
 
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
@@ -510,7 +462,7 @@ def userArguments (args) :
     try :
         if not sys.argv[1].lower() == 'project' :
             if os.path.isfile(aProject.local.projErrorLogFile) :
-                terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+                tools.terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
     except :
         pass
 
@@ -539,11 +491,19 @@ subparsers = parser.add_subparsers(help='sub-command help')
 helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Available choices
-mediaTypes          = ['book']
-componentTypes      = ['usfm']
-backupTypes         = ['archive', 'backup', 'cloud', 'template']
-backgrounds         = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
-compareTests        = ['source', 'source-working', 'working']
+# Project
+mediaTypes              = ['book']
+componentTypes          = ['usfm']
+backupTypes             = ['archive', 'backup', 'cloud', 'template']
+# Group
+manageCommands          = ['add', 'remove', 'update', 'execute', 'lock', 'unlock', 'list']
+hyphenCommands          = ['add', 'remove', 'update']
+preprocessCommands      = ['add', 'remove']
+illustrationCommands    = ['on', 'off']
+# Other
+backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+compareTests            = ['source', 'source-working', 'working']
+postprocessCommands     = ['add', 'remove', 'execute']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -555,9 +515,10 @@ sysCommand.add_argument('-n', '--user_name', help='Proved a name of the user who
 sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
 
 # FIXME: Restore from template will not work. The pid is the new project name but we
-# currently do not have any means to specify the template.
+# currently do not have any means to specify the template. The same will be true for
+# backups, we may need to add a "resource_id" arg to be able to ID them.
 
-# Add project subprocess arguments
+# Add Project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-d', '--delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
@@ -569,25 +530,21 @@ projCommand.add_argument('-m', '--media', choices=mediaTypes, help='If creating 
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-c', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 
-# Add group subprocess arguments
+# Add Group subprocess arguments
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
 groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-groupCommand.add_argument('group_id', help='The component type is needed for creating a new component.')
+groupCommand.add_argument('group_id', help='A unique ID for this group.')
+groupCommand.add_argument('-m', '--manage', choices=manageCommands, help='The general commands that can be used for managing groups.')
+groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
 groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-groupCommand.add_argument('-a', '--add', action='store_true', help='Add a new component group to this project.')
-groupCommand.add_argument('-r', '--remove', action='store_true', help='remove an existing component group from this project.')
+groupCommand.add_argument('-y', '--hyphenation', choices=hyphenCommands, help='Manage hyphenation for this group.')
+groupCommand.add_argument('-p', '--preprocess', choices=preprocessCommands, help='Turn on or off automated preprocessing when importing and updating components into the group.')
+groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands, help='Manage the use of illustrations in this group.')
 groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
-groupCommand.add_argument('-e', '--execute', action='store_true', help='Execute the render process for a specific group in this project.')
-groupCommand.add_argument('-u', '--update', action='store_true', help='Update a component group. If -s (source) is used a new component source path will be recorded as well.')
-groupCommand.add_argument('-p', '--preprocess', help='Turn on or off preprocessing when importing and updating components. To turn it on use "True", to turn off, use "False"')
-groupCommand.add_argument('-o', '--output_list', action='store_true', help='Generate a list of valid component IDs with their names for the specified component type.')
-groupCommand.add_argument('-l', '--lock', action='store_true', help='Lock a component group.')
-groupCommand.add_argument('-n', '--unlock', action='store_true', help='Unlock a component group.')
 
-# Add component subprocess arguments
+# Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('group_id', help='The group ID this component is a part of.')
@@ -595,7 +552,7 @@ compCommand.add_argument('component_id', help='The component ID, required any ac
 compCommand.add_argument('-c', '--compare', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a specific component from a specified group.')
 
-# Add binding subprocess arguments
+# Add Binding subprocess arguments
 bindCommand = subparsers.add_parser('binding', help='General project binding management commands help')
 bindCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 bindCommand.add_argument('bind_id', help='Binding group ID (a positional argument required for all actions with this subprocess)')
@@ -605,7 +562,7 @@ bindCommand.add_argument('-i', '--id_list', help='A list of groups that are to b
 bindCommand.add_argument('-e', '--execute', action='store_true', help='Execute the binding process for a specific binding group in this project.')
 bindCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 
-# Add font subprocess arguments
+# Add Font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')
 fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 fontCommand.add_argument('group_id', help='The group ID this font is a part of.')
@@ -616,38 +573,17 @@ fontCommand.add_argument('-r', '--remove', action='store_true', help='Remove the
 fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
 fontCommand.add_argument('-m', '--main', action='store_true', help='Set, the specified (valid system) font to be the main (primary) font for this component type.')
 
-# Add text hyphenation processing subprocess arguments
-hyphenCommand = subparsers.add_parser('hyphen', help='General settings for handling component text hyphenation processing commands.')
-hyphenCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-hyphenCommand.add_argument('component_type', help='Specify the component group.')
-hyphenCommand.add_argument('-a', '--add', action='store_true', help='Add (turn on) hyphenation for a component type. Note: if all the necessary components are not present, this could end badly.')
-hyphenCommand.add_argument('-r', '--remove', action='store_true', help='Remove (turn off) hyphenation for a component type.')
-hyphenCommand.add_argument('-f', '--force', action='store_true', help='When used with update (-u), this will delete the source hyphenation file that was copied into the project when it was created. Use this only if you are sure you want to replace it. Any edits done to this file will be lost.')
-hyphenCommand.add_argument('-u', '--update', action='store_true', help='Update the hyphenation files. This is done normally when adjustments are made to configuration or a word list.')
-hyphenCommand.add_argument('-c', '--compare', action='store_true', help='Compare the editable publishing project ParaTExt hyphenation file with its project source.')
-
-# Add illustration subprocess arguments
-illustrationCommand = subparsers.add_parser('illustration', help='General project illustration handling commands help')
-illustrationCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-illustrationCommand.add_argument('component_type', help='The component type is needed when adding an illustration to a project. (This is a required positional argument.)')
-illustrationCommand.add_argument('-a', '--add', help='Provide a file name for the illustration you wish to add to the project.')
-illustrationCommand.add_argument('-r', '--remove', help='Provide a file name for an illustration you wish to remove from the project.')
-illustrationCommand.add_argument('-p', '--path', help='If the illustration is in a unknown location, provide a valid path to where the illustration that is specified with -a.')
-illustrationCommand.add_argument('-f', '--force', action='store_true', help='Force (overwrite) an illustration of the same name in the specified project.')
-
-# Add text post processing subprocess arguments
+# Add text Postprocessing subprocess arguments
 postprocessCommand = subparsers.add_parser('postprocess', help='General settings for handling component post processing commands.')
 postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-postprocessCommand.add_argument('component_type', help='Specify the component type. This is required for all post process operations.')
-postprocessCommand.add_argument('-a', '--add', action='store_true', help='Install a post process into the project scripts folder. If you do not specify a process with path (-p) a default process script will be installed.')
-postprocessCommand.add_argument('-r', '--remove', action='store_true', help='Disconnect a post process from the component type. This does not remove the actual script from the project unless force (-f) is used.')
+postprocessCommand.add_argument('group_id', help='A unique ID for this group.')
+postprocessCommand.add_argument('-m', '--manage', choices=postprocessCommands, help='The general commands that can be used for managing postprocesses.')
 postprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a post process script to be updated, replaced or brought back to default condition for this component type.')
-postprocessCommand.add_argument('-c', '--component_name', help='Give a (registered) component name to execute a post process script on all valid sub-components associated with that component.')
+postprocessCommand.add_argument('-i', '--cid_list', help='If desired, list components to have a post process run on them. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 postprocessCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
 postprocessCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for the -e command.')
-postprocessCommand.add_argument('-e', '--execute', action='store_true', help='Execute a post process script. If a valid component ID is not specified, it will run on all components of the type it is a part of.')
 
-# Add settings subprocess arguments
+# Add Settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
 settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
@@ -655,35 +591,11 @@ settingsCommand.add_argument('section', help='The section path to the key/value 
 settingsCommand.add_argument('key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
 
-# Add Project exporting subprocess arguments
-exportCommand = subparsers.add_parser('export', help='Commands for exporting data from a project for a variety of purposes.')
-exportCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-exportCommand.add_argument('component_type', help='Component ID (a positional argument required for all actions with this subprocess)')
-exportCommand.add_argument('component_name', help='Specify a valid component name to be exported. The sub-components associated with that name will be exported.')
-exportCommand.add_argument('-p', '--path', help='Optional - This will specify a path/folder where the exported data is output to. Default is to create an export folder in the source folder and output to that.')
-exportCommand.add_argument('-s', '--script', help='Optional - The name of an installed post process script to be used in the export process. Default will just blind copy the working text to the export folder.')
-exportCommand.add_argument('-e', '--execute', action='store_true', help='Execute an export operation.')
-exportCommand.add_argument('-b', '--bundle', action='store_true', help='Bundle the exported file(s) into a single compressed file.')
-exportCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting file(s) of the same name.')
+# FIXME: Need to add Export management
 
-# Add Project install subprocess arguments
-installCommand = subparsers.add_parser('install', help='Commands for manually installing files into a project for a variety of purposes.')
-installCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-installCommand.add_argument('file', help='The file to be installed, relitive paths are allowed.')
-installCommand.add_argument('path', help='Specify the path to the project folder where the file goes.')
-installCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting file.')
+# FIXME: Need to add Macro management
 
-# Add Macro subprocess arguments
-macroCommand = subparsers.add_parser('macro', help='Commands for creating user macros and installing the files into a project for a variety of purposes.')
-macroCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-macroCommand.add_argument('name', help='The name of the macro to create or call.')
-macroCommand.add_argument('-a', '--add', action='store_true', help='Add/install the specified macro into the Macros/user folder.')
-macroCommand.add_argument('-e', '--execute', action='store_true', help='Execute an installed macro.')
-macroCommand.add_argument('-c', '--command', help='Add a list (\'[rapuma 1, rapuma 2, etc.]\') of Rapuma commands to a macro file. This would be used along with the -a command.')
-macroCommand.add_argument('-p', '--path', help='If the macro you are adding already exsists, specify the path to it and include the name of the file. This would be used with the -a command and instead of -c command.')
-macroCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting macro file.')
-
-# Add Project preserve subprocess arguments
+# Add page background subprocess arguments
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
 backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
 backgroundCommand.add_argument('background_type', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
