@@ -557,7 +557,7 @@ class Paratext (object) :
             self.log.writeToLog(self.errorCodes['0260'])
 
         # These calls may be order-sensitive, update local project source
-        if not os.path.isfile(ptProjHyphFile) or isOlder(ptProjHyphFile, ptHyphFile) :
+        if not os.path.isfile(ptProjHyphFile) or self.tools.isOlder(ptProjHyphFile, ptHyphFile) :
             self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
             self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
             self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(ptHyphFile)])

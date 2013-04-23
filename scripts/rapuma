@@ -294,9 +294,9 @@ def userArguments (args) :
             aProject.createManager(args.component_type, 'hyphenation')
             manager = args.component_type + '_Hyphenation'
             if args.hyphenation == 'add' :
-                aProject.managers[manager].turnOnHyphenation()
+                aProject.managers[manager].turnOnHyphenation(args.group_id)
             elif args.hyphenation == 'remove' :
-                aProject.managers[manager].turnOffHyphenation()
+                aProject.managers[manager].turnOffHyphenation(args.group_id)
             elif args.hyphenation == 'update' :
                 aProject.managers[manager].updateHyphenation(args.force)
         elif args.preprocess :
@@ -367,11 +367,11 @@ def userArguments (args) :
     # Binding level commands
     elif sys.argv[1].lower() == 'binding' :
         # Add a new binding group
-        if args.add :
+        if args.manage == 'add' :
             Binding(args.project_id).addBindingGroup(args.bind_id, args.id_list, args.force)
-        elif args.remove :
+        elif args.manage == 'remove' :
             Binding(args.project_id).removeBindingGroup(args.bind_id)
-        elif args.execute :
+        elif args.manage == 'execute' :
             Binding(args.project_id).bindComponents(args.bind_id)
 
     # Font level commands
@@ -503,6 +503,7 @@ illustrationCommands    = ['on', 'off']
 # Other
 backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
 compareTests            = ['source', 'source-working', 'working']
+bindCommands            = ['add', 'remove', 'execute']
 postprocessCommands     = ['add', 'remove', 'execute']
 
 # Add main arguments (first postion options)
@@ -556,10 +557,8 @@ compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a speci
 bindCommand = subparsers.add_parser('binding', help='General project binding management commands help')
 bindCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 bindCommand.add_argument('bind_id', help='Binding group ID (a positional argument required for all actions with this subprocess)')
-bindCommand.add_argument('-a', '--add', action='store_true', help='Add a new binding group to this project.')
-bindCommand.add_argument('-r', '--remove', action='store_true', help='Remove an exsisting binding group from this project.')
+bindCommand.add_argument('-m', '--manage', choices=bindCommands, help='The general commands that can be used for managing project binding.')
 bindCommand.add_argument('-i', '--id_list', help='A list of groups that are to be bound together.')
-bindCommand.add_argument('-e', '--execute', action='store_true', help='Execute the binding process for a specific binding group in this project.')
 bindCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 
 # Add Font subprocess arguments

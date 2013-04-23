@@ -161,9 +161,9 @@ class Commander (object) :
         mid     = self.projectMediaIDCode
 
         return {
-                'addBible'      : ['Add Scripture components for a Bible group.',       'rapuma group ' + pid + ' Bible -c usfm -a -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' NT -c usfm -a -d base -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' OT -c usfm -a -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+                'addBible'      : ['Add Scripture components for a Bible group.',       'rapuma group ' + pid + ' Bible -c usfm -m add -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addNT'         : ['Add Scripture components for an NT group.',         'rapuma group ' + pid + ' NT -c usfm -m add -d base -s $1 -i "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addOT'         : ['Add Scripture components for an OT group.',         'rapuma group ' + pid + ' OT -c usfm -m add -d base -s $1 -i "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
                 'archive'       : ['Archive this project',                              'rapuma project ' + pid + ' -p archive '], 
                 'backgroundOff' : ['Turn off all backgounds on output page.',           'rapuma background ' + pid + ' none'], 
                 'backup'        : ['Backup this project',                               'rapuma project ' + pid + ' -p backup '], 
@@ -197,13 +197,11 @@ class Commander (object) :
                 'compareSource' : ['Compare component working text with source.',       'rapuma component ' + pid + ' ' + gid + ' $1 -c source'], 
                 'compareWork'   : ['Compare working text with previous working text.',  'rapuma component ' + pid + ' ' + gid + ' $1 -c working'], 
                 'edit'          : ['Edit specified component file.',                    'rapuma edit ' + pid + ' ' + gid + ' -c $1 -g -s'], 
-                'export'        : ['Export working text from the ' + gid + ' group.',   'rapuma export ' + pid + ' ' + gid + ' $1 -e -f  '], 
-                'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma hyphen ' + pid + ' ' + cType + ' -r  '], 
-                'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma hyphen ' + pid + ' ' + cType + ' -a  '], 
-                'postprocess'   : ['Run a post-process script.',                        'rapuma locking ' + pid + ' $1 -u \n\nrapuma postprocess ' + pid + ' ' + cType + ' -c $1 -e -s $2 '], 
-                'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e -f '], 
-                'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -u '], 
-                'view'          : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -e '], 
+                'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma group ' + pid + ' ' + gid + ' -c ' + cType + ' -y remove  '], 
+                'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma group ' + pid + ' ' + gid + ' -c ' + cType + ' -y add  '], 
+                'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -m execute -f '], 
+                'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -m update '], 
+                'view'          : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' -i \"$1\" -m execute '], 
             }
 
 
@@ -214,7 +212,7 @@ class Commander (object) :
         pid     = self.pid
 
         return {
-                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma binding ' + pid + ' ' + bid + ' -e '] 
+                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma binding ' + pid + ' ' + bid + ' -m execute '] 
             }
 
 

@@ -371,7 +371,7 @@ class Xetex (Manager) :
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
             for c in self.pt_tools.getNWFChars(self.gid) :
-                uv = rtnUnicodeValue(c)
+                uv = self.tools.rtnUnicodeValue(c)
                 # We handel these chars special in this context
                 if not uv in ['2011', '002D'] :
                     lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')

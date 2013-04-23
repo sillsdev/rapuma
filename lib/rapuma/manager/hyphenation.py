@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, re, shutil, subprocess
+import os, re, shutil, subprocess, codecs
 
 
 # Load the local classes
@@ -94,10 +94,10 @@ class Hyphenation (Manager) :
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
             '0240' : ['LOG', 'Hyphenation report: <<1>> = <<2>>'],
-            '0250' : ['MSG', 'Turned on hyphenation for component type: [<<1>>]'],
-            '0255' : ['MSG', 'Hyphenation is already on for component type: [<<1>>]'],
-            '0260' : ['MSG', 'Turned off hyphenation for component type: [<<1>>]'],
-            '0265' : ['MSG', 'Hyphenation is already off for component type: [<<1>>]'],
+            '0250' : ['MSG', 'Turned on hyphenation for group: [<<1>>]'],
+            '0255' : ['MSG', 'Hyphenation is already on for group: [<<1>>]'],
+            '0260' : ['MSG', 'Turned off hyphenation for group: [<<1>>]'],
+            '0265' : ['MSG', 'Hyphenation is already off for group: [<<1>>]'],
             '0270' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
 
             'HYPH-000' : ['MSG', 'Hyphenation module messages'],
@@ -140,9 +140,9 @@ class Hyphenation (Manager) :
         if not self.useHyphenation :
             self.projConfig['Groups'][gid]['useHyphenation'] = True
             self.tools.writeConfFile(self.projConfig)
-            self.project.log.writeToLog(self.errorCodes['0250'], [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0250'], [gid])
         else :
-            self.project.log.writeToLog(self.errorCodes['0255'], [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0255'], [gid])
 
 
     def turnOffHyphenation (self, gid) :
@@ -154,9 +154,9 @@ class Hyphenation (Manager) :
         if self.useHyphenation :
             self.projConfig['Groups'][gid]['useHyphenation'] = False
             self.tools.writeConfFile(self.projConfig)
-            self.project.log.writeToLog(self.errorCodes['0260'], [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0260'], [gid])
         else :
-            self.project.log.writeToLog(self.errorCodes['0265'], [self.cType])
+            self.project.log.writeToLog(self.errorCodes['0265'], [gid])
 
 
     def updateHyphenation (self, force = False) :
