@@ -143,6 +143,13 @@ Todo:
             <value>Components</value>
         </setting>
         <setting>
+            <name>Project Deliverables Folder</name>
+            <key>projDeliverablesFolder</key>
+            <description>The folder were project deliverable (rendered) items are kept.</description>
+            <type>string</type>
+            <value>Deliverables</value>
+        </setting>
+        <setting>
             <name>Project Scripts Folder</name>
             <key>projScriptsFolder</key>
             <description>The folder where all the project custom processing scripts are kept.</description>

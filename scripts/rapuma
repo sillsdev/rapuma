@@ -66,7 +66,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130417221909'
+systemVersion   = '0.1.20130424'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -76,16 +76,18 @@ tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 ########################### Rapuma Functions ##############################
 ###########################################################################
 
-def checkCreatorVersion (projConfig, systemVersion) :
+def checkCreatorVersion (pid, projConfig, systemVersion) :
     '''Keep track of the version of Rapuma used in the current project.'''
 
     if not tools.testForSetting(projConfig, 'ProjectInfo', 'projectCreatorVersion') :
         projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
         tools.writeConfFile(projConfig)
-    else :
-        if projConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
-            projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
-            tools.writeConfFile(projConfig)
+
+    if projConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
+        projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
+        tools.writeConfFile(projConfig)
+        # Now update the scripts if that is needed
+        Commander(pid).updateScripts()
 
 
 def hasValidSourcePath (gid, csid) :
@@ -123,11 +125,11 @@ def isTemplate (tid) :
 def initProject (pid, gid) :
     '''Initialize an existing project according to the project ID given.'''
 
-    local   = ProjLocal(pid)
-    pc      = ProjConfig(local)
-    log     = ProjLog(pid)
-    checkCreatorVersion(pc.projConfig, systemVersion)
-    aProject = Project(pid, gid)
+    local       = ProjLocal(pid)
+    pc          = ProjConfig(local)
+    log         = ProjLog(pid)
+    aProject    = Project(pid, gid)
+    checkCreatorVersion(pid, pc.projConfig, systemVersion)
     return aProject
 
 
@@ -210,17 +212,14 @@ def userArguments (args) :
             targetPath = tools.resolvePath(args.targetPath)
             if not os.path.exists(targetPath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
-
         # Create/refresh helper scripts
         if args.scripts :
             Commander(pid).updateScripts()
             return True
-
         # Remove an exsisting project
         if args.delete :
             ProjSetup(pid).deleteProject()
             return True
-
         # Restore (or revert to) the last backup
         if args.restore == 'backup' :
             if isProject(pid) :
@@ -258,7 +257,6 @@ def userArguments (args) :
         # Backup (evaporate) to cloud
         elif args.preserve == 'cloud' :
             ProjBackup(pid).pushToCloud()
-
         # Creating a new project from a template, archive, or scratch
         else :
             # First test for some necessary params
@@ -267,7 +265,6 @@ def userArguments (args) :
                 sys.exit('\nERROR: No path for this project has been given. Process halting.\n')
             else :
                 projFolder = os.path.join(targetPath, pid)
-
             # New (to current system) project from archive
             if args.restore == 'archive' :
                 ProjBackup(pid).restoreArchive(targetPath, sourcePath)
@@ -316,38 +313,53 @@ def userArguments (args) :
                     sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                 elif not args.component_type :
                     sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                elif not args.source_id :
-                    sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
-                elif args.source :
-                    if not tools.resolvePath(args.source) :
-                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                elif args.source_id :
-                    if not hasValidSourcePath(args.group_id, args.source_id) :
-                        sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                # Having sorted through any potential problems, try adding the group
-                ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
+                # Having sorted through some of the potential problems, try adding the group according to type
+                if args.component_type == 'bind' :
+                    Binding(args.project_id).addBindingGroup(args.group_id, args.cid_list, args.force)
+                elif args.component_type == 'map' :
+                    MapSet(args.project_id).addMapSet(args.group_id, args.cid_list, args.force)
+                elif args.component_type == 'usfm' :
+                    if not args.source_id :
+                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
+                    elif args.source :
+                        if not tools.resolvePath(args.source) :
+                            sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                    elif args.source_id :
+                        if not hasValidSourcePath(args.group_id, args.source_id) :
+                            sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
             elif args.manage == 'remove' :
-                ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
-                if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                    Commander(args.project_id).removeScripts()
+                cType = aProject.projConfig['Groups'][args.group_id]['cType']
+                if cType == 'bind' :
+                    Binding(args.project_id).removeBindingGroup(args.group_id)
+                elif cType == 'map' :
+                    MapSet(args.project_id).removeMapSet(args.group_id)
+                elif cType == 'usfm' :
+                    ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
+                    if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                        Commander(args.project_id).removeScripts()
             elif args.manage == 'update' :
                 ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
             elif args.manage == 'execute' :
-                aProject = initProject(args.project_id, args.group_id)
+                cType = aProject.projConfig['Groups'][args.group_id]['cType']
+                print cType
                 if args.cid_list :
                     if not aProject.isValidCidList(args.group_id, args.cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-                if aProject.isGroup(args.group_id) :
+                if cType == 'bind' :
+                    print 'in binding'
+                    Binding(args.project_id).bindComponents(args.group_id)
+                elif cType == 'map' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, args.cid_list, args.force)
+                elif cType == 'usfm' :
+                    aProject = initProject(args.project_id, args.group_id)
                     aProject.renderGroup(args.group_id, args.cid_list, args.force)
-                else :
-                    sys.exit('\nERROR: The group ID given is not found in this project. Must provide a valid group ID. Process halted!\n')
             elif args.manage == 'lock' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
             elif args.manage == 'unlock' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, False)
-            elif args.manage == 'list' :
+            elif args.component_type == 'usfm' and args.manage == 'list' :
                 aProject.listAllComponents(args.component_type)
-
         elif args.preprocess :
             aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
 
@@ -363,16 +375,6 @@ def userArguments (args) :
         # Commands for editing project files
         elif args.edit :
                 aProject.edit(args.component_id)
-
-    # Binding level commands
-    elif sys.argv[1].lower() == 'binding' :
-        # Add a new binding group
-        if args.manage == 'add' :
-            Binding(args.project_id).addBindingGroup(args.bind_id, args.id_list, args.force)
-        elif args.manage == 'remove' :
-            Binding(args.project_id).removeBindingGroup(args.bind_id)
-        elif args.manage == 'execute' :
-            Binding(args.project_id).bindComponents(args.bind_id)
 
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
@@ -493,10 +495,10 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Available choices
 # Project
 mediaTypes              = ['book']
-componentTypes          = ['usfm']
 backupTypes             = ['archive', 'backup', 'cloud', 'template']
 # Group
 manageCommands          = ['add', 'remove', 'update', 'execute', 'lock', 'unlock', 'list']
+componentTypes          = ['bind', 'map', 'usfm']
 hyphenCommands          = ['add', 'remove', 'update']
 preprocessCommands      = ['add', 'remove']
 illustrationCommands    = ['on', 'off']
@@ -552,14 +554,6 @@ compCommand.add_argument('group_id', help='The group ID this component is a part
 compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
 compCommand.add_argument('-c', '--compare', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a specific component from a specified group.')
-
-# Add Binding subprocess arguments
-bindCommand = subparsers.add_parser('binding', help='General project binding management commands help')
-bindCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-bindCommand.add_argument('bind_id', help='Binding group ID (a positional argument required for all actions with this subprocess)')
-bindCommand.add_argument('-m', '--manage', choices=bindCommands, help='The general commands that can be used for managing project binding.')
-bindCommand.add_argument('-i', '--id_list', help='A list of groups that are to be bound together.')
-bindCommand.add_argument('-f', '--force', action='store_true', help='Force an action if overriding a default non-action is needed.')
 
 # Add Font subprocess arguments
 fontCommand = subparsers.add_parser('font', help='General font handling commands help')

@@ -106,8 +106,8 @@ class Commander (object) :
         '''Create scripts that process specific group components.'''
 
         # Output the scripts (If this is a new project we need to pass)
-        if self.tools.isConfSection(self.projConfig, 'Binding') :
-            for bid in self.projConfig['Binding'].keys() :
+        if self.tools.isConfSection(self.projConfig, 'Groups') :
+            for bid in self.projConfig['Groups'].keys() :
                 allScripts = self.getBndScripInfo(bid)
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projScriptsFolder, key) + bid
@@ -212,7 +212,7 @@ class Commander (object) :
         pid     = self.pid
 
         return {
-                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma binding ' + pid + ' ' + bid + ' -m execute '] 
+                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma group ' + pid + ' ' + bid + ' -m execute '] 
             }
 
 

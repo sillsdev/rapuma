@@ -91,18 +91,17 @@ class Binding (object) :
 
         if force :
             try :
-                if self.tools.testForSetting(self.projConfig['Binding'], bgID) :
-                    del self.projConfig['Binding'][bgID]
+                if self.tools.testForSetting(self.projConfig['Groups'], bgID) :
+                    del self.projConfig['Groups'][bgID]
             except :
                 pass
 
         try :
             # Add the info to the components section
-            if not self.tools.testForSetting(self.projConfig, 'Binding') :
-                self.tools.buildConfSection(self.projConfig, 'Binding')
-            if not self.tools.testForSetting(self.projConfig['Binding'], bgID) :
-                self.tools.buildConfSection(self.projConfig['Binding'], bgID)
-                self.projConfig['Binding'][bgID]['gidList'] = gIDs.split()
+            if not self.tools.testForSetting(self.projConfig['Groups'], bgID) :
+                self.tools.buildConfSection(self.projConfig['Groups'], bgID)
+                self.projConfig['Groups'][bgID]['gidList'] = gIDs.split()
+                self.projConfig['Groups'][bgID]['cType'] = 'bind'
                 self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0210'], [bgID])
             else :
@@ -115,8 +114,8 @@ class Binding (object) :
     def removeBindingGroup (self, bgID) :
         '''Remove a binding group from the project config.'''
 
-        if self.tools.testForSetting(self.projConfig['Binding'], bgID) :
-            del self.projConfig['Binding'][bgID]
+        if self.tools.testForSetting(self.projConfig['Groups'], bgID) :
+            del self.projConfig['Groups'][bgID]
             self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0220'], [bgID])
         else :
@@ -127,12 +126,11 @@ class Binding (object) :
         '''Bind a project binding group. Right now this is hard-wired to only work
         with pdftk.'''
 
-
 #        import pdb; pdb.set_trace()
 
         # Check for components and render any that do not exist
-        for gid in self.projConfig['Binding'][bgID]['gidList'] :
-            gidPdf = os.path.join(self.local.projComponentsFolder, gid, gid + '.pdf')
+        for gid in self.projConfig['Groups'][bgID]['gidList'] :
+            gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
             cType = self.projConfig['Groups'][gid]['cType']
             renderer = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
             manager = cType + '_' + renderer.capitalize()
@@ -155,17 +153,14 @@ class Binding (object) :
 
         # Build the command
         confCommand = ['pdftk']
-        outputPath = os.path.join(self.local.projComponentsFolder, bgID)
-        if not os.path.exists(outputPath) :
-            os.makedirs(outputPath)
         # Append each of the input files
-        for gid in self.projConfig['Binding'][bgID]['gidList'] :
-            gidPdf = os.path.join(self.local.projComponentsFolder, gid, gid + '.pdf')
+        for gid in self.projConfig['Groups'][bgID]['gidList'] :
+            gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
             confCommand.append(gidPdf)
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(outputPath, bgID + '.pdf')
+        output = os.path.join(self.local.projDeliverablesFolder, bgID + '.pdf')
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)
@@ -177,14 +172,14 @@ class Binding (object) :
 
         # Collect the page count and record in group
         newPages = self.getPdfPages(output)
-        if self.tools.testForSetting(self.projConfig['Binding'][bgID], 'totalPages') :
-            oldPages = int(self.projConfig['Binding'][bgID]['totalPages'])
+        if self.tools.testForSetting(self.projConfig['Groups'][bgID], 'totalPages') :
+            oldPages = int(self.projConfig['Groups'][bgID]['totalPages'])
             if oldPages != newPages or oldPages == 'None' :
-                self.projConfig['Binding'][bgID]['totalPages'] = newPages
+                self.projConfig['Groups'][bgID]['totalPages'] = newPages
                 self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
         else :
-            self.projConfig['Binding'][bgID]['totalPages'] = newPages
+            self.projConfig['Groups'][bgID]['totalPages'] = newPages
             self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
 

@@ -110,6 +110,7 @@ class Xetex (Manager) :
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
+        self.projDeliverablesFolder = self.local.projDeliverablesFolder
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         self.projHyphenationFolder  = self.local.projHyphenationFolder
         self.projFontsFolder        = self.local.projFontsFolder
@@ -118,6 +119,7 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
+        self.deliverablePdfFile     = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
         self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
         self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
@@ -314,15 +316,16 @@ class Xetex (Manager) :
             self.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
 
 
-    def displayPdfOutput (self) :
+    def displayPdfOutput (self, fileName) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
 #        import pdb; pdb.set_trace()
 
         if self.usePdfViewer :
             # Build the viewer command
-            self.pdfViewer.append(self.gidPdfFile)
+            self.pdfViewer.append(fileName)
             # Run the XeTeX and collect the return code for analysis
+            print self.pdfViewer
             try :
                 subprocess.Popen(self.pdfViewer)
                 return True
@@ -764,11 +767,11 @@ class Xetex (Manager) :
         # Get our list of cids
         # Check for cidList, use std group if it isn't there
         # If there is a cidList, create an alternate ouput name
-        PdfSubName = ''
+        PdfSubFile = ''
         if cidList :
             if isinstance(cidList, str) :
                 cidList = cidList.split()
-                PdfSubName = os.path.join(self.gidFolder, self.gid + '-' + '-'.join(cidList) + '.pdf')
+                PdfSubFile = os.path.join(self.gidFolder, self.gid + '-' + '-'.join(cidList) + '.pdf')
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
@@ -876,10 +879,9 @@ class Xetex (Manager) :
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Process alternate name if needed
-            if PdfSubName :
-                shutil.copy(self.gidPdfFile, PdfSubName)
-                os.remove(self.gidPdfFile)
-                self.gidPdfFile = PdfSubName
+            if PdfSubFile :
+                os.rename(self.gidPdfFile, PdfSubFile)
+                self.gidPdfFile = PdfSubFile
 
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
@@ -897,12 +899,16 @@ class Xetex (Manager) :
         else :
             self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])
 
-        # Review the results if desired
+        # Move to the Deliverables folder for easier access
         if os.path.isfile(self.gidPdfFile) :
-            if self.displayPdfOutput() :
-                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(self.gidPdfFile)])
+            shutil.move(self.gidPdfFile, self.deliverablePdfFile)
+
+        # Review the results if desired
+        if os.path.isfile(self.deliverablePdfFile) :
+            if self.displayPdfOutput(self.deliverablePdfFile) :
+                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(self.deliverablePdfFile)])
             else :
-                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(self.gidPdfFile)])
+                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(self.deliverablePdfFile)])
 
 
 
