@@ -342,12 +342,10 @@ def userArguments (args) :
                 ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
             elif args.manage == 'execute' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                print cType
                 if args.cid_list :
                     if not aProject.isValidCidList(args.group_id, args.cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
                 if cType == 'bind' :
-                    print 'in binding'
                     Binding(args.project_id).bindComponents(args.group_id)
                 elif cType == 'map' :
                     MapSet(args.project_id).renderMapSet(args.group_id, args.cid_list, args.force)

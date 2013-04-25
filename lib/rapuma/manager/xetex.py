@@ -119,7 +119,7 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-        self.deliverablePdfFile     = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
+#        self.deliverablePdfFile     = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
         self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
         self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
@@ -767,11 +767,11 @@ class Xetex (Manager) :
         # Get our list of cids
         # Check for cidList, use std group if it isn't there
         # If there is a cidList, create an alternate ouput name
-        PdfSubFile = ''
+        pdfSubFileName = ''
         if cidList :
             if isinstance(cidList, str) :
                 cidList = cidList.split()
-                PdfSubFile = os.path.join(self.gidFolder, self.gid + '-' + '-'.join(cidList) + '.pdf')
+                pdfSubFileName = self.gid + '-' + '-'.join(cidList) + '.pdf'
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
@@ -879,9 +879,9 @@ class Xetex (Manager) :
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Process alternate name if needed
-            if PdfSubFile :
-                os.rename(self.gidPdfFile, PdfSubFile)
-                self.gidPdfFile = PdfSubFile
+#            if pdfSubFile :
+#                os.rename(self.gidPdfFile, pdfSubFile)
+#                self.gidPdfFile = pdfSubFile
 
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
@@ -901,14 +901,18 @@ class Xetex (Manager) :
 
         # Move to the Deliverables folder for easier access
         if os.path.isfile(self.gidPdfFile) :
-            shutil.move(self.gidPdfFile, self.deliverablePdfFile)
+            if pdfSubFileName :
+                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
+            else :
+                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.deliverablePdfFileName)
+            shutil.move(self.gidPdfFile, deliverablePdfFile)
 
         # Review the results if desired
-        if os.path.isfile(self.deliverablePdfFile) :
-            if self.displayPdfOutput(self.deliverablePdfFile) :
-                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(self.deliverablePdfFile)])
+        if os.path.isfile(deliverablePdfFile) :
+            if self.displayPdfOutput(deliverablePdfFile) :
+                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(deliverablePdfFile)])
             else :
-                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(self.deliverablePdfFile)])
+                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(deliverablePdfFile)])
 
 
 
