@@ -904,7 +904,7 @@ class Xetex (Manager) :
             if pdfSubFileName :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
             else :
-                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.deliverablePdfFileName)
+                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 
         # Review the results if desired
