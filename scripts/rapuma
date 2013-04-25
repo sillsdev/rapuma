@@ -66,7 +66,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130424'
+systemVersion   = '0.1.20130425'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -327,7 +327,7 @@ def userArguments (args) :
                 if args.cid_list :
                     if not aProject.isValidCidList(args.group_id, args.cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-                elif cType == 'map' :
+                if cType == 'map' :
                     MapSet(args.project_id).renderMapSet(args.group_id, args.cid_list, args.force, args.proof)
                 elif cType == 'usfm' :
                     aProject = initProject(args.project_id, args.group_id)

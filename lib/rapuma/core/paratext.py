@@ -315,8 +315,8 @@ class Paratext (object) :
             return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            terminal('No source path found for: [' + str(e) + ']')
-            terminal('Please add a source path for this component type.')
+            self.tools.terminal('No source path found for: [' + str(e) + ']')
+            self.tools.terminal('Please add a source path for this component type.')
             self.tools.dieNow()
 
 
@@ -487,7 +487,7 @@ class Paratext (object) :
         if self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
             if not os.path.isfile(preProcessFile) :
                 shutil.copy(rapumaPreProcessFile, preProcessFile)
-                makeExecutable(preProcessFile)
+                self.tools.makeExecutable(preProcessFile)
                 self.log.writeToLog(self.errorCodes['0280'])
             else :
                 err = subprocess.call([preProcessFile, ptHyphFile])
@@ -505,7 +505,7 @@ class Paratext (object) :
 
         if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(ptHyphFile, ptProjHyphFile)
+            self.tools.utf8Copy(ptHyphFile, ptProjHyphFile)
             # Once copied, check if any preprocessing is needed
             self.preprocessSource(ptHyphFile, preProcessFile, rapumaPreProcessFile)
         else :
@@ -517,7 +517,7 @@ class Paratext (object) :
 
         if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
-            utf8Copy(ptHyphFile, ptProjHyphBakFile)
+            self.tools.utf8Copy(ptHyphFile, ptProjHyphBakFile)
             self.tools.makeReadOnly(ptProjHyphBakFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
