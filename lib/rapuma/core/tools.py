@@ -101,6 +101,11 @@ class ToolsPath (object) :
         return os.path.join(targetFolder, sName + '.source')
 
 
+    def getGroupPreprocessFile (self, gid) :
+        '''Get the file name and path to the group's preprocess script.'''
+
+        return os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
+
 
 ###############################################################################
 ############################ Begin Normal Tools Class #########################
@@ -115,6 +120,17 @@ class Tools (object) :
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
+
+    def proofFileName (self, fileName) :
+        '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
+        
+        # FIXME: It would be nice to have an alpha character incrementer
+        
+        (path, fn) = os.path.split(fileName)
+        fParts = fn.split('.')
+        newName = 'proof_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
+        return os.path.join(path, newName)
+
 
     def makeFileHeader (self, fileName, desc = None, noEditWarn = True) :
         '''Create a header for project files which may or may not be editable.'''

@@ -173,7 +173,7 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
 
 
-    def render(self, cidList, force) :
+    def render(self, cidList, force, proof) :
         '''Does USFM specific rendering of a USFM component'''
 
 #        import pdb; pdb.set_trace()
@@ -194,7 +194,7 @@ class Usfm (Group) :
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
         # Note: We pass the cidList straight through
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(cidList, force)
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(cidList, force, proof)
 
         return True
 

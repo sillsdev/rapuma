@@ -678,7 +678,7 @@ class ProjSetup (object) :
             confFile = os.path.join(self.local.userHome, 'rapuma.conf')
         else :
             confFile = os.path.join(self.local.projConfFolder, config + '.conf')
-            
+
         # Test for existance
         if not os.path.exists(confFile) :
             self.log.writeToLog(self.errorCodes['0810'], [self.tools.fName(confFile)])
@@ -721,60 +721,6 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-#    def getGroupSourcePath (self, gid) :
-#        '''Get the source path for a specified group.'''
-
-##        import pdb; pdb.set_trace()
-
-#        csid = self.projConfig['Groups'][gid]['csid']
-#        try :
-#            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
-#        except Exception as e :
-#            # If we don't succeed, we should probably quite here
-#            self.tools.terminal('Could not find the path for group: [' + gid + '], This was the error: ' + str(e))
-
-
-#    def getSourceFile (self, gid, cid) :
-#        '''Get the source file name with path.'''
-
-#        sourcePath          = self.getGroupSourcePath(gid)
-#        cType               = self.projConfig['Groups'][gid]['cType']
-#        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
-#        # Build the file name
-#        if sourceEditor.lower() == 'paratext' :
-#            sName = self.paratext.formPTName(gid, cid)
-#        elif sourceEditor.lower() == 'generic' :
-#            sName = self.paratext.formGenericName(gid, cid)
-#        else :
-#            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
-
-#        return os.path.join(sourcePath, sName)
-
-
-#    def getWorkingFile (self, gid, cid) :
-#        '''Return the working file name with path.'''
-
-#        csid            = self.projConfig['Groups'][gid]['csid']
-#        cType           = self.projConfig['Groups'][gid]['cType']
-#        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-#        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
-
-
-#    def getWorkCompareFile (self, gid, cid) :
-#        '''Return the working compare file (saved from last update) name with path.'''
-
-#        return self.getWorkingFile(gid, cid) + '.cv1'
-
-
-#    def getWorkingSourceFile (self, gid, cid) :
-#        '''Get the working source file name with path.'''
-
-#        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
-#        source          = self.getSourceFile(gid, cid)
-#        sName           = os.path.split(source)[1]
-#        return os.path.join(targetFolder, sName + '.source')
-
-
     def installUsfmWorkingText (self, gid, cid, force = False) :
         '''Find the USFM source text and install it into the working text
         folder of the project with the proper name. If a USFM text file
@@ -786,8 +732,6 @@ class ProjSetup (object) :
 
         cType               = self.projConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
-        grpPreprocessFile   = os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
-        rpmPreprocessFile   = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
         targetFolder        = os.path.join(self.local.projComponentsFolder, cid)
         target              = self.tools_path.getWorkingFile(gid, cid)
         targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
@@ -823,9 +767,8 @@ class ProjSetup (object) :
         if self.usfmCopy(targetSource, target) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
-                if not os.path.isfile(grpPreprocessFile) :
-                    self.installPreprocess(grpPreprocessFile, rpmPreprocessFile)
-                if not self.runProcessScript(target, grpPreprocessFile) :
+                self.checkForPreprocessScript(gid)
+                if not self.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
             # If this is a USFM component type we need to remove any \fig markers,
@@ -944,10 +887,13 @@ class ProjSetup (object) :
         self.log.writeToLog(self.errorCodes['1240'], [str(onOff), gid])
 
 
-    def installPreprocess (self, grpPreprocessFile, rpmPreprocessFile) :
+    def checkForPreprocessScript (self, gid) :
         '''Check to see if a preprocess script is installed. If not, install the
         default script and give a warning that the script is not complete.'''
 
+        cType = self.projConfig['Groups'][gid]['cType']
+        rpmPreprocessFile = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
+        grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
         # Check and copy if needed
         if not os.path.isfile(grpPreprocessFile) :
             shutil.copy(rpmPreprocessFile, grpPreprocessFile)

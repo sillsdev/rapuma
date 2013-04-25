@@ -325,7 +325,6 @@ class Xetex (Manager) :
             # Build the viewer command
             self.pdfViewer.append(fileName)
             # Run the XeTeX and collect the return code for analysis
-            print self.pdfViewer
             try :
                 subprocess.Popen(self.pdfViewer)
                 return True
@@ -760,7 +759,7 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 0600 #######################
 ###############################################################################
 
-    def run (self, cidList, force) :
+    def run (self, cidList, force, proof) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -878,11 +877,6 @@ class Xetex (Manager) :
                     # If we don't succeed, we should probably quite here
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
-            # Process alternate name if needed
-#            if pdfSubFile :
-#                os.rename(self.gidPdfFile, pdfSubFile)
-#                self.gidPdfFile = pdfSubFile
-
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
             if self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
@@ -905,6 +899,10 @@ class Xetex (Manager) :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
             else :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
+
+            if proof :
+                deliverablePdfFile = self.tools.proofFileName()
+
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 
         # Review the results if desired

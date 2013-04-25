@@ -122,7 +122,7 @@ class Binding (object) :
             self.log.writeToLog(self.errorCodes['0225'], [bgID])
 
 
-    def bindComponents (self, bgID) :
+    def bindComponents (self, bgID, proof = False) :
         '''Bind a project binding group. Right now this is hard-wired to only work
         with pdftk.'''
 
@@ -161,6 +161,8 @@ class Binding (object) :
         confCommand.append('cat')
         confCommand.append('output')
         output = os.path.join(self.local.projDeliverablesFolder, bgID + '.pdf')
+        if proof :
+            output = self.tools.proofFileName(output)
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)
