@@ -66,7 +66,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130425'
+systemVersion   = '0.1.20130426'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -261,6 +261,11 @@ def userArguments (args) :
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
         aProject = initProject(args.project_id, args.group_id)
+        if args.cid_list :
+            if type(args.cid_list) != list :
+                cid_list = args.cid_list.split()
+            else :
+                cid_list = args.cid_list
         if args.hyphenation :
             aProject.createManager(args.component_type, 'hyphenation')
             manager = args.component_type + '_Hyphenation'
@@ -285,15 +290,15 @@ def userArguments (args) :
         elif args.manage :
             if args.manage == 'add' :
                 # To add a group we need to do these checks first
-                if not args.cid_list :
+                if not cid_list :
                     sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                 elif not args.component_type :
                     sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
                 if args.component_type == 'bind' :
-                    Binding(args.project_id).addBindingGroup(args.group_id, args.cid_list, args.force)
+                    Binding(args.project_id).addBindingGroup(args.group_id, cid_list, args.force)
                 elif args.component_type == 'map' :
-                    MapSet(args.project_id).addMapSet(args.group_id, args.cid_list, args.force)
+                    MapSet(args.project_id).addMapSet(args.group_id, cid_list, args.force)
                 elif args.component_type == 'usfm' :
                     if not args.source_id :
                         sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
@@ -303,7 +308,7 @@ def userArguments (args) :
                     elif args.source_id :
                         if not hasValidSourcePath(args.group_id, args.source_id) :
                             sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, args.cid_list, args.source_id, tools.resolvePath(args.source), args.force)
+                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, cid_list, args.source_id, tools.resolvePath(args.source), args.force)
             elif args.manage == 'remove' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
                 if cType == 'bind' :
@@ -315,7 +320,7 @@ def userArguments (args) :
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         Commander(args.project_id).removeScripts()
             elif args.manage == 'update' :
-                ProjSetup(args.project_id).updateGroup(args.group_id, args.cid_list, args.source, args.force)
+                ProjSetup(args.project_id).updateGroup(args.group_id, cid_list, args.source, args.force)
             elif args.manage == 'bind' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
                 if cType == 'bind' :
@@ -324,14 +329,14 @@ def userArguments (args) :
                     sys.exit('\nERROR: This is not a valid binding group. Process halted!\n')
             elif args.manage == 'render' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                if args.cid_list :
-                    if not aProject.isValidCidList(args.group_id, args.cid_list) :
+                if cid_list :
+                    if not aProject.isValidCidList(args.group_id, cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
                 if cType == 'map' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, args.cid_list, args.force, args.proof)
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, args.force, args.proof)
                 elif cType == 'usfm' :
                     aProject = initProject(args.project_id, args.group_id)
-                    aProject.renderGroup(args.group_id, args.cid_list, args.force, args.proof)
+                    aProject.renderGroup(args.group_id, cid_list, args.force, args.proof)
             elif args.manage == 'lock' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
             elif args.manage == 'unlock' :

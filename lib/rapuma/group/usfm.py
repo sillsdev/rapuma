@@ -188,7 +188,7 @@ class Usfm (Group) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup() :
+            if not self.preProcessGroup(cids) :
                 return False
 
         # With everything in place we can render the component and we pass-through
@@ -199,7 +199,7 @@ class Usfm (Group) :
         return True
 
 
-    def preProcessGroup (self) :
+    def preProcessGroup (self, cidList) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
@@ -233,7 +233,7 @@ class Usfm (Group) :
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
-        for cid in self.cfg['cidList'] :
+        for cid in cidList :
             cType = self.cfg['cType']
             cidUsfm = self.getCidPath(cid)
             # Test for source here and die if it isn't there

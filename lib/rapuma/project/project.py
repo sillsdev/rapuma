@@ -220,7 +220,6 @@ class Project (object) :
     def isValidCidList (self, gid, thisCidlist) :
         '''Check to see if all the components in the list are in the group.'''
 
-        thisCidlist = thisCidlist.split()
         cidList = self.projConfig['Groups'][gid]['cidList']
         for cid in thisCidlist :
             if not cid in cidList :

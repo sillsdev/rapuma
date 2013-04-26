@@ -768,9 +768,7 @@ class Xetex (Manager) :
         # If there is a cidList, create an alternate ouput name
         pdfSubFileName = ''
         if cidList :
-            if isinstance(cidList, str) :
-                cidList = cidList.split()
-                pdfSubFileName = self.gid + '-' + '-'.join(cidList) + '.pdf'
+            pdfSubFileName = self.gid + '-' + '-'.join(cidList) + '.pdf'
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
@@ -899,9 +897,9 @@ class Xetex (Manager) :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
             else :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
-
+            # Adjust name for proof file
             if proof :
-                deliverablePdfFile = self.tools.proofFileName()
+                deliverablePdfFile = self.tools.proofFileName(deliverablePdfFile)
 
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 

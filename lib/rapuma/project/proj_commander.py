@@ -199,6 +199,7 @@ class Commander (object) :
                 'edit'          : ['Edit specified component file.',                    'rapuma component ' + pid + ' ' + gid + ' --edit $1 '], 
                 'hyphenOff'     : ['Turn off hyphenation in project.',                  'rapuma group ' + pid + ' ' + gid + ' --component_type ' + cType + ' --hyphenation remove  '], 
                 'hyphenOn'      : ['Turn on hyphenation in project.',                   'rapuma group ' + pid + ' ' + gid + ' --component_type ' + cType + ' --hyphenation add  '], 
+                'proof'         : ['Create proof of the ' + gid + ' group PDF file.',   'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render --force --proof'], 
                 'render'        : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render --force '], 
                 'update'        : ['Update the ' + gid + ' group from its source.',     'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update '], 
                 'view'          : ['Render the ' + gid + ' group PDF file.',            'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render '], 
