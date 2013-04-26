@@ -60,7 +60,7 @@ class Binding (object) :
             '0230' : ['MSG', 'Completed proccessing on the [<<1>>] binding group.'],
             '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding group.'],
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding group.'],
-            '0250' : ['MSG', 'Binding component [<<1>>] not found. Will create/recreate it now.'],
+            '0250' : ['MSG', 'Completed final render on Binding component [<<1>>].'],
             '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
 
         }
@@ -100,8 +100,9 @@ class Binding (object) :
             # Add the info to the components section
             if not self.tools.testForSetting(self.projConfig['Groups'], bgID) :
                 self.tools.buildConfSection(self.projConfig['Groups'], bgID)
-                self.projConfig['Groups'][bgID]['gidList'] = gIDs.split()
-                self.projConfig['Groups'][bgID]['cType'] = 'bind'
+                self.projConfig['Groups'][bgID]['gidList']  = gIDs.split()
+                self.projConfig['Groups'][bgID]['cType']    = 'bind'
+                self.projConfig['Groups'][bgID]['bgMode']   = 'bind'
                 self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0210'], [bgID])
             else :
@@ -122,47 +123,50 @@ class Binding (object) :
             self.log.writeToLog(self.errorCodes['0225'], [bgID])
 
 
-    def bindComponents (self, bgID, proof = False) :
+    def bindComponents (self, bgID) :
         '''Bind a project binding group. Right now this is hard-wired to only work
         with pdftk.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Check for components and render any that do not exist
+        # Do a final render on all the bind components (groups)
         for gid in self.projConfig['Groups'][bgID]['gidList'] :
             gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
             cType = self.projConfig['Groups'][gid]['cType']
             renderer = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
             manager = cType + '_' + renderer.capitalize()
-            if not os.path.exists(gidPdf) :
-                self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(gidPdf)])
-                # Seriously!, a bind command should not be called when components
-                # have not been created. However, if that's the case, then we'll
-                # do it this way even though it is not the most efficient.
-                # Suspend the PDF viewer for this operation if needed
-                orgPdfViewerSettings = self.projConfig['Managers'][manager]['usePdfViewer']
-                if orgPdfViewerSettings == 'True' :
-                    self.projConfig['Managers'][manager]['usePdfViewer'] = False
-                    self.tools.writeConfFile(self.projConfig)
-                # Render the group
-                Project(self.pid, gid).renderGroup(gid, '', '')
-                # Turn on the PDF viewer if needed
-                if self.projConfig['Managers'][manager]['usePdfViewer'] != orgPdfViewerSettings :
-                    self.projConfig['Managers'][manager]['usePdfViewer'] = orgPdfViewerSettings
-                    self.tools.writeConfFile(self.projConfig)
+            # Capture and change original gid bgMode
+            orgBgMode = self.projConfig['Groups'][gid]['bgMode']
+            thisBgMode = self.projConfig['Groups'][bgID]['bgMode']
+            self.projConfig['Groups'][gid]['bgMode'] = thisBgMode
+            self.tools.writeConfFile(self.projConfig)
+            # Suspend the PDF viewer for this operation if needed
+            orgPdfViewerSettings = self.projConfig['Managers'][manager]['usePdfViewer']
+            if orgPdfViewerSettings == 'True' :
+                self.projConfig['Managers'][manager]['usePdfViewer'] = False
+                self.tools.writeConfFile(self.projConfig)
+            # Render the group
+            Project(self.pid, gid).renderGroup(gid, '')
+            self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(gidPdf)])
+            # Turn on the PDF viewer if needed
+            if self.projConfig['Managers'][manager]['usePdfViewer'] != orgPdfViewerSettings :
+                self.projConfig['Managers'][manager]['usePdfViewer'] = orgPdfViewerSettings
+                self.tools.writeConfFile(self.projConfig)
+            # Return to original bgMode
+            self.projConfig['Groups'][gid]['bgMode'] = orgBgMode
+            self.tools.writeConfFile(self.projConfig)
 
         # Build the command
         confCommand = ['pdftk']
         # Append each of the input files
         for gid in self.projConfig['Groups'][bgID]['gidList'] :
             gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
-            confCommand.append(gidPdf)
+            gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
+            confCommand.append(self.tools.modeFileName(gidPdf, thisBgMode))
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(self.local.projDeliverablesFolder, bgID + '.pdf')
-        if proof :
-            output = self.tools.proofFileName(output)
+        output = os.path.join(self.local.projDeliverablesFolder, 'Final_' + bgID + '_' + self.tools.ymd() + '.pdf')
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)

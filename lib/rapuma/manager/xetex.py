@@ -176,6 +176,8 @@ class Xetex (Manager) :
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
 
             '0205' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
+            '0210' : ['LOG', 'Turned on draft background settings.'],
+            '0215' : ['LOG', 'Turned on proof background settings.'],
             '0270' : ['LOG', 'Copied macro: <<1>>'],
             '0275' : ['ERR', 'No macro package for : <<1>>'],
 
@@ -205,6 +207,40 @@ class Xetex (Manager) :
 ###############################################################################
 ######################## Error Code Block Series = 200 ########################
 ###############################################################################
+
+    def noBgSettings (self) :
+        '''Change all the backgound settings to facilitate bound output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = False
+        self.layoutConfig['PageLayout']['useCropmarks'] = False
+        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        self.layoutConfig['PageLayout']['useLines'] = False
+
+
+    def proofSettings (self) :
+        '''Change all the backgound settings to facilitate a proof output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = True
+        self.layoutConfig['PageLayout']['useLines'] = False
+        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
+            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        else :
+            self.layoutConfig['PageLayout']['useCropmarks'] = False
+            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
+            self.pg_back.installBoxBoarderFile()
+        self.log.writeToLog(self.errorCodes['0215'])
+
+
+    def draftSettings (self) :
+        '''Change all the backgound settings to facilitate a draft output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = False
+        self.layoutConfig['PageLayout']['useCropmarks'] = False
+        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        self.layoutConfig['PageLayout']['useLines'] = True
+        self.pg_back.installLinesFile()
+        self.log.writeToLog(self.errorCodes['0210'])
+
 
     def rtnBoolDepend (self, bdep) :
         '''Return the boolean value of a boolDepend target. This assumes that
@@ -759,7 +795,7 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 0600 #######################
 ###############################################################################
 
-    def run (self, cidList, force, proof) :
+    def run (self, cidList, force) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -772,6 +808,18 @@ class Xetex (Manager) :
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
+        # Adjust the backgound settings
+        bgMode = self.projConfig['Groups'][self.gid]['bgMode']
+        if bgMode == 'bind' :
+            self.noBgSettings()
+        elif bgMode == 'proof' :
+            self.proofSettings()
+        elif bgMode == 'draft' :
+            self.draftSettings()
+        # Reset the switches
+        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         # This is the file we will make. If force is set, delete the old one.
         if force :
             if os.path.isfile(self.gidPdfFile) :
@@ -897,9 +945,9 @@ class Xetex (Manager) :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
             else :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
-            # Adjust name for proof file
-            if proof :
-                deliverablePdfFile = self.tools.proofFileName(deliverablePdfFile)
+            # Adjust name for proof or binding
+            if bgMode != 'draft' :
+                deliverablePdfFile = self.tools.modeFileName(deliverablePdfFile, bgMode)
 
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 

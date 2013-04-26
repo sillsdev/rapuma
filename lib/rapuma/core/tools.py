@@ -121,14 +121,14 @@ class Tools (object) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-    def proofFileName (self, fileName) :
+    def modeFileName (self, fileName, mode = 'draft') :
         '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
         
         # FIXME: It would be nice to have an alpha character incrementer
         
         (path, fn) = os.path.split(fileName)
         fParts = fn.split('.')
-        newName = 'proof_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
+        newName = mode + '_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
         return os.path.join(path, newName)
 
 

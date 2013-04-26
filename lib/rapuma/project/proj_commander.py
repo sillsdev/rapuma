@@ -213,7 +213,7 @@ class Commander (object) :
         pid     = self.pid
 
         return {
-                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma group ' + pid + ' ' + bid + ' --manage execute '] 
+                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',        'rapuma group ' + pid + ' ' + bid + ' --manage bind '] 
             }
 
 

@@ -66,7 +66,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130426'
+systemVersion   = '0.1.20130426a'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -261,6 +261,7 @@ def userArguments (args) :
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
         aProject = initProject(args.project_id, args.group_id)
+        cid_list = ''
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
@@ -287,6 +288,9 @@ def userArguments (args) :
                 sys.exit('\nERROR: Add illustrations on not completed yet')
             elif args.illustrations == 'off' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
+        elif args.background_mode :
+            aProject.projConfig['Groups'][args.group_id]['bgMode'] = args.background_mode
+            tools.writeConfFile(aProject.projConfig)
         elif args.manage :
             if args.manage == 'add' :
                 # To add a group we need to do these checks first
@@ -324,19 +328,21 @@ def userArguments (args) :
             elif args.manage == 'bind' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
                 if cType == 'bind' :
-                    Binding(args.project_id).bindComponents(args.group_id, args.proof)
+                    Binding(args.project_id).bindComponents(args.group_id)
                 else :
                     sys.exit('\nERROR: This is not a valid binding group. Process halted!\n')
             elif args.manage == 'render' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
+                if cType != 'render' :
+                    sys.exit('\nERROR: This is not a valid render group. Process halted!\n')
                 if cid_list :
                     if not aProject.isValidCidList(args.group_id, cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
                 if cType == 'map' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, args.force, args.proof)
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, args.force)
                 elif cType == 'usfm' :
                     aProject = initProject(args.project_id, args.group_id)
-                    aProject.renderGroup(args.group_id, cid_list, args.force, args.proof)
+                    aProject.renderGroup(args.group_id, cid_list, args.force)
             elif args.manage == 'lock' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
             elif args.manage == 'unlock' :
@@ -485,6 +491,7 @@ componentTypes          = ['bind', 'map', 'usfm']
 hyphenCommands          = ['add', 'remove', 'update']
 preprocessCommands      = ['add', 'remove']
 illustrationCommands    = ['on', 'off']
+bgModes                 = ['bind', 'draft', 'proof']
 # Other
 backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
 backgroundCommands      = ['add', 'remove']
@@ -510,14 +517,10 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-m', '--manage', choices=manageProject, help='The general commands that can be used for managing a project.')
-#projCommand.add_argument('-d', '--delete', action='store_true', help='Delete a project permanently from the system. This will do just what is says. Be careful!')
-#projCommand.add_argument('-p', '--preserve', choices=backupTypes, help='If creating a new project, give a human readable name to describe this project.')
-#projCommand.add_argument('-r', '--restore', choices=backupTypes, help='This will restore a project from a backup or archive, Pull in data from a cloud backup. Or, create a new project from a template found in the Rapuma resouces folder.')
 projCommand.add_argument('-s', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
 projCommand.add_argument('-t', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
 projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
-#projCommand.add_argument('-c', '--scripts', action='store_true', help='Create/recreate helper scripts that will help with various repetitive tasks.')
 
 # Add Group subprocess arguments
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
@@ -532,7 +535,7 @@ groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands,
 groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-groupCommand.add_argument('-o', '--proof', action='store_true', help='Specify if the rendered object is for "proof" viewing which may require special handling.')
+groupCommand.add_argument('-b', '--background_mode', choices=bgModes, help='Specify the background mode for this group.')
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
