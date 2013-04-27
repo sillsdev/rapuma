@@ -809,17 +809,17 @@ class Xetex (Manager) :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
         # Adjust the backgound settings
-        bgMode = self.projConfig['Groups'][self.gid]['bgMode']
-        if bgMode == 'bind' :
-            self.noBgSettings()
-        elif bgMode == 'proof' :
-            self.proofSettings()
-        elif bgMode == 'draft' :
-            self.draftSettings()
-        # Reset the switches
-        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
-        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
+#        bgMode = self.projConfig['Groups'][self.gid]['bgMode']
+#        if bgMode == 'bind' :
+#            self.noBgSettings()
+#        elif bgMode == 'proof' :
+#            self.proofSettings()
+#        elif bgMode == 'draft' :
+#            self.draftSettings()
+#        # Reset the switches
+#        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+#        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+#        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         # This is the file we will make. If force is set, delete the old one.
         if force :
             if os.path.isfile(self.gidPdfFile) :
@@ -946,8 +946,8 @@ class Xetex (Manager) :
             else :
                 deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
             # Adjust name for proof or binding
-            if bgMode != 'draft' :
-                deliverablePdfFile = self.tools.modeFileName(deliverablePdfFile, bgMode)
+#            if bgMode != 'draft' :
+#                deliverablePdfFile = self.tools.modeFileName(deliverablePdfFile, bgMode)
 
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 
