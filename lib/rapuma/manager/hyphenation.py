@@ -36,7 +36,6 @@ class Hyphenation (Manager) :
     # Shared values
     xmlConfFile     = 'hyphenation.xml'
 
-
     def __init__(self, project, cfg, cType) :
         '''Initialize the Hyphenation manager.'''
 
