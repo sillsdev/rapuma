@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: style.xml
+Description:
+This is a settings file for the style manager.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+        totalPages = 47
+
+
+<root>
+    <setting>
+        <name>Group Binding List</name>
+        <key>bindingList</key>
+        <description>A list of groups in this project to bind.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Default Style Extensions File</name>
+        <key>defaultExtStyFile</key>
+        <description>The name of the override style file.</description>
+        <type>string</type>
+        <value>usfm-ext.sty</value>
+    </setting>
+    <setting>
+        <name>Page Count</name>
+        <key>pageCount</key>
+        <description>The total number of pages that were bound.</description>
+        <type>string</type>
+        <value>0</value>
+    </setting>
+</root>
+
