@@ -42,6 +42,7 @@
             <prefix>\\</prefix>
             <keyword>eject</keyword>
             <keyword>break</keyword>
+            <keyword>hrule</keyword>
             <keyword>skipline</keyword>
             <keyword>skiphalfline</keyword>
             <keyword>skipqline</keyword>
@@ -58,15 +59,16 @@
             <keyword>id</keyword>
             <keyword>h</keyword>
             <keyword>rem</keyword>
-            <keyword>m[t]?[0-4]?</keyword>
-            <keyword>s[0-4]?</keyword>
+            <keyword>[i]?m[tiqstp]?[0-4]?</keyword>
+            <keyword>[i]?s[0-4]?</keyword>
             <keyword>r</keyword>
-            <keyword>p</keyword>
+            <keyword>nb</keyword>
+            <keyword>[i]?p[imcrh]?</keyword>
             <keyword>v\s[0-9]+</keyword>
             <keyword>f[r|t|q]?</keyword>
             <keyword>x[o|t]?</keyword>
             <keyword>q[0-4]?</keyword>
-            <keyword>b</keyword>
+            <keyword>[i]?b</keyword>
         </context>
 
         <context id="usfm-chapter" style-ref="blue" class="no-spell-check">
