@@ -292,15 +292,13 @@ def userArguments (args) :
 #            aProject.projConfig['Groups'][args.group_id]['bgMode'] = args.background_mode
 #            tools.writeConfFile(aProject.projConfig)
         elif args.manage :
-            if args.manage == 'add' :
+            if args.manage == 'add-group' :
                 # To add a group we need to do these checks first
                 if not cid_list :
                     sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                 elif not args.component_type :
                     sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
-                if args.component_type == 'bind' :
-                    Binding(args.project_id).addBindingGroup(args.group_id, cid_list, args.force)
                 elif args.component_type == 'map' :
                     MapSet(args.project_id).addMapSet(args.group_id, cid_list, args.force)
                 elif args.component_type == 'usfm' :
@@ -313,39 +311,36 @@ def userArguments (args) :
                         if not hasValidSourcePath(args.group_id, args.source_id) :
                             sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, cid_list, args.source_id, tools.resolvePath(args.source), args.force)
-            elif args.manage == 'remove' :
+            elif args.manage == 'remove-group' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                if cType == 'bind' :
-                    Binding(args.project_id).removeBindingGroup(args.group_id)
                 elif cType == 'map' :
                     MapSet(args.project_id).removeMapSet(args.group_id)
                 elif cType == 'usfm' :
                     ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         Commander(args.project_id).removeScripts()
-            elif args.manage == 'update' :
+            elif args.manage == 'update-group' :
                 ProjSetup(args.project_id).updateGroup(args.group_id, cid_list, args.source, args.force)
-            elif args.manage == 'bind' :
-                cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                if cType == 'bind' :
-                    Binding(args.project_id).bindComponents(args.group_id)
-                else :
-                    sys.exit('\nERROR: This is not a valid binding group. Process halted!\n')
-            elif args.manage == 'render' :
+            elif args.manage == 'bind-book' :
+                aProject.binding.bindBook()
+            # Render a group
+            elif args.manage.find('render') > 0 :
+                aProject = initProject(args.project_id, args.group_id)
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
                 if cid_list :
                     if not aProject.isValidCidList(args.group_id, cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-                if cType == 'map' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, args.force)
-                elif cType == 'usfm' :
-                    aProject = initProject(args.project_id, args.group_id)
-                    aProject.renderGroup(args.group_id, cid_list, args.force)
-                else :
-                    sys.exit('\nERROR: This is not a valid render group. Process halted!\n')
-            elif args.manage == 'lock' :
+                if args.manage == 'render-draft' :
+                    aProject.renderGroup(args.group_id, cid_list, 'draft', args.force)
+                elif args.manage == 'render-proof' :
+                    aProject.renderGroup(args.group_id, cid_list, 'proof', args.force)
+                elif args.manage == 'render-map-draft' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'draft' args.force)
+                elif args.manage == 'render-map-proof' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'proof' args.force)
+            elif args.manage == 'lock-group' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
-            elif args.manage == 'unlock' :
+            elif args.manage == 'unlock-group' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, False)
             elif args.component_type == 'usfm' and args.manage == 'list' :
                 aProject.listAllComponents(args.component_type)
@@ -486,17 +481,15 @@ mediaTypes              = ['book']
 backupTypes             = ['archive', 'backup', 'cloud', 'template']
 manageProject           = ['add-project', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
 # Group
-manageGroup             = ['add', 'remove', 'update', 'render', 'bind', 'lock', 'unlock', 'list']
+manageGroup             = ['add-group', 'bind-book', 'render-draft', 'list-components', 'lock-group', 'render-maps', 'render-proof', 'remove-group', 'update-group', 'unlock-group']
 componentTypes          = ['map', 'pdf', 'usfm']
-hyphenCommands          = ['add', 'remove', 'update']
-preprocessCommands      = ['add', 'remove']
-illustrationCommands    = ['on', 'off']
-#bgModes                 = ['bind', 'draft', 'proof']
+hyphenCommands          = ['add-hyphenation', 'remove-hyphenation', 'update-hyphenation']
+preprocessCommands      = ['add-preprocess', 'remove-preprocess']
+illustrationCommands    = ['add-illustrations', 'remove-illustrations']
 # Other
 backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
 backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']
-bindCommands            = ['add', 'remove', 'bind']
 postprocessCommands     = ['add', 'remove', 'process']
 fontCommands            = ['add', 'remove', 'primary']
 
@@ -535,7 +528,6 @@ groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands,
 groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-#groupCommand.add_argument('-b', '--background_mode', choices=bgModes, help='Specify the background mode for this group.')
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')

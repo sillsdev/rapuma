@@ -208,40 +208,6 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
-    def noBgSettings (self) :
-        '''Change all the backgound settings to facilitate bound output.'''
-
-        self.layoutConfig['PageLayout']['useWatermark'] = False
-        self.layoutConfig['PageLayout']['useCropmarks'] = False
-        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        self.layoutConfig['PageLayout']['useLines'] = False
-
-
-    def proofSettings (self) :
-        '''Change all the backgound settings to facilitate a proof output.'''
-
-        self.layoutConfig['PageLayout']['useWatermark'] = True
-        self.layoutConfig['PageLayout']['useLines'] = False
-        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
-            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        else :
-            self.layoutConfig['PageLayout']['useCropmarks'] = False
-            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
-            self.pg_back.installBoxBoarderFile()
-        self.log.writeToLog(self.errorCodes['0215'])
-
-
-    def draftSettings (self) :
-        '''Change all the backgound settings to facilitate a draft output.'''
-
-        self.layoutConfig['PageLayout']['useWatermark'] = False
-        self.layoutConfig['PageLayout']['useCropmarks'] = False
-        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        self.layoutConfig['PageLayout']['useLines'] = True
-        self.pg_back.installLinesFile()
-        self.log.writeToLog(self.errorCodes['0210'])
-
-
     def rtnBoolDepend (self, bdep) :
         '''Return the boolean value of a boolDepend target. This assumes that
         the format is config:section:key, or config:section:section:key, if
@@ -795,7 +761,47 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 0600 #######################
 ###############################################################################
 
-    def run (self, cidList, force) :
+
+
+
+    def noBgSettings (self) :
+        '''Change all the backgound settings to facilitate bound output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = False
+        self.layoutConfig['PageLayout']['useCropmarks'] = False
+        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        self.layoutConfig['PageLayout']['useLines'] = False
+
+
+    def proofSettings (self) :
+        '''Change all the backgound settings to facilitate a proof output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = True
+        self.layoutConfig['PageLayout']['useLines'] = False
+        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
+            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+
+        else :
+            self.layoutConfig['PageLayout']['useCropmarks'] = False
+            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
+            self.pg_back.installBoxBoarderFile()
+        self.log.writeToLog(self.errorCodes['0215'])
+
+
+    def draftSettings (self) :
+        '''Change all the backgound settings to facilitate a draft output.'''
+
+        self.layoutConfig['PageLayout']['useWatermark'] = False
+        self.layoutConfig['PageLayout']['useCropmarks'] = False
+        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+        self.layoutConfig['PageLayout']['useLines'] = True
+        self.pg_back.installLinesFile()
+        self.log.writeToLog(self.errorCodes['0210'])
+
+
+
+
+    def run (self, mode, cidList, force) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -808,18 +814,26 @@ class Xetex (Manager) :
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
+
+
+
+# FIXME: Working here
+
+
+
+
+
         # Adjust the backgound settings
-#        bgMode = self.projConfig['Groups'][self.gid]['bgMode']
-#        if bgMode == 'bind' :
-#            self.noBgSettings()
-#        elif bgMode == 'proof' :
-#            self.proofSettings()
-#        elif bgMode == 'draft' :
-#            self.draftSettings()
-#        # Reset the switches
-#        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-#        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
-#        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
+        if mode == 'bind' :
+            self.tools.str2bool(self.projConfig['']['']
+        elif mode == 'proof' :
+            self.proofSettings()
+        elif mode == 'draft' :
+            self.draftSettings()
+        # Reset the switches
+        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
+        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
+        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         # This is the file we will make. If force is set, delete the old one.
         if force :
             if os.path.isfile(self.gidPdfFile) :
