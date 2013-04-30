@@ -32,14 +32,15 @@ class Binding (Manager) :
     def __init__(self, project, cfg, cType) :
         '''Do the primary initialization for this manager.'''
 
-        super(Layout, self).__init__(project, cfg)
+        super(Binding, self).__init__(project, cfg)
 
         # List the renderers this manager supports
         self.tools                          = Tools()
         self.cType                          = cType
         self.Ctype                          = cType.capitalize()
-        self.manager                        = 'pdf_Binding'
+        self.manager                        = 'usfm_Binding'
         self.project                        = project
+        self.local                          = project.local
         self.managers                       = project.managers
         self.projConfig                     = self.project.projConfig
         self.projMediaType                  = self.project.projectMediaIDCode
@@ -49,8 +50,6 @@ class Binding (Manager) :
         # Paths
 
         # Files with paths
-        # Set local var and override in project object (if needed)
-        self.project.local.layoutConfFile   = self.layoutConfFile
 
         # Get persistant values from the config if there are any
         newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlBindConfig)

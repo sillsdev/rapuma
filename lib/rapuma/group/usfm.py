@@ -76,7 +76,7 @@ class Usfm (Group) :
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         self.style                  = self.project.managers[self.cType + '_Style']
-        self.bind                   = self.project.managers['pdf_Binding']
+        self.bind                   = self.project.managers[self.cType + '_Binding']
 
         # File names
         self.adjustmentConfFile     = project.local.adjustmentConfFile

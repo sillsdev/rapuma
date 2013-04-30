@@ -120,7 +120,7 @@ class Project (object) :
     def loadManager (self, cType, mType) :
         '''Do basic load on a manager.'''
 
-#        if mType == 'component' :
+#        if mType == 'binding' :
 #            import pdb; pdb.set_trace()
 
         fullName = cType + '_' + mType.capitalize()
@@ -145,6 +145,9 @@ class Project (object) :
             self.tools.buildConfSection(self.projConfig['Managers'], fullName)
 
         # Update settings if needed
+        
+        print os.path.join(self.local.rapumaConfigFolder, mType + '.xml')
+        
         update = False
         managerDefaults = self.tools.getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
         for k, v, in managerDefaults.iteritems() :
