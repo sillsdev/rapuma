@@ -98,6 +98,8 @@ class Project (object) :
             '0205' : ['LOG', 'Created the [<<1>>] manager object.'],
             '0210' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
             '0211' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
+
+            '0410' : ['WRN', 'No groups were added to the binding order.'],
         }
 
 ###############################################################################
@@ -145,9 +147,6 @@ class Project (object) :
             self.tools.buildConfSection(self.projConfig['Managers'], fullName)
 
         # Update settings if needed
-        
-        print os.path.join(self.local.rapumaConfigFolder, mType + '.xml')
-        
         update = False
         managerDefaults = self.tools.getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
         for k, v, in managerDefaults.iteritems() :
@@ -165,6 +164,41 @@ class Project (object) :
                 self.log.writeToLog(self.errorCodes['0210'],[fullName])
             else :
                 self.log.writeToLog(self.errorCodes['0211'],[fullName])
+
+
+###############################################################################
+########################### Project Level Functions ###########################
+###############################################################################
+######################## Error Code Block Series = 400 ########################
+###############################################################################
+
+    def bind (self, mode) :
+        '''Bind all groups in the order they are indicated in.'''
+
+        # Get the order of the groups to be bound.
+        bindOrder = {}
+        for grp in self.projConfig['Groups'].keys() :
+            if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
+                bindOrder[self.projConfig['Groups'][grp]['bindingOrder']] = grp
+        bindGrpNum = len(bindOrder)
+        # Need not keep going if nothing was found
+        if bindGrpNum == 0 :
+            self.log.writeToLog(self.errorCodes['0410'])
+            return False
+
+        # Bind the groups in order
+        keyList = bindOrder.keys()
+        keyList.sort()
+        for key in keyList :
+            print bindOrder[key]
+
+
+
+
+
+
+
+
 
 
 ###############################################################################

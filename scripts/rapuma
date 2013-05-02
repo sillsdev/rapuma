@@ -66,7 +66,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130427'
+systemVersion   = '0.1.20130502'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -122,7 +122,7 @@ def isTemplate (tid) :
         return False
 
 
-def initProject (pid, gid) :
+def initProject (pid, gid = None) :
     '''Initialize an existing project according to the project ID given.'''
 
     local       = ProjLocal(pid)
@@ -203,13 +203,13 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'project' :
         pid = args.project_id
         # Source path is optional but if given, resolve it
-        if args.sourcePath :
-            sourcePath = tools.resolvePath(args.sourcePath)
+        if args.source_path :
+            sourcePath = tools.resolvePath(args.source_path)
             if not os.path.exists(sourcePath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
         # Target path is optional also but if given, resolve it
-        if args.targetPath :
-            targetPath = tools.resolvePath(args.targetPath)
+        if args.target_path :
+            targetPath = tools.resolvePath(args.target_path)
             if not os.path.exists(targetPath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
         # Figure out what manage command this is and do it
@@ -228,7 +228,7 @@ def userArguments (args) :
             if isProject(pid) :
                 ProjBackup(pid).restoreBackup()
             else :
-                if args.targetPath :
+                if args.target_path :
                     ProjBackup(pid).restoreBackup(os.path.join(targetPath))
                 else :
                     sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
@@ -236,9 +236,9 @@ def userArguments (args) :
             if isProject(pid) :
                 ProjBackup(pid).pullFromCloud()
             else :
-                if args.targetPath :
-                    if os.path.exists(tools.resolvePath(args.targetPath)) :
-                        ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.targetPath), pid))
+                if args.target_path :
+                    if os.path.exists(tools.resolvePath(args.target_path)) :
+                        ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid))
                     else :
                         sys.exit('\nERROR: Path is not valid. Process halting.\n')
                 else :
@@ -257,6 +257,14 @@ def userArguments (args) :
             ProjBackup(pid).projectToTemplate(args.template)
         elif args.manage == 'update-helper-scripts' :
             Commander(pid).updateScripts()
+        elif args.manage.find('bind') <= 0 :
+            aProject = initProject(args.project_id)
+            if args.manage == 'bind-draft' :
+                aProject.bind('draft')
+            if args.manage == 'bind-proof' :
+                aProject.bind('proof')
+            if args.manage == 'bind-final' :
+                aProject.bind('final')
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -288,9 +296,6 @@ def userArguments (args) :
                 sys.exit('\nERROR: Add illustrations on not completed yet')
             elif args.illustrations == 'off' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
-#        elif args.background_mode :
-#            aProject.projConfig['Groups'][args.group_id]['bgMode'] = args.background_mode
-#            tools.writeConfFile(aProject.projConfig)
         elif args.manage :
             if args.manage == 'add-group' :
                 # To add a group we need to do these checks first
@@ -304,27 +309,25 @@ def userArguments (args) :
                 elif args.component_type == 'usfm' :
                     if not args.source_id :
                         sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
-                    elif args.source :
-                        if not tools.resolvePath(args.source) :
+                    elif args.source_path :
+                        if not tools.resolvePath(args.source_path) :
                             sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     elif args.source_id :
                         if not hasValidSourcePath(args.group_id, args.source_id) :
                             sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, cid_list, args.source_id, tools.resolvePath(args.source), args.force)
+                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
             elif args.manage == 'remove-group' :
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                elif cType == 'map' :
+                if cType == 'map' :
                     MapSet(args.project_id).removeMapSet(args.group_id)
                 elif cType == 'usfm' :
                     ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         Commander(args.project_id).removeScripts()
             elif args.manage == 'update-group' :
-                ProjSetup(args.project_id).updateGroup(args.group_id, cid_list, args.source, args.force)
-            elif args.manage == 'bind-book' :
-                aProject.binding.bindBook()
+                ProjSetup(args.project_id).updateGroup(args.group_id, cid_list, args.source_path, args.force)
             # Render a group
-            elif args.manage.find('render') > 0 :
+            elif args.manage.find('render') <= 0 :
                 aProject = initProject(args.project_id, args.group_id)
                 cType = aProject.projConfig['Groups'][args.group_id]['cType']
                 if cid_list :
@@ -334,10 +337,14 @@ def userArguments (args) :
                     aProject.renderGroup(args.group_id, cid_list, 'draft', args.force)
                 elif args.manage == 'render-proof' :
                     aProject.renderGroup(args.group_id, cid_list, 'proof', args.force)
-                elif args.manage == 'render-map-draft' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'draft' args.force)
-                elif args.manage == 'render-map-proof' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'proof' args.force)
+                elif args.manage == 'render-final' :
+                    aProject.renderGroup(args.group_id, cid_list, 'final', args.force)
+                elif args.manage == 'maps-draft' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'draft', args.force)
+                elif args.manage == 'maps-proof' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'proof', args.force)
+                elif args.manage == 'maps-final' :
+                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'final', args.force)
             elif args.manage == 'lock-group' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
             elif args.manage == 'unlock-group' :
@@ -479,9 +486,9 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Project
 mediaTypes              = ['book']
 backupTypes             = ['archive', 'backup', 'cloud', 'template']
-manageProject           = ['add-project', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
+manageProject           = ['add-project', 'bind-draft', 'bind-proof', 'bind-final', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
 # Group
-manageGroup             = ['add-group', 'bind-book', 'render-draft', 'list-components', 'lock-group', 'render-maps', 'render-proof', 'remove-group', 'update-group', 'unlock-group']
+manageGroup             = ['add-group', 'render-draft', 'render-proof', 'render-final', 'list-components', 'lock-group', 'maps-draft', 'maps-proof', 'maps-final', 'remove-group', 'update-group', 'unlock-group']
 componentTypes          = ['map', 'pdf', 'usfm']
 hyphenCommands          = ['add-hyphenation', 'remove-hyphenation', 'update-hyphenation']
 preprocessCommands      = ['add-preprocess', 'remove-preprocess']
@@ -510,8 +517,8 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 projCommand.add_argument('-m', '--manage', choices=manageProject, help='The general commands that can be used for managing a project.')
-projCommand.add_argument('-s', '--sourcePath', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
-projCommand.add_argument('-t', '--targetPath', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
+projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+projCommand.add_argument('-t', '--target_path', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
 projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 
@@ -525,7 +532,7 @@ groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help
 groupCommand.add_argument('-y', '--hyphenation', choices=hyphenCommands, help='Manage hyphenation for this group.')
 groupCommand.add_argument('-p', '--preprocess', choices=preprocessCommands, help='Turn on or off automated preprocessing when importing and updating components into the group.')
 groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands, help='Manage the use of illustrations in this group.')
-groupCommand.add_argument('-s', '--source', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
+groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
 

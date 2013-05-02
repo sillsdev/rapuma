@@ -90,9 +90,6 @@ class Xetex (Manager) :
         self.useIllustrations       = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
         self.useMarginalVerses      = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.chapNumOffSingChap     = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
-        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
 
         # File names
         # Some of these file names will only be used once but for consitency
@@ -113,6 +110,7 @@ class Xetex (Manager) :
         self.projDeliverablesFolder = self.local.projDeliverablesFolder
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         self.projHyphenationFolder  = self.local.projHyphenationFolder
+        self.projIllustrationsFolder= self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
@@ -139,9 +137,9 @@ class Xetex (Manager) :
         self.compHyphFile           = self.hyphenation.compHyphFile
         self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
-        self.projWatermarkFile      = self.pg_back.projWatermarkFile
-        self.linesFile              = self.pg_back.projLinesFile
-        self.boxBoarderFile         = self.pg_back.boxBoarderFile
+#        self.projWatermarkFile      = self.pg_back.projWatermarkFile
+#        self.linesFile              = self.pg_back.projLinesFile
+#        self.boxBoarderFile         = self.pg_back.boxBoarderFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -384,7 +382,6 @@ class Xetex (Manager) :
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
 
         return True
-
 
 
 ###############################################################################
@@ -764,39 +761,39 @@ class Xetex (Manager) :
 
 
 
-    def noBgSettings (self) :
-        '''Change all the backgound settings to facilitate bound output.'''
+#    def noBgSettings (self) :
+#        '''Change all the backgound settings to facilitate bound output.'''
 
-        self.layoutConfig['PageLayout']['useWatermark'] = False
-        self.layoutConfig['PageLayout']['useCropmarks'] = False
-        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        self.layoutConfig['PageLayout']['useLines'] = False
-
-
-    def proofSettings (self) :
-        '''Change all the backgound settings to facilitate a proof output.'''
-
-        self.layoutConfig['PageLayout']['useWatermark'] = True
-        self.layoutConfig['PageLayout']['useLines'] = False
-        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
-            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-
-        else :
-            self.layoutConfig['PageLayout']['useCropmarks'] = False
-            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
-            self.pg_back.installBoxBoarderFile()
-        self.log.writeToLog(self.errorCodes['0215'])
+#        self.layoutConfig['PageLayout']['useWatermark'] = False
+#        self.layoutConfig['PageLayout']['useCropmarks'] = False
+#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#        self.layoutConfig['PageLayout']['useLines'] = False
 
 
-    def draftSettings (self) :
-        '''Change all the backgound settings to facilitate a draft output.'''
+#    def proofSettings (self) :
+#        '''Change all the backgound settings to facilitate a proof output.'''
 
-        self.layoutConfig['PageLayout']['useWatermark'] = False
-        self.layoutConfig['PageLayout']['useCropmarks'] = False
-        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        self.layoutConfig['PageLayout']['useLines'] = True
-        self.pg_back.installLinesFile()
-        self.log.writeToLog(self.errorCodes['0210'])
+#        self.layoutConfig['PageLayout']['useWatermark'] = True
+#        self.layoutConfig['PageLayout']['useLines'] = False
+#        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
+#            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+
+#        else :
+#            self.layoutConfig['PageLayout']['useCropmarks'] = False
+#            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
+#            self.pg_back.installBoxBoarderFile()
+#        self.log.writeToLog(self.errorCodes['0215'])
+
+
+#    def draftSettings (self) :
+#        '''Change all the backgound settings to facilitate a draft output.'''
+
+#        self.layoutConfig['PageLayout']['useWatermark'] = False
+#        self.layoutConfig['PageLayout']['useCropmarks'] = False
+#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#        self.layoutConfig['PageLayout']['useLines'] = True
+#        self.pg_back.installLinesFile()
+#        self.log.writeToLog(self.errorCodes['0210'])
 
 
 
@@ -814,26 +811,6 @@ class Xetex (Manager) :
         else :
             cidList = self.projConfig['Groups'][self.gid]['cidList']
 
-
-
-
-# FIXME: Working here
-
-
-
-
-
-        # Adjust the backgound settings
-        if mode == 'bind' :
-            self.tools.str2bool(self.projConfig['']['']
-        elif mode == 'proof' :
-            self.proofSettings()
-        elif mode == 'draft' :
-            self.draftSettings()
-        # Reset the switches
-        self.useWatermark           = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        self.useLines               = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
-        self.useBoxBoarder          = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         # This is the file we will make. If force is set, delete the old one.
         if force :
             if os.path.isfile(self.gidPdfFile) :
@@ -901,9 +878,17 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
-            # Add lines background for composition work
-            if self.useLines :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.linesFile, 'output', self.tools.tempName(self.gidPdfFile)]
+
+
+
+
+
+
+            # Background management
+            bgList = self.projConfig['Managers'][self.manager][mode + 'Background']
+            for bg in bgList :
+                bgFile = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
+                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
                     shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
@@ -913,29 +898,11 @@ class Xetex (Manager) :
                     # If we don't succeed, we should probably quite here
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
-            # Add a watermark if required
-            if self.useWatermark :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.projWatermarkFile, 'output', self.tools.tempName(self.gidPdfFile)]
-                try :
-                    subprocess.call(cmd)
-                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(self.tools.tempName(self.gidPdfFile))
-                    self.log.writeToLog(self.errorCodes['0645'])
-                except Exception as e :
-                    # If we don't succeed, we should probably quite here
-                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
-            # Add a box around the page (for proof reading)
-            if self.useBoxBoarder :
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', self.boxBoarderFile, 'output', self.tools.tempName(self.gidPdfFile)]
-                try :
-                    subprocess.call(cmd)
-                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(self.tools.tempName(self.gidPdfFile))
-                    self.log.writeToLog(self.errorCodes['0645'])
-                except Exception as e :
-                    # If we don't succeed, we should probably quite here
-                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
+
+
+
+
 
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
@@ -956,12 +923,9 @@ class Xetex (Manager) :
         # Move to the Deliverables folder for easier access
         if os.path.isfile(self.gidPdfFile) :
             if pdfSubFileName :
-                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, pdfSubFileName)
+                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, pdfSubFileName), mode)
             else :
-                deliverablePdfFile = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
-            # Adjust name for proof or binding
-#            if bgMode != 'draft' :
-#                deliverablePdfFile = self.tools.modeFileName(deliverablePdfFile, bgMode)
+                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, self.gidPdfFileName), mode)
 
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 

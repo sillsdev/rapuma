@@ -324,7 +324,7 @@ class ProjSetup (object) :
         self.projConfig['Groups'][gid]['cType']                 = cType
         self.projConfig['Groups'][gid]['csid']                  = csid
         self.projConfig['Groups'][gid]['cidList']               = cidList
-#        self.projConfig['Groups'][gid]['bgMode']                = 'draft'
+        self.projConfig['Groups'][gid]['bindingOrder']          = 0
 
         # Here we need to "inject" cType information into the config
         # If we don't createGroup() will fail badly.

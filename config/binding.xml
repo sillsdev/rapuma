@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-File: style.xml
+File: binding.xml
 Description:
 This is a settings file for the style manager.
 
@@ -24,27 +24,6 @@ Todo:
         <description>The total number of pages that were bound.</description>
         <type>string</type>
         <value>0</value>
-    </setting>
-    <setting>
-        <name>Draft Background</name>
-        <key>draftBackgound</key>
-        <description>A list of backgounds to use for a bound draft version of the publication.</description>
-        <type>list</type>
-        <value>draftWatermark</value>
-    </setting>
-    <setting>
-        <name>Proof Background</name>
-        <key>proofBackgound</key>
-        <description>A list of backgounds to use for a bound proof version of the publication.</description>
-        <type>list</type>
-        <value>proofWatermark</value>
-    </setting>
-    <setting>
-        <name>Final Background</name>
-        <key>finalBackgound</key>
-        <description>A list of backgounds to use for a bound final version of the publication. Normally there are none.</description>
-        <type>list</type>
-        <value></value>
     </setting>
 </root>
 

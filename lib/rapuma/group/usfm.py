@@ -189,7 +189,7 @@ class Usfm (Group) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup(cids) :
+            if not self.preProcessGroup(cids, mode) :
                 return False
 
         # With everything in place we can render the component and we pass-through
@@ -200,17 +200,16 @@ class Usfm (Group) :
         return True
 
 
-    def preProcessGroup (self, cidList) :
+    def preProcessGroup (self, cidList, mode) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
+        # FIXME: Note page boarder has not really been implemented yet.
+        # It is different from backgound management
         useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
         useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        useWatermark            = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-        useLines                = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
         usePageBorder           = self.tools.str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
-        useBoxBoarder           = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
         useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
 
         # Check if there is a font installed
@@ -281,23 +280,10 @@ class Usfm (Group) :
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
 
-        # Be sure there is a watermark file listed in the conf and
-        # installed if watermark is turned on (True). Fallback on the
-        # the default if needed.
-        if useWatermark :
-            self.pg_background.installDefaultWatermarkFile()
-
-
-# FIXME: Check the age of the existing lines file against the book_layout.conf
-# remake if they are different. Same with box boarder
-
-        # Same for lines background file used for composition
-        if useLines :
-            self.pg_background.installLinesFile()
-
-        # Same for box background file used for composition
-        if useBoxBoarder :
-            self.pg_background.installBoxBoarderFile()
+        # Background management
+        bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
+        for bg in bgList :
+            self.pg_background.checkForBackground(bg, mode)
 
         # Any more stuff to run?
 

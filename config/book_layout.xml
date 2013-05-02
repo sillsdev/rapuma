@@ -826,48 +826,6 @@ Todo:
             <value></value>
         </setting>
         <setting>
-            <name>Use Watermark</name>
-            <key>useWatermark</key>
-            <description>Turn on (or off) the use of a page watermark in this project.</description>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>Watermark File</name>
-            <description>Watermark default file name. Change this name to indicate what watermark you want put on the page, if you choose to use a watermark.</description>
-            <key>watermarkFile</key>
-            <type>string</type>
-            <value>watermark_draft.pdf</value>
-        </setting>
-        <setting>
-            <name>Use Lines</name>
-            <key>useLines</key>
-            <description>Turn on (or off) the use of lines in the background of the page in this project. This is to help with composition work.</description>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Lines Background File</name>
-            <description>The default background file used to display lines behind the text, if that feature is selected.</description>
-            <key>linesFile</key>
-            <type>string</type>
-            <value>lines_background.pdf</value>
-        </setting>
-        <setting>
-            <name>Use Box Boarder</name>
-            <key>useBoxBoarder</key>
-            <description>Turn on (or off) the use of a page sized box in the background to show the reader the actual page size. This helps with proof reading and format discovery.</description>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Box Boarder Background File</name>
-            <description>The default background file used to display a box behind the text, if that feature is selected.</description>
-            <key>boxBoarderFile</key>
-            <type>string</type>
-            <value>box_background.pdf</value>
-        </setting>
-        <setting>
             <name>USFM TeX Page Height</name>
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>

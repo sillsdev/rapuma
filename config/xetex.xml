@@ -75,5 +75,26 @@ Todo:
         <type>string</type>
         <value>grp-extentions.tex</value>
     </setting>
+    <setting>
+        <name>Draft Background</name>
+        <key>draftBackground</key>
+        <description>A list of backgounds to use for a bound draft version of the publication.</description>
+        <type>list</type>
+        <value>linesWatermark,draftWatermark</value>
+    </setting>
+    <setting>
+        <name>Proof Background</name>
+        <key>proofBackground</key>
+        <description>A list of backgounds to use for a bound proof version of the publication.</description>
+        <type>list</type>
+        <value>boxWatermark,proofWatermark</value>
+    </setting>
+    <setting>
+        <name>Final Background</name>
+        <key>finalBackground</key>
+        <description>A list of backgounds to use for a bound final version of the publication. Normally there are none.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
 </root>
 

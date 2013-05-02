@@ -40,19 +40,10 @@ class PageBackground (object) :
         self.local                      = None
         self.projConfig                 = None
         self.layoutConfig               = None
-        self.useWatermark               = False
-        self.useLines                   = False
-        self.useBoxBoarder              = False
         # Paths
         self.projIllustrationsFolder    = None
         # File names and paths
-        self.projWatermarkFile          = None
-        self.rpmDefWatermarkFile        = None
-        self.projLinesFile              = None
-        self.projBaselineGridFileName   = None
-        self.rpmLinesTemplateFileName   = None
-        self.boxBoarderFile             = None
-        self.rpmBoxBoarderFile          = None
+
         # Try to finish the init (failing is okay for some functions in this module)
         self.finishInit()
         # Log messages for this module
@@ -78,29 +69,15 @@ class PageBackground (object) :
             self.projConfig                 = ProjConfig(self.local).projConfig
             self.log                        = ProjLog(self.pid)
             self.layoutConfig               = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
-            # Set booleans
-            self.useWatermark               = self.tools.str2bool(self.layoutConfig['PageLayout']['useWatermark'])
-            self.useLines                   = self.tools.str2bool(self.layoutConfig['PageLayout']['useLines'])
-            self.useBoxBoarder              = self.tools.str2bool(self.layoutConfig['PageLayout']['useBoxBoarder'])
             # File names
-            self.projWatermarkFileName      = self.layoutConfig['PageLayout']['watermarkFile']
-            self.rpmDefWatermarkFileName    = 'watermark_default.pdf'
-            self.projLinesFileName          = self.layoutConfig['PageLayout']['linesFile']
-            self.projBaselineGridFileName   = 'baselinegrid.svg'
-            self.rpmLinesTemplateFileName   = 'grid.svg'
-            self.boxBoarderFileName         = self.layoutConfig['PageLayout']['boxBoarderFile']
-            self.rpmBoxBoarderFileName      = 'box_background.pdf'
+
+
             # Paths
             self.projIllustrationsFolder    = self.local.projIllustrationsFolder
             self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
             # Files with path
-            self.projWatermarkFile          = os.path.join(self.projIllustrationsFolder, self.projWatermarkFileName)
-            self.rpmDefWatermarkFile        = os.path.join(self.rpmIllustrationsFolder, self.rpmDefWatermarkFileName)
-            self.projLinesFile              = os.path.join(self.projIllustrationsFolder, self.projLinesFileName)
-            self.projBaselineGridFile       = os.path.join(self.projIllustrationsFolder, self.projBaselineGridFileName)
-            self.rpmLinesTemplateFile       = os.path.join(self.rpmIllustrationsFolder, self.rpmLinesTemplateFileName)
-            self.boxBoarderFile             = os.path.join(self.projIllustrationsFolder, self.boxBoarderFileName)
-            self.rpmBoxBoarderFile          = os.path.join(self.rpmIllustrationsFolder, self.rpmBoxBoarderFileName)
+
+
         except Exception as e :
             # If this doesn't work, we should probably say something
             self.tools.terminal('Error: PageBackground() extra init failed because of: ' + str(e))
@@ -112,138 +89,148 @@ class PageBackground (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
-    def backgroundOff (self) :
-        '''Turn off all page backgrounds.'''
+#    def backgroundOff (self) :
+#        '''Turn off all page backgrounds.'''
 
-        self.layoutConfig['PageLayout']['useWatermark'] = False
-        self.layoutConfig['PageLayout']['useLines'] = False
-        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-        self.layoutConfig['PageLayout']['useCropmarks'] = False
-        if self.tools.writeConfFile(self.layoutConfig) :
-            self.log.writeToLog(self.errorCodes['0250'])
-
-
-    def addBackground (self, bType, force = False) :
-        '''Add a page background type to a project. In some cases, there can
-        be more than one. This function will determine what is allowed.'''
-
-        change = False
-        if bType == 'watermark' :
-            # Turn on watermark and make sure there is a file to use
-            if self.useWatermark == False :
-                self.installDefaultWatermarkFile(force)
-                self.layoutConfig['PageLayout']['useWatermark'] = True
-                change = True
-        elif bType == 'lines' :
-            # Turn on lines and make sure there is a file to use
-            if self.installLinesFile(force) :
-                change = True
-            if self.useLines == False :
-                self.layoutConfig['PageLayout']['useLines'] = True
-                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-                self.layoutConfig['PageLayout']['useCropmarks'] = False
-                change = True
-        elif bType == 'boarder' :
-            # Turn on lines and make sure there is a file to use
-            if self.useLines == False :
-                self.installBoxBoarderFile(force)
-                self.layoutConfig['PageLayout']['useBoxBoarder'] = True
-                self.layoutConfig['PageLayout']['useLines'] = False
-                self.layoutConfig['PageLayout']['useCropmarks'] = False
-                change = True
-        elif bType == 'cropmarks' :
-                self.layoutConfig['PageLayout']['useCropmarks'] = True
-                self.layoutConfig['PageLayout']['useLines'] = False
-                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-                change = True
-
-        if change :
-            if self.tools.writeConfFile(self.layoutConfig) :
-                self.log.writeToLog(self.errorCodes['0220'], [bType])
-        else :
-            self.log.writeToLog(self.errorCodes['0240'], [bType])
+#        self.layoutConfig['PageLayout']['useWatermark'] = False
+#        self.layoutConfig['PageLayout']['useLines'] = False
+#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#        self.layoutConfig['PageLayout']['useCropmarks'] = False
+#        if self.tools.writeConfFile(self.layoutConfig) :
+#            self.log.writeToLog(self.errorCodes['0250'])
 
 
-    def removeBackground (self, bType) :
-        '''Remove a page background type.'''
+#    def addBackground (self, bType, force = False) :
+#        '''Add a page background type to a project. In some cases, there can
+#        be more than one. This function will determine what is allowed.'''
 
-        change = False
-        if bType == 'watermark' :
-            # Turn it off if it is on but do not do anything with the watermark file
-            if self.useWatermark == True :
-                self.layoutConfig['PageLayout']['useWatermark'] = False
-                change = True
-        elif bType == 'lines' :
-            if self.useLines == True :
-                self.layoutConfig['PageLayout']['useLines'] = False
-                change = True
-        elif bType == 'boarder' :
-                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-                change = True
-        elif bType == 'cropmarks' :
-                self.layoutConfig['PageLayout']['useCropmarks'] = False
-                change = True
+#        change = False
+#        if bType == 'watermark' :
+#            # Turn on watermark and make sure there is a file to use
+#            if self.useWatermark == False :
+#                self.installDefaultWatermarkFile(force)
+#                self.layoutConfig['PageLayout']['useWatermark'] = True
+#                change = True
+#        elif bType == 'lines' :
+#            # Turn on lines and make sure there is a file to use
+#            if self.installLinesFile(force) :
+#                change = True
+#            if self.useLines == False :
+#                self.layoutConfig['PageLayout']['useLines'] = True
+#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#                self.layoutConfig['PageLayout']['useCropmarks'] = False
+#                change = True
+#        elif bType == 'boarder' :
+#            # Turn on lines and make sure there is a file to use
+#            if self.useLines == False :
+#                self.installBoxBoarderFile(force)
+#                self.layoutConfig['PageLayout']['useBoxBoarder'] = True
+#                self.layoutConfig['PageLayout']['useLines'] = False
+#                self.layoutConfig['PageLayout']['useCropmarks'] = False
+#                change = True
+#        elif bType == 'cropmarks' :
+#                self.layoutConfig['PageLayout']['useCropmarks'] = True
+#                self.layoutConfig['PageLayout']['useLines'] = False
+#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#                change = True
 
-        if change :
-            if self.tools.writeConfFile(self.layoutConfig) :
-                self.log.writeToLog(self.errorCodes['0230'], [bType])
-        else :
-            self.log.writeToLog(self.errorCodes['0240'], [bType])
+#        if change :
+#            if self.tools.writeConfFile(self.layoutConfig) :
+#                self.log.writeToLog(self.errorCodes['0220'], [bType])
+#        else :
+#            self.log.writeToLog(self.errorCodes['0240'], [bType])
 
 
-    def changeWatermarkFile (self) :
-        '''Change the current watermark file.'''
+#    def removeBackground (self, bType) :
+#        '''Remove a page background type.'''
 
-# FIXME: This is a place holder function
+#        change = False
+#        if bType == 'watermark' :
+#            # Turn it off if it is on but do not do anything with the watermark file
+#            if self.useWatermark == True :
+#                self.layoutConfig['PageLayout']['useWatermark'] = False
+#                change = True
+#        elif bType == 'lines' :
+#            if self.useLines == True :
+#                self.layoutConfig['PageLayout']['useLines'] = False
+#                change = True
+#        elif bType == 'boarder' :
+#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
+#                change = True
+#        elif bType == 'cropmarks' :
+#                self.layoutConfig['PageLayout']['useCropmarks'] = False
+#                change = True
 
-        terminal('This does not work yet.')
+#        if change :
+#            if self.tools.writeConfFile(self.layoutConfig) :
+#                self.log.writeToLog(self.errorCodes['0230'], [bType])
+#        else :
+#            self.log.writeToLog(self.errorCodes['0240'], [bType])
 
 
-    def installDefaultWatermarkFile (self, force = False) :
+    def checkForBackground (self, bg, mode) :
+        '''Check to see if a required backgound file is present. If not,
+        make it so.'''
+
+        bgFileName      = bg + '.pdf'
+        projBgFile      = os.path.join(self.projIllustrationsFolder, bgFileName)
+        if not os.path.exists(projBgFile) :
+            if bg.find('lines') >= 0 :
+                self.installLinesFile(projBgFile)
+            elif bg.find('box') >= 0 :
+                self.installBoxBoarderFile(projBgFile)
+            else :
+                self.installWatermarkFile(projBgFile, mode)
+
+
+    def installWatermarkFile (self, target, mode) :
         '''Install a default Rapuma watermark file into the project.'''
 
-        if not os.path.exists(self.projWatermarkFile or force) :
-            try :
-                shutil.copy(self.rpmDefWatermarkFile, self.projWatermarkFile)
-                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projWatermarkFile)])
-            except Exception as e :
-                # If this doesn't work, we should probably quit here
-                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projWatermarkFile),str(e)])
+        # FIXME: A custom watermark creation function is needed here, load default for now
+        rpmDefWatermarkFile = os.path.join(self.rpmIllustrationsFolder, mode + 'Watermark.pdf')
+
+        try :
+            shutil.copy(rpmDefWatermarkFile, target)
+            self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
+        except Exception as e :
+            # If this doesn't work, we should probably quit here
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
-    def installBoxBoarderFile (self, force = False) :
+    def installBoxBoarderFile (self, target) :
         '''Install a background lines file into the project.'''
 
-        if not os.path.exists(self.boxBoarderFile) or force :
-            try :
-                shutil.copy(self.rpmBoxBoarderFile, self.boxBoarderFile)
-                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.boxBoarderFile)])
-            except Exception as e :
-                # If this doesn't work, we should probably quit here
-                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.boxBoarderFile),str(e)])
+        # FIXME: A custom box watermark creation function is needed here, load default for now
+        rpmDefBoxWatermarkFile = os.path.join(self.rpmIllustrationsFolder, 'box_view-210x145.pdf')
+
+        try :
+            shutil.copy(rpmDefBoxWatermarkFile, target)
+            self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
+        except Exception as e :
+            # If this doesn't work, we should probably quit here
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
-    def installLinesFile (self, force = False) :
+    def installLinesFile (self, target) :
         '''Install a background lines file into the project.'''
 
-        if not os.path.exists(self.projLinesFile) or force:
-            try :
-                if self.createLinesFile() :
-                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(self.projLinesFile)])
-                    return True
-            except Exception as e :
-                # If this doesn't work, we should probably quit here
-                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(self.projLinesFile),str(e)])
+        try :
+            if self.createLinesFile(target) :
+                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
+                return True
+        except Exception as e :
+            # If this doesn't work, we should probably quit here
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
-    def createLinesFile (self) :
+    def createLinesFile (self, bgLinesFile) :
         '''Create a lines background file used for composition work. The code
         in this file came from Flip Wester (flip_wester@sil.org)'''
 
         # Set our file names
-        source = self.rpmLinesTemplateFile
-        output = self.projBaselineGridFile
-        final_output = self.projLinesFile
+        source = os.path.join(self.rpmIllustrationsFolder, 'grid.svg')
+        output = os.path.join(self.projIllustrationsFolder,  'lines-grid.svg')
+        final_output = bgLinesFile
 
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit

@@ -78,7 +78,6 @@ class Commander (object) :
 
         self.makeStaticScripts()
         self.makeGrpScripts()
-        self.makeBndScripts()
 
 
     def makeGrpScripts (self) :
@@ -98,27 +97,6 @@ class Commander (object) :
                     self.tools.makeExecutable(fullFile)
             
             self.tools.terminal('\nCompleted creating/recreating group helper scripts.\n')
-        else :
-            pass
-
-
-    def makeBndScripts (self) :
-        '''Create scripts that process specific group components.'''
-
-        # Output the scripts (If this is a new project we need to pass)
-        if self.tools.isConfSection(self.projConfig, 'Groups') :
-            for bid in self.projConfig['Groups'].keys() :
-                allScripts = self.getBndScripInfo(bid)
-                for key in allScripts.keys() :
-                    fullFile = os.path.join(self.local.projScriptsFolder, key) + bid
-                    with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
-                        writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
-                        writeObject.write(allScripts[key][1] + '\n\n')
-
-                    # Make the script executable
-                    self.tools.makeExecutable(fullFile)
-
-            self.tools.terminal('\nCompleted creating/recreating binding helper scripts.\n')
         else :
             pass
 
@@ -161,9 +139,9 @@ class Commander (object) :
         mid     = self.projectMediaIDCode
 
         return {
-                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible --component_type usfm --manage add --source_id base --sourcePath $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    --component_type usfm --manage add --source_id base --sourcePath $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    --component_type usfm --manage add --source_id base --sourcePath $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible --component_type usfm --manage add --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    --component_type usfm --manage add --source_id base --source_path $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    --component_type usfm --manage add --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
                 'archive'       : ['Archive this project',                          'rapuma project '       + pid + '       --manage save-archive '], 
                 'backup'        : ['Backup this project',                           'rapuma project '       + pid + '       --manage save-backup '], 
                 'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + '       --restore-cloud '], 
@@ -173,15 +151,7 @@ class Commander (object) :
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + '       --manage update-helper-scripts '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
-                'backgroundOff' : ['Turn off all backgounds on output page.',       'rapuma background '    + pid + ' none'], 
-                'cropmarksOff'  : ['Turn off cropmarks on output page.',            'rapuma background '    + pid + ' cropmarks --manage remove'], 
-                'cropmarksOn'   : ['Turn on cropmarks on output page.',             'rapuma background '    + pid + ' cropmarks --manage add'], 
-                'linesOff'      : ['Turn off line background.',                     'rapuma background '    + pid + ' lines --manage remove'], 
-                'linesOn'       : ['Turn on line background.',                      'rapuma background '    + pid + ' lines --manage add'], 
-                'pageBoarderOff': ['Turn off page box on output page.',             'rapuma background '    + pid + ' boarder --manage remove'], 
-                'pageBoarderOn' : ['Turn on page box on output page.',              'rapuma background '    + pid + ' boarder -a'], 
-                'watermarkOff'  : ['Turn off watermark background.',                'rapuma background '    + pid + ' watermark --manage remove'], 
-                'watermarkOn'   : ['Turn on watermark background.',                 'rapuma background '    + pid + ' watermark --manage add']
+                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + '       --manage bind-final '], 
             }
 
 
@@ -199,24 +169,11 @@ class Commander (object) :
                 'edit'          : ['Edit specified component file.',                'rapuma component ' + pid + ' ' + gid + ' --edit $1 '], 
                 'hyphenOff'     : ['Turn off hyphenation in project.',              'rapuma group ' + pid + ' ' + gid + ' --component_type ' + cType + ' --hyphenation remove  '], 
                 'hyphenOn'      : ['Turn on hyphenation in project.',               'rapuma group ' + pid + ' ' + gid + ' --component_type ' + cType + ' --hyphenation add  '], 
-                'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render --force --proof'], 
-                'render'        : ['Render the ' + gid + ' group PDF file.',        'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render --force '], 
+                'draft'         : ['Create ' + gid + ' group PDF draft file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-draft --force '], 
+                'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-proof --force '], 
+                'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-final --force '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update '], 
-                'view'          : ['Render the ' + gid + ' group PDF file.',        'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render '], 
             }
-
-
-    def getBndScripInfo (self, bid) :
-        '''Create a dictionary of the group binding script information used in
-        most projects.'''
-
-        pid     = self.pid
-
-        return {
-                'bind'          : ['Bind the ' + bid + ' groups to a PDF file.',    'rapuma group ' + pid + ' ' + bid + ' --manage bind '] 
-            }
-
-
 
 
 

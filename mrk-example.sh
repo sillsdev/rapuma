@@ -10,20 +10,17 @@ unzip -o ~/Publishing/testArea/KYUM.zip -d ~/Publishing/testArea
 rapuma project KYU-MYMR-MRKA --manage remove-project
 
 # Create the project
-rapuma project KYU-MYMR-MRKA --manage add-project --targetPath ~/Publishing/testArea --media_type book --name 'Kayah Book of Mark example in the Burmese script'
+rapuma project KYU-MYMR-MRKA --manage add-project --target_path ~/Publishing/testArea --media_type book --name 'Kayah Book of Mark example in the Burmese script'
 
 # Install groups to render
-rapuma group KYU-MYMR-MRKA Mark --manage add --component_type usfm --cid_list mrk --source_id MYMR --source ~/Publishing/testArea/KYUM/pt_environ
-rapuma group KYU-MYMR-MRKA Intro --manage add --component_type usfm --cid_list int --source_id MYMR --source ~/Publishing/testArea/KYUM/pt_environ
-
-# Create a binding group
-rapuma group KYU-MYMR-MRKA BOOK --manage add --component_type bind --cid_list "Intro Mark"
+rapuma group KYU-MYMR-MRKA Mark --manage add-group --component_type usfm --cid_list mrk --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
+rapuma group KYU-MYMR-MRKA Intro --manage add-group --component_type usfm --cid_list int --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
 
 # Set the font to the right one
 rapuma font KYU-MYMR-MRKA Mark usfm Padauk --manage primary --force
 
 # Turn on preprocessing for Mark group
-rapuma group KYU-MYMR-MRKA Mark --preprocess add
+rapuma group KYU-MYMR-MRKA Mark --preprocess add-preprocess
 
 # Turn on font features in Padauk & adjust default settings
 rapuma settings KYU-MYMR-MRKA project Managers/usfm_Font useRenderingSystem GR
@@ -48,16 +45,16 @@ echo copying: usfm-ext.sty
 cp ~/Publishing/testArea/KYUM/resources/usfm-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Styles/usfm-ext.sty
 
 # Now update the text so the prprocess is used
-rapuma group KYU-MYMR-MRKA Mark --manage update --force
+rapuma group KYU-MYMR-MRKA Mark --manage update-group --force
 
 # Install and switch font (Padauk 2.95 has a bug)
 rapuma font KYU-MYMR-MRKA Mark usfm --manage add Padauk_2.701
 rapuma font KYU-MYMR-MRKA Mark usfm --manage primary --force Padauk_2.701
 
 # Render the component
-rapuma group KYU-MYMR-MRKA Intro --manage render
-rapuma group KYU-MYMR-MRKA Mark --manage render
-rapuma group KYU-MYMR-MRKA BOOK --manage bind --proof
+rapuma group KYU-MYMR-MRKA Intro --manage render-draft
+rapuma group KYU-MYMR-MRKA Mark --manage render-proof
+#rapuma group KYU-MYMR-MRKA BOOK --manage bind-final
 
 # Backup the project
 rapuma project KYU-MYMR-MRKA --manage save-backup
