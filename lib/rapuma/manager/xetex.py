@@ -17,7 +17,8 @@
 # this process
 
 import os, shutil, re, codecs, subprocess
-from xml.etree import ElementTree
+from xml.etree                      import ElementTree
+from configobj                      import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools
@@ -195,6 +196,7 @@ class Xetex (Manager) :
             '0645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
             'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
             '0665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
+            '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
         }
@@ -759,45 +761,6 @@ class Xetex (Manager) :
 ###############################################################################
 
 
-
-
-#    def noBgSettings (self) :
-#        '''Change all the backgound settings to facilitate bound output.'''
-
-#        self.layoutConfig['PageLayout']['useWatermark'] = False
-#        self.layoutConfig['PageLayout']['useCropmarks'] = False
-#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#        self.layoutConfig['PageLayout']['useLines'] = False
-
-
-#    def proofSettings (self) :
-#        '''Change all the backgound settings to facilitate a proof output.'''
-
-#        self.layoutConfig['PageLayout']['useWatermark'] = True
-#        self.layoutConfig['PageLayout']['useLines'] = False
-#        if self.layoutConfig['PageLayout']['useCropmarks'] == True :
-#            self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-
-#        else :
-#            self.layoutConfig['PageLayout']['useCropmarks'] = False
-#            self.layoutConfig['PageLayout']['useBoxBoarder'] = True
-#            self.pg_back.installBoxBoarderFile()
-#        self.log.writeToLog(self.errorCodes['0215'])
-
-
-#    def draftSettings (self) :
-#        '''Change all the backgound settings to facilitate a draft output.'''
-
-#        self.layoutConfig['PageLayout']['useWatermark'] = False
-#        self.layoutConfig['PageLayout']['useCropmarks'] = False
-#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#        self.layoutConfig['PageLayout']['useLines'] = True
-#        self.pg_back.installLinesFile()
-#        self.log.writeToLog(self.errorCodes['0210'])
-
-
-
-
     def run (self, mode, cidList, force) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
@@ -878,12 +841,6 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
-
-
-
-
-
-
             # Background management
             bgList = self.projConfig['Managers'][self.manager][mode + 'Background']
             for bg in bgList :
@@ -898,12 +855,6 @@ class Xetex (Manager) :
                     # If we don't succeed, we should probably quite here
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
-
-
-
-
-
-
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
             if self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
@@ -917,6 +868,10 @@ class Xetex (Manager) :
                 self.tools.writeConfFile(self.projConfig)
                 self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
 
+            # If we are in bind mode we will finish up here
+            if mode == 'bind' :
+                self.log.writeToLog(self.errorCodes['0670'], [self.gid])
+                return True
         else :
             self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])
 
@@ -936,6 +891,6 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(deliverablePdfFile)])
 
-
+        return True
 
 

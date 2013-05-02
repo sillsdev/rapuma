@@ -71,7 +71,6 @@ class PageBackground (object) :
             self.layoutConfig               = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
             # File names
 
-
             # Paths
             self.projIllustrationsFolder    = self.local.projIllustrationsFolder
             self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
@@ -88,84 +87,6 @@ class PageBackground (object) :
 ###############################################################################
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
-
-#    def backgroundOff (self) :
-#        '''Turn off all page backgrounds.'''
-
-#        self.layoutConfig['PageLayout']['useWatermark'] = False
-#        self.layoutConfig['PageLayout']['useLines'] = False
-#        self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#        self.layoutConfig['PageLayout']['useCropmarks'] = False
-#        if self.tools.writeConfFile(self.layoutConfig) :
-#            self.log.writeToLog(self.errorCodes['0250'])
-
-
-#    def addBackground (self, bType, force = False) :
-#        '''Add a page background type to a project. In some cases, there can
-#        be more than one. This function will determine what is allowed.'''
-
-#        change = False
-#        if bType == 'watermark' :
-#            # Turn on watermark and make sure there is a file to use
-#            if self.useWatermark == False :
-#                self.installDefaultWatermarkFile(force)
-#                self.layoutConfig['PageLayout']['useWatermark'] = True
-#                change = True
-#        elif bType == 'lines' :
-#            # Turn on lines and make sure there is a file to use
-#            if self.installLinesFile(force) :
-#                change = True
-#            if self.useLines == False :
-#                self.layoutConfig['PageLayout']['useLines'] = True
-#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#                self.layoutConfig['PageLayout']['useCropmarks'] = False
-#                change = True
-#        elif bType == 'boarder' :
-#            # Turn on lines and make sure there is a file to use
-#            if self.useLines == False :
-#                self.installBoxBoarderFile(force)
-#                self.layoutConfig['PageLayout']['useBoxBoarder'] = True
-#                self.layoutConfig['PageLayout']['useLines'] = False
-#                self.layoutConfig['PageLayout']['useCropmarks'] = False
-#                change = True
-#        elif bType == 'cropmarks' :
-#                self.layoutConfig['PageLayout']['useCropmarks'] = True
-#                self.layoutConfig['PageLayout']['useLines'] = False
-#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#                change = True
-
-#        if change :
-#            if self.tools.writeConfFile(self.layoutConfig) :
-#                self.log.writeToLog(self.errorCodes['0220'], [bType])
-#        else :
-#            self.log.writeToLog(self.errorCodes['0240'], [bType])
-
-
-#    def removeBackground (self, bType) :
-#        '''Remove a page background type.'''
-
-#        change = False
-#        if bType == 'watermark' :
-#            # Turn it off if it is on but do not do anything with the watermark file
-#            if self.useWatermark == True :
-#                self.layoutConfig['PageLayout']['useWatermark'] = False
-#                change = True
-#        elif bType == 'lines' :
-#            if self.useLines == True :
-#                self.layoutConfig['PageLayout']['useLines'] = False
-#                change = True
-#        elif bType == 'boarder' :
-#                self.layoutConfig['PageLayout']['useBoxBoarder'] = False
-#                change = True
-#        elif bType == 'cropmarks' :
-#                self.layoutConfig['PageLayout']['useCropmarks'] = False
-#                change = True
-
-#        if change :
-#            if self.tools.writeConfFile(self.layoutConfig) :
-#                self.log.writeToLog(self.errorCodes['0230'], [bType])
-#        else :
-#            self.log.writeToLog(self.errorCodes['0240'], [bType])
 
 
     def checkForBackground (self, bg, mode) :

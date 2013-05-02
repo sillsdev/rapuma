@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 # By Dennis Drescher (dennis_drescher at sil.org
 
 
@@ -257,14 +258,9 @@ def userArguments (args) :
             ProjBackup(pid).projectToTemplate(args.template)
         elif args.manage == 'update-helper-scripts' :
             Commander(pid).updateScripts()
-        elif args.manage.find('bind') <= 0 :
+        elif args.manage == 'bind-book' :
             aProject = initProject(args.project_id)
-            if args.manage == 'bind-draft' :
-                aProject.bind('draft')
-            if args.manage == 'bind-proof' :
-                aProject.bind('proof')
-            if args.manage == 'bind-final' :
-                aProject.bind('final')
+            aProject.bind()
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -334,17 +330,17 @@ def userArguments (args) :
                     if not aProject.isValidCidList(args.group_id, cid_list) :
                         sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
                 if args.manage == 'render-draft' :
-                    aProject.renderGroup(args.group_id, cid_list, 'draft', args.force)
+                    aProject.renderGroup(args.group_id, 'draft', cid_list, args.force)
                 elif args.manage == 'render-proof' :
-                    aProject.renderGroup(args.group_id, cid_list, 'proof', args.force)
+                    aProject.renderGroup(args.group_id, 'proof', cid_list, args.force)
                 elif args.manage == 'render-final' :
-                    aProject.renderGroup(args.group_id, cid_list, 'final', args.force)
+                    aProject.renderGroup(args.group_id, 'final', cid_list, args.force)
                 elif args.manage == 'maps-draft' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'draft', args.force)
+                    MapSet(args.project_id).renderMapSet(args.group_id, 'draft', cid_list, args.force)
                 elif args.manage == 'maps-proof' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'proof', args.force)
+                    MapSet(args.project_id).renderMapSet(args.group_id, 'proof', cid_list, args.force)
                 elif args.manage == 'maps-final' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, cid_list, 'final', args.force)
+                    MapSet(args.project_id).renderMapSet(args.group_id, 'final', cid_list, args.force)
             elif args.manage == 'lock-group' :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, True)
             elif args.manage == 'unlock-group' :
@@ -486,7 +482,7 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Project
 mediaTypes              = ['book']
 backupTypes             = ['archive', 'backup', 'cloud', 'template']
-manageProject           = ['add-project', 'bind-draft', 'bind-proof', 'bind-final', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
+manageProject           = ['add-project', 'bind-book', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
 # Group
 manageGroup             = ['add-group', 'render-draft', 'render-proof', 'render-final', 'list-components', 'lock-group', 'maps-draft', 'maps-proof', 'maps-final', 'remove-group', 'update-group', 'unlock-group']
 componentTypes          = ['map', 'pdf', 'usfm']

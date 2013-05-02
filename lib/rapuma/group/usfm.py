@@ -189,7 +189,7 @@ class Usfm (Group) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup(cids, mode) :
+            if not self.preProcessGroup(mode, cids) :
                 return False
 
         # With everything in place we can render the component and we pass-through
@@ -200,7 +200,7 @@ class Usfm (Group) :
         return True
 
 
-    def preProcessGroup (self, cidList, mode) :
+    def preProcessGroup (self, mode, cidList) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 

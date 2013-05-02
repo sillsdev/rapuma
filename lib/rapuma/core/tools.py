@@ -17,12 +17,10 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat, tempfile
-from datetime import *
-from xml.etree import ElementTree
-#import xml.etree.ElementTree as ElementTree
-
-from configobj import ConfigObj, Section
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat, tempfile, subprocess
+from datetime           import *
+from xml.etree          import ElementTree
+from configobj          import ConfigObj, Section
 
 
 ###############################################################################
@@ -120,6 +118,19 @@ class Tools (object) :
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
+
+    def getPdfPages (self, pdfFile) :
+        '''Get the total number of pages in a PDF file.'''
+
+        # Create a temporary file that we will use to hold data.
+        # It should be deleted after the function is done.
+        rptData = tempfile.NamedTemporaryFile()
+        rCode = subprocess.call(['pdftk', pdfFile, 'dump_data', 'output', rptData.name])
+        with codecs.open(rptData.name, 'rt', 'utf_8_sig') as contents :
+            for line in contents :
+                if line.split(':')[0] == 'NumberOfPages' :
+                    return int(line.split(':')[1].strip())
+
 
     def modeFileName (self, fileName, mode = 'draft') :
         '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
