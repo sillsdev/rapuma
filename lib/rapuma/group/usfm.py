@@ -174,7 +174,7 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
 
 
-    def render(self, mode, cidList, force) :
+    def render(self, gid, mode, cidList, force) :
         '''Does USFM specific rendering of a USFM component'''
 
 #        import pdb; pdb.set_trace()
@@ -182,35 +182,35 @@ class Usfm (Group) :
         # If the whole group is being rendered, we need to preprocess it
         cids = []
         if not cidList :
-            cids = self.projConfig['Groups'][self.gid]['cidList']
+            cids = self.projConfig['Groups'][gid]['cidList']
         else :
             cids = cidList
 
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup(mode, cids) :
+            if not self.preProcessGroup(gid, mode, cids) :
                 return False
 
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
         # Note: We pass the cidList straight through
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(mode, cidList, force)
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(gid, mode, cidList, force)
 
         return True
 
 
-    def preProcessGroup (self, mode, cidList) :
+    def preProcessGroup (self, gid, mode, cidList) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
         # FIXME: Note page boarder has not really been implemented yet.
         # It is different from backgound management
-        useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
-        useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][gid]['useIllustrations'])
+        useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][gid]['useHyphenation'])
         usePageBorder           = self.tools.str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
-        useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useManualAdjustments'])
+        useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][gid]['useManualAdjustments'])
 
         # Check if there is a font installed
         if not self.font.varifyFont() :
@@ -255,23 +255,23 @@ class Usfm (Group) :
                 # Component piclist file
                 cidPiclist = self.getCidPiclistPath(cid)
                 if useIllustrations :
-                    if self.illustration.hasIllustrations(self.gid, cid) :
+                    if self.illustration.hasIllustrations(gid, cid) :
                         if not os.path.isfile(cidPiclist) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
-                            self.illustration.getPics(self.gid, cid)
+                            self.illustration.getPics(gid, cid)
                             # Now make a fresh version of the piclist file
-                            self.illustration.createPiclistFile(self.gid, cid)
+                            self.illustration.createPiclistFile(gid, cid)
                             self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
                             for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
                                     # Remake the piclist file
-                                    self.illustration.createPiclistFile(self.gid, cid)
+                                    self.illustration.createPiclistFile(gid, cid)
                                     self.log.writeToLog(self.errorCodes['0265'], [cid])
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
-                        self.illustration.getPics(self.gid, cid)
+                        self.illustration.getPics(gid, cid)
                 else :
                     # If we are not using illustrations then any existing piclist file will be removed
                     if os.path.isfile(cidPiclist) :

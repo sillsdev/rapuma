@@ -761,7 +761,7 @@ class Xetex (Manager) :
 ###############################################################################
 
 
-    def run (self, mode, cidList, force) :
+    def run (self, gid, mode, cidList, force) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -770,9 +770,9 @@ class Xetex (Manager) :
         # If there is a cidList, create an alternate ouput name
         pdfSubFileName = ''
         if cidList :
-            pdfSubFileName = self.gid + '-' + '-'.join(cidList) + '.pdf'
+            pdfSubFileName = gid + '-' + '-'.join(cidList) + '.pdf'
         else :
-            cidList = self.projConfig['Groups'][self.gid]['cidList']
+            cidList = self.projConfig['Groups'][gid]['cidList']
 
         # This is the file we will make. If force is set, delete the old one.
         if force :
@@ -795,9 +795,9 @@ class Xetex (Manager) :
                     self.project.local.adjustmentConfFile, self.project.local.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
-            cidUsfm = self.project.groups[self.gid].getCidPath(cid)
-            cidAdj = self.project.groups[self.gid].getCidAdjPath(cid)
-            cidIlls = self.project.groups[self.gid].getCidPiclistPath(cid)
+            cidUsfm = self.project.groups[gid].getCidPath(cid)
+            cidAdj = self.project.groups[gid].getCidAdjPath(cid)
+            cidIlls = self.project.groups[gid].getCidPiclistPath(cid)
             for f in [cidUsfm, cidAdj, cidIlls] :
                 if os.path.exists(f) :
                     dep.append(f)
@@ -857,20 +857,20 @@ class Xetex (Manager) :
 
             # Collect the page count and record in group
             newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
-            if self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'totalPages') :
-                oldPages = int(self.projConfig['Groups'][self.gid]['totalPages'])
+            if self.tools.testForSetting(self.projConfig['Groups'][gid], 'totalPages') :
+                oldPages = int(self.projConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
-                    self.projConfig['Groups'][self.gid]['totalPages'] = newPages
+                    self.projConfig['Groups'][gid]['totalPages'] = newPages
                     self.tools.writeConfFile(self.projConfig)
-                    self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
+                    self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
             else :
-                self.projConfig['Groups'][self.gid]['totalPages'] = newPages
+                self.projConfig['Groups'][gid]['totalPages'] = newPages
                 self.tools.writeConfFile(self.projConfig)
-                self.log.writeToLog(self.errorCodes['0610'], [str(newPages),self.gid])
+                self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
 
             # If we are in bind mode we will finish up here
             if mode == 'bind' :
-                self.log.writeToLog(self.errorCodes['0670'], [self.gid])
+                self.log.writeToLog(self.errorCodes['0670'], [gid])
                 return True
         else :
             self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])

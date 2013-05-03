@@ -139,19 +139,19 @@ class Commander (object) :
         mid     = self.projectMediaIDCode
 
         return {
-                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible --component_type usfm --manage add --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    --component_type usfm --manage add --source_id base --source_path $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    --component_type usfm --manage add --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible --component_type usfm --manage add-group --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    --component_type usfm --manage add-group --source_id base --source_path $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
+                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    --component_type usfm --manage add-group --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
                 'archive'       : ['Archive this project',                          'rapuma project '       + pid + '       --manage save-archive '], 
                 'backup'        : ['Backup this project',                           'rapuma project '       + pid + '       --manage save-backup '], 
-                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + '       --restore-cloud '], 
+                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + '       --manage restore-cloud '], 
                 'cloudPush'     : ['Push data from this project to the cloud',      'rapuma project '       + pid + '       --manage save-cloud '], 
-                'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + '       --restore-backup '], 
-                'template'      : ['Create a template of the project.',             'rapuma project '       + pid + '       --restore-template $1 '], 
+                'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + '       --manage restore-backup '], 
+                'template'      : ['Create a template of the project.',             'rapuma project '       + pid + '       --manage restore-template $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + '       --manage update-helper-scripts '], 
+                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + '       --manage bind-book '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
-                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + '       --manage bind-final '], 
             }
 
 
@@ -172,7 +172,7 @@ class Commander (object) :
                 'draft'         : ['Create ' + gid + ' group PDF draft file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-draft --force '], 
                 'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-proof --force '], 
                 'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-final --force '], 
-                'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update '], 
+                'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update-group '], 
             }
 
 

@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, unicodedata, subprocess, shutil, re
+import codecs, os, unicodedata, subprocess, shutil, re, tempfile
 from configobj                      import ConfigObj
 from importlib                      import import_module
 from functools                      import partial
@@ -775,17 +775,15 @@ class ProjSetup (object) :
             # If this is a USFM component type we need to remove any \fig markers,
             # and record them in the illustration.conf file for later use
             if cType == 'usfm' :
-                tempFile = target + '.tmp'
+                tempFile = tempfile.NamedTemporaryFile()
                 contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
                 # logUsfmFigure() logs the fig data and strips it from the working text
                 # Note: Using partial() to allows the passing of the cid param 
                 # into logUsfmFigure()
                 contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
-                codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
+                codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
                 # Finish by copying the tempFile to the source
-                if not shutil.copy(tempFile, target) :
-                    # Take out the trash
-                    os.remove(tempFile)
+                shutil.copy(tempFile.name, target)
 
             # If the text is there, we should return True so do a last check to see
             if os.path.isfile(target) :

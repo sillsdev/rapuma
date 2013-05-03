@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, dircache, subprocess, re
+import codecs, os, dircache, subprocess, re, shutil
 from configobj import ConfigObj
 from importlib import import_module
 

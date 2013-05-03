@@ -99,7 +99,12 @@ class Project (object) :
             '0210' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
             '0211' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
 
-            '0410' : ['WRN', 'No groups were added to the binding order.'],
+            '0410' : ['WRN', 'No groups were added to the binding order. Please add one or more groups.'],
+            '0430' : ['MSG', 'Completed proccessing on bound output: [<<1>>].'],
+            '0435' : ['ERR', 'Failed to complete proccessing on bound output: [<<1>>].'],
+            '0440' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding output.'],
+            '0450' : ['MSG', 'Completed final render on binding output [<<1>>].'],
+            '0460' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
         }
 
 ###############################################################################
@@ -178,6 +183,9 @@ class Project (object) :
         # Get the order of the groups to be bound.
         bindOrder = {}
         for grp in self.projConfig['Groups'].keys() :
+            if not self.tools.testForSetting(self.projConfig['Groups'][grp], 'bindingOrder') :
+                self.projConfig['Groups'][grp]['bindingOrder'] = 0
+                self.tools.writeConfFile(self.projConfig)
             if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
                 bindOrder[self.projConfig['Groups'][grp]['bindingOrder']] = grp
         bindGrpNum = len(bindOrder)
@@ -190,43 +198,45 @@ class Project (object) :
         keyList = bindOrder.keys()
         keyList.sort()
         for key in keyList :
-            self.renderGroup(bindOrder[key], 'bind')
-
-# FIXME: The bgID used here is no longer valid
-
+            # Do a force render in the bind mode
+            self.renderGroup(bindOrder[key], 'bind', '', True)
+#            print bindOrder[key]
+        
+        self.tools.dieNow()
 
         # Build the final bind command
         confCommand = ['pdftk']
         # Append each of the input files
-        for gid in self.projConfig['Groups'][bgID]['gidList'] :
-            gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
-            gidPdf = os.path.join(self.local.projDeliverablesFolder, gid + '.pdf')
-            confCommand.append(self.tools.modeFileName(gidPdf, thisBgMode))
+        for key in bindOrder :
+            gidPdf = os.path.join(self.local.projComponentsFolder, bindOrder[key], bindOrder[key] + '.pdf')
+            confCommand.append(gidPdf)
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(self.local.projDeliverablesFolder, 'Final_' + bgID + '_' + self.tools.ymd() + '.pdf')
+        output = os.path.join(self.local.projDeliverablesFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)
         # Analyse the return code
         if rCode == int(0) :
-            self.log.writeToLog(self.errorCodes['0230'], [bgID])
+            self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(output)])
         else :
-            self.log.writeToLog(self.errorCodes['0235'], [bgID])
+            self.log.writeToLog(self.errorCodes['0435'], [self.tools.fName(output)])
 
         # Collect the page count and record in group
         newPages = self.tools.getPdfPages(output)
-        if self.tools.testForSetting(self.projConfig['Groups'][bgID], 'totalPages') :
-            oldPages = int(self.projConfig['Groups'][bgID]['totalPages'])
+        # FIXME: For now, we need to hard-code the manager name
+        manager = 'usfm_Xetex'
+        if self.tools.testForSetting(self.projConfig['Managers'][manager], 'totalBoundPages') :
+            oldPages = int(self.projConfig['Managers'][manager]['totalBoundPages'])
             if oldPages != newPages or oldPages == 'None' :
-                self.projConfig['Groups'][bgID]['totalPages'] = newPages
+                self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
                 self.tools.writeConfFile(self.projConfig)
-                self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
+                self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
         else :
-            self.projConfig['Groups'][bgID]['totalPages'] = newPages
+            self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
             self.tools.writeConfFile(self.projConfig)
-            self.log.writeToLog(self.errorCodes['0240'], [str(newPages),bgID])
+            self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
 
         # Build the viewer command
         pdfViewer = self.projConfig['Managers'][manager]['pdfViewerCommand']
@@ -236,10 +246,7 @@ class Project (object) :
             subprocess.Popen(pdfViewer)
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0260'], [str(e)])
-
-
-
+            self.log.writeToLog(self.errorCodes['0460'], [str(e)])
 
 
 ###############################################################################
@@ -260,7 +267,7 @@ class Project (object) :
         if self.tools.isConfSection(self.projConfig['Groups'], gid) :
 
             # Now create the group and pass the params on
-            self.createGroup(gid).render(mode, cidList, force)
+            self.createGroup(gid).render(gid, mode, cidList, force)
             return True
 
 
