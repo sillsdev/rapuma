@@ -753,8 +753,17 @@ class Paratext (object) :
         figDict['useThisCaption'] = True
         figDict['useThisCaptionRef'] = True
         figDict['bid'] = cid.lower()
-        figDict['chapter'] = re.sub(ur'([0-9]+)[.:][0-9]+', ur'\1', figDict['reference'].upper())
-        figDict['verse'] = re.sub(ur'[0-9]+[.:]([0-9]+)', ur'\1', figDict['reference'].upper())
+        c = re.search(ur'([0-9]+)[.:][0-9]+', figDict['reference'].upper())
+        if c is None :
+            figDict['chapter'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['chapter'] = c.group(1)
+
+        v = re.search(ur'[0-9]+[.:]([0-9]+)', figDict['reference'].upper())
+        if v is None :
+            figDict['verse'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['verse'] = v.group(1)
         figDict['scale'] = '1.0'
         if figDict['width'] == 'col' :
             figDict['position'] = 'tl'
