@@ -177,76 +177,76 @@ class Project (object) :
 ######################## Error Code Block Series = 400 ########################
 ###############################################################################
 
-    def bind (self) :
-        '''Bind all groups in the order they are indicated in.'''
+#    def bind (self) :
+#        '''Bind all groups in the order they are indicated in.'''
 
-        # Get the order of the groups to be bound.
-        bindOrder = {}
-        for grp in self.projConfig['Groups'].keys() :
-            if not self.tools.testForSetting(self.projConfig['Groups'][grp], 'bindingOrder') :
-                self.projConfig['Groups'][grp]['bindingOrder'] = 0
-                self.tools.writeConfFile(self.projConfig)
-            if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
-                bindOrder[self.projConfig['Groups'][grp]['bindingOrder']] = grp
-        bindGrpNum = len(bindOrder)
-        # Need not keep going if nothing was found
-        if bindGrpNum == 0 :
-            self.log.writeToLog(self.errorCodes['0410'])
-            return False
+#        # Get the order of the groups to be bound.
+#        bindOrder = {}
+#        for grp in self.projConfig['Groups'].keys() :
+#            if not self.tools.testForSetting(self.projConfig['Groups'][grp], 'bindingOrder') :
+#                self.projConfig['Groups'][grp]['bindingOrder'] = 0
+#                self.tools.writeConfFile(self.projConfig)
+#            if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
+#                bindOrder[self.projConfig['Groups'][grp]['bindingOrder']] = grp
+#        bindGrpNum = len(bindOrder)
+#        # Need not keep going if nothing was found
+#        if bindGrpNum == 0 :
+#            self.log.writeToLog(self.errorCodes['0410'])
+#            return False
 
-        # Rerender the groups by bindingOrder value
-        keyList = bindOrder.keys()
-        keyList.sort()
-        for key in keyList :
-            # Do a force render in the bind mode
-            self.renderGroup(bindOrder[key], 'bind', '', True)
-#            print bindOrder[key]
-        
-        self.tools.dieNow()
+#        # Rerender the groups by bindingOrder value
+#        keyList = bindOrder.keys()
+#        keyList.sort()
+#        for key in keyList :
+#            # Do a force render in the bind mode
+#            self.renderGroup(bindOrder[key], 'bind', '', True)
+##            print bindOrder[key]
+#        
+#        self.tools.dieNow()
 
-        # Build the final bind command
-        confCommand = ['pdftk']
-        # Append each of the input files
-        for key in bindOrder :
-            gidPdf = os.path.join(self.local.projComponentsFolder, bindOrder[key], bindOrder[key] + '.pdf')
-            confCommand.append(gidPdf)
-        # Now the rest of the commands and output file
-        confCommand.append('cat')
-        confCommand.append('output')
-        output = os.path.join(self.local.projDeliverablesFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
-        confCommand.append(output)
-        # Run the binding command
-        rCode = subprocess.call(confCommand)
-        # Analyse the return code
-        if rCode == int(0) :
-            self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(output)])
-        else :
-            self.log.writeToLog(self.errorCodes['0435'], [self.tools.fName(output)])
+#        # Build the final bind command
+#        confCommand = ['pdftk']
+#        # Append each of the input files
+#        for key in bindOrder :
+#            gidPdf = os.path.join(self.local.projComponentsFolder, bindOrder[key], bindOrder[key] + '.pdf')
+#            confCommand.append(gidPdf)
+#        # Now the rest of the commands and output file
+#        confCommand.append('cat')
+#        confCommand.append('output')
+#        output = os.path.join(self.local.projDeliverablesFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
+#        confCommand.append(output)
+#        # Run the binding command
+#        rCode = subprocess.call(confCommand)
+#        # Analyse the return code
+#        if rCode == int(0) :
+#            self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(output)])
+#        else :
+#            self.log.writeToLog(self.errorCodes['0435'], [self.tools.fName(output)])
 
-        # Collect the page count and record in group
-        newPages = self.tools.getPdfPages(output)
-        # FIXME: For now, we need to hard-code the manager name
-        manager = 'usfm_Xetex'
-        if self.tools.testForSetting(self.projConfig['Managers'][manager], 'totalBoundPages') :
-            oldPages = int(self.projConfig['Managers'][manager]['totalBoundPages'])
-            if oldPages != newPages or oldPages == 'None' :
-                self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
-                self.tools.writeConfFile(self.projConfig)
-                self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
-        else :
-            self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
-            self.tools.writeConfFile(self.projConfig)
-            self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
+#        # Collect the page count and record in group
+#        newPages = self.tools.getPdfPages(output)
+#        # FIXME: For now, we need to hard-code the manager name
+#        manager = 'usfm_Xetex'
+#        if self.tools.testForSetting(self.projConfig['Managers'][manager], 'totalBoundPages') :
+#            oldPages = int(self.projConfig['Managers'][manager]['totalBoundPages'])
+#            if oldPages != newPages or oldPages == 'None' :
+#                self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
+#                self.tools.writeConfFile(self.projConfig)
+#                self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
+#        else :
+#            self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
+#            self.tools.writeConfFile(self.projConfig)
+#            self.log.writeToLog(self.errorCodes['0440'], [str(newPages),self.tools.fName(output)])
 
-        # Build the viewer command
-        pdfViewer = self.projConfig['Managers'][manager]['pdfViewerCommand']
-        pdfViewer.append(output)
-        # Run the viewer and collect the return code for analysis
-        try :
-            subprocess.Popen(pdfViewer)
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0460'], [str(e)])
+#        # Build the viewer command
+#        pdfViewer = self.projConfig['Managers'][manager]['pdfViewerCommand']
+#        pdfViewer.append(output)
+#        # Run the viewer and collect the return code for analysis
+#        try :
+#            subprocess.Popen(pdfViewer)
+#        except Exception as e :
+#            # If we don't succeed, we should probably quite here
+#            self.log.writeToLog(self.errorCodes['0460'], [str(e)])
 
 
 ###############################################################################

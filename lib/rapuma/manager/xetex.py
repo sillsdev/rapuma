@@ -856,7 +856,7 @@ class Xetex (Manager) :
                     self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
 
             # Collect the page count and record in group
-            newPages = Binding(self.pid).getPdfPages(self.gidPdfFile)
+            newPages = self.tools.getPdfPages(self.gidPdfFile)
             if self.tools.testForSetting(self.projConfig['Groups'][gid], 'totalPages') :
                 oldPages = int(self.projConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :

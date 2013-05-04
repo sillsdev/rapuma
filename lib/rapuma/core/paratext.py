@@ -764,13 +764,25 @@ class Paratext (object) :
             figDict['verse'] = 0  # Or however you want to handle "pattern not found"
         else:
             figDict['verse'] = v.group(1)
+
+
+# FIXME: with scale, width, position and location, we want to do a lookup and
+# and see if there already is a setting. If there is, we want to keep it.
+
         figDict['scale'] = '1.0'
+
         if figDict['width'] == 'col' :
             figDict['position'] = 'tl'
         else :
             figDict['position'] = 't'
+
         if not figDict['location'] :
             figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
+
+
+
+
+
         if not self.tools.testForSetting(illustrationConfig, gid) :
             self.tools.buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file

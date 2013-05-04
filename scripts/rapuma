@@ -19,8 +19,10 @@
 # Firstly, import all the standard Python modules we need for this process and
 # set the base path
 
-import os, sys
+import os, sys, timeit
 from functools import partial
+
+startTime = timeit.default_timer()
 
 # Set the Rapuma base program paths
 rapumaHome = os.environ.get('RAPUMA_BASE')
@@ -259,8 +261,7 @@ def userArguments (args) :
         elif args.manage == 'update-helper-scripts' :
             Commander(pid).updateScripts()
         elif args.manage == 'bind-book' :
-            aProject = initProject(args.project_id)
-            aProject.bind()
+            Binding(pid).bind()
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
@@ -419,7 +420,7 @@ def userArguments (args) :
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
         if args.manage == 'add' :
-            PageBackground(args.project_id).addBackground(args.background_type, args.force)
+            PageBackground(args.project_id).checkForBackground(args.background_type + 'Watermark', args.background_type, args.force)
         elif args.manage == 'remove' :
             PageBackground(args.project_id).removeBackground(args.background_type)
         elif args.background_type == 'none' :
@@ -490,7 +491,8 @@ hyphenCommands          = ['add', 'remove', 'update']
 preprocessCommands      = ['add', 'remove']
 illustrationCommands    = ['add', 'remove']
 # Other
-backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+#backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+backgrounds             = ['draft', 'proof', 'final', 'lines', 'box']
 backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']
 postprocessCommands     = ['add', 'remove', 'process']
@@ -587,7 +589,8 @@ userArguments(parser.parse_args())
 ###############################################################################
 
 # In case there are any Canadians using this, politely say good bye
-tools.terminal('\n\t\tThank you, please come again!\n')
+tools.terminal('\n\t\tTotal process time: ' + str(round(timeit.default_timer() - startTime, 2)) + ' (seconds)\n')
+tools.terminal('\t\tThank you, please come again!\n')
 
 
 

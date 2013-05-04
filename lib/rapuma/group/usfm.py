@@ -63,7 +63,7 @@ class Usfm (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('component', 'text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer, 'binding')
+        self.usfmManagers = ('component', 'text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -76,7 +76,7 @@ class Usfm (Group) :
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         self.style                  = self.project.managers[self.cType + '_Style']
-        self.bind                   = self.project.managers[self.cType + '_Binding']
+#        self.bind                   = self.project.managers[self.cType + '_Binding']
 
         # File names
         self.adjustmentConfFile     = project.local.adjustmentConfFile

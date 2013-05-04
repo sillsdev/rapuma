@@ -89,13 +89,22 @@ class PageBackground (object) :
 ###############################################################################
 
 
-    def checkForBackground (self, bg, mode) :
+    def removeBackground (self, bg) :
+        '''Remove backgound components from the project and turn off settings.'''
+
+        projBgFile      = os.path.join(self.projIllustrationsFolder, bg + 'Watermark.pdf')
+        if os.path.exists(projBgFile) :
+            os.remove(projBgFile)
+
+# FIXME: Need to be able to remove the backgound from the settings
+
+
+    def checkForBackground (self, bg, mode, force = False) :
         '''Check to see if a required backgound file is present. If not,
         make it so.'''
 
-        bgFileName      = bg + '.pdf'
-        projBgFile      = os.path.join(self.projIllustrationsFolder, bgFileName)
-        if not os.path.exists(projBgFile) :
+        projBgFile      = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
+        if not os.path.exists(projBgFile) or force :
             if bg.find('lines') >= 0 :
                 self.installLinesFile(projBgFile)
             elif bg.find('box') >= 0 :
