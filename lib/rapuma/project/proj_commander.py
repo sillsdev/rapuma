@@ -152,6 +152,8 @@ class Commander (object) :
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + '       --manage bind-book '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
+                'backgroundOff' : ['Remove a backgound from a project',             'rapuma background '    + pid + ' $1    --manage remove --force '],
+                'backgroundOn'  : ['Create a backgound for a project',              'rapuma background '    + pid + ' $1    --manage add --force ']
             }
 
 

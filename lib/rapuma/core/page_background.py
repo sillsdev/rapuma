@@ -53,7 +53,7 @@ class PageBackground (object) :
             '0230' : ['MSG', 'Set [<<1>>] background to False.'],
             '0240' : ['MSG', 'No change to [<<1>>] background.'],
             '0250' : ['MSG', 'All backgrounds have been turned off.'],
-            '0280' : ['LOG', 'Installed background file [<<1>>] into the project.'],
+            '0280' : ['MSG', 'Installed background file [<<1>>] into the project.'],
             '0290' : ['ERR', 'Failed to install background file [<<1>>]. It ended with this error: [<<2>>]'],
         }
 
