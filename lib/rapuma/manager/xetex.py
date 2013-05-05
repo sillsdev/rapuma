@@ -140,7 +140,7 @@ class Xetex (Manager) :
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
 #        self.projWatermarkFile      = self.pg_back.projWatermarkFile
 #        self.linesFile              = self.pg_back.projLinesFile
-#        self.boxBoarderFile         = self.pg_back.boxBoarderFile
+#        self.boxBorderFile         = self.pg_back.boxBorderFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)

@@ -491,7 +491,7 @@ hyphenCommands          = ['add', 'remove', 'update']
 preprocessCommands      = ['add', 'remove']
 illustrationCommands    = ['add', 'remove']
 # Other
-#backgrounds             = ['boarder', 'cropmarks', 'lines', 'none', 'watermark']
+#backgrounds             = ['border', 'cropmarks', 'lines', 'none', 'watermark']
 backgrounds             = ['draft', 'proof', 'final', 'lines', 'box']
 backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']

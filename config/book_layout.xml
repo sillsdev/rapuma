@@ -877,7 +877,7 @@ Todo:
         </setting>
         <setting>
             <name>USFM TeX Page Border Scale</name>
-            <description>Enter in the scale factor for the page boarder and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
+            <description>Enter in the scale factor for the page border and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
             <key>pageBorderScale</key>
             <type>integer</type>
             <value></value>

@@ -205,7 +205,7 @@ class Usfm (Group) :
         and/or creating any dependents it needs to render properly.'''
 
         # Get some relevant settings
-        # FIXME: Note page boarder has not really been implemented yet.
+        # FIXME: Note page border has not really been implemented yet.
         # It is different from backgound management
         useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][gid]['useIllustrations'])
         useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][gid]['useHyphenation'])

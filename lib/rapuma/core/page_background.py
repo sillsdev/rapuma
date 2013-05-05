@@ -54,7 +54,7 @@ class PageBackground (object) :
             '0240' : ['MSG', 'No change to [<<1>>] background.'],
             '0250' : ['MSG', 'All backgrounds have been turned off.'],
             '0280' : ['MSG', 'Installed background file [<<1>>] into the project.'],
-            '0290' : ['ERR', 'Failed to install background file [<<1>>]. It ended with this error: [<<2>>]'],
+            '0290' : ['ERR', 'Failed to install background file [<<1>>]. Error: [<<2>>]'],
         }
 
 
@@ -106,14 +106,16 @@ class PageBackground (object) :
         projBgFile      = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
         if not os.path.exists(projBgFile) or force :
             if bg.find('lines') >= 0 :
-                self.installLinesFile(projBgFile)
+                if self.createLinesFile(projBgFile) :
+                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(projBgFile)])
             elif bg.find('box') >= 0 :
-                self.installBoxBoarderFile(projBgFile)
+                if self.createBorderFile(projBgFile) :
+                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(projBgFile)])
             else :
-                self.installWatermarkFile(projBgFile, mode)
+                self.createWatermarkFile(projBgFile, mode)
 
 
-    def installWatermarkFile (self, target, mode) :
+    def createWatermarkFile (self, target, mode) :
         '''Install a default Rapuma watermark file into the project.'''
 
         # FIXME: A custom watermark creation function is needed here, load default for now
@@ -127,30 +129,53 @@ class PageBackground (object) :
             self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
-    def installBoxBoarderFile (self, target) :
-        '''Install a background lines file into the project.'''
+    def createBorderFile (self, bgLinesFile) :
+        '''Create a border backgound file used for proof reading.'''
 
-        # FIXME: A custom box watermark creation function is needed here, load default for now
-        rpmDefBoxWatermarkFile = os.path.join(self.rpmIllustrationsFolder, 'box_view-210x145.pdf')
+        # Set our file names
+        source = os.path.join(self.rpmIllustrationsFolder, 'border.svg')
+        output = os.path.join(self.projIllustrationsFolder,  'pageborder.svg')
+        final_output = bgLinesFile
 
-        try :
-            shutil.copy(rpmDefBoxWatermarkFile, target)
-            self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
+        # input and calculation
+        # get the values for page dimensions from Rapuma book_layout.conf 
+        pageHeight          = int(self.layoutConfig['PageLayout']['pageHeight'])
+        pageWidth           = int(self.layoutConfig['PageLayout']['pageWidth'])
+
+        # The page size is defined in [mm] but is entered in pixels [px] 
+        # The conversion factor for [px] is 90/25.4 
+        # paper height [px]
+        paperHeight = round(pageHeight*90/25.4, 2)
+        # paper width [px]
+        paperWidth = round(pageWidth*90/25.4, 2)
+
+        # Read in the source file
+        contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
+
+        # Make the changes
+
+        # 01 enter paper dimensions
+        # paper height [px]
+        # SearchText: @pH
+        # ReplaceText: variable paperHeight
+        contents = re.sub(ur'@pH', ur'%r' % paperHeight, contents)
+
+        # 02 paper width [px]
+        # SearchText: @pW
+        # ReplaceText: variable paperWidth
+        contents = re.sub(ur'@pW', ur'%r' % paperWidth, contents)
+
+        # Write out a temp file so we can do some checks
+        codecs.open(output, "wt", encoding="utf_8_sig").write(contents)
+
+        # commands = ['inkscape', output, final_output]
+        commands = ['inkscape', '-f', output, '-A', final_output]
+
+        try:
+            subprocess.call(commands) 
+            return True
         except Exception as e :
-            # If this doesn't work, we should probably quit here
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
-
-
-    def installLinesFile (self, target) :
-        '''Install a background lines file into the project.'''
-
-        try :
-            if self.createLinesFile(target) :
-                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
-                return True
-        except Exception as e :
-            # If this doesn't work, we should probably quit here
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(final_output),str(e)])
 
 
     def createLinesFile (self, bgLinesFile) :
@@ -177,12 +202,9 @@ class PageBackground (object) :
         #bottomMarginFactor  = int(float(self.layoutConfig['Margins']['bottomMarginFactor']))
         bottomMarginFactor  = float(self.layoutConfig['Margins']['bottomMarginFactor'])
 
-# FIXME: If the fontSizeUnit is less than 1 this will fail and cause the script to hang
-# SOLUTION: 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
         # causing the script to hang. Changing the values back to floats solves the problem.
-        
 
         # The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
         # The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
@@ -198,22 +220,22 @@ class PageBackground (object) :
         # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
         # [px] measurements in Inkscape
         baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
-        print 'Space between lines: ', baselineskip, 'px'
+        self.tools.terminal('Space between lines: ', baselineskip, 'px')
 
         # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
         # converted to pixels [px]
         topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
-        print 'topMargin: ', topMargin, 'px'
+        self.tools.terminal('topMargin: ', topMargin, 'px')
 
         # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
         # based on pixel [px] measurements in Inkscape 
         topskip = round((1.25 * 12 * fontSizeUnit),3)
         #topskip = round((0.8 * 12 * fontSizeUnit),3)
-        print 'topskipcalc: ', topskip
+        self.tools.terminal('topskipcalc: ', topskip)
 
         # The firstBaseLine is topMargin minus topskip in [px] 
         firstBaseLine = topMargin - topskip
-        print 'firstBaseLine: ', firstBaseLine
+        self.tools.terminal('firstBaseLine: ', firstBaseLine)
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
         # gridlines. 
@@ -225,7 +247,6 @@ class PageBackground (object) :
 
         # Read in the source file
         contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
-
 
         # Make the changes
 
@@ -285,9 +306,8 @@ class PageBackground (object) :
 
         try:
             subprocess.call(commands) 
+            return True
         except Exception as e :
-            print 'Error found: ' + str(e)
-            
-        return True
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(final_output),str(e)])
 
 
