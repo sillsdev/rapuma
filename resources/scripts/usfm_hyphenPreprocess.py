@@ -24,6 +24,8 @@ contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
 
 # Do stuff here
 
+tools.terminal('\nThe hyphenation preprocess script has not been modified yet. It is in its defaul form. Nothing has been done to the component data.\n')
+
 # Write out a temp file so we can do some checks
 codecs.open(tempFile, "wt", encoding="utf_8_sig").write(contents)
 

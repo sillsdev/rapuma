@@ -67,7 +67,7 @@ class Usfm (Group) :
 
         # Init the general managers
         for mType in self.usfmManagers :
-            self.project.createManager(self.cType, mType)
+            self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
         self.font                   = self.project.managers[self.cType + '_Font']

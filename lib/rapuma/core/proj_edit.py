@@ -113,7 +113,7 @@ class ProjEdit (object) :
                 self.log.writeToLog('EDIT-010', [cid])
                 self.tools.dieNow()
 
-            self.createManager(cType, 'text')
+            self.createManager('text')
             compWorkText = self.groups[gid].getCidPath(cid)
             if os.path.isfile(compWorkText) :
                 editDocs.append(compWorkText)

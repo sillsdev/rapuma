@@ -174,7 +174,7 @@ class Commander (object) :
                 'draft'         : ['Create ' + gid + ' group PDF draft file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-draft --force '], 
                 'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-proof --force '], 
                 'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage render-final --force '], 
-                'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update-group '], 
+                'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group ' + pid + ' ' + gid + ' --cid_list \"$1\" --manage update-group $2 '], 
             }
 
 

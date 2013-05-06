@@ -69,7 +69,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130505'
+systemVersion   = '0.1.20130506'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -125,7 +125,7 @@ def isTemplate (tid) :
         return False
 
 
-def initProject (pid, gid = None) :
+def initProject (pid, gid) :
     '''Initialize an existing project according to the project ID given.'''
 
     local       = ProjLocal(pid)
@@ -273,14 +273,7 @@ def userArguments (args) :
             else :
                 cid_list = args.cid_list
         if args.hyphenation :
-            aProject.createManager(args.component_type, 'hyphenation')
-            manager = args.component_type + '_Hyphenation'
-            if args.hyphenation == 'add' :
-                aProject.managers[manager].turnOnHyphenation(args.group_id)
-            elif args.hyphenation == 'remove' :
-                aProject.managers[manager].turnOffHyphenation(args.group_id)
-            elif args.hyphenation == 'update' :
-                aProject.managers[manager].updateHyphenation(args.force)
+            aProject.manageHyphenation(args.hyphenation)
         elif args.preprocess :
             if args.preprocess == 'add' :
                 ps = ProjSetup(args.project_id)
@@ -367,7 +360,7 @@ def userArguments (args) :
     # Font level commands
     elif sys.argv[1].lower() == 'font' :
         aProject = initProject(args.project_id, args.group_id)
-        aProject.createManager(args.component_type, 'font')
+        aProject.createManager('font')
         font = aProject.managers[args.component_type + '_Font'].checkForSubFont(args.font_id)
         manager = args.component_type + '_Font'
         if not args.component_type :

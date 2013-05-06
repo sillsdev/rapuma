@@ -68,7 +68,7 @@ class ConfigTools (object) :
         self.Ctype                  = self.cType.capitalize()
         # Load the managers we will need
         if self.cType + '_Layout' not in self.managers :
-            self.project.createManager(self.cType, 'layout')
+            self.project.createManager('layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
 
 

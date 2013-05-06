@@ -111,6 +111,8 @@ class Compare (object) :
         for d in diff :
             if d[:1] == '+' or d[:1] == '-' :
                 return True
+        # FIXME: Is returning False better than None?
+        return False
 
 
     def compare (self, new, old) :

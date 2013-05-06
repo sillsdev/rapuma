@@ -56,7 +56,7 @@ class Hyphenation (Manager) :
         # Necessary config objects
         self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
-            self.project.createManager(self.cType, 'layout')
+            self.project.createManager('layout')
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
@@ -132,41 +132,45 @@ class Hyphenation (Manager) :
         Compare(self.project.projectIDCode).compare(self.ptHyphFile, self.ptHyphBakFile)
 
 
-    def turnOnHyphenation (self, gid) :
+    def turnOnHyphenation (self) :
         '''Turn on hyphenation to a project for a specified component type.'''
 
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
-            self.projConfig['Groups'][gid]['useHyphenation'] = True
+            self.projConfig['Groups'][self.gid]['useHyphenation'] = True
             self.tools.writeConfFile(self.projConfig)
-            self.project.log.writeToLog(self.errorCodes['0250'], [gid])
+            self.project.log.writeToLog(self.errorCodes['0250'], [self.gid])
         else :
-            self.project.log.writeToLog(self.errorCodes['0255'], [gid])
+            self.project.log.writeToLog(self.errorCodes['0255'], [self.gid])
 
 
-    def turnOffHyphenation (self, gid) :
+    def turnOffHyphenation (self) :
         '''Turn off hyphenation from a project for a specified component type.
         No removal of files will occure, only the useHyphenation will be set 
         to false.'''
 
         # Make sure we turn it on if it isn't already
         if self.useHyphenation :
-            self.projConfig['Groups'][gid]['useHyphenation'] = False
+            self.projConfig['Groups'][self.gid]['useHyphenation'] = False
             self.tools.writeConfFile(self.projConfig)
-            self.project.log.writeToLog(self.errorCodes['0260'], [gid])
+            self.project.log.writeToLog(self.errorCodes['0260'], [self.gid])
         else :
-            self.project.log.writeToLog(self.errorCodes['0265'], [gid])
+            self.project.log.writeToLog(self.errorCodes['0265'], [self.gid])
 
 
     def updateHyphenation (self, force = False) :
         '''Update critical hyphenation control files for a specified component type.'''
+
+        print 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', self.ptHyphFile
 
         # Clean out the previous version of the component hyphenation file
         if os.path.isfile(self.compHyphFile) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
-            self.paratext.preprocessSource(self.ptHyphFile, self.preProcessFile, self.rapumaPreProcessFile)
+            self.paratext.preprocessSource(self.gid, self.ptHyphFile, self.preProcessFile, self.rapumaPreProcessFile)
+
+
         # Create a new version
         self.harvestSource(force)
         self.makeHyphenatedWords()

@@ -220,22 +220,22 @@ class PageBackground (object) :
         # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
         # [px] measurements in Inkscape
         baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
-        self.tools.terminal('Space between lines: ', baselineskip, 'px')
+        self.tools.terminal('Space between lines: ' + str(baselineskip) + ' px')
 
         # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
         # converted to pixels [px]
         topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
-        self.tools.terminal('topMargin: ', topMargin, 'px')
+        self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
 
         # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
         # based on pixel [px] measurements in Inkscape 
         topskip = round((1.25 * 12 * fontSizeUnit),3)
         #topskip = round((0.8 * 12 * fontSizeUnit),3)
-        self.tools.terminal('topskipcalc: ', topskip)
+        self.tools.terminal('topskipcalc: ' + str(topskip))
 
         # The firstBaseLine is topMargin minus topskip in [px] 
         firstBaseLine = topMargin - topskip
-        self.tools.terminal('firstBaseLine: ', firstBaseLine)
+        self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
         # gridlines. 

@@ -25,6 +25,7 @@ from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_log       import ProjLog
+from rapuma.core.proj_compare   import Compare
 
 
 class Paratext (object) :
@@ -480,10 +481,32 @@ class Paratext (object) :
 #   1) mixed syntax is illegal (abc-efg=hij)
 
 
-    def preprocessSource (self, ptHyphFile, preProcessFile, rapumaPreProcessFile) :
+    def preprocessSource (self, gid, ptHyphFile, preProcessFile, rapumaPreProcessFile) :
         '''Run a hyphenation preprocess script on the project's source hyphenation
         file. This happens when the component type import processes are happening.'''
 
+#        import pdb; pdb.set_trace()
+
+        # Get group setting vars
+        csid = self.projConfig['Groups'][gid]['csid']
+#        cType = self.projConfig['Groups'][gid]['cType']
+
+        # File Names
+        ptHyphFileName              = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        sourcePath                  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
+        # Set file names with full path 
+        ptHyphFile                  = os.path.join(sourcePath, ptHyphFileName)
+        ptProjHyphFile              = os.path.join(self.projHyphenationFolder, ptHyphFileName)
+        ptProjHyphBakFile           = os.path.join(self.projHyphenationFolder, ptHyphFileName + '.bak')
+
+        # Bring the ptProjHyphFile into the project if it is not there (probably isn't)
+        if not os.path.isfile(ptProjHyphFile) or self.tools.isOlder(ptProjHyphFile, ptHyphFile) :
+            self.copyPtHyphenWords(gid, ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
+            self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
+            self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(ptHyphFile)])
+        else :
+            self.log.writeToLog(self.errorCodes['0255'], [self.tools.fName(ptHyphFile)])
+        # Check first to see if there is a preprocess script
         if self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
             if not os.path.isfile(preProcessFile) :
                 shutil.copy(rapumaPreProcessFile, preProcessFile)
@@ -499,7 +522,7 @@ class Paratext (object) :
                     return False
 
 
-    def copyPtHyphenWords (self, ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile) :
+    def copyPtHyphenWords (self, gid, ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
         We will also create a backup as well to be used for comparison or fallback.'''
 
@@ -507,13 +530,44 @@ class Paratext (object) :
             # Use a special kind of copy to prevent problems with BOMs
             self.tools.utf8Copy(ptHyphFile, ptProjHyphFile)
             # Once copied, check if any preprocessing is needed
-            self.preprocessSource(ptHyphFile, preProcessFile, rapumaPreProcessFile)
+            self.preprocessSource(gid, ptHyphFile, preProcessFile, rapumaPreProcessFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
 
 
+
+
+
+
+
+
+
     def backupPtHyphenWords (self, ptHyphFile, ptProjHyphBakFile) :
         '''Backup the ParaTExt project hyphenation words list to the project.'''
+
+#        import pdb; pdb.set_trace()
+
+
+
+
+
+
+
+# FIXME: Working here
+
+
+
+
+
+
+
+
+        # Remove any existing backup file if it is different.
+        print Compare(self.pid).isDifferent(ptHyphFile, ptProjHyphBakFile)
+        if Compare(self.pid).isDifferent(ptHyphFile, ptProjHyphBakFile) :
+#        if os.path.exists(ptProjHyphBakFile) :
+            os.remove(ptProjHyphBakFile)
+            print 'took it out!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
         if os.path.isfile(ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
@@ -521,6 +575,13 @@ class Paratext (object) :
             self.tools.makeReadOnly(ptProjHyphBakFile)
         else :
             self.log.writeToLog('USFM-040', [ptHyphFile])
+
+
+
+
+
+
+
 
 
     def processHyphens(self, gid, force = False) :
@@ -558,7 +619,7 @@ class Paratext (object) :
 
         # These calls may be order-sensitive, update local project source
         if not os.path.isfile(ptProjHyphFile) or self.tools.isOlder(ptProjHyphFile, ptHyphFile) :
-            self.copyPtHyphenWords(ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
+            self.copyPtHyphenWords(gid, ptHyphFile, ptProjHyphFile, preProcessFile, rapumaPreProcessFile)
             self.backupPtHyphenWords(ptHyphFile, ptProjHyphBakFile)
             self.log.writeToLog(self.errorCodes['0250'], [self.tools.fName(ptHyphFile)])
         else :
