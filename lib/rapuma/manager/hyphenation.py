@@ -52,7 +52,7 @@ class Hyphenation (Manager) :
         self.manager                = self.cType + '_Hyphenation'
         self.managers               = project.managers
         self.configTools            = ConfigTools(project)
-        self.paratext               = Paratext(project.projectIDCode)
+        self.paratext               = Paratext(project.projectIDCode, self.gid)
         # Necessary config objects
         self.projConfig             = project.projConfig
         if self.cType + '_Layout' not in self.managers :
@@ -161,14 +161,12 @@ class Hyphenation (Manager) :
     def updateHyphenation (self, force = False) :
         '''Update critical hyphenation control files for a specified component type.'''
 
-        print 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', self.ptHyphFile
-
         # Clean out the previous version of the component hyphenation file
         if os.path.isfile(self.compHyphFile) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
-            self.paratext.preprocessSource(self.gid, self.ptHyphFile, self.preProcessFile, self.rapumaPreProcessFile)
+            self.paratext.preprocessSource()
 
 
         # Create a new version
@@ -195,7 +193,7 @@ class Hyphenation (Manager) :
 
         # Process according to sourceEditor (PT is all we can support right now)
         if self.sourceEditor == 'paratext' :
-            self.paratext.processHyphens(self.gid, force)
+            self.paratext.processHyphens(force)
             # Report the word harvest to the log
             rpt = self.paratext.wordTotals()
             for c in rpt :
