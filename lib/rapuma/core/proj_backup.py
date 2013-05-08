@@ -42,13 +42,19 @@ class ProjBackup (object) :
         self.projConfig     = None
         self.log            = None
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
+
             '0000' : ['MSG', 'Placeholder message'],
             '0220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
-            '0240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!']
-        }
+            '0240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!'],
 
+            '0610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
+            '0620' : ['ERR', 'User backup storage path not yet configured!'],
+            '0630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]']
+
+        }
 
 
     def finishInit (self, projHome = None) :
@@ -123,6 +129,9 @@ class ProjBackup (object) :
 ###############################################################################
 ########################## Archive Project Functions ##########################
 ###############################################################################
+####################### Error Code Block Series = 0400 ########################
+###############################################################################
+
 
     def makeExcludeFileList (self) :
         '''Return a list of files that are not necessary to be included in a backup
@@ -313,6 +322,9 @@ class ProjBackup (object) :
 ###############################################################################
 ########################### Backup Project Functions ##########################
 ###############################################################################
+####################### Error Code Block Series = 0600 ########################
+###############################################################################
+
 
     def backupProject (self) :
         '''Backup a project. Send the compressed backup file to the user-specified
@@ -322,25 +334,26 @@ class ProjBackup (object) :
         copy exists, it will overwrite it.'''
 
         if not self.isProject(self.pid) :
-            self.tools.terminal('\nThe ' + self.pid + ' project is not registered. No backup was done.')
-            return False
+            self.log.writeToLog(self.errorCodes['0610'], [self.pid])
 
         # Set some paths and file names
-        backupName = self.pid + '.zip'
-        userBackups = self.tools.resolvePath(self.userConfig['Resources']['backups'])
         backupTarget = ''
-        if os.path.isdir(userBackups) :
-            backupTarget = os.path.join(userBackups, backupName)
+        userBackups = ''
+        backupName = self.pid + '.zip'
+        if self.tools.testForSetting(self.userConfig['Resources'], 'backups') :
+            userBackups = self.tools.resolvePath(self.userConfig['Resources']['backups'])
         else :
-            self.tools.terminal('\nError: User backup storage path not yet configured!\n')
-            self.tools.dieNow()
+            self.log.writeToLog(self.errorCodes['0620'])
+        # Make sure the dir is there
+        if not os.path.isdir(userBackups) :
+            os.makedirs(userBackups)
+        backupTarget = os.path.join(userBackups, backupName)
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
         # Finish here
-        self.tools.terminal('Backup for [' + self.pid + '] created and saved to: ' + backupTarget + '\n')
-        
+        self.log.writeToLog(self.errorCodes['0630'], [self.pid,backupTarget])
         return True
 
 
@@ -392,6 +405,9 @@ class ProjBackup (object) :
 ###############################################################################
 ######################### Template Project Functions ##########################
 ###############################################################################
+####################### Error Code Block Series = 0800 ########################
+###############################################################################
+
 
     def projectToTemplate (self, pid, tid) :
         '''Preserve critical project information in a template. The pid is the project
@@ -493,6 +509,9 @@ class ProjBackup (object) :
 ###############################################################################
 ############################ Cloud Backup Functions ###########################
 ###############################################################################
+####################### Error Code Block Series = 1000 ########################
+###############################################################################
+
 
     def pullFromCloud (self, projHome = None) :
         '''Pull data from cloud storage and merge/replace local data.
