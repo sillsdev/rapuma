@@ -77,7 +77,7 @@ class Hyphenation (Manager) :
         # Set file names with full path 
         self.lccodeTexFile          = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
         self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
-        self.grpHyphExcTexFile      = os.path.join(self.gidFolder, self.grpHyphExcTexFileName)
+        self.grpHyphExcTexFile      = os.path.join(self.projHyphenationFolder, self.grpHyphExcTexFileName)
         self.preProcessFile         = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
         self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.preProcessFileName)
         self.ptHyphFile             = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
@@ -112,15 +112,6 @@ class Hyphenation (Manager) :
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
-
-    def checkGrpHyphExcTexFile (self) :
-        '''If hyphenation is turned off, return False. Otherwise, look for the
-        exsistance of the grpHyphExcTexFile, try to create if it is not there.'''
-
-        # Bail out here if hyphenation isn't even turned on
-        if not self.useHyphenation :
-            return False
-
 
     def compareWithSource (self) :
         '''Compare working hyphenation file with the original copied read-only

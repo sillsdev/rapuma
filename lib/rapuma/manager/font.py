@@ -41,7 +41,7 @@ class Font (Manager) :
 
         # Set values for this manager
         self.tools                  = Tools()
-        self.pt_tools               = Paratext(project.projectIDCode)
+        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.project                = project
         self.cfg                    = cfg
         self.cType                  = cType
@@ -65,10 +65,10 @@ class Font (Manager) :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = self.pt_tools.getSourceEditor(self.gid)
+        self.sourceEditor = self.pt_tools.getSourceEditor()
 
         if not self.ptDefaultFont :
-            ptSet = self.pt_tools.getPTSettings(self.gid)
+            ptSet = self.pt_tools.getPTSettings()
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont

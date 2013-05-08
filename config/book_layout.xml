@@ -682,34 +682,6 @@ Todo:
             <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
             <usfmTex>\pretolerance=[v]</usfmTex>
         </setting>
-        <setting>
-            <name>TeX Inputs Order</name>
-            <description>With some TeX input files it matters greatly what the order is in wich they are inputed. This field specifies this order.</description>
-            <key>inputsOrder</key>
-            <type>list</type>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <value>inputLccodeFile,inputGrpHyphenExceptionsFile</value>
-        </setting>
-        <setting>
-            <name>Input TeX lccode File</name>
-            <description>Insert a setting that will input (connect) the project TeX lccode file to the TeX renderer.</description>
-            <key>inputLccodeFile</key>
-            <type>string</type>
-            <value>[Hyphenation:lccodeFile]</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <usfmTex>\input "[path:projHyphenationFolder][pathSep][v]"</usfmTex>
-            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
-        </setting>
-        <setting>
-            <name>Input TeX Group Hyphen Exceptions File</name>
-            <description>Insert a setting that will input (connect) the project TeX hyphen exceptions file to the TeX renderer.</description>
-            <key>inputGrpHyphenExceptionsFile</key>
-            <type>string</type>
-            <value>[Hyphenation:grpHyphenExceptionsFile]</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <usfmTex>\input "[path:projComponentsFolder][pathSep][self.gid][pathSep][v]"</usfmTex>
-            <note>If a value is not set, there is normally no output. To get around this we put the placeholder for the hyphenExceptionsFile in the value so it gets transfered to the TeX ouput. This may be useful for other settings where the value is not necessary.</note>
-        </setting>
     </section>
     <section>
         <name>Illustrations</name>

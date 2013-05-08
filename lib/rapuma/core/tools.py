@@ -66,9 +66,9 @@ class ToolsPath (object) :
         sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         # Build the file name
         if sourceEditor.lower() == 'paratext' :
-            sName = Paratext(self.pid).formPTName(gid, cid)
+            sName = Paratext(self.pid, gid).formPTName(cid)
         elif sourceEditor.lower() == 'generic' :
-            sName = Paratext(self.pid).formGenericName(gid, cid)
+            sName = Paratext(self.pid, gid).formGenericName(cid)
         else :
             self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
 

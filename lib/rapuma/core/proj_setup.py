@@ -46,14 +46,23 @@ class ProjSetup (object) :
         self.userConfig             = self.user.userConfig
         self.tools                  = Tools()
         self.backup                 = ProjBackup(pid)
-        self.projHome               = None
-        self.projectMediaIDCode     = None
-        self.local                  = None
-        self.projConfig             = None
-        self.log                    = None
-        self.groups                 = {}
-        # Finish the init now if possible
-        self.finishInit()
+        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local                  = ProjLocal(self.pid)
+        self.projConfig             = ProjConfig(self.local).projConfig
+        self.log                    = ProjLog(self.pid)
+        self.paratext               = Paratext(self.pid)
+        self.compare                = Compare(self.pid)
+        self.tools_path             = ToolsPath(self.local, self.projConfig, self.userConfig)
+
+#        self.projHome               = None
+#        self.projectMediaIDCode     = None
+#        self.local                  = None
+#        self.projConfig             = None
+#        self.log                    = None
+#        self.groups                 = {}
+#        # Finish the init now if possible
+#        self.finishInit()
 
 
         self.errorCodes     = {
@@ -182,25 +191,25 @@ class ProjSetup (object) :
 
         }
 
-    def finishInit (self) :
-        '''Some times not all the information is available that is needed
-        but that may not be a problem for some functions. We will atempt to
-        finish the init here but will fail silently, which may not be a good
-        idea in the long run.'''
+#    def finishInit (self) :
+#        '''Some times not all the information is available that is needed
+#        but that may not be a problem for some functions. We will atempt to
+#        finish the init here but will fail silently, which may not be a good
+#        idea in the long run.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        try :
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.pid)
-            self.projConfig         = ProjConfig(self.local).projConfig
-            self.log                = ProjLog(self.pid)
-            self.paratext           = Paratext(self.pid)
-            self.compare            = Compare(self.pid)
-            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
-        except :
-            pass
+#        try :
+#            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+#            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+#            self.local              = ProjLocal(self.pid)
+#            self.projConfig         = ProjConfig(self.local).projConfig
+#            self.log                = ProjLog(self.pid)
+#            self.paratext           = Paratext(self.pid)
+#            self.compare            = Compare(self.pid)
+#            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
+#        except :
+#            pass
 
 #        except Exception as e :
 #            # If we don't succeed, we give a warning in case it is important

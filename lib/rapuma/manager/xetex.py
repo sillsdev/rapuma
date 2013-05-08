@@ -57,7 +57,7 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
-        self.pt_tools               = Paratext(project.projectIDCode)
+        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.pg_back                = PageBackground(project.projectIDCode)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
@@ -118,7 +118,6 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-#        self.deliverablePdfFile     = os.path.join(self.projDeliverablesFolder, self.gidPdfFileName)
         self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
         self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
@@ -138,9 +137,6 @@ class Xetex (Manager) :
         self.compHyphFile           = self.hyphenation.compHyphFile
         self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
-#        self.projWatermarkFile      = self.pg_back.projWatermarkFile
-#        self.linesFile              = self.pg_back.projLinesFile
-#        self.boxBorderFile         = self.pg_back.boxBorderFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -374,7 +370,7 @@ class Xetex (Manager) :
             lccodeObject.write(self.tools.makeFileHeader(self.tools.fName(self.lccodeTexFile), description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
-            for c in self.pt_tools.getNWFChars(self.gid) :
+            for c in self.pt_tools.getNWFChars() :
                 uv = self.tools.rtnUnicodeValue(c)
                 # We handel these chars special in this context
                 if not uv in ['2011', '002D'] :
@@ -699,7 +695,8 @@ class Xetex (Manager) :
                 gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
             if self.makeGrpExtTexFile() :
                 gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
-            if self.hyphenation.checkGrpHyphExcTexFile() :
+            if self.useHyphenation :
+                gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
             if self.style.checkDefaultStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')

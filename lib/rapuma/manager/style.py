@@ -38,7 +38,7 @@ class Style (Manager) :
 
         # Set values for this manager
         self.tools                  = Tools()
-        self.pt_tools               = Paratext(project.projectIDCode)
+        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.setup                  = ProjSetup(project.projectIDCode)
         self.project                = project
         self.local                  = project.local

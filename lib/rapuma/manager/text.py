@@ -41,7 +41,7 @@ class Text (Manager) :
 
         # Set values for this manager
         self.tools                  = Tools()
-        self.pt_tools               = Paratext(project.projectIDCode)
+        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.configTools            = ConfigTools(project)
         self.project                = project
         self.projConfig             = project.projConfig
@@ -54,7 +54,7 @@ class Text (Manager) :
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-        self.sourceEditor           = self.pt_tools.getSourceEditor(self.gid)
+        self.sourceEditor           = self.pt_tools.getSourceEditor()
         self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
