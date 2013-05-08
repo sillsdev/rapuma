@@ -49,18 +49,18 @@ class Paratext (object) :
         self.useHyphenation         = False
         # File Names
         self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        self.preProcessFileName     = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        self.preProcessFileName     = None
         self.ptProjHyphErrFileName  = None
         # Folder paths
-        self.sourcePath             = ''
+        self.sourcePath             = None
         self.projHyphenationFolder  = self.local.projHyphenationFolder
         # Set file names with full path 
         self.ptHyphFile             = None
         self.ptProjHyphErrFile      = None
-        self.preProcessFile         = os.path.join(self.local.projHyphenationFolder, self.preProcessFileName)
+        self.preProcessFile         = None
         self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
         self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
-        self.rapumaPreProcessFile   = os.path.join(self.local.rapumaScriptsFolder, self.preProcessFileName)
+        self.rapumaPreProcessFile   = os.path.join(self.local.rapumaScriptsFolder, 'hyphenPreprocess.py')
         # Some hyphenation handling settings and data that might work
         # better if they were more global
         self.allPtHyphenWords       = set()
@@ -96,12 +96,14 @@ class Paratext (object) :
             self.csid                   = self.projConfig['Groups'][self.gid]['csid']
             # File names
             self.ptProjHyphErrFileName  = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
+            self.preProcessFileName     = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
             # Folder paths
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
             self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
             # Set file names with full path 
             self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
             self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
+            self.preProcessFile         = os.path.join(self.local.projHyphenationFolder, self.preProcessFileName)
         except Exception as e :
             if not self.gid :
 #                import pdb; pdb.set_trace()
@@ -511,12 +513,12 @@ class Paratext (object) :
 #        import pdb; pdb.set_trace()
 
         # Bring the ptProjHyphFile into the project if it is not there (probably isn't)
-        if not os.path.isfile(self.ptProjHyphFile) or self.tools.isOlder(self.ptProjHyphFile, self.ptHyphFile) :
-            self.copyPtHyphenWords()
-            self.backupPtHyphenWords()
-            self.log.writeToLog(self.errorCodes['0450'], [self.tools.fName(self.ptHyphFile)])
-        else :
-            self.log.writeToLog(self.errorCodes['0455'], [self.tools.fName(self.ptHyphFile)])
+#        if not os.path.isfile(self.ptProjHyphFile) or self.tools.isOlder(self.ptProjHyphFile, self.ptHyphFile) :
+#            self.copyPtHyphenWords()
+#            self.backupPtHyphenWords()
+#            self.log.writeToLog(self.errorCodes['0450'], [self.tools.fName(self.ptHyphFile)])
+#        else :
+#            self.log.writeToLog(self.errorCodes['0455'], [self.tools.fName(self.ptHyphFile)])
         # Check first to see if there is a preprocess script
         if self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
             if not os.path.isfile(self.preProcessFile) :
@@ -538,8 +540,8 @@ class Paratext (object) :
         if os.path.isfile(self.ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
             self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphFile)
-            # Once copied, check if any preprocessing is needed
-            self.preprocessSource()
+#            # Once copied, check if any preprocessing is needed
+#            self.preprocessSource()
         else :
             self.log.writeToLog(self.errorCodes['0410'])
 
@@ -550,15 +552,22 @@ class Paratext (object) :
 #        import pdb; pdb.set_trace()
 
         # Remove any existing backup file if it is different.
-        if os.path.exists(self.ptProjHyphBakFile) :
-            if Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
-                os.remove(self.ptProjHyphBakFile)
-                if os.path.isfile(self.ptHyphFile) :
+        if os.path.exists(self.ptHyphFile) :
+        
+            if os.path.exists(self.ptProjHyphBakFile) :
+                print Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile)
+                if Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
+                    if os.path.exists(self.ptProjHyphBakFile) :
+                        os.remove(self.ptProjHyphBakFile)
                     # Use a special kind of copy to prevent problems with BOMs
                     self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
                     self.tools.makeReadOnly(self.ptProjHyphBakFile)
-                else :
-                    self.log.writeToLog(self.errorCodes['0410'])
+            else :
+                # Use a special kind of copy to prevent problems with BOMs
+                self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
+                self.tools.makeReadOnly(self.ptProjHyphBakFile)
+        else :
+            self.log.writeToLog(self.errorCodes['0410'])
 
 
     def installHyphenPreprocess (self) :
@@ -593,6 +602,7 @@ class Paratext (object) :
         if not os.path.isfile(self.ptProjHyphFile) or self.tools.isOlder(self.ptProjHyphFile, self.ptHyphFile) :
             self.copyPtHyphenWords()
             self.backupPtHyphenWords()
+            self.preprocessSource()
             self.log.writeToLog(self.errorCodes['0450'], [self.tools.fName(self.ptHyphFile)])
         else :
             self.log.writeToLog(self.errorCodes['0455'], [self.tools.fName(self.ptHyphFile)])

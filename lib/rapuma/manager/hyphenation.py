@@ -157,7 +157,7 @@ class Hyphenation (Manager) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
-            self.paratext.preprocessSource()
+            self.paratext.processHyphens()
 
 
         # Create a new version

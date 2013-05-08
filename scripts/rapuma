@@ -19,8 +19,8 @@
 # Firstly, import all the standard Python modules we need for this process and
 # set the base path
 
-import os, sys, timeit
-from functools import partial
+import os, sys, timeit, datetime
+from functools          import partial
 
 startTime = timeit.default_timer()
 
@@ -69,7 +69,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130507'
+systemVersion   = '0.1.20130508'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -582,7 +582,8 @@ userArguments(parser.parse_args())
 ###############################################################################
 
 # In case there are any Canadians using this, politely say good bye
-tools.terminal('\n\t\tTotal process time: ' + str(round(timeit.default_timer() - startTime, 2)) + ' (seconds)\n')
+timeTotal = round(timeit.default_timer() - startTime, 2)
+tools.terminal('\n\t\tTotal process time: ' + str(datetime.timedelta(seconds = timeTotal)).split('.')[0] + '\n')
 tools.terminal('\t\tThank you, please come again!\n')
 
 
