@@ -164,6 +164,11 @@ class ProjBackup (object) :
                     elif fileName.find('_set.tex') > 0 :
                         excludeFiles.append(os.path.join(root, fileName))
 
+        # Exclude all PDFs from the Deliverables folder
+        for root, dirs, files in os.walk(self.local.projDeliverablesFolder) :
+            for fileName in files :
+                excludeFiles.append(os.path.join(root, fileName))
+
         return excludeFiles
 
 
