@@ -58,7 +58,7 @@ class ProjEdit (object) :
         functions in this module.'''
 
         # Look for an existing project home path
-        if self.isProject(self.pid) :
+        if self.tools.isProject(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :
             localProjHome   = ''
@@ -72,16 +72,6 @@ class ProjEdit (object) :
         if self.projHome : 
             self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
             self.projConfig = ProjConfig(self.local).projConfig
-
-
-    def isProject (self, pid) :
-        '''Simple test to see if a project is registered in the Rapuma config.'''
-
-        try :
-            projHome = self.userConfig['Projects'][pid]['projectPath']
-            return True
-        except :
-            return False
 
 
 ###############################################################################

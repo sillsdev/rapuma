@@ -61,6 +61,7 @@ from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
 from rapuma.project.proj_commander  import Commander
 from rapuma.core.tools              import Tools
+from rapuma.core.tools              import ToolsProject
 
 # Instantiate User config class
 uc              = UserConfig()
@@ -99,17 +100,6 @@ def hasValidSourcePath (gid, csid) :
     try :
         path = uc.userConfig['Projects'][self.projectIDCode][csid + '_sourcePath']
         return os.path.isdir(tools.resolvePath(path))
-    except :
-        return False
-
-
-def isProject (pid) :
-    '''Look up in the user config to see if a project is registered.
-    Return False if it is not.'''
-
-    try :
-        if pid in uc.userConfig['Projects'].keys() :
-            return True
     except :
         return False
 
@@ -193,9 +183,10 @@ def userArguments (args) :
             uc.setSystemSettings('userName', args.user_name)
         elif args.resources :
             uc.setSystemSettings('resources', args.resources)
-    # Test for valid project ID
+    # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
-        isProject(args.project_id)
+        if not ToolsProject(args.project_id).isProject() :
+            sys.exit('\nERROR: Project ID is not valid. Process halting.\n')
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -228,7 +219,7 @@ def userArguments (args) :
         elif args.manage == 'restore-archive' :
             ProjBackup(pid).restoreArchive(targetPath, sourcePath)
         elif args.manage == 'restore-backup' :
-            if isProject(pid) :
+            if ToolsProject(pid).isProject() :
                 ProjBackup(pid).restoreBackup()
             else :
                 if args.target_path :
@@ -236,7 +227,7 @@ def userArguments (args) :
                 else :
                     sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
         elif args.manage == 'restore-cloud' :
-            if isProject(pid) :
+            if ToolsProject(pid).isProject() :
                 ProjBackup(pid).pullFromCloud()
             else :
                 if args.target_path :
@@ -265,28 +256,16 @@ def userArguments (args) :
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
-        aProject = initProject(args.project_id, args.group_id)
-        cid_list = ''
+        if args.group_id :
+            aProject = initProject(args.project_id, args.group_id)
+            cid_list = ''
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
             else :
                 cid_list = args.cid_list
-        if args.hyphenation :
-            aProject.manageHyphenation(args.hyphenation)
-        elif args.preprocess :
-            if args.preprocess == 'add' :
-                ps = ProjSetup(args.project_id)
-                ps.turnOnOffPreprocess(args.group_id, True)
-                ps.checkForPreprocessScript (args.group_id)
-            elif args.preprocess == 'remove' :
-                ProjSetup(args.project_id).turnOnOffPreprocess(args.group_id, False)
-        elif args.illustrations :
-            if args.illustrations == 'on' :
-                sys.exit('\nERROR: Add illustrations on not completed yet')
-            elif args.illustrations == 'off' :
-                sys.exit('\nERROR: Add illustrations off not completed yet')
-        elif args.manage :
+        # Start processing
+        if args.manage :
             if args.manage == 'add-group' :
                 # To add a group we need to do these checks first
                 if not cid_list :
@@ -341,6 +320,20 @@ def userArguments (args) :
                 ProjSetup(args.project_id).lockUnlock(args.group_id, False)
             elif args.component_type == 'usfm' and args.manage == 'list' :
                 aProject.listAllComponents(args.component_type)
+        elif args.hyphenation :
+            aProject.manageHyphenation(args.hyphenation)
+        elif args.preprocess :
+            if args.preprocess == 'add' :
+                ps = ProjSetup(args.project_id)
+                ps.turnOnOffPreprocess(args.group_id, True)
+                ps.checkForPreprocessScript (args.group_id)
+            elif args.preprocess == 'remove' :
+                ProjSetup(args.project_id).turnOnOffPreprocess(args.group_id, False)
+        elif args.illustrations :
+            if args.illustrations == 'on' :
+                sys.exit('\nERROR: Add illustrations on not completed yet')
+            elif args.illustrations == 'off' :
+                sys.exit('\nERROR: Add illustrations off not completed yet')
         elif args.preprocess :
             aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
 

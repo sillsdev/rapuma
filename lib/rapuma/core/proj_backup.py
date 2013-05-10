@@ -64,7 +64,7 @@ class ProjBackup (object) :
 #        import pdb; pdb.set_trace()
 
         # Look for an existing project home path
-        if self.isProject(self.pid) :
+        if self.tools.isProject(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :
             localProjHome   = ''
@@ -86,16 +86,6 @@ class ProjBackup (object) :
 ###############################################################################
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
-
-
-    def isProject (self, pid) :
-        '''Simple test to see if a project is registered in the Rapuma config.'''
-
-        try :
-            projHome = self.userConfig['Projects'][pid]['projectPath']
-            return True
-        except :
-            return False
 
 
     def registerProject (self, pid) :
@@ -333,7 +323,7 @@ class ProjBackup (object) :
         backup so it will only keep one copy in any given location. If another
         copy exists, it will overwrite it.'''
 
-        if not self.isProject(self.pid) :
+        if not self.tools.isProject(self.pid) :
             self.log.writeToLog(self.errorCodes['0610'], [self.pid])
 
         # Set some paths and file names

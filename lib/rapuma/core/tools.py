@@ -24,10 +24,45 @@ from configobj          import ConfigObj, Section
 
 
 ###############################################################################
-############################ Begin Normal Tools Class #########################
+########################### Begin Special Tools Class #########################
 ###############################################################################
 
+class ToolsProject (object) :
+    '''This is a special set of shared project tools.'''
+
+    def __init__(self, pid = None, gid = None) :
+        '''Do the primary initialization for this manager.'''
+
+        self.pid                    = pid
+        self.gid                    = gid
+        self.tools                  = Tools()
+        try :
+            self.user               = UserConfig()
+            self.userConfig         = self.user.userConfig
+            self.local              = ProjLocal(self.pid)
+            self.projConfig         = ProjConfig(self.local).projConfig
+        except :
+            pass
+
+###############################################################################
+############################### Project routines ##############################
+###############################################################################
+
+    def isGroup (self) :
+        '''Return True if this gid is found in the project config.'''
+
+        return self.tools.isConfSection(self.projConfig['Groups'], self.gid)
+
+
+    def isProject (self) :
+        '''Return True if this pid is found in the rapuma config.'''
+
+        return self.tools.isConfSection(self.userConfig['Projects'], self.pid)
+
+
+
 class ToolsPath (object) :
+    '''This is a special set of shared path tools.'''
 
     def __init__(self, local, projConfig, userConfig) :
         '''Do the primary initialization for this manager.'''
@@ -35,7 +70,11 @@ class ToolsPath (object) :
         self.local                  = local
         self.projConfig             = projConfig
         self.userConfig             = userConfig
-        self.pid                    = projConfig['ProjectInfo']['projectIDCode']
+        self.pid                    = None
+        try :
+            self.pid                    = projConfig['ProjectInfo']['projectIDCode']
+        except :
+            pass
 
 ###############################################################################
 ############################ Functions Begin Here #############################
@@ -377,7 +416,7 @@ class Tools (object) :
 
 
 ###############################################################################
-########################## Config/Dictionary routines #########################
+############################ Text encoding routines ###########################
 ###############################################################################
 
     def decodeText (self, fileName, sourceEncoded) :

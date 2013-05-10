@@ -205,12 +205,6 @@ class Project (object) :
             return True
 
 
-    def isGroup (self, gid) :
-        '''Return True if this gid is found in the project config.'''
-
-        return self.tools.isConfSection(self.projConfig['Groups'], gid)
-
-
     def createGroup (self, gid) :
         '''Create a group object that can be acted on. It is assumed
         this only happens for one group per session. This group
@@ -284,18 +278,5 @@ class Project (object) :
             self.commands[command].run(opts, self, userConfig)
         else :
             self.tools.terminalError('The command: [' + command + '] failed to run with these options: ' + str(opts))
-
-
-    def isProject (self, pid) :
-        '''Look up in the user config to see if a project is registered. This
-        is a duplicate of the function in the main rapuma file.'''
-
-        try :
-            if pid in self.userConfig['Projects'].keys() :
-                pass
-        except :
-            sys.exit('\nERROR: Project ID given is not valid! Process halted.\n')
-
-
 
 

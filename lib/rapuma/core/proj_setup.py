@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, unicodedata, subprocess, shutil, re, tempfile
+import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile
 from configobj                      import ConfigObj
 from importlib                      import import_module
 from functools                      import partial
@@ -41,29 +41,16 @@ class ProjSetup (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.pid                    = pid
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.tools                  = Tools()
-        self.backup                 = ProjBackup(pid)
-        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                  = ProjLocal(self.pid)
-        self.projConfig             = ProjConfig(self.local).projConfig
-        self.log                    = ProjLog(self.pid)
-        self.paratext               = Paratext(self.pid)
-        self.compare                = Compare(self.pid)
-        self.tools_path             = ToolsPath(self.local, self.projConfig, self.userConfig)
-
-#        self.projHome               = None
-#        self.projectMediaIDCode     = None
-#        self.local                  = None
-#        self.projConfig             = None
-#        self.log                    = None
-#        self.groups                 = {}
-#        # Finish the init now if possible
-#        self.finishInit()
-
+        self.pid                    = pid
+        self.projHome               = None
+        self.projectMediaIDCode     = None
+        self.local                  = None
+        self.projConfig             = None
+        self.log                    = None
+        self.groups                 = {}
 
         self.errorCodes     = {
             'GRUP-000' : ['MSG', 'Group processing messages'],
@@ -133,10 +120,7 @@ class ProjSetup (object) :
             'STYL-150' : ['MSG', 'Style file: [<<1>>] is valid.'],
             'STYL-155' : ['ERR', 'Style file: [<<1>>] did NOT pass the validation test.'],
 
-
-
             'TEXT-160' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
-
 
             '0201' : ['ERR', 'Source path given for source ID [<<1>>] group not valid! Use -s (source) to indicate where the source files are for this component source ID.'],
             '0203' : ['ERR', 'Component group source path not valid. Use -s (source) to provide a valid source path.'],
@@ -191,29 +175,30 @@ class ProjSetup (object) :
 
         }
 
-#    def finishInit (self) :
-#        '''Some times not all the information is available that is needed
-#        but that may not be a problem for some functions. We will atempt to
-#        finish the init here but will fail silently, which may not be a good
-#        idea in the long run.'''
+        # Because this function can be called elsewhere in the module we call it here too
+        self.finishInit()
 
-##        import pdb; pdb.set_trace()
+    def finishInit (self) :
+        '''If this is a new project we need to handle these settings special.'''
+        if self.tools.testForSetting(self.userConfig['Projects'], self.pid) :
+            try :
+                self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+                self.backup             = ProjBackup(self.pid)
+                self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+                self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+                self.local              = ProjLocal(self.pid)
+                self.projConfig         = ProjConfig(self.local).projConfig
+                self.log                = ProjLog(self.pid)
+                self.paratext           = Paratext(self.pid)
+                self.compare            = Compare(self.pid)
+                self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
+                return True
+            except Exception as e :
+                self.tools.terminal('proj_setup.finishInit() failed with this error: ' + str(e))
+        else :
+            return False
 
-#        try :
-#            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-#            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-#            self.local              = ProjLocal(self.pid)
-#            self.projConfig         = ProjConfig(self.local).projConfig
-#            self.log                = ProjLog(self.pid)
-#            self.paratext           = Paratext(self.pid)
-#            self.compare            = Compare(self.pid)
-#            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
-#        except :
-#            pass
 
-#        except Exception as e :
-#            # If we don't succeed, we give a warning in case it is important
-#            terminal('Warning: proj_setup.finishInit() failed with: ' + str(e))
 
 
 ###############################################################################

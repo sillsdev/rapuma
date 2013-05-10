@@ -48,7 +48,7 @@ class Paratext (object) :
         self.csid                   = None
         self.useHyphenation         = False
         # File Names
-        self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
+        self.ptHyphFileName         = None
         self.preProcessFileName     = None
         self.ptProjHyphErrFileName  = None
         # Folder paths
@@ -58,8 +58,8 @@ class Paratext (object) :
         self.ptHyphFile             = None
         self.ptProjHyphErrFile      = None
         self.preProcessFile         = None
-        self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
-        self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
+        self.ptProjHyphFile         = None
+        self.ptProjHyphBakFile      = None
         self.rapumaPreProcessFile   = os.path.join(self.local.rapumaScriptsFolder, 'hyphenPreprocess.py')
         # Some hyphenation handling settings and data that might work
         # better if they were more global
@@ -95,6 +95,7 @@ class Paratext (object) :
         try :
             self.csid                   = self.projConfig['Groups'][self.gid]['csid']
             # File names
+            self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
             self.ptProjHyphErrFileName  = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
             self.preProcessFileName     = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
             # Folder paths
@@ -104,6 +105,8 @@ class Paratext (object) :
             self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
             self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
             self.preProcessFile         = os.path.join(self.local.projHyphenationFolder, self.preProcessFileName)
+            self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
+            self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
         except Exception as e :
             if not self.gid :
 #                import pdb; pdb.set_trace()
