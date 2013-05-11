@@ -105,6 +105,8 @@ class Binding (object) :
         be called from outside project and project needs to be reinitialized
         each time a group is rendered from here.'''
 
+#        import pdb; pdb.set_trace()
+
         # Get the order of the groups to be bound.
         bindOrder = {}
         for grp in self.projConfig['Groups'].keys() :

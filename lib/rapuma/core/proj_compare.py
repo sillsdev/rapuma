@@ -105,6 +105,10 @@ class Compare (object) :
     def isDifferent (self, new, old) :
         '''Return True if the contents of the files are different.'''
 
+        # If one file is missing, return True
+        if not os.path.exists(new) or not os.path.exists(old) :
+            return True
+
         # Inside of diffl() open both files with universial line endings then
         # check each line for differences.
         diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())

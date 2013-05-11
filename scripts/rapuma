@@ -183,17 +183,9 @@ def userArguments (args) :
         elif args.resources :
             uc.setSystemSettings('resources', args.resources)
     # Test for valid project ID if this is anything else than a project call
-
-
-
-
     elif sys.argv[1].lower() != 'project' :
         if not tools.isConfSection(uc.userConfig['Projects'], args.project_id) :
             sys.exit('\nERROR: Project ID is not valid. Process halting.\n')
-
-
-
-
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
