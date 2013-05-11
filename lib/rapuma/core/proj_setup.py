@@ -181,20 +181,20 @@ class ProjSetup (object) :
     def finishInit (self) :
         '''If this is a new project we need to handle these settings special.'''
         if self.tools.testForSetting(self.userConfig['Projects'], self.pid) :
-            try :
-                self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-                self.backup             = ProjBackup(self.pid)
-                self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-                self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-                self.local              = ProjLocal(self.pid)
-                self.projConfig         = ProjConfig(self.local).projConfig
-                self.log                = ProjLog(self.pid)
-                self.paratext           = Paratext(self.pid)
-                self.compare            = Compare(self.pid)
-                self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
-                return True
-            except Exception as e :
-                self.tools.terminal('proj_setup.finishInit() failed with this error: ' + str(e))
+#            try :
+            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+            self.backup             = ProjBackup(self.pid)
+            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+            self.local              = ProjLocal(self.pid)
+            self.projConfig         = ProjConfig(self.local).projConfig
+            self.log                = ProjLog(self.pid)
+            self.paratext           = Paratext(self.pid)
+            self.compare            = Compare(self.pid)
+            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
+            return True
+#            except Exception as e :
+#                self.tools.terminal('proj_setup.finishInit() failed with this error: ' + str(e))
         else :
             return False
 

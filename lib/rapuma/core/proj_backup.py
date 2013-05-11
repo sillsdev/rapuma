@@ -19,11 +19,11 @@ import codecs, os, zipfile, shutil
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
+from rapuma.core.tools              import Tools
+from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
 
 
 class ProjBackup (object) :
@@ -64,7 +64,7 @@ class ProjBackup (object) :
 #        import pdb; pdb.set_trace()
 
         # Look for an existing project home path
-        if self.tools.isProject(self.pid) :
+        if self.tools.isConfSection(self.userConfig['Projects'], self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :
             localProjHome   = ''
@@ -323,7 +323,8 @@ class ProjBackup (object) :
         backup so it will only keep one copy in any given location. If another
         copy exists, it will overwrite it.'''
 
-        if not self.tools.isProject(self.pid) :
+        # First see if this is even a valid project
+        if not self.tools.isConfSection(self.userConfig['Projects'], self.pid) :
             self.log.writeToLog(self.errorCodes['0610'], [self.pid])
 
         # Set some paths and file names

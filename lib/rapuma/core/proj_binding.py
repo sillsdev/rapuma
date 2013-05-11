@@ -52,7 +52,7 @@ class Binding (object) :
             '0000' : ['MSG', 'Placeholder message'],
             
             '0205' : ['MSG', 'Unassigned message.'],
-            '0210' : ['MSG', 'Created the [<<1>>] binding group.'],
+            '0210' : ['MSG', 'No groups are specified for binding.'],
             '0212' : ['WRN', 'The [<<1>>] binding group already exists. Use force to replace.'],
             '0215' : ['ERR', 'Failed to create the [<<1>>] binding group. Got error: [<<2>>]'],
             '0220' : ['MSG', 'Removed the [<<1>>] binding group.'],
@@ -116,7 +116,7 @@ class Binding (object) :
         bindGrpNum = len(bindOrder)
         # Need not keep going if nothing was found
         if bindGrpNum == 0 :
-            self.log.writeToLog(self.errorCodes['0410'])
+            self.log.writeToLog(self.errorCodes['0210'])
             return False
 
 

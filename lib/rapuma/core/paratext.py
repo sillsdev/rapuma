@@ -46,76 +46,21 @@ class Paratext (object) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.csid                   = None
-        self.useHyphenation         = False
-        # File Names
-        self.ptHyphFileName         = None
-        self.preProcessFileName     = None
-        self.ptProjHyphErrFileName  = None
-        # Folder paths
         self.sourcePath             = None
-        self.projHyphenationFolder  = self.local.projHyphenationFolder
-        # Set file names with full path 
-        self.ptHyphFile             = None
-        self.ptProjHyphErrFile      = None
-        self.preProcessFile         = None
-        self.ptProjHyphFile         = None
-        self.ptProjHyphBakFile      = None
-        self.rapumaPreProcessFile   = os.path.join(self.local.rapumaScriptsFolder, 'hyphenPreprocess.py')
-        # Some hyphenation handling settings and data that might work
-        # better if they were more global
-        self.allPtHyphenWords       = set()
-        self.goodPtHyphenWords      = set()
-        self.badWords               = set()
-        self.hyphenWords            = set()
-        self.approvedWords          = set()
-
-        self.softHyphenWords        = set()
-        self.nonHyphenWords         = set()
 
         self.errorCodes     = {
             '0000' : ['MSG', 'Group processing messages'],
             '0005' : ['LOG', 'Paratext module finishInit() failed. No GID provided'],
-            '0010' : ['ERR', 'Paratext module finishInit() failed with this error: [<<1>>]'],
+            '0010' : ['WRN', 'Paratext module finishInit() failed with this error: [<<1>>]'],
 
-            '0410' : ['ERR', 'ParaTExt source hypenation file not found.'],
-            '0430' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - paratext.checkForBadWords()'],
-            '0450' : ['LOG', 'Updated project file: [<<1>>]'],
-            '0455' : ['LOG', 'Did not update project file: [<<1>>]'],
-            '0460' : ['MSG', 'Force switch was set. Removed hyphenation source files for update proceedure.'],
-            '0480' : ['ERR', 'New default hyphen preprocess script copied into the project. Please edit and rerun this process.'],
-            '0485' : ['ERR', 'Unable to install default hyphen preprocess script. Failed with error: [<<1>>]'],
-            '0490' : ['MSG', 'Ran hyphen preprocess script on project hyphenation source file.'],
-            '0495' : ['ERR', 'Preprocess script failed to run on source file.'],
         }
 
-        # It might be possible that this module was called without a GID
-        # Here we will try to initalize settings that depend on there being
-        # a GID. If it fails, we will try to report back what it was. If it
-        # fails really bad we will stop the process.
+        # A source path is often important, try to get that now
         try :
             self.csid                   = self.projConfig['Groups'][self.gid]['csid']
-            # File names
-            self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-            self.ptProjHyphErrFileName  = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-            self.preProcessFileName     = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
-            # Folder paths
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-            self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-            # Set file names with full path 
-            self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
-            self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
-            self.preProcessFile         = os.path.join(self.local.projHyphenationFolder, self.preProcessFileName)
-            self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
-            self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
-        except Exception as e :
-            if not self.gid :
-#                import pdb; pdb.set_trace()
-                # This can happen freequently, don't stop
-                self.log.writeToLog(self.errorCodes['0005'])
-                pass
-            else :
-                # This is pretty bad, we need to stop
-                self.log.writeToLog(self.errorCodes['0010'], [str(e)])
+        except :
+            pass
 
 
 ###############################################################################
@@ -310,6 +255,8 @@ class Paratext (object) :
     def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
+#        import pdb; pdb.set_trace()
+
         # Return the dictionary
         if os.path.isdir(self.sourcePath) :
             ssfFile = self.findSsfFile()
@@ -323,13 +270,12 @@ class Paratext (object) :
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
 
-    #    import pdb; pdb.set_trace()
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
         if self.tools.testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
             se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
-            if self.findSsfFile(self.gid) :
+            if self.findSsfFile() :
                 se = 'paratext'
 
         return se
@@ -479,283 +425,6 @@ class Paratext (object) :
                 'lao' : ['Laodiceans',                          'laodiceans',                   'C3', '?'] 
 
                }
-
-
-###############################################################################
-################### ParaTExt Hyphenation Handling Functions ###################
-###############################################################################
-####################### Error Code Block Series = 0400 ########################
-###############################################################################
-
-
-# Overview:
-# A ParaTExt hyphenation word list (hyphenatedWords.txt) can potentually contain
-# the following types of words:
-#
-#   1) abc-efg      = abc-efg   / exsiting words that contain a hyphen(s)
-#   2) *abc-efg     = abc-efg   / approved words (by PT user) demarked by '*'
-#   3) abc=efg      = abc-efg   / soft hyphens are added to a word
-#   4) abcefg       = abcefg    / no hyphens found (may need further processing)
-#
-# (* Note that the "*" demarker is added by ParaTExt as a user approves a given
-#   word. This character must be added manually if any processing is done outside
-#   of PT so that PT can "learn" how words should be hyphenated and will make
-#   better decisions in its automated hyphening. In theory, the user should be
-#   teach PT to the point where no outside processing is needed.
-#
-# There may be some problems with words encountered. If any of the following are
-# found they will be reported but it will not stop processing:
-#
-#   1) mixed syntax is illegal (abc-efg=hij)
-
-
-    def preprocessSource (self) :
-        '''Run a hyphenation preprocess script on the project's source hyphenation
-        file. This happens when the component type import processes are happening.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Bring the ptProjHyphFile into the project if it is not there (probably isn't)
-#        if not os.path.isfile(self.ptProjHyphFile) or self.tools.isOlder(self.ptProjHyphFile, self.ptHyphFile) :
-#            self.copyPtHyphenWords()
-#            self.backupPtHyphenWords()
-#            self.log.writeToLog(self.errorCodes['0450'], [self.tools.fName(self.ptHyphFile)])
-#        else :
-#            self.log.writeToLog(self.errorCodes['0455'], [self.tools.fName(self.ptHyphFile)])
-        # Check first to see if there is a preprocess script
-        if self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess']) :
-            if not os.path.isfile(self.preProcessFile) :
-                self.installHyphenPreprocess()
-            else :
-                err = subprocess.call([self.preProcessFile, self.ptProjHyphFile])
-                if err == 0 :
-                    self.log.writeToLog(self.errorCodes['0490'])
-                    return True
-                else :
-                    self.log.writeToLog(self.errorCodes['0495'])
-                    return False
-
-
-    def copyPtHyphenWords (self) :
-        '''Simple copy of the ParaTExt project hyphenation words list to the project.
-        We will also create a backup as well to be used for comparison or fallback.'''
-
-        if os.path.isfile(self.ptHyphFile) :
-            # Use a special kind of copy to prevent problems with BOMs
-            self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphFile)
-#            # Once copied, check if any preprocessing is needed
-#            self.preprocessSource()
-        else :
-            self.log.writeToLog(self.errorCodes['0410'])
-
-
-    def backupPtHyphenWords (self) :
-        '''Backup the ParaTExt project hyphenation words list to the project.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Remove any existing backup file if it is different.
-        if os.path.exists(self.ptHyphFile) :
-        
-            if os.path.exists(self.ptProjHyphBakFile) :
-                print Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile)
-                if Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
-                    if os.path.exists(self.ptProjHyphBakFile) :
-                        os.remove(self.ptProjHyphBakFile)
-                    # Use a special kind of copy to prevent problems with BOMs
-                    self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
-                    self.tools.makeReadOnly(self.ptProjHyphBakFile)
-            else :
-                # Use a special kind of copy to prevent problems with BOMs
-                self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphBakFile)
-                self.tools.makeReadOnly(self.ptProjHyphBakFile)
-        else :
-            self.log.writeToLog(self.errorCodes['0410'])
-
-
-    def installHyphenPreprocess (self) :
-        '''Install the hypenation preprocess script.'''
-
-        try :
-            shutil.copy(self.rapumaPreProcessFile, self.preProcessFile)
-            self.tools.makeExecutable(self.preProcessFile)
-            self.log.writeToLog(self.errorCodes['0480'])
-        except Exception as e :
-            self.log.writeToLog(self.errorCodes['0485'], [str(e)])
-
-
-
-    def processHyphens(self, force = False) :
-        '''This controls the processing of the master PT hyphenation file. The end
-        result are four data sets that are ready to be handed off to the next part
-        of the process. It is assumed that at this point we have a valid PT hyphen
-        file that came out of PT that way or it was fixed during copy by a preprocess
-        script that was made to fix specific problems.'''
-
-        # The project source files are protected but if force is used
-        # we need to delete them here.
-        if force :
-            if os.path.exists(self.ptProjHyphFile) :
-                os.remove(self.ptProjHyphFile)
-            if os.path.exists(self.ptProjHyphBakFile) :
-                os.remove(self.ptProjHyphBakFile)
-            self.log.writeToLog(self.errorCodes['0460'])
-
-        # These calls may be order-sensitive, update local project source
-        if not os.path.isfile(self.ptProjHyphFile) or self.tools.isOlder(self.ptProjHyphFile, self.ptHyphFile) :
-            self.copyPtHyphenWords()
-            self.backupPtHyphenWords()
-            self.preprocessSource()
-            self.log.writeToLog(self.errorCodes['0450'], [self.tools.fName(self.ptHyphFile)])
-        else :
-            self.log.writeToLog(self.errorCodes['0455'], [self.tools.fName(self.ptHyphFile)])
-
-        # Continue by processing the files located in the project
-        self.getAllPtHyphenWords()
-        self.getApprovedWords()
-        self.getHyphenWords()
-        self.getSoftHyphenWords()
-        self.getNonHyhpenWords()
-
-
-    def getAllPtHyphenWords (self) :
-        '''Return a data set of all the words found in a ParaTExt project
-        hyphated words text file. The Py set() method is used for moving
-        the data because some lists can get really big. This will return the
-        entire wordlist as it is found in the ptHyphenFile. That can be used
-        for other processing.'''
-
-        # Go get the file if it is to be had
-        if os.path.isfile(self.ptProjHyphFile) :
-            with codecs.open(self.ptProjHyphFile, "r", encoding='utf_8') as hyphenWords :
-                for line in hyphenWords :
-                    # Using the logic that there can only be one word in a line
-                    # if the line contains more than one word it is not wanted
-                    word = line.split()
-                    if len(word) == 1 :
-                        self.allPtHyphenWords.add(word[0])
-
-            # Now remove any bad/mal-formed words
-            self.checkForBadWords()
-
-
-    def getApprovedWords (self) :
-        '''Return a data set of approved words found in a ParaTExt project
-        hyphen word list that have a '*' in front of them. This indicates that
-        the spelling has been manually approved by the user. These words may
-        or may not contain hyphens'''
-
-        # Go get the file if it is to be had
-        for word in list(self.goodPtHyphenWords) :
-            if word[:1] == '*' :
-                self.approvedWords.add(word[1:])
-                self.goodPtHyphenWords.remove(word)
-
-
-    def getHyphenWords (self) :
-        '''Return a data set of pre-hyphated words found in a ParaTExt project
-        hyphen words list. These are words that are spelled with a hyphen in
-        them but can break on line endings.'''
-
-        # Go get the file if it is to be had
-        for word in list(self.goodPtHyphenWords) :
-            if '-' in word :
-                self.hyphenWords.add(word)
-                self.goodPtHyphenWords.remove(word)
-
-
-    def getSoftHyphenWords (self) :
-        '''Return a data set of words that contain soft hyphens but have not
-        been approved by the user. These are normally created by PT or some
-        external process.'''
-
-        for word in list(self.goodPtHyphenWords) :
-            if '=' in word :
-                self.softHyphenWords.add(word)
-                self.goodPtHyphenWords.remove(word)
-
-
-    def getNonHyhpenWords (self) :
-        '''Return a data set of words that do not contain hyphens. These are
-        words that cannot normally be broken. This process must be run after
-        getApprovedWords(), getSoftHyphenWords() and getHyphenWords().'''
-
-        self.nonHyphenWords = self.goodPtHyphenWords.copy()
-        self.nonHyphenWords.difference_update(self.approvedWords)
-        self.nonHyphenWords.difference_update(self.softHyphenWords)
-        self.nonHyphenWords.difference_update(self.hyphenWords)
-
-
-    def checkForBadWords (self) :
-        '''Check the words in the master list for bad syntax. Remove them
-        and put them in a hyphen error words file in the project and give
-        a warning to the user.'''
-
-        for word in list(self.allPtHyphenWords) :
-            if '-' in word and '=' in word :
-                self.badWords.add(word)
-            else :
-                # Make the good words list here
-                self.goodPtHyphenWords.add(word)
-
-        if len(self.badWords) :
-            errWords = list(self.badWords)
-            errWords.sort()
-            with codecs.open(self.ptProjHyphErrFile, "w", encoding='utf_8') as wordErrorsObject :
-                wordErrorsObject.write('# ' + self.tools.fName(self.ptProjHyphErrFile) + '\n')
-                wordErrorsObject.write('# This is an auto-generated file which contains errors in the hyphenation words file.\n')
-                for word in errWords :
-                    wordErrorsObject.write(word + '\n')
-
-            # Report the problem to the user
-            self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(self.ptProjHyphErrFile)])
-
-
-    def wordTotals (self) :
-        '''Return a report on word processing totals. For accuracy this is
-        dependent on getApprovedWords(), getSoftHyphenWords(), getHyphenWords()
-        and getNonHyhpenWords to be run before it. If the difference is off, die
-        here and report the numbers.'''
-
-        wrds = len(self.allPtHyphenWords)
-        badw = len(self.badWords)
-        excp = len(self.approvedWords)
-        soft = len(self.softHyphenWords)
-        hyph = len(self.hyphenWords)
-        pwrd = len(self.nonHyphenWords)
-        diff = wrds - (badw + excp + soft + hyph + pwrd)
-        
-        rpt = '\tAll words = ' + str(wrds) + '\n' \
-                '\tBad words = ' + str(badw) + '\n' \
-                '\tException words = ' + str(excp) + '\n' \
-                '\tSoft hyphen words = ' + str(soft) + '\n' \
-                '\tHyphen words = ' + str(hyph) + '\n' \
-                '\tProcess words = ' + str(pwrd) + '\n' \
-                '\tDifference = ' + str(diff) + '\n\n' \
-
-        # Die here if the diff is off (not 0)
-        if diff != 0 :
-            self.tools.dieNow('\nWord totals do not balance.\n\n' + rpt + 'Rapuma halted!\n')
-
-        return [['Total words', str(wrds)], ['Bad words', str(badw)], ['Exception words', str(excp)], ['Soft Hyphen words', str(soft)], ['Hyphen words', str(hyph)], ['Process words', str(pwrd)]]
-
-
-    def pt2GenHyphens (self, hyphenWords) :
-        '''Create a set of generic hyphen markers on a given list of words
-        that contain hyphens or PT hyphen markers (=).'''
-        
-        # Make a new set to work on and pass on
-        for word in list(hyphenWords) :
-            soft = re.sub(u'\=', u'<->', word)
-            norm = re.sub(u'\-', u'<->', word)
-            if word != soft :
-                hyphenWords.add(soft)
-                hyphenWords.remove(word)
-            elif word != norm :
-                hyphenWords.add(norm)
-                hyphenWords.remove(word)
-
-        return hyphenWords
 
 
 ###############################################################################
@@ -952,7 +621,6 @@ class Paratext (object) :
         # Now, override default styleFile name if we found something in the PT conf
         if ptConf['ScriptureText']['StyleSheet'] :
             self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-
 
         # Set the target destination
         target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)

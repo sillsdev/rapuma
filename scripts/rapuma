@@ -61,7 +61,6 @@ from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
 from rapuma.project.proj_commander  import Commander
 from rapuma.core.tools              import Tools
-from rapuma.core.tools              import ToolsProject
 
 # Instantiate User config class
 uc              = UserConfig()
@@ -184,9 +183,17 @@ def userArguments (args) :
         elif args.resources :
             uc.setSystemSettings('resources', args.resources)
     # Test for valid project ID if this is anything else than a project call
+
+
+
+
     elif sys.argv[1].lower() != 'project' :
-        if not ToolsProject(args.project_id).isProject() :
+        if not tools.isConfSection(uc.userConfig['Projects'], args.project_id) :
             sys.exit('\nERROR: Project ID is not valid. Process halting.\n')
+
+
+
+
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -256,9 +263,7 @@ def userArguments (args) :
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
-        if args.group_id :
-            aProject = initProject(args.project_id, args.group_id)
-            cid_list = ''
+        cid_list = None
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
@@ -321,6 +326,7 @@ def userArguments (args) :
             elif args.component_type == 'usfm' and args.manage == 'list' :
                 aProject.listAllComponents(args.component_type)
         elif args.hyphenation :
+            aProject = initProject(args.project_id, args.group_id)
             aProject.manageHyphenation(args.hyphenation)
         elif args.preprocess :
             if args.preprocess == 'add' :
