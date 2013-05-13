@@ -37,17 +37,18 @@ class Maps (object) :
     def __init__(self, pid) :
         '''Do the primary initialization for this manager.'''
 
-        self.pid                = pid
-        self.tools              = Tools()
-        self.user               = UserConfig()
-        self.userConfig         = self.user.userConfig
-        self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local              = ProjLocal(self.pid)
-        self.projConfig         = ProjConfig(self.local).projConfig
-        self.log                = ProjLog(self.pid)
+        self.pid                        = pid
+        self.tools                      = Tools()
+        self.user                       = UserConfig()
+        self.userConfig                 = self.user.userConfig
+        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local                      = ProjLocal(self.pid)
+        self.projConfig                 = ProjConfig(self.local).projConfig
+        self.log                        = ProjLog(self.pid)
         # File names
-        self.projMapXmlFileName = 'proj_maps.xml'
+        self.defaultXmlConfFileName     = 'proj_maps.xml'
+        self.mapsConfFileName           = 'maps.conf'
         # Paths
         self.projMapsFolder     = os.path.join(self.local.projIllustrationsFolder, 'Maps')
         # File names with paths

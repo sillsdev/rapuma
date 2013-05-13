@@ -218,7 +218,7 @@ def userArguments (args) :
         elif args.manage == 'restore-archive' :
             ProjBackup(pid).restoreArchive(targetPath, sourcePath)
         elif args.manage == 'restore-backup' :
-            if ToolsProject(pid).isProject() :
+            if tools.isConfSection(uc.userConfig['Projects'], pid) :
                 ProjBackup(pid).restoreBackup()
             else :
                 if args.target_path :
@@ -226,7 +226,7 @@ def userArguments (args) :
                 else :
                     sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
         elif args.manage == 'restore-cloud' :
-            if ToolsProject(pid).isProject() :
+            if tools.isConfSection(uc.userConfig['Projects'], pid) :
                 ProjBackup(pid).pullFromCloud()
             else :
                 if args.target_path :
