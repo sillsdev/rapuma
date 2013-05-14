@@ -481,7 +481,7 @@ mediaTypes              = ['book']
 backupTypes             = ['archive', 'backup', 'cloud', 'template']
 manageProject           = ['add-project', 'bind-book', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
 # Group
-manageGroup             = ['add-group', 'render-draft', 'render-proof', 'render-final', 'list-components', 'lock-group', 'maps-draft', 'maps-proof', 'maps-final', 'remove-group', 'update-group', 'unlock-group']
+manageGroup             = ['add-group', 'add-map', 'render-draft', 'render-proof', 'render-final', 'list-components', 'lock-group', 'maps-draft', 'maps-proof', 'maps-final', 'remove-group', 'remove-map', 'update-group', 'update-map', 'unlock-group']
 componentTypes          = ['map', 'pdf', 'usfm']
 hyphenCommands          = ['add', 'remove', 'update']
 preprocessCommands      = ['add', 'remove']
@@ -528,7 +528,7 @@ groupCommand.add_argument('-p', '--preprocess', choices=preprocessCommands, help
 groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands, help='Manage the use of illustrations in this group.')
 groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
-groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
@@ -575,13 +575,6 @@ backgroundCommand.add_argument('project_id', help='A project ID for the project 
 backgroundCommand.add_argument('background_type', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
 backgroundCommand.add_argument('-m', '--manage', choices=backgroundCommands, help='The general commands that can be used for managing backgound.')
 backgroundCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting background file.')
-
-# Add page background subprocess arguments
-mapsCommand = subparsers.add_parser('maps', help='Commands for managing project maps.')
-mapsCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-mapsCommand.add_argument('-m', '--manage', choices=mapCommands, help='The general commands that can be used for managing maps.')
-mapsCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting background file.')
-mapsCommand.add_argument('-i', '--map_files', help='Specify map files for the project.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args())
