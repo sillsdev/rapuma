@@ -60,6 +60,7 @@ from rapuma.core.proj_compare       import Compare
 from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
 from rapuma.project.proj_commander  import Commander
+from rapuma.project.proj_maps       import Maps
 from rapuma.core.tools              import Tools
 
 # Instantiate User config class
@@ -412,12 +413,14 @@ def userArguments (args) :
 
     # Commands for processing maps
     elif sys.argv[1].lower() == 'maps' :
+        if type(args.map_files) != list :
+            map_list = args.map_files.split()
         if args.manage == 'add' :
-            Maps(args.project_id).addMaps(args.map_files)
+            Maps(args.project_id).addMaps(map_list)
         elif args.manage == 'remove' :
             Maps(args.project_id).removMaps()
         elif args.background_type == 'render-maps' :
-            Maps(args.project_id).renderMaps(args.map_files, args.force)
+            Maps(args.project_id).renderMaps(map_list, args.force)
 
     # Totally lost
     else:
