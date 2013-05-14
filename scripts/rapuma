@@ -70,7 +70,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130508'
+systemVersion   = '0.1.20130514'
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -170,6 +170,10 @@ def trimLog (self, logFile, limit = 1000) :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
+    # Common error handler
+    def cmdError (cmd, cmdType) :
+        sys.exit('\nERROR: The ' + cmd + ' command is not valid to use with ' + cmdType + '. Process halting.\n')
+
     # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
         if args.about :
@@ -195,7 +199,9 @@ def userArguments (args) :
 
     # Project level commands
     elif sys.argv[1].lower() == 'project' :
-        pid = args.project_id
+        pid         = args.project_id
+        cmdType     = args.command_type
+        cmd         = args.command
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
@@ -207,134 +213,171 @@ def userArguments (args) :
             if not os.path.exists(targetPath) :
                 sys.exit('\nERROR: Path is not valid. Process halting.\n')
         # Figure out what manage command this is and do it
-        if args.manage == 'add-project' :
-            if not args.media_type in ['book'] :
-                sys.exit('\nERROR: Media type given: [' + args.media_type + '] is not valid. Process halting.\n')
-            if not args.name :
-                sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
-            nProjPath = os.path.join(targetPath, pid)
-            ProjSetup(pid).newProject(nProjPath, args.media_type, args.name, systemVersion, '')
-        elif args.manage == 'remove-project' :
-            ProjSetup(pid).deleteProject()
-        elif args.manage == 'restore-archive' :
-            ProjBackup(pid).restoreArchive(targetPath, sourcePath)
-        elif args.manage == 'restore-backup' :
-            if tools.isConfSection(uc.userConfig['Projects'], pid) :
-                ProjBackup(pid).restoreBackup()
+        if cmd == 'add' :
+            if cmdType == 'project' :
+                if not args.media_type in ['book'] :
+                    sys.exit('\nERROR: Media type given: [' + args.media_type + '] is not valid. Process halting.\n')
+                if not args.name :
+                    sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
+                nProjPath = os.path.join(targetPath, pid)
+                ProjSetup(pid).newProject(nProjPath, args.media_type, args.name, systemVersion, '')
             else :
-                if args.target_path :
-                    ProjBackup(pid).restoreBackup(os.path.join(targetPath))
+                cmdError(cmd, cmdType)
+        elif cmd == 'bind' :
+            if cmdType == 'project' :
+                Binding(pid).bind()
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'remove' :
+            if cmdType == 'project' :
+                ProjSetup(pid).deleteProject()
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'restore' :
+            if cmdType == 'archive' :
+                ProjBackup(pid).restoreArchive(targetPath, sourcePath)
+            elif cmdType == 'backup' :
+                if tools.isConfSection(uc.userConfig['Projects'], pid) :
+                    ProjBackup(pid).restoreBackup()
                 else :
-                    sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
-        elif args.manage == 'restore-cloud' :
-            if tools.isConfSection(uc.userConfig['Projects'], pid) :
-                ProjBackup(pid).pullFromCloud()
-            else :
-                if args.target_path :
-                    if os.path.exists(tools.resolvePath(args.target_path)) :
-                        ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid))
+                    if args.target_path :
+                        ProjBackup(pid).restoreBackup(os.path.join(targetPath))
                     else :
-                        sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                        sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
+            elif cmdType == 'cloud' :
+                if tools.isConfSection(uc.userConfig['Projects'], pid) :
+                    ProjBackup(pid).pullFromCloud()
                 else :
-                    sys.exit('\nERROR: To get rain from this cloud, a target path must be provided with -t. Process halting.\n')
-        elif args.manage == 'restore-template' :
-            ProjBackup(pid).templateToProject(args.name)
-        elif args.manage == 'save-archive' :
-            ProjBackup(pid).archiveProject()
-        elif args.manage == 'save-backup' :
-            ProjBackup(pid).backupProject()
-        elif args.manage == 'save-cloud' :
-            ProjBackup(pid).pushToCloud()
-        elif args.manage == 'save-template' :
-            if isTemplate(args.template) :
-                sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
-            ProjBackup(pid).projectToTemplate(args.template)
-        elif args.manage == 'update-helper-scripts' :
-            Commander(pid).updateScripts()
-        elif args.manage == 'bind-book' :
-            Binding(pid).bind()
+                    if args.target_path :
+                        if os.path.exists(tools.resolvePath(args.target_path)) :
+                            ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid))
+                        else :
+                            sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                    else :
+                        sys.exit('\nERROR: To get rain from this cloud, a target path must be provided with -t. Process halting.\n')
+            elif cmdType == 'template' :
+                ProjBackup(pid).templateToProject(args.name)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'save' :
+            if cmdType == 'archive' :
+                ProjBackup(pid).archiveProject()
+            elif cmdType == 'backup' :
+                ProjBackup(pid).backupProject()
+            elif cmdType == 'cloud' :
+                ProjBackup(pid).pushToCloud()
+            elif cmdType == 'template' :
+                if isTemplate(args.template) :
+                    sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
+                ProjBackup(pid).projectToTemplate(args.template)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'update' :
+            if cmdType == 'helper' :
+                Commander(pid).updateScripts()
+            else :
+                 cmdError(cmd, cmdType)
 
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
-        cid_list = None
+        cmdType     = args.command_type
+        cmd         = args.command
+        pid         = args.project_id
+        gid         = args.group_id
+        cid_list    = None
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
             else :
                 cid_list = args.cid_list
-        # Start processing
-        if args.manage :
-            if args.manage == 'add-group' :
+        # Figure out what manage command this is and do it
+        if cmd == 'add' :
+            if cmdType == 'group' :
                 # To add a group we need to do these checks first
                 if not cid_list :
                     sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                 elif not args.component_type :
                     sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
-                elif args.component_type == 'map' :
-                    MapSet(args.project_id).addMapSet(args.group_id, cid_list, args.force)
                 elif args.component_type == 'usfm' :
                     if not args.source_id :
-                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a group. Process halted!\n')
+                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                     elif args.source_path :
                         if not tools.resolvePath(args.source_path) :
                             sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     elif args.source_id :
-                        if not hasValidSourcePath(args.group_id, args.source_id) :
+                        if not hasValidSourcePath(gid, args.source_id) :
                             sys.exit('\nERROR: No source path found for this source ID. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    ProjSetup(args.project_id).addGroup(args.component_type, args.group_id, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
-            elif args.manage == 'remove-group' :
-                cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                if cType == 'map' :
-                    MapSet(args.project_id).removeMapSet(args.group_id)
-                elif cType == 'usfm' :
-                    ProjSetup(args.project_id).removeGroup(args.group_id, args.force)
-                    if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                        Commander(args.project_id).removeScripts()
-            elif args.manage == 'update-group' :
-                ProjSetup(args.project_id).updateGroup(args.group_id, cid_list, args.source_path, args.force)
-            # Render a group
-            elif args.manage.find('render') <= 0 :
-                aProject = initProject(args.project_id, args.group_id)
-                cType = aProject.projConfig['Groups'][args.group_id]['cType']
-                if cid_list :
-                    if not aProject.isValidCidList(args.group_id, cid_list) :
-                        sys.exit('\nERROR: Must provide a valid list (-i) of one or more component IDs in the provided list are not a part of this group. Process halted!\n')
-                if args.manage == 'render-draft' :
-                    aProject.renderGroup(args.group_id, 'draft', cid_list, args.force)
-                elif args.manage == 'render-proof' :
-                    aProject.renderGroup(args.group_id, 'proof', cid_list, args.force)
-                elif args.manage == 'render-final' :
-                    aProject.renderGroup(args.group_id, 'final', cid_list, args.force)
-                elif args.manage == 'maps-draft' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, 'draft', cid_list, args.force)
-                elif args.manage == 'maps-proof' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, 'proof', cid_list, args.force)
-                elif args.manage == 'maps-final' :
-                    MapSet(args.project_id).renderMapSet(args.group_id, 'final', cid_list, args.force)
-            elif args.manage == 'lock-group' :
-                ProjSetup(args.project_id).lockUnlock(args.group_id, True)
-            elif args.manage == 'unlock-group' :
-                ProjSetup(args.project_id).lockUnlock(args.group_id, False)
-            elif args.component_type == 'usfm' and args.manage == 'list' :
-                aProject.listAllComponents(args.component_type)
-        elif args.hyphenation :
-            aProject = initProject(args.project_id, args.group_id)
-            aProject.manageHyphenation(args.hyphenation)
-        elif args.preprocess :
-            if args.preprocess == 'add' :
-                ps = ProjSetup(args.project_id)
-                ps.turnOnOffPreprocess(args.group_id, True)
-                ps.checkForPreprocessScript (args.group_id)
-            elif args.preprocess == 'remove' :
-                ProjSetup(args.project_id).turnOnOffPreprocess(args.group_id, False)
-        elif args.illustrations :
-            if args.illustrations == 'on' :
+                    ProjSetup(pid).addGroup(args.component_type, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+            elif cmdType == 'hyphenation' :
+                initProject(pid, gid).manageHyphenation(cmd)
+            elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations on not completed yet')
-            elif args.illustrations == 'off' :
+            elif cmdType == 'map' :
+                if not args.component_type :
+                    sys.exit('\nERROR: Must provide a component type (-c) ID when adding a map group. Process halted!\n')
+                elif args.component_type == 'map' :
+                    MapSet(pid).addMapSet(gid, cid_list, args.force)
+            elif cmdType == 'preprocess' :
+                ps = ProjSetup(pid)
+                ps.turnOnOffPreprocess(gid, True)
+                ps.checkForPreprocessScript (gid)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'draft' :
+            if cmdType == 'group' :
+                initProject(pid, gid).renderGroup('draft', cid_list, args.force)
+            elif cmdType == 'map' :
+                MapSet(pid).renderMapSet(gid, 'draft', cid_list, args.force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'final' :
+            if cmdType == 'group' :
+                initProject(pid, gid).renderGroup('final', cid_list, args.force)
+            elif cmdType == 'map' :
+                MapSet(pid, gid).renderMapSet('final', cid_list, args.force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'lock' :
+            if cmdType == 'group' :
+                ProjSetup(pid).lockUnlock(gid, True)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'proof' :
+            if cmdType == 'group' :
+                initProject(pid, gid).renderGroup('proof', cid_list, args.force)
+            elif cmdType == 'map' :
+                MapSet(pid, gid).renderMapSet('proof', cid_list, args.force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'remove' :
+            if cmdType == 'group' :
+                if initProject(pid, gid).projConfig['Groups'][gid]['cType'] == 'usfm' :
+                    ProjSetup(pid).removeGroup(gid, args.force)
+                    if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                        Commander(pid).removeScripts()
+            elif cmdType == 'hyphenation' :
+                initProject(pid, gid).manageHyphenation(cmd)
+            elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
-        elif args.preprocess :
-            aProject.turnOnOffPreprocess(args.group_id, args.preprocess)
+            elif cmdType == 'map' :
+                MapSet(pid, gid).removeMapSet()
+            elif cmdType == 'preprocess' :
+                ProjSetup(pid).turnOnOffPreprocess(gid, False)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'update' :
+            if cmdType == 'group' :
+                ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
+            elif cmdType == 'hyphenation' :
+                initProject(pid, gid).manageHyphenation(cmd)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'unlock' :
+            if cmdType == 'group' :
+                ProjSetup(pid).lockUnlock(gid, False)
+            else :
+                cmdError(cmd, cmdType)
 
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
@@ -477,22 +520,19 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Available choices
 # Project
+pCommandTypes           = ['archive', 'backup', 'cloud', 'helper', 'project', 'template']
+pCommands               = ['add', 'bind', 'remove', 'restore', 'save', 'update']
 mediaTypes              = ['book']
-backupTypes             = ['archive', 'backup', 'cloud', 'template']
-manageProject           = ['add-project', 'bind-book', 'remove-project', 'restore-archive', 'restore-backup', 'restore-cloud', 'restore-template', 'save-archive', 'save-backup', 'save-cloud', 'save-template', 'update-helper-scripts']
 # Group
-manageGroup             = ['add-group', 'add-map', 'render-draft', 'render-proof', 'render-final', 'list-components', 'lock-group', 'maps-draft', 'maps-proof', 'maps-final', 'remove-group', 'remove-map', 'update-group', 'update-map', 'unlock-group']
-componentTypes          = ['map', 'pdf', 'usfm']
-hyphenCommands          = ['add', 'remove', 'update']
-preprocessCommands      = ['add', 'remove']
-illustrationCommands    = ['add', 'remove']
+gCommandTypes           = ['group', 'hyphenation', 'illustration', 'map', 'preprocess', 'text']
+gCommands               = ['add', 'draft', 'proof', 'final', 'lock', 'remove', 'update', 'unlock']
+componentTypes          = ['usfm', 'map']
 # Other
 backgrounds             = ['draft', 'proof', 'final', 'lines', 'box']
 backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']
 postprocessCommands     = ['add', 'remove', 'process']
 fontCommands            = ['add', 'remove', 'primary']
-mapCommands             = ['add', 'remove', 'render-maps']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -510,7 +550,8 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 # Add Project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-projCommand.add_argument('-m', '--manage', choices=manageProject, help='The general commands that can be used for managing a project.')
+projCommand.add_argument('command_type', choices=pCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+projCommand.add_argument('command', choices=pCommands, help='The general commands that can be used for managing a project.')
 projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
 projCommand.add_argument('-t', '--target_path', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
 projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
@@ -520,12 +561,10 @@ projCommand.add_argument('-n', '--name', help='If creating a new project, give a
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
 groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 groupCommand.add_argument('group_id', help='A unique ID for this group.')
-groupCommand.add_argument('-m', '--manage', choices=manageGroup, help='The general commands that can be used for managing groups.')
+groupCommand.add_argument('command_type', choices=gCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
+groupCommand.add_argument('command', choices=gCommands, help='The general commands that can be used for managing groups.')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
 groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-groupCommand.add_argument('-y', '--hyphenation', choices=hyphenCommands, help='Manage hyphenation for this group.')
-groupCommand.add_argument('-p', '--preprocess', choices=preprocessCommands, help='Turn on or off automated preprocessing when importing and updating components into the group.')
-groupCommand.add_argument('-l', '--illustrations', choices=illustrationCommands, help='Manage the use of illustrations in this group.')
 groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')

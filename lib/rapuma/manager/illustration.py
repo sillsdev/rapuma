@@ -17,10 +17,11 @@
 # this process
 
 import os, shutil, codecs
+from configobj                      import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.project.manager     import Manager
+from rapuma.core.tools              import Tools
+from rapuma.project.manager         import Manager
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -75,7 +76,8 @@ class Illustration (Manager) :
             self.tools.writeConfFile(self.projConfig)
 
         # Load the config object
-        self.illustrationConfig = self.tools.initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
+#        self.illustrationConfig = self.tools.initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
+        self.illustrationConfig =         confObj = ConfigObj(self.illustrationConfFile, encoding='utf-8')
         # Load settings from the manager config
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

@@ -136,7 +136,7 @@ class Binding (object) :
         keyList.sort()
         for key in keyList :
             # Do a force render in the bind mode
-            Project(self.pid, bindOrder[key]).renderGroup(bindOrder[key], 'bind', '', True)
+            Project(self.pid, bindOrder[key]).renderGroup('bind', '', True)
 
 
 

@@ -101,6 +101,8 @@ class Project (object) :
             '0210' : ['LOG', 'Wrote out [<<1>>] settings to the project configuration file.'],
             '0211' : ['ERR', 'Failed to write out project [<<1>>] settings to the project configuration file.'],
 
+            '0660' : ['ERR', 'Invalid component ID: [<<1>>].'],
+
         }
 
 ###############################################################################
@@ -167,7 +169,7 @@ class Project (object) :
 ###############################################################################
 ########################### Project Level Functions ###########################
 ###############################################################################
-######################## Error Code Block Series = 400 ########################
+####################### Error Code Block Series = 0400 ########################
 ###############################################################################
 
     def manageHyphenation (self, action) :
@@ -186,58 +188,56 @@ class Project (object) :
 ###############################################################################
 ############################ Group Level Functions ############################
 ###############################################################################
+####################### Error Code Block Series = 0600 ########################
+###############################################################################
 
 
-    def renderGroup (self, gid, mode, cidList = None, force = False) :
+    def renderGroup (self, mode, cidList = None, force = False) :
         '''Render a group of subcomponents or any number of components
         in the group specified in the cidList.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Just in case, set the gid here.
-        self.gid = gid
+        if cidList :
+            self.isValidCidList(cidList)
 
         # Do a basic test for exsistance
-        if self.tools.isConfSection(self.projConfig['Groups'], gid) :
+        if self.tools.isConfSection(self.projConfig['Groups'], self.gid) :
 
             # Now create the group and pass the params on
-            self.createGroup(gid).render(gid, mode, cidList, force)
+            self.createGroup().render(self.gid, mode, cidList, force)
             return True
 
 
-    def createGroup (self, gid) :
+    def createGroup (self) :
         '''Create a group object that can be acted on. It is assumed
         this only happens for one group per session. This group
         will contain one or more compoenents. The information for
         each one will be contained in the group object.'''
 
-        # Just in case, set the gid here.
-        self.gid = gid
-
         # If the object already exists just return it
-        if gid in self.groups: return self.groups[gid]
+        if self.gid in self.groups: return self.groups[self.gid]
 
 #        import pdb; pdb.set_trace()
 
-        cType = self.projConfig['Groups'][gid]['cType']
+        cType = self.projConfig['Groups'][self.gid]['cType']
         # Create a special component object if called
-        cfg = self.projConfig['Groups'][gid]
+        cfg = self.projConfig['Groups'][self.gid]
         module = import_module('rapuma.group.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         groupObj = ManagerClass(self, cfg)
-        self.groups[gid] = groupObj
+        self.groups[self.gid] = groupObj
 
         return groupObj
 
 
-    def isValidCidList (self, gid, thisCidlist) :
+    def isValidCidList (self, thisCidlist) :
         '''Check to see if all the components in the list are in the group.'''
 
-        cidList = self.projConfig['Groups'][gid]['cidList']
+        cidList = self.projConfig['Groups'][self.gid]['cidList']
         for cid in thisCidlist :
             if not cid in cidList :
-                return False
-        return True
+                self.log.writeToLog(self.errorCodes['0620'],[cid])
 
 
     def listAllComponents (self, cType) :

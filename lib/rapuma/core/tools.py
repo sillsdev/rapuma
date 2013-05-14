@@ -490,7 +490,7 @@ class Tools (object) :
             else :
                 return conf[key1]
         except :
-            return
+            return None
 
 
     def isConfSection (self, confObj, section) :
