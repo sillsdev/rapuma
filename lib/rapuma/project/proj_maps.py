@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
 
@@ -50,9 +51,19 @@ class Maps (object) :
         self.defaultXmlConfFileName     = 'proj_maps.xml'
         self.mapsConfFileName           = 'maps.conf'
         # Paths
-        self.projMapsFolder     = os.path.join(self.local.projIllustrationsFolder, 'Maps')
+        self.projMapsFolder             = os.path.join(self.local.projIllustrationsFolder, 'Maps')
+        self.rpmRapumaConfigFolder      = self.local.rapumaConfigFolder
         # File names with paths
-        self.projMapXmlFile     = os.path.join(self.projMapsFolder, self.projMapXmlFileName)
+        self.projMapXmlFile             = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
+        self.mapsConfFile               = os.path.join(self.projConfFolder, self.mapsConfFileName)
+
+        # Load the config object
+        self.mapsConfig                 = self.tools.initConfig(self.mapsConfFile, self.defaultXmlConfFile)
+        # Load settings from the manager config
+        for k, v in self.projConfig['Managers'][self.manager].iteritems() :
+            setattr(self, k, v)
+
+
         # Log messages for this module
         self.errorCodes     = {
 

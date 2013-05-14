@@ -480,24 +480,28 @@ class Paratext (object) :
         else:
             figDict['verse'] = v.group(1)
 
-
-# FIXME: with scale, width, position and location, we want to do a lookup and
-# and see if there already is a setting. If there is, we want to keep it.
-
-        figDict['scale'] = '1.0'
-
-        if figDict['width'] == 'col' :
-            figDict['position'] = 'tl'
+        # If this is an update, we need to keep the original settings in case the
+        # default settings have been modified for this project.
+        # Illustration Scale
+        if not self.tools.testForSetting(illustrationConfig[gid][figDict['illustrationID']], 'scale') :
+            figDict['scale'] = '1.0'
         else :
-            figDict['position'] = 't'
-
-        if not figDict['location'] :
-            figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
-
-
-
-
-
+            figDict['scale'] = illustrationConfig[gid][figDict['illustrationID']]['scale']
+        # Illustration Position
+        if not self.tools.testForSetting(illustrationConfig[gid][figDict['illustrationID']], 'position') :
+            if figDict['width'] == 'col' :
+                figDict['position'] = 'tl'
+            else :
+                figDict['position'] = 't'
+        else :
+            figDict['position'] = illustrationConfig[gid][figDict['illustrationID']]['position']
+        # Illustration Location
+        if not self.tools.testForSetting(illustrationConfig[gid][figDict['illustrationID']], 'location') :
+            if not figDict['location'] :
+                figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
+        else :
+            figDict['location'] = illustrationConfig[gid][figDict['illustrationID']]['location']
+        # Now make (update) the actual illustration section
         if not self.tools.testForSetting(illustrationConfig, gid) :
             self.tools.buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
