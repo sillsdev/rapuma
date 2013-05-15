@@ -68,7 +68,7 @@ class Maps (object) :
         # Log messages for this module
         self.errorCodes     = {
 
-            '0205' : ['MSG', 'Unassigned message.'],
+            '0205' : ['ERR', 'Cannot find: [<<1>>]'],
             '0210' : ['LOG', 'Wrote out map settings to the project configuration file.'],
             '0215' : ['ERR', 'Failed to write out project map settings to the project configuration file.'],
             '0220' : ['MSG', 'Added maps to project.'],
@@ -87,13 +87,30 @@ class Maps (object) :
 
 #        import pdb; pdb.set_trace()
 
-    def addMaps (self, mapList) :
+    def addMapGroup (self, gid, mapFileList, sourceId, path, force = False) :
         '''Add maps to the project.'''
 
-        self.createMapsFolder()
-        self.mapsConfig['ProjMapInfo']['mapFileList'] = mapList
-        self.tools.writeConfFile(self.mapsConfig)
-        self.log.writeToLog(self.errorCodes['0220'])
+        print gid, mapFileList, sourceId, path, force
+
+        mapInfo = {}
+        mapInfo['MapFiles'] = {}
+
+        # First test for the files
+        for m in mapFileList :
+            mp = os.path.join(path, m)
+            if not os.path.exists(mp) :
+                self.log.writeToLog(self.errorCodes['0205'], [mp])
+            else :
+                mapInfo['MapFiles'][os.urandom(8)] = {}
+                
+        print mapInfo
+        
+
+
+#        self.createMapsFolder()
+#        self.mapsConfig['ProjMapInfo']['mapFileList'] = mapList
+#        self.tools.writeConfFile(self.mapsConfig)
+#        self.log.writeToLog(self.errorCodes['0220'])
 
 
     def removeMaps (self) :

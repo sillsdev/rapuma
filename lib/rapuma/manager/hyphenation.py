@@ -175,7 +175,7 @@ class Hyphenation (Manager) :
             self.log.writeToLog(self.errorCodes['0265'], [self.gid])
 
 
-    def updateHyphenation (self, force = False) :
+    def updateHyphenation (self, force) :
         '''Update critical hyphenation control files for a specified component type.'''
 
         # Clean out the previous version of the component hyphenation file
@@ -183,7 +183,7 @@ class Hyphenation (Manager) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
-            self.processHyphens()
+            self.processHyphens(force)
 
 
         # Create a new version
@@ -349,12 +349,14 @@ class Hyphenation (Manager) :
 
 
 
-    def processHyphens(self, force = False) :
+    def processHyphens(self, force) :
         '''This controls the processing of the master PT hyphenation file. The end
         result are four data sets that are ready to be handed off to the next part
         of the process. It is assumed that at this point we have a valid PT hyphen
         file that came out of PT that way or it was fixed during copy by a preprocess
         script that was made to fix specific problems.'''
+
+#        import pdb; pdb.set_trace()
 
         # The project source files are protected but if force is used
         # we need to delete them here.

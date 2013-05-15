@@ -309,13 +309,13 @@ def userArguments (args) :
                 elif args.source_path :
                     if not tools.resolvePath(args.source_path) :
                         sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                elif not args.source_id :
+                    sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
                 if cType == 'usfm' :
-                    if not args.source_id :
-                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                     ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
                 elif cType == 'map' :
-                    MapGroup(pid).addMapGroup(gid, cid_list, args.force)
+                    Maps(pid).addMapGroup(gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
             elif cmdType == 'hyphenation' :
                 initProject(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -331,7 +331,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     initProject(pid, gid).renderGroup(cmd, cid_list, args.force)
                 elif cType == 'map' :
-                    MapGroup(pid).renderMapGroup(gid, cmd, cid_list, args.force)
+                    Maps(pid).renderMapGroup(gid, cmd, cid_list, args.force)
                 else :
                     cTypeError(cType)
             else :
@@ -352,7 +352,7 @@ def userArguments (args) :
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
             elif cmdType == 'map' :
-                MapGroup(pid, gid).removeGroupSet()
+                Maps(pid).removeMapGroup(gid)
             elif cmdType == 'preprocess' :
                 ProjSetup(pid).turnOnOffPreprocess(gid, False)
             else :
@@ -365,11 +365,11 @@ def userArguments (args) :
                             sys.exit('\nERROR: Not valid: [' + args.source_path + ']. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 elif cType == 'map' :
-                    MapGroup(pid).updateMapGroup(gid, cid_list, args.force)
+                    Maps(pid).updateMapGroup(gid, cid_list, args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
-                initProject(pid, gid).manageHyphenation(cmd)
+                initProject(pid, gid).manageHyphenation(cmd, args.force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'unlock' :

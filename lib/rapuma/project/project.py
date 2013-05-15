@@ -172,7 +172,7 @@ class Project (object) :
 ####################### Error Code Block Series = 0400 ########################
 ###############################################################################
 
-    def manageHyphenation (self, action) :
+    def manageHyphenation (self, action, force = False) :
         '''Run a hyphenation management command.'''
 
         self.createManager('hyphenation')
@@ -182,7 +182,7 @@ class Project (object) :
         elif action == 'remove' :
             self.managers[manager].turnOffHyphenation()
         elif action == 'update' :
-            self.managers[manager].updateHyphenation()
+            self.managers[manager].updateHyphenation(force)
 
 
 ###############################################################################
