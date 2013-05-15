@@ -341,7 +341,8 @@ class Xetex (Manager) :
         # Try to get dependent files in place
         if not os.path.isfile(self.compHyphFile) :
             # Call the Hyphenation manager to create a sorted file of hyphenated words
-            self.hyphenation.updateHyphenation()
+            # We will not use force (set to False) for this.
+            self.hyphenation.updateHyphenation(False)
 
         # Create the output file here
         with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
