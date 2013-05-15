@@ -237,7 +237,7 @@ class Project (object) :
         cidList = self.projConfig['Groups'][self.gid]['cidList']
         for cid in thisCidlist :
             if not cid in cidList :
-                self.log.writeToLog(self.errorCodes['0620'],[cid])
+                self.log.writeToLog(self.errorCodes['0660'],[cid])
 
 
     def listAllComponents (self, cType) :

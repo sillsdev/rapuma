@@ -119,9 +119,6 @@ class Commander (object) :
             # Make the script executable
             self.tools.makeExecutable(fullFile)
 
-        # Outpu scripts for project groups
-        # FIXME: write the code for this
-
         self.tools.terminal('\nCompleted creating/recreating static helper scripts.\n')
 
 

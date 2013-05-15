@@ -71,6 +71,7 @@ tools           = Tools()
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
 systemVersion   = '0.1.20130514'
+local           = None
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -118,6 +119,7 @@ def isTemplate (tid) :
 def initProject (pid, gid) :
     '''Initialize an existing project according to the project ID given.'''
 
+    global local
     local       = ProjLocal(pid)
     pc          = ProjConfig(local)
     log         = ProjLog(pid)
@@ -126,24 +128,23 @@ def initProject (pid, gid) :
     return aProject
 
 
-def trimLog (self, logFile, limit = 1000) :
+def trimLog () :
     '''Trim a log file.  This will take an existing log file and
     trim it to the amount specified in the system file.'''
 
     # Of course this isn't needed if there isn't even a log file
-    if os.path.isfile(logFile) :
+    if local and os.path.isfile(local.projLogFile) :
 
-        # Change this to an int()
-        limit = int(limit)
-        
+        limit = int(uc.userConfig['System']['projLogLineLimit'])
+
         # Read in the existing log file
-        readObject = codecs.open(logFile, "r", encoding='utf_8')
+        readObject = codecs.open(local.projLogFile, "r", encoding='utf_8')
         lines = readObject.readlines()
         readObject.close()
 
         # Process only if we have enough lines
         if len(lines) > limit :
-            writeObject = codecs.open(logFile, "w", encoding='utf_8')
+            writeObject = codecs.open(local.projLogFile, "w", encoding='utf_8')
             lineCount = 0
             for line in lines :
                 if limit > lineCount :
@@ -151,10 +152,6 @@ def trimLog (self, logFile, limit = 1000) :
                     lineCount +=1
 
             writeObject.close()
-
-        return True
-    else :
-        return False
 
 
 ###############################################################################
@@ -469,30 +466,15 @@ def userArguments (args) :
     else:
         sys.exit('\nERROR: Command not recognized: [' + sys.argv[1] + ']\n')
 
-    # During a process, a number of log entries will be made and written out.
-    # Over time the log file could get very large. To control the size, there
-    # is a setting in the user config file that limits the number of lines in
-    # the log file. The default is 1000 but it can be adjusted if needed. The
-    # following call here will trim the log file to its specified limit. This
-    # is done here as there should be no further operations done at this point.
-    # Note: This will not work with "project" commands (aProject is not declaired)
-    # To get around that we will use a 'try' statement to prevent confusing errors.
-    try :
-        if not sys.argv[1].lower() == 'project' :
-            if os.path.isfile(aProject.local.projLogFile) :
-                trimLog(aProject.local.projLogFile, uc.userConfig['System']['projLogLineLimit'])
-    except :
-        pass
-
     # Look for an error log file and notify the user if one is found that there
     # were errors in the process. This might have failed because we loose our 
     # project object some times. For now, we'll put a 'try' around it.
-    try :
-        if not sys.argv[1].lower() == 'project' :
-            if os.path.isfile(aProject.local.projErrorLogFile) :
-                tools.terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
-    except :
-        pass
+    if not sys.argv[1].lower() == 'project' :
+        if local and os.path.isfile(local.projErrorLogFile) :
+            tools.terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+
+    # Do some project log maintenance
+    trimLog()
 
 ###############################################################################
 ############################### Argparser Setup ###############################
