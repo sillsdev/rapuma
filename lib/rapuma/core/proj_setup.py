@@ -358,7 +358,7 @@ class ProjSetup (object) :
         groupFolder = os.path.join(self.local.projComponentsFolder, gid)
 
         # First test for lock
-        if self.isLocked(gid) and force == False :
+        if self.tools_path.isLocked(gid) and force == False :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Remove subcomponents from the target if there are any
@@ -514,19 +514,6 @@ class ProjSetup (object) :
 ###############################################################################
 ####################### Error Code Block Series = 0400 ########################
 ###############################################################################
-
-    def isLocked (self, gid) :
-        '''Test to see if a group is locked. Return True if the group is 
-        locked. However, if the group doesn't even exsist, it is assumed
-        that it is unlocked and return False. :-)'''
-
-        if not self.tools.testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
-            return False
-        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
-            return True
-        else :
-            return False
-
 
     def lockUnlock (self, gid, lock = True) :
         '''Lock or unlock to enable or disable actions to be taken on a group.'''

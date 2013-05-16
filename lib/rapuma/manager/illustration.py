@@ -77,7 +77,7 @@ class Illustration (Manager) :
 
         # Load the config object
 #        self.illustrationConfig = self.tools.initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
-        self.illustrationConfig =         confObj = ConfigObj(self.illustrationConfFile, encoding='utf-8')
+        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
         # Load settings from the manager config
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

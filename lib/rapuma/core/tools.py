@@ -23,7 +23,44 @@ from xml.etree                      import ElementTree
 from configobj                      import ConfigObj, Section
 
 ###############################################################################
-########################### Begin Special Tools Class #########################
+############################### Group Tools Class #############################
+###############################################################################
+
+class ToolsGroup (object) :
+    '''This is a special set of tools for working with groups.'''
+
+    def __init__(self, local, projConfig, userConfig) :
+        '''Do the primary initialization for this manager.'''
+
+        self.local                  = local
+        self.projConfig             = projConfig
+        self.userConfig             = userConfig
+        self.pid                    = None
+        self.tools                  = Tools()
+        try :
+            self.pid                = projConfig['ProjectInfo']['projectIDCode']
+        except :
+            pass
+
+###############################################################################
+############################ Functions Begin Here #############################
+###############################################################################
+
+    def isLocked (self, gid) :
+        '''Test to see if a group is locked. Return True if the group is 
+        locked. However, if the group doesn't even exsist, it is assumed
+        that it is unlocked and return False. :-)'''
+
+        if not self.tools.testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
+            return False
+        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
+            return True
+        else :
+            return False
+
+
+###############################################################################
+################################ Path Tools Class #############################
 ###############################################################################
 
 class ToolsPath (object) :
@@ -36,15 +73,15 @@ class ToolsPath (object) :
         self.projConfig             = projConfig
         self.userConfig             = userConfig
         self.pid                    = None
+        self.tools                  = Tools()
         try :
-            self.pid                    = projConfig['ProjectInfo']['projectIDCode']
+            self.pid                = projConfig['ProjectInfo']['projectIDCode']
         except :
             pass
 
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
-
 
     def getGroupSourcePath (self, gid) :
         '''Get the source path for a specified group.'''
@@ -74,7 +111,7 @@ class ToolsPath (object) :
         elif sourceEditor.lower() == 'generic' :
             sName = Paratext(self.pid, gid).formGenericName(cid)
         else :
-            self.log.writeToLog(self.errorCodes['1100'], [sourceEditor])
+            return None
 
         return os.path.join(sourcePath, sName)
 
@@ -100,7 +137,9 @@ class ToolsPath (object) :
         targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
         source          = self.getSourceFile(gid, cid)
         sName           = os.path.split(source)[1]
-        return os.path.join(targetFolder, sName + '.source')
+        filePath        = os.path.join(targetFolder, sName + '.source')
+        if os.path.exists(filePath) :
+            return filePath
 
 
     def getGroupPreprocessFile (self, gid) :
@@ -422,10 +461,10 @@ class Tools (object) :
             self.writeConfFile(configObj)
         else :
             # But check against the default for possible new settings
-            configObj               = ConfigObj(encoding='utf-8')
-            orgConfigObj             = ConfigObj(confFile, encoding='utf-8')
-            orgFileName                 = orgConfigObj.filename
-            defaultObj               = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+            configObj           = ConfigObj(encoding='utf-8')
+            orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
+            orgFileName         = orgConfigObj.filename
+            defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
             defaultObj.merge(orgConfigObj)
             # A key comparison should be enough to tell if it is the same or not
             if self.confObjCompare(defaultObj, orgConfigObj) :

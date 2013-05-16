@@ -70,7 +70,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130515'
+systemVersion   = '0.1.20130516a'
 local           = None
 
 # Give a welcome message
@@ -126,7 +126,6 @@ def initProject (pid, gid) :
     pc          = ProjConfig(local)
     log         = ProjLog(pid)
     aProject    = Project(pid, gid)
-    checkCreatorVersion(pid, pc.projConfig, systemVersion)
     return aProject
 
 
@@ -193,6 +192,12 @@ def userArguments (args) :
     elif sys.argv[1].lower() != 'project' :
         if not tools.isConfSection(uc.userConfig['Projects'], args.project_id) :
             sys.exit('\nERROR: Project ID is not valid. Process halting.\n')
+        # Update the creator version if necessary
+        pid         = args.project_id
+        local       = ProjLocal(pid)
+        pc          = ProjConfig(local)
+        checkCreatorVersion(pid, pc.projConfig, systemVersion)
+
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -315,7 +320,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
                 elif cType == 'map' :
-                    Maps(pid).addMapGroup(gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+                    Maps(pid).addGroup(gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
             elif cmdType == 'hyphenation' :
                 initProject(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -343,16 +348,18 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'group' :
-                if initProject(pid, gid).projConfig['Groups'][gid]['cType'] == 'usfm' :
+                if cType == 'usfm' :
                     ProjSetup(pid).removeGroup(gid, args.force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         Commander(pid).removeScripts()
+                elif cType == 'map' :
+                    Maps(pid).removeGroup(gid, args.force)
+                else :
+                    cTypeError(cType)
             elif cmdType == 'hyphenation' :
                 initProject(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
-            elif cmdType == 'map' :
-                Maps(pid).removeMapGroup(gid)
             elif cmdType == 'preprocess' :
                 ProjSetup(pid).turnOnOffPreprocess(gid, False)
             else :
@@ -365,7 +372,7 @@ def userArguments (args) :
                             sys.exit('\nERROR: Not valid: [' + args.source_path + ']. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 elif cType == 'map' :
-                    Maps(pid).updateMapGroup(gid, cid_list, args.force)
+                    Maps(pid).updateGroup(gid, cid_list, args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
