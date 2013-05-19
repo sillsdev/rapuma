@@ -76,8 +76,6 @@ class Usfm (Group) :
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         self.style                  = self.project.managers[self.cType + '_Style']
-#        self.bind                   = self.project.managers[self.cType + '_Binding']
-
         # File names
         self.adjustmentConfFile     = project.local.adjustmentConfFile
         # Folder paths
@@ -86,7 +84,6 @@ class Usfm (Group) :
         self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
         # File names with folder paths
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
-#        self.grpPreprocessFile      = self.text.grpPreprocessFile
 
         # Get persistant values from the config if there are any
         newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
@@ -95,7 +92,6 @@ class Usfm (Group) :
         # Set them here
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
-
 
         # Check if there is a font installed
         if not self.font.varifyFont() :
@@ -255,7 +251,8 @@ class Usfm (Group) :
                 cidPiclist = self.getCidPiclistPath(cid)
                 if useIllustrations :
                     if self.illustration.hasIllustrations(gid, cid) :
-                        if not os.path.isfile(cidPiclist) :
+                        # Create if not there of if the config has changed
+                        if not os.path.isfile(cidPiclist) or self.tools.isOlder(cidPiclist, self.local.illustrationConfFile) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
                             self.illustration.getPics(gid, cid)

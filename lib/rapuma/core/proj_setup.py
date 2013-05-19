@@ -24,7 +24,7 @@ import palaso.sfm as sfm
 from palaso.sfm                     import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath
+from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
@@ -144,10 +144,6 @@ class ProjSetup (object) :
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
-            '0410' : ['ERR', 'The group [<<1>>] lock/unlock function failed with this error: [<<2>>]'],
-            '0420' : ['LOG', 'The lock setting on the [<<1>>] group has been set to [<<2>>].'],
-            '0430' : ['WRN', 'The [<<1>>] group is not found. Lock NOT set to [<<2>>].'],
-
             '0810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
             '0840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
             '0860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
@@ -192,6 +188,7 @@ class ProjSetup (object) :
             self.paratext           = Paratext(self.pid)
             self.compare            = Compare(self.pid)
             self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
+            self.tools_group        = ToolsGroup(self.local, self.projConfig, self.userConfig)
             return True
 #            except Exception as e :
 #                self.tools.terminal('proj_setup.finishInit() failed with this error: ' + str(e))
@@ -199,14 +196,11 @@ class ProjSetup (object) :
             return False
 
 
-
-
 ###############################################################################
 ############################ Group Setup Functions ############################
 ###############################################################################
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
-
 
     def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
         '''Update a group, --source is optional but if given it will
@@ -250,17 +244,19 @@ class ProjSetup (object) :
 
 #            import pdb; pdb.set_trace()
 
-# FIXME: Very little difference between these, may need to rework at some point
+            # The use of force is for if the group is locked or source is
+            # matching but you want to rerun a preprocess on the text to update it.
+            # In the past the component was pretty much removed with the function
+            # uninstallGroupComponent() that practice has been discontinued as it
+            # doesn't seem to make sense anymore
             if force :
                 self.lockUnlock(gid, False)
-                self.uninstallGroupComponent(gid, cid, force)
                 self.installUsfmWorkingText(gid, cid, force)
                 self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 self.compare.compareComponent(gid, cid, 'working')
-            # Do a compare to see if we need to do this
+            # Just do a compare to see if we need to do this. force turned off
             elif self.compare.isDifferent(source, targetSource) :
-                self.uninstallGroupComponent(gid, cid, True)
-                self.installUsfmWorkingText(gid, cid, force)
+                self.installUsfmWorkingText(gid, cid, False)
                 self.compare.compareComponent(gid, cid, 'working')
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
@@ -510,35 +506,15 @@ class ProjSetup (object) :
 
 
 ###############################################################################
-########################### Group Locking Functions ###########################
+########################### Project Lock Functions ############################
 ###############################################################################
 ####################### Error Code Block Series = 0400 ########################
 ###############################################################################
 
-    def lockUnlock (self, gid, lock = True) :
-        '''Lock or unlock to enable or disable actions to be taken on a group.'''
+    def lockUnlock (self, gid, lock) :
+        '''This is a placeholder for a shared function.'''
 
-        try :
-            self.setLock(gid, lock)
-            return True
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0410'], [gid,str(e)])
-
-
-    def setLock (self, gid, lock) :
-        '''Set a group lock to True or False.'''
-
-        if self.tools.testForSetting(self.projConfig['Groups'], gid) :
-            self.projConfig['Groups'][gid]['isLocked'] = lock
-            # Update the projConfig
-            if self.tools.writeConfFile(self.projConfig) :
-                # Report back
-                self.log.writeToLog(self.errorCodes['0420'], [gid, str(lock)])
-                return True
-        else :
-            self.log.writeToLog(self.errorCodes['0430'], [gid, str(lock)])
-            return False
+        self.tools_group.lockUnlock(gid, lock)
 
 
 ###############################################################################

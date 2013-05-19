@@ -56,7 +56,6 @@ class Illustration (Manager) :
         self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']
 
         # File names
-        self.illustrationConfFileName   = self.project.projectMediaIDCode + '_illustration.conf'
         self.defaultXmlConfFileName     = 'illustration.xml'
         # Folder paths
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
@@ -65,7 +64,6 @@ class Illustration (Manager) :
         self.projConfFolder             = self.project.local.projConfFolder
         self.rpmRapumaConfigFolder      = self.project.local.rapumaConfigFolder
         # File names with folder paths
-        self.illustrationConfFile       = os.path.join(self.projConfFolder, self.illustrationConfFileName)
         self.defaultXmlConfFile         = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
 
         # If we have nothing in the project for pointing to an illustrations
@@ -76,8 +74,7 @@ class Illustration (Manager) :
             self.tools.writeConfFile(self.projConfig)
 
         # Load the config object
-#        self.illustrationConfig = self.tools.initConfig(self.illustrationConfFile, self.defaultXmlConfFile)
-        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
+        self.illustrationConfig         = ConfigObj(self.project.local.illustrationConfFile, encoding='utf-8')
         # Load settings from the manager config
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

@@ -17,7 +17,8 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat, tempfile, subprocess
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat
+import difflib, tempfile, subprocess
 from datetime                       import *
 from xml.etree                      import ElementTree
 from configobj                      import ConfigObj, Section
@@ -36,15 +37,20 @@ class ToolsGroup (object) :
         self.projConfig             = projConfig
         self.userConfig             = userConfig
         self.pid                    = None
+        self.log                    = None
         self.tools                  = Tools()
+
         try :
             self.pid                = projConfig['ProjectInfo']['projectIDCode']
         except :
             pass
 
 ###############################################################################
-############################ Functions Begin Here #############################
+########################### Group Locking Functions ###########################
 ###############################################################################
+####################### Error Code Block Series = 0200 ########################
+###############################################################################
+
 
     def isLocked (self, gid) :
         '''Test to see if a group is locked. Return True if the group is 
@@ -55,6 +61,29 @@ class ToolsGroup (object) :
             return False
         elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
             return True
+        else :
+            return False
+
+
+    def lockUnlock (self, gid, lock = True) :
+        '''Lock or unlock to enable or disable actions to be taken on a group.'''
+
+        try :
+            self.setLock(gid, lock)
+            return True
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            sys.exit('\nERROR: The group [' + gid + '] lock/unlock function failed with this error: [' + str(e) + ']')
+
+
+    def setLock (self, gid, lock) :
+        '''Set a group lock to True or False.'''
+
+        if self.tools.testForSetting(self.projConfig['Groups'], gid) :
+            self.projConfig['Groups'][gid]['isLocked'] = lock
+            # Update the projConfig
+            if self.tools.writeConfFile(self.projConfig) :
+                return True
         else :
             return False
 
@@ -570,38 +599,51 @@ class Tools (object) :
     def writeConfFile (self, config) :
         '''Generic routin to write out to, or create a config file.'''
 
-    #    import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         # Build the folder path if needed
         if not os.path.exists(os.path.split(config.filename)[0]) :
             os.makedirs(os.path.split(config.filename)[0])
 
         # Make a backup in our temp dir case something goes dreadfully wrong
-        confData = tempfile.NamedTemporaryFile()
+        orgConfData = tempfile.NamedTemporaryFile()
         if os.path.isfile(config.filename) :
-            shutil.copy(config.filename, confData.name)
+            shutil.copy(config.filename, orgConfData.name)
 
-        # Let's try to write it out
-        try :
-            # To track when a conf file was saved as well as other general
-            # housekeeping we will create a GeneralSettings section with
-            # a last edit date key/value.
-            self.buildConfSection(config, 'GeneralSettings')
-            # If we got past that, write a time stamp
-            config['GeneralSettings']['lastEdit'] = self.tStamp()
-            # Try to write out the data now
-            config.write()
+        # Now do a compare on the new data set to see if there was any actual changes.
+        # Writing out a "non-change" will affect other processes downstream. There may
+        # be a better way to do this but this will have to do for now.
+        newConfData = tempfile.NamedTemporaryFile()
+        new = ConfigObj(config,  encoding='utf-8')
+        new.filename = newConfData.name
+        new.write()
 
-        except Exception as e :
-            terminal(u'\nERROR: Could not write to: ' + config.filename)
-            terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
-            # Recover now
-            if os.path.isfile(confData) :
-                shutil.copy(confData.name, config.filename)
-            # Use raise to send out a stack trace. An error at this point
-            # is like a kernel panic. Not good at all.
-            raise
-
+        # Inside of diffl() open both files with universial line endings then
+        # check each line for differences. This looks for an identical file
+        diff = difflib.ndiff(open(newConfData.name, 'rU').readlines(), open(orgConfData.name, 'rU').readlines())
+        for d in diff :
+            if d[:1] == '+' or d[:1] == '-' :
+                # Let's try to write it out
+                try :
+                    # To track when a conf file was saved as well as other general
+                    # housekeeping we will create a GeneralSettings section with
+                    # a last edit date key/value.
+                    self.buildConfSection(config, 'GeneralSettings')
+                    # If we got past that, write a time stamp
+                    config['GeneralSettings']['lastEdit'] = self.tStamp()
+                    # Try to write out the data now
+                    config.write()
+                except Exception as e :
+                    terminal(u'\nERROR: Could not write to: ' + config.filename)
+                    terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
+                    # Recover now
+                    if os.path.isfile(confData) :
+                        shutil.copy(orgConfData.name, config.filename)
+                    # Use raise to send out a stack trace. An error at this point
+                    # is like a kernel panic. Not good at all.
+                    raise
+                # No need to look for more if we write out on the first findall
+                break
         # Should be done if we made it this far
         return True
 

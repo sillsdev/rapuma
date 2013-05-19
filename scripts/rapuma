@@ -61,7 +61,7 @@ from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
 from rapuma.project.proj_commander  import Commander
 from rapuma.project.proj_maps       import Maps
-from rapuma.core.tools              import Tools
+from rapuma.core.tools              import Tools, ToolsGroup
 
 # Instantiate User config class
 uc              = UserConfig()
@@ -343,7 +343,12 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'lock' :
             if cmdType == 'group' :
-                ProjSetup(pid).lockUnlock(gid, True)
+                if cType == 'usfm' :
+                    ProjSetup(pid).lockUnlock(gid, True)
+                elif cType == 'map' :
+                    Maps(pid).lockUnlock(gid, True)
+                else :
+                    cTypeError(cType)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
