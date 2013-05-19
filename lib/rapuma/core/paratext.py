@@ -441,7 +441,7 @@ class Paratext (object) :
 
         # Get config objects unique to this function
         layoutConfig            = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
-        illustrationConfig      = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_illustration.conf'), encoding='utf-8')
+        illustrationConfig      = ConfigObj(os.path.join(self.local.projConfFolder, self.local.illustrationConfFile), encoding='utf-8')
         # Description of figKeys (in order found in \fig)
             # description = A brief description of what the illustration is about
             # file = The file name of the illustration (only the file name)

@@ -166,9 +166,7 @@ class ToolsPath (object) :
         targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
         source          = self.getSourceFile(gid, cid)
         sName           = os.path.split(source)[1]
-        filePath        = os.path.join(targetFolder, sName + '.source')
-        if os.path.exists(filePath) :
-            return filePath
+        return os.path.join(targetFolder, sName + '.source')
 
 
     def getGroupPreprocessFile (self, gid) :
