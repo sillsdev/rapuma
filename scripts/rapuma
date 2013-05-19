@@ -377,7 +377,7 @@ def userArguments (args) :
                             sys.exit('\nERROR: Not valid: [' + args.source_path + ']. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 elif cType == 'map' :
-                    Maps(pid).updateGroup(gid, cid_list, args.force)
+                    Maps(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :

@@ -21,7 +21,7 @@ import os, shutil, codecs, re, subprocess, tempfile
 from configobj                      import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath
+from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
@@ -48,6 +48,7 @@ class Maps (object) :
         self.projConfig                 = ProjConfig(self.local).projConfig
         self.log                        = ProjLog(self.pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
+        self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         # File names
         self.mapsConfFileName           = 'maps.conf'
         # Paths
@@ -62,6 +63,8 @@ class Maps (object) :
         # Log messages for this module
         self.errorCodes     = {
 
+            '0050' : ['ERR', 'Map group [<<1>>] is locked, no action can be taken. Use force (-f) to override.'],
+
             '0205' : ['ERR', 'Cannot find: [<<1>>]'],
             '0210' : ['LOG', 'Wrote out map settings to the project configuration file.'],
             '0220' : ['MSG', 'Added map group [<<1>>] to project.'],
@@ -70,7 +73,6 @@ class Maps (object) :
             '0250' : ['LOG', 'Created map group folder: [<<1>>]'],
             '0260' : ['LOG', 'Created map component folder: [<<2>>]'],
 
-            '0410' : ['ERR', 'Map group [<<1>>] is locked, no action can be taken. Use force (-f) to override.'],
             '0420' : ['MSG', 'Removed map group: [<<1>>]'],
             '0430' : ['WRN', 'Cannot removed map group: [<<1>>]'],
             '0460' : ['MSG', 'Map component [<<1>>] has been removed from the project.'],
@@ -78,6 +80,7 @@ class Maps (object) :
             '0610' : ['ERR', 'No valid source path for this map group.'],
             '0620' : ['LOG', 'Reset source path for this map group: [<<1>>]'],
             '0630' : ['ERR', 'Component [<<1>>] is not a part of the [<<2>>] map group.'],
+            '0640' : ['MSG', 'Component [<<1>>] part of the [<<2>>] map group has been updated.'],
 
             '0840' : ['MSG', 'Rendered the project maps.'],
 
@@ -143,7 +146,7 @@ class Maps (object) :
         self.tools.writeConfFile(self.mapsConfig)
         # Create a component folder and copy the source into it
         self.createComponentFolder(cid)
-        shutil.copy(filePath, os.path.join(self.projComponentsFolder, cid, fileName))
+        shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projComponentsFolder, cid, fileName))
         self.log.writeToLog(self.errorCodes['0225'], [cid,gid])
 
 
@@ -180,8 +183,8 @@ class Maps (object) :
         groupFolder     = os.path.join(self.local.projComponentsFolder, gid)
 
         # First test for lock
-        if self.tools_path.isLocked(gid) and force == False :
-            self.log.writeToLog(self.errorCodes['0410'], [gid])
+        if self.tools_group.isLocked(gid) and force == False :
+            self.log.writeToLog(self.errorCodes['0050'], [gid])
 
         # Remove subcomponents from the target if there are any
         self.tools.buildConfSection(self.projConfig, 'Groups')
@@ -228,11 +231,13 @@ class Maps (object) :
         '''Update a map group, --source is optional but if given it will
         overwrite the current setting.'''
 
+#        import pdb; pdb.set_trace()
+
         # Just in case there are any problems with the source path
         # resolve it here before going on.
         csid        = self.projConfig['Groups'][gid]['csid']
         if not self.tools.resolvePath(sourcePath) :
-            if testForSetting(self.userConfig['Projects'][self.pid], csid + '_sourcePath') :
+            if self.tools.testForSetting(self.userConfig['Projects'][self.pid], csid + '_sourcePath') :
                 sourcePath = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
                 if not os.path.exists(sourcePath) :
                     self.log.writeToLog(self.errorCodes['0610'], [csid])
@@ -262,22 +267,17 @@ class Maps (object) :
             target          = os.path.join(targetFolder, fileName)
             source          = os.path.join(sourcePath, fileName)
 
-#            import pdb; pdb.set_trace()
-
             if force :
-            
-# FIXME: move locking to tools
-            
-                self.lockUnlock(gid, False)
-                self.uninstallGroupComponent(gid, cid, force)
+                self.tools_group.lockUnlock(gid, False)
+                self.uninstallGroupComponent(gid, cid)
                 self.addComponent(gid, fileName, sourcePath, pgOrder)
                 self.log.writeToLog(self.errorCodes['0640'], [cid,gid])
             else :
-                self.log.writeToLog(self.errorCodes['0650'], [cid])
+                self.log.writeToLog(self.errorCodes['0050'], [cid])
 
         # Now be sure the group is locked down before we go
         if self.projConfig['Groups'][gid]['isLocked'] == 'False' :
-            self.tools.lockUnlock(gid, True)
+            self.tools_group.lockUnlock(gid, True)
 
 
 
