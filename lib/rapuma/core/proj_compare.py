@@ -126,9 +126,14 @@ class Compare (object) :
         if self.isDifferent(new, old) :
             # Get diff viewer
             diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
+            # Just in case the conf gets messed up (it has happened before)
+            if type(diffViewer) != list :
+                diffViewer = diffViewer.split()
+            diffViewer.append(new)
+            diffViewer.append(old)
             try :
                 self.log.writeToLog(self.errorCodes['295'], [self.tools.fName(new),self.tools.fName(old)])
-                subprocess.call([diffViewer, new, old])
+                subprocess.call(diffViewer)
             except Exception as e :
                 # If we don't succeed, we should probably quite here
                 self.log.writeToLog(self.errorCodes['280'], [str(e)])
