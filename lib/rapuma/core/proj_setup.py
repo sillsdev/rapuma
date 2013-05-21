@@ -236,11 +236,19 @@ class ProjSetup (object) :
                     if not cid in self.projConfig['Groups'][gid]['cidList'] :
                         self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
 
+        # Unlock the group so it can be worked on
+        self.lockUnlock(gid, False)
+
         # Process each cid
         for cid in cidList :
             target          = self.tools_path.getWorkingFile(gid, cid)
             targetSource    = self.tools_path.getWorkingSourceFile(gid, cid)
             source          = self.tools_path.getSourceFile(gid, cid)
+            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
+            # Set aside a tmp backup of the target
+            targetBackup    = tempfile.NamedTemporaryFile(delete=True)
+            if os.path.exists(target) :
+                shutil.copy(target, targetBackup.name)
 
 #            import pdb; pdb.set_trace()
 
@@ -249,15 +257,16 @@ class ProjSetup (object) :
             # In the past the component was pretty much removed with the function
             # uninstallGroupComponent() that practice has been discontinued as it
             # doesn't seem to make sense anymore
-            if force :
-                self.lockUnlock(gid, False)
+            if force or self.compare.isDifferent(source, targetSource) :
                 self.installUsfmWorkingText(gid, cid, force)
-                self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
+                if force :
+                    self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 self.compare.compareComponent(gid, cid, 'working')
-            # Just do a compare to see if we need to do this. force turned off
-            elif self.compare.isDifferent(source, targetSource) :
-                self.installUsfmWorkingText(gid, cid, False)
-                self.compare.compareComponent(gid, cid, 'working')
+                # Update our compare for next time
+                if os.path.isfile(workingComp) :
+                    self.tools.makeWriteable(workingComp)
+                shutil.copy(targetBackup.name, workingComp)
+                self.tools.makeReadOnly(workingComp)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 

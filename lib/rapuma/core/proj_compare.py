@@ -39,6 +39,7 @@ class Compare (object) :
         self.projectMediaIDCode = None
         self.local              = None
         self.projConfig         = None
+        self.diffViewCmd        = self.userConfig['System']['textDifferentialViewerCommand']
         self.finishInit()
 
         # Log messages for this module
@@ -122,18 +123,18 @@ class Compare (object) :
     def compare (self, new, old) :
         '''Run a compare on two files. Do not open in viewer unless it is different.'''
 
+#        import pdb; pdb.set_trace()
+
         # If there are any differences, open the diff viewer
         if self.isDifferent(new, old) :
-            # Get diff viewer
-            diffViewer = self.userConfig['System']['textDifferentialViewerCommand']
-            # Just in case the conf gets messed up (it has happened before)
-            if type(diffViewer) != list :
-                diffViewer = diffViewer.split()
-            diffViewer.append(new)
-            diffViewer.append(old)
+            # To prevent file names being pushed back to the list ref
+            # we need to use extend() rather than append()
+            cmd = []
+            cmd.extend(self.diffViewCmd)
+            cmd.extend([new, old])
             try :
                 self.log.writeToLog(self.errorCodes['295'], [self.tools.fName(new),self.tools.fName(old)])
-                subprocess.call(diffViewer)
+                subprocess.call(cmd)
             except Exception as e :
                 # If we don't succeed, we should probably quite here
                 self.log.writeToLog(self.errorCodes['280'], [str(e)])

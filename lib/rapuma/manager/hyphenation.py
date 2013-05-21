@@ -178,13 +178,18 @@ class Hyphenation (Manager) :
     def updateHyphenation (self, force) :
         '''Update critical hyphenation control files for a specified component type.'''
 
+
+
+
+# FIXME: Force needs to be used better here. Also, we need to do a diff check
+# between the project backup and the PT version to see if there has been a change.
+
         # Clean out the previous version of the component hyphenation file
         if os.path.isfile(self.compHyphFile) :
             os.remove(self.compHyphFile)
         # Run a hyphenation source preprocess if specified
         if self.useSourcePreprocess :
             self.processHyphens(force)
-
 
         # Create a new version
         self.harvestSource(force)
@@ -193,6 +198,14 @@ class Hyphenation (Manager) :
         if not os.path.isfile(self.compHyphFile) :
             self.tools.dieNow('Failed to create: ' + self.compHyphFile)
         self.log.writeToLog(self.errorCodes['0270'], [self.cType])
+
+
+
+
+
+
+
+
 
 
     def harvestSource (self, force = None) :
@@ -302,13 +315,9 @@ class Hyphenation (Manager) :
         '''Simple copy of the ParaTExt project hyphenation words list to the project.
         We will also create a backup as well to be used for comparison or fallback.'''
 
-        print self.ptHyphFile
-
         if os.path.isfile(self.ptHyphFile) :
             # Use a special kind of copy to prevent problems with BOMs
             self.tools.utf8Copy(self.ptHyphFile, self.ptProjHyphFile)
-#            # Once copied, check if any preprocessing is needed
-#            self.preprocessSource()
         else :
             self.log.writeToLog(self.errorCodes['1410'], '', 'copyPtHyphenWords()')
 
@@ -322,7 +331,6 @@ class Hyphenation (Manager) :
         if os.path.exists(self.ptHyphFile) :
         
             if os.path.exists(self.ptProjHyphBakFile) :
-                print Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile)
                 if Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
                     if os.path.exists(self.ptProjHyphBakFile) :
                         os.remove(self.ptProjHyphBakFile)
