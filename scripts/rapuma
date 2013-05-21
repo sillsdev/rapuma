@@ -198,7 +198,6 @@ def userArguments (args) :
         pc          = ProjConfig(local)
         checkCreatorVersion(pid, pc.projConfig, systemVersion)
 
-
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
     if sys.argv[1].lower() == 'system' :

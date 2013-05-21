@@ -107,6 +107,23 @@ class Binding (object) :
 
 #        import pdb; pdb.set_trace()
 
+
+
+
+
+
+# FIXME: Because we need many, if not all, of the services used in the render
+# process, it might be good to do some preprocessing to be sure everthing happens
+# that is supposed to. Example, first time bind is run hypenation doesn't seem to
+# to work but after subsequent runs with draft and proof, hypenation works with bind.
+# Might be able to prevent that with preprocessing here.
+
+
+
+
+
+
+
         # Get the order of the groups to be bound.
         bindOrder = {}
         for grp in self.projConfig['Groups'].keys() :

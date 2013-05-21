@@ -62,7 +62,6 @@ class Hyphenation (Manager) :
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
-        self.preProcessFileName     = self.cType + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
         self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
         lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
         self.lccodeTexFileName      = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
@@ -72,6 +71,7 @@ class Hyphenation (Manager) :
         self.grpHyphExcTexFileName  = self.configTools.processLinePlaceholders(grpHyphExcValue, grpHyphExcValue)
         self.ptProjHyphErrFileName  = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
         self.preProcessFileName     = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        self.rapumaPreProcessFileName = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
         # Folder Paths
         self.projScriptsFolder      = project.local.projScriptsFolder
         self.projHyphenationFolder  = project.local.projHyphenationFolder
@@ -84,7 +84,7 @@ class Hyphenation (Manager) :
         self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
         self.grpHyphExcTexFile      = os.path.join(self.projHyphenationFolder, self.grpHyphExcTexFileName)
         self.preProcessFile         = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
-        self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.preProcessFileName)
+        self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.rapumaPreProcessFileName)
         self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
         self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
         self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
@@ -112,6 +112,8 @@ class Hyphenation (Manager) :
             '0260' : ['MSG', 'Turned off hyphenation for group: [<<1>>]'],
             '0265' : ['MSG', 'Hyphenation is already off for group: [<<1>>]'],
             '0270' : ['MSG', 'Updated hyphenation files for component type: [<<1>>]'],
+            '0275' : ['ERR', 'Cannot create file: [<<1>>]'],
+            '0280' : ['MSG', 'Cannot update project hyphenation files. No difference found with source. Use force (-f) to run the update process.'],
 
             '1410' : ['ERR', 'ParaTExt source hypenation file not found.'],
             '1430' : ['WRN', 'Problems found in hyphenation word list. They were reported in [<<1>>].  Process continued but results may not be right. - paratext.checkForBadWords()'],
@@ -154,6 +156,9 @@ class Hyphenation (Manager) :
 
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
+            self.layoutConfig['Hyphenation']['setHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
+            self.layoutConfig['Hyphenation']['createHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
+            self.tools.writeConfFile(self.layoutConfig)
             self.projConfig['Groups'][self.gid]['useHyphenation'] = True
             self.tools.writeConfFile(self.projConfig)
             self.log.writeToLog(self.errorCodes['0250'], [self.gid])
@@ -178,34 +183,30 @@ class Hyphenation (Manager) :
     def updateHyphenation (self, force) :
         '''Update critical hyphenation control files for a specified component type.'''
 
+        def update () :
+            # Clean out the previous version of the component hyphenation file
+            if os.path.isfile(self.compHyphFile) :
+                os.remove(self.compHyphFile)
+            # Run a hyphenation source preprocess if specified
+            if self.useSourcePreprocess :
+                self.processHyphens(force)
 
+            # Create a new version
+            self.harvestSource(force)
+            self.makeHyphenatedWords()
+            # Quick sanity test
+            if not os.path.isfile(self.compHyphFile) :
+                self.log.writeToLog(self.errorCodes['0275'], [self.tools.fName(self.compHyphFile)])
+            self.log.writeToLog(self.errorCodes['0270'], [self.cType])
 
-
-# FIXME: Force needs to be used better here. Also, we need to do a diff check
-# between the project backup and the PT version to see if there has been a change.
-
-        # Clean out the previous version of the component hyphenation file
-        if os.path.isfile(self.compHyphFile) :
-            os.remove(self.compHyphFile)
-        # Run a hyphenation source preprocess if specified
-        if self.useSourcePreprocess :
-            self.processHyphens(force)
-
-        # Create a new version
-        self.harvestSource(force)
-        self.makeHyphenatedWords()
-        # Quick sanity test
-        if not os.path.isfile(self.compHyphFile) :
-            self.tools.dieNow('Failed to create: ' + self.compHyphFile)
-        self.log.writeToLog(self.errorCodes['0270'], [self.cType])
-
-
-
-
-
-
-
-
+        if force :
+            update()
+        elif not os.path.exists(self.compHyphFile) :
+            update()
+        elif os.path.exists(self.ptProjHyphBakFile) and self.tools.isOlder(self.ptProjHyphBakFile, self.ptHyphFile) :
+            update()
+        else :
+            self.log.writeToLog(self.errorCodes['0280'])
 
 
     def harvestSource (self, force = None) :
