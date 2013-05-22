@@ -172,7 +172,8 @@ class ToolsPath (object) :
     def getGroupPreprocessFile (self, gid) :
         '''Get the file name and path to the group's preprocess script.'''
 
-        return os.path.join(self.local.projComponentsFolder, gid, gid + '_groupPreprocess.py')
+        csid            = self.projConfig['Groups'][gid]['csid']
+        return os.path.join(self.local.projScriptsFolder, csid + '_textPreprocess.py')
 
 
 ###############################################################################

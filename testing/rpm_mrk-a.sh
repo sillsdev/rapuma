@@ -44,8 +44,8 @@ rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 # Copy (system) some preset setting files into the project
 echo copying: extention.tex
 cp ~/Publishing/testArea/KYUM/resources/extentions.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/extentions.tex
-echo copying: Mark_groupPreprocess.py
-cp ~/Publishing/testArea/KYUM/resources/Mark_groupPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Components/Mark/Mark_groupPreprocess.py
+echo copying: MYMR_textPreprocess.py
+cp ~/Publishing/testArea/KYUM/resources/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Scripts/MYMR_textPreprocess.py
 echo copying: usfm-ext.sty
 cp ~/Publishing/testArea/KYUM/resources/usfm-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Styles/usfm-ext.sty
 

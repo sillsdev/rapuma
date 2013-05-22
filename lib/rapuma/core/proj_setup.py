@@ -857,7 +857,7 @@ class ProjSetup (object) :
         default script and give a warning that the script is not complete.'''
 
         cType = self.projConfig['Groups'][gid]['cType']
-        rpmPreprocessFile = os.path.join(self.local.rapumaScriptsFolder, cType + '_groupPreprocess.py')
+        rpmPreprocessFile = os.path.join(self.local.rapumaScriptsFolder, 'textPreprocess.py')
         grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
         # Check and copy if needed
         if not os.path.isfile(grpPreprocessFile) :
