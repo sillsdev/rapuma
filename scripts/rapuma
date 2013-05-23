@@ -512,7 +512,7 @@ gCommandTypes           = ['group', 'hyphenation', 'illustration', 'preprocess']
 gCommands               = ['add', 'draft', 'proof', 'final', 'lock', 'remove', 'update', 'unlock']
 componentTypes          = ['usfm', 'map']
 # Other
-backgrounds             = ['draft', 'proof', 'final', 'lines', 'box']
+backgrounds             = ['cropmarks', 'draft', 'proof', 'final', 'lines', 'box']
 backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']
 postprocessCommands     = ['add', 'remove', 'process']

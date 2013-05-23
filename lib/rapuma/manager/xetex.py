@@ -772,6 +772,16 @@ class Xetex (Manager) :
         else :
             cidList = self.projConfig['Groups'][gid]['cidList']
 
+        # Background management (Phase one)
+        # Much of the backgound handeling happens after rendering but
+        # if cropmarks are desired, they must be turned on before the
+        # document is rendered. We turn that on here before and turn
+        # it off below when backgounds are being added.
+        if 'cropmarks' in self.projConfig['Managers'][self.manager][mode + 'Background'] :
+            if not self.tools.str2bool(self.layoutConfig['PageLayout']['useCropmarks']) :
+                self.layoutConfig['PageLayout']['useCropmarks'] = True
+                self.tools.writeConfFile(self.layoutConfig)
+
         # This is the file we will make. If force is set, delete the old one.
         if force :
             if os.path.isfile(self.gidPdfFile) :
@@ -839,9 +849,16 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
-            # Background management
+            # Background management (Phase 2)
             bgList = self.projConfig['Managers'][self.manager][mode + 'Background']
             for bg in bgList :
+                # Special handling for cropmarks happened before rendering
+                # Turn off cropmarks here because it is done already
+                if bg == 'cropmarks' :
+                    if self.tools.str2bool(self.layoutConfig['PageLayout']['useCropmarks']) :
+                        self.layoutConfig['PageLayout']['useCropmarks'] = False
+                        self.tools.writeConfFile(self.layoutConfig)
+                    continue
                 bgFile = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
                 cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :

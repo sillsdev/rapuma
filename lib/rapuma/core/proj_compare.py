@@ -40,6 +40,11 @@ class Compare (object) :
         self.local              = None
         self.projConfig         = None
         self.diffViewCmd        = self.userConfig['System']['textDifferentialViewerCommand']
+        # Make sure the diff view command is a list
+        if type(self.diffViewCmd) != list :
+            self.diffViewCmd = [self.userConfig['System']['textDifferentialViewerCommand']]
+        # In case there is not enough information for every function we will
+        # finish with this and quit safely if necessary
         self.finishInit()
 
         # Log messages for this module
