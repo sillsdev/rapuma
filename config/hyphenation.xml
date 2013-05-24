@@ -21,26 +21,5 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
-    <setting>
-        <name>Source Hyphenation Preprocess Script</name>
-        <key>sourcePreProcessScriptName</key>
-        <description>The name of the source hyphenation preprocess script file.</description>
-        <type>string</type>
-        <value>hyphenPreprocess.py</value>
-    </setting>
-    <setting>
-        <name>ParaTExt Hyphenation File Name</name>
-        <key>ptHyphenFileName</key>
-        <description>The name of the ParaTExt source hyphenation file.</description>
-        <type>string</type>
-        <value>hyphenatedWords.txt</value>
-    </setting>
-    <setting>
-        <name>Hyphenation Errors File Name</name>
-        <key>ptHyphErrFileName</key>
-        <description>The name of the file Rapuma generates which contains words that were rejected by the hyphenation process.</description>
-        <type>string</type>
-        <value>hyphenatedWordErrors.txt</value>
-    </setting>
 </root>
 

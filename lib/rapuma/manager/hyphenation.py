@@ -62,16 +62,16 @@ class Hyphenation (Manager) :
         self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
-        self.ptHyphFileName         = self.projConfig['Managers']['usfm_Hyphenation']['ptHyphenFileName']
-        lccodeValue                 = self.layoutConfig['Hyphenation']['lccodeFile']
-        self.lccodeTexFileName      = self.configTools.processLinePlaceholders(lccodeValue, lccodeValue)
-        compHyphValue               = self.layoutConfig['Hyphenation']['compHyphenFile']
-        self.compHyphFileName       = self.configTools.processLinePlaceholders(compHyphValue, compHyphValue)
-        grpHyphExcValue             = self.layoutConfig['Hyphenation']['grpHyphenExceptionsFile']
-        self.grpHyphExcTexFileName  = self.configTools.processLinePlaceholders(grpHyphExcValue, grpHyphExcValue)
-        self.ptProjHyphErrFileName  = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['ptHyphErrFileName']
-        self.preProcessFileName     = self.csid + '_' + self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
-        self.rapumaPreProcessFileName = self.projConfig['Managers']['usfm_Hyphenation']['sourcePreProcessScriptName']
+        # Some of these file names are dependent on Paratext, such as the ptHyphFileName
+        # Others are dependent on the macro package used in TeX. If these change, it must
+        # change here. If other modules need these values, they must get them here.
+        self.ptHyphFileName         = 'hyphenatedWords.txt'
+        self.lccodeTexFileName      = self.csid + '_lccode.tex'
+        self.compHyphFileName       = self.csid + '_hyphenation.txt'
+        self.grpHyphExcTexFileName  = self.csid + '_hyphenation.tex'
+        self.ptProjHyphErrFileName  = 'hyphenatedWordErrors.txt'
+        self.preProcessFileName     = self.csid + '_hyphenPreprocess.py'
+        self.rapumaPreProcessFileName = 'hyphenPreprocess.py'
         # Folder Paths
         self.projScriptsFolder      = project.local.projScriptsFolder
         self.projHyphenationFolder  = project.local.projHyphenationFolder
