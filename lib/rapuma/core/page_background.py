@@ -49,10 +49,12 @@ class PageBackground (object) :
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
-            '0220' : ['MSG', 'Set [<<1>>] background to True.'],
-            '0230' : ['MSG', 'Set [<<1>>] background to False.'],
-            '0240' : ['MSG', 'No change to [<<1>>] background.'],
-            '0250' : ['MSG', 'All backgrounds have been turned off.'],
+            '0220' : ['MSG', 'Background [<<1>>] is already being used for the [<<2>>] background type.'],
+            '0230' : ['MSG', 'Background [<<1>>] has been added for use in the [<<2>>] background.'],
+            '0240' : ['MSG', 'Background [<<1>>] has been removed from the [<<2>>] background type.'],
+            '0250' : ['MSG', 'Background [<<1>>] is not used in [<<2>>] background type. Cannot remove.'],
+            '0260' : ['MSG', 'Background [<<1>>] has been updated for the [<<2>>] background type.'],
+            '0270' : ['MSG', 'Background [<<1>>] is not found in the [<<2>>] background type. Cannot update.'],
             '0280' : ['MSG', 'Installed background file [<<1>>] into the project.'],
             '0290' : ['ERR', 'Failed to install background file [<<1>>]. Error: [<<2>>]'],
         }
@@ -75,8 +77,6 @@ class PageBackground (object) :
             self.projIllustrationsFolder    = self.local.projIllustrationsFolder
             self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
             # Files with path
-
-
         except Exception as e :
             # If this doesn't work, we should probably say something
             self.tools.terminal('Error: PageBackground() extra init failed because of: ' + str(e))
@@ -88,15 +88,67 @@ class PageBackground (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
+# FIXME: We have a bit of a time-bomb here in that backgounds are managed at
+# the project level but the settings info we need comes from the manager level
+# which is tied to the cType. In the code below we will be making the assumption
+# that the cType is "usfm". That will point us to the usfm_Xetex manager which
+# all of this is currently tied to. If this ever changes, we are hosed as far
+# as backgound management goes.
 
-    def removeBackground (self, bg) :
-        '''Remove backgound components from the project and turn off settings.'''
 
-        projBgFile      = os.path.join(self.projIllustrationsFolder, bg + 'Watermark.pdf')
-        if os.path.exists(projBgFile) :
-            os.remove(projBgFile)
+    def addBackground (self, outType, bgrd) :
+        '''Add a backgound to a specific output type.'''
 
-# FIXME: Need to be able to remove the backgound from the settings
+        bgName = bgrd
+        # Handle cropmarks
+        if bgrd != 'cropmarks' :
+            bgName = bgrd + 'Watermark'
+
+        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        if not bgName in bgList :
+            bgList.append(bgName)
+            self.projConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
+            self.tools.writeConfFile(self.projConfig)
+            if bgrd != 'cropmarks' :
+                self.checkForBackground(bgName, outType)
+            self.log.writeToLog(self.errorCodes['0230'], [bgName, outType])
+        else :
+            self.log.writeToLog(self.errorCodes['0220'], [bgName, outType])
+
+
+    def removeBackground (self, outType, bgrd) :
+        '''Remove a backgound from a specified output type.'''
+
+        bgName = bgrd
+        # Handle cropmarks
+        if bgrd != 'cropmarks' :
+            bgName = bgrd + 'Watermark'
+
+        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        if bgName in bgList :
+            bgList.remove(bgName)
+            self.projConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
+            self.tools.writeConfFile(self.projConfig)
+            self.log.writeToLog(self.errorCodes['0240'], [bgName, outType])
+        else :
+            self.log.writeToLog(self.errorCodes['0250'], [bgName, outType])
+
+
+    def updateBackground (self, outType, bgrd) :
+        '''Update a background for a specific output type.'''
+
+        bgName = bgrd
+        # Handle cropmarks
+        if bgrd != 'cropmarks' :
+            bgName = bgrd + 'Watermark'
+
+        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        if bgName in bgList :
+            if bgrd != 'cropmarks' :
+                self.checkForBackground(bgName, outType, True)
+            self.log.writeToLog(self.errorCodes['0260'], [bgName, outType])
+        else :
+            self.log.writeToLog(self.errorCodes['0270'], [bgName, outType])
 
 
     def checkForBackground (self, bg, mode, force = False) :

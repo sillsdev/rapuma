@@ -70,7 +70,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130524'
+systemVersion   = '0.1.20130524a'
 local           = None
 
 # Give a welcome message
@@ -457,12 +457,16 @@ def userArguments (args) :
 
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
-        if args.manage == 'add' :
-            PageBackground(args.project_id).checkForBackground(args.background_type + 'Watermark', args.background_type, args.force)
-        elif args.manage == 'remove' :
-            PageBackground(args.project_id).removeBackground(args.background_type)
-        elif args.background_type == 'none' :
-            PageBackground(args.project_id).backgroundOff()
+        outType     = args.output_type
+        cmd         = args.command
+        pid         = args.project_id
+        bgrd        = args.background
+        if cmd == 'add' :
+            PageBackground(pid).addBackground(outType, bgrd)
+        elif cmd == 'remove' :
+            PageBackground(pid).removeBackground(outType, bgrd)
+        elif cmd == 'update' :
+            PageBackground(pid).updateBackground(outType, bgrd)
 
     # Totally lost
     else:
@@ -511,9 +515,11 @@ mediaTypes              = ['book']
 gCommandTypes           = ['group', 'hyphenation', 'illustration', 'preprocess']
 gCommands               = ['add', 'draft', 'proof', 'final', 'lock', 'remove', 'update', 'unlock']
 componentTypes          = ['usfm', 'map']
+# Background
+outputType              = ['bind', 'draft', 'final', 'proof']
+backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
+backgroundCommands      = ['add', 'remove', 'update']
 # Other
-backgrounds             = ['cropmarks', 'draft', 'proof', 'final', 'lines', 'box']
-backgroundCommands      = ['add', 'remove']
 compareTests            = ['source', 'source-working', 'working']
 postprocessCommands     = ['add', 'remove', 'process']
 fontCommands            = ['add', 'remove', 'primary']
@@ -595,9 +601,9 @@ settingsCommand.add_argument('value', type=fsunicode, help='A new value to add o
 # Add page background subprocess arguments
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
 backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-backgroundCommand.add_argument('background_type', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
-backgroundCommand.add_argument('-m', '--manage', choices=backgroundCommands, help='The general commands that can be used for managing backgound.')
-backgroundCommand.add_argument('-f', '--force', action='store_true', help='Force overwrite on exsisting background file.')
+backgroundCommand.add_argument('output_type', choices=outputType, help='The type of (rendered) output a background will be applied to or removed from.')
+backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
+backgroundCommand.add_argument('command', choices=backgroundCommands, help='The general commands that can be used for managing backgound.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args())
