@@ -203,8 +203,6 @@ class Usfm (Group) :
         # FIXME: Note page border has not really been implemented yet.
         # It is different from backgound management
         useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][gid]['useIllustrations'])
-        useHyphenation          = self.tools.str2bool(self.projConfig['Groups'][gid]['useHyphenation'])
-        usePageBorder           = self.tools.str2bool(self.layoutConfig['PageLayout']['usePageBorder'])
         useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][gid]['useManualAdjustments'])
 
         # Check if there is a font installed

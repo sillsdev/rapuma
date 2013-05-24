@@ -91,7 +91,6 @@ class Xetex (Manager) :
         self.useIllustrations       = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
         self.useMarginalVerses      = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
         self.chapNumOffSingChap     = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-
         # File names
         # Some of these file names will only be used once but for consitency
         # we will create them all in one place.
@@ -450,16 +449,24 @@ class Xetex (Manager) :
         dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile]
         makeIt = False
 
-        # Check for existance and age
 #        import pdb; pdb.set_trace()
-        if os.path.isfile(self.setTexFile) :
-            for f in dep :
-                if self.tools.isOlder(self.setTexFile, f) :
-                    # Something changed in a conf file this is dependent on
-                    makeIt = True
-                    break
-        else :
-            makeIt = True
+
+        # Check for existance and age
+        # FIXME: An issue that goes beyond existance and age is when the settings
+        # need to be regenerated because of a difference between groups, hyphenation
+        # for example. Need to find a way to triger this process when this kind of
+        # difference exsists. What would make the most sense?
+#        if os.path.isfile(self.setTexFile) :
+#            for f in dep :
+#                if self.tools.isOlder(self.setTexFile, f) :
+#                    # Something changed in a conf file this is dependent on
+#                    makeIt = True
+#                    break
+#        else :
+#            makeIt = True
+
+        # FIXME: Temporary override because of the problem above.
+        makeIt = True
 
         # Bail out here if necessary, return True because everything seems okay
         if not makeIt :
