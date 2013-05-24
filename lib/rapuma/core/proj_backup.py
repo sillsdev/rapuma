@@ -148,6 +148,10 @@ class ProjBackup (object) :
         # Special processing of the Macros folder (in this case we
         # want to keep most of the .tex files.)
         for root, dirs, files in os.walk(self.local.projMacrosFolder) :
+            # These are specific files in the macro folder we don't want
+            excludeFiles.append(os.path.join(root, 'macLink.tex'))
+            excludeFiles.append(os.path.join(root, 'settings.tex'))
+            # Now do a more general search
             for fileName in files :
                 # Get rid of backup files
                 if fileName[-1] == '~' :
@@ -158,10 +162,6 @@ class ProjBackup (object) :
                     # A special indicator for file we want to keep
                     if fileName.find('-ext.') > 0 :
                         continue
-                    elif fileName.find('macLink.tex') > 0 :
-                        excludeFiles.append(os.path.join(root, fileName))
-                    elif fileName.find('_set.tex') > 0 :
-                        excludeFiles.append(os.path.join(root, fileName))
 
         # Exclude all PDFs from the Deliverables folder
         for root, dirs, files in os.walk(self.local.projDeliverablesFolder) :
