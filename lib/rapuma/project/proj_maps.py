@@ -19,6 +19,7 @@
 
 import os, shutil, codecs, re, subprocess, tempfile
 from configobj                      import ConfigObj, Section
+from functools                      import partial
 
 # Load the local classes
 from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
@@ -27,6 +28,8 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.project.project         import Project
+from rapuma.core.paratext           import Paratext
+#from rapuma.core.proj_setup         import ProjSetup
 
 
 ###############################################################################
@@ -35,10 +38,11 @@ from rapuma.project.project         import Project
 
 class Maps (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid) :
         '''Do the primary initialization for this manager.'''
 
         self.pid                        = pid
+        self.gid                        = gid
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
@@ -49,16 +53,21 @@ class Maps (object) :
         self.log                        = ProjLog(self.pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
+        self.paratext                   = Paratext(self.pid)
         # File names
-        self.mapsConfFileName           = 'maps.conf'
-        # Paths
+        self.illustrationConfFileName   = 'illustration.conf'
+        self.gidTexFileName             = self.gid + '.tex'
+        # Folder paths
         self.projConfFolder             = self.local.projConfFolder
         self.projComponentsFolder       = self.local.projComponentsFolder
+        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
+        self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
         # File names with paths
-        self.mapsConfFile               = os.path.join(self.projConfFolder, self.mapsConfFileName)
+        self.illustrationConfFile       = os.path.join(self.projConfFolder, self.illustrationConfFileName)
+        self.gidTexFile                 = os.path.join(self.gidFolder, self.gidTexFileName)
 
         # Load the maps settings config object
-        self.mapsConfig                 = ConfigObj(self.mapsConfFile, encoding='utf-8')
+        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
 
         # Log messages for this module
         self.errorCodes     = {
@@ -82,9 +91,21 @@ class Maps (object) :
             '0630' : ['ERR', 'Component [<<1>>] is not a part of the [<<2>>] map group.'],
             '0640' : ['MSG', 'Component [<<1>>] part of the [<<2>>] map group has been updated.'],
 
-            '0840' : ['MSG', 'Rendered the project maps.'],
+            '0825' : ['MSG', 'Rendering of [<<1>>] successful.'],
+            '0830' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
+            '0835' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
+            '0840' : ['MSG', 'Rendered the project maps for group: [<<1>>].'],
+            '0860' : ['ERR', 'Invalid map component ID: [<<1>>].'],
 
         }
+
+        # A source path is often important, try to get that now
+        try :
+            self.csid                   = self.projConfig['Groups'][self.gid]['csid']
+            self.cType                  = self.projConfig['Groups'][self.gid]['cType']
+            self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
+        except :
+            pass
 
 
 ###############################################################################
@@ -93,11 +114,33 @@ class Maps (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
-#        import pdb; pdb.set_trace()
+# FIXME? This is a duplicate of a function of the same name in proj_setup but
+# because this changes the config obj I copied it here to save on confusion
+    def addComponentType (self, cType) :
+        '''Add (register) a component type to the config if it 
+        is not there already.'''
 
-    def addGroup (self, gid, mapFileList, csid, csidPath, force = False) :
+        Ctype = cType.capitalize()
+        # Build the comp type config section
+        self.tools.buildConfSection(self.projConfig, 'CompTypes')
+        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
+
+        # Get persistant values from the config if there are any
+        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
+        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
+            self.projConfig['CompTypes'][Ctype] = newSectionSettings
+            # Save the setting rightaway
+            self.tools.writeConfFile(self.projConfig)
+
+
+    def addGroup (self, mapFileList, csid, csidPath, force = False) :
         '''Add maps to the project.'''
 
+        # First be sure the component type exists in the conf
+        self.addComponentType('map')
+
+#        import pdb; pdb.set_trace()
+        
         # First test for the map component files
         pgOrder = 0
         for fileName in mapFileList :
@@ -106,57 +149,72 @@ class Maps (object) :
             if not os.path.exists(filePath) :
                 self.log.writeToLog(self.errorCodes['0205'], [filePath])
             else :
-                self.addComponent(gid, fileName, filePath, pgOrder)
+                self.addComponent(fileName, csidPath, pgOrder, force)
 
         # Having made it this far we can output information to the project config
-        self.createGroupFolder(gid)
-        self.projConfig['Groups'][gid] = {}
-        self.projConfig['Groups'][gid]['cidList'] = self.mapsConfig['Groups'][gid].keys()
-        self.projConfig['Groups'][gid]['startPageNumber'] = 1
-        self.projConfig['Groups'][gid]['cType'] = 'map'
-        self.projConfig['Groups'][gid]['isLocked'] = True
-        self.projConfig['Groups'][gid]['csid'] = csid
-        self.projConfig['Groups'][gid]['totalPages'] = pgOrder
-        self.projConfig['Groups'][gid]['precedingGroup'] = None
-        self.projConfig['Groups'][gid]['bindingOrder'] = 0
+        self.createGroupFolder()
+        self.createMapGroupStyleFile(force)
+        self.projConfig['Groups'] = {}
+        self.projConfig['Groups'][self.gid] = {}
+        self.projConfig['Groups'][self.gid]['cidList'] = self.illustrationConfig[self.gid].keys()
+        self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
+        self.projConfig['Groups'][self.gid]['cType'] = 'map'
+        self.projConfig['Groups'][self.gid]['isLocked'] = True
+        self.projConfig['Groups'][self.gid]['csid'] = csid
+        self.projConfig['Groups'][self.gid]['totalPages'] = pgOrder
+        self.projConfig['Groups'][self.gid]['precedingGroup'] = None
+        self.projConfig['Groups'][self.gid]['bindingOrder'] = 0
         self.tools.writeConfFile(self.projConfig)
         # Add map group source path to userConfig
         self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = csidPath
         self.tools.writeConfFile(self.userConfig)
 
-        self.log.writeToLog(self.errorCodes['0220'], [gid])
+        self.log.writeToLog(self.errorCodes['0220'], [self.gid])
 
 
-    def addComponent (self, gid, fileName, filePath, pgOrder) :
+    def addComponent (self, fileName, filePath, pgOrder, force) :
         '''Add a single map component to a group.'''
 
-        # Build a map file info dictionary
-        mapInfo = {}
-        mapInfo['Groups'] = {}
-        mapInfo['Groups'][gid] = {}
-        cid = os.path.splitext(fileName)[0].upper()
-        mapInfo['Groups'][gid][cid] = {}
-        mapInfo['Groups'][gid][cid]['mapFileName'] = fileName
-        mapInfo['Groups'][gid][cid]['mapFileType'] = os.path.splitext(fileName)[1][1:].lower()
-        mapInfo['Groups'][gid][cid]['pageTitle'] = 'Title: ' + cid
-        mapInfo['Groups'][gid][cid]['usePageTitle'] = True
-        mapInfo['Groups'][gid][cid]['pageOrder'] = pgOrder
-        # Merge the info into the existing maps config file
-        self.mapsConfig.merge(mapInfo)
-        self.tools.writeConfFile(self.mapsConfig)
-        # Create a component folder and copy the source into it
+#        import pdb; pdb.set_trace()
+
+        # Because we use are using the paratext.logFigure()
+        # function we need to format the figConts manually
+        # so it gets what it expects
+        cid = os.path.splitext(fileName)[0]
+        figConts = 'some text\\fig Map file for: ' + self.gid + '|' + fileName + '|span|b|SIL International 2013|None|MAP 1:1 \\fig* some more text'
+        # Put the map (illustration) into the config file
+        # This is a really dumb way to do this but this is how
+        # logFigure() is expecting to see the data
+        re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, self.gid, cid), figConts)
+
+        # Reload the illustrationConfFile
+        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
+
+        # Modify this entry in the illustration config file
+        self.illustrationConfig[self.gid][cid]['pageOrder'] = pgOrder
+        self.illustrationConfig[self.gid][cid]['bid'] = 'map'
+        self.illustrationConfig[self.gid][cid]['location'] = ''
+        self.illustrationConfig[self.gid][cid]['position'] = 'b'
+        self.tools.writeConfFile(self.illustrationConfig)
+        # Copy the file into the project illustration folder
+        if not os.path.exists(self.projIllustrationsFolder) :
+            os.makedirs(self.projIllustrationsFolder)
+        shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projIllustrationsFolder, fileName))
+
+        # Create a component folder and its contents
         self.createComponentFolder(cid)
-        shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projComponentsFolder, cid, fileName))
-        self.log.writeToLog(self.errorCodes['0225'], [cid,gid])
+        self.createComponentContainerFile(cid, force)
+
+        self.log.writeToLog(self.errorCodes['0225'], [cid,self.gid])
 
 
-    def createGroupFolder (self, gid) :
+    def createGroupFolder (self) :
         '''Create a project maps folder if one is not there.'''
 
-        folder = os.path.join(self.projComponentsFolder, gid)
+        folder = os.path.join(self.projComponentsFolder, self.gid)
         if not os.path.exists(folder) :
             os.makedirs(folder)
-            self.log.writeToLog(self.errorCodes['0250'], [gid])
+            self.log.writeToLog(self.errorCodes['0250'], [self.gid])
 
 
     def createComponentFolder (self, cid) :
@@ -166,6 +224,52 @@ class Maps (object) :
         if not os.path.exists(folder) :
             os.makedirs(folder)
             self.log.writeToLog(self.errorCodes['0260'], [cid])
+
+
+    def createComponentContainerFile (self, cid, force) :
+        '''Create the map component container file. This is a usfm-like
+        file that will guide the rendering process. Because we look at
+        map processing different than text, this file is auto-generated.'''
+
+        mapFileName = self.illustrationConfig[self.gid][cid]['fileName']
+        cidFileName = cid + '_' + self.gid + '.map'
+        cidFile = os.path.join(self.projComponentsFolder, cid, cidFileName)
+
+        # Lets start with just a simple file and go from there
+        if not os.path.exists(cidFile) or force :
+            contents = codecs.open(cidFile, "w", encoding="utf_8_sig")
+            contents.write('\\id map - ' + mapFileName + '\n')
+            contents.write('\\rem Auto-generated map rendering file. Edit as needed.\n')
+            contents.write('\\rem Generated on: ' + self.tools.tStamp() + '\n')
+            contents.write('\\mt1 How do we get a title here?\n')
+            contents.write('\\c 1\n')
+            contents.write('\\p\n')
+            contents.write('\\v 1 \\nbsp\n')
+
+
+    def createMapGroupStyleFile (self, force) :
+        '''Create the map component container file. This is a usfm-like
+        file that will guide the rendering process. Because we look at
+        map processing different than text, this file is auto-generated.'''
+
+        styFileName     = 'usfm-grp-ext.sty'
+        styFile         = os.path.join(self.projComponentsFolder, self.gid, styFileName)
+
+        # Lets start with just a simple file and go from there
+        # This should go in before any other auto-generated sty
+        # file so we should be good to go
+        if not os.path.exists(styFile) or force :
+            contents = codecs.open(styFile, "w", encoding="utf_8_sig")
+            contents.write('# Auto-generated style file for map rendering. Edit as needed.\n')
+            contents.write('# ' + styFileName + ' Generated on: ' + self.tools.tStamp() + '\n\n')
+            contents.write('\\Marker v\n')
+            contents.write('\\FontSize 0.2\n\n')
+            contents.write('\\Marker mt1\n')
+            contents.write('\\FontSize 14\n')
+            contents.write('\\SpaceAfter -24\n')
+            contents.write('\\SpaceBefore 0\n\n')
+            contents.write('\\Marker p\n')
+            contents.write('\\FontSize 0.2\n\n')
 
 
 ###############################################################################
@@ -280,24 +384,61 @@ class Maps (object) :
             self.tools_group.lockUnlock(gid, True)
 
 
-
-
-
-
 ###############################################################################
 ############################## Render Functions ###############################
 ###############################################################################
 ######################## Error Code Block Series = 0800 #######################
 ###############################################################################
 
-    def renderMaps (self, mapFiles = None, force = False) :
+    def renderMapGroup (self, mode, cidList = None, force = False) :
         '''Render a map or a set of maps.'''
 
-        self.log.writeToLog(self.errorCodes['0640'])
+        # Sort out the cid list
+        if cidList :
+            self.isValidCidList(cidList)
+        else :
+            cidList = self.projConfig['Groups'][self.gid]['cidList']
+
+        # Be sure all the images are preprocessed
+#        for cid in cidList :
+#            self.preprocessImage(cid, force)
+
+        # TeX rendering
+        Project(self.pid, self.gid).renderGroup(mode, cidList, True)
 
 
+        self.log.writeToLog(self.errorCodes['0840'], [self.gid])
 
 
+    def isValidCidList (self, thisCidlist) :
+        '''Check to see if all the components in the list are in the group.'''
+
+        cidList = self.projConfig['Groups'][self.gid]['cidList']
+        for cid in thisCidlist :
+            if not cid in cidList :
+                self.log.writeToLog(self.errorCodes['0860'],[cid])
+
+
+    def preprocessImage (self, cid, force) :
+        '''Use ImageMagick to preprocess a map image.'''
+        
+        # Create the file names we will need
+        fileName = self.mapsConfig['Groups'][self.gid][cid]['mapFileName']
+        inFile = os.path.join(self.projComponentsFolder, cid, fileName)
+        outOne = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '-1.png'))
+        outTwo = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '-2.png'))
+        outThree = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '.pdf'))
+
+        # Create the ImageMagick rendering commands
+        cmdOne = ['convert', '-border', '5', '-bordercolor', 'black', inFile, '-density', '150', '-rotate', '-90', outOne]
+        cmdTwo = ['convert', outOne, '-border', '100', '-bordercolor', 'white', outTwo]
+        cmdThree = ['convert', outTwo, '-format', 'pdf', outThree]
+
+        # Run the processes
+        processes = [cmdOne, cmdTwo, cmdThree]
+        if not os.path.exists(outThree) or force :
+            for cmd in processes :
+                subprocess.call(cmd)
 
 
 

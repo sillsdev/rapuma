@@ -94,7 +94,7 @@ Todo:
             <key>recognizedComponentTypes</key>
             <description>A list of valid component types that are recognized by the Rapuma system.</description>
             <type>list</type>
-            <value>usfm</value>
+            <value>usfm,map</value>
         </setting>
     </section>
     <section>

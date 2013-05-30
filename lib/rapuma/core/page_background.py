@@ -30,22 +30,31 @@ class PageBackground (object) :
 
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
+        
+        # FIXME: because the usfm cType is most common at this time, to make
+        # things easier we set that as the cType. If the project is not using
+        # that cType, this will all break.
+
+#        import pdb; pdb.set_trace()
 
         self.pid                        = pid
+        self.cType                      = 'usfm'
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = None
-        self.projectMediaIDCode         = None
-        self.local                      = None
-        self.projConfig                 = None
-        self.layoutConfig               = None
+        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
+        self.local                      = ProjLocal(self.pid)
+        self.projConfig                 = ProjConfig(self.local).projConfig
+        self.log                        = ProjLog(self.pid)
+        # If the order of importance is set right in the list, this should
+        # end in joy.
+        for cType in self.userConfig['System']['recognizedComponentTypes'] :
+            if self.tools.testForSetting(self.projConfig['CompTypes'], cType.capitalize()) :
+                self.layoutConfig       = ConfigObj(os.path.join(self.local.projConfFolder, cType + '_layout.conf'), encoding='utf-8')
         # Paths
-        self.projIllustrationsFolder    = None
-        # File names and paths
+        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
+        self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
 
-        # Try to finish the init (failing is okay for some functions in this module)
-        self.finishInit()
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
@@ -58,28 +67,6 @@ class PageBackground (object) :
             '0280' : ['MSG', 'Installed background file [<<1>>] into the project.'],
             '0290' : ['ERR', 'Failed to install background file [<<1>>]. Error: [<<2>>]'],
         }
-
-
-    def finishInit (self, projHome = None) :
-        '''Finishing collecting settings that would be needed for most
-        functions in this module.'''
-
-        try :
-            self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local                      = ProjLocal(self.pid)
-            self.projConfig                 = ProjConfig(self.local).projConfig
-            self.log                        = ProjLog(self.pid)
-            self.layoutConfig               = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
-            # File names
-
-            # Paths
-            self.projIllustrationsFolder    = self.local.projIllustrationsFolder
-            self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
-            # Files with path
-        except Exception as e :
-            # If this doesn't work, we should probably say something
-            self.tools.terminal('Error: PageBackground() extra init failed because of: ' + str(e))
 
 
 ###############################################################################
@@ -190,7 +177,7 @@ class PageBackground (object) :
         final_output = bgLinesFile
 
         # input and calculation
-        # get the values for page dimensions from Rapuma book_layout.conf 
+        # get the values for page dimensions from Rapuma usfm_layout.conf 
         pageHeight          = int(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = int(self.layoutConfig['PageLayout']['pageWidth'])
 
@@ -241,17 +228,13 @@ class PageBackground (object) :
 
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
-        # from Rapuma book_layout.conf 
+        # from Rapuma usfm_layout.conf 
         pageHeight          = int(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = int(self.layoutConfig['PageLayout']['pageWidth'])
-        #lineSpacingFactor   = int(float(self.layoutConfig['Fonts']['lineSpacingFactor']))
         lineSpacingFactor   = float(self.layoutConfig['Fonts']['lineSpacingFactor'])
-        #fontSizeUnit        = int(float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', '')))
         fontSizeUnit        = float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = int(self.layoutConfig['Margins']['marginUnit'])
-        #topMarginFactor     = int(float(self.layoutConfig['Margins']['topMarginFactor']))
         topMarginFactor     = float(self.layoutConfig['Margins']['topMarginFactor'])
-        #bottomMarginFactor  = int(float(self.layoutConfig['Margins']['bottomMarginFactor']))
         bottomMarginFactor  = float(self.layoutConfig['Margins']['bottomMarginFactor'])
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor

@@ -39,7 +39,6 @@ class Paratext (object) :
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
-        self.projectMediaIDCode     = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                  = ProjLocal(pid)
         self.projConfig             = ProjConfig(self.local).projConfig
         self.log                    = ProjLog(self.pid)
@@ -265,15 +264,15 @@ class Paratext (object) :
                     return self.tools.xmlFileToDict(ssfFile)
 
 
-    def getSourceEditor (self) :
+    def getSourceEditor (self, cType) :
         '''Return the sourceEditor if it is set. If not try to
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
 
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if self.tools.testForSetting(self.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
-            se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        if self.tools.testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'sourceEditor') :
+            se = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         else :
             if self.findSsfFile() :
                 se = 'paratext'
@@ -296,11 +295,13 @@ class Paratext (object) :
 
 
     def usfmCidInfo (self) :
-        '''Return a dictionary of all valid information about USFMs used in PT.'''
+        '''Return a dictionary of all valid information about USFMs used in PT. Note
+        that a couple special non-standard IDs have been added at the top of the list.'''
 
     #            ID     Comp Name                               Comp ID                         PT ID  Chps
         return {
                 '_z_' : ['USFM InternalCaller',                 'usfm_internal_caller',         '00',   0], 
+                'map' : ['Map',                                 'map',                          '00',   1], 
                 'gen' : ['Genesis',                             'genesis',                      '01',  50], 
                 'exo' : ['Exodus',                              'exodus',                       '02',  40], 
                 'lev' : ['Leviticus',                           'leviticus',                    '03',  27], 
@@ -440,7 +441,7 @@ class Paratext (object) :
         behavior.'''
 
         # Get config objects unique to this function
-        layoutConfig            = ConfigObj(os.path.join(self.local.projConfFolder, self.projectMediaIDCode + '_layout.conf'), encoding='utf-8')
+        layoutConfig            = ConfigObj(os.path.join(self.local.projConfFolder, self.cType + '_layout.conf'), encoding='utf-8')
         illustrationConfig      = ConfigObj(os.path.join(self.local.projConfFolder, self.local.illustrationConfFile), encoding='utf-8')
         # Description of figKeys (in order found in \fig)
             # description = A brief description of what the illustration is about
@@ -451,14 +452,21 @@ class Paratext (object) :
             # copyright = Copyright information for the illustration
             # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
 
-        fig = figConts.group(1).split('|')
+        # We want the figConts to be a list but it comes in as a re group
+        figList = figConts.group(1).split('|')
+
         figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
         figDict = {}
-        cvSep = layoutConfig['Illustrations']['chapterVerseSeperator']
+        # FIXME: If this is for a map and no layout information has been added
+        # to the project yet, the cvSep look up will fail, get around with a try
+        try :
+            cvSep = layoutConfig['Illustrations']['chapterVerseSeperator']
+        except :
+            cvSep = ':'
 
         # Add all the figure info to the dictionary
         c = 0
-        for value in fig :
+        for value in figList :
             figDict[figKeys[c]] = value
             c +=1
 
@@ -467,7 +475,7 @@ class Paratext (object) :
         figDict['useThisIllustration'] = True
         figDict['useThisCaption'] = True
         figDict['useThisCaptionRef'] = True
-        figDict['bid'] = cid.lower()
+        figDict['bid'] = cid
         c = re.search(ur'([0-9]+)[.:][0-9]+', figDict['reference'].upper())
         if c is None :
             figDict['chapter'] = 0  # Or however you want to handle "pattern not found"
@@ -505,10 +513,10 @@ class Paratext (object) :
         if not self.tools.testForSetting(illustrationConfig, gid) :
             self.tools.buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not self.tools.testForSetting(illustrationConfig[gid], figDict['illustrationID'].upper()) :
-            self.tools.buildConfSection(illustrationConfig[gid], figDict['illustrationID'].upper())
+        if not self.tools.testForSetting(illustrationConfig[gid], figDict['illustrationID']) :
+            self.tools.buildConfSection(illustrationConfig[gid], figDict['illustrationID'])
         for k in figDict.keys() :
-            illustrationConfig[gid][figDict['illustrationID'].upper()][k] = figDict[k]
+            illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
 
         # Write out the conf file to preserve the data found
         self.tools.writeConfFile(illustrationConfig)
@@ -517,8 +525,14 @@ class Paratext (object) :
         # allow for that. However, default behavior is to strip them
         # because usfmTex does not handle \fig markers. By returning
         # them here, they will not be removed from the working text.
-        if self.tools.str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
-            return '\\fig ' + figConts.group(1) + '\\fig*'
+        # FIXME: One issue here is that is is basicaly hard-wired for
+        # usfm to be the only cType. This breaks if you are working with
+        # something else. To get around it we will use a try statement
+        try :
+            if self.tools.str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+                return '\\fig ' + figConts.group(1) + '\\fig*'
+        except :
+            return None
 
 
 ###############################################################################

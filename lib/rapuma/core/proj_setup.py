@@ -182,6 +182,8 @@ class ProjSetup (object) :
             self.backup             = ProjBackup(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+            # These could be initialized above but because it might be necessary
+            # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.pid)
@@ -481,6 +483,8 @@ class ProjSetup (object) :
     def addComponentType (self, cType) :
         '''Add (register) a component type to the config if it 
         is not there already.'''
+
+#        import pdb; pdb.set_trace()
 
         Ctype = cType.capitalize()
         # Build the comp type config section

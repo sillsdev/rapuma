@@ -295,7 +295,10 @@ def userArguments (args) :
         if args.component_type :
             cType = args.component_type
         else :
-            cType = initProject(pid, gid).projConfig['Groups'][gid]['cType']
+            try :
+                cType = initProject(pid, gid).projConfig['Groups'][gid]['cType']
+            except :
+                sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
@@ -319,7 +322,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
                 elif cType == 'map' :
-                    Maps(pid).addGroup(gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+                    Maps(pid, gid).addGroup(cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
             elif cmdType == 'hyphenation' :
                 initProject(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -335,7 +338,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     initProject(pid, gid).renderGroup(cmd, cid_list, args.force)
                 elif cType == 'map' :
-                    Maps(pid).renderMapGroup(gid, cmd, cid_list, args.force)
+                    Maps(pid, gid).renderMapGroup(cmd, cid_list, args.force)
                 else :
                     cTypeError(cType)
             else :
@@ -345,7 +348,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     ProjSetup(pid).lockUnlock(gid, True)
                 elif cType == 'map' :
-                    Maps(pid).lockUnlock(gid, True)
+                    Maps(pid, gid).lockUnlock(True)
                 else :
                     cTypeError(cType)
             else :
@@ -357,7 +360,7 @@ def userArguments (args) :
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         Commander(pid).removeScripts()
                 elif cType == 'map' :
-                    Maps(pid).removeGroup(gid, args.force)
+                    Maps(pid, gid).removeGroup(args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -376,7 +379,7 @@ def userArguments (args) :
                             sys.exit('\nERROR: Not valid: [' + args.source_path + ']. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 elif cType == 'map' :
-                    Maps(pid).updateGroup(gid, cid_list, args.source_path, args.force)
+                    Maps(pid, gid).updateGroup(cid_list, args.source_path, args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :

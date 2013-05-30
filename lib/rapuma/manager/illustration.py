@@ -174,6 +174,10 @@ class Illustration (Manager) :
     def hasIllustrations (self, gid, bid) :
         '''Return True if this component as any illustrations associated with it.'''
 
+        # Adjustment for Map cType
+        if self.cType == 'map' :
+            bid = 'map'
+
         for i in self.illustrationConfig[gid].keys() :
             if self.illustrationConfig[gid][i]['bid'] == bid :
                 return True
@@ -188,43 +192,51 @@ class Illustration (Manager) :
         piclistFile = self.project.groups[gid].getCidPiclistPath(cid)
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
+        trueCid = cid
         obj = {}
 
-        try :
-            with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
-                writeObject.write('% Do not bother editing this file.\n\n')
-                for i in self.illustrationConfig[gid].keys() :
-                    obj = self.illustrationConfig[gid][i]
-                    thisRef = ''
-                    # Filter out if needed with this
-                    if not self.tools.str2bool(obj['useThisIllustration']) :
-                        continue
-                    # Is a caption going to be used on this illustration?
-                    caption = ''
-                    if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
-                        if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
-                            and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
-                            if obj['caption'] :
-                                caption = obj['caption']
-                    # Work out if we want a caption reference or not for this illustration
-                    if self.illustrationConfig[gid][i]['bid'] == cid.lower() :
-                        if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
-                            and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
-                            if obj['location'] :
-                                thisRef = obj['location']
-                            else :
-                                thisRef = obj['chapter'] + cvSep + obj['verse']
-                        # If we made it this far we can output the line
-                        writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
-                            ' |' + obj['fileName'] + '|' + obj['width'] + '|' + obj['position'] + \
-                                '|' + obj['scale'] + '|' + obj['copyright'] + '|' + caption + '|' + thisRef + ' \n')
-            # Report to log
-            self.log.writeToLog(self.errorCodes['0265'], [cid])
-            return True
-        except Exception as e :
-            # If this doesn't work, we should probably quite here
-            self.tools.dieNow('Error: Create piclist file failed with this error: ' + str(e))
+        # Change cid for map cType
+        # Note: The piclist IDs must be three characters long but need not be recognized USFM
+        # file IDs. As such, we adjust the code to recognize 'map' as our ID for map rendering
+        # operations. This seems to work for now.
+        if self.cType == 'map' :
+            cid = 'map'
+
+        with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
+            writeObject.write('% Do not bother editing this file.\n\n')
+
+#            import pdb; pdb.set_trace()
+
+            for i in self.illustrationConfig[gid].keys() :
+                obj = self.illustrationConfig[gid][i]
+                thisRef = ''
+                # Filter out if needed with this
+                if not self.tools.str2bool(obj['useThisIllustration']) :
+                    continue
+                # Is a caption going to be used on this illustration?
+                caption = ''
+                if self.illustrationConfig[gid][i]['bid'] == cid :
+                    if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
+                        and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
+                        if obj['caption'] :
+                            caption = obj['caption']
+                # Work out if we want a caption reference or not for this illustration
+                if self.illustrationConfig[gid][i]['bid'] == cid :
+                    if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
+                        and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
+                        if obj['location'] :
+                            thisRef = obj['location']
+                        else :
+                            thisRef = obj['chapter'] + cvSep + obj['verse']
+
+                    # If we made it this far we can output the line
+                    writeObject.write(obj['bid'] + ' ' + obj['chapter'] + '.' + obj['verse'] + \
+                        ' |' + obj['fileName'] + '|' + obj['width'] + '|' + obj['position'] + \
+                            '|' + obj['scale'] + '|' + obj['copyright'] + '|' + caption + '|' + thisRef + ' \n')
+        # Report to log
+        self.log.writeToLog(self.errorCodes['0265'], [trueCid])
+        return True
 
 
 

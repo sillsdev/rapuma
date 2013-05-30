@@ -198,10 +198,11 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # If there are any cids listed we need to test them
         if cidList :
             self.isValidCidList(cidList)
 
-        # Do a basic test for exsistance
+        # Otherwise, do a basic test for exsistance and move on
         if self.tools.isConfSection(self.projConfig['Groups'], self.gid) :
 
             # Now create the group and pass the params on
@@ -236,8 +237,10 @@ class Project (object) :
 
         cidList = self.projConfig['Groups'][self.gid]['cidList']
         for cid in thisCidlist :
-            if not cid in cidList :
-                self.log.writeToLog(self.errorCodes['0660'],[cid])
+            # If this is not a usfm type we do not need to validate
+            if self.cType == 'usfm' :
+                if not cid in cidList :
+                    self.log.writeToLog(self.errorCodes['0660'],[cid])
 
 
     def listAllComponents (self, cType) :

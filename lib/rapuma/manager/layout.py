@@ -42,10 +42,9 @@ class Layout (Manager) :
         self.project                        = project
         self.managers                       = project.managers
         self.projConfig                     = self.project.projConfig
-        self.projMediaType                  = self.project.projectMediaIDCode
         # File names
-        self.defaultXmlConfFileName         = self.project.projectMediaIDCode + '_layout.xml'
-        self.layoutConfFileName             = self.project.projectMediaIDCode + '_layout.conf'
+        self.defaultXmlConfFileName         = self.cType + '_layout.xml'
+        self.layoutConfFileName             = self.cType + '_layout.conf'
         # Paths
         self.projConfFolder                 = self.project.local.projConfFolder
         self.rapumaConfigFolder             = self.project.local.rapumaConfigFolder

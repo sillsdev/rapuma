@@ -62,7 +62,9 @@ class Xetex (Manager) :
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
         self.component              = self.managers[self.cType + '_Component']
-        self.hyphenation            = self.managers[self.cType + '_Hyphenation']
+        # Don't need hyphenation for rendering maps
+        if cType != 'map' :
+            self.hyphenation            = self.managers[self.cType + '_Hyphenation']
         self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
         self.style                  = self.managers[self.cType + '_Style']
@@ -87,10 +89,17 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        self.useIllustrations       = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
-        self.useMarginalVerses      = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
-        self.chapNumOffSingChap     = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
+        # Adjust settings for rendering maps
+        if cType != 'map' :
+            self.useHyphenation     = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+            self.useIllustrations   = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
+            self.useMarginalVerses  = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
+            self.chapNumOffSingChap = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
+        else :
+            self.useHyphenation     = False
+            self.useIllustrations   = True
+            self.useMarginalVerses  = False
+            self.chapNumOffSingChap = True
         # File names
         # Some of these file names will only be used once but for consitency
         # we will create them all in one place.
@@ -117,8 +126,8 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-        self.layoutXmlFile          = os.path.join(self.rapumaConfigFolder, self.project.projectMediaIDCode + '_layout.xml')
-        self.layoutConfFile         = os.path.join(self.projConfFolder, self.project.projectMediaIDCode + '_layout.conf')
+        self.layoutXmlFile          = self.layout.defaultXmlConfFile
+        self.layoutConfFile         = self.layout.layoutConfFile
         self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
         self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
         self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
@@ -132,10 +141,12 @@ class Xetex (Manager) :
         self.grpExtStyFile          = self.style.grpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
-        self.lccodeTexFile          = self.hyphenation.lccodeTexFile
-        self.compHyphFile           = self.hyphenation.compHyphFile
-        self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
-        self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
+        # These files will not be used
+        if cType != 'map' :
+            self.lccodeTexFile          = self.hyphenation.lccodeTexFile
+            self.compHyphFile           = self.hyphenation.compHyphFile
+            self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
+            self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -189,7 +200,7 @@ class Xetex (Manager) :
             '0635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
             '0640' : ['ERR', 'Failed to add background to [<<1>>]. Ended with error: [<<2>>]'],
             '0645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
-            'XTEX-150' : ['ERR', 'Component type [<<1>>] not supported!'],
+            '0650' : ['ERR', 'Component type [<<1>>] not supported!'],
             '0665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
             '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
@@ -293,8 +304,9 @@ class Xetex (Manager) :
     def copyInMacros (self) :
         '''Copy in the right macro set for this component and renderer combination.'''
 
-        if self.cType.lower() == 'usfm' :
 
+
+        if self.cType.lower() in ['usfm', 'map'] :
             # Copy in to the process folder the macro package for this component
             if not os.path.isdir(self.projMacPackFolder) :
                 os.makedirs(self.projMacPackFolder)
@@ -426,11 +438,12 @@ class Xetex (Manager) :
                 writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macLinkFile), description))
                 writeObject.write('\\input ' + self.tools.quotePath(mainMacroFile) + '\n')
                 # If we are using marginal verses then we will need this
-                if self.useMarginalVerses :
-                    self.copyInMargVerse()
-                    writeObject.write('\\input ' + self.tools.quotePath(self.ptxMargVerseFile) + '\n')
-                else :
-                    self.removeMargVerse()
+                if self.cType == 'usfm' :
+                    if self.useMarginalVerses :
+                        self.copyInMargVerse()
+                        writeObject.write('\\input ' + self.tools.quotePath(self.ptxMargVerseFile) + '\n')
+                    else :
+                        self.removeMargVerse()
 
         return True
 
@@ -720,12 +733,17 @@ class Xetex (Manager) :
             # Now add in each of the components
             for cid in cidList :
                 cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
-                if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
-                    gidTexObject.write('\\OmitChapterNumbertrue\n') 
+                if self.cType == 'usfm' :
+                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                        gidTexObject.write('\\OmitChapterNumbertrue\n') 
+                        gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                        gidTexObject.write('\\OmitChapterNumberfalse\n') 
+                    else :
+                        gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                elif self.cType == 'map' :
                     gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
-                    gidTexObject.write('\\OmitChapterNumberfalse\n') 
                 else :
-                    gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    self.log.writeToLog(self.errorCodes['0650'], [self.cType])
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
 
@@ -811,11 +829,15 @@ class Xetex (Manager) :
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)
-            cidAdj = self.project.groups[gid].getCidAdjPath(cid)
             cidIlls = self.project.groups[gid].getCidPiclistPath(cid)
-            for f in [cidUsfm, cidAdj, cidIlls] :
+            for f in [cidUsfm, cidIlls] :
                 if os.path.exists(f) :
                     dep.append(f)
+            # Treat adjustment file separate
+            if self.cType == 'usfm' :
+                cidAdj = self.project.groups[gid].getCidAdjPath(cid)
+                if os.path.exists(cidAdj) :
+                    dep.append(cidAdj)
 
         # Render if gidPdf is older or is missing
         render = False

@@ -65,7 +65,7 @@ class Font (Manager) :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = self.pt_tools.getSourceEditor()
+        self.sourceEditor = self.pt_tools.getSourceEditor(self.cType)
 
         if not self.ptDefaultFont :
             ptSet = self.pt_tools.getPTSettings()
