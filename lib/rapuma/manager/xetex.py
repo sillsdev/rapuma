@@ -27,6 +27,7 @@ from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
 from rapuma.core.page_background    import PageBackground
 from rapuma.core.proj_binding       import Binding
+from rapuma.project.proj_maps       import Maps
 
 
 ###############################################################################
@@ -64,7 +65,7 @@ class Xetex (Manager) :
         self.component              = self.managers[self.cType + '_Component']
         # Don't need hyphenation for rendering maps
         if cType != 'map' :
-            self.hyphenation            = self.managers[self.cType + '_Hyphenation']
+            self.hyphenation        = self.managers[self.cType + '_Hyphenation']
         self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
         self.style                  = self.managers[self.cType + '_Style']
@@ -303,8 +304,6 @@ class Xetex (Manager) :
 
     def copyInMacros (self) :
         '''Copy in the right macro set for this component and renderer combination.'''
-
-
 
         if self.cType.lower() in ['usfm', 'map'] :
             # Copy in to the process folder the macro package for this component
@@ -732,8 +731,8 @@ class Xetex (Manager) :
                     gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
             # Now add in each of the components
             for cid in cidList :
-                cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
                 if self.cType == 'usfm' :
+                    cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
@@ -741,7 +740,7 @@ class Xetex (Manager) :
                     else :
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
                 elif self.cType == 'map' :
-                    gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    gidTexObject.write('\\ptxfile{' + Maps(self.pid, self.gid).getGidContainerFile() + '}\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
             # This can only hapen once in the whole process, this marks the end
@@ -829,7 +828,7 @@ class Xetex (Manager) :
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)
-            cidIlls = self.project.groups[gid].getCidPiclistPath(cid)
+            cidIlls = self.project.groups[gid].getCidPiclistFile(cid)
             for f in [cidUsfm, cidIlls] :
                 if os.path.exists(f) :
                     dep.append(f)

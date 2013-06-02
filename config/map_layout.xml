@@ -57,7 +57,7 @@ Todo:
             <description>Omit all the chapter numbers in the book. (Often this is used for one-chapter books.) Default = False</description>
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
             <boolDependTrue>layoutConfig:ChapterVerse:omitAllChapterNumbers</boolDependTrue>
             <usfmTex>\OmitChapterNumbertrue</usfmTex>
         </setting>
@@ -91,15 +91,6 @@ Todo:
             <type>integer</type>
             <value>3</value>
             <usfmTex>\def\AfterChapterSpaceFactor{[v]}</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Adorn Verse Number Setting</name>
-            <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
-            <key>adornVerseSetting</key>
-            <type>string</type>
-            <value></value>
-            <usfmTex>\def\AdornVerseNumber#1{[v]}</usfmTex>
-            <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>
     </section>
     <section>
@@ -177,13 +168,6 @@ Todo:
         <name>Crossreferences</name>
         <sectionID>Crossreferences</sectionID>
         <description>This section includes all textual elements that go into the Crossreferences area.</description>
-        <setting>
-            <name>Include Crossreferences</name>
-            <description>[NOT IMPLEMENTED] Include crossreferences in the output. Defalt = True</description>
-            <key>includeCrossreferences</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
         <setting>
             <name>Use Auto Callers (Crossrefs)</name>
             <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
@@ -489,14 +473,14 @@ Todo:
             <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
             <key>useRunningHeader</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
         <setting>
             <name>USFM TeX Show Verse References (Running Header)</name>
             <description>Set this to true if you want to include verse numbers in header/footer references, or only chapter numbers. (ptx2pdf syntax = \VerseRefstrue)   Default = False (Only chapter numbers)</description>
             <key>showVerseReferences</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <boolDependTrue>layoutConfig:HeaderContent:showVerseReferences</boolDependTrue>
             <usfmTex>\VerseRefstrue</usfmTex>
         </setting>
@@ -505,19 +489,9 @@ Todo:
             <description>Omit the book name in the running header (RH). Default = False</description>
             <key>omitBookReference</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
             <boolDependTrue>layoutConfig:HeaderContent:omitBookReference</boolDependTrue>
             <usfmTex>\OmitBookReftrue</usfmTex>
-        </setting>
-        <setting>
-            <name>USFM TeX Omit Chapter Number (Running Header)</name>
-            <description>Omit the chapter numbers in the running header (RH). Default = False</description>
-            <key>omitChapterNumberRH</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>layoutConfig:HeaderContent:omitChapterNumberRH</boolDependTrue>
-            <usfmTex>\OmitChapterNumberRHtrue</usfmTex>
-            <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
         <setting>
             <name>USFM TeX Running Header Title (Left Side)</name>
@@ -556,7 +530,7 @@ Todo:
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHoddcenter{})   Default = pagenumber</description>
             <key>runningHeaderOddCenter</key>
             <type>string</type>
-            <value>pagenumber</value>
+            <value>empty</value>
             <usfmTex>\def\RHoddcenter{\[v]}</usfmTex>
         </setting>
         <setting>
@@ -564,7 +538,7 @@ Todo:
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHoddright{})   Default = rangeref</description>
             <key>runningHeaderOddRight</key>
             <type>string</type>
-            <value>lastref</value>
+            <value>empty</value>
             <usfmTex>\def\RHoddright{\[v]}</usfmTex>
         </setting>
         <setting>
@@ -572,7 +546,7 @@ Todo:
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHevenleft{})   Default = rangeref</description>
             <key>runningHeaderEvenLeft</key>
             <type>string</type>
-            <value>firstref</value>
+            <value>empty</value>
             <usfmTex>\def\RHevenleft{\[v]}</usfmTex>
         </setting>
         <setting>
@@ -580,7 +554,7 @@ Todo:
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHevencenter{})   Default = pagenumber</description>
             <key>runningHeaderEvenCenter</key>
             <type>string</type>
-            <value>pagenumber</value>
+            <value>empty</value>
             <usfmTex>\def\RHevencenter{\[v]}</usfmTex>
         </setting>
         <setting>
@@ -601,7 +575,7 @@ Todo:
             <description>Turn On Figure Placeholders - If set to true ptx2pdf will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <boolDependTrue>layoutConfig:Illustrations:useFigurePlaceHolders</boolDependTrue>
             <usfmTex>\FigurePlaceholderstrue</usfmTex>
         </setting>
@@ -617,7 +591,7 @@ Todo:
             <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
             <key>useCaptions</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
         <setting>
             <name>USFM TeX Caption Reference</name>
@@ -653,7 +627,7 @@ Todo:
             <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
             <key>topMarginFactor</key>
             <type>integer</type>
-            <value>1.75</value>
+            <value>0.5</value>
             <usfmTex>\def\TopMarginFactor{[v]}</usfmTex>
         </setting>
         <setting>
@@ -661,7 +635,7 @@ Todo:
             <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
             <key>bottomMarginFactor</key>
             <type>integer</type>
-            <value>1.12</value>
+            <value>0.2</value>
             <usfmTex>\def\BottomMarginFactor{[v]}</usfmTex>
         </setting>
         <setting>
@@ -698,13 +672,6 @@ Todo:
             <key>pageSizeCode</key>
             <type>string</type>
             <value>A5</value>
-        </setting>
-        <setting>
-            <name>Starting Page Number</name>
-            <description>Sometimes the content should not start with the default page number of '1'. If a number is set in this field, the macro will insert a \pageno command in the control file.  Note this is for the main content section only.  Individual components in the front and back matter must have the \pageno command inserted manually into their control files.   Default = Null (which means no command output, page starts on '1')</description>
-            <key>pageNumberBegin</key>
-            <type>integer</type>
-            <value></value>
         </setting>
         <setting>
             <name>USFM TeX Page Height</name>
@@ -748,15 +715,6 @@ Todo:
             <value>page_border.pdf</value>
         </setting>
         <setting>
-            <name>USFM TeX End Book No Eject</name>
-            <description>To save space on long publications the next book can start on the same page of the previous one.   Default = False</description>
-            <key>useEndBookNoEject</key>
-            <type>boolean</type>
-            <value>False</value>
-            <usfmTex></usfmTex>
-            <boolDependTrue></boolDependTrue>
-        </setting>
-        <setting>
             <name>USFM TeX Page Border Scale</name>
             <description>Enter in the scale factor for the page border and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
             <key>pageBorderScale</key>
@@ -782,14 +740,6 @@ Todo:
             <key>rightToLeft</key>
             <type>boolean</type>
             <value>False</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Quote Kern Amount (Em)</name>
-            <description>Often, when there are quotes within quotes, when they end the two types of quote markers are so close together that, from the reader's perspective, it is hard to tell what is going on.  To fix this kerning space is added between the two characters to make it clear which is which.  The amount is in em space measurement.  For more information on what that is, go to this address:   http://en.wikipedia.org/wiki/Em_(typography) Enter the amount in em but do not follow with "em" as the system assumes the measurement is in em.  Enter 0 if no kerning of quotes is desired.   Defalt = 0.1</description>
-            <key>quoteKernAmount</key>
-            <type>integer</type>
-            <value>0.1em</value>
-            <usfmTex>\quotekernamount=[v]</usfmTex>
         </setting>
     </section>
     <section>

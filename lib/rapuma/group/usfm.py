@@ -162,7 +162,7 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.adj')
 
 
-    def getCidPiclistPath (self, cid) :
+    def getCidPiclistFile (self, cid) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
@@ -246,7 +246,7 @@ class Usfm (Group) :
                     if os.path.isfile(cidAdjFile) :
                         os.remove(cidAdjFile)
                 # Component piclist file
-                cidPiclist = self.getCidPiclistPath(cid)
+                cidPiclist = self.getCidPiclistFile(cid)
                 if useIllustrations :
                     if self.illustration.hasIllustrations(gid, cid) :
                         # Create if not there of if the config has changed

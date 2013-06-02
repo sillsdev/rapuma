@@ -24,6 +24,7 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
+from rapuma.project.proj_maps       import Maps
 
 
 ###############################################################################
@@ -52,6 +53,7 @@ class Map (Group) :
         self.Ctype                  = self.cType.capitalize()
         self.mType                  = project.projectMediaIDCode
         self.tools                  = Tools()
+        self.proj_maps              = Maps(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
         self.local                  = project.local
@@ -125,18 +127,17 @@ class Map (Group) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
-    def getCidPath (self, cid) :
+    def getCidPath (self, gid) :
         '''Return the full path of the cName working text file. This assumes
         the cid is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
+        return os.path.join(self.local.projComponentsFolder, gid, self.component.makeFileNameWithExt(gid))
 
 
-    def getCidPiclistPath (self, cid) :
-        '''Return the full path of the cName working text illustrations file. 
-        This assumes the cName is valid.'''
+    def getCidPiclistFile (self, gid) :
+        '''Return the full path and name of the map group piclist file.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
+        return os.path.join(self.local.projComponentsFolder, gid, 'map' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
@@ -187,48 +188,50 @@ class Map (Group) :
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
-        for cid in cidList :
-            cType = self.cfg['cType']
-            cidMap = self.getCidPath(cid)
-            # Test for source here and die if it isn't there
-            if not os.path.isfile(cidMap) :
-                self.log.writeToLog(self.errorCodes['0220'], [cid], 'map.preProcessGroup():0220')
 
-            # Add/manage the dependent files for this cid
-            if self.macroPackage == 'usfmTex' :
-                # Component piclist file
-                cidPiclist = self.getCidPiclistPath(cid)
 
+# FIXME: Trying to process only one group component (container)
+
+
+#        for cid in cidList :
+        cType = self.cfg['cType']
+        # Test for source here and die if it isn't there
+        if not os.path.isfile(self.proj_maps.getGidContainerFile()) :
+            self.log.writeToLog(self.errorCodes['0220'], [self.gid], 'map.preProcessGroup():0220')
+
+        # Add/manage the dependent files for this map group
+        if self.macroPackage == 'usfmTex' :
+            # Component piclist file
+            cidPiclist = self.getCidPiclistFile(self.gid)
 
 #                import pdb; pdb.set_trace()
 
-
-
-                if self.illustration.hasIllustrations(gid, cid) :
-                    # Create if not there of if the config has changed
-                    if not os.path.isfile(cidPiclist) or self.tools.isOlder(cidPiclist, self.local.illustrationConfFile) :
-                        # First check if we have the illustrations we think we need
-                        # and get them if we do not.
-                        self.illustration.getPics(gid, cid)
-                        # Now make a fresh version of the piclist file
-                        self.illustration.createPiclistFile(gid, cid)
-                        self.log.writeToLog(self.errorCodes['0265'], [cid])
-                    else :
-                        for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
-                            if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
-                                # Remake the piclist file
-                                self.illustration.createPiclistFile(gid, cid)
-                                self.log.writeToLog(self.errorCodes['0265'], [cid])
-                    # Do a quick check to see if the illustration files for this book
-                    # are in the project. If it isn't, the run will be killed
-                    self.illustration.getPics(gid, cid)
+            # Send map as the bid
+            if self.illustration.hasIllustrations(gid, 'map') :
+                # Create if not there of if the config has changed
+                if not os.path.isfile(cidPiclist) or self.tools.isOlder(cidPiclist, self.local.illustrationConfFile) :
+                    # First check if we have the illustrations we think we need
+                    # and get them if we do not.
+                    self.illustration.getPics(gid, 'map')
+                    # Now make a fresh version of the piclist file
+                    self.illustration.createPiclistFile(gid, 'map')
+                    self.log.writeToLog(self.errorCodes['0265'], ['map'])
                 else :
-                    # If we are not using illustrations then any existing piclist file will be removed
-                    if os.path.isfile(cidPiclist) :
-                        os.remove(cidPiclist)
-                        self.log.writeToLog(self.errorCodes['0255'], [cid])
+                    for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
+                        if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
+                            # Remake the piclist file
+                            self.illustration.createPiclistFile(gid, 'map')
+                            self.log.writeToLog(self.errorCodes['0265'], ['map'])
+                # Do a quick check to see if the illustration files for this book
+                # are in the project. If it isn't, the run will be killed
+                self.illustration.getPics(gid, 'map')
             else :
-                self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
+                # If we are not using illustrations then any existing piclist file will be removed
+                if os.path.isfile(cidPiclist) :
+                    os.remove(cidPiclist)
+                    self.log.writeToLog(self.errorCodes['0255'], ['map'])
+        else :
+            self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
 
         # Background management
         bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']

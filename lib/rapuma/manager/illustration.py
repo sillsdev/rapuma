@@ -58,6 +58,7 @@ class Illustration (Manager) :
         # File names
         self.defaultXmlConfFileName     = 'illustration.xml'
         # Folder paths
+        self.projComponentsFolder  = self.project.local.projComponentsFolder
         self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
@@ -178,9 +179,13 @@ class Illustration (Manager) :
         if self.cType == 'map' :
             bid = 'map'
 
-        for i in self.illustrationConfig[gid].keys() :
-            if self.illustrationConfig[gid][i]['bid'] == bid :
-                return True
+        # If we are missing the bid we fail (gracefully)
+        try :
+            for i in self.illustrationConfig[gid].keys() :
+                if self.illustrationConfig[gid][i]['bid'] == bid :
+                    return True
+        except :
+            return False
 
 
     def createPiclistFile (self, gid, cid) :
@@ -189,7 +194,7 @@ class Illustration (Manager) :
         there is no \fig data no piclist file will be made.'''
 
         # Check for a .piclist file
-        piclistFile = self.project.groups[gid].getCidPiclistPath(cid)
+        piclistFile = self.project.groups[gid].getCidPiclistFile(gid)
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         trueCid = cid
@@ -199,8 +204,8 @@ class Illustration (Manager) :
         # Note: The piclist IDs must be three characters long but need not be recognized USFM
         # file IDs. As such, we adjust the code to recognize 'map' as our ID for map rendering
         # operations. This seems to work for now.
-        if self.cType == 'map' :
-            cid = 'map'
+#        if self.cType == 'map' :
+#            cid = 'map'
 
         with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')

@@ -149,14 +149,16 @@ class Maps (object) :
             if not os.path.exists(filePath) :
                 self.log.writeToLog(self.errorCodes['0205'], [filePath])
             else :
-                self.addComponent(fileName, csidPath, pgOrder, force)
+                self.addIllustration(fileName, csidPath, pgOrder, force)
 
         # Having made it this far we can output information to the project config
+        cidList = self.illustrationConfig[self.gid].keys()
         self.createGroupFolder()
         self.createMapGroupStyleFile(force)
         self.projConfig['Groups'] = {}
         self.projConfig['Groups'][self.gid] = {}
-        self.projConfig['Groups'][self.gid]['cidList'] = self.illustrationConfig[self.gid].keys()
+#        self.projConfig['Groups'][self.gid]['cidList'] = cidList
+        self.projConfig['Groups'][self.gid]['cidList'] = [self.gid]
         self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
         self.projConfig['Groups'][self.gid]['cType'] = 'map'
         self.projConfig['Groups'][self.gid]['isLocked'] = True
@@ -164,7 +166,14 @@ class Maps (object) :
         self.projConfig['Groups'][self.gid]['totalPages'] = pgOrder
         self.projConfig['Groups'][self.gid]['precedingGroup'] = None
         self.projConfig['Groups'][self.gid]['bindingOrder'] = 0
+        self.tools.buildConfSection(self.projConfig, 'Managers')
+        self.tools.buildConfSection(self.projConfig['Managers'], 'map_Xetex')
+        self.projConfig['Managers']['map_Xetex']['draftBackground'] = ['draftWatermark']
         self.tools.writeConfFile(self.projConfig)
+
+        # Make a container file for the images
+        self.createComponentContainerFile(cidList, force)
+
         # Add map group source path to userConfig
         self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = csidPath
         self.tools.writeConfFile(self.userConfig)
@@ -172,7 +181,7 @@ class Maps (object) :
         self.log.writeToLog(self.errorCodes['0220'], [self.gid])
 
 
-    def addComponent (self, fileName, filePath, pgOrder, force) :
+    def addIllustration (self, fileName, filePath, pgOrder, force) :
         '''Add a single map component to a group.'''
 
 #        import pdb; pdb.set_trace()
@@ -191,19 +200,21 @@ class Maps (object) :
         self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
 
         # Modify this entry in the illustration config file
-        self.illustrationConfig[self.gid][cid]['pageOrder'] = pgOrder
+#        self.illustrationConfig[self.gid][cid]['pageOrder'] = pgOrder
         self.illustrationConfig[self.gid][cid]['bid'] = 'map'
         self.illustrationConfig[self.gid][cid]['location'] = ''
         self.illustrationConfig[self.gid][cid]['position'] = 'b'
+        self.illustrationConfig[self.gid][cid]['scale'] = '0.75'
+        self.illustrationConfig[self.gid][cid]['chapter'] = pgOrder
         self.tools.writeConfFile(self.illustrationConfig)
         # Copy the file into the project illustration folder
         if not os.path.exists(self.projIllustrationsFolder) :
             os.makedirs(self.projIllustrationsFolder)
         shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projIllustrationsFolder, fileName))
 
-        # Create a component folder and its contents
-        self.createComponentFolder(cid)
-        self.createComponentContainerFile(cid, force)
+         # Create a component folder and its contents
+#        self.createComponentFolder(cid)
+#        self.createComponentContainerFile(cid, force)
 
         self.log.writeToLog(self.errorCodes['0225'], [cid,self.gid])
 
@@ -217,34 +228,47 @@ class Maps (object) :
             self.log.writeToLog(self.errorCodes['0250'], [self.gid])
 
 
-    def createComponentFolder (self, cid) :
-        '''Create a project maps folder if one is not there.'''
+#    def createComponentFolder (self, cid) :
+#        '''Create a project maps folder if one is not there.'''
 
-        folder = os.path.join(self.projComponentsFolder, cid)
-        if not os.path.exists(folder) :
-            os.makedirs(folder)
-            self.log.writeToLog(self.errorCodes['0260'], [cid])
+#        folder = os.path.join(self.projComponentsFolder, cid)
+#        if not os.path.exists(folder) :
+#            os.makedirs(folder)
+#            self.log.writeToLog(self.errorCodes['0260'], [cid])
 
 
-    def createComponentContainerFile (self, cid, force) :
+    def getGidContainerFileName (self) :
+        '''Create the gid container file name. '''
+
+        return 'map' + '_' + self.projConfig['Groups'][self.gid]['csid'] + '.map'
+
+
+    def getGidContainerFile (self) :
+        '''Create the gid container file name. '''
+
+        return os.path.join(self.projComponentsFolder, self.gid, self.getGidContainerFileName())
+
+
+    def createComponentContainerFile (self, cidList, force) :
         '''Create the map component container file. This is a usfm-like
         file that will guide the rendering process. Because we look at
         map processing different than text, this file is auto-generated.'''
 
-        mapFileName = self.illustrationConfig[self.gid][cid]['fileName']
-        cidFileName = cid + '_' + self.gid + '.map'
-        cidFile = os.path.join(self.projComponentsFolder, cid, cidFileName)
-
-        # Lets start with just a simple file and go from there
-        if not os.path.exists(cidFile) or force :
-            contents = codecs.open(cidFile, "w", encoding="utf_8_sig")
-            contents.write('\\id map - ' + mapFileName + '\n')
+        gidFile = self.getGidContainerFile()
+        if not os.path.exists(gidFile) or force :
+            contents = codecs.open(gidFile, "w", encoding="utf_8_sig")
+            contents.write('\\id map - ' + self.tools.fName(gidFile) + '\n')
             contents.write('\\rem Auto-generated map rendering file. Edit as needed.\n')
-            contents.write('\\rem Generated on: ' + self.tools.tStamp() + '\n')
-            contents.write('\\mt1 How do we get a title here?\n')
-            contents.write('\\c 1\n')
-            contents.write('\\p\n')
-            contents.write('\\v 1 \\nbsp\n')
+            contents.write('\\rem Generated on: ' + self.tools.tStamp() + '\n\n')
+            pgCount = 1
+            for cid in cidList :
+                title = self.illustrationConfig[self.gid][cid]['caption']
+                contents.write('\\mt1 ' + title + '\n')
+                contents.write('\\c ' + str(pgCount) + '\n')
+                contents.write('\\p\n')
+                contents.write('\\v 1 \\nbsp\n')
+                contents.write('\\eject\n\n')
+                pgCount +=1
 
 
     def createMapGroupStyleFile (self, force) :
@@ -266,7 +290,7 @@ class Maps (object) :
             contents.write('\\FontSize 0.2\n\n')
             contents.write('\\Marker mt1\n')
             contents.write('\\FontSize 14\n')
-            contents.write('\\SpaceAfter -24\n')
+            contents.write('\\SpaceAfter 0\n')
             contents.write('\\SpaceBefore 0\n\n')
             contents.write('\\Marker p\n')
             contents.write('\\FontSize 0.2\n\n')
