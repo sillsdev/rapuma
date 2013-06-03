@@ -229,11 +229,11 @@ class PageBackground (object) :
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
         # from Rapuma usfm_layout.conf 
-        pageHeight          = int(self.layoutConfig['PageLayout']['pageHeight'])
-        pageWidth           = int(self.layoutConfig['PageLayout']['pageWidth'])
+        pageHeight          = float(self.layoutConfig['PageLayout']['pageHeight'])
+        pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
         lineSpacingFactor   = float(self.layoutConfig['Fonts']['lineSpacingFactor'])
         fontSizeUnit        = float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
-        marginUnit          = int(self.layoutConfig['Margins']['marginUnit'])
+        marginUnit          = float(self.layoutConfig['Margins']['marginUnit'])
         topMarginFactor     = float(self.layoutConfig['Margins']['topMarginFactor'])
         bottomMarginFactor  = float(self.layoutConfig['Margins']['bottomMarginFactor'])
 
