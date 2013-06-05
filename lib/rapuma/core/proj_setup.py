@@ -176,8 +176,7 @@ class ProjSetup (object) :
 
     def finishInit (self) :
         '''If this is a new project we need to handle these settings special.'''
-        if self.tools.testForSetting(self.userConfig['Projects'], self.pid) :
-#            try :
+        if self.tools.testForSetting(self.userConfig, 'Projects', self.pid) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.backup             = ProjBackup(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
@@ -192,8 +191,6 @@ class ProjSetup (object) :
             self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
             self.tools_group        = ToolsGroup(self.local, self.projConfig, self.userConfig)
             return True
-#            except Exception as e :
-#                self.tools.terminal('proj_setup.finishInit() failed with this error: ' + str(e))
         else :
             return False
 
@@ -616,6 +613,9 @@ class ProjSetup (object) :
                 self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
 
         # Delete everything in the project path
+        # FIXME: If the project was not found in the config, but was actually physically present,
+        # This next part of the process gets skipped which can cause a problem if a new project
+        # of the same name is being setup. Is there a way around this?
         if self.projHome :
             if os.path.exists(self.projHome) :
                 shutil.rmtree(self.projHome)

@@ -11,11 +11,7 @@ These instructions are for manually installing the developer version of the Rapu
 
 REQUIRED PACKAGES
 -----------------------------------------
-There are a number of packages that need to be installed for Rapuma to work. Some are more critical than others but all of them are needed. Some of the packages are located in other repositories that you will need to add to your system repository source list. Fastest way is to open the sources.list file for editing with this command in your terminal:
-
-    sudo gedit /etc/apt/sources.list
-
-Next go to the SIL Linux packages site and hook your system up with that if it isn't already. Follow the instructions on this page:
+Go to the SIL Linux packages site and hook your system up with that if it isn't already. Follow the instructions on this page:
 
     http://packages.sil.org
 
@@ -55,6 +51,11 @@ Some suggested additional packages to make your Linux DTP system complete:
 Some suggested SIL Packages would be:
 
     sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
+
+TECKit Work-around:
+There is a dependency conflict created in the way the texlive package is currently put together. It will block TECKit from being able to install correctly. It may be some time before this is fixed so a work-around can be applied by doing the following:
+
+    sudo dpkg-divert --package teckit --add /usr/bin/teckit_compile
 
 (Note: On newer versions of Ubuntu, the SIL repo may not be up to date so some of the above may not be available.)
 
