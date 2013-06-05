@@ -201,6 +201,13 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
 
+    def updateAllGroups (self, force = False) :
+        '''Run the update on all the groups in a project.'''
+
+        for gid in self.projConfig['Groups'].keys() :
+            self.updateGroup(gid, force)
+
+
     def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
         '''Update a group, --source is optional but if given it will
         overwrite the current setting. Normal behavior is to have it 

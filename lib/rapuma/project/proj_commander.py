@@ -146,6 +146,7 @@ class Commander (object) :
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  restore --target_path $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' helper    update '], 
+                'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
