@@ -53,12 +53,12 @@ from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_config        import ProjConfig
-from rapuma.core.proj_setup         import ProjSetup
 from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.proj_binding       import Binding
 from rapuma.core.proj_compare       import Compare
 from rapuma.core.page_background    import PageBackground
 from rapuma.project.project         import Project
+from rapuma.project.proj_setup      import ProjSetup
 from rapuma.project.proj_commander  import Commander
 from rapuma.project.proj_maps       import Maps
 from rapuma.core.tools              import Tools, ToolsGroup

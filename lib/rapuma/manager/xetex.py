@@ -28,6 +28,7 @@ from rapuma.core.proj_config        import ConfigTools
 from rapuma.core.page_background    import PageBackground
 from rapuma.core.proj_binding       import Binding
 from rapuma.project.proj_maps       import Maps
+from rapuma.project.proj_style      import ProjStyle
 
 
 ###############################################################################
@@ -58,8 +59,9 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
-        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
-        self.pg_back                = PageBackground(project.projectIDCode)
+        self.pt_tools               = Paratext(self.pid, self.gid)
+        self.pg_back                = PageBackground(self.pid)
+        self.proj_style             = ProjStyle(self.pid, self.gid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
         self.component              = self.managers[self.cType + '_Component']
@@ -68,7 +70,6 @@ class Xetex (Manager) :
             self.hyphenation        = self.managers[self.cType + '_Hyphenation']
         self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
-        self.style                  = self.managers[self.cType + '_Style']
         # Get config objs
         self.projConfig             = project.projConfig
         self.layoutConfig           = self.layout.layoutConfig
@@ -106,10 +107,10 @@ class Xetex (Manager) :
         # we will create them all in one place.
         self.gidTexFileName         = self.gid + '.tex'
         self.gidPdfFileName         = self.gid + '.pdf'
-        self.macLinkFileName        = self.projConfig['Managers'][self.manager]['macLinkTexFile']
-        self.setTexFileName         = self.projConfig['Managers'][self.manager]['defaultSetTexFile']
-        self.extTexFileName         = self.projConfig['Managers'][self.manager]['defaultExtTexFile']
-        self.grpExtTexFileName      = self.projConfig['Managers'][self.manager]['grpExtTexFile']
+        self.macLinkFileName        = 'macLink.tex'
+        self.setTexFileName         = 'settings.tex'
+        self.extTexFileName         = 'extentions.tex'
+        self.grpExtTexFileName      = self.gid + '-ext.tex'
         self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
         # Folder paths
         self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
@@ -135,11 +136,11 @@ class Xetex (Manager) :
         self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
         self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
         self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
-        self.grpExtTexFile          = os.path.join(self.gidFolder, self.grpExtTexFileName)
+        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
-        self.defaultStyFile         = self.style.defaultStyFile
-        self.defaultExtStyFile      = self.style.defaultExtStyFile
-        self.grpExtStyFile          = self.style.grpExtStyFile
+        self.defaultStyFile         = self.proj_style.defaultStyFile
+        self.glbExtStyFile          = self.proj_style.glbExtStyFile
+        self.grpExtStyFile          = self.proj_style.grpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
         # These files will not be used
@@ -718,11 +719,11 @@ class Xetex (Manager) :
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
-            if self.style.checkDefaultStyFile() :
+            if self.proj_style.checkDefaultStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
-            if self.style.checkDefaultExtStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.defaultExtStyFile + '}\n')
-            if self.style.checkGrpExtStyFile() :
+            if self.proj_style.checkGlbExtStyFile() :
+                gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
+            if self.proj_style.checkGrpExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :

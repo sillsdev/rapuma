@@ -27,9 +27,8 @@ from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.project         import Project
 from rapuma.core.paratext           import Paratext
-#from rapuma.core.proj_setup         import ProjSetup
+from rapuma.project.project         import Project
 
 
 ###############################################################################
@@ -39,7 +38,7 @@ from rapuma.core.paratext           import Paratext
 class Maps (object) :
 
     def __init__(self, pid, gid) :
-        '''Do the primary initialization for this manager.'''
+        '''Do the primary initialization for this class.'''
 
         self.pid                        = pid
         self.gid                        = gid

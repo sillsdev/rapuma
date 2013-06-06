@@ -25,6 +25,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
 from rapuma.project.proj_maps       import Maps
+from rapuma.project.proj_style      import ProjStyle
 
 
 ###############################################################################
@@ -54,6 +55,7 @@ class Map (Group) :
         self.mType                  = project.projectMediaIDCode
         self.tools                  = Tools()
         self.proj_maps              = Maps(self.pid, self.gid)
+        self.proj_style             = ProjStyle(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
         self.local                  = project.local
@@ -65,7 +67,7 @@ class Map (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.mapManagers = ('component', 'text', 'style', 'font', 'layout', 'illustration', self.renderer)
+        self.mapManagers = ('component', 'text', 'font', 'layout', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.mapManagers :
@@ -77,7 +79,6 @@ class Map (Group) :
         self.layout                 = self.project.managers[self.cType + '_Layout']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
-        self.style                  = self.project.managers[self.cType + '_Style']
         # File names
 
         # Folder paths
@@ -182,18 +183,11 @@ class Map (Group) :
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
-        self.style.checkDefaultStyFile()
-        self.style.checkDefaultExtStyFile()
-        self.style.checkGrpExtStyFile()
+        self.proj_style.checkDefaultStyFile()
+        self.proj_style.checkGlbExtStyFile()
+        self.proj_style.checkGrpExtStyFile()
 
-        # See if the working text is present for each subcomponent in the
-        # component and try to install it if it is not
-
-
-# FIXME: Trying to process only one group component (container)
-
-
-#        for cid in cidList :
+        # Process the container of the map files
         cType = self.cfg['cType']
         # Test for source here and die if it isn't there
         if not os.path.isfile(self.proj_maps.getGidContainerFile()) :

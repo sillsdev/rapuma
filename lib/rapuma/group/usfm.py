@@ -24,6 +24,7 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
+from rapuma.project.proj_style      import ProjStyle
 
 
 ###############################################################################
@@ -46,16 +47,18 @@ class Usfm (Group) :
         super(Usfm, self).__init__(project, cfg)
 
         # Set values for this manager
-        self.tools                  = Tools()
-        self.pg_background          = PageBackground(project.projectIDCode)
-        self.project                = project
-        self.projConfig             = project.projConfig
-        self.local                  = project.local
-        self.log                    = project.log
-        self.cfg                    = cfg
+        self.pid                    = project.projectIDCode
         self.gid                    = project.gid
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
+        self.project                = project
+        self.local                  = project.local
+        self.tools                  = Tools()
+        self.proj_style             = ProjStyle(self.pid, self.gid)
+        self.pg_background          = PageBackground(self.pid)
+        self.projConfig             = project.projConfig
+        self.log                    = project.log
+        self.cfg                    = cfg
         self.mType                  = project.projectMediaIDCode
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
@@ -63,7 +66,7 @@ class Usfm (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('component', 'text', 'style', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
+        self.usfmManagers = ('component', 'text', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -75,7 +78,6 @@ class Usfm (Group) :
         self.layout                 = self.project.managers[self.cType + '_Layout']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
-        self.style                  = self.project.managers[self.cType + '_Style']
         # File names
         self.adjustmentConfFile     = project.local.adjustmentConfFile
         # Folder paths
@@ -217,9 +219,9 @@ class Usfm (Group) :
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
-        self.style.checkDefaultStyFile()
-        self.style.checkDefaultExtStyFile()
-        self.style.checkGrpExtStyFile()
+        self.proj_style.checkDefaultStyFile()
+        self.proj_style.checkGlbExtStyFile()
+        self.proj_style.checkGrpExtStyFile()
 
         # Adjust the page number if necessary
         self.checkStartPageNumber()

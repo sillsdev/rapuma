@@ -29,13 +29,13 @@ rapuma group KYU-MYMR-MRKA Mark hyphenation add
 rapuma settings KYU-MYMR-MRKA project Managers/usfm_Font useRenderingSystem GR
 rapuma settings KYU-MYMR-MRKA project Managers/usfm_Font useLanguage kyu
 rapuma settings KYU-MYMR-MRKA project Managers/usfm_Font useMapping kye_renumber
-rapuma settings KYU-MYMR-MRKA book_layout Fonts fontSizeUnit 0.82pt
-rapuma settings KYU-MYMR-MRKA book_layout Fonts lineSpacingFactor 1.3
+rapuma settings KYU-MYMR-MRKA usfm_layout Fonts fontSizeUnit 0.82pt
+rapuma settings KYU-MYMR-MRKA usfm_layout Fonts lineSpacingFactor 1.3
 
 # Adjust the publication format
-rapuma settings KYU-MYMR-MRKA book_layout Columns bodyColumns 2
-rapuma settings KYU-MYMR-MRKA book_layout TeXBehavior vFuzz 4.8pt
-rapuma settings KYU-MYMR-MRKA book_layout Illustrations useFigurePlaceHolders False
+rapuma settings KYU-MYMR-MRKA usfm_layout Columns bodyColumns 2
+rapuma settings KYU-MYMR-MRKA usfm_layout TeXBehavior vFuzz 4.8pt
+rapuma settings KYU-MYMR-MRKA usfm_layout Illustrations useFigurePlaceHolders False
 rapuma settings KYU-MYMR-MRKA project Groups/Mark usePreprocessScript True
 rapuma settings KYU-MYMR-MRKA project Groups/Mark useIllustrations True
 rapuma settings KYU-MYMR-MRKA project Groups/Mark bindingOrder 2

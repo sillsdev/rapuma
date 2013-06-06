@@ -29,13 +29,13 @@ rpm group KYU-MYMR-MRKA Mark hyphenation add
 rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useRenderingSystem GR
 rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useLanguage kyu
 rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useMapping kye_renumber
-rpm settings KYU-MYMR-MRKA book_layout Fonts fontSizeUnit 0.82pt
-rpm settings KYU-MYMR-MRKA book_layout Fonts lineSpacingFactor 1.3
+rpm settings KYU-MYMR-MRKA usfm_layout Fonts fontSizeUnit 0.82pt
+rpm settings KYU-MYMR-MRKA usfm_layout Fonts lineSpacingFactor 1.3
 
 # Adjust the publication format
-rpm settings KYU-MYMR-MRKA book_layout Columns bodyColumns 2
-rpm settings KYU-MYMR-MRKA book_layout TeXBehavior vFuzz 4.8pt
-rpm settings KYU-MYMR-MRKA book_layout Illustrations useFigurePlaceHolders False
+rpm settings KYU-MYMR-MRKA usfm_layout Columns bodyColumns 2
+rpm settings KYU-MYMR-MRKA usfm_layout TeXBehavior vFuzz 4.8pt
+rpm settings KYU-MYMR-MRKA usfm_layout Illustrations useFigurePlaceHolders False
 rpm settings KYU-MYMR-MRKA project Groups/Mark usePreprocessScript True
 rpm settings KYU-MYMR-MRKA project Groups/Mark useIllustrations True
 rpm settings KYU-MYMR-MRKA project Groups/Mark bindingOrder 2
