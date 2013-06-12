@@ -83,6 +83,7 @@ class Illustration (Manager) :
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
+            '0010' : ['ERR', 'Component type [<<1>>] not recognized!'],
             '0240' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
             '0220' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
             '0230' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
@@ -193,8 +194,16 @@ class Illustration (Manager) :
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
-        # Check for a .piclist file
-        piclistFile = self.project.groups[gid].getCidPiclistFile(gid)
+#        import pdb; pdb.set_trace()
+
+        cType = self.projConfig['Groups'][gid]['cType']
+        if cType == 'usfm' :
+            piclistFile = self.project.groups[gid].getCidPiclistFile(cid)
+        elif cType == 'map' :
+            piclistFile = self.project.groups[gid].getCidPiclistFile(gid)
+        else :
+            self.log.writeToLog(self.errorCodes['0010'], [cType])
+        
         cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         trueCid = cid
@@ -210,8 +219,6 @@ class Illustration (Manager) :
         with codecs.open(piclistFile, "w", encoding='utf_8') as writeObject :
             writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
             writeObject.write('% Do not bother editing this file.\n\n')
-
-#            import pdb; pdb.set_trace()
 
             for i in self.illustrationConfig[gid].keys() :
                 obj = self.illustrationConfig[gid][i]

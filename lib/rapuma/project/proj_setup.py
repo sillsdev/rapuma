@@ -194,14 +194,14 @@ class ProjSetup (object) :
             # doesn't seem to make sense anymore
             if force or self.compare.isDifferent(source, targetSource) :
                 self.installUsfmWorkingText(gid, cid, force)
-                if force :
-                    self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
-                self.compare.compareComponent(gid, cid, 'working')
                 # Update our compare for next time
                 if os.path.isfile(workingComp) :
                     self.tools.makeWriteable(workingComp)
                 shutil.copy(targetBackup.name, workingComp)
                 self.tools.makeReadOnly(workingComp)
+                if force :
+                    self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
+                self.compare.compareComponent(gid, cid, 'working')
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 

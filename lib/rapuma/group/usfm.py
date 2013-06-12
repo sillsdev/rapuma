@@ -129,7 +129,8 @@ class Usfm (Group) :
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
             '0240' : ['LOG', 'Could not find adjustments for [<<1>>], created place holder setting.'],
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
-            '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+            '0260' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+            '0265' : ['ERR', 'Failed to create piclist file for [<<1>>]!'],
         }
 
         # Pick up some init settings that come after the managers have been installed
@@ -248,30 +249,37 @@ class Usfm (Group) :
                     if os.path.isfile(cidAdjFile) :
                         os.remove(cidAdjFile)
                 # Component piclist file
-                cidPiclist = self.getCidPiclistFile(cid)
+                cidPiclistFile = self.getCidPiclistFile(cid)
                 if useIllustrations :
                     if self.illustration.hasIllustrations(gid, cid) :
-                        # Create if not there of if the config has changed
-                        if not os.path.isfile(cidPiclist) or self.tools.isOlder(cidPiclist, self.local.illustrationConfFile) :
+                        # Create if not there or if the config has changed
+                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
                             self.illustration.getPics(gid, cid)
                             # Now make a fresh version of the piclist file
-                            self.illustration.createPiclistFile(gid, cid)
-                            self.log.writeToLog(self.errorCodes['0265'], [cid])
+                            if self.illustration.createPiclistFile(gid, cid) :
+                                self.log.writeToLog(self.errorCodes['0260'], [cid])
+                            else :
+                                self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
                             for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
-                                if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
+                                if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
                                     self.illustration.createPiclistFile(gid, cid)
                                     self.log.writeToLog(self.errorCodes['0265'], [cid])
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
                         self.illustration.getPics(gid, cid)
+                    else :
+                        # Does not seem to be any illustrations for this cid
+                        # clean out any piclist file that might be there
+                        if os.path.isfile(cidPiclistFile) :
+                            os.remove(cidPiclistFile)
                 else :
                     # If we are not using illustrations then any existing piclist file will be removed
-                    if os.path.isfile(cidPiclist) :
-                        os.remove(cidPiclist)
+                    if os.path.isfile(cidPiclistFile) :
+                        os.remove(cidPiclistFile)
                         self.log.writeToLog(self.errorCodes['0255'], [cid])
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])

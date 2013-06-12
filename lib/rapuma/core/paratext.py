@@ -51,7 +51,6 @@ class Paratext (object) :
             '0000' : ['MSG', 'Group processing messages'],
             '0005' : ['LOG', 'Paratext module finishInit() failed. No GID provided'],
             '0010' : ['WRN', 'Paratext module finishInit() failed with this error: [<<1>>]'],
-
         }
 
         # A source path is often important, try to get that now
