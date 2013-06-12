@@ -596,11 +596,28 @@ class Xetex (Manager) :
                 # font. For this reason, we take them all out. Only the primary font will support
                 # all font features.
                 params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.project.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
+                if self.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
                     # Secondary (only)
                     writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
                         addParams(writeObject, params, v)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             # Add special custom commands (may want to parameterize and move 
             # these to the config XML at some point)
@@ -636,6 +653,13 @@ class Xetex (Manager) :
             writeObject.write(u'\\def\\skipline{\\vskip\\baselineskip}\n')
             writeObject.write(u'\\def\\skiphalfline{\\vskip 0.5\\baselineskip}\n')
             writeObject.write(u'\\def\\skipqline{\\vskip 0.25\\baselineskip}\n')
+
+            # TOC handling
+            if self.tools.str2bool(self.projConfig['Groups'][self.gid]['tocInclude']) :
+                writeObject.write('\n% Table of Contents\n')
+                writeObject.write('\\GenerateTOC[Table of Contents]{toc.usfm}\n')
+
+
 
             # End here
             writeObject.close()

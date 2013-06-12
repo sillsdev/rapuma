@@ -61,6 +61,7 @@ from rapuma.project.project         import Project
 from rapuma.project.proj_setup      import ProjSetup
 from rapuma.project.proj_commander  import Commander
 from rapuma.project.proj_maps       import Maps
+from rapuma.project.proj_toc        import Toc
 from rapuma.core.tools              import Tools, ToolsGroup
 
 # Instantiate User config class
@@ -70,7 +71,7 @@ tools           = Tools()
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
 systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.1.20130612'
+systemVersion   = '0.1.20130612b'
 local           = None
 
 # Give a welcome message
@@ -310,21 +311,24 @@ def userArguments (args) :
         if cmd == 'add' :
 #            import pdb; pdb.set_trace()
             if cmdType == 'group' :
-                # To add a group we need to do these checks first
-                if not cid_list :
-                    sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
-                elif not cType :
-                    sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                elif args.source_path :
-                    if not tools.resolvePath(args.source_path) :
-                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                elif not args.source_id :
-                    sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
+                # To add a group (other than TOC) we need to do these checks first
+                if gid != 'TOC' :
+                    if not cid_list :
+                        sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
+                    elif not cType :
+                        sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
+                    elif args.source_path :
+                        if not tools.resolvePath(args.source_path) :
+                            sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                    elif not args.source_id :
+                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
                 if cType == 'usfm' :
                     ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
                 elif cType == 'map' :
                     Maps(pid, gid).addGroup(cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+                elif cType == 'toc' :
+                    Toc(pid, gid).addGroup(args.force)
             elif cmdType == 'hyphenation' :
                 initProject(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -341,18 +345,15 @@ def userArguments (args) :
                     initProject(pid, gid).renderGroup(cmd, cid_list, args.force)
                 elif cType == 'map' :
                     Maps(pid, gid).renderMapGroup(cmd, cid_list, args.force)
+                elif cType == 'toc' :
+                    Toc(pid, gid).renderToc(cmd, args.force)
                 else :
                     cTypeError(cType)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'lock' :
             if cmdType == 'group' :
-                if cType == 'usfm' :
-                    ProjSetup(pid).lockUnlock(gid, True)
-                elif cType == 'map' :
-                    Maps(pid, gid).lockUnlock(True)
-                else :
-                    cTypeError(cType)
+                ProjSetup(pid).lockUnlock(gid, True)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
@@ -363,6 +364,8 @@ def userArguments (args) :
                         Commander(pid).removeScripts()
                 elif cType == 'map' :
                     Maps(pid, gid).removeGroup(args.force)
+                elif cType == 'toc' :
+                    Toc(pid, gid).removeGroup(args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -382,6 +385,8 @@ def userArguments (args) :
                     ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
                 elif cType == 'map' :
                     Maps(pid, gid).updateGroup(cid_list, args.source_path, args.force)
+                elif cType == 'toc' :
+                    Toc(pid, gid).updateGroup(args.force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -519,7 +524,7 @@ mediaTypes              = ['book']
 # Group
 gCommandTypes           = ['group', 'hyphenation', 'illustration', 'preprocess']
 gCommands               = ['add', 'draft', 'proof', 'final', 'lock', 'remove', 'update', 'unlock']
-componentTypes          = ['usfm', 'map']
+componentTypes          = ['usfm', 'map', 'toc']
 # Background
 outputType              = ['bind', 'draft', 'final', 'proof']
 backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']

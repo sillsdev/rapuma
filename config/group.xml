@@ -104,5 +104,12 @@ Todo:
         <type>string</type>
         <value>None</value>
     </setting>
+    <setting>
+        <name>Include in TOC</name>
+        <key>tocInclude</key>
+        <description>Set to True if this group is to be included in the Table of Contents.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
 </root>
 
