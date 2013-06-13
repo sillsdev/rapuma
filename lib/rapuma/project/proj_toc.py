@@ -35,7 +35,7 @@ from rapuma.project.project         import Project
 ################################## Begin Class ################################
 ###############################################################################
 
-class Toc (object) :
+class ProjToc (object) :
 
     def __init__(self, pid, gid) :
         '''Do the primary initialization for this class.'''
@@ -310,7 +310,7 @@ class Toc (object) :
         # Probably should do a little preprocessing here
 
         # TeX rendering
-        Project(self.pid, self.gid).renderGroup(mode, ['toc'], True)
+        Project(self.pid, self.gid).renderGroup(mode, '', True)
 
 
         self.log.writeToLog(self.errorCodes['0840'])

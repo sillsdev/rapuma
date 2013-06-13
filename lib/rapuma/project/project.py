@@ -200,6 +200,7 @@ class Project (object) :
 
         # If there are any cids listed we need to test them
         if cidList :
+            print cidList
             self.isValidCidList(cidList)
 
         # Otherwise, do a basic test for exsistance and move on

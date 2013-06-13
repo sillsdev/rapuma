@@ -27,7 +27,8 @@ from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
 from rapuma.core.page_background    import PageBackground
 from rapuma.core.proj_binding       import Binding
-from rapuma.project.proj_maps       import Maps
+from rapuma.project.proj_maps       import ProjMaps
+from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
 
 
@@ -746,7 +747,9 @@ class Xetex (Manager) :
                     else :
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
                 elif self.cType == 'map' :
-                    gidTexObject.write('\\ptxfile{' + Maps(self.pid, self.gid).getGidContainerFile() + '}\n')
+                    gidTexObject.write('\\ptxfile{' + ProjMaps(self.pid, self.gid).getGidContainerFile() + '}\n')
+                elif self.cType == 'toc' :
+                    gidTexObject.write('\\ptxfile{' + ProjToc(self.pid, self.gid).getGidContainerFile() + '}\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
             # This can only hapen once in the whole process, this marks the end

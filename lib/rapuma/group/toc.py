@@ -7,7 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class handles Map component type tasks for book projects.
+# This class handles Table of Content type tasks for book projects.
 
 
 ###############################################################################
@@ -24,7 +24,7 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
-from rapuma.project.proj_maps       import ProjMaps
+from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
 
 
@@ -37,24 +37,24 @@ from rapuma.project.proj_style      import ProjStyle
 
 
 
-class Map (Group) :
+class Toc (Group) :
     '''This class contains information about a type of component 
     used in a type of project.'''
 
     # Shared values
-    xmlConfFile     = 'map.xml'
+    xmlConfFile     = 'toc.xml'
 
     def __init__(self, project, cfg) :
-        super(Map, self).__init__(project, cfg)
+        super(Toc, self).__init__(project, cfg)
 
         # Set values for this manager
         self.pid                    = project.projectIDCode
         self.gid                    = project.gid
-        self.cType                  = 'map'
+        self.cType                  = 'toc'
         self.Ctype                  = self.cType.capitalize()
         self.mType                  = project.projectMediaIDCode
         self.tools                  = Tools()
-        self.proj_maps              = ProjMaps(self.pid, self.gid)
+        self.proj_toc               = ProjToc(self.pid, self.gid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
@@ -67,10 +67,10 @@ class Map (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.mapManagers = ('component', 'text', 'font', 'layout', 'illustration', self.renderer)
+        self.tocManagers = ('component', 'text', 'font', 'layout', 'illustration', self.renderer)
 
         # Init the general managers
-        for mType in self.mapManagers :
+        for mType in self.tocManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
@@ -136,13 +136,13 @@ class Map (Group) :
 
 
     def getCidPiclistFile (self, gid) :
-        '''Return the full path and name of the map group piclist file.'''
+        '''Return the full path and name of the toc group piclist file.'''
 
-        return os.path.join(self.local.projComponentsFolder, gid, 'map' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
+        return os.path.join(self.local.projComponentsFolder, gid, 'toc' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
-        '''Does Map specific rendering of a Map component'''
+        '''Does toc specific rendering of a toc component'''
 
 #        import pdb; pdb.set_trace()
 
@@ -162,13 +162,13 @@ class Map (Group) :
         # With everything in place we can render the component and we pass-through
         # the force (render/view) command so the renderer will do the right thing.
         # Note: We pass the cidList straight through
-        self.project.managers['map_' + self.renderer.capitalize()].run(gid, mode, cidList, force)
+        self.project.managers['toc_' + self.renderer.capitalize()].run(gid, mode, cidList, force)
 
         return True
 
 
     def preProcessGroup (self, gid, mode, cidList) :
-        '''This will prepare a map component group for rendering by checking
+        '''This will prepare a toc component group for rendering by checking
         for and/or creating any dependents it needs to render properly.'''
 
         # Check if there is a font installed
@@ -187,45 +187,11 @@ class Map (Group) :
         self.proj_style.checkGlbExtStyFile()
         self.proj_style.checkGrpExtStyFile()
 
-        # Process the container of the map files
+        # Process the container of the toc files
         cType = self.cfg['cType']
         # Test for source here and die if it isn't there
-        if not os.path.isfile(self.proj_maps.getGidContainerFile()) :
-            self.log.writeToLog(self.errorCodes['0220'], [self.gid], 'map.preProcessGroup():0220')
-
-        # Add/manage the dependent files for this map group
-        if self.macroPackage == 'usfmTex' :
-            # Component piclist file
-            cidPiclist = self.getCidPiclistFile(self.gid)
-
-#                import pdb; pdb.set_trace()
-
-            # Send map as the bid
-            if self.illustration.hasIllustrations(gid, 'map') :
-                # Create if not there of if the config has changed
-                if not os.path.isfile(cidPiclist) or self.tools.isOlder(cidPiclist, self.local.illustrationConfFile) :
-                    # First check if we have the illustrations we think we need
-                    # and get them if we do not.
-                    self.illustration.getPics(gid, 'map')
-                    # Now make a fresh version of the piclist file
-                    self.illustration.createPiclistFile(gid, 'map')
-                    self.log.writeToLog(self.errorCodes['0265'], ['map'])
-                else :
-                    for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
-                        if self.tools.isOlder(cidPiclist, f) or not os.path.isfile(cidPiclist) :
-                            # Remake the piclist file
-                            self.illustration.createPiclistFile(gid, 'map')
-                            self.log.writeToLog(self.errorCodes['0265'], ['map'])
-                # Do a quick check to see if the illustration files for this book
-                # are in the project. If it isn't, the run will be killed
-                self.illustration.getPics(gid, 'map')
-            else :
-                # If we are not using illustrations then any existing piclist file will be removed
-                if os.path.isfile(cidPiclist) :
-                    os.remove(cidPiclist)
-                    self.log.writeToLog(self.errorCodes['0255'], ['map'])
-        else :
-            self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
+        if not os.path.isfile(self.proj_toc.getGidContainerFile()) :
+            self.log.writeToLog(self.errorCodes['0220'], [self.gid], 'toc.preProcessGroup():0220')
 
         # Background management
         bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
@@ -240,7 +206,7 @@ class Map (Group) :
 
 
 ###############################################################################
-######################### Map Component Text Functions ########################
+######################### TOC Component Text Functions ########################
 ###############################################################################
 ######################## Error Code Block Series = 0400 #######################
 ###############################################################################

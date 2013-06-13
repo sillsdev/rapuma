@@ -35,7 +35,7 @@ from rapuma.project.project         import Project
 ################################## Begin Class ################################
 ###############################################################################
 
-class Maps (object) :
+class ProjMaps (object) :
 
     def __init__(self, pid, gid) :
         '''Do the primary initialization for this class.'''
