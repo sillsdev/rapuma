@@ -154,7 +154,7 @@ class Maps (object) :
         cidList = self.illustrationConfig[self.gid].keys()
         self.createGroupFolder()
         self.createMapGroupStyleFile(force)
-        self.projConfig['Groups'] = {}
+        self.tools.buildConfSection(self.projConfig, 'Groups')
         self.projConfig['Groups'][self.gid] = {}
 #        self.projConfig['Groups'][self.gid]['cidList'] = cidList
         self.projConfig['Groups'][self.gid]['cidList'] = [self.gid]

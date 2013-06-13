@@ -602,23 +602,6 @@ class Xetex (Manager) :
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
                         addParams(writeObject, params, v)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             # Add special custom commands (may want to parameterize and move 
             # these to the config XML at some point)
             writeObject.write('\n% Special commands\n')
@@ -656,10 +639,8 @@ class Xetex (Manager) :
 
             # TOC handling
             if self.tools.str2bool(self.projConfig['Groups'][self.gid]['tocInclude']) :
-                writeObject.write('\n% Table of Contents\n')
-                writeObject.write('\\GenerateTOC[Table of Contents]{toc.usfm}\n')
-
-
+                writeObject.write('\n% Table of Contents required\n')
+                writeObject.write('\\GenerateTOC[___toc___]{toc.usfm}\n')
 
             # End here
             writeObject.close()

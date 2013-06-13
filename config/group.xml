@@ -111,5 +111,12 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
+    <setting>
+        <name>TOC Section Title</name>
+        <key>tocSectionTitle</key>
+        <description>Assuming section titles are being use, if this group begins a new section, this field can contain the section title. However, this is not required.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 
