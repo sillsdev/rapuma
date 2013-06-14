@@ -64,7 +64,7 @@ class ProjBackup (object) :
 #        import pdb; pdb.set_trace()
 
         # Look for an existing project home path
-        if self.tools.isConfSection(self.userConfig['Projects'], self.pid) :
+        if self.userConfig['Projects'].has_key(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :
             localProjHome   = ''
@@ -102,7 +102,7 @@ class ProjBackup (object) :
             pid             = self.projConfig['ProjectInfo']['projectIDCode']
             pmid            = self.projConfig['ProjectInfo']['projectMediaIDCode']
             pCreate         = self.projConfig['ProjectInfo']['projectCreateDate']
-            if not self.tools.isConfSection(self.userConfig['Projects'], pid) :
+            if not self.userConfig['Projects'].has_key(pid) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
                 self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
@@ -324,7 +324,7 @@ class ProjBackup (object) :
         copy exists, it will overwrite it.'''
 
         # First see if this is even a valid project
-        if not self.tools.isConfSection(self.userConfig['Projects'], self.pid) :
+        if not self.userConfig['Projects'].has_key(self.pid) :
             self.log.writeToLog(self.errorCodes['0610'], [self.pid])
 
         # Set some paths and file names

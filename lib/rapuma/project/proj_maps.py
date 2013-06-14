@@ -315,7 +315,7 @@ class ProjMaps (object) :
 
         # Remove subcomponents from the target if there are any
         self.tools.buildConfSection(self.projConfig, 'Groups')
-        if self.tools.isConfSection(self.projConfig['Groups'], gid) :
+        if self.projConfig['Groups'].has_key(gid) :
             for cid in cidList :
                 self.uninstallGroupComponent(gid, cid)
             if os.path.exists(groupFolder) :

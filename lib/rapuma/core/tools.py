@@ -565,39 +565,6 @@ class Tools (object) :
             return newConf
 
 
-#    def testForSetting (self, conf, key1, key2 = None) :
-#        '''Using a try statement, this will test for a setting in a config object.
-#        If its not there it returns None.'''
-
-#        if conf[key1].has_key(key2) :
-#            print 'cccc', conf.has_key(key1)
-#            return conf[key1].has_key(key2)
-#        elif conf.has_key(key1) :
-#            return 'bbbbb', conf.has_key(key1)
-#        else :
-#            return None
-#            
-#        try :
-#            if key2 :
-#                return conf[key1][key2]
-#            else :
-#                return conf[key1]
-#        except :
-#            return None
-
-
-    def isConfSection (self, confObj, section) :
-        '''A simple test to see if a section in a conf object is valid'''
-
-        return confObj.has_key(section)
-
-#        try :
-#            s = confObj[section]
-#            return True
-#        except :
-#            return False
-
-
     def buildConfSection (self, confObj, section) :
         '''Build a conf object section if it doesn't exist.'''
 

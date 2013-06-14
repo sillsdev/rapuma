@@ -130,7 +130,7 @@ class UserConfig (object) :
         self.userConfig.write()
         
         # Check to see if we were succeful
-        if not self.tools.isConfSection(self.userConfig['Projects'], pid) :
+        if not self.userConfig['Projects'].has_key(pid) :
             return True
 
 

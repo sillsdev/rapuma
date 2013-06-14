@@ -84,7 +84,7 @@ class Commander (object) :
         '''Create scripts that process specific group components.'''
 
         # Output the scripts (If this is a new project we need to pass)
-        if self.tools.isConfSection(self.projConfig, 'Groups') :
+        if self.projConfig.has_key('Groups') :
             for gid in self.projConfig['Groups'].keys() :
                 allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
