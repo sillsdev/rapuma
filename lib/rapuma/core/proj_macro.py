@@ -93,7 +93,7 @@ class ProjMacro (object) :
         if path and os.path.isfile(os.path.join(self.tools.resolvePath(path))) :
             sourceMacro     = os.path.join(self.tools.resolvePath(path))
         macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)
-        if self.tools.testForSetting(self.projConfig['GeneralSettings'], 'userMacros') and name in self.projConfig['GeneralSettings']['userMacros'] :
+        if self.projConfig['GeneralSettings'].has_key('userMacros') and name in self.projConfig['GeneralSettings']['userMacros'] :
             oldMacro = name
 
         # First check for prexsisting macro record
@@ -132,7 +132,7 @@ class ProjMacro (object) :
         makeExecutable(macroTarget)
 
         # Record the macro with the project
-        if self.tools.testForSetting(self.projConfig['GeneralSettings'], 'userMacros') :
+        if self.projConfig['GeneralSettings'].has_key('userMacros') :
             macroList = self.projConfig['GeneralSettings']['userMacros']
             if self.tools.fName(macroTarget) not in macroList :
                 self.projConfig['GeneralSettings']['userMacros'] = self.tools.addToList(macroList, self.tools.fName(macroTarget))

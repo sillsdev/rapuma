@@ -517,7 +517,7 @@ class Xetex (Manager) :
                     if not v :
                         continue
                     # Gather each macro package line we need to output
-                    if self.tools.testForSetting(macTexVals, k, self.macroPackage) :
+                    if macTexVals[k].has_key(self.macroPackage) :
                         macVal = (macTexVals[k][self.macroPackage])
                         # Test for boolDepend True and False. If there is a boolDepend
                         # then we don't need to output just yet. These next two if/elif
@@ -525,9 +525,9 @@ class Xetex (Manager) :
                         # In some cases we want output only if a certain bool is set to
                         # true, but in a few rare cases we want output when a certain
                         # bool is set to false. These will screen for both cases.
-                        if self.tools.testForSetting(macTexVals, k, 'boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
+                        if macTexVals[k].has_key('boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
                             continue
-                        elif self.tools.testForSetting(macTexVals, k, 'boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
+                        elif macTexVals[k].has_key('boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
@@ -909,7 +909,7 @@ class Xetex (Manager) :
 
             # Collect the page count and record in group
             newPages = self.tools.getPdfPages(self.gidPdfFile)
-            if self.tools.testForSetting(self.projConfig['Groups'][gid], 'totalPages') :
+            if self.projConfig['Groups'][gid].has_key('totalPages') :
                 oldPages = int(self.projConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
                     self.projConfig['Groups'][gid]['totalPages'] = newPages

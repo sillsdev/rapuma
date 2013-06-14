@@ -124,6 +124,8 @@ class UserConfig (object) :
     def unregisterProject (self, pid) :
         '''Remove a project from the user config file.'''
         
+#        import pdb; pdb.set_trace()
+        
         del self.userConfig['Projects'][pid]
         self.userConfig.write()
         

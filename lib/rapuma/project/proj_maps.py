@@ -136,7 +136,7 @@ class ProjMaps (object) :
         '''Add maps to the project.'''
 
         # First be sure the component type exists in the conf
-        self.addComponentType('map')
+        self.projConfig = self.tools.addComponentType(self.projConfig, self.local, 'map')
 
 #        import pdb; pdb.set_trace()
         
@@ -364,7 +364,7 @@ class ProjMaps (object) :
         # resolve it here before going on.
         csid        = self.projConfig['Groups'][gid]['csid']
         if not self.tools.resolvePath(sourcePath) :
-            if self.tools.testForSetting(self.userConfig['Projects'][self.pid], csid + '_sourcePath') :
+            if self.userConfig['Projects'][self.pid].has_key(csid + '_sourcePath') :
                 sourcePath = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
                 if not os.path.exists(sourcePath) :
                     self.log.writeToLog(self.errorCodes['0610'], [csid])

@@ -53,6 +53,7 @@ class ProjToc (object) :
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.tocData                    = {}
+        self.columns                    = str(0)
         # File names
         self.tocWorkFileName            = self.pid + '.toc'
         # Folder paths
@@ -60,6 +61,8 @@ class ProjToc (object) :
         self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
         # File names with paths
         self.tocWorkFile                = os.path.join(self.gidFolder, self.tocWorkFileName)
+
+        self.finishInit()
 
         # Log messages for this module
         self.errorCodes     = {
@@ -70,7 +73,7 @@ class ProjToc (object) :
             '0220' : ['MSG', 'Added TOC group to the project.'],
             '0225' : ['ERR', 'TOC group not found in this project.'],
             '0250' : ['LOG', 'Created TOC group folder'],
-            '0260' : ['ERR', 'Only support for two or three columns.'],
+            '0260' : ['ERR', 'Only support for two or three columns, [<<1>>] columns requested.'],
 
             '0420' : ['MSG', 'Removed Table of Contents'],
 
@@ -84,13 +87,10 @@ class ProjToc (object) :
 
         }
 
-        # A source path is often important, try to get that now
-        try :
-            self.csid                   = self.projConfig['Groups'][self.gid]['csid']
-            self.cType                  = self.projConfig['Groups'][self.gid]['cType']
-            self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-        except :
-            pass
+    def finishInit (self) :
+        '''If this is a new project we need to handle these settings special.'''
+        if self.projConfig['Groups'].has_key(self.gid) :
+            self.columns                = str(self.projConfig['Groups'][self.gid]['columns'])
 
 
 ###############################################################################
@@ -104,6 +104,9 @@ class ProjToc (object) :
         '''Add maps to the project.'''
 
 #        import pdb; pdb.set_trace()
+
+        # First be sure the component type exists in the conf
+        self.projConfig = self.tools.addComponentType(self.projConfig, self.local, 'toc')
 
         # Having made it this far we can output information to the project config
         self.createTocFolder()
@@ -121,9 +124,12 @@ class ProjToc (object) :
         self.projConfig['Groups'][self.gid]['columns'] = 2
         self.tools.writeConfFile(self.projConfig)
 
+        # With the group installed we can finish the initialization
+        self.finishInit()
+
         # Make a container file for the images
         self.createTocWorkingFile(force)
-        
+
         # Add/update with any available TOC info
         self.updateToc(force)
 
@@ -139,13 +145,12 @@ class ProjToc (object) :
             if os.path.exists(self.tocWorkFile) :
                 os.remove(self.tocWorkFile)
 
-        if self.tools.testForSetting(self.projConfig['Groups'], self.gid) :
+        if self.projConfig['Groups'].has_key(self.gid) :
             if not os.path.exists(self.tocWorkFile) or force :
                 mainTitle = self.projConfig['Groups'][self.gid]['mainTitle']
                 hdrName = self.projConfig['Groups'][self.gid]['hdrName']
                 hdrAbbr = self.projConfig['Groups'][self.gid]['hdrAbbr']
                 hdrPgNum = self.projConfig['Groups'][self.gid]['hdrPgNum']
-                columns = self.projConfig['Groups'][self.gid]['columns']
                 with codecs.open(self.tocWorkFile, "w", encoding="utf_8_sig") as contents :
                     contents.write('\\id TOC - Rapuma TOC working file, edit as needed.\n')
                     contents.write('\\rem Generated on: ' + self.tools.tStamp() + '\n')
@@ -155,12 +160,12 @@ class ProjToc (object) :
                     contents.write('\\makedigitsother\\catcode`{=1 \\catcode`}=2 \n')
                     contents.write('\\baselineskip=12pt \n')
                     # Output header by number of columns requested
-                    if columns == 2 :
+                    if self.columns == '2' :
                         contents.write('\\tbltwowlheader{' + hdrName + '}{' + hdrPgNum + '}\n')
-                    elif columns == 3 :
+                    elif self.columns == '3' :
                         contents.write('\\tblthreewlheader{' + hdrName + '}{' + hdrAbbr + '}{' + hdrPgNum + '}\n')
                     else :
-                        self.log.writeToLog(self.errorCodes['0260'])
+                        self.log.writeToLog(self.errorCodes['0260'], [self.columns], 'proj_toc.createTocWorkingFile()')
 
                 self.log.writeToLog(self.errorCodes['0210'], [self.gid])
                 return True
@@ -229,16 +234,17 @@ class ProjToc (object) :
         # Do not bother if no TOC data exists
         if self.collectTocData() :
             if os.path.exists(self.tocWorkFile) :
-                columns = self.projConfig['Groups'][self.gid]['columns']
-                with open(self.tocWorkFile, "a") as contents :
-                    for (idx, item) in enumerate(self.tocData['bindGroup0']['lines'].keys()) :
-                        thisLine = self.tocData['bindGroup0']['lines']['line{}'.format(idx+1)]
-                        if columns == 2 :
-                            contents.write('\\tbltwowlrow{' + thisLine['toc1'] + '}{' + thisLine['pgn'] + '}\n')
-                        elif columns == 3 :
-                            contents.write('\\tblthreewlrow{' + thisLine['toc1'] + '}{' + thisLine['toc2'] + '}{' + thisLine['pgn'] + '}\n')
-                        else :
-                            self.log.writeToLog(self.errorCodes['0260'])
+                # Do a quick check for data the dict was empty when we started
+                if len(self.tocData) > 0 :
+                    with open(self.tocWorkFile, "a") as contents :
+                        for (idx, item) in enumerate(self.tocData['bindGroup0']['lines'].keys()) :
+                            thisLine = self.tocData['bindGroup0']['lines']['line{}'.format(idx+1)]
+                            if self.columns == '2' :
+                                contents.write('\\tbltwowlrow{' + thisLine['toc1'] + '}{' + thisLine['pgn'] + '}\n')
+                            elif self.columns == '3' :
+                                contents.write('\\tblthreewlrow{' + thisLine['toc1'] + '}{' + thisLine['toc2'] + '}{' + thisLine['pgn'] + '}\n')
+                            else :
+                                self.log.writeToLog(self.errorCodes['0260'], [self.columns], 'proj_toc.updateToc()')
 
                 self.log.writeToLog(self.errorCodes['0630'])
                 return True
@@ -254,7 +260,7 @@ class ProjToc (object) :
         exsists and return it in a dictionary.'''
 
         for gid in self.projConfig['Groups'].keys() :
-            if self.tools.testForSetting(self.projConfig['Groups'][gid], 'tocInclude') :
+            if self.projConfig['Groups'][gid].has_key('tocInclude') :
                 if self.tools.str2bool(self.projConfig['Groups'][gid]['tocInclude']) :
                     bg = 'bindGroup{}'.format(self.projConfig['Groups'][gid]['bindingOrder'])
                     self.tocData[bg] = {}

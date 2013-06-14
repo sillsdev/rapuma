@@ -331,7 +331,7 @@ class ProjBackup (object) :
         backupTarget = ''
         userBackups = ''
         backupName = self.pid + '.zip'
-        if self.tools.testForSetting(self.userConfig['Resources'], 'backups') :
+        if self.userConfig['Resources'].has_key('backups') :
             userBackups = self.tools.resolvePath(self.userConfig['Resources']['backups'])
         else :
             self.log.writeToLog(self.errorCodes['0620'])

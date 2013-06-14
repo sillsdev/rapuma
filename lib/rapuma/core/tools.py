@@ -57,7 +57,7 @@ class ToolsGroup (object) :
         locked. However, if the group doesn't even exsist, it is assumed
         that it is unlocked and return False. :-)'''
 
-        if not self.tools.testForSetting(self.projConfig['Groups'], gid, 'isLocked') :
+        if not self.projConfig['Groups'][gid].has_key('isLocked') :
             return False
         elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
             return True
@@ -79,7 +79,7 @@ class ToolsGroup (object) :
     def setLock (self, gid, lock) :
         '''Set a group lock to True or False.'''
 
-        if self.tools.testForSetting(self.projConfig['Groups'], gid) :
+        if self.projConfig['Groups'].has_key(gid) :
             self.projConfig['Groups'][gid]['isLocked'] = lock
             # Update the projConfig
             if self.tools.writeConfFile(self.projConfig) :
@@ -474,12 +474,30 @@ class Tools (object) :
 ########################## Config/Dictionary routines #########################
 ###############################################################################
 
+    def addComponentType (self, cfg, local, cType) :
+        '''Add (register) a component type to the config if it 
+        is not there already.'''
+
+        Ctype = cType.capitalize()
+        self.buildConfSection(cfg, 'CompTypes')
+        if not cfg['CompTypes'].has_key(Ctype) :
+            # Build the comp type config section
+            self.buildConfSection(cfg['CompTypes'], Ctype)
+
+            # Get persistant values from the config if there are any
+            newSectionSettings = self.getPersistantSettings(cfg['CompTypes'][Ctype], os.path.join(local.rapumaConfigFolder, cType + '.xml'))
+            if newSectionSettings != cfg['CompTypes'][Ctype] :
+                cfg['CompTypes'][Ctype] = newSectionSettings
+                # Save the setting rightaway
+                self.writeConfFile(cfg)
+                return cfg
+
+
     def initConfig (self, confFile, defaultFile) :
         '''Initialize or load a config file. This will load a config file if an
         existing one is there and update it with any new system default settings
         If one does not exist a new one will be created based on system default
         settings.'''
-
 
     #    projConfFolder = os.path.split(confFile)[0]
 
@@ -534,7 +552,7 @@ class Tools (object) :
 
             newConf = {}
             for k, v, in compDefaults.iteritems() :
-                if not self.testForSetting(confSection, k) :
+                if not confSection.has_key(k) :
     # FIXME: Not sure if this next part is good or not. This will look for
     # a "None" type to be passed to it then it will replace it with an empty
     # string to outupt to the config object. This may not be the best way. 
@@ -547,33 +565,43 @@ class Tools (object) :
             return newConf
 
 
-    def testForSetting (self, conf, key1, key2 = None) :
-        '''Using a try statement, this will test for a setting in a config object.
-        If its not there it returns None.'''
+#    def testForSetting (self, conf, key1, key2 = None) :
+#        '''Using a try statement, this will test for a setting in a config object.
+#        If its not there it returns None.'''
 
-        try :
-            if key2 :
-                return conf[key1][key2]
-            else :
-                return conf[key1]
-        except :
-            return None
+#        if conf[key1].has_key(key2) :
+#            print 'cccc', conf.has_key(key1)
+#            return conf[key1].has_key(key2)
+#        elif conf.has_key(key1) :
+#            return 'bbbbb', conf.has_key(key1)
+#        else :
+#            return None
+#            
+#        try :
+#            if key2 :
+#                return conf[key1][key2]
+#            else :
+#                return conf[key1]
+#        except :
+#            return None
 
 
     def isConfSection (self, confObj, section) :
         '''A simple test to see if a section in a conf object is valid'''
 
-        try :
-            s = confObj[section]
-            return True
-        except :
-            return False
+        return confObj.has_key(section)
+
+#        try :
+#            s = confObj[section]
+#            return True
+#        except :
+#            return False
 
 
     def buildConfSection (self, confObj, section) :
         '''Build a conf object section if it doesn't exist.'''
 
-        if not self.isConfSection (confObj, section) :
+        if not confObj.has_key(section) :
             confObj[section] = {}
             return True
 

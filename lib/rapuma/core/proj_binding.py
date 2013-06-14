@@ -127,7 +127,7 @@ class Binding (object) :
         # Get the order of the groups to be bound.
         bindOrder = {}
         for grp in self.projConfig['Groups'].keys() :
-            if not self.tools.testForSetting(self.projConfig['Groups'][grp], 'bindingOrder') :
+            if not self.projConfig['Groups'][grp].has_key('bindingOrder') :
                 self.projConfig['Groups'][grp]['bindingOrder'] = 0
                 self.tools.writeConfFile(self.projConfig)
             if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
@@ -181,7 +181,7 @@ class Binding (object) :
         newPages = self.tools.getPdfPages(output)
         # FIXME: For now, we need to hard-code the manager name
         manager = 'usfm_Xetex'
-        if self.tools.testForSetting(self.projConfig['Managers'][manager], 'totalBoundPages') :
+        if self.projConfig['Managers'][manager].has_key('totalBoundPages') :
             oldPages = int(self.projConfig['Managers'][manager]['totalBoundPages'])
             if oldPages != newPages or oldPages == 'None' :
                 self.projConfig['Managers'][manager]['totalBoundPages'] = newPages

@@ -49,7 +49,7 @@ class PageBackground (object) :
         # If the order of importance is set right in the list, this should
         # end in joy.
         for cType in self.userConfig['System']['recognizedComponentTypes'] :
-            if self.tools.testForSetting(self.projConfig['CompTypes'], cType.capitalize()) :
+            if self.projConfig['CompTypes'].has_key(cType.capitalize()) :
                 self.layoutConfig       = ConfigObj(os.path.join(self.local.projConfFolder, cType + '_layout.conf'), encoding='utf-8')
         # Paths
         self.projIllustrationsFolder    = self.local.projIllustrationsFolder

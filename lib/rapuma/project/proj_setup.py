@@ -105,7 +105,8 @@ class ProjSetup (object) :
 
     def finishInit (self) :
         '''If this is a new project we need to handle these settings special.'''
-        if self.tools.testForSetting(self.userConfig, 'Projects', self.pid) :
+
+        if self.userConfig['Projects'].get(self.pid) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.backup             = ProjBackup(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
@@ -217,7 +218,7 @@ class ProjSetup (object) :
 
         # Do not want to add this group, non-force, if it already exsists.
         self.tools.buildConfSection(self.projConfig, 'Groups')
-        if self.tools.testForSetting(self.projConfig['Groups'], gid) and not force :
+        if self.projConfig['Groups'].has_key(gid) and not force :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         sourceKey = csid + '_sourcePath'
@@ -539,7 +540,7 @@ class ProjSetup (object) :
             return
 
         # Check if project is registered with Rapuma
-        if not self.tools.testForSetting(self.userConfig, 'Projects', self.pid) :
+        if not self.userConfig['Projects'].get(self.pid) :
             self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
         else :
             # Remove references from user rapuma.conf

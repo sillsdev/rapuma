@@ -167,7 +167,7 @@ class Font (Manager) :
             if os.path.isdir(tmpFolder) :
                 shutil.rmtree(tmpFolder)
             # Finally check for a substitute font name
-            if self.tools.testForSetting(fInfo['FontInformation'], 'substituteFontName') :
+            if fInfo['FontInformation'].has_key('substituteFontName') :
                 return fInfo['FontInformation']['substituteFontName']
             else :
                 return font
@@ -189,7 +189,7 @@ class Font (Manager) :
             self.tools.dieNow()
 
         # See if this font is already in the font config file
-        if not self.tools.testForSetting(self.fontConfig, 'Fonts', font) :
+        if not self.fontConfig['Fonts'].has_key(font) :
             self.tools.buildConfSection(self.fontConfig, 'Fonts')
 
         # Set as primary for the calling cType if there is none now
@@ -222,7 +222,7 @@ class Font (Manager) :
             return True
 
         else :
-            if self.tools.testForSetting(self.fontConfig['Fonts'], font) :
+            if self.fontConfig['Fonts'].has_key(font) :
                 self.project.log.writeToLog(self.errorCodes['0247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
@@ -350,7 +350,7 @@ class Font (Manager) :
                     self.project.projConfig['Managers'][self.manager]['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
-            if self.tools.testForSetting(self.fontConfig['Fonts'], font) :
+            if self.fontConfig['Fonts'].has_key(font) :
                 del self.fontConfig['Fonts'][font]
                 return True
 

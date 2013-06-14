@@ -143,7 +143,7 @@ class Project (object) :
         managerDefaults = None
         # Insert the Manager section if it is not already there
         self.tools.buildConfSection(self.projConfig, 'Managers')
-        if not self.tools.testForSetting(self.projConfig['Managers'], fullName) :
+        if not self.projConfig['Managers'].has_key(fullName) :
             self.tools.buildConfSection(self.projConfig['Managers'], fullName)
 
         # Update settings if needed
@@ -151,7 +151,7 @@ class Project (object) :
         managerDefaults = self.tools.getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
         for k, v, in managerDefaults.iteritems() :
             # Do not overwrite if a value is already there
-            if not self.tools.testForSetting(self.projConfig['Managers'][fullName], k) :
+            if not self.projConfig['Managers'][fullName].has_key(k) :
                 self.projConfig['Managers'][fullName][k] = v
                 # If we are dealing with an empty string, don't bother writing out
                 # Trying to avoid needless conf updating here. Just in case we are

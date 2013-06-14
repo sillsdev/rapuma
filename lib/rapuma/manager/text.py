@@ -94,7 +94,7 @@ class Text (Manager) :
         This cannot fail.'''
 
         se = ''
-        if self.tools.testForSetting(self.project.projConfig['CompTypes'][self.Ctype], 'sourceEditor') :
+        if self.project.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') :
             se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
         if se != editor :

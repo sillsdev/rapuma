@@ -85,7 +85,7 @@ class Paratext (object) :
 
         ptSet = self.getPTSettings()
         chars = []
-        if self.tools.testForSetting(ptSet['ScriptureText'], 'ValidPunctuation') :
+        if ptSet['ScriptureText'].has_key('ValidPunctuation') :
             for c in ptSet['ScriptureText']['ValidPunctuation'].split() :
                 # Leave it a lone if it is a single character
                 if len(c) == 1 :
@@ -270,7 +270,7 @@ class Paratext (object) :
 
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if self.tools.testForSetting(self.projConfig['CompTypes'][cType.capitalize()], 'sourceEditor') :
+        if self.projConfig['CompTypes'][cType.capitalize()].has_key('sourceEditor') :
             se = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         else :
             if self.findSsfFile() :
@@ -490,12 +490,12 @@ class Paratext (object) :
         # If this is an update, we need to keep the original settings in case the
         # default settings have been modified for this project.
         # Illustration Scale
-        if self.tools.testForSetting(illustrationConfig, gid, figDict['illustrationID']) :
+        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
             figDict['scale'] = illustrationConfig[gid][figDict['illustrationID']]['scale']
         else :
             figDict['scale'] = '1.0'
         # Illustration Position
-        if self.tools.testForSetting(illustrationConfig, gid, figDict['illustrationID']) :
+        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
             figDict['position'] = illustrationConfig[gid][figDict['illustrationID']]['position']
         else :
             if figDict['width'] == 'col' :
@@ -503,16 +503,16 @@ class Paratext (object) :
             else :
                 figDict['position'] = 't'
         # Illustration Location
-        if self.tools.testForSetting(illustrationConfig, gid, figDict['illustrationID']) :
+        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
             figDict['location'] = illustrationConfig[gid][figDict['illustrationID']]['location']
         else :
             if not figDict['location'] :
                 figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
         # Now make (update) the actual illustration section
-        if not self.tools.testForSetting(illustrationConfig, gid) :
+        if not illustrationConfig.has_key(gid) :
             self.tools.buildConfSection(illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not self.tools.testForSetting(illustrationConfig[gid], figDict['illustrationID']) :
+        if not illustrationConfig[gid].has_key(figDict['illustrationID']) :
             self.tools.buildConfSection(illustrationConfig[gid], figDict['illustrationID'])
         for k in figDict.keys() :
             illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]

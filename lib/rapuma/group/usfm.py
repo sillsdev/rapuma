@@ -320,10 +320,10 @@ class Usfm (Group) :
         '''Make sure the page number settings are in place. This may be deprecated later.'''
 
         change = False
-        if not self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'precedingGroup') :
+        if not self.projConfig['Groups'][self.gid].has_key('precedingGroup') :
             self.projConfig['Groups'][self.gid]['precedingGroup'] = None
             change = True
-        if not self.tools.testForSetting(self.projConfig['Groups'][self.gid], 'startPageNumber') :
+        if not self.projConfig['Groups'][self.gid].has_key('startPageNumber') :
             self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
             change = True
         if change :
@@ -341,7 +341,7 @@ class Usfm (Group) :
         # Check for a master adj conf file
         if os.path.exists(self.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
-            if not self.tools.testForSetting(self.adjustmentConfig, self.gid) :
+            if not self.adjustmentConfig.has_key(self.gid) :
                 self.tools.buildConfSection(self.adjustmentConfig, self.gid)
                 self.tools.buildConfSection(self.adjustmentConfig[self.gid], cid)
                 self.adjustmentConfig[self.gid][cid]['%1.1'] = '1'
@@ -393,7 +393,7 @@ class Usfm (Group) :
             if gid not in self.adjustmentConfig.keys() :
                 self.tools.buildConfSection(self.adjustmentConfig, gid)
             for comp in self.projConfig['Groups'][gid]['cidList'] :
-                if not self.tools.testForSetting(self.adjustmentConfig[gid], comp) :
+                if not self.adjustmentConfig[gid].has_key(comp) :
                     self.tools.buildConfSection(self.adjustmentConfig[gid], comp)
                 self.adjustmentConfig[gid][comp]['%1.1'] = '1'
         self.tools.writeConfFile(self.adjustmentConfig)

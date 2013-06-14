@@ -166,7 +166,7 @@ class Illustration (Manager) :
             self.log.writeToLog('ILUS-050', [fileName])
 
         # Check to see if this is a watermark file, if it is, remove config setting
-        if self.tools.testForSetting(self.projConfig['CompTypes'][self.Ctype], 'pageWatermarkFile') :
+        if self.projConfig['CompTypes'][self.Ctype].has_key('pageWatermarkFile') :
             org = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
             if org == fileName :
                 self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
