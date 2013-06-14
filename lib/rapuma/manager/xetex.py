@@ -25,11 +25,11 @@ from rapuma.core.tools              import Tools
 from rapuma.project.manager         import Manager
 from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
-from rapuma.core.page_background    import PageBackground
 from rapuma.core.proj_binding       import Binding
 from rapuma.project.proj_maps       import ProjMaps
 from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
+from rapuma.project.proj_background import PageBackground
 
 
 ###############################################################################

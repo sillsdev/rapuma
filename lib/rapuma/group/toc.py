@@ -22,10 +22,10 @@ from configobj import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.core.page_background    import PageBackground
 from rapuma.group.group             import Group
 from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
+from rapuma.project.proj_background import PageBackground
 
 
 ###############################################################################
