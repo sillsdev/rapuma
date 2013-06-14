@@ -186,8 +186,6 @@ class ProjSetup (object) :
             if os.path.exists(target) :
                 shutil.copy(target, targetBackup.name)
 
-#            import pdb; pdb.set_trace()
-
             # The use of force is for if the group is locked or source is
             # matching but you want to rerun a preprocess on the text to update it.
             # In the past the component was pretty much removed with the function
@@ -264,7 +262,18 @@ class ProjSetup (object) :
         # Here we need to "inject" cType information into the config
         # If we don't createGroup() will fail badly.
         self.cType = cType
-        self.addComponentType(cType)
+
+
+
+
+
+#        import pdb; pdb.set_trace()
+        self.tools.addComponentType(self.projConfig, self.local, cType)
+
+
+
+
+
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
         if self.tools.writeConfFile(self.projConfig) :
@@ -414,23 +423,23 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0300 ########################
 ###############################################################################
 
-    def addComponentType (self, cType) :
-        '''Add (register) a component type to the config if it 
-        is not there already.'''
+#    def addComponentType (self, cType) :
+#        '''Add (register) a component type to the config if it 
+#        is not there already.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        Ctype = cType.capitalize()
-        # Build the comp type config section
-        self.tools.buildConfSection(self.projConfig, 'CompTypes')
-        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
+#        Ctype = cType.capitalize()
+#        # Build the comp type config section
+#        self.tools.buildConfSection(self.projConfig, 'CompTypes')
+#        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
 
-        # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
-        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
-            self.projConfig['CompTypes'][Ctype] = newSectionSettings
-            # Save the setting rightaway
-            self.tools.writeConfFile(self.projConfig)
+#        # Get persistant values from the config if there are any
+#        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
+#        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
+#            self.projConfig['CompTypes'][Ctype] = newSectionSettings
+#            # Save the setting rightaway
+#            self.tools.writeConfFile(self.projConfig)
 
 
     def addCompGroupSourcePath (self, csid, source) :
@@ -885,7 +894,7 @@ class ProjSetup (object) :
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
         if not self.components[cType] :
-            self.addComponentType(cType)
+            self.tools.addComponentType(self.projConfig, self.local, cType)
 
         # Make the target folder if needed
         if not os.path.isdir(self.local.projScriptsFolder) :

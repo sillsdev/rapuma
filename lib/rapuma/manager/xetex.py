@@ -641,7 +641,7 @@ class Xetex (Manager) :
             # TOC handling
             if self.tools.str2bool(self.projConfig['Groups'][self.gid]['tocInclude']) :
                 writeObject.write('\n% Table of Contents required\n')
-                writeObject.write('\\GenerateTOC[___toc___]{toc.usfm}\n')
+                writeObject.write('\\GenerateTOC[___toc___]{toc.usfm}\n\n')
 
             # End here
             writeObject.close()
