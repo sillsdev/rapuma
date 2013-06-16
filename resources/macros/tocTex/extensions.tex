@@ -1,0 +1,125 @@
+% extensions.tex
+%
+% Custom TeX setup file for the usfmTex macro package.
+
+%%%%%%%%%%%%%%%%%%%%%%%  Extra Tweaks %%%%%%%%%%%%%%%%%%%%%%
+
+% In a perfect world none of these would be needed but when
+% your publication throws you a curve, perhaps one of these
+% work-arounds might help you do what you want to do.
+
+% Process \b 
+% This is often frowned upon but if you want to add extra
+% spaces around poetry, uncomment this next line.
+%\def\b{\vskip 0.5\baselineskip}
+
+%%%%% Baselineskip Adjustment Hook
+% This hook provides a means to adjust the baselineskip on a
+% specific style. It provides a place to put the initial 
+% setting so the hook can make the change and then go back
+% to the initial setting when done.
+\newdimen\remblskip \remblskip=\baselineskip
+
+% Baselineskip Adjustment Hook Example
+%\sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
+%\sethook{after}{s1}{\baselineskip=\remblskip}
+
+%%%%% Substituting Characters
+% Some times, when a character does not exist in a font
+% you can substitute from another if no special rendering
+% is needed. This code will do that. Modify as needed.
+%% Example (1)
+%\font\cwi="[../Fonts/Padauk/Padauk.ttf]" at 10pt
+%\catcode"A92E=\active                            % Make U+A92E an active character
+%\def^^^^a92e{\leavevmode{\cwi\char"A92E}}        % Define it to print itself
+
+%% Example (2)
+%\font\crossmaltese="[../Fonts/freefont/FreeSerif.ttf]" at 12pt
+%\catcode"2720=\active                            % Make U+F058 an active character
+%\def^^^^2720{\leavevmode{\crossmaltese\char"2720}}        % Define it to print itself
+
+%%%%% Non-standard Spaces
+% Some publications may use non-standard (U+0020) between words.
+% But TeX (and XeTeX) will treat spaces other than U+0020 as
+% non-breaking which messes up your justification. This is a
+% work around to force TeX to break and stretch words with
+% another space character in a controled way.
+%\catcode"2009=13
+%\def^^^^2009{\hskip .2em plus.1em minus.1em\relax}
+
+%%%%% Heading space
+% There always seems to be problems with extra space between 
+% the section heading and the top of the column when the 
+% section head is at the top of the column. To take up the
+% slack this code will usually help. Any adjustments needed
+% should be done in the .sty and \VerticalSpaceFactor.
+% Trying to adjust this code doesn't seem to make any dif.
+%\catcode`\@=11
+%\def\gridb@x#1{%
+ %\setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
+ %\dimen2=\ht0 \advance\dimen2 by \dp0
+ %\dimen0=\baselineskip \vskip\baselineskip
+ %\ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
+                              % when doing a picture box, because it's not part of the
+                              % current page
+% \loop \ifdim\dimen0<\dimen2
+%   \advance\dimen0 by \baselineskip
+%    \line{}\nobreak \repeat
+% \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
+% \unvbox0 \nobreak
+%}
+%\catcode`\@=12
+
+%%%%%%%%%%%%%%%%%%%%% TOC Generation %%%%%%%%%%%%%%%%%%%%%%
+
+% The following code controls the layout of the TOC file
+% This code can be addjusted to get the right look to your
+% TOC. You can also adjust the \toc<n> styles found in
+% the .sty file. The functions that are embedded in the
+% TOC file are:
+%	\tbltwowlheader{lable1}{label3}
+%	\tbltwowlrow{val1}{val3}
+% Or, if you wish a three column layout you could use this:
+%	\tblthreewlheader{lable1}{label3}
+%	\tblthreewlrow{val1}{val3}
+% Other layouts, more code will be need to be added.
+% To change the leader, leader spacing and other general
+% layout formating, adjust the settings below.
+
+\catcode`@=11
+
+\def\makedigitsother{\m@kedigitsother}
+\def\makedigitsletters{\m@kedigitsletters}
+
+% These are custom settings that can go in the .tex file to
+% adjust elements on the page
+\def\myleader{.}		% The leader character
+\def\leaderspace{0.6em}		% The space between the leader characters
+\def\tblmarginright{0in}	% The width of the table's right margin
+\def\tblheaderspace{4pt}	% The space between the header and the first row
+\def\tblrowspace{4pt}		% The space between rows of the table
+\def\tblthreewcolmngap{.75in}	% The space between col 1 & 2 on a three col table
+
+
+% Macro code for leadered two colum layout:
+\newdimen\tbltwowllabel
+\def\tbltwowlheader#1#2{\parfillskip=\tblmarginright\toch #1\toch*\hfil
+  \setbox0=\hbox{\toch #2\toch*}\tbltwowllabel=\wd0\box0\par\vskip \tblheaderspace}
+
+\def\tbltwowlrow#1#2{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\tocbn #1\tocbn*%
+  \quad\leaders\hbox to \leaderspace{\hss\myleader\hss}\hfill\hbox to \tbltwowllabel{%
+  \hfil\tocpg #2\tocpg*}\par}%
+
+% Macro code for leadered three colum layout:
+\newdimen\tblthreewllabel
+\def\tblthreewlheader#1#2#3{\parfillskip=\tblmarginright\setbox0\hbox{\toch #1\toch*\relax}\tblthreewllabel=\wd0
+  \noindent\box0\hskip\tblthreewcolmngap\toch #2\toch*\hfil\toch #3\toch*\par\vskip \tblheaderspace}
+
+\def\tblthreewlrow#1#2#3{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\hbox to \tblthreewllabel{\tocbn #1\tocbn*\hss\relax}%
+  \hskip\tblthreewcolmngap\tocba #2\tocba*
+  \leaders\hbox to \leaderspace{\hss\tocbn \myleader\tocbn*\hss}\hfil
+  \enskip\tocpg #3\tocpg*\par}%
+
+\catcode `@=12
+
+
