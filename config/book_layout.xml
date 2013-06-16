@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!--
+File: book_layout.xml
+Description:
+This contains all the layout and format values for a book publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This contains general format settings for UsfmTex macro package.</description>
+        <setting>
+            <name>Measurement Unit</name>
+            <key>measurementUnit</key>
+            <description>The unit of measurement used in this publication.</description>
+            <type>string</type>
+            <value>mm</value>
+        </setting>
+        <setting>
+            <name>Source Encoding Transform</name>
+            <description>In the case of multi-script projects or non-Unicode, an encoding transformation may be needed make the source data useful to the system.  The encoding information is stored in the Encoding section and should be the same as other files used in this project. (Default = False)</description>
+            <key>sourceEncodeTransform</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
+    <section>
+        <name>Margins</name>
+        <sectionID>Margins</sectionID>
+        <description>Here find ye settings that affect margin settings. Arrg!</description>
+        <setting>
+            <name>Base Margin Unit</name>
+            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
+            <key>marginUnit</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+    </section>
+    <section>
+        <name>Page Layout</name>
+        <sectionID>PageLayout</sectionID>
+        <description>Page layout information.  This covers general page layout format options.</description>
+        <setting>
+            <name>Page Size ID Code</name>
+            <description>If you are using a common page size please enter the standard code.  If a custom size is being used just enter "custom". Default = A5</description>
+            <key>pageSizeCode</key>
+            <type>string</type>
+            <value>A5</value>
+        </setting>
+        <setting>
+            <name>Starting Page Number</name>
+            <description>Sometimes the content should not start with the default page number of '1'. If a number is set in this field, the macro will insert a \pageno command in the control file.  Note this is for the main content section only.  Individual components in the front and back matter must have the \pageno command inserted manually into their control files.   Default = Null (which means no command output, page starts on '1')</description>
+            <key>pageNumberBegin</key>
+            <type>integer</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Page Height</name>
+            <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
+            <key>pageHeight</key>
+            <type>integer</type>
+            <value>210</value>
+        </setting>
+        <setting>
+            <name>Page Width</name>
+            <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
+            <key>pageWidth</key>
+            <type>integer</type>
+            <value>148</value>
+        </setting>
+        <setting>
+            <name>Cropmarks</name>
+            <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
+            <key>useCropmarks</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
+    <section>
+        <name>Text Elements</name>
+        <sectionID>TextElements</sectionID>
+        <description>General settings for text level elements</description>
+        <setting>
+            <name>Justify Paragraphs</name>
+            <description>Paragraphs are justified by default.  Set this to false to turn off justification.   Default = True</description>
+            <key>justifyParagraphs</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Right To Left</name>
+            <description>Uncomment to use right-to-left text layout mode   Default = False</description>
+            <key>rightToLeft</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
+</root>
+

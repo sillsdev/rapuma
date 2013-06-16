@@ -2,7 +2,7 @@
 
 
 <!--
-File: format_values.xml
+File: usfmTex.xml
 Description:
 This contains all the layout and format values for a book publication.
 
@@ -13,25 +13,6 @@ Todo:
 
 
 <root>
-    <section>
-        <name>General Settings</name>
-        <sectionID>GeneralSettings</sectionID>
-        <description>This contains general format settings for UsfmTex macro package.</description>
-        <setting>
-            <name>Measurement Unit</name>
-            <key>measurementUnit</key>
-            <description>The unit of measurement used in this publication.</description>
-            <type>string</type>
-            <value>mm</value>
-        </setting>
-        <setting>
-            <name>Source Encoding Transform</name>
-            <description>In the case of multi-script projects or non-Unicode, an encoding transformation may be needed make the source data useful to the system.  The encoding information is stored in the Encoding section and should be the same as other files used in this project. (Default = False)</description>
-            <key>sourceEncodeTransform</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-    </section>
     <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
@@ -50,16 +31,16 @@ Todo:
             <type>boolean</type>
             <value>True</value>
             <boolDependTrue>layoutConfig:ChapterVerse:omitVerseNumberOne</boolDependTrue>
-            <usfmTex>\OmitVerseNumberOnetrue</usfmTex>
+            <texCode>\OmitVerseNumberOnetrue</texCode>
         </setting>
         <setting>
             <name>Omit All Chapter Numbers</name>
             <description>Omit all the chapter numbers in the book. (Often this is used for one-chapter books.) Default = False</description>
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <boolDependTrue>layoutConfig:ChapterVerse:omitAllChapterNumbers</boolDependTrue>
-            <usfmTex>\OmitChapterNumbertrue</usfmTex>
+            <texCode>\OmitChapterNumbertrue</texCode>
         </setting>
         <setting>
             <name>Chapter Verse Separator</name>
@@ -67,30 +48,39 @@ Todo:
             <key>chapterVerseSeparator</key>
             <type>string</type>
             <value>\kern.1em:\kern.1em</value>
-            <usfmTex>\def\ChapterVerseSeparator{[v]}</usfmTex>
+            <texCode>\def\ChapterVerseSeparator{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Marginal Verses</name>
+            <name>Marginal Verses</name>
             <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
             <key>useMarginalVerses</key>
             <type>boolean</type>
             <value>False</value>
         </setting>
         <setting>
-            <name>USFM TeX After Verse Space Factor</name>
+            <name>After Verse Space Factor</name>
             <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.  Default = 2</description>
             <key>afterVerseSpaceFactor</key>
             <type>integer</type>
             <value>2</value>
-            <usfmTex>\def\AfterVerseSpaceFactor{[v]}</usfmTex>
+            <texCode>\def\AfterVerseSpaceFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX After Chapter Space Factor</name>
+            <name>After Chapter Space Factor</name>
             <description>You may need a little extra space following the Chapter numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.  Default = 3</description>
             <key>afterChapterSpaceFactor</key>
             <type>integer</type>
             <value>3</value>
-            <usfmTex>\def\AfterChapterSpaceFactor{[v]}</usfmTex>
+            <texCode>\def\AfterChapterSpaceFactor{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Adorn Verse Number Setting</name>
+            <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
+            <key>adornVerseSetting</key>
+            <type>string</type>
+            <value></value>
+            <texCode>\def\AdornVerseNumber#1{[v]}</texCode>
+            <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>
     </section>
     <section>
@@ -103,7 +93,7 @@ Todo:
             <key>titleColumns</key>
             <type>integer</type>
             <value>1</value>
-            <usfmTex>\TitleColumns=[v]</usfmTex>
+            <texCode>\TitleColumns=[v]</texCode>
         </setting>
         <setting>
             <name>Intro Columns</name>
@@ -111,7 +101,7 @@ Todo:
             <key>introColumns</key>
             <type>integer</type>
             <value>1</value>
-            <usfmTex>\IntroColumns=[v]</usfmTex>
+            <texCode>\IntroColumns=[v]</texCode>
         </setting>
         <setting>
             <name>Body Columns</name>
@@ -119,7 +109,7 @@ Todo:
             <key>bodyColumns</key>
             <type>integer</type>
             <value>1</value>
-            <usfmTex>\BodyColumns=[v]</usfmTex>
+            <texCode>\BodyColumns=[v]</texCode>
         </setting>
         <setting>
             <name>Column Gutter Rule</name>
@@ -128,39 +118,39 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
-            <usfmTex>\ColumnGutterRuletrue</usfmTex>
+            <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Column Gutter Factor</name>
+            <name>Column Gutter Factor</name>
             <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 15</description>
             <key>columnGutterFactor</key>
             <type>integer</type>
             <value>15</value>
-            <usfmTex>\def\ColumnGutterFactor{[v]}</usfmTex>
+            <texCode>\def\ColumnGutterFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Column Shift</name>
+            <name>Column Shift</name>
             <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  Use this if more than one column is being used.  It will output both the \columnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
             <key>columnShift</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\columnshift=[vm]</usfmTex>
+            <texCode>\columnshift=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Column Shift</name>
+            <name>Column Shift</name>
             <description>Single column shift will shift a colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  It will output the \singlecolumnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
             <key>singleColumnShift</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>%\singlecolumnshift=[vm]</usfmTex>
+            <texCode>%\singlecolumnshift=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Column Gutter Rule Skip</name>
+            <name>Column Gutter Rule Skip</name>
             <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\ColumnGutterRuleSkip=[vm]</usfmTex>
+            <texCode>\ColumnGutterRuleSkip=[vm]</texCode>
             <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
         </setting>
     </section>
@@ -169,6 +159,13 @@ Todo:
         <sectionID>Crossreferences</sectionID>
         <description>This section includes all textual elements that go into the Crossreferences area.</description>
         <setting>
+            <name>Include Crossreferences</name>
+            <description>[NOT IMPLEMENTED] Include crossreferences in the output. Defalt = True</description>
+            <key>includeCrossreferences</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
             <name>Use Auto Callers (Crossrefs)</name>
             <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
             <key>useAutoCallerCrossrefs</key>
@@ -176,7 +173,7 @@ Todo:
             <value>True</value>
         </setting>
         <setting>
-            <name>USFM TeX Crossreference Auto Caller Character</name>
+            <name>Crossreference Auto Caller Character</name>
             <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
             <key>crossrefAutoCallerCharacter</key>
             <type>list</type>
@@ -189,7 +186,7 @@ Todo:
             <type>string</type>
             <value></value>
             <boolDependTrue>layoutConfig:Crossreferences:useAutoCallerCrossrefs</boolDependTrue>
-            <usfmTex>\AutoCallers{x}{[v]}</usfmTex>
+            <texCode>\AutoCallers{x}{[v]}</texCode>
         </setting>
         <setting>
             <name>Numeric Callers (Crossrefs)</name>
@@ -198,7 +195,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Crossreferences:useNumericCallersCrossrefs</boolDependTrue>
-            <usfmTex>\NumericCallers{x}</usfmTex>
+            <texCode>\NumericCallers{x}</texCode>
         </setting>
         <setting>
             <name>Page Reset Callers (Crossrefs)</name>
@@ -207,7 +204,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Crossreferences:pageResetCallersCrossrefs</boolDependTrue>
-            <usfmTex>\PageResetCallers{x}</usfmTex>
+            <texCode>\PageResetCallers{x}</texCode>
         </setting>
         <setting>
             <name>Omit Caller In Crossrefs</name>
@@ -216,7 +213,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Crossreferences:omitCallerInCrossrefs</boolDependTrue>
-            <usfmTex>\OmitCallerInNote{x}</usfmTex>
+            <texCode>\OmitCallerInNote{x}</texCode>
         </setting>
         <setting>
             <name>Paragraphed Crossrefs</name>
@@ -225,7 +222,7 @@ Todo:
             <type>boolean</type>
             <value>True</value>
             <boolDependTrue>layoutConfig:Crossreferences:paragraphedCrossrefs</boolDependTrue>
-            <usfmTex>\ParagraphedNotes{x}</usfmTex>
+            <texCode>\ParagraphedNotes{x}</texCode>
         </setting>
     </section>
     <section>
@@ -260,7 +257,7 @@ Todo:
             <type>string</type>
             <value></value>
             <boolDependTrue>layoutConfig:Footnotes:useAutoCallerFootnotes</boolDependTrue>
-            <usfmTex>\AutoCallers{f}{[v]}</usfmTex>
+            <texCode>\AutoCallers{f}{[v]}</texCode>
         </setting>
         <setting>
             <name>Numeric Callers (Footnotes)</name>
@@ -269,7 +266,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Footnotes:useNumericCallersFootnotes</boolDependTrue>
-            <usfmTex>\NumericCallers{f}</usfmTex>
+            <texCode>\NumericCallers{f}</texCode>
         </setting>
         <setting>
             <name>Page Reset Callers (Footnotes)</name>
@@ -278,7 +275,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Footnotes:pageResetCallersFootnotes</boolDependTrue>
-            <usfmTex>\PageResetCallers{f}</usfmTex>
+            <texCode>\PageResetCallers{f}</texCode>
         </setting>
         <setting>
             <name>Omit Caller In Footnotes</name>
@@ -287,7 +284,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>layoutConfig:Footnotes:omitCallerInFootnotes</boolDependTrue>
-            <usfmTex>\OmitCallerInNote{f}</usfmTex>
+            <texCode>\OmitCallerInNote{f}</texCode>
         </setting>
         <setting>
             <name>Paragraphed Footnotes</name>
@@ -296,18 +293,18 @@ Todo:
             <type>boolean</type>
             <value>True</value>
             <boolDependTrue>layoutConfig:Footnotes:paragraphedFootnotes</boolDependTrue>
-            <usfmTex>\ParagraphedNotes{f}</usfmTex>
+            <texCode>\ParagraphedNotes{f}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Define Footnote Rule</name>
+            <name>Define Footnote Rule</name>
             <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
             <key>defineFootnoteRule</key>
             <type>string</type>
             <value></value>
-            <usfmTex>\def\footnoterule{[v]}</usfmTex>
+            <texCode>\def\footnoterule{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Auto Caller Number Characters</name>
+            <name>Auto Caller Number Characters</name>
             <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
             <key>autoCallerMaxCharacterNumbers</key>
             <type>string</type>
@@ -319,28 +316,28 @@ Todo:
         <sectionID>Fonts</sectionID>
         <description>Information for fonts used in the publication project.</description>
         <setting>
-            <name>USFM TeX Font Size Unit</name>
+            <name>Font Size Unit</name>
             <description>Using a value in points (pt), this scales the font size of all elements according to the amount of the value. 1pt is equal to 100%. Example, to decrease the size by 5%, enter the value .095pt. Default = 1pt</description>
             <key>fontSizeUnit</key>
             <type>integer</type>
             <value>1pt</value>
-            <usfmTex>\FontSizeUnit=[v]</usfmTex>
+            <texCode>\FontSizeUnit=[v]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Line Spacing Factor</name>
+            <name>Line Spacing Factor</name>
             <description>Scaling factor used to adjust line spacing (leading), relative to font size  Default = 1.1</description>
             <key>lineSpacingFactor</key>
             <type>integer</type>
             <value>1.1</value>
-            <usfmTex>\def\LineSpacingFactor{[v]}</usfmTex>
+            <texCode>\def\LineSpacingFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Vertical Space Factor</name>
+            <name>Vertical Space Factor</name>
             <description>Scaling factor used to adjust amount of vertical spaces applied for USFM style sheet SpaceBefore and SpaceAfter values.   Default = 0.2</description>
             <key>verticalSpaceFactor</key>
             <type>integer</type>
             <value>1</value>
-            <usfmTex>\def\VerticalSpaceFactor{[v]}</usfmTex>
+            <texCode>\def\VerticalSpaceFactor{[v]}</texCode>
         </setting>
     </section>
     <section>
@@ -355,29 +352,29 @@ Todo:
             <value>False</value>
         </setting>
         <setting>
-            <name>USFM TeX Header Position</name>
+            <name>Header Position</name>
             <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 0.5mm</description>
             <key>headerPosition</key>
             <type>integer</type>
             <value>0.5</value>
-            <usfmTex>\def\HeaderPosition{[v]}</usfmTex>
+            <texCode>\def\HeaderPosition{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Rule Position</name>
+            <name>Running Header Rule Position</name>
             <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  This is a simple dimension, not a relative "factor".   Default = 4mm</description>
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
             <boolDependTrue>layoutConfig:HeaderFooter:useRunningHeaderRule</boolDependTrue>
-            <usfmTex>\RHruleposition=[vm]</usfmTex>
+            <texCode>\RHruleposition=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Footer Position</name>
+            <name>Footer Position</name>
             <description>Position of the baseline of the footer relative to the bottom edge of the paper (not the text area).   Default = 0.5mm</description>
             <key>footerPosition</key>
             <type>integer</type>
             <value>0.5</value>
-            <usfmTex>\def\FooterPosition{[v]}</usfmTex>
+            <texCode>\def\FooterPosition{[v]}</texCode>
         </setting>
     </section>
     <section>
@@ -392,76 +389,76 @@ Todo:
             <value>False</value>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Title (Left)</name>
+            <name>Running Footer Title (Left)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitleleft{})   Default = empty</description>
             <key>runningFooterTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFtitleleft{\[v]}</usfmTex>
+            <texCode>\def\RFtitleleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Title (Center)</name>
+            <name>Running Footer Title (Center)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitlecenter{})   Default = empty</description>
             <key>runningFooterTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFtitlecenter{\[v]}</usfmTex>
+            <texCode>\def\RFtitlecenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Title (Right)</name>
+            <name>Running Footer Title (Right)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitleright{})   Default = empty</description>
             <key>runningFooterTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFtitleright{\[v]}</usfmTex>
+            <texCode>\def\RFtitleright{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Odd (Left)</name>
+            <name>Running Footer Odd (Left)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddleft{})   Default = empty</description>
             <key>runningFooterOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFoddleft{\[v]}</usfmTex>
+            <texCode>\def\RFoddleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Odd (Center)</name>
+            <name>Running Footer Odd (Center)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddcenter{})   Default = empty</description>
             <key>runningFooterOddCenter</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFoddcenter{\[v]}</usfmTex>
+            <texCode>\def\RFoddcenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Odd (Right)</name>
+            <name>Running Footer Odd (Right)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddright{})   Default = empty</description>
             <key>runningFooterOddRight</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFoddright{\[v]}</usfmTex>
+            <texCode>\def\RFoddright{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Even (Left)</name>
+            <name>Running Footer Even (Left)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevenleft{})   Default = empty</description>
             <key>runningFooterEvenLeft</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFevenleft{\[v]}</usfmTex>
+            <texCode>\def\RFevenleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Even (Center)</name>
+            <name>Running Footer Even (Center)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevencenter{})   Default = empty</description>
             <key>runningFooterEvenCenter</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFevencenter{\[v]}</usfmTex>
+            <texCode>\def\RFevencenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Footer Even (Right)</name>
+            <name>Running Footer Even (Right)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevenright{})   Default = empty</description>
             <key>runningFooterEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RFevenright{\[v]}</usfmTex>
+            <texCode>\def\RFevenright{\[v]}</texCode>
         </setting>
     </section>
     <section>
@@ -473,97 +470,177 @@ Todo:
             <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
             <key>useRunningHeader</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
         </setting>
         <setting>
-            <name>USFM TeX Show Verse References (Running Header)</name>
+            <name>Show Verse References (Running Header)</name>
             <description>Set this to true if you want to include verse numbers in header/footer references, or only chapter numbers. (ptx2pdf syntax = \VerseRefstrue)   Default = False (Only chapter numbers)</description>
             <key>showVerseReferences</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
             <boolDependTrue>layoutConfig:HeaderContent:showVerseReferences</boolDependTrue>
-            <usfmTex>\VerseRefstrue</usfmTex>
+            <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Omit Book Reference (Running Header)</name>
+            <name>Omit Book Reference (Running Header)</name>
             <description>Omit the book name in the running header (RH). Default = False</description>
             <key>omitBookReference</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
             <boolDependTrue>layoutConfig:HeaderContent:omitBookReference</boolDependTrue>
-            <usfmTex>\OmitBookReftrue</usfmTex>
+            <texCode>\OmitBookReftrue</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Title (Left Side)</name>
+            <name>Omit Chapter Number (Running Header)</name>
+            <description>Omit the chapter numbers in the running header (RH). Default = False</description>
+            <key>omitChapterNumberRH</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDependTrue>layoutConfig:HeaderContent:omitChapterNumberRH</boolDependTrue>
+            <texCode>\OmitChapterNumberRHtrue</texCode>
+            <note>This is not implemented in texCode but can be found in the standard ptx2pdf macro package.</note>
+        </setting>
+        <setting>
+            <name>Running Header Title (Left Side)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHtitleleft{})   Default = empty</description>
             <key>runningHeaderTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RHtitleleft{\[v]}</usfmTex>
+            <texCode>\def\RHtitleleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Title (Center)</name>
+            <name>Running Header Title (Center)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHtitlecenter{})   Default = empty</description>
             <key>runningHeaderTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RHtitlecenter{\[v]}</usfmTex>
+            <texCode>\def\RHtitlecenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Title (Right Side)</name>
+            <name>Running Header Title (Right Side)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHtitleright{})   Default = empty</description>
             <key>runningHeaderTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RHtitleright{\[v]}</usfmTex>
+            <texCode>\def\RHtitleright{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Odd (Left/Inside Of The Page)</name>
+            <name>Running Header Odd (Left/Inside Of The Page)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHoddleft{})   Default = empty</description>
             <key>runningHeaderOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RHoddleft{\[v]}</usfmTex>
+            <texCode>\def\RHoddleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Odd (Center)</name>
+            <name>Running Header Odd (Center)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHoddcenter{})   Default = pagenumber</description>
             <key>runningHeaderOddCenter</key>
             <type>string</type>
-            <value>empty</value>
-            <usfmTex>\def\RHoddcenter{\[v]}</usfmTex>
+            <value>pagenumber</value>
+            <texCode>\def\RHoddcenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Odd (Right/Outside Of The Page)</name>
+            <name>Running Header Odd (Right/Outside Of The Page)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHoddright{})   Default = rangeref</description>
             <key>runningHeaderOddRight</key>
             <type>string</type>
-            <value>empty</value>
-            <usfmTex>\def\RHoddright{\[v]}</usfmTex>
+            <value>lastref</value>
+            <texCode>\def\RHoddright{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Even (Left/Outside Of The Page)</name>
+            <name>Running Header Even (Left/Outside Of The Page)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHevenleft{})   Default = rangeref</description>
             <key>runningHeaderEvenLeft</key>
             <type>string</type>
-            <value>empty</value>
-            <usfmTex>\def\RHevenleft{\[v]}</usfmTex>
+            <value>firstref</value>
+            <texCode>\def\RHevenleft{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Even (Center)</name>
+            <name>Running Header Even (Center)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHevencenter{})   Default = pagenumber</description>
             <key>runningHeaderEvenCenter</key>
             <type>string</type>
-            <value>empty</value>
-            <usfmTex>\def\RHevencenter{\[v]}</usfmTex>
+            <value>pagenumber</value>
+            <texCode>\def\RHevencenter{\[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Running Header Even (Right/Inside Of The Page)</name>
+            <name>Running Header Even (Right/Inside Of The Page)</name>
             <description>This will specify what can go in the running header at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) (ptx2pdf syntax = \RHevenright{})   Default = empty</description>
             <key>runningHeaderEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <usfmTex>\def\RHevenright{\[v]}</usfmTex>
+            <texCode>\def\RHevenright{\[v]}</texCode>
+        </setting>
+    </section>
+    <section>
+        <name>Hyphenation</name>
+        <sectionID>Hyphenation</sectionID>
+        <description>Some information for building TeX commands for building the hyphenation control file and other related files located in the project's hyphenation folder.  Some file names are stored in this section.  These are not used in the makefile process and can vary depending on how the process is run.  Note: remember to re-make/overwrite the current TeX Hyphenation file for the changes to take effect.</description>
+        <setting>
+            <name>Create New TeX Hyphen Language Name</name>
+            <description>Create a language name to be used for applying or creating hyphenation rules for text of a specific language. (\newlanguage). This setting is active when useHyphenation is set to True and a value is entered in this field.</description>
+            <key>createHyphenLanguage</key>
+            <type>string</type>
+            <value></value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\newlanguage\[v]</texCode>
+            <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
+        </setting>
+        <setting>
+            <name>Set TeX Hyphen Language Name</name>
+            <description>Set a language name to be used for applying or creating hyphenation rules for text of a specific language. (\language=). This setting is dependent on the createHyphenLanguage.</description>
+            <key>setHyphenLanguage</key>
+            <type>string</type>
+            <value></value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\language=\[v]</texCode>
+            <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
+        </setting>
+        <setting>
+            <name>TeX Hyphen Character</name>
+            <description>Set the default TeX hyphen character to insert at hyphenation breaks (\defaulthyphenchar).  The normal is '‐' (U+2010) but it could be changed to use something like U+200B (ZWSP) Just change the character setting in the value. (Note that normally in the hyphenation word list source text you will find U+002D, a minus sign which also doubles for a hyphen character but it is not a proper one.) Remember to put a '"' (double quote) before the Unicode value, TeX needs this.   Default = "2010</description>
+            <key>setHyphenCharacter</key>
+            <type>string</type>
+            <value>"002D</value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\defaulthyphenchar=[v]</texCode>
+        </setting>
+        <setting>
+            <name>TeX Hyphenation Penalty</name>
+            <description>The bigger the number the harder it is to break a word in the hyphen list (\hyphenpenalty). This setting is active when useHyphenation is set to True.  Default = 0</description>
+            <key>setHyphenPenalty</key>
+            <type>integer</type>
+            <value>50</value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\hyphenpenalty=[v]</texCode>
+        </setting>
+        <setting>
+            <name>TeX Hyphenation Penalty Off</name>
+            <description>If useHyphenation is set to False, this will automatically set the TeX \hyphenpenalty setting to 10000 which effectivly turns off hyphenation. If useHyphenation is set to True, this setting should be overwritten with the necessary settings to make hyphenation work. (In theory.)</description>
+            <key>texHyphenOff</key>
+            <type>integer</type>
+            <value>10000</value>
+            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
+            <texCode>\hyphenpenalty=[v]</texCode>
+        </setting>
+        <setting>
+            <name>TeX Explicit Hyphenation Penalty</name>
+            <description>Like with \hyphenpenalty this will adjust TEX's ability to break explicit hyphens.  These are words that occure in the text which are spelled with a hyphen in them.  Normally, TeX will not touch these unless this is set to a low number like -50. This setting is active when useHyphenation is set to True. Default = 50</description>
+            <key>setExHyphenPenalty</key>
+            <type>integer</type>
+            <value>50</value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\exhyphenpenalty=[v]</texCode>
+        </setting>
+        <setting>
+            <name>TeX Pretolerance</name>
+            <description>Pretolerance is an integer parameter that is used in TeX's line breaking algorithm.  Use an integer from -1 to 10000.  If \pretolerance is -1, then TeX bypasses the first attempt at breaking a paragraph without hyphenation.  Normally it is always best to allow TeX to use its defaults first so the setting here is nothing by default. This setting is active when useHyphenation is set to True. Default = 0</description>
+            <key>pretolerance</key>
+            <type>integer</type>
+            <value>0</value>
+            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <texCode>\pretolerance=[v]</texCode>
         </setting>
     </section>
     <section>
@@ -571,30 +648,30 @@ Todo:
         <sectionID>Illustrations</sectionID>
         <description>Illustration resources</description>
         <setting>
-            <name>USFM TeX Figure Placeholders</name>
+            <name>Figure Placeholders</name>
             <description>Turn On Figure Placeholders - If set to true ptx2pdf will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
             <boolDependTrue>layoutConfig:Illustrations:useFigurePlaceHolders</boolDependTrue>
-            <usfmTex>\FigurePlaceholderstrue</usfmTex>
+            <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Chapter Verse Seperator</name>
+            <name>Chapter Verse Seperator</name>
             <description>A reference can be included with the illustrations and the seperator can be changed with this setting.  The default is ":"</description>
             <key>chapterVerseSeperator</key>
             <type>string</type>
             <value>:</value>
         </setting>
         <setting>
-            <name>USFM TeX Captions</name>
+            <name>Captions</name>
             <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
             <key>useCaptions</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>True</value>
         </setting>
         <setting>
-            <name>USFM TeX Caption Reference</name>
+            <name>Caption Reference</name>
             <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
             <key>useCaptionReferences</key>
             <type>boolean</type>
@@ -606,7 +683,7 @@ Todo:
             <key>texPicPath</key>
             <type>string</type>
             <value>[path:projIllustrationsFolder]/</value>
-            <usfmTex>\PicPath={[v]}</usfmTex>
+            <texCode>\PicPath={[v]}</texCode>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
@@ -615,47 +692,47 @@ Todo:
         <sectionID>Margins</sectionID>
         <description>Here find ye settings that affect margin settings. Arrg!</description>
         <setting>
-            <name>USFM TeX Base Margin Unit</name>
+            <name>Base Margin Unit</name>
             <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
             <key>marginUnit</key>
-            <type>integer</type>
-            <value>10</value>
-            <usfmTex>\MarginUnit=[vm]</usfmTex>
+            <type>function</type>
+            <value>layout.getBaseMarginSetting()</value>
+            <texCode>\MarginUnit=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Top Margin Factor</name>
+            <name>Top Margin Factor</name>
             <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
             <key>topMarginFactor</key>
-            <type>integer</type>
-            <value>0.5</value>
-            <usfmTex>\def\TopMarginFactor{[v]}</usfmTex>
+            <type>function</type>
+            <value>layout.getTopMarginFactor()</value>
+            <texCode>\def\TopMarginFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Bottom Margin Factor</name>
+            <name>Bottom Margin Factor</name>
             <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
             <key>bottomMarginFactor</key>
-            <type>integer</type>
-            <value>0.2</value>
-            <usfmTex>\def\BottomMarginFactor{[v]}</usfmTex>
+            <type>function</type>
+            <value>layout.getBottomMarginFactor()</value>
+            <texCode>\def\BottomMarginFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Side Margin Factor</name>
+            <name>Side Margin Factor</name>
             <description>Relative size of side margin based on MarginUnit.  This determins the distance between the edge of the page and the body text.   Default = 0.7</description>
             <key>sideMarginFactor</key>
-            <type>integer</type>
-            <value>1.0</value>
-            <usfmTex>\def\SideMarginFactor{[v]}</usfmTex>
+            <type>function</type>
+            <value>layout.getSideMarginFactor()</value>
+            <texCode>\def\SideMarginFactor{[v]}</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Extra Right Margin</name>
+            <name>Extra Right Margin</name>
             <description>For some single column publications it might be necessary to tweak the right margin to get things to line up, especialy when using marginal verses.  This setting is in mm.  Enter a number (just a number) which represents the distance in mm that you want to pull the right margin in toward the middle of the page.   Defalt = 0mm</description>
             <key>extraRightMargin</key>
             <type>integer</type>
             <value>0</value>
-            <usfmTex>\ExtraRMargin=[vm]</usfmTex>
+            <texCode>\ExtraRMargin=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Binding Gutter</name>
+            <name>Binding Gutter</name>
             <description>If the amount is greater than '0' (zero) additional space will be added to the binding gutter.  This additional margin on the binding side of the page will enable printing for formats that need more space for binding like with a comb bind or hole punch.   Default = 0mm</description>
             <key>bindingGutter</key>
             <type>integer</type>
@@ -667,60 +744,57 @@ Todo:
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
-            <name>Page Size ID Code</name>
-            <description>If you are using a common page size please enter the standard code.  If a custom size is being used just enter "custom". Default = A5</description>
-            <key>pageSizeCode</key>
-            <type>string</type>
-            <value>A5</value>
-        </setting>
-        <setting>
-            <name>USFM TeX Page Height</name>
+            <name>Page Height</name>
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>
-            <type>integer</type>
-            <value>210</value>
-            <usfmTex>\PaperHeight=[vm]</usfmTex>
+            <type>reference</type>
+            <value>layoutConfig:PageLayout:pageHeight</value>
+            <texCode>\PaperHeight=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Page Width</name>
+            <name>Page Width</name>
             <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
             <key>pageWidth</key>
-            <type>integer</type>
-            <value>148</value>
-            <usfmTex>\PaperWidth=[vm]</usfmTex>
+            <type>reference</type>
+            <value>layoutConfig:PageLayout:pageWidth</value>
+            <texCode>\PaperWidth=[vm]</texCode>
         </setting>
         <setting>
-            <name>USFM TeX Cropmarks</name>
+            <name>Cropmarks</name>
             <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
             <key>useCropmarks</key>
             <type>boolean</type>
             <value>False</value>
-            <usfmTex>\CropMarkstrue</usfmTex>
+            <texCode>\CropMarkstrue</texCode>
             <boolDependTrue>layoutConfig:PageLayout:useCropmarks</boolDependTrue>
         </setting>
         <setting>
-            <name>USFM TeX Page Border</name>
-            <description>Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
+            <name>Page Border</name>
+            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
             <key>usePageBorder</key>
             <type>boolean</type>
             <value>False</value>
-            <usfmTex></usfmTex>
-            <boolDependTrue></boolDependTrue>
         </setting>
         <setting>
-            <name>USFM TeX Page Border File</name>
-            <description>Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
+            <name>Page Border File</name>
+            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
             <key>pageBorderFile</key>
             <type>string</type>
             <value>page_border.pdf</value>
         </setting>
         <setting>
-            <name>USFM TeX Page Border Scale</name>
-            <description>Enter in the scale factor for the page border and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
+            <name>End Book No Eject</name>
+            <description>[NOT IMPLEMENTED] To save space on long publications the next book can start on the same page of the previous one.   Default = False</description>
+            <key>useEndBookNoEject</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Page Border Scale</name>
+            <description>[NOT IMPLEMENTED] Enter in the scale factor for the page border and TeX will scale the PDF file as needed.  If you do not enter anything, no scaling will be applied.  Here are some examples:  scaled 900 = 90% of original size  scaled 1100 = 110% of original size (not tested yet)  xscaled 800 yscaled 900 (to scale individual directions)  width 140mm height 205mm (to scale to a known size)   Default = Null (which equates to 1000 or no scaling)</description>
             <key>pageBorderScale</key>
             <type>integer</type>
             <value></value>
-            <usfmTex></usfmTex>
         </setting>
     </section>
     <section>
@@ -728,18 +802,12 @@ Todo:
         <sectionID>TextElements</sectionID>
         <description>General settings for text level elements</description>
         <setting>
-            <name>Justify Paragraphs</name>
-            <description>Paragraphs are justified by default.  Set this to false to turn off justification.   Default = True</description>
-            <key>justifyParagraphs</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>Right To Left</name>
-            <description>Uncomment to use right-to-left text layout mode   Default = False</description>
-            <key>rightToLeft</key>
-            <type>boolean</type>
-            <value>False</value>
+            <name>Quote Kern Amount (Em)</name>
+            <description>Often, when there are quotes within quotes, when they end the two types of quote markers are so close together that, from the reader's perspective, it is hard to tell what is going on.  To fix this kerning space is added between the two characters to make it clear which is which.  The amount is in em space measurement.  For more information on what that is, go to this address:   http://en.wikipedia.org/wiki/Em_(typography) Enter the amount in em but do not follow with "em" as the system assumes the measurement is in em.  Enter 0 if no kerning of quotes is desired.   Defalt = 0.1</description>
+            <key>quoteKernAmount</key>
+            <type>integer</type>
+            <value>0.1em</value>
+            <texCode>\quotekernamount=[v]</texCode>
         </setting>
     </section>
     <section>
@@ -752,7 +820,7 @@ Todo:
             <key>hFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <usfmTex>\hfuzz=[v]</usfmTex>
+            <texCode>\hfuzz=[v]</texCode>
         </setting>
         <setting>
             <name>Vertical Fuzz</name>
@@ -760,7 +828,7 @@ Todo:
             <key>vFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <usfmTex>\vfuzz=[v]</usfmTex>
+            <texCode>\vfuzz=[v]</texCode>
         </setting>
     </section>
 </root>
