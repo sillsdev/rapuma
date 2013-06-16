@@ -54,6 +54,9 @@ class Text (Manager) :
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
         self.rapumaXmlTextConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+
+#        import pdb; pdb.set_trace()
+
         self.sourceEditor           = self.pt_tools.getSourceEditor(self.cType)
         self.setSourceEditor(self.sourceEditor)
 

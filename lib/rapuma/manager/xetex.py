@@ -17,7 +17,8 @@
 # this process
 
 import os, shutil, re, codecs, subprocess
-from xml.etree                      import ElementTree
+from xml.etree                      import cElementTree as ET
+from collections                    import defaultdict
 from configobj                      import ConfigObj
 
 # Load the local classes
@@ -269,41 +270,6 @@ class Xetex (Manager) :
             return True
 
 
-    def makeTexSettingsDict (self, xmlFile) :
-        '''Create a dictionary object from a layout xml file. This will track two kinds of
-        bool settings for both True and False so setting output can be determined depending
-        on what kind of bool it is. boolDependFalse is a very rare case though. Nonetheless
-        those are tracked for each setting regardless of their use.'''
-
-        if  os.path.exists(xmlFile) :
-            # Read in our XML file
-            doc = ElementTree.parse(xmlFile)
-            # Create an empty dictionary
-            data = {}
-            # Extract the section/key/value data
-            thisSection = ''; thisTex = ''; thisBoolDepTrue = ''; thisBoolDepFalse = ''
-            for event, elem in ElementTree.iterparse(xmlFile):
-                if elem.tag == 'setting' :
-                    if thisTex or thisBoolDepTrue or thisBoolDepFalse:
-                        data[thisSection] = {self.macroPackage : thisTex, 'boolDependTrue' : thisBoolDepTrue, 'boolDependFalse' : thisBoolDepFalse}
-                    thisSection = ''
-                    thisTex = ''
-                    thisBoolDepTrue = ''
-                    thisBoolDepFalse = ''
-                if elem.tag == 'key' :
-                    thisSection = elem.text
-                elif elem.tag == self.macroPackage :
-                    thisTex = elem.text
-                elif elem.tag == 'boolDependTrue' :
-                    thisBoolDepTrue = elem.text
-                elif elem.tag == 'boolDependFalse' :
-                    thisBoolDepFalse = elem.text
-            # Ship it!
-            return data
-        else :
-            raise IOError, "Can't open " + xmlFile
-
-
     def copyInMacros (self) :
         '''Copy in the right macro set for this component and renderer combination.'''
 
@@ -449,35 +415,39 @@ class Xetex (Manager) :
         return True
 
 
-    def makeSetTexFile (self) :
-        '''Create the main settings file that XeTeX will use in gidTex to render 
-        gidPdf. This is a required file so it will run every time. However, it
-        may not need to be remade. We will look for its exsistance and then compare 
-        it to its primary dependents to see if we actually need to do anything.'''
 
-        description = 'This is the main settings file that XeTeX will use to configure \
-            the rendered output. It can be overridden by other TeX macro files that \
-            are added in down-stream.'
 
-        # Set vals
-        dep = [self.layoutConfFile, self.fontConfFile, self.projConfFile]
-        makeIt = False
 
-#        import pdb; pdb.set_trace()
 
-        # Check for existance and age
-        # FIXME: An issue that goes beyond existance and age is when the settings
-        # need to be regenerated because of a difference between groups, hyphenation
-        # for example. Need to find a way to triger this process when this kind of
-        # difference exsists. What would make the most sense?
-#        if os.path.isfile(self.setTexFile) :
-#            for f in dep :
-#                if self.tools.isOlder(self.setTexFile, f) :
-#                    # Something changed in a conf file this is dependent on
-#                    makeIt = True
-#                    break
-#        else :
-#            makeIt = True
+# FIXME Need to add the mac settings file def here. This is really broken now
+
+
+
+
+
+
+# FIXME: Change the name here to makeSetTexFile()
+
+        def etree_to_dict(t):
+            d = {t.tag: {} if t.attrib else None}
+            children = list(t)
+            if children:
+                dd = defaultdict(list)
+                for dc in map(etree_to_dict, children):
+                    for k, v in dc.iteritems():
+                        dd[k].append(v)
+                d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+            if t.attrib:
+                d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
+            if t.text:
+                text = t.text.strip()
+                if children or t.attrib:
+                    if text:
+                      d[t.tag]['#text'] = text
+                else:
+                    d[t.tag] = text
+            return d
+
 
         # FIXME: Temporary override because of the problem above.
         makeIt = True
@@ -487,12 +457,47 @@ class Xetex (Manager) :
             return True
         else :
             # Otherwise make/remake the file
-            macTexVals = dict(self.makeTexSettingsDict(self.layoutXmlFile))
+            # First read in the plain text contents
+            contents = codecs.open(self.layoutXmlFile, "r").read()
+            # Convert it it a dict with our internal function
+            layoutDict = etree_to_dict(ET.XML(contents))
+            # Create a dict that contains only the data we need here
+            macTexVals = {}
+            for sections in layoutDict['root']['section'] :
+                macTexVals[sections['sectionID']] = {}
+                for section in sections :
+                    secItem = sections[section]
+                    if type(secItem) is list :
+                        for setting in secItem :
+                            for k in setting.keys() :
+                                if k == self.macroPackage and setting.get(k) != None :
+                                    macTexVals[sections['sectionID']] = {'name' : setting['name']}
+                                    if setting.get(k) and setting.get(k) != None :
+                                        macTexVals[sections['sectionID']][k] = setting.get(k)
+                                    if setting.has_key('boolDependTrue') and setting['boolDependTrue'] != None :
+                                        macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+                                    if setting.has_key('boolDependFalse') :
+                                        macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
+            # Delete any empty sections
+            for i in macTexVals.keys() :
+                if len(macTexVals[i]) == 0 :
+                    del macTexVals[i]
 
+#            print macTexVals
+
+            # Open a fresh settings file
             writeObject = codecs.open(self.setTexFile, "w", encoding='utf_8')
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.setTexFile), description))
 
-            # Bring in the settings from the layoutConfig
+            # The layoutConfig file is our template to populate with our current values
+            
+# FIXME:
+'''Why don't we use the macTexVals dictionary as our template instead of the layoutConfFile.
+This way we should get exactly what we need in the settings file with a lot less work.'''
+            
+            
+            
+            
             for section in self.layoutConfig.keys() :
                 writeObject.write('\n% ' + section + '\n')
                 vals = {}
@@ -510,40 +515,71 @@ class Xetex (Manager) :
                 except :
                     inputsOrder = []
 
+                print section
+
                 # Start gathering up all the items in this section now
                 for k, v in self.layoutConfig[section].iteritems() :
+                
+                
+                    print '\t' + k
+                
+                
                     # This will prevent output on empty fields, never output when
                     # there is no value
                     if not v :
                         continue
                     # Gather each macro package line we need to output
-                    if macTexVals[k].has_key(self.macroPackage) :
-                        macVal = (macTexVals[k][self.macroPackage])
+#                    print k, v, self.macroPackage
+
+
+
+
+
+
+
+
+#                    import pdb; pdb.set_trace()
+
+# FIXME: 
+'''Some problem with macTexVals not aligning with the config obj.
+More work needs to be done to syncronize the two at this point so
+that two work better together here.'''
+
+
+
+                    if macTexVals[section].has_key(k) :
+                        print macTexVals[section][k]
+                        macVal = (macTexVals[section][k][self.macroPackage])
                         # Test for boolDepend True and False. If there is a boolDepend
                         # then we don't need to output just yet. These next two if/elif
                         # statements insure that output happens in the proper condition.
                         # In some cases we want output only if a certain bool is set to
                         # true, but in a few rare cases we want output when a certain
                         # bool is set to false. These will screen for both cases.
-                        if macTexVals[k].has_key('boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependTrue'])) :
+                        if macTexVals[section].has_key('boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependTrue'])) :
                             continue
-                        elif macTexVals[k].has_key('boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[k]['boolDependFalse'])) == False :
+                        elif macTexVals[section].has_key('boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependFalse'])) == False :
                             continue
                         # After having made it past the previous two tests, we can ouput now.
                         else :
                             # Here we will build a dictionary for this section made up
                             # of all the k, v, and macVals needed. We also build a
                             # list of keys to be used for ordered output
-                            vals[k] = [v, macVal]
-                            if not k in inputsOrder :
+                            vals[section] = [v, macVal]
+                            if not section in inputsOrder :
                                 # In case there was an inputsOrder list in the config,
                                 # this will prepend the value to that list. The idea is
                                 # that the ordered output goes last (or at the bottom)
-                                inputsOrder.insert(0, k)
+                                inputsOrder.insert(0, section)
 
                 # Write the lines out according to the inputsOrder
                 for key in inputsOrder :
                     writeObject.write(self.configTools.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
+
+
+            self.tools.dieNow()
+
+
 
             # Move on to Fonts, add all the font def commands
             def addParams (writeObject, pList, line) :
@@ -579,7 +615,6 @@ class Xetex (Manager) :
                 if fontPath :
                     params['^^path^^'] = fontPath
 
-    #            import pdb; pdb.set_trace()
                 # Create the fonts settings that will be used with TeX
                 if self.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
                     # Primary

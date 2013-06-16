@@ -189,8 +189,10 @@ class Font (Manager) :
             self.tools.dieNow()
 
         # See if this font is already in the font config file
-        if not self.fontConfig['Fonts'].has_key(font) :
+        if not self.fontConfig.has_key('Fonts') :
             self.tools.buildConfSection(self.fontConfig, 'Fonts')
+            if not self.fontConfig['Fonts'].has_key(font) :
+                self.tools.buildConfSection(self.fontConfig['Fonts'], font)
 
         # Set as primary for the calling cType if there is none now
         if not self.project.projConfig['Managers'][self.manager]['primaryFont'] :

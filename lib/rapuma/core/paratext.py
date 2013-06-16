@@ -253,8 +253,6 @@ class Paratext (object) :
     def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
-#        import pdb; pdb.set_trace()
-
         # Return the dictionary
         if os.path.isdir(self.sourcePath) :
             ssfFile = self.findSsfFile()
@@ -268,9 +266,12 @@ class Paratext (object) :
         figure out what it should be and return that. Unless we
         find we are in a PT project, we'll call it generic.'''
 
+#        import pdb; pdb.set_trace()
+
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if self.projConfig['CompTypes'][cType.capitalize()].has_key('sourceEditor') :
+        if self.projConfig['CompTypes'][cType.capitalize()].has_key('sourceEditor') \
+            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != '' :
             se = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         else :
             if self.findSsfFile() :
