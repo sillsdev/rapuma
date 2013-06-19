@@ -32,7 +32,7 @@ from rapuma.project.project         import Project
 ################################## Begin Class ################################
 ###############################################################################
 
-class Binding (object) :
+class ProjBinding (object) :
 
     def __init__(self, pid) :
         '''Do the primary initialization for this manager.'''

@@ -29,7 +29,7 @@ from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.core.proj_compare       import Compare
+from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.paratext           import Paratext
 from rapuma.project.project         import Project
@@ -96,8 +96,6 @@ class ProjSetup (object) :
             '1160' : ['ERR', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
             '1165' : ['LOG', 'Component preprocessing script is already installed.'],
 
-            '1240' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
-
         }
 
         # Because this function can be called elsewhere in the module we call it here too
@@ -117,7 +115,7 @@ class ProjSetup (object) :
             self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.pid)
             self.paratext           = Paratext(self.pid)
-            self.compare            = Compare(self.pid)
+            self.compare            = ProjCompare(self.pid)
             self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
             self.tools_group        = ToolsGroup(self.local, self.projConfig, self.userConfig)
             return True
@@ -787,166 +785,6 @@ class ProjSetup (object) :
             # We may want to rethink this later but for now, it feels right.
             self.log.writeToLog(self.errorCodes['1070'], [source,str(e)], 'proj_setup.usfmTextFileIsValid():1070')
             return False
-
-
-###############################################################################
-########################## Text Processing Functions ##########################
-###############################################################################
-######################## Error Code Block Series = 1200 #######################
-###############################################################################
-
-    def turnOnOffPreprocess (self, gid, onOff) :
-        '''Turn on or off preprocessing on incoming component text.'''
-
-        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff
-        self.tools.writeConfFile(self.projConfig)
-        self.log.writeToLog(self.errorCodes['1240'], [str(onOff), gid])
-
-
-    def checkForPreprocessScript (self, gid) :
-        '''Check to see if a preprocess script is installed. If not, install the
-        default script and give a warning that the script is not complete.'''
-
-        cType = self.projConfig['Groups'][gid]['cType']
-        rpmPreprocessFile = os.path.join(self.local.rapumaScriptsFolder, 'textPreprocess.py')
-        grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
-        # Check and copy if needed
-        if not os.path.isfile(grpPreprocessFile) :
-            shutil.copy(rpmPreprocessFile, grpPreprocessFile)
-            self.tools.makeExecutable(grpPreprocessFile)
-            self.log.writeToLog(self.errorCodes['1160'])
-        else :
-            self.log.writeToLog(self.errorCodes['1165'])
-
-
-    def runProcessScript (self, target, scriptFile) :
-        '''Run a text processing script on a component. This assumes the 
-        component and the script are valid and the component lock is turned 
-        off. If not, you cannot expect any good to come of this.'''
-
-        # subprocess will fail if permissions are not set on the
-        # script we want to run. The correct permission should have
-        # been set when we did the installation.
-        err = subprocess.call([scriptFile, target])
-        if err == 0 :
-            self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(target), self.tools.fName(scriptFile)])
-        else :
-            self.log.writeToLog(self.errorCodes['1020'], [self.tools.fName(target), self.tools.fName(scriptFile), str(err)])
-            return False
-
-        return True
-
-
-    def scriptInstall (self, source, target) :
-        '''Install a script. A script can be a collection of items in
-        a zip file or a single .py script file.'''
-
-        scriptTargetFolder, fileName = os.path.split(target)
-        if self.tools.isExecutable(source) :
-            shutil.copy(source, target)
-            self.tools.makeExecutable(target)
-        elif self.tools.fName(source).split('.')[1].lower() == 'zip' :
-            myZip = zipfile.ZipFile(source, 'r')
-            for f in myZip.namelist() :
-                data = myZip.read(f, source)
-                # Pretty sure zip represents directory separator char as "/" regardless of OS
-                myPath = os.path.join(scriptTargetFolder, f.split("/")[-1])
-                try :
-                    myFile = open(myPath, "wb")
-                    myFile.write(data)
-                    myFile.close()
-                except :
-                    pass
-            myZip.close()
-            return True
-        else :
-            self.tools.dieNow('Script is an unrecognized type: ' + self.tools.fName(source) + ' Cannot continue with installation.')
-
-
-    def installPostProcess (self, cType, script, force = None) :
-        '''Install a post process script into the main components processing
-        folder for a specified component type. This script will be run on 
-        every file of that type that is imported into the project. Some
-        projects will have their own specially developed post process
-        script. Use the "script" var to specify a process (which should be
-        bundled in a system compatable way). If "script" is not specified
-        we will copy in a default script that the user can modify. This is
-        currently limited to Python scripts only which do in-place processes
-        on the target files. The script needs to have the same name as the
-        zip file it is bundled in, except the extention is .py instead of
-        the bundle .zip extention.'''
-
-        # Define some internal vars
-        Ctype               = cType.capitalize()
-        oldScript           = ''
-        scriptName          = os.path.split(script)[1]
-        scriptSourceFolder  = os.path.split(script)[0]
-        scriptTarget        = os.path.join(self.local.projScriptsFolder, self.tools.fName(script).split('.')[0] + '.py')
-        if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
-            oldScript = scriptName
-
-        # First check for prexsisting script record
-        if not force :
-            if oldScript :
-                self.log.writeToLog('POST-080', [oldScript])
-                return False
-
-        # In case this is a new project we may need to install a component
-        # type and make a process (components) folder
-        if not self.components[cType] :
-            self.tools.addComponentType(self.projConfig, self.local, cType)
-
-        # Make the target folder if needed
-        if not os.path.isdir(self.local.projScriptsFolder) :
-            os.makedirs(self.local.projScriptsFolder)
-
-        # First check to see if there already is a script file, return if there is
-        if os.path.isfile(scriptTarget) and not force :
-            self.log.writeToLog('POST-082', [self.tools.fName(scriptTarget)])
-            return False
-
-        # No script found, we can proceed
-        if not os.path.isfile(scriptTarget) :
-            self.scriptInstall(script, scriptTarget)
-            if not os.path.isfile(scriptTarget) :
-                self.tools.dieNow('Failed to install script!: ' + self.tools.fName(scriptTarget))
-            self.log.writeToLog('POST-110', [self.tools.fName(scriptTarget)])
-        elif force :
-            self.scriptInstall(script, scriptTarget)
-            if not os.path.isfile(scriptTarget) :
-                self.tools.dieNow('Failed to install script!: ' + self.tools.fName(scriptTarget))
-            self.log.writeToLog('POST-115', [self.tools.fName(scriptTarget)])
-
-        # Record the script with the cType post process scripts list
-        scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
-        if self.tools.fName(scriptTarget) not in scriptList :
-            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = self.tools.addToList(scriptList, self.tools.fName(scriptTarget))
-            self.tools.writeConfFile(self.projConfig)
-
-        return True
-
-
-    def removePostProcess (self, cType) :
-        '''Remove (actually disconnect) a preprocess script from a
-
-        component type. This will not actually remove the script. That
-        would need to be done manually. Rather, this will remove the
-        script name entry from the component type so the process cannot
-        be accessed for this specific component type.'''
-
-        Ctype = cType.capitalize()
-        # Get old setting
-        old = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
-        # Reset the field to ''
-        if old != '' :
-            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
-            self.tools.writeConfFile(self.projConfig)
-            self.log.writeToLog('POST-130', [old,Ctype])
-
-        else :
-            self.log.writeToLog('POST-135', [cType.capitalize()])
-
-        return True
 
 
 

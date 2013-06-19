@@ -23,7 +23,7 @@ import os, re, shutil, subprocess, codecs
 from rapuma.core.tools          import Tools
 from rapuma.project.manager     import Manager
 from rapuma.core.proj_config    import ConfigTools
-from rapuma.core.proj_compare   import Compare
+from rapuma.core.proj_compare   import ProjCompare
 from rapuma.core.paratext       import Paratext
 
 
@@ -148,7 +148,7 @@ class Hyphenation (Manager) :
         project. '''
 
         # This is the only time we call a compare in the module (so far)
-        Compare(self.project.projectIDCode).compare(self.ptHyphFile, self.ptProjHyphBakFile)
+        ProjCompare(self.pid).compare(self.ptHyphFile, self.ptProjHyphBakFile)
 
 
     def turnOnHyphenation (self) :
@@ -332,7 +332,7 @@ class Hyphenation (Manager) :
         if os.path.exists(self.ptHyphFile) :
         
             if os.path.exists(self.ptProjHyphBakFile) :
-                if Compare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
+                if ProjCompare(self.pid).isDifferent(self.ptHyphFile, self.ptProjHyphBakFile) :
                     if os.path.exists(self.ptProjHyphBakFile) :
                         os.remove(self.ptProjHyphBakFile)
                     # Use a special kind of copy to prevent problems with BOMs

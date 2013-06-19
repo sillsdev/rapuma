@@ -54,8 +54,9 @@ from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.proj_backup        import ProjBackup
-from rapuma.core.proj_binding       import Binding
-from rapuma.core.proj_compare       import Compare
+from rapuma.core.proj_binding       import ProjBinding
+from rapuma.core.proj_compare       import ProjCompare
+from rapuma.core.proj_process       import ProjProcess
 from rapuma.core.tools              import Tools, ToolsGroup
 from rapuma.project.project         import Project
 from rapuma.project.proj_setup      import ProjSetup
@@ -183,6 +184,7 @@ def userArguments (args) :
             tools.terminal('About: ' + systemAbout + '\n')
             return
 
+    ##### SYSTEM
     # Pre-command process: System level commands
     if sys.argv[1].lower() == 'system' :
         if args.user_name :
@@ -204,6 +206,7 @@ def userArguments (args) :
     if sys.argv[1].lower() == 'system' :
         pass
 
+    ##### PROJECT
     # Project level commands
     elif sys.argv[1].lower() == 'project' :
         pid         = args.project_id
@@ -232,7 +235,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'bind' :
             if cmdType == 'project' :
-                Binding(pid).bind()
+                ProjBinding(pid).bind()
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
@@ -287,6 +290,7 @@ def userArguments (args) :
             else :
                  cmdError(cmd, cmdType)
 
+    ##### GROUP
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
         cmdType     = args.command_type
@@ -399,84 +403,117 @@ def userArguments (args) :
             else :
                 cmdError(cmd, cmdType)
 
+    ##### COMPONENT
     # Component level commands
     elif sys.argv[1].lower() == 'component' :
-        aProject = initProject(args.project_id, args.group_id)
-        # Render vs. view command is just a matter of forcing the component
-        # to be rendered if render is selected by the user. Otherwise, if
-        # only view is requested, if force is set to False and the component
-        # will not be rerendered if it already exsists.
-        if args.compare :
-            Compare(args.project_id).compareComponent(args.group_id, args.component_id.lower(), args.compare)
-        # Commands for editing project files
-        elif args.edit :
-                aProject.edit(args.component_id)
+        cmd         = args.command
+        pid         = args.project_id
+        gid         = args.group_id
+        cid         = args.component_id
+        if args.compare_type :
+            compareType = args.compare_type
+        if cmd == 'add' :
+            ProjComponent(pid, gid).addComponent(cid)
+        elif cmd == 'compare' :
+            ProjCompare(pid).compareComponent(gid, cid.lower(), compareType)
+        elif cmd == 'edit' :
+            ProjComponent(pid, gid).editComponent(cid)
+        elif cmd == 'remove' :
+            ProjComponent(pid, gid).removeComponent(cid)
+        elif cmd == 'update' :
+            ProjComponent(pid, gid).updateComponent(cid)
 
-    # Font level commands
-    elif sys.argv[1].lower() == 'font' :
-        aProject = initProject(args.project_id, args.group_id)
-        aProject.createManager('font')
-        font = aProject.managers[args.component_type + '_Font'].checkForSubFont(args.font_id)
-        manager = args.component_type + '_Font'
-        if not args.component_type :
-            sys.exit('\nERROR: Component type ID is missing from command argument. Process halted!\n')
-        if args.manage == 'add' :
-            # Physically install the font files
-            aProject.managers[manager].installFont(font, args.force)
-        elif args.manage == 'remove' :
-            aProject.managers[manager].removeFont(args.component_type, font, args.force)
-        elif args.manage == 'primary' :
-            aProject.managers[manager].setPrimaryFont(args.component_type.capitalize(), font, args.force)
-
-    # Post processing commands
-    elif sys.argv[1].lower() == 'postprocess' :
-        # Run a post process command on a component or component type
-        # Because we can lock at all levels, there is no need for (-f --force)
-        # to be used here. If a component name is given it will only run on that
-        # component which includes all listed sub-components. Otherwise, all 
-        # components of the specified type will be acted on by the postprocess.
-        if args.manage == 'execute' :
-            if not args.script :
-                sys.exit('\nERROR: No script was specified, Please use -s to specify a script to execute.\n')
-            elif not args.component_name.lower() :
-                sys.exit('\nERROR: No component ID was specified, Please use -c to specify a valid component (group) ID to run this post process script on.\n')
+    ##### PACKAGES
+    # Package management commands
+    elif sys.argv[1].lower() == 'package' :
+        cmdType     = args.package_type
+        cmd         = args.command
+        pid         = args.project_id
+        gid         = args.group_id
+        pkid        = args.package_id
+        force       = args.force
+        if cmd == 'add' :
+            if cmdType == 'font' :
+                ProjFont(pid, gid).addFontPack(pkid, force)
+            elif cmdType == 'macro' :
+                ProjMacro(pid, gid).addMacPack(pkid, force)
             else :
-                ProjSetup(args.project_id).runProcessScript(args.component_name.lower(), args.script)
-        # Install a custom or a default post process script, force to overwrite what is there
-        elif args.manage == 'add' :
-            filePath = ''
-            if args.path :
-                filePath = tools.resolvePath(args.path)
-                if not os.path.isfile(filePath) :
-                    sys.exit('\nERROR: The following path does not appear to be valid: ' + filePath + '\n')
-            ProjSetup(args.project_id).installPostProcess(args.component_type, filePath, args.force)
-        # Disconnect a post process script from the component type (This does not
-        # physically remove it unless -f is used.)
-        elif args.manage == 'remove' :
-            ProjSetup(args.project_id).removePostProcess(args.component_type, force)
+                cmdError(cmd, cmdType)
+        elif cmd == 'primary' :
+            if cmdType == 'font' :
+                ProjFont(pid, gid).makePrimary(pkid, force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'remove' :
+            if cmdType == 'font' :
+                ProjFont(pid, gid).removeFontPack(pkid, force)
+            elif cmdType == 'macro' :
+                ProjMacro(pid, gid).removeMacPack(pkid, force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'update' :
+            if cmdType == 'font' :
+                ProjFont(pid, gid).updateFontPack(pkid, force)
+            elif cmdType == 'macro' :
+                ProjMacro(pid, gid).updateMacPack(pkid, force)
+            else :
+                cmdError(cmd, cmdType)
 
+    ##### PROCESS
+    # Processing commands
+    elif sys.argv[1].lower() == 'process' :
+
+# FIXME:
+        sys.exit('\nERROR: Sorry process handling is quite broken right now. Process halted!\n')
+
+        cmdType     = args.package_type
+        cmd         = args.command
+        pid         = args.project_id
+        gid         = args.group_id
+        force       = args.force
+        script      = args.script
+        path        = ''
+        if args.path and tools.resolvePath(args.path) :
+            path = tools.resolvePath(args.path) :
+        if cmd == 'add' :
+            if cmdType in ['export', 'preprocess', 'postprocess'] :
+                ProjProcess(pid).addProcess(script, path, force)
+            else :
+                cmdError(cmd, cmdType)
+        elif cmd == 'remove' :
+            pass
+        elif cmd == 'update' :
+            pass
+
+    ##### SETTINGS
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
+        pid         = args.project_id
+        config      = args.configuration
+        section     = args.section
+        key         = args.key
+        value       = args.value
         if args.configuration :
-            if (args.section or args.key or args.value) :
-                ProjSetup(args.project_id).changeConfigSetting(args.configuration, args.section, args.key, args.value)
+            if (section or key or value) :
+                ProjSetup(pid).changeConfigSetting(config, section, key, value)
             else :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
             sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
 
+    ##### BACKGROUND
     # Commands for setting the page background
     elif sys.argv[1].lower() == 'background' :
-        outType     = args.output_type
+        cmdType     = args.output_type
         cmd         = args.command
         pid         = args.project_id
         bgrd        = args.background
         if cmd == 'add' :
-            PageBackground(pid).addBackground(outType, bgrd)
+            PageBackground(pid).addBackground(cmdType, bgrd)
         elif cmd == 'remove' :
-            PageBackground(pid).removeBackground(outType, bgrd)
+            PageBackground(pid).removeBackground(cmdType, bgrd)
         elif cmd == 'update' :
-            PageBackground(pid).updateBackground(outType, bgrd)
+            PageBackground(pid).updateBackground(cmdType, bgrd)
 
     # Totally lost
     else:
@@ -518,21 +555,26 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Available choices
 # Project
-pCommandTypes           = ['archive', 'backup', 'cloud', 'groups', 'helper', 'project', 'template']
-pCommands               = ['add', 'bind', 'remove', 'restore', 'save', 'update']
+prCommandTypes          = ['archive', 'backup', 'cloud', 'groups', 'helper', 'project', 'template']
+prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
 mediaTypes              = ['book']
 # Group
-gCommandTypes           = ['group', 'hyphenation', 'illustration', 'preprocess']
-gCommands               = ['add', 'draft', 'proof', 'final', 'lock', 'remove', 'update', 'unlock']
+grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
+grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'run', 'update', 'unlock']
 componentTypes          = ['usfm', 'map', 'toc']
-# Background
-outputType              = ['bind', 'draft', 'final', 'proof']
-backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
-backgroundCommands      = ['add', 'remove', 'update']
-# Other
+# Component
+cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
 compareTests            = ['source', 'source-working', 'working']
-postprocessCommands     = ['add', 'remove', 'process']
-fontCommands            = ['add', 'remove', 'primary']
+# Packages
+pkCommandType           = ['font', 'macro']
+pkCommand               = ['add', 'primary', 'remove', 'update']
+# Processes
+pcCommandType           = ['export', 'preprocess', 'postprocess']
+pcCommand               = ['add', 'remove', 'update']
+# Background
+bgCommandType           = ['bind', 'draft', 'final', 'proof']
+bgCommands              = ['add', 'remove', 'update']
+backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -550,8 +592,8 @@ sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where 
 # Add Project subprocess arguments
 projCommand = subparsers.add_parser('project', help='General project management commands help')
 projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-projCommand.add_argument('command_type', choices=pCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-projCommand.add_argument('command', choices=pCommands, help='The general commands that can be used for managing a project.')
+projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
 projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
 projCommand.add_argument('-t', '--target_path', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
 projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
@@ -562,40 +604,40 @@ projCommand.add_argument('-f', '--force', action='store_true', help='Force an ac
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')
 groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 groupCommand.add_argument('group_id', help='A unique ID for this group.')
-groupCommand.add_argument('command_type', choices=gCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
-groupCommand.add_argument('command', choices=gCommands, help='The general commands that can be used for managing groups.')
-groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
+groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
+groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
 groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
 groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
+groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('group_id', help='The group ID this component is a part of.')
 compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
-compCommand.add_argument('-c', '--compare', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
-compCommand.add_argument('-d', '--edit', action='store_true', help='Edit a specific component from a specified group.')
+packCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
+compCommand.add_argument('-c', '--compare_type', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 
-# Add Font subprocess arguments
-fontCommand = subparsers.add_parser('font', help='General font handling commands help')
-fontCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-fontCommand.add_argument('group_id', help='The group ID this font is a part of.')
-fontCommand.add_argument('component_type', help='Specify the component type. This is required for all font functions.')
-fontCommand.add_argument('font_id', help='The font family name ID. The ID given has to be a valid system font.')
-fontCommand.add_argument('-m', '--manage', choices=fontCommands, help='The general commands that can be used for managing fonts.')
-fontCommand.add_argument('-f', '--force', action='store_true', help='Force the addition or removal of a font from the system even if it is used by other components.')
+# Add Package management subprocess arguments
+packCommand = subparsers.add_parser('package', help='General package handling commands help')
+packCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+packCommand.add_argument('group_id', help='The group ID this package is a part of.')
+packCommand.add_argument('package_id', help='The package name ID. The ID given has to be a valid system package.')
+packCommand.add_argument('package_type', choices=pkCommandType, help='The package type. The type given has to be a valid system package type.')
+packCommand.add_argument('command', choices=pkCommands, help='The general commands that can be used for managing groups.')
+packCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
 
-# Add text Postprocessing subprocess arguments
-postprocessCommand = subparsers.add_parser('postprocess', help='General settings for handling component post processing commands.')
-postprocessCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-postprocessCommand.add_argument('group_id', help='A unique ID for this group.')
-postprocessCommand.add_argument('-m', '--manage', choices=postprocessCommands, help='The general commands that can be used for managing postprocesses.')
-postprocessCommand.add_argument('-f', '--force', action='store_true', help='Force a post process script to be updated, replaced or brought back to default condition for this component type.')
-postprocessCommand.add_argument('-i', '--cid_list', help='If desired, list components to have a post process run on them. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-postprocessCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
-postprocessCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for the -e command.')
+# Add Processing subprocess arguments
+processCommand = subparsers.add_parser('process', help='General settings for managing processes. Actual execution of the processes is done through the group commands')
+processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+processCommand.add_argument('group_id', help='A unique ID for this group.')
+processCommand.add_argument('process_type', choices=pcCommandType, help='The type of process being managed. The type given has to be a valid system package type.')
+processCommand.add_argument('command', choices=pcCommands, help='The general commands that can be used for managing groups.')
+processCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
+processCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for postprocesses.')
+processCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
 
 # Add Settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
@@ -605,16 +647,12 @@ settingsCommand.add_argument('section', help='The section path to the key/value 
 settingsCommand.add_argument('key', help='The key which has the value to be changed.')
 settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
 
-# FIXME: Need to add Export management
-
-# FIXME: Need to add Macro management
-
 # Add page background subprocess arguments
 backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
 backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-backgroundCommand.add_argument('output_type', choices=outputType, help='The type of (rendered) output a background will be applied to or removed from.')
+backgroundCommand.add_argument('output_type', choices=bgCommandType, help='The type of (rendered) output a background will be applied to or removed from.')
 backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
-backgroundCommand.add_argument('command', choices=backgroundCommands, help='The general commands that can be used for managing backgound.')
+backgroundCommand.add_argument('command', choices=bgCommands, help='The general commands that can be used for managing backgound.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args())
