@@ -23,14 +23,13 @@ from configobj                      import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.project.manager         import Manager
+from rapuma.manager.manager         import Manager
 from rapuma.core.paratext           import Paratext
 from rapuma.core.proj_config        import ConfigTools
-from rapuma.core.proj_binding       import Binding
 from rapuma.project.proj_maps       import ProjMaps
 from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
-from rapuma.project.proj_background import PageBackground
+from rapuma.project.proj_background import ProjBackground
 
 
 ###############################################################################
@@ -58,11 +57,12 @@ class Xetex (Manager) :
         self.gid                    = project.gid
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
+        self.mType                  = project.projectMediaIDCode
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
-        self.pg_back                = PageBackground(self.pid)
+        self.pg_back                = ProjBackground(self.pid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
@@ -74,6 +74,10 @@ class Xetex (Manager) :
         self.font                   = self.managers[self.cType + '_Font']
         # Get config objs
         self.projConfig             = project.projConfig
+        
+        
+# FIXME: How do I want to pull in multiple conf files
+        
         self.layoutConfig           = self.layout.layoutConfig
         self.fontConfig             = self.font.fontConfig
         self.userConfig             = self.project.userConfig
@@ -492,8 +496,8 @@ class Xetex (Manager) :
             # The layoutConfig file is our template to populate with our current values
             
 # FIXME:
-'''Why don't we use the macTexVals dictionary as our template instead of the layoutConfFile.
-This way we should get exactly what we need in the settings file with a lot less work.'''
+# Why don't we use the macTexVals dictionary as our template instead of the layoutConfFile.
+# This way we should get exactly what we need in the settings file with a lot less work.
             
             
             
@@ -541,9 +545,9 @@ This way we should get exactly what we need in the settings file with a lot less
 #                    import pdb; pdb.set_trace()
 
 # FIXME: 
-'''Some problem with macTexVals not aligning with the config obj.
-More work needs to be done to syncronize the two at this point so
-that two work better together here.'''
+# Some problem with macTexVals not aligning with the config obj.
+# More work needs to be done to syncronize the two at this point so
+# that two work better together here.
 
 
 

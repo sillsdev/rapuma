@@ -32,8 +32,8 @@ from rapuma.core.proj_log           import ProjLog
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.paratext           import Paratext
-from rapuma.project.project         import Project
-from rapuma.project.proj_commander  import Commander
+from rapuma.manager.project         import Project
+from rapuma.project.proj_commander  import ProjCommander
 
 
 class ProjSetup (object) :
@@ -279,7 +279,7 @@ class ProjSetup (object) :
 
         # Update helper scripts
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            Commander(self.pid).updateScripts()
+            ProjCommander(self.pid).updateScripts()
 
         # Initialize the project now to get settings into the project config
         # This might help to overcome other module initialization problems.
@@ -531,7 +531,7 @@ class ProjSetup (object) :
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            Commander(self.pid).updateScripts()
+            ProjCommander(self.pid).updateScripts()
 
         # Report what we did
         self.tools.terminal('Created new project [' + self.pid + ']')

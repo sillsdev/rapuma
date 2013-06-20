@@ -24,7 +24,7 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.group.group             import Group
 from rapuma.project.proj_style      import ProjStyle
-from rapuma.project.proj_background import PageBackground
+from rapuma.project.proj_background import ProjBackground
 
 
 ###############################################################################
@@ -55,7 +55,7 @@ class Usfm (Group) :
         self.local                  = project.local
         self.tools                  = Tools()
         self.proj_style             = ProjStyle(self.pid, self.gid)
-        self.pg_background          = PageBackground(self.pid)
+        self.pg_background          = ProjBackground(self.pid)
         self.projConfig             = project.projConfig
         self.log                    = project.log
         self.cfg                    = cfg

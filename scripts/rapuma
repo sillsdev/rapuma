@@ -58,12 +58,12 @@ from rapuma.core.proj_binding       import ProjBinding
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.proj_process       import ProjProcess
 from rapuma.core.tools              import Tools, ToolsGroup
-from rapuma.project.project         import Project
 from rapuma.project.proj_setup      import ProjSetup
-from rapuma.project.proj_commander  import Commander
+from rapuma.project.proj_commander  import ProjCommander
 from rapuma.project.proj_maps       import ProjMaps
 from rapuma.project.proj_toc        import ProjToc
-from rapuma.project.proj_background import PageBackground
+from rapuma.project.proj_background import ProjBackground
+from rapuma.manager.project         import Project
 
 # Instantiate User config class
 uc              = UserConfig()
@@ -94,7 +94,7 @@ def checkCreatorVersion (pid, projConfig, systemVersion) :
         projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
         tools.writeConfFile(projConfig)
         # Now update the scripts if that is needed
-        Commander(pid).updateScripts()
+        ProjCommander(pid).updateScripts()
 
 
 def hasValidSourcePath (pid, gid, csid) :
@@ -286,7 +286,7 @@ def userArguments (args) :
             if cmdType == 'groups' :
                 ProjSetup(pid).updateAllGroups(args.force)
             elif cmdType == 'helper' :
-                Commander(pid).updateScripts()
+                ProjCommander(pid).updateScripts()
             else :
                  cmdError(cmd, cmdType)
 
@@ -365,7 +365,7 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     ProjSetup(pid).removeGroup(gid, args.force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                        Commander(pid).removeScripts()
+                        ProjCommander(pid).removeScripts()
                 elif cType == 'map' :
                     ProjMaps(pid, gid).removeGroup(args.force)
                 elif cType == 'toc' :
@@ -474,7 +474,7 @@ def userArguments (args) :
         script      = args.script
         path        = ''
         if args.path and tools.resolvePath(args.path) :
-            path = tools.resolvePath(args.path) :
+            path = tools.resolvePath(args.path)
         if cmd == 'add' :
             if cmdType in ['export', 'preprocess', 'postprocess'] :
                 ProjProcess(pid).addProcess(script, path, force)
@@ -509,11 +509,11 @@ def userArguments (args) :
         pid         = args.project_id
         bgrd        = args.background
         if cmd == 'add' :
-            PageBackground(pid).addBackground(cmdType, bgrd)
+            ProjBackground(pid).addBackground(cmdType, bgrd)
         elif cmd == 'remove' :
-            PageBackground(pid).removeBackground(cmdType, bgrd)
+            ProjBackground(pid).removeBackground(cmdType, bgrd)
         elif cmd == 'update' :
-            PageBackground(pid).updateBackground(cmdType, bgrd)
+            ProjBackground(pid).updateBackground(cmdType, bgrd)
 
     # Totally lost
     else:
@@ -567,10 +567,10 @@ cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
 compareTests            = ['source', 'source-working', 'working']
 # Packages
 pkCommandType           = ['font', 'macro']
-pkCommand               = ['add', 'primary', 'remove', 'update']
+pkCommands              = ['add', 'primary', 'remove', 'update']
 # Processes
 pcCommandType           = ['export', 'preprocess', 'postprocess']
-pcCommand               = ['add', 'remove', 'update']
+pcCommands              = ['add', 'remove', 'update']
 # Background
 bgCommandType           = ['bind', 'draft', 'final', 'proof']
 bgCommands              = ['add', 'remove', 'update']
@@ -617,7 +617,7 @@ compCommand = subparsers.add_parser('component', help='General project component
 compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
 compCommand.add_argument('group_id', help='The group ID this component is a part of.')
 compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
-packCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
+compCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
 compCommand.add_argument('-c', '--compare_type', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 
 # Add Package management subprocess arguments

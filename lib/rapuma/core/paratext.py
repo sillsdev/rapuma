@@ -25,7 +25,7 @@ from rapuma.core.proj_config    import ProjConfig
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_log       import ProjLog
-from rapuma.core.proj_compare   import Compare
+from rapuma.core.proj_compare   import ProjCompare
 
 
 class Paratext (object) :

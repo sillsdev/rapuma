@@ -60,7 +60,7 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
-        m = import_module('rapuma.project.' + self.projectMediaIDCode)
+        m = import_module('rapuma.manager.' + self.projectMediaIDCode)
         self.__class__ = getattr(m, self.projectMediaIDCode[0].upper() + self.projectMediaIDCode[1:])
 
         # Update the existing config file with the project type XML file

@@ -20,7 +20,7 @@ import os, shutil
 
 # Load the local classes
 from rapuma.core.tools          import Tools
-from rapuma.project.manager     import Manager
+from rapuma.manager.manager     import Manager
 
 
 ###############################################################################
@@ -38,13 +38,14 @@ class Layout (Manager) :
         self.tools                          = Tools()
         self.cType                          = cType
         self.Ctype                          = cType.capitalize()
+        self.mType                          = project.projectMediaIDCode
         self.manager                        = self.cType + '_Layout'
         self.project                        = project
         self.managers                       = project.managers
         self.projConfig                     = self.project.projConfig
         # File names
-        self.defaultXmlConfFileName         = self.cType + '_layout.xml'
-        self.layoutConfFileName             = self.cType + '_layout.conf'
+        self.defaultXmlConfFileName         = self.mType + '_layout.xml'
+        self.layoutConfFileName             = self.mType + '_layout.conf'
         # Paths
         self.projConfFolder                 = self.project.local.projConfFolder
         self.rapumaConfigFolder             = self.project.local.rapumaConfigFolder

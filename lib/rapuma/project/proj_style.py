@@ -21,7 +21,7 @@ import os, shutil, warnings, codecs
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.core.paratext           import Paratext
-from rapuma.project.manager         import Manager
+from rapuma.manager.manager         import Manager
 from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal

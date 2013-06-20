@@ -25,7 +25,7 @@ from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 
 
-class Commander (object) :
+class ProjCommander (object) :
 
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''

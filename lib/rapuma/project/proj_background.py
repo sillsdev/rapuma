@@ -26,7 +26,7 @@ from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_log       import ProjLog
 
 
-class PageBackground (object) :
+class ProjBackground (object) :
 
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''

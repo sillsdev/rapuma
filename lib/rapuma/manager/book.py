@@ -24,7 +24,7 @@
 
 # Load the local classes
 #from rapuma.core.tools import *
-from rapuma.project.project import Project
+from rapuma.manager.project      import Project
 
 
 ###############################################################################

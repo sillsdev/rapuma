@@ -21,7 +21,7 @@ from configobj                      import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.project.manager         import Manager
+from rapuma.manager.manager         import Manager
 
 ###############################################################################
 ################################## Begin Class ################################

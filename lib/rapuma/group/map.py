@@ -23,7 +23,7 @@ from configobj import ConfigObj, Section
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.group.group             import Group
-from rapuma.project.proj_background import PageBackground
+from rapuma.project.proj_background import ProjBackground
 from rapuma.project.proj_maps       import ProjMaps
 from rapuma.project.proj_style      import ProjStyle
 
@@ -231,7 +231,7 @@ class Map (Group) :
         bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
         for bg in bgList :
             # For some reason it is best to load the mod right here
-            PageBackground(self.pid).checkForBackground(bg, mode)
+            ProjBackground(self.pid).checkForBackground(bg, mode)
 
         # Any more stuff to run?
 

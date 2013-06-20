@@ -28,7 +28,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.paratext           import Paratext
-from rapuma.project.project         import Project
+from rapuma.manager.project         import Project
 
 
 ###############################################################################
