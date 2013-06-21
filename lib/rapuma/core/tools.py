@@ -435,6 +435,17 @@ class Tools (object) :
                 return False
 
 
+    def pkgExtract (self, source, targetFolder, confXml) :
+        '''Extract a Rapuma package (zip file) and test for success.'''
+
+        if zipfile.is_zipfile(source) :
+            myzip = zipfile.ZipFile(source, 'r')
+            myzip.extractall(targetFolder)
+            # Double check extract
+            if os.path.isfile(confXml) :
+                return True
+
+
     def rtnUnicodeValue (self, char) :
         '''Return the Unicode value as a string.'''
 

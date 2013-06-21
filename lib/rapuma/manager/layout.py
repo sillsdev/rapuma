@@ -44,18 +44,22 @@ class Layout (Manager) :
         self.managers                       = project.managers
         self.projConfig                     = self.project.projConfig
         # File names
-        self.defaultXmlConfFileName         = self.mType + '_layout.xml'
-        self.layoutConfFileName             = self.mType + '_layout.conf'
+        self.layoutXmlConfFileName          = self.mType + '_layout.xml'
+        self.layoutConfFileName             = 'layout.conf'
         # Paths
         self.projConfFolder                 = self.project.local.projConfFolder
         self.rapumaConfigFolder             = self.project.local.rapumaConfigFolder
         # Files with paths
         self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
-        self.defaultXmlConfFile             = os.path.join(self.rapumaConfigFolder, self.defaultXmlConfFileName)
+        self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
+
+
         # Set local var and override in project object (if needed)
         self.project.local.layoutConfFile   = self.layoutConfFile
-        # Load the config object
-        self.layoutConfig = self.tools.initConfig(self.layoutConfFile, self.defaultXmlConfFile)
+        # Load the layout config object
+        self.layoutConfig = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
+
+
         # Grab the projConfig settings for this manager
         for k, v in self.project.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

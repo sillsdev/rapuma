@@ -62,6 +62,7 @@ class Usfm (Group) :
         self.mType                  = project.projectMediaIDCode
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.macroPackage           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
@@ -134,8 +135,6 @@ class Usfm (Group) :
         }
 
         # Pick up some init settings that come after the managers have been installed
-        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
-        self.layoutConfig           = self.layout.layoutConfig
         if not os.path.isfile(self.adjustmentConfFile) :
             if self.createProjAdjustmentConfFile() :
                 self.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.adjustmentConfFile)])

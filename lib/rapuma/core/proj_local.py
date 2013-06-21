@@ -48,8 +48,8 @@ class ProjLocal (object) :
         # Create a list of project folders for later processing
         self.projFolders = lc['ProjFolders'].keys()
 
-        # Do a loopy thingy and pull out all the known settings
-        localTypes = ['ProjFolders', 'UserFolders', 'RapumaFolders', 'ProjFiles', 'UserFiles', 'RapumaFiles']
+        # Do a loopy thingy and pull out all the known folder names
+        localTypes = ['ProjFolders', 'UserFolders', 'RapumaFolders']
         for t in localTypes :
             if t[:3].lower() == 'pro' :
                 home = getattr(self, 'projHome')
@@ -57,17 +57,9 @@ class ProjLocal (object) :
                 home = getattr(self, 'userHome')
             elif t[:3].lower() == 'rap' :
                 home = getattr(self, 'rapumaHome')
-
+            # Combine folder names with paths and set vars
             for key in lc[t] :
-                # For extra credit, if we are looking at files, set the name here
-                if t[-5:].lower() == 'files' :
-                    if type(lc[t][key]) == list :
-                        setattr(self, key + 'Name', lc[t][key][len(lc[t][key])-1])
-                    else :
-                        setattr(self, key + 'Name', lc[t][key])
-                    # Uncomment for testing
-#                    print key + 'Name = ', getattr(self, key + 'Name')
-
+                setattr(self, key + 'Name', lc[t][key])
                 if type(lc[t][key]) == list :
                     setattr(self, key, os.path.join(home, *lc[t][key]))
                 else :
@@ -76,12 +68,19 @@ class ProjLocal (object) :
                 # Uncomment for testing
 #                print key + ' = ', getattr(self, key)
 
-        # Extract just the file names from these
-        localTypes = ['ProjFiles', 'UserFiles', 'RapumaFiles']
-
         # Add some additional necessary params
         self.lockExt = '.lock'
         
+        # Add necessary file names
+        self.projConfFileName       = 'project.conf'
+        self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
+        self.userConfFileName       = 'rapuma.conf'
+        self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
+        self.projLogFileName        = 'rapuma.log'
+        self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
+        self.projErrorLogFileName   = 'error.log'
+        self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
+
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
             if os.path.isfile(self.projErrorLogFile) :

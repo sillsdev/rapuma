@@ -20,13 +20,6 @@ Todo:
         <value>--somethingimportant</value>
     </setting>
     <setting>
-        <name>Macro Package</name>
-        <key>macroPackage</key>
-        <description>The macro package the XeTeX rendering engine will use to render components.</description>
-        <type>string</type>
-        <value>usfmTex</value>
-    </setting>
-    <setting>
         <name>Use PDF Viewer</name>
         <key>usePdfViewer</key>
         <description>Route the output to the PDF viewer.</description>

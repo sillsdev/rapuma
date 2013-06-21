@@ -43,17 +43,22 @@ class Font (Manager) :
         self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.project                = project
+        self.local                  = project.local
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
+        self.mType                  = project.projectMediaIDCode
         self.gid                    = project.gid
         self.fontConfig             = ConfigObj(encoding='utf-8')
         self.project                = project
         self.manager                = self.cType + '_Font'
-        self.rapumaXmlFontConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+        self.rapumaXmlFontConfig    = os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile)
+
+        self.fontConfFileName       = 'font.conf'
+        self.fontConfFile           = os.path.join(self.local.projConfFolder, self.fontConfFileName)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile))
+        newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile))
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
             self.project.projConfig['Managers'][self.manager] = newSectionSettings
             # Save the setting rightaway
@@ -112,12 +117,12 @@ class Font (Manager) :
         }
 
         # Create an empty default font config file if needed
-        if not os.path.isfile(self.project.local.fontConfFile) :
-            self.fontConfig.filename = self.project.local.fontConfFile
+        if not os.path.isfile(self.fontConfFile) :
+            self.fontConfig.filename = self.fontConfFile
             self.tools.writeConfFile(self.fontConfig)
             self.project.log.writeToLog(self.errorCodes['0010'])
         else :
-            self.fontConfig = ConfigObj(self.project.local.fontConfFile, encoding='utf-8')
+            self.fontConfig = ConfigObj(self.fontConfFile, encoding='utf-8')
 
 
 ###############################################################################
@@ -141,7 +146,7 @@ class Font (Manager) :
 
         # Check for the font family bundle, look in user resources first
         userSource = os.path.join(self.tools.resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
-        rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
+        rapumaSource = os.path.join(self.local.rapumaFontsFolder, font + '.zip')
         source = ''
         if os.path.isfile(userSource) :
             source = userSource
@@ -155,11 +160,11 @@ class Font (Manager) :
 
         if self.tools.isInZip(font + '.xml', source) :
             xmlFile = font + '/' + font + '.xml'
-            tmpFolder = os.path.join(self.project.local.projConfFolder, font)
+            tmpFolder = os.path.join(self.local.projConfFolder, font)
             # Extract to a temp file/folder
             myzip = zipfile.ZipFile(source)
-            myzip.extract(xmlFile, self.project.local.projConfFolder)
-            metaDataSource = os.path.join(self.project.local.projConfFolder, xmlFile)
+            myzip.extract(xmlFile, self.local.projConfFolder)
+            metaDataSource = os.path.join(self.local.projConfFolder, xmlFile)
             myzip.close()
             fInfo = self.tools.getXMLSettings(metaDataSource)
             # Now kill the temp file and folder
@@ -182,7 +187,7 @@ class Font (Manager) :
         install the new settings (or just reset to default settings).'''
 
         # Set vars do initial checks
-        metaDataSource = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        metaDataSource = os.path.join(self.local.projFontsFolder, font, font + '.xml')
         Ctype = cType.capitalize()
         if not os.path.isfile(metaDataSource) :
             self.project.log.writeToLog('FONT-040', [self.tools.fName(metaDataSource)])
@@ -265,20 +270,12 @@ class Font (Manager) :
         # First be sure this is a font we can work with
         font = self.checkForSubFont(font)
 
-        def extract (source, confXml) :
-            if zipfile.is_zipfile(source) :
-                myzip = zipfile.ZipFile(source, 'r')
-                myzip.extractall(self.project.local.projFontsFolder)
-                # Double check extract
-                if os.path.isfile(confXml) :
-                    return True
-
 #        import pdb; pdb.set_trace()
 
         # Look in user resources first
         userSource = os.path.join(self.tools.resolvePath(self.project.userConfig['Resources']['fonts']), font + '.zip')
-        rapumaSource = os.path.join(self.project.local.rapumaFontsFolder, font + '.zip')
-        confXml = os.path.join(self.project.local.projFontsFolder, font, font + '.xml')
+        rapumaSource = os.path.join(self.local.rapumaFontsFolder, font + '.zip')
+        confXml = os.path.join(self.local.projFontsFolder, font, font + '.xml')
         if os.path.isfile(userSource) :
             source = userSource
         elif os.path.isfile(rapumaSource) :
@@ -289,10 +286,10 @@ class Font (Manager) :
         # When is force is used, delete the existing font to ensure a clean copy
         if force :
             try :
-                shutil.rmtree(os.path.join(self.project.local.projFontsFolder, font))
+                shutil.rmtree(os.path.join(self.local.projFontsFolder, font))
             except :
                 pass
-            if extract(source, confXml) :
+            if self.tools.pkgExtract(source, self.local.projFontsFolder, confXml) :
                 self.project.log.writeToLog(self.errorCodes['0260'], [self.tools.fName(source)])
                 return True
             else :
@@ -304,7 +301,7 @@ class Font (Manager) :
                 self.project.log.writeToLog(self.errorCodes['0262'], [self.tools.fName(source)])
                 return True
             else :
-                if extract(source, confXml) :
+                if self.tools.pkgExtract(source, self.local.projFontsFolder, confXml) :
                     self.project.log.writeToLog(self.errorCodes['0267'], [self.tools.fName(source)])
                     return True
                 else :
@@ -364,7 +361,7 @@ class Font (Manager) :
             removePConfSettings(Ctype, font)
             self.project.log.writeToLog('FONT-080', [font,Ctype])
             if force :
-                shutil.rmtree(os.path.join(self.project.local.projFontsFolder, font))
+                shutil.rmtree(os.path.join(self.local.projFontsFolder, font))
                 # Since this is a force we want to delete settings in the fontConfFile too
                 removeFConfSettings(font)
                 # Now remove settings from all the other cTypes
@@ -398,7 +395,7 @@ class Font (Manager) :
         else :
             self.project.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor], 'font.varifyFont():0210')
 
-        if os.path.isdir(os.path.join(self.project.local.projFontsFolder, font)) and self.primaryFont == font :
+        if os.path.isdir(os.path.join(self.local.projFontsFolder, font)) and self.primaryFont == font :
             return True
 
 

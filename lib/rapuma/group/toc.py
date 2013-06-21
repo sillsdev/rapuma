@@ -63,6 +63,7 @@ class Toc (Group) :
         self.cfg                    = cfg
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
@@ -116,10 +117,6 @@ class Toc (Group) :
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
         }
-
-        # Pick up some init settings that come after the managers have been installed
-        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
-        self.layoutConfig           = self.layout.layoutConfig
 
 
 ###############################################################################

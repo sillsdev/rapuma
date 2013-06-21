@@ -30,6 +30,7 @@ from rapuma.project.proj_maps       import ProjMaps
 from rapuma.project.proj_toc        import ProjToc
 from rapuma.project.proj_style      import ProjStyle
 from rapuma.project.proj_background import ProjBackground
+from rapuma.project.proj_macro      import ProjMacro
 
 
 ###############################################################################
@@ -64,20 +65,16 @@ class Xetex (Manager) :
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
+        self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
         self.component              = self.managers[self.cType + '_Component']
-        # Don't need hyphenation for rendering maps
-        if cType != 'map' :
-            self.hyphenation        = self.managers[self.cType + '_Hyphenation']
+        self.hyphenation            = self.managers[self.cType + '_Hyphenation']
+        self.illustration           = self.managers[self.cType + '_Illustration']
         self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
         # Get config objs
         self.projConfig             = project.projConfig
-        
-        
-# FIXME: How do I want to pull in multiple conf files
-        
         self.layoutConfig           = self.layout.layoutConfig
         self.fontConfig             = self.font.fontConfig
         self.userConfig             = self.project.userConfig
@@ -85,8 +82,11 @@ class Xetex (Manager) :
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macroPackage           = self.projConfig['Managers'][self.manager]['macroPackage']
+        self.macroPackage           = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
 
+        # Macro package config object
+        self.macPackConfig          = self.proj_macro.macPackConfig
+        
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
         for k, v in self.managerSettings.iteritems() :
@@ -97,30 +97,15 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        # Adjust settings for rendering maps
-        if cType != 'map' :
-            self.useHyphenation     = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-            self.useIllustrations   = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useIllustrations'])
-            self.useMarginalVerses  = self.tools.str2bool(self.layoutConfig['ChapterVerse']['useMarginalVerses'])
-            self.chapNumOffSingChap = self.tools.str2bool(self.layoutConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-        else :
-            self.useHyphenation     = False
-            self.useIllustrations   = True
-            self.useMarginalVerses  = False
-            self.chapNumOffSingChap = True
+
         # File names
         # Some of these file names will only be used once but for consitency
         # we will create them all in one place.
         self.gidTexFileName         = self.gid + '.tex'
         self.gidPdfFileName         = self.gid + '.pdf'
-        self.macLinkFileName        = 'macLink.tex'
-        self.setTexFileName         = 'settings.tex'
-        self.extTexFileName         = 'extentions.tex'
-        self.grpExtTexFileName      = self.gid + '-ext.tex'
-        self.ptxMargVerseFileName   = 'ptxplus-marginalverses.tex'
+        self.macLinkFileName        = self.macroPackage + '.tex'
+        self.grpExtTexFileName      = self.gid + '-extentions.tex'
         # Folder paths
-        self.rapumaMacrosFolder     = self.local.rapumaMacrosFolder
-        self.rapumaMacPackFolder    = os.path.join(self.rapumaMacrosFolder, self.macroPackage)
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
@@ -129,16 +114,27 @@ class Xetex (Manager) :
         self.projHyphenationFolder  = self.local.projHyphenationFolder
         self.projIllustrationsFolder= self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
-        self.projMacrosFolder       = self.local.projMacrosFolder
-        self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macroPackage)
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-        self.layoutXmlFile          = self.layout.defaultXmlConfFile
+        self.layoutXmlFile          = self.layout.layoutXmlConfFile
+        self.projConfFile           = self.local.projConfFile
         self.layoutConfFile         = self.layout.layoutConfFile
-        self.fontConfFile           = os.path.join(self.projConfFolder, 'font.conf')
-        self.illustrationConfFile   = os.path.join(self.projConfFolder, 'illustration.conf')
-        self.projConfFile           = os.path.join(self.projConfFolder, 'project.conf')
+        self.fontConfFile           = self.font.fontConfFile
+        self.illustrationConfFile   = self.illustration.illustrationConfFile
+        # If adjustments are needed...
+        self.adjustmentConfFile     = ''
+        if self.macroPackage in ['usfmTex', 'ptx2pdf'] :
+            self.adjustmentConfFile = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
+
+
+
+
+
+
+
+# FIXME: Start working here
+
         self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
         self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
         self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
@@ -149,12 +145,11 @@ class Xetex (Manager) :
         self.grpExtStyFile          = self.proj_style.grpExtStyFile
         self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
         self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
-        # These files will not be used
+        # These files will not be used with the map cType
         if cType != 'map' :
             self.lccodeTexFile          = self.hyphenation.lccodeTexFile
             self.compHyphFile           = self.hyphenation.compHyphFile
             self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
-            self.ptxMargVerseFile       = os.path.join(self.projMacPackFolder, self.ptxMargVerseFileName)
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -253,25 +248,25 @@ class Xetex (Manager) :
             return cfg[secA][secB][key]
 
 
-    def copyInMargVerse (self) :
-        '''Copy in the marginalverse macro package.'''
+#    def copyInMargVerse (self) :
+#        '''Copy in the marginalverse macro package.'''
 
-        # Copy in to the process folder the macro package for this component
-        if not os.path.isdir(self.projMacPackFolder) :
-            os.makedirs(self.projMacPackFolder)
+#        # Copy in to the process folder the macro package for this component
+#        if not os.path.isdir(self.projMacPackFolder) :
+#            os.makedirs(self.projMacPackFolder)
 
-        if not os.path.isfile(self.ptxMargVerseFile) :
-            shutil.copy(os.path.join(self.rapumaMacPackFolder, self.tools.fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
-            self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(self.ptxMargVerseFile)])
-            return True
+#        if not os.path.isfile(self.ptxMargVerseFile) :
+#            shutil.copy(os.path.join(self.rapumaMacPackFolder, self.tools.fName(self.ptxMargVerseFile)), self.ptxMargVerseFile)
+#            self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(self.ptxMargVerseFile)])
+#            return True
 
 
-    def removeMargVerse (self) :
-        '''Remove the marginal verse macro package from the project.'''
+#    def removeMargVerse (self) :
+#        '''Remove the marginal verse macro package from the project.'''
 
-        if os.path.isfile(self.ptxMargVerseFile) :
-            os.remove(self.ptxMargVerseFile)
-            return True
+#        if os.path.isfile(self.ptxMargVerseFile) :
+#            os.remove(self.ptxMargVerseFile)
+#            return True
 
 
     def copyInMacros (self) :
@@ -404,17 +399,17 @@ class Xetex (Manager) :
                     makeLinkFile = True
                     self.log.writeToLog(self.errorCodes['0460'], [self.tools.fName(f),self.tools.fName(self.macLinkFile)])
 
-        if makeLinkFile :
-            with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macLinkFile), description))
-                writeObject.write('\\input ' + self.tools.quotePath(mainMacroFile) + '\n')
-                # If we are using marginal verses then we will need this
-                if self.cType == 'usfm' :
-                    if self.useMarginalVerses :
-                        self.copyInMargVerse()
-                        writeObject.write('\\input ' + self.tools.quotePath(self.ptxMargVerseFile) + '\n')
-                    else :
-                        self.removeMargVerse()
+#        if makeLinkFile :
+#            with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
+#                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macLinkFile), description))
+#                writeObject.write('\\input ' + self.tools.quotePath(mainMacroFile) + '\n')
+#                # If we are using marginal verses then we will need this
+#                if self.cType == 'usfm' :
+#                    if self.useMarginalVerses :
+#                        self.copyInMargVerse()
+#                        writeObject.write('\\input ' + self.tools.quotePath(self.ptxMargVerseFile) + '\n')
+#                    else :
+#                        self.removeMargVerse()
 
         return True
 
@@ -870,9 +865,9 @@ class Xetex (Manager) :
 
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
-        dep = [self.extTexFile, self.project.local.projConfFile, 
-                self.project.local.layoutConfFile, self.project.local.fontConfFile, 
-                    self.project.local.adjustmentConfFile, self.project.local.illustrationConfFile, ]
+        dep = [self.extTexFile, self.projConfFile, 
+                self.layoutConfFile, self.fontConfFile, 
+                    self.adjustmentConfFile, self.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)

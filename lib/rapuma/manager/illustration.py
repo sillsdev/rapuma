@@ -39,9 +39,11 @@ class Illustration (Manager) :
         # Set values for this manager
         self.tools                      = Tools()
         self.project                    = project
+        self.local                      = project.local
         self.cfg                        = cfg
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
+        self.mType                      = project.projectMediaIDCode
         self.manager                    = self.cType + '_Illustration'
         self.managers                   = project.managers
         self.log                        = project.log
@@ -57,15 +59,17 @@ class Illustration (Manager) :
 
         # File names
         self.defaultXmlConfFileName     = 'illustration.xml'
+        self.illustrationConfFileName   = 'illustration.conf'
         # Folder paths
-        self.projComponentsFolder  = self.project.local.projComponentsFolder
-        self.projIllustrationsFolder    = self.project.local.projIllustrationsFolder
+        self.projComponentsFolder  = self.local.projComponentsFolder
+        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
-        self.projConfFolder             = self.project.local.projConfFolder
-        self.rpmRapumaConfigFolder      = self.project.local.rapumaConfigFolder
+        self.projConfFolder             = self.local.projConfFolder
+        self.rpmRapumaConfigFolder      = self.local.rapumaConfigFolder
         # File names with folder paths
         self.defaultXmlConfFile         = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
+        self.illustrationConfFile       = os.path.join(self.projIllustrationsFolder, self.illustrationConfFileName)
 
         # If we have nothing in the project for pointing to an illustrations
         # lib, put the default in here
@@ -75,7 +79,7 @@ class Illustration (Manager) :
             self.tools.writeConfFile(self.projConfig)
 
         # Load the config object
-        self.illustrationConfig         = ConfigObj(self.project.local.illustrationConfFile, encoding='utf-8')
+        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
         # Load settings from the manager config
         for k, v in self.projConfig['Managers'][self.manager].iteritems() :
             setattr(self, k, v)

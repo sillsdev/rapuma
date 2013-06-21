@@ -63,6 +63,7 @@ class Map (Group) :
         self.cfg                    = cfg
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.macroPackage           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
@@ -117,9 +118,6 @@ class Map (Group) :
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
         }
 
-        # Pick up some init settings that come after the managers have been installed
-        self.macroPackage           = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()]['macroPackage']
-        self.layoutConfig           = self.layout.layoutConfig
 
 
 ###############################################################################
@@ -194,7 +192,7 @@ class Map (Group) :
             self.log.writeToLog(self.errorCodes['0220'], [self.gid], 'map.preProcessGroup():0220')
 
         # Add/manage the dependent files for this map group
-        if self.macroPackage == 'usfmTex' :
+        if self.macroPackage == 'mapTex' :
             # Component piclist file
             cidPiclist = self.getCidPiclistFile(self.gid)
 

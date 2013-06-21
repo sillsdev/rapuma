@@ -48,26 +48,46 @@ class ProjMacro (object) :
         self.log                        = ProjLog(self.pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
+        self.cType                      = self.projConfig['Groups'][self.gid]['cType']
+        self.Ctype                      = self.cType.capitalize()
+        self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # File names
-
+        self.macPackXmlConfFileName     = self.macPack + '.xml'
+        self.macPackConfFileName        = self.macPack + '.conf'
+        self.macPackFileName            = self.macPack + '.zip'
         # Folder paths
-        self.projMacroFolder            = self.local.projMacroFolder
+        self.projConfFolder             = self.local.projConfFolder
+        self.projMacrosFolder           = self.local.projMacrosFolder
+        self.rapumaMacrosFolder         = self.local.rapumaMacrosFolder
+        self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
         # File names with paths
-
-
-        self.finishInit()
+        self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+        self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
+        self.macPackFile                = os.path.join(self.projMacPackFolder, self.macPackFileName)
+        self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
 
         # Log messages for this module
         self.errorCodes     = {
 
             '0050' : ['MSG', 'Placeholder message'],
 
+            'MCRO-000' : ['MSG', 'Messages for user macro issues (mainly found in project.py)'],
+            'MCRO-010' : ['ERR', 'This macro [<<1>>] is already registered for this project. Use force -f to overwrite it.'],
+            'MCRO-020' : ['ERR', 'The macro file [<<1>>] already exsists in this project. Use force -f to overwrite it.'],
+            'MCRO-030' : ['MSG', 'The macro file [<<1>>] has been installed into this project.'],
+            'MCRO-050' : ['MSG', 'Running macro command: [<<1>>]'],
+            'MCRO-060' : ['ERR', 'Macro file not found: [<<1>>]'],
+            '1000' : ['MSG', 'Placeholder message'],
+
+            '0250' : ['ERR', 'Failed to install macro package: [<<1>>]']
+
         }
 
-    def finishInit (self) :
-        '''If this is a new project some settings need to be handled special.'''
+        # Load the macPack configuration object
+        if not os.path.exists(self.macPackXmlConfFile) :
+            self.addMacPack(self.macPack)
+        self.macPackConfig = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
-        pass
 
 
 ###############################################################################
@@ -76,6 +96,14 @@ class ProjMacro (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
+    def addMacPack (self, force = False) :
+        '''Add a macro package to the project.'''
+
+        if os.path.exists(self.projMacPackFolder) and force :
+            self.removeMacPack(force)
+
+        if not self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
+            self.log.writeToLog(self.errorCodes['0250'], [self.macPack])
 
 
 ###############################################################################
@@ -107,6 +135,114 @@ class ProjMacro (object) :
 ###############################################################################
 ######################## Error Code Block Series = 0800 #######################
 ###############################################################################
+
+
+
+
+
+###############################################################################
+######################## User Macro Handling Functions ########################
+###############################################################################
+######################## Error Code Block Series = 1000 #######################
+###############################################################################
+
+# FIXME: All the code below is not currently working, needs rewriting
+
+    def addUserMacro (self, name, cmd = None, path = None, force = False) :
+        '''Install a user defined macro.'''
+
+        # Define some internal vars
+        oldMacro            = ''
+        sourceMacro         = ''
+        # FIXME: This needs to support a file extention such as .sh
+        if path and os.path.isfile(os.path.join(self.tools.resolvePath(path))) :
+            sourceMacro     = os.path.join(self.tools.resolvePath(path))
+        macroTarget         = os.path.join(self.local.projUserMacrosFolder, name)
+        if self.projConfig['GeneralSettings'].has_key('userMacros') and name in self.projConfig['GeneralSettings']['userMacros'] :
+            oldMacro = name
+
+        # First check for prexsisting macro record
+        if not force :
+            if oldMacro :
+                self.log.writeToLog('MCRO-010', [oldMacro])
+                self.tools.dieNow()
+
+        # Make the target folder if needed (should be there already, though)
+        if not os.path.isdir(self.local.projUserMacrosFolder) :
+            os.makedirs(self.local.projUserMacrosFolder)
+
+        # First check to see if there already is a macro file, die if there is
+        if os.path.isfile(macroTarget) and not force :
+            self.log.writeToLog('MCRO-020', [self.tools.fName(macroTarget)])
+
+        # If force, then get rid of the file before going on
+        if force :
+            if os.path.isfile(macroTarget) :
+                os.remove(macroTarget)
+
+        # No script found, we can proceed
+        if os.path.isfile(sourceMacro) :
+            shutil.copy(sourceMacro, macroTarget)
+        else :
+            # Create a new user macro file
+            mf = codecs.open(macroTarget, 'w', 'utf_8_sig')
+            mf.write('#!/bin/sh\n\n')
+            mf.write('# This macro file was auto-generated by Rapuma. Add commands as desired.\n\n')
+            # FIXME: This should be done as a list so multiple commands can be added
+            if cmd :
+                mf.write(cmd + '\n')
+            mf.close
+
+        # Be sure that it is executable
+        makeExecutable(macroTarget)
+
+        # Record the macro with the project
+        if self.projConfig['GeneralSettings'].has_key('userMacros') :
+            macroList = self.projConfig['GeneralSettings']['userMacros']
+            if self.tools.fName(macroTarget) not in macroList :
+                self.projConfig['GeneralSettings']['userMacros'] = self.tools.addToList(macroList, self.tools.fName(macroTarget))
+                self.tools.writeConfFile(self.projConfig)
+        else :
+                self.projConfig['GeneralSettings']['userMacros'] = [self.tools.fName(macroTarget)]
+                self.tools.writeConfFile(self.projConfig)
+
+        self.log.writeToLog('MCRO-030', [self.tools.fName(macroTarget)])
+        return True
+
+
+    def runUserMacro (self, name) :
+        '''Run an installed, user defined macro.'''
+
+        # In most cases we use subprocess.call() to do a process call.  However,
+        # in this case it takes too much fiddling to get a these more complex Rapuma
+        # calls to run from within Rapuma.  To make it easy, we use os.system() to
+        # make the call out.
+        macroFile = os.path.join(self.local.projUserMacrosFolder, name)
+        if os.path.isfile(macroFile) :
+            if self.macroRunner(macroFile) :
+                return True
+        else :
+            self.log.writeToLog('MCRO-060', [self.tools.fName(macroFile)])
+
+
+    def macroRunner (self, macroFile) :
+        '''Run a macro. This assumes the macroFile includes a full path.'''
+
+        try :
+            macro = codecs.open(macroFile, "r", encoding='utf_8')
+            for line in macro :
+                # Clean the line, may be a BOM to remove
+                line = line.replace(u'\ufeff', '').strip()
+                if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
+                    self.log.writeToLog('MCRO-050', [line])
+                    # FIXME: Could this be done better with subprocess()?
+                    os.system(line)
+            return True
+
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            terminal('Macro failed with the following error: ' + str(e))
+            self.tools.dieNow()
 
 
 
