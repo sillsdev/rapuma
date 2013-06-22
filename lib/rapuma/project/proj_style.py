@@ -22,7 +22,7 @@ import os, shutil, warnings, codecs
 from rapuma.core.tools              import Tools
 from rapuma.core.paratext           import Paratext
 from rapuma.manager.manager         import Manager
-from rapuma.core.proj_config        import ProjConfig
+from rapuma.project.proj_config     import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -44,12 +44,12 @@ class ProjStyle (Manager) :
         self.pt_tools                   = Paratext(pid, gid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                      = ProjLocal(self.pid)
-        self.projConfig                 = ProjConfig(self.local).projConfig
-        self.log                        = ProjLog(self.pid)
-        self.cType                      = self.projConfig['Groups'][self.gid]['cType']
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.projectMediaIDCode         = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.local                      = ProjLocal(pid)
+        self.projConfig                 = ProjConfig(pid).projConfig
+        self.log                        = ProjLog(pid)
+        self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         # Misc settings
         self.renderer                   = self.projConfig['CompTypes'][self.Ctype]['renderer']
@@ -57,10 +57,10 @@ class ProjStyle (Manager) :
         # File names
         self.defaultStyFileName         = self.cType + '.sty'
         self.glbExtStyFileName          = self.cType + '-ext.sty'
-        self.grpExtStyFileName          = self.cType + '-' + self.gid + '-ext.sty'
+        self.grpExtStyFileName          = self.cType + '-' + gid + '-ext.sty'
         # Folder paths
         self.projComponentsFolder       = self.local.projComponentsFolder
-        self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
+        self.gidFolder                  = os.path.join(self.projComponentsFolder, gid)
         self.projStylesFolder           = self.local.projStylesFolder
         self.rapumaStyFolder            = self.local.rapumaStylesFolder
         self.rapumaCmpStyFolder         = os.path.join(self.rapumaStyFolder, self.cType)

@@ -22,6 +22,7 @@ from configobj                      import ConfigObj
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
+from rapuma.project.proj_config     import ProjConfig
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -44,15 +45,16 @@ class Illustration (Manager) :
         self.cType                      = cType
         self.Ctype                      = cType.capitalize()
         self.mType                      = project.projectMediaIDCode
+        self.pid                        = project.projectIDCode
+        self.gid                        = project.gid
         self.manager                    = self.cType + '_Illustration'
         self.managers                   = project.managers
         self.log                        = project.log
         self.backgroundTypes            = ['watermark', 'lines']
-        # Bring in some manager objects we will need
-        self.layout                     = self.managers[self.cType + '_Layout']
+        self.proj_config                = ProjConfig(self.pid)
         # Get config objs
-        self.projConfig                 = project.projConfig
-        self.layoutConfig               = self.layout.layoutConfig
+        self.projConfig                 = self.proj_config.projConfig
+        self.layoutConfig               = self.proj_config.layoutConfig
         self.userConfig                 = project.userConfig
         # Get some config settings
         self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']

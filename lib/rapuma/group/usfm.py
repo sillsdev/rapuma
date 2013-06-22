@@ -24,6 +24,8 @@ from configobj import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.group.group             import Group
 from rapuma.project.proj_style      import ProjStyle
+from rapuma.project.proj_macro      import ProjMacro
+#from rapuma.project.proj_layout     import ProjLayout
 from rapuma.project.proj_background import ProjBackground
 
 
@@ -55,7 +57,9 @@ class Usfm (Group) :
         self.local                  = project.local
         self.tools                  = Tools()
         self.proj_style             = ProjStyle(self.pid, self.gid)
-        self.pg_background          = ProjBackground(self.pid)
+        self.proj_macro             = ProjMacro(self.pid, self.gid)
+        self.proj_layout            = ProjMacro(self.pid, self.gid)
+        self.pg_background          = ProjBackground(self.pid, self.gid)
         self.projConfig             = project.projConfig
         self.log                    = project.log
         self.cfg                    = cfg
@@ -63,11 +67,13 @@ class Usfm (Group) :
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        # If adjustments are needed in the macPack we insert into local here for down-stream use
+        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('component', 'text', 'font', 'layout', 'hyphenation', 'illustration', self.renderer)
+        self.usfmManagers = ('component', 'text', 'font', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
@@ -76,11 +82,10 @@ class Usfm (Group) :
         # Create the internal ref names we use in this module
         self.font                   = self.project.managers[self.cType + '_Font']
         self.component              = self.project.managers[self.cType + '_Component']
-        self.layout                 = self.project.managers[self.cType + '_Layout']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         # File names
-        self.adjustmentConfFile     = project.local.adjustmentConfFile
+
         # Folder paths
         self.projScriptsFolder      = self.local.projScriptsFolder
         self.projComponentsFolder   = self.local.projComponentsFolder
@@ -140,8 +145,8 @@ class Usfm (Group) :
                 self.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.adjustmentConfFile)])
             else :
                 self.updateCompAdjustmentConf()
-        # Now get the adj config
-        self.adjustmentConfig       = ConfigObj(self.adjustmentConfFile, encoding='utf-8')
+        # Now reget the adj config
+        self.adjustmentConfig       = self.proj_macro.getAdjustmentConfFile()
 
 
 ###############################################################################
@@ -262,7 +267,7 @@ class Usfm (Group) :
                             else :
                                 self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
-                            for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
+                            for f in [self.proj_layout.layoutConfFile, self.proj_layout.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
                                     self.illustration.createPiclistFile(gid, cid)

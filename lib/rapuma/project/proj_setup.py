@@ -25,7 +25,6 @@ from palaso.sfm                     import usfm, style, element, text
 
 # Load the local classes
 from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
-from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -34,6 +33,7 @@ from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.paratext           import Paratext
 from rapuma.manager.project         import Project
 from rapuma.project.proj_commander  import ProjCommander
+from rapuma.project.proj_config     import ProjConfig
 
 
 class ProjSetup (object) :
@@ -112,7 +112,7 @@ class ProjSetup (object) :
             # These could be initialized above but because it might be necessary
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
-            self.projConfig         = ProjConfig(self.local).projConfig
+            self.projConfig         = ProjConfig(self.pid).projConfig
             self.log                = ProjLog(self.pid)
             self.paratext           = Paratext(self.pid)
             self.compare            = ProjCompare(self.pid)
@@ -261,16 +261,8 @@ class ProjSetup (object) :
         # If we don't createGroup() will fail badly.
         self.cType = cType
 
-
-
-
-
 #        import pdb; pdb.set_trace()
         self.tools.addComponentType(self.projConfig, self.local, cType)
-
-
-
-
 
         # Lock and save our config settings
         self.projConfig['Groups'][gid]['isLocked']  = True
@@ -425,8 +417,6 @@ class ProjSetup (object) :
 #        '''Add (register) a component type to the config if it 
 #        is not there already.'''
 
-##        import pdb; pdb.set_trace()
-
 #        Ctype = cType.capitalize()
 #        # Build the comp type config section
 #        self.tools.buildConfSection(self.projConfig, 'CompTypes')
@@ -480,6 +470,8 @@ class ProjSetup (object) :
     def newProject (self, projHome, pmid, pname, systemVersion, tid = None) :
         '''Create a new publishing project.'''
 
+#        import pdb; pdb.set_trace()
+
         # Sort out some necessary vars
         self.projHome = projHome
         self.projectMediaIDCode = pmid
@@ -492,8 +484,9 @@ class ProjSetup (object) :
         # Add project to local Rapuma project registry
         self.user.registerProject(self.pid, pname, self.projectMediaIDCode, self.projHome)
 
-        # At this point we should have enough to finish the module init
-        self.finishInit()
+        # Load a couple necessary modules
+        self.local              = ProjLocal(self.pid)
+
 
         # Run some basic tests to see if this project can be created
         # Look for project in current folder
@@ -527,7 +520,7 @@ class ProjSetup (object) :
             self.backup.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
         else :
             # If not from a template, just create a new version of the project config file
-            ProjConfig(self.local).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
+            ProjConfig(self.pid).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :

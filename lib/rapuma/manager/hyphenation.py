@@ -20,11 +20,11 @@ import os, re, shutil, subprocess, codecs
 
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.manager.manager     import Manager
-from rapuma.core.proj_config    import ConfigTools
-from rapuma.core.proj_compare   import ProjCompare
-from rapuma.core.paratext       import Paratext
+from rapuma.core.tools              import Tools
+from rapuma.manager.manager         import Manager
+from rapuma.project.proj_config     import ProjConfig, ConfigTools
+from rapuma.core.proj_compare       import ProjCompare
+from rapuma.core.paratext           import Paratext
 
 
 ###############################################################################
@@ -55,11 +55,16 @@ class Hyphenation (Manager) :
         self.configTools            = ConfigTools(project)
         self.userConfig             = project.userConfig
         self.log                    = project.log
+        self.proj_config            = ProjConfig(self.pid)
+        self.layoutConfig           = self.proj_config.layoutConfig
+        self.projConfig             = self.proj_config.projConfig
+
         # Necessary config objects
-        self.projConfig             = project.projConfig
-        if self.cType + '_Layout' not in self.managers :
-            self.project.createManager('layout')
-        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+#        self.projConfig             = project.projConfig
+#        if self.cType + '_Layout' not in self.managers :
+#            self.project.createManager('layout')
+#        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
+
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
         # Some of these file names are dependent on Paratext, such as the ptHyphFileName

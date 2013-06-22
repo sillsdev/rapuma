@@ -18,17 +18,17 @@
 # this process
 
 import os, shutil, codecs, re, subprocess, tempfile
-from configobj                      import ConfigObj, Section
-from functools                      import partial
+from configobj                          import ConfigObj, Section
+from functools                          import partial
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
-from rapuma.core.proj_config        import ProjConfig
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
-from rapuma.core.paratext           import Paratext
-from rapuma.manager.project         import Project
+from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+from rapuma.core.paratext               import Paratext
+from rapuma.manager.project             import Project
+from rapuma.project.proj_config         import ProjConfig
 
 
 ###############################################################################
@@ -47,9 +47,9 @@ class ProjToc (object) :
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                      = ProjLocal(self.pid)
-        self.projConfig                 = ProjConfig(self.local).projConfig
-        self.log                        = ProjLog(self.pid)
+        self.local                      = ProjLocal(pid)
+        self.projConfig                 = ProjConfig(pid).projConfig
+        self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.tocData                    = {}

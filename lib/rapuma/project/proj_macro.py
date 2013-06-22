@@ -20,11 +20,11 @@
 import os, shutil, codecs
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
-from rapuma.core.proj_config        import ProjConfig
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
+from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+from rapuma.project.proj_config         import ProjConfig
 
 
 ###############################################################################
@@ -42,10 +42,10 @@ class ProjMacro (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.pmid                       = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                      = ProjLocal(self.pid)
-        self.projConfig                 = ProjConfig(self.local).projConfig
-        self.log                        = ProjLog(self.pid)
+        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local                      = ProjLocal(pid)
+        self.projConfig                 = ProjConfig(pid).projConfig
+        self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.cType                      = self.projConfig['Groups'][self.gid]['cType']
@@ -104,6 +104,18 @@ class ProjMacro (object) :
 
         if not self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
             self.log.writeToLog(self.errorCodes['0250'], [self.macPack])
+
+
+    def getAdjustmentConfFile (self) :
+        '''Return the full path and name of the adjustment file if the
+        macro package requires it. Return null if not required.'''
+        
+        adjustmentConfFile     = ''
+        if self.macPack in ['usfmTex', 'ptx2pdf'] :
+            adjustmentConfFileName = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
+            adjustmentConfFile = os.path.join(self.projConfFolder, adjustmentConfFileName)
+
+        return adjustmentConfFile
 
 
 ###############################################################################

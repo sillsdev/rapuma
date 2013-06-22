@@ -16,19 +16,20 @@
 # this process
 
 import codecs, os, difflib, subprocess, shutil, re
-from configobj import ConfigObj
+from configobj                          import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
+from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.project.proj_macro          import ProjMacro
+from rapuma.core.proj_log               import ProjLog
+from rapuma.project.proj_config         import ProjConfig
 
 
 class ProjBackground (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid) :
         '''Intitate the whole class and create the object.'''
         
         # FIXME: because the usfm cType is most common at this time, to make
@@ -38,19 +39,20 @@ class ProjBackground (object) :
 #        import pdb; pdb.set_trace()
 
         self.pid                        = pid
-        self.cType                      = 'usfm'
+        self.gid                        = gid
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.local                      = ProjLocal(self.pid)
-        self.projConfig                 = ProjConfig(self.local).projConfig
-        self.log                        = ProjLog(self.pid)
-        # If the order of importance is set right in the list, this should
-        # end in joy.
-        for cType in self.userConfig['System']['recognizedComponentTypes'] :
-            if self.projConfig['CompTypes'].has_key(cType.capitalize()) :
-                self.layoutConfig       = ConfigObj(os.path.join(self.local.projConfFolder, cType + '_layout.conf'), encoding='utf-8')
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.local                      = ProjLocal(pid)
+        self.proj_config                = ProjConfig(pid)
+        self.proj_macro                 = ProjMacro(pid, gid)
+        self.log                        = ProjLog(pid)
+        self.projConfig                 = self.proj_config.projConfig
+        self.layoutConfig               = self.proj_config.layoutConfig
+        self.macPackConfig              = self.proj_macro.macPackConfig
+        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.Ctype                      = self.cType.capitalize()
         # Paths
         self.projIllustrationsFolder    = self.local.projIllustrationsFolder
         self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
@@ -231,11 +233,11 @@ class ProjBackground (object) :
         # from Rapuma usfm_layout.conf 
         pageHeight          = float(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
-        lineSpacingFactor   = float(self.layoutConfig['Fonts']['lineSpacingFactor'])
-        fontSizeUnit        = float(self.layoutConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
+        lineSpacingFactor   = float(self.macPackConfig['Fonts']['lineSpacingFactor'])
+        fontSizeUnit        = float(self.macPackConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = float(self.layoutConfig['Margins']['marginUnit'])
-        topMarginFactor     = float(self.layoutConfig['Margins']['topMarginFactor'])
-        bottomMarginFactor  = float(self.layoutConfig['Margins']['bottomMarginFactor'])
+        topMarginFactor     = float(self.macPackConfig['Margins']['topMarginFactor'])
+        bottomMarginFactor  = float(self.macPackConfig['Margins']['bottomMarginFactor'])
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,

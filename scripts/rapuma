@@ -52,12 +52,12 @@ import codecs, argparse
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.proj_binding       import ProjBinding
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.proj_process       import ProjProcess
 from rapuma.core.tools              import Tools, ToolsGroup
+from rapuma.project.proj_config     import ProjConfig
 from rapuma.project.proj_setup      import ProjSetup
 from rapuma.project.proj_commander  import ProjCommander
 from rapuma.project.proj_maps       import ProjMaps
@@ -118,17 +118,6 @@ def isTemplate (tid) :
             return True
     except :
         return False
-
-
-def initProject (pid, gid) :
-    '''Initialize an existing project according to the project ID given.'''
-
-    global local
-    local       = ProjLocal(pid)
-    pc          = ProjConfig(local)
-    log         = ProjLog(pid)
-    aProject    = Project(pid, gid)
-    return aProject
 
 
 def trimLog () :
@@ -198,7 +187,7 @@ def userArguments (args) :
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
-        pc          = ProjConfig(local)
+        pc          = ProjConfig(pid)
         checkCreatorVersion(pid, pc.projConfig, systemVersion)
 
     # Command processing
@@ -303,7 +292,7 @@ def userArguments (args) :
             cType = args.component_type
         else :
             try :
-                cType = initProject(pid, gid).projConfig['Groups'][gid]['cType']
+                cType = Project(pid, gid).projConfig['Groups'][gid]['cType']
             except :
                 sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
         if args.cid_list :
@@ -334,7 +323,7 @@ def userArguments (args) :
                 elif cType == 'toc' :
                     ProjToc(pid, gid).addGroup(args.force)
             elif cmdType == 'hyphenation' :
-                initProject(pid, gid).manageHyphenation(cmd)
+                Project(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations on not completed yet')
             elif cmdType == 'preprocess' :
@@ -346,7 +335,7 @@ def userArguments (args) :
         elif cmd in ['draft', 'final', 'proof'] :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    initProject(pid, gid).renderGroup(cmd, cid_list, args.force)
+                    Project(pid, gid).renderGroup(cmd, cid_list, args.force)
                 elif cType == 'map' :
                     ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, args.force)
                 elif cType == 'toc' :
@@ -373,7 +362,7 @@ def userArguments (args) :
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
-                initProject(pid, gid).manageHyphenation(cmd)
+                Project(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
             elif cmdType == 'preprocess' :
@@ -394,7 +383,7 @@ def userArguments (args) :
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
-                initProject(pid, gid).manageHyphenation(cmd, args.force)
+                Project(pid, gid).manageHyphenation(cmd, args.force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'unlock' :

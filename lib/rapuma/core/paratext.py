@@ -20,12 +20,12 @@ from configobj import ConfigObj
 from importlib import import_module
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
-from rapuma.core.proj_compare   import ProjCompare
+from rapuma.core.tools              import Tools
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.core.proj_compare       import ProjCompare
+from rapuma.project.proj_config     import ProjConfig
 
 
 class Paratext (object) :
@@ -40,8 +40,8 @@ class Paratext (object) :
         self.userConfig             = self.user.userConfig
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.local                  = ProjLocal(pid)
-        self.projConfig             = ProjConfig(self.local).projConfig
-        self.log                    = ProjLog(self.pid)
+        self.projConfig             = ProjConfig(pid).projConfig
+        self.log                    = ProjLog(pid)
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.csid                   = None

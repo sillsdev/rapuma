@@ -17,20 +17,20 @@
 # this process
 
 import os, shutil, re, codecs, subprocess
-from xml.etree                      import cElementTree as ET
-from collections                    import defaultdict
-from configobj                      import ConfigObj
+from xml.etree                          import cElementTree as ET
+from collections                        import defaultdict
+from configobj                          import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools              import Tools
-from rapuma.manager.manager         import Manager
-from rapuma.core.paratext           import Paratext
-from rapuma.core.proj_config        import ConfigTools
-from rapuma.project.proj_maps       import ProjMaps
-from rapuma.project.proj_toc        import ProjToc
-from rapuma.project.proj_style      import ProjStyle
-from rapuma.project.proj_background import ProjBackground
-from rapuma.project.proj_macro      import ProjMacro
+from rapuma.core.tools                  import Tools
+from rapuma.manager.manager             import Manager
+from rapuma.core.paratext               import Paratext
+from rapuma.project.proj_config         import ProjConfig, ConfigTools
+from rapuma.project.proj_maps           import ProjMaps
+from rapuma.project.proj_toc            import ProjToc
+from rapuma.project.proj_style          import ProjStyle
+from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_macro          import ProjMacro
 
 
 ###############################################################################
@@ -63,19 +63,19 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
-        self.pg_back                = ProjBackground(self.pid)
+        self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
+        self.proj_config            = ProjConfig(self.pid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
         self.component              = self.managers[self.cType + '_Component']
         self.hyphenation            = self.managers[self.cType + '_Hyphenation']
         self.illustration           = self.managers[self.cType + '_Illustration']
-        self.layout                 = self.managers[self.cType + '_Layout']
         self.font                   = self.managers[self.cType + '_Font']
         # Get config objs
-        self.projConfig             = project.projConfig
-        self.layoutConfig           = self.layout.layoutConfig
+        self.projConfig             = self.proj_config.projConfig
+        self.layoutConfig           = self.proj_config.layoutConfig
         self.fontConfig             = self.font.fontConfig
         self.userConfig             = self.project.userConfig
         # Some config settings
@@ -114,42 +114,35 @@ class Xetex (Manager) :
         self.projHyphenationFolder  = self.local.projHyphenationFolder
         self.projIllustrationsFolder= self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
+        self.projMacrosFolder       = self.local.projMacrosFolder
+        self.projMacPackFolder      = os.path.join(self.projMacrosFolder, self.macroPackage)
         # Set file names with full path 
         self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
         self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-        self.layoutXmlFile          = self.layout.layoutXmlConfFile
-        self.projConfFile           = self.local.projConfFile
-        self.layoutConfFile         = self.layout.layoutConfFile
+        self.layoutXmlFile          = self.proj_config.layoutXmlConfFile
+        self.projConfFile           = self.proj_config.projConfFile
+        self.layoutConfFile         = self.proj_config.layoutConfFile
         self.fontConfFile           = self.font.fontConfFile
         self.illustrationConfFile   = self.illustration.illustrationConfFile
-        # If adjustments are needed...
-        self.adjustmentConfFile     = ''
-        if self.macroPackage in ['usfmTex', 'ptx2pdf'] :
-            self.adjustmentConfFile = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
+        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
 
 
 
 
-
-
-
-# FIXME: Start working here
-
-        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macLinkFileName)
-        self.setTexFile             = os.path.join(self.projMacrosFolder, self.setTexFileName)
-        self.extTexFile             = os.path.join(self.projMacrosFolder, self.extTexFileName)
-        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.grpExtTexFileName)
+        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFileName)
+        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
+
         self.defaultStyFile         = self.proj_style.defaultStyFile
         self.glbExtStyFile          = self.proj_style.glbExtStyFile
         self.grpExtStyFile          = self.proj_style.grpExtStyFile
-        self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
-        self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
+#        self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
+#        self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
         # These files will not be used with the map cType
-        if cType != 'map' :
-            self.lccodeTexFile          = self.hyphenation.lccodeTexFile
-            self.compHyphFile           = self.hyphenation.compHyphFile
-            self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
+#        if cType != 'map' :
+#            self.lccodeTexFile          = self.hyphenation.lccodeTexFile
+#            self.compHyphFile           = self.hyphenation.compHyphFile
+#            self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)

@@ -19,10 +19,10 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
+from rapuma.core.tools              import Tools
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.project.proj_config     import ProjConfig
 
 
 class ProjCommander (object) :
@@ -34,30 +34,15 @@ class ProjCommander (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projHome           = None
-        self.projectMediaIDCode = None
-        self.local              = None
-        self.projConfig         = None
-        self.finishInit()
+        self.projConfig         = ProjConfig(pid).projConfig
+        self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local              = ProjLocal(self.pid)
 
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
         }
-
-
-    def finishInit (self) :
-        '''Some times not all the information is available that is needed
-        but that may not be a problem for some functions. We will atempt to
-        finish the init here.'''
-
-        try :
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.pid)
-            self.projConfig         = ProjConfig(self.local).projConfig
-        except :
-            pass
 
 
 ###############################################################################

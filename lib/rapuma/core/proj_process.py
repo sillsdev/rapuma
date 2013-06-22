@@ -16,14 +16,14 @@
 # this process
 
 import codecs, os
-from configobj                  import ConfigObj
+from configobj                      import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
+from rapuma.core.tools              import Tools
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.project.proj_config     import ProjConfig
 
 
 class ProjProcess (object) :
@@ -37,9 +37,9 @@ class ProjProcess (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
+        self.projConfig     = ProjConfig(self.pid).projConfig
         self.projHome       = None
         self.local          = None
-        self.projConfig     = None
         self.finishInit()
 
         # Log messages for this module
@@ -76,7 +76,6 @@ class ProjProcess (object) :
         # If a projHome was succefully found, we can go on
         if self.projHome : 
             self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-            self.projConfig = ProjConfig(self.local).projConfig
 
 
 ###############################################################################

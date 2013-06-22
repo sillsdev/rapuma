@@ -19,10 +19,10 @@
 import os, shutil, codecs, re, subprocess
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.manager.manager     import Manager
-from rapuma.core.proj_config    import ConfigTools
-from rapuma.core.paratext       import Paratext
+from rapuma.core.tools              import Tools
+from rapuma.manager.manager         import Manager
+from rapuma.core.paratext           import Paratext
+from rapuma.project.proj_config     import ConfigTools
 
 
 ###############################################################################

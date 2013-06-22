@@ -36,10 +36,12 @@ class ProjEdit (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
+        self.projConfig     = ProjConfig(pid).projConfig
         self.projHome       = None
         self.local          = None
-        self.projConfig     = None
+
         self.finishInit()
+
         # Log messages for this module
         self.errorCodes     = {
             'EDIT-000' : ['MSG', 'Messages for editing project and setting files.'],
@@ -71,7 +73,6 @@ class ProjEdit (object) :
         # If a projHome was succefully found, we can go on
         if self.projHome : 
             self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
-            self.projConfig = ProjConfig(self.local).projConfig
 
 
 ###############################################################################

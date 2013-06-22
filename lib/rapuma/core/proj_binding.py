@@ -21,11 +21,11 @@ from configobj                      import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.manager.project         import Project
+from rapuma.project.proj_config     import ProjConfig
 
 
 ###############################################################################
@@ -41,10 +41,10 @@ class ProjBinding (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
+        self.projConfig         = ProjConfig(pid).projConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
-        self.projConfig         = None
         self.finishInit()
 
         # Log messages for this module
@@ -74,7 +74,6 @@ class ProjBinding (object) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
             self.local              = ProjLocal(self.pid)
-            self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.pid)
         except :
             pass

@@ -19,11 +19,11 @@ import codecs, os, difflib, subprocess
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools, ToolsPath
-from rapuma.core.proj_config    import ProjConfig
-from rapuma.core.user_config    import UserConfig
-from rapuma.core.proj_local     import ProjLocal
-from rapuma.core.proj_log       import ProjLog
+from rapuma.core.tools              import Tools, ToolsPath
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.project.proj_config     import ProjConfig
 
 
 class ProjCompare (object) :
@@ -35,10 +35,10 @@ class ProjCompare (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
+        self.projConfig         = ProjConfig(pid).projConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
-        self.projConfig         = None
         self.diffViewCmd        = self.userConfig['System']['textDifferentialViewerCommand']
         # Make sure the diff view command is a list
         if type(self.diffViewCmd) != list :
@@ -65,7 +65,6 @@ class ProjCompare (object) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
             self.local              = ProjLocal(self.pid)
-            self.projConfig         = ProjConfig(self.local).projConfig
             self.log                = ProjLog(self.pid)
             self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
         except :

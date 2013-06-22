@@ -20,15 +20,15 @@ from configobj import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.core.proj_config        import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
+from rapuma.project.proj_config     import ProjConfig
 
 
 class ProjBackup (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
 
         self.pid            = pid
@@ -77,7 +77,7 @@ class ProjBackup (object) :
         # If a projHome was succefully found, we can go on
         if self.projHome : 
             self.local      = ProjLocal(self.pid)
-            self.projConfig = ProjConfig(self.local).projConfig
+            self.projConfig = ProjConfig(self.pid).projConfig
             self.log        = ProjLog(self.pid)
 
 
@@ -95,7 +95,7 @@ class ProjBackup (object) :
         # If this is a new project to the system, we should have a projHome
         # by now so we can try to get the projConfig now
         self.local          = ProjLocal(pid)
-        self.projConfig     = ProjConfig(self.local).projConfig
+        self.projConfig     = ProjConfig(pid).projConfig
 
         if len(self.projConfig) :
             pName           = self.projConfig['ProjectInfo']['projectName']
@@ -295,12 +295,14 @@ class ProjBackup (object) :
         for folder in ['Scripts', os.path.join('Macros', 'User')] :
             fixExecutables(os.path.join(archTarget, folder))
 
+# FIXME: This will need some work 
+
         # Add project to local Rapuma project registry
         # To do this we need to open up the restored project config file
         # and pull out some settings.
         local       = ProjLocal(rapumaHome, userHome, archTarget)
-        pc          = ProjConfig(local)
-        log         = ProjLog(local, uc)
+        pc          = ProjConfig(pid)
+        log         = ProjLog(pid)
         aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
     #    import pdb; pdb.set_trace()
         uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
