@@ -46,7 +46,7 @@ class ProjMaps (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
         self.projConfig                 = ProjConfig(pid).projConfig
         self.log                        = ProjLog(pid)

@@ -44,14 +44,6 @@ class ProjConfig (object) :
         self.local                          = ProjLocal(self.pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(self.pid)
-
-
-
-        self.fontConfFile           = os.path.join(self.local.projConfFolder, self.fontConfFileName)
-        self.rapumaXmlFontConfig        = os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile)
-        self.fontConfig                 = self.tools.initConfig()
-
-
         # File names
         self.projConfFileName               = 'project.conf'
         self.progConfXmlFileName            = self.mType + '.xml'
@@ -79,7 +71,7 @@ class ProjConfig (object) :
 
         # For a cleaner init we will test for gid
         if gid :
-            finishInit()
+            self.finishInit()
         else :
             self.cType                      = ''
             self.Ctype                      = ''
@@ -96,15 +88,15 @@ class ProjConfig (object) :
         }
 
 
-        def finishInit () :
-            '''Finishing collecting settings that would be needed for most
-            functions in this module.'''
+    def finishInit (self) :
+        '''Finishing collecting settings that would be needed for most
+        functions in this module.'''
 
-    #        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
-            self.cType                          = self.projConfig['Groups'][self.gid]['cType']
-            self.Ctype                          = self.cType.capitalize()
-            self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.cType                          = self.projConfig['Groups'][self.gid]['cType']
+        self.Ctype                          = self.cType.capitalize()
+        self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
 
 
 ###############################################################################

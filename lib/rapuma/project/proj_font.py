@@ -22,6 +22,7 @@ from configobj                      import ConfigObj, Section
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.core.paratext           import Paratext
+from rapuma.core.user_config        import UserConfig
 from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig
 
@@ -30,7 +31,7 @@ from rapuma.project.proj_config     import ProjConfig
 ################################## Begin Class ################################
 ###############################################################################
 
-class ProjFonts (object) :
+class ProjFont (object) :
 
     def __init__(self, pid, gid) :
         '''Do the primary initialization for this class.'''
@@ -39,25 +40,26 @@ class ProjFonts (object) :
         self.gid                        = gid
         self.tools                      = Tools()
         self.pt_tools                   = Paratext(pid, gid)
+        self.user                       = UserConfig()
+        self.userConfig                 = self.user.userConfig
         self.proj_config                = ProjConfig(pid, gid)
-        self.cfg                        = cfg
-        self.cType                      = cType
-        self.Ctype                      = cType.capitalize()
-        self.mType                      = project.projectMediaIDCode
         self.projConfig                 = self.proj_config.projConfig
         self.fontConfig                 = self.proj_config.fontConfig
+        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.Ctype                      = self.cType.capitalize()
+        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile))
-        if newSectionSettings != self.projConfig['Managers'][self.manager] :
-            self.projConfig['Managers'][self.manager] = newSectionSettings
-            # Save the setting rightaway
-            self.tools.writeConfFile(self.projConfig)
+#        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile))
+#        if newSectionSettings != self.projConfig['Managers'][self.manager] :
+#            self.projConfig['Managers'][self.manager] = newSectionSettings
+#            # Save the setting rightaway
+#            self.tools.writeConfFile(self.projConfig)
 
-        self.compSettings = self.projConfig['Managers'][self.manager]
+#        self.compSettings = self.projConfig['Managers'][self.manager]
 
-        for k, v in self.compSettings.iteritems() :
-            setattr(self, k, v)
+#        for k, v in self.compSettings.iteritems() :
+#            setattr(self, k, v)
 
         # Get our component sourceEditor
         self.sourceEditor = self.pt_tools.getSourceEditor(self.cType)
