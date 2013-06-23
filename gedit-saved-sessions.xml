@@ -4,19 +4,18 @@
   <file path="file:///home/dennis/Projects/rapuma/dev_setup.sh"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/project.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/project.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/tools.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/map.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/group/toc.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/text.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/font.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/illustration.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/hyphenation.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/layout.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_font.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_backup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_compare.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py"/>
@@ -25,5 +24,6 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_toc.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_maps.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_style.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_config.py"/>
 </session>
 </saved-sessions>

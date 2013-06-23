@@ -21,11 +21,12 @@ from configobj import ConfigObj, Section
 #from functools import partial
 
 # Load the local classes
-from rapuma.core.tools              import Tools
-from rapuma.group.group             import Group
-from rapuma.project.proj_toc        import ProjToc
-from rapuma.project.proj_style      import ProjStyle
-from rapuma.project.proj_background import ProjBackground
+from rapuma.core.tools                  import Tools
+from rapuma.group.group                 import Group
+from rapuma.project.proj_toc            import ProjToc
+from rapuma.project.proj_font           import ProjFont
+from rapuma.project.proj_style          import ProjStyle
+from rapuma.project.proj_background     import ProjBackground
 
 
 ###############################################################################
@@ -55,6 +56,7 @@ class Toc (Group) :
         self.mType                  = project.projectMediaIDCode
         self.tools                  = Tools()
         self.proj_toc               = ProjToc(self.pid, self.gid)
+        self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
@@ -68,14 +70,13 @@ class Toc (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.tocManagers = ('component', 'text', 'font', 'layout', 'illustration', self.renderer)
+        self.tocManagers = ('component', 'text', 'layout', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.tocManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
-        self.font                   = self.project.managers[self.cType + '_Font']
         self.component              = self.project.managers[self.cType + '_Component']
         self.layout                 = self.project.managers[self.cType + '_Layout']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
@@ -98,14 +99,14 @@ class Toc (Group) :
             setattr(self, k, v)
 
         # Check if there is a font installed
-        if not self.font.varifyFont() :
+        if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.font.installFont(font)
+            self.proj_font.installFont(font)
 
         # Module Error Codes
         self.errorCodes     = {
@@ -169,14 +170,14 @@ class Toc (Group) :
         for and/or creating any dependents it needs to render properly.'''
 
         # Check if there is a font installed
-        if not self.font.varifyFont() :
+        if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.font.installFont(font)
+            self.proj_font.installFont(font)
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now

@@ -45,11 +45,20 @@ class ProjConfig (object) :
         self.tools                          = Tools()
         self.log                            = ProjLog(self.pid)
 
+
+
+        self.fontConfFile           = os.path.join(self.local.projConfFolder, self.fontConfFileName)
+        self.rapumaXmlFontConfig        = os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile)
+        self.fontConfig                 = self.tools.initConfig()
+
+
         # File names
         self.projConfFileName               = 'project.conf'
         self.progConfXmlFileName            = self.mType + '.xml'
-        self.layoutXmlConfFileName          = self.mType + '_layout.xml'
         self.layoutConfFileName             = 'layout.conf'
+        self.layoutXmlConfFileName          = self.mType + '_layout.xml'
+        self.fontConfFileName               = 'font.conf'
+        self.fontXmlConfFileName            = 'font.xml'
         # Paths
         self.projConfFolder                 = self.local.projConfFolder
         self.rapumaConfigFolder             = self.local.rapumaConfigFolder
@@ -58,15 +67,13 @@ class ProjConfig (object) :
         self.projConfXmlFile                = os.path.join(self.rapumaConfigFolder, self.progConfXmlFileName)
         self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
         self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
+        self.fontConfFile                   = os.path.join(self.projConfFolder, self.fontConfFileName)
+        self.fontXmlConfFile                = os.path.join(self.rapumaConfigFolder, self.fontXmlConfFileName)
         # Load the config objects
-        self.layoutConfig = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
-
+        self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
+        self.fontConfig                     = self.tools.initConfig(self.fontConfFile, self.fontXmlConfFile)
         self.projConfig                     = self.tools.initConfig(self.local.projConfFile, self.projConfXmlFile)
-#        # Create a fresh projConfig object
-#        if os.path.isfile(self.local.projConfFile) :
-#            self.projConfig = ConfigObj(self.local.projConfFile, encoding='utf-8')
-#            self.mType = self.projConfig['ProjectInfo']['projectMediaIDCode']
-#            self.projConfig.filename = self.local.projConfFile
+
         self.tools_path                     = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                    = ToolsGroup(self.local, self.projConfig, self.userConfig)
 

@@ -21,12 +21,12 @@ from configobj import ConfigObj, Section
 #from functools import partial
 
 # Load the local classes
-from rapuma.core.tools              import Tools
-from rapuma.group.group             import Group
-from rapuma.project.proj_style      import ProjStyle
-from rapuma.project.proj_macro      import ProjMacro
-#from rapuma.project.proj_layout     import ProjLayout
-from rapuma.project.proj_background import ProjBackground
+from rapuma.core.tools                  import Tools
+from rapuma.group.group                 import Group
+from rapuma.project.proj_style          import ProjStyle
+from rapuma.project.proj_font           import ProjFont
+from rapuma.project.proj_macro          import ProjMacro
+from rapuma.project.proj_background     import ProjBackground
 
 
 ###############################################################################
@@ -57,6 +57,7 @@ class Usfm (Group) :
         self.local                  = project.local
         self.tools                  = Tools()
         self.proj_style             = ProjStyle(self.pid, self.gid)
+        self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_layout            = ProjMacro(self.pid, self.gid)
         self.pg_background          = ProjBackground(self.pid, self.gid)
@@ -73,14 +74,13 @@ class Usfm (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('component', 'text', 'font', 'hyphenation', 'illustration', self.renderer)
+        self.usfmManagers = ('component', 'text', 'hyphenation', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
-        self.font                   = self.project.managers[self.cType + '_Font']
         self.component              = self.project.managers[self.cType + '_Component']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
@@ -102,14 +102,14 @@ class Usfm (Group) :
             setattr(self, k, v)
 
         # Check if there is a font installed
-        if not self.font.varifyFont() :
+        if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.font.installFont(font)
+            self.proj_font.installFont(font)
 
         # Module Error Codes
         self.errorCodes     = {
@@ -213,14 +213,14 @@ class Usfm (Group) :
         useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][gid]['useManualAdjustments'])
 
         # Check if there is a font installed
-        if not self.font.varifyFont() :
+        if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.font.installFont(font)
+            self.proj_font.installFont(font)
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
