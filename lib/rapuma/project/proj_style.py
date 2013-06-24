@@ -21,7 +21,6 @@ import os, shutil, warnings, codecs
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.core.paratext           import Paratext
-from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
@@ -32,7 +31,7 @@ from rapuma.core.proj_log           import ProjLog
 ################################## Begin Class ################################
 ###############################################################################
 
-class ProjStyle (Manager) :
+class ProjStyle (object) :
 
     def __init__(self, pid, gid) :
         '''Do the primary initialization for this class.'''

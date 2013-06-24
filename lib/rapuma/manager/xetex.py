@@ -31,6 +31,8 @@ from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_style          import ProjStyle
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_macro          import ProjMacro
+from rapuma.project.proj_hyphenation    import ProjHyphenation
+from rapuma.project.proj_illustration   import ProjIllustration
 
 
 ###############################################################################
@@ -69,8 +71,8 @@ class Xetex (Manager) :
         self.proj_config            = ProjConfig(self.pid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
-        self.hyphenation            = self.managers[self.cType + '_Hyphenation']
-        self.illustration           = self.managers[self.cType + '_Illustration']
+        self.hyphenation            = ProjHyphenation(self.pid, self.gid)
+        self.illustration           = ProjIllustration(self.pid, self.gid)
         # Get config objs
         self.projConfig             = self.proj_config.projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
@@ -121,7 +123,7 @@ class Xetex (Manager) :
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
         self.fontConfFile           = self.proj_config.fontConfFile
-        self.illustrationConfFile   = self.illustration.illustrationConfFile
+        self.illustrationConfFile   = self.proj_config.illustrationConfFile
         self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
 
 

@@ -25,81 +25,77 @@ from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig, ConfigTools
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.paratext           import Paratext
+from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
 
 
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
 
-class Hyphenation (Manager) :
+class ProjHyphenation (object) :
 
-    # Shared values
-    xmlConfFile     = 'hyphenation.xml'
+    def __init__(self, pid, gid) :
+        '''Do the primary initialization for this class.'''
 
-    def __init__(self, project, cfg, cType) :
-        '''Initialize the Hyphenation manager.'''
+        self.pid                        = pid
+        self.gid                        = gid
+        self.tools                      = Tools()
+        self.local                      = ProjLocal(pid)
+        self.user                       = UserConfig()
+        self.userConfig                 = self.user.userConfig
+        self.proj_config                = ProjConfig(self.pid)
+        self.layoutConfig               = self.proj_config.layoutConfig
+        self.projConfig                 = self.proj_config.projConfig
+        self.hyphenConfig               = self.proj_config.hyphenConfig
+        self.csid                       = self.projConfig['Groups'][self.gid]['csid']
+        self.log                        = ProjLog(pid)
+        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.Ctype                      = self.cType.capitalize()
+        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
 
-        super(Hyphenation, self).__init__(project, cfg)
-
-        # Set values for this manager
-        self.tools                  = Tools()
-        self.cfg                    = cfg
-        self.cType                  = cType
-        self.Ctype                  = cType.capitalize()
-        self.pid                    = project.projectIDCode
-        self.gid                    = project.gid
-        self.project                = project
-        self.local                  = project.local
-        self.manager                = self.cType + '_Hyphenation'
-        self.managers               = project.managers
-        self.configTools            = ConfigTools(project)
-        self.userConfig             = project.userConfig
-        self.log                    = project.log
-        self.proj_config            = ProjConfig(self.pid)
-        self.layoutConfig           = self.proj_config.layoutConfig
-        self.projConfig             = self.proj_config.projConfig
-        self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         # File Names
         # Some of these file names are dependent on Paratext, such as the ptHyphFileName
         # Others are dependent on the macro package used in TeX. If these change, it must
         # change here. If other modules need these values, they must get them here.
-        self.ptHyphFileName         = 'hyphenatedWords.txt'
-        self.lccodeTexFileName      = self.csid + '_lccode.tex'
-        self.compHyphFileName       = self.csid + '_hyphenation.txt'
-        self.grpHyphExcTexFileName  = self.csid + '_hyphenation.tex'
-        self.ptProjHyphErrFileName  = 'hyphenatedWordErrors.txt'
-        self.preProcessFileName     = self.csid + '_hyphenPreprocess.py'
-        self.rapumaPreProcessFileName = 'hyphenPreprocess.py'
+        self.ptHyphFileName             = 'hyphenatedWords.txt'
+        self.lccodeTexFileName          = self.csid + '_lccode.tex'
+        self.compHyphFileName           = self.csid + '_hyphenation.txt'
+        self.grpHyphExcTexFileName      = self.csid + '_hyphenation.tex'
+        self.ptProjHyphErrFileName      = 'hyphenatedWordErrors.txt'
+        self.preProcessFileName         = self.csid + '_hyphenPreprocess.py'
+        self.rapumaPreProcessFileName   = 'hyphenPreprocess.py'
         # Folder Paths
-        self.projScriptsFolder      = project.local.projScriptsFolder
-        self.projHyphenationFolder  = project.local.projHyphenationFolder
-        self.rapumaScriptsFolder    = project.local.rapumaScriptsFolder
-        self.projComponentsFolder   = project.local.projComponentsFolder
-        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
-        self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
+        self.projScriptsFolder          = self.local.projScriptsFolder
+        self.projHyphenationFolder      = self.local.projHyphenationFolder
+        self.rapumaScriptsFolder        = self.local.rapumaScriptsFolder
+        self.projComponentsFolder       = self.local.projComponentsFolder
+        self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
+        self.sourcePath                 = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         # Set file names with full path 
-        self.lccodeTexFile          = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
-        self.compHyphFile           = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
-        self.grpHyphExcTexFile      = os.path.join(self.projHyphenationFolder, self.grpHyphExcTexFileName)
-        self.preProcessFile         = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
-        self.rapumaPreProcessFile   = os.path.join(self.rapumaScriptsFolder, self.rapumaPreProcessFileName)
-        self.ptHyphFile             = os.path.join(self.sourcePath, self.ptHyphFileName)
-        self.ptProjHyphErrFile      = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
-        self.ptProjHyphFile         = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
-        self.ptProjHyphBakFile      = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
+        self.lccodeTexFile              = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
+        self.compHyphFile               = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
+        self.grpHyphExcTexFile          = os.path.join(self.projHyphenationFolder, self.grpHyphExcTexFileName)
+        self.preProcessFile             = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
+        self.rapumaPreProcessFile       = os.path.join(self.rapumaScriptsFolder, self.rapumaPreProcessFileName)
+        self.ptHyphFile                 = os.path.join(self.sourcePath, self.ptHyphFileName)
+        self.ptProjHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
+        self.ptProjHyphFile             = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
+        self.ptProjHyphBakFile          = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
         # Misc Settings
-        self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.useHyphenation         = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
-        self.useSourcePreprocess    = self.tools.str2bool(self.projConfig['Managers']['usfm_Hyphenation']['useHyphenSourcePreprocess'])
+        self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.useHyphenation             = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        self.useSourcePreprocess        = self.tools.str2bool(self.hyphenConfig['GeneralSettings']['useHyphenSourcePreprocess'])
         # Data containers for this module
-        self.allHyphenWords         = set()
-        self.allPtHyphenWords       = set()
-        self.goodPtHyphenWords      = set()
-        self.badWords               = set()
-        self.hyphenWords            = set()
-        self.approvedWords          = set()
-        self.softHyphenWords        = set()
-        self.nonHyphenWords         = set()
+        self.allHyphenWords             = set()
+        self.allPtHyphenWords           = set()
+        self.goodPtHyphenWords          = set()
+        self.badWords                   = set()
+        self.hyphenWords                = set()
+        self.approvedWords              = set()
+        self.softHyphenWords            = set()
+        self.nonHyphenWords             = set()
 
         # Log messages for this module
         self.errorCodes     = {

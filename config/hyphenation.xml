@@ -14,12 +14,17 @@ Todo:
 
 
 <root>
-    <setting>
-        <name>Use Hyphenation Source Preprocess</name>
-        <description>Set to true to use hyphenation source preprocessing. However, a hyphenation preprocess script will need to be present for it to work.</description>
-        <key>useHyphenSourcePreprocess</key>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This section contains general hypenation information and settings for this project.</description>
+        <setting>
+            <name>Use Hyphenation Source Preprocess</name>
+            <description>Set to true to use hyphenation source preprocessing. However, a hyphenation preprocess script will need to be present for it to work.</description>
+            <key>useHyphenSourcePreprocess</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
 </root>
 

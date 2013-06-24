@@ -70,14 +70,13 @@ class Map (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.mapManagers = ('text', 'illustration', self.renderer)
+        self.mapManagers = ('text', self.renderer)
 
         # Init the general managers
         for mType in self.mapManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
-        self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         # File names
 

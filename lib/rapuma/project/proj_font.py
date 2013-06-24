@@ -25,7 +25,6 @@ from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig
 
 
@@ -53,20 +52,13 @@ class ProjFont (object) :
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
 
-        # Get persistant values from the config if there are any
-#        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Managers'][self.manager], os.path.join(self.local.rapumaConfigFolder, self.xmlConfFile))
-#        if newSectionSettings != self.projConfig['Managers'][self.manager] :
-#            self.projConfig['Managers'][self.manager] = newSectionSettings
-#            # Save the setting rightaway
-#            self.tools.writeConfFile(self.projConfig)
-
-        self.generalSettings = self.fontConfig['GeneralSettings']
+        self.generalSettings            = self.fontConfig['GeneralSettings']
 
         for k, v in self.generalSettings.iteritems() :
             setattr(self, k, v)
 
         # Get our component sourceEditor
-        self.sourceEditor = self.pt_tools.getSourceEditor(self.cType)
+        self.sourceEditor               = self.pt_tools.getSourceEditor(self.cType)
 
         if self.ptDefaultFont == '' :
             ptSet = self.pt_tools.getPTSettings()
@@ -91,7 +83,6 @@ class ProjFont (object) :
             'FONT-090' : ['WRN', 'No replacement for primary font found.  - font.removeFont()'],
             'FONT-100' : ['ERR', 'This function has not been implemented yet!.  - font.setGlyphMap()'],
 
-
             '0010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
 
             '0210' : ['ERR', 'This editor: [<<1>>] is not recognized by the system.'],
@@ -111,14 +102,6 @@ class ProjFont (object) :
             '0435' : ['MSG', 'The primary font for component type [<<1>>] has been set to [<<2>>]'],
             '0437' : ['MSG', 'The font [<<1>>] is already set for component type [<<2>>]. Use -f to force change it to another font.'],
         }
-
-        # Create an empty default font config file if needed
-#        if not os.path.isfile(self.fontConfFile) :
-#            self.fontConfig.filename = self.fontConfFile
-#            self.tools.writeConfFile(self.fontConfig)
-#            self.log.writeToLog(self.errorCodes['0010'])
-#        else :
-#            self.fontConfig = ConfigObj(self.fontConfFile, encoding='utf-8')
 
 
 ###############################################################################

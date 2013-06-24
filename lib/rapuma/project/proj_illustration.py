@@ -23,68 +23,54 @@ from configobj                      import ConfigObj
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
+from rapuma.core.user_config        import UserConfig
 
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
 
-class Illustration (Manager) :
+class ProjIllustration (object) :
 
-    def __init__(self, project, cfg, cType) :
-        '''Initialize the Illustration manager.'''
+    def __init__(self, pid, gid) :
+        '''Do the primary initialization for this class.'''
 
-        '''Do the primary initialization for this manager.'''
-
-        super(Illustration, self).__init__(project, cfg)
-
-        # Set values for this manager
+        self.pid                        = pid
+        self.gid                        = gid
         self.tools                      = Tools()
-        self.project                    = project
-        self.local                      = project.local
-        self.cfg                        = cfg
-        self.cType                      = cType
-        self.Ctype                      = cType.capitalize()
-        self.mType                      = project.projectMediaIDCode
-        self.pid                        = project.projectIDCode
-        self.gid                        = project.gid
-        self.manager                    = self.cType + '_Illustration'
-        self.managers                   = project.managers
-        self.log                        = project.log
-        self.backgroundTypes            = ['watermark', 'lines']
+        self.local                      = ProjLocal(pid)
+        self.user                       = UserConfig()
+        self.userConfig                 = self.user.userConfig
         self.proj_config                = ProjConfig(self.pid)
-        # Get config objs
-        self.projConfig                 = self.proj_config.projConfig
         self.layoutConfig               = self.proj_config.layoutConfig
-        self.userConfig                 = project.userConfig
+        self.illustrationConfig         = self.proj_config.illustrationConfig
+        self.projConfig                 = self.proj_config.projConfig
+        self.csid                       = self.projConfig['Groups'][self.gid]['csid']
+        self.log                        = ProjLog(pid)
+        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.Ctype                      = self.cType.capitalize()
+        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
-        self.userIllustrationsLibName   = self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName']
+        self.userIllustrationsLibName   = self.illustrationConfig['GeneralSettings']['userIllustrationsLibName']
 
         # File names
-        self.defaultXmlConfFileName     = 'illustration.xml'
-        self.illustrationConfFileName   = 'illustration.conf'
+
         # Folder paths
-        self.projComponentsFolder  = self.local.projComponentsFolder
+        self.projComponentsFolder       = self.local.projComponentsFolder
         self.projIllustrationsFolder    = self.local.projIllustrationsFolder
         self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
         self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
         self.projConfFolder             = self.local.projConfFolder
-        self.rpmRapumaConfigFolder      = self.local.rapumaConfigFolder
         # File names with folder paths
-        self.defaultXmlConfFile         = os.path.join(self.rpmRapumaConfigFolder, self.defaultXmlConfFileName)
-        self.illustrationConfFile       = os.path.join(self.projIllustrationsFolder, self.illustrationConfFileName)
 
         # If we have nothing in the project for pointing to an illustrations
         # lib, put the default in here
         if not self.userIllustrationsLibName :
             self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
-            self.projConfig['Managers'][cType + '_Illustration']['userIllustrationsLibName'] = self.userIllustrationsLibName
+            self.illustrationConfig['GeneralSettings']['userIllustrationsLibName'] = self.userIllustrationsLibName
             self.tools.writeConfFile(self.projConfig)
-
-        # Load the config object
-        self.illustrationConfig         = ConfigObj(self.illustrationConfFile, encoding='utf-8')
-        # Load settings from the manager config
-        for k, v in self.projConfig['Managers'][self.manager].iteritems() :
-            setattr(self, k, v)
 
         # Log messages for this module
         self.errorCodes     = {

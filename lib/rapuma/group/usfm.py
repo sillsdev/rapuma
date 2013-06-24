@@ -74,14 +74,13 @@ class Usfm (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.usfmManagers = ('text', 'hyphenation', 'illustration', self.renderer)
+        self.usfmManagers = ('text', self.renderer)
 
         # Init the general managers
         for mType in self.usfmManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
-        self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         # File names
 

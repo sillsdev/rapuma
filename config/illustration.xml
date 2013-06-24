@@ -14,19 +14,24 @@ Todo:
 
 
 <root>
-    <setting>
-        <name>Illustrations Library</name>
-        <key>userIllustrationsLibName</key>
-        <description>The library of illustrations this component type will draw from. The library must be found in a folder of the same name installed in the user illustrations library.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Preserve USFM FIG Data</name>
-        <key>preserveUsfmFigData</key>
-        <description>By default, \fig marker data is logged in the project illustration configuration file and removed from the working text. If set to True, this action will be overridden.</description>
-        <type>boolean</type>
-        <value>False</value>
-    </setting>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This section contains general illustration information and settings for this project.</description>
+        <setting>
+            <name>Illustrations Library</name>
+            <key>userIllustrationsLibName</key>
+            <description>The library of illustrations this component type will draw from. The library must be found in a folder of the same name installed in the user illustrations library.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Preserve USFM FIG Data</name>
+            <key>preserveUsfmFigData</key>
+            <description>By default, \fig marker data is logged in the project illustration configuration file and removed from the working text. If set to True, this action will be overridden.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
 </root>
 

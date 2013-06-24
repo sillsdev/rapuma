@@ -51,6 +51,10 @@ class ProjConfig (object) :
         self.layoutXmlConfFileName          = self.mType + '_layout.xml'
         self.fontConfFileName               = 'font.conf'
         self.fontXmlConfFileName            = 'font.xml'
+        self.hyphenConfFileName             = 'hyphenation.conf'
+        self.hyphenXmlConfFileName          = 'hyphenation.xml'
+        self.illustrationConfFileName       = 'illustration.conf'
+        self.illustrationXmlConfFileName    = 'illustration.xml'
         # Paths
         self.projConfFolder                 = self.local.projConfFolder
         self.rapumaConfigFolder             = self.local.rapumaConfigFolder
@@ -61,10 +65,16 @@ class ProjConfig (object) :
         self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
         self.fontConfFile                   = os.path.join(self.projConfFolder, self.fontConfFileName)
         self.fontXmlConfFile                = os.path.join(self.rapumaConfigFolder, self.fontXmlConfFileName)
+        self.hyphenConfFile                 = os.path.join(self.projConfFolder, self.hyphenConfFileName)
+        self.hyphenXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.hyphenXmlConfFileName)
+        self.illustrationConfFile           = os.path.join(self.projConfFolder, self.illustrationConfFileName)
+        self.illustrationXmlConfFile        = os.path.join(self.rapumaConfigFolder, self.illustrationXmlConfFileName)
         # Load the config objects
         self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
         self.fontConfig                     = self.tools.initConfig(self.fontConfFile, self.fontXmlConfFile)
         self.projConfig                     = self.tools.initConfig(self.local.projConfFile, self.projConfXmlFile)
+        self.hyphenConfig                   = self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
+        self.illustrationConfig             = self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
 
         self.tools_path                     = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                    = ToolsGroup(self.local, self.projConfig, self.userConfig)
@@ -136,11 +146,6 @@ class ConfigTools (object) :
         self.cType                  = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
         self.layoutConfig           = ProjConfig(self.pid).layoutConfig
-
-        # Load the managers we will need
-#        if self.cType + '_Layout' not in self.managers :
-#            self.project.createManager('layout')
-#        self.layoutConfig           = self.managers[self.cType + '_Layout'].layoutConfig
 
 
     def processLinePlaceholders (self, line, value) :
