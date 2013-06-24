@@ -23,6 +23,8 @@ from configobj                      import ConfigObj, Section
 from rapuma.core.tools              import Tools
 from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
+from rapuma.core.proj_local         import ProjLocal
+from rapuma.core.proj_log           import ProjLog
 from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import ProjConfig
 
@@ -45,6 +47,8 @@ class ProjFont (object) :
         self.proj_config                = ProjConfig(pid, gid)
         self.projConfig                 = self.proj_config.projConfig
         self.fontConfig                 = self.proj_config.fontConfig
+        self.local                      = ProjLocal(pid)
+        self.log                        = ProjLog(pid)
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
@@ -56,19 +60,19 @@ class ProjFont (object) :
 #            # Save the setting rightaway
 #            self.tools.writeConfFile(self.projConfig)
 
-#        self.compSettings = self.projConfig['Managers'][self.manager]
+        self.generalSettings = self.fontConfig['GeneralSettings']
 
-#        for k, v in self.compSettings.iteritems() :
-#            setattr(self, k, v)
+        for k, v in self.generalSettings.iteritems() :
+            setattr(self, k, v)
 
         # Get our component sourceEditor
         self.sourceEditor = self.pt_tools.getSourceEditor(self.cType)
 
-        if not self.ptDefaultFont :
+        if self.ptDefaultFont == '' :
             ptSet = self.pt_tools.getPTSettings()
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
-                self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont'] = self.ptDefaultFont
+                self.fontConfig['GeneralSettings']['ptDefaultFont'] = self.ptDefaultFont
                 self.tools.writeConfFile(self.projConfig)
 
         # Log messages for this module
@@ -109,12 +113,12 @@ class ProjFont (object) :
         }
 
         # Create an empty default font config file if needed
-        if not os.path.isfile(self.fontConfFile) :
-            self.fontConfig.filename = self.fontConfFile
-            self.tools.writeConfFile(self.fontConfig)
-            self.log.writeToLog(self.errorCodes['0010'])
-        else :
-            self.fontConfig = ConfigObj(self.fontConfFile, encoding='utf-8')
+#        if not os.path.isfile(self.fontConfFile) :
+#            self.fontConfig.filename = self.fontConfFile
+#            self.tools.writeConfFile(self.fontConfig)
+#            self.log.writeToLog(self.errorCodes['0010'])
+#        else :
+#            self.fontConfig = ConfigObj(self.fontConfFile, encoding='utf-8')
 
 
 ###############################################################################
@@ -192,8 +196,8 @@ class ProjFont (object) :
                 self.tools.buildConfSection(self.fontConfig['Fonts'], font)
 
         # Set as primary for the calling cType if there is none now
-        if not self.projConfig['Managers'][self.manager]['primaryFont'] :
-            self.projConfig['Managers'][self.manager]['primaryFont'] = font
+        if not self.fontConfig['GeneralSettings']['primaryFont'] :
+            self.fontConfig['GeneralSettings']['primaryFont'] = font
 
         # If force was set, force the settings, otherwise, let them be
         if force :
@@ -206,15 +210,15 @@ class ProjFont (object) :
             self.fontConfig['Fonts'][font] = fInfo.dict()
             self.tools.writeConfFile(self.fontConfig)
             # Adjust installed fonts list if needed
-            if len(self.projConfig['Managers'][self.manager]['installedFonts']) == 0 :
-                self.projConfig['Managers'][self.manager]['installedFonts'] = [font]
+            if len(self.fontConfig['GeneralSettings']['installedFonts']) == 0 :
+                self.fontConfig['GeneralSettings']['installedFonts'] = [font]
             else :
-                fontList = self.projConfig['Managers'][self.manager]['installedFonts']
+                fontList = self.fontConfig['GeneralSettings']['installedFonts']
                 if fontList != [font] :
-                    self.projConfig['Managers'][self.manager]['installedFonts'] = self.tools.addToList(fontList, font)
-            primFont = self.projConfig['Managers'][self.manager]['primaryFont']
+                    self.fontConfig['GeneralSettings']['installedFonts'] = self.tools.addToList(fontList, font)
+            primFont = self.fontConfig['GeneralSettings']['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
-                self.projConfig['Managers'][self.manager]['primaryFont'] = font
+                self.fontConfig['GeneralSettings']['primaryFont'] = font
 
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.projConfig)
@@ -234,16 +238,16 @@ class ProjFont (object) :
                     self.log.writeToLog(self.errorCodes['0245'], [font])
 
             # Adjust installed fonts list if needed
-            if len(self.projConfig['Managers'][self.manager]['installedFonts']) == 0 :
-                self.projConfig['Managers'][self.manager]['installedFonts'] = [font]
+            if len(self.fontConfig['GeneralSettings']['installedFonts']) == 0 :
+                self.fontConfig['GeneralSettings']['installedFonts'] = [font]
             else :
-                fontList = self.projConfig['Managers'][self.manager]['installedFonts']
+                fontList = self.fontConfig['GeneralSettings']['installedFonts']
                 if fontList != [font] :
-                    self.projConfig['Managers'][self.manager]['installedFonts'] = self.tools.addToList(fontList, font)
+                    self.fontConfig['GeneralSettings']['installedFonts'] = self.tools.addToList(fontList, font)
 
-            primFont = self.projConfig['Managers'][self.manager]['primaryFont']
+            primFont = self.fontConfig['GeneralSettings']['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
-                self.projConfig['Managers'][self.manager]['primaryFont'] = font
+                self.fontConfig['GeneralSettings']['primaryFont'] = font
 
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.projConfig)
@@ -326,19 +330,19 @@ class ProjFont (object) :
 
         def removePConfSettings (Ctype, font) :
             # Adjust installed fonts list if needed
-            fontList = self.projConfig['Managers'][self.manager]['installedFonts']
-            primFont = self.projConfig['Managers'][self.manager]['primaryFont']
+            fontList = self.fontConfig['GeneralSettings']['installedFonts']
+            primFont = self.fontConfig['GeneralSettings']['primaryFont']
             if font in fontList :
                 fontList.remove(font)
-                self.projConfig['Managers'][self.manager]['installedFonts'] = fontList
+                self.fontConfig['GeneralSettings']['installedFonts'] = fontList
             # There has to be a primary font no matter what. If the font being
             # removed was primary, then try setting the first 
             if primFont == font :
                 if len(fontList) == 0 :
-                    self.projConfig['Managers'][self.manager]['primaryFont'] = ''
+                    self.fontConfig['GeneralSettings']['primaryFont'] = ''
                     self.log.writeToLog('FONT-090', [font,Ctype])
                 else :
-                    self.projConfig['Managers'][self.manager]['primaryFont'] = fontList[0]
+                    self.fontConfig['GeneralSettings']['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
             if self.fontConfig['Fonts'].has_key(font) :
@@ -349,7 +353,7 @@ class ProjFont (object) :
         Ctype = cType.capitalize()
 
         # Remove settings for this font if we find it in the specified cType
-        if font in self.projConfig['Managers'][self.manager]['installedFonts'] :
+        if font in self.fontConfig['GeneralSettings']['installedFonts'] :
             removePConfSettings(Ctype, font)
             self.log.writeToLog('FONT-080', [font,Ctype])
             if force :
@@ -402,15 +406,15 @@ class ProjFont (object) :
         '''Set the primary font for the project.'''
 
         def setIt (Ctype, font) :
-            self.projConfig['Managers'][self.manager]['primaryFont'] = font
+            self.fontConfig['GeneralSettings']['primaryFont'] = font
             self.tools.writeConfFile(self.projConfig)
             # Sanity check
-            if self.projConfig['Managers'][self.manager]['primaryFont'] == font :
+            if self.fontConfig['GeneralSettings']['primaryFont'] == font :
                 return True
 
         Ctype = cType.capitalize()
         # First check to see if it is already has a primary font set
-        if self.projConfig['Managers'][self.manager]['primaryFont'] == '' :
+        if self.fontConfig['GeneralSettings']['primaryFont'] == '' :
             if setIt(Ctype, font) :
                 self.log.writeToLog(self.errorCodes['0435'], [Ctype,font])
                 return True
@@ -419,8 +423,8 @@ class ProjFont (object) :
                 self.log.writeToLog(self.errorCodes['0432'], [font,Ctype])
 
                 return True
-        elif self.projConfig['Managers'][self.manager]['primaryFont'] :
-            self.log.writeToLog(self.errorCodes['0437'], [self.projConfig['Managers'][self.manager]['primaryFont'],Ctype])
+        elif self.fontConfig['GeneralSettings']['primaryFont'] :
+            self.log.writeToLog(self.errorCodes['0437'], [self.fontConfig['GeneralSettings']['primaryFont'],Ctype])
             return True
         else :
             self.log.writeToLog(self.errorCodes['0430'], [font,Ctype])

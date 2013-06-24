@@ -69,14 +69,12 @@ class Xetex (Manager) :
         self.proj_config            = ProjConfig(self.pid)
         self.configTools            = ConfigTools(project)
         # Bring in some manager objects we will need
-        self.component              = self.managers[self.cType + '_Component']
         self.hyphenation            = self.managers[self.cType + '_Hyphenation']
         self.illustration           = self.managers[self.cType + '_Illustration']
-        self.font                   = self.managers[self.cType + '_Font']
         # Get config objs
         self.projConfig             = self.proj_config.projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
-        self.fontConfig             = self.font.fontConfig
+        self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
         # Some config settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
@@ -122,7 +120,7 @@ class Xetex (Manager) :
         self.layoutXmlFile          = self.proj_config.layoutXmlConfFile
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
-        self.fontConfFile           = self.font.fontConfFile
+        self.fontConfFile           = self.proj_config.fontConfFile
         self.illustrationConfFile   = self.illustration.illustrationConfFile
         self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
 
@@ -766,7 +764,7 @@ class Xetex (Manager) :
             # Now add in each of the components
             for cid in cidList :
                 if self.cType == 'usfm' :
-                    cidSource = os.path.join(self.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
+                    cidSource = os.path.join(self.projComponentsFolder, cid, self.makeFileNameWithExt(cid))
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')

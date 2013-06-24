@@ -253,6 +253,8 @@ class Paratext (object) :
     def getPTSettings (self) :
         '''Return the data into a dictionary for the system to use.'''
 
+#        import pdb; pdb.set_trace()
+
         # Return the dictionary
         if os.path.isdir(self.sourcePath) :
             ssfFile = self.findSsfFile()

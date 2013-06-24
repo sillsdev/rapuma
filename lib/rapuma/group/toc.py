@@ -70,15 +70,13 @@ class Toc (Group) :
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
-        self.tocManagers = ('component', 'text', 'layout', 'illustration', self.renderer)
+        self.tocManagers = ('text', 'illustration', self.renderer)
 
         # Init the general managers
         for mType in self.tocManagers :
             self.project.createManager(mType)
 
         # Create the internal ref names we use in this module
-        self.component              = self.project.managers[self.cType + '_Component']
-        self.layout                 = self.project.managers[self.cType + '_Layout']
         self.illustration           = self.project.managers[self.cType + '_Illustration']
         self.text                   = self.project.managers[self.cType + '_Text']
         # File names
@@ -125,6 +123,18 @@ class Toc (Group) :
 ###############################################################################
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
+
+    def makeFileName(self, cid) :
+        '''From what we know, return the full file name.'''
+
+        return cid + '_' + self.csid
+
+
+    def makeFileNameWithExt(self, cid) :
+        '''From what we know, return the full file name.'''
+
+        return self.makeFileName(cid) + '.' + self.cType
+
 
     def getCidPath (self, gid) :
         '''Return the full path of the cName working text file. This assumes
