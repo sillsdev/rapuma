@@ -707,32 +707,32 @@ Todo:
             <name>Base Margin Unit</name>
             <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
             <key>marginUnit</key>
-            <type>function</type>
-            <value>layout.getBaseMarginSetting()</value>
+            <type>integer</type>
+            <value>(getBaseMarginSetting)</value>
             <texCode>\MarginUnit=[vm]</texCode>
         </setting>
         <setting>
             <name>Top Margin Factor</name>
             <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
             <key>topMarginFactor</key>
-            <type>function</type>
-            <value>layout.getTopMarginFactor()</value>
+            <type>integer</type>
+            <value>(getTopMarginFactor)</value>
             <texCode>\def\TopMarginFactor{[v]}</texCode>
         </setting>
         <setting>
             <name>Bottom Margin Factor</name>
             <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
             <key>bottomMarginFactor</key>
-            <type>function</type>
-            <value>layout.getBottomMarginFactor()</value>
+            <type>integer</type>
+            <value>(getBottomMarginFactor)</value>
             <texCode>\def\BottomMarginFactor{[v]}</texCode>
         </setting>
         <setting>
             <name>Side Margin Factor</name>
             <description>Relative size of side margin based on MarginUnit.  This determins the distance between the edge of the page and the body text.   Default = 0.7</description>
             <key>sideMarginFactor</key>
-            <type>function</type>
-            <value>layout.getSideMarginFactor()</value>
+            <type>integer</type>
+            <value>(getSideMarginFactor)</value>
             <texCode>\def\SideMarginFactor{[v]}</texCode>
         </setting>
         <setting>

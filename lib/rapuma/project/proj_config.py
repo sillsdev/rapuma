@@ -51,6 +51,8 @@ class ProjConfig (object) :
         self.layoutXmlConfFileName          = self.mType + '_layout.xml'
         self.fontConfFileName               = 'font.conf'
         self.fontXmlConfFileName            = 'font.xml'
+        self.adjustmentConfFileName         = 'adjustment.conf'
+        self.adjustmentXmlConfFileName      = 'adjustment.xml'
         self.hyphenConfFileName             = 'hyphenation.conf'
         self.hyphenXmlConfFileName          = 'hyphenation.xml'
         self.illustrationConfFileName       = 'illustration.conf'
@@ -65,11 +67,14 @@ class ProjConfig (object) :
         self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
         self.fontConfFile                   = os.path.join(self.projConfFolder, self.fontConfFileName)
         self.fontXmlConfFile                = os.path.join(self.rapumaConfigFolder, self.fontXmlConfFileName)
+        self.adjustmentConfFile             = os.path.join(self.projConfFolder, self.adjustmentConfFileName)
+        self.adjustmentXmlConfFile          = os.path.join(self.rapumaConfigFolder, self.adjustmentXmlConfFileName)
         self.hyphenConfFile                 = os.path.join(self.projConfFolder, self.hyphenConfFileName)
         self.hyphenXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.hyphenXmlConfFileName)
         self.illustrationConfFile           = os.path.join(self.projConfFolder, self.illustrationConfFileName)
         self.illustrationXmlConfFile        = os.path.join(self.rapumaConfigFolder, self.illustrationXmlConfFileName)
         # Load the config objects
+        self.adjustmentConfig               = self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
         self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
         self.fontConfig                     = self.tools.initConfig(self.fontConfFile, self.fontXmlConfFile)
         self.projConfig                     = self.tools.initConfig(self.local.projConfFile, self.projConfXmlFile)
@@ -112,6 +117,8 @@ class ProjConfig (object) :
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
+####################### Error Code Block Series = 1000 ########################
+###############################################################################
 
 
     def makeNewProjConf (self, local, pid, pmid, pname, cVersion) :
@@ -129,19 +136,54 @@ class ProjConfig (object) :
 
 
 ###############################################################################
-########################## Config Handling Functions ##########################
+######################## Dynamic Config Value Functions #######################
+###############################################################################
+####################### Error Code Block Series = 2000 ########################
+###############################################################################
+
+    def getBaseMarginSetting (self) :
+        '''Pull the base margin setting from the default layout configuration.'''
+
+        return 'aaa'
+
+
+    def getTopMarginFactor (self) :
+        '''Calculate the top margin factor based on what the base margin
+        and top margin settings are.'''
+
+        return 'bbb'
+
+
+    def getBottomMarginFactor (self) :
+        '''Calculate the bottom margin factor based on what the base margin
+        and bottom margin settings are.'''
+
+        return 'ccc'
+
+
+    def getSideMarginFactor (self) :
+        '''Calculate the side margin factor based on what the base margin
+        and side margin settings are.'''
+
+        return 'ddd'
+
+
+
+###############################################################################
+###############################################################################
+############################ Config Handling Class ############################
+###############################################################################
 ###############################################################################
 
 class ConfigTools (object) :
     '''Configuration handling functions.'''
 
-    def __init__(self, project) :
+    def __init__(self, pid, gid) :
 
-        self.project                = project
-        self.managers               = project.managers
-        self.projConfig             = project.projConfig
-        self.gid                    = project.gid
-        self.pid                    = project.projectIDCode
+        self.gid                    = gid
+        self.pid                    = pid
+        self.proj_config            = ProjConfig(pid)
+        self.projConfig             = self.proj_config.projConfig
         self.csid                   = self.projConfig['Groups'][self.gid]['csid']
         self.cType                  = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
@@ -152,34 +194,59 @@ class ConfigTools (object) :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
-        # Allow for multiple placeholders with "while"
-        while self.hasPlaceHolder(line) :
-            (holderType, holderKey) = self.getPlaceHolder(line)
-            # Insert the raw value
-            if holderType == 'v' :
-                line = self.insertValue(line, value)
-            # Go get a value from another setting in the self.layoutConfig
-            elif holderType in self.layoutConfig.keys() :
-                holderValue = self.layoutConfig[holderType][holderKey]
-                line = self.insertValue(line, holderValue)
-            # A value that needs a measurement unit attached
-            elif holderType == 'vm' :
-                line = self.insertValue(line, self.addMeasureUnit(value))
-            # A value that is a path
-            elif holderType == 'path' :
-                pth = getattr(self.project.local, holderKey)
-                line = self.insertValue(line, pth)
-            # A value that is a path separater character
-            elif holderType == 'pathSep' :
-                pathSep = os.sep
-                line = self.insertValue(line, pathSep)
-            # A value that contains a system delclaired value
-            # Note this only works if the value we are looking for has
-            # been declaired above in the module init
-            elif holderType == 'self' :
-                line = self.insertValue(line, getattr(self, holderKey))
+        if self.functForString(line) :
+        
+        
+        
+        
+        
+        
+# FIXME: Need to write a function to call a function built from the string
+        
+            x = getattr(self.proj_config, line)
+            print x
+            return x
+            
+#            return 'This worked!'
 
-        return line
+
+
+
+
+
+
+
+
+
+        else :
+            # Allow for multiple placeholders with "while"
+            while self.hasPlaceHolder(line) :
+                (holderType, holderKey) = self.getPlaceHolder(line)
+                # Insert the raw value
+                if holderType == 'v' :
+                    line = self.insertValue(line, value)
+                # Go get a value from another setting in the self.layoutConfig
+                elif holderType in self.layoutConfig.keys() :
+                    holderValue = self.layoutConfig[holderType][holderKey]
+                    line = self.insertValue(line, holderValue)
+                # A value that needs a measurement unit attached
+                elif holderType == 'vm' :
+                    line = self.insertValue(line, self.addMeasureUnit(value))
+                # A value that is a path
+                elif holderType == 'path' :
+                    pth = getattr(self.project.local, holderKey)
+                    line = self.insertValue(line, pth)
+                # A value that is a path separater character
+                elif holderType == 'pathSep' :
+                    pathSep = os.sep
+                    line = self.insertValue(line, pathSep)
+                # A value that contains a system delclaired value
+                # Note this only works if the value we are looking for has
+                # been declaired above in the module init
+                elif holderType == 'self' :
+                    line = self.insertValue(line, getattr(self, holderKey))
+
+            return line
 
 
     def insertValue (self, line, v) :
@@ -200,6 +267,13 @@ class ConfigTools (object) :
 
         # If things get more complicated we may need to beef this up a bit
         if line.find('[') > -1 and line.find(']') > -1 :
+            return True
+
+
+    def functForString (self, line) :
+        '''Check to see if the string is a function.'''
+
+        if line.find('(') > -1 and line.find(')') > -1 :
             return True
 
 

@@ -40,15 +40,16 @@ class Text (Manager) :
         super(Text, self).__init__(project, cfg)
 
         # Set values for this manager
+        self.gid                    = project.gid
+        self.pid                    = project.projectIDCode
         self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode, project.gid)
-        self.configTools            = ConfigTools(project)
+        self.configTools            = ConfigTools(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
-        self.gid                    = project.gid
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         self.log                    = project.log
         self.manager                = self.cType + '_Text'

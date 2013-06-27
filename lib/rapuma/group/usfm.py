@@ -26,6 +26,7 @@ from rapuma.group.group                 import Group
 from rapuma.project.proj_style          import ProjStyle
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_macro          import ProjMacro
+from rapuma.project.proj_config         import ProjConfig
 from rapuma.project.proj_background     import ProjBackground
 
 
@@ -59,17 +60,19 @@ class Usfm (Group) :
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
-        self.proj_layout            = ProjMacro(self.pid, self.gid)
+        self.proj_config            = ProjConfig(self.pid, self.gid)
         self.pg_background          = ProjBackground(self.pid, self.gid)
         self.projConfig             = project.projConfig
         self.log                    = project.log
         self.cfg                    = cfg
         self.mType                  = project.projectMediaIDCode
+        self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # If adjustments are needed in the macPack we insert into local here for down-stream use
-        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
+        self.adjustmentConfig       = self.proj_config.adjustmentConfig
+        self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
 
@@ -137,15 +140,6 @@ class Usfm (Group) :
             '0265' : ['ERR', 'Failed to create piclist file for [<<1>>]!'],
         }
 
-        # Pick up some init settings that come after the managers have been installed
-        if not os.path.isfile(self.adjustmentConfFile) :
-            if self.createProjAdjustmentConfFile() :
-                self.log.writeToLog(self.errorCodes['0010'], [self.tools.fName(self.adjustmentConfFile)])
-            else :
-                self.updateCompAdjustmentConf()
-        # Now reget the adj config
-        self.adjustmentConfig       = self.proj_macro.getAdjustmentConfFile()
-
 
 ###############################################################################
 ############################ Functions Begin Here #############################
@@ -169,21 +163,21 @@ class Usfm (Group) :
         '''Return the full path of the cName working text file. This assumes
         the cid is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileNameWithExt(cid))
+        return os.path.join(self.local.projComponentsFolder, cid, self.makeFileNameWithExt(cid))
 
 
     def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.adj')
+        return os.path.join(self.local.projComponentsFolder, cid, self.makeFileName(cid) + '.adj')
 
 
     def getCidPiclistFile (self, cid) :
         '''Return the full path of the cName working text illustrations file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.component.makeFileName(cid) + '.piclist')
+        return os.path.join(self.local.projComponentsFolder, cid, self.makeFileName(cid) + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
@@ -277,7 +271,7 @@ class Usfm (Group) :
                             else :
                                 self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
-                            for f in [self.proj_layout.layoutConfFile, self.proj_layout.illustrationConfFile] :
+                            for f in [self.proj_config.layoutConfFile, self.proj_config.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
                                     self.illustration.createPiclistFile(gid, cid)

@@ -69,7 +69,7 @@ class Xetex (Manager) :
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid)
-        self.configTools            = ConfigTools(project)
+        self.configTools            = ConfigTools(self.pid, self.gid)
         # Bring in some manager objects we will need
         self.hyphenation            = ProjHyphenation(self.pid, self.gid)
         self.illustration           = ProjIllustration(self.pid, self.gid)

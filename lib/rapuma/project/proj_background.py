@@ -24,7 +24,7 @@ from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.project.proj_macro          import ProjMacro
 from rapuma.core.proj_log               import ProjLog
-from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.proj_config         import ProjConfig, ConfigTools
 
 
 class ProjBackground (object) :
@@ -41,6 +41,7 @@ class ProjBackground (object) :
         self.pid                        = pid
         self.gid                        = gid
         self.tools                      = Tools()
+        self.configTools                = ConfigTools(pid, gid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
@@ -236,8 +237,10 @@ class ProjBackground (object) :
         lineSpacingFactor   = float(self.macPackConfig['Fonts']['lineSpacingFactor'])
         fontSizeUnit        = float(self.macPackConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = float(self.layoutConfig['Margins']['marginUnit'])
-        topMarginFactor     = float(self.macPackConfig['Margins']['topMarginFactor'])
-        bottomMarginFactor  = float(self.macPackConfig['Margins']['bottomMarginFactor'])
+        topMarginFactor     = self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['topMarginFactor'], '')
+#        topMarginFactor     = float(self.macPackConfig['Margins']['topMarginFactor'])
+        bottomMarginFactor  = self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['bottomMarginFactor'], '')
+#        bottomMarginFactor  = float(self.macPackConfig['Margins']['bottomMarginFactor'])
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
