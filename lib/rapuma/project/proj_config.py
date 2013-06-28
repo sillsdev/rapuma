@@ -136,40 +136,6 @@ class ProjConfig (object) :
 
 
 ###############################################################################
-######################## Dynamic Config Value Functions #######################
-###############################################################################
-####################### Error Code Block Series = 2000 ########################
-###############################################################################
-
-    def getBaseMarginSetting (self) :
-        '''Pull the base margin setting from the default layout configuration.'''
-
-        return 'aaa'
-
-
-    def getTopMarginFactor (self) :
-        '''Calculate the top margin factor based on what the base margin
-        and top margin settings are.'''
-
-        return 'bbb'
-
-
-    def getBottomMarginFactor (self) :
-        '''Calculate the bottom margin factor based on what the base margin
-        and bottom margin settings are.'''
-
-        return 'ccc'
-
-
-    def getSideMarginFactor (self) :
-        '''Calculate the side margin factor based on what the base margin
-        and side margin settings are.'''
-
-        return 'ddd'
-
-
-
-###############################################################################
 ###############################################################################
 ############################ Config Handling Class ############################
 ###############################################################################
@@ -189,35 +155,27 @@ class ConfigTools (object) :
         self.Ctype                  = self.cType.capitalize()
         self.layoutConfig           = ProjConfig(self.pid).layoutConfig
 
+        self.errorCodes     = {
+
+            '0000' : ['MSG', 'Placeholder message'],
+
+        }
+
+
+###############################################################################
+######################## Basic Config Handling Functions ######################
+###############################################################################
+####################### Error Code Block Series = 1000 ########################
+###############################################################################
 
     def processLinePlaceholders (self, line, value) :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
         if self.functForString(line) :
-        
-        
-        
-        
-        
-        
-# FIXME: Need to write a function to call a function built from the string
-        
-            x = getattr(self.proj_config, line)
-            print x
-            return x
-            
-#            return 'This worked!'
-
-
-
-
-
-
-
-
-
-
+            # Return whatever value the function gives
+            thisFunction = getattr(self, line.replace('(', '').replace(')', ''))
+            return thisFunction()
         else :
             # Allow for multiple placeholders with "while"
             while self.hasPlaceHolder(line) :
@@ -296,6 +254,41 @@ class ConfigTools (object) :
         
         mu = self.layoutConfig['GeneralSettings']['measurementUnit']
         return val + mu
+
+
+###############################################################################
+######################## Dynamic Config Value Functions #######################
+###############################################################################
+####################### Error Code Block Series = 2000 ########################
+###############################################################################
+
+    def getTopMarginFactor (self) :
+        '''Calculate the top margin factor based on what the base margin
+        and top margin settings are.'''
+
+        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
+        topMargin = int(self.layoutConfig['PageLayout']['topMargin'])
+        return float(topMargin / marginUnit)
+
+
+    def getBottomMarginFactor (self) :
+        '''Calculate the bottom margin factor based on what the base margin
+        and bottom margin settings are.'''
+
+        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
+        bottomMargin = int(self.layoutConfig['PageLayout']['bottomMargin'])
+        return float(bottomMargin / marginUnit)
+
+
+    def getSideMarginFactor (self) :
+        '''Calculate the side margin factor based on what the base margin
+        and side margin settings are.'''
+
+        # For this we will be using the outsideMargin setting not the inside
+        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
+        outsideMargin = int(self.layoutConfig['PageLayout']['outsideMargin'])
+        return float(outsideMargin / marginUnit)
+
 
 
 

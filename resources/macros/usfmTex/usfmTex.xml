@@ -696,6 +696,7 @@ Todo:
             <type>string</type>
             <value>[path:projIllustrationsFolder]/</value>
             <texCode>\PicPath={[v]}</texCode>
+            <note>This will insert the path dynamically when this setting is referenced.</note>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
@@ -708,8 +709,9 @@ Todo:
             <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
             <key>marginUnit</key>
             <type>integer</type>
-            <value>(getBaseMarginSetting)</value>
+            <value>layoutConfig:PageLayout:marginUnit</value>
             <texCode>\MarginUnit=[vm]</texCode>
+            <note>This will reference the margin unit in the main layout config file</note>
         </setting>
         <setting>
             <name>Top Margin Factor</name>
@@ -718,6 +720,7 @@ Todo:
             <type>integer</type>
             <value>(getTopMarginFactor)</value>
             <texCode>\def\TopMarginFactor{[v]}</texCode>
+            <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
         <setting>
             <name>Bottom Margin Factor</name>
@@ -726,6 +729,7 @@ Todo:
             <type>integer</type>
             <value>(getBottomMarginFactor)</value>
             <texCode>\def\BottomMarginFactor{[v]}</texCode>
+            <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
         <setting>
             <name>Side Margin Factor</name>
@@ -734,6 +738,7 @@ Todo:
             <type>integer</type>
             <value>(getSideMarginFactor)</value>
             <texCode>\def\SideMarginFactor{[v]}</texCode>
+            <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
         <setting>
             <name>Extra Right Margin</name>

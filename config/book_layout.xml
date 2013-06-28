@@ -33,18 +33,6 @@ Todo:
         </setting>
     </section>
     <section>
-        <name>Margins</name>
-        <sectionID>Margins</sectionID>
-        <description>Here find ye settings that affect margin settings. Arrg!</description>
-        <setting>
-            <name>Base Margin Unit</name>
-            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
-            <key>marginUnit</key>
-            <type>integer</type>
-            <value>10</value>
-        </setting>
-    </section>
-    <section>
         <name>Page Layout</name>
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
@@ -75,6 +63,55 @@ Todo:
             <key>pageWidth</key>
             <type>integer</type>
             <value>148</value>
+        </setting>
+        <setting>
+            <name>Base Margin Unit</name>
+            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
+            <key>marginUnit</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Top Margin</name>
+            <description>The distance from the top of the page to the printable text area. Default = 10</description>
+            <key>topMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Bottom Margin</name>
+            <description>The distance from the bottom of the page to the printable text area. Default = 10</description>
+            <key>bottomMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Inside Margin</name>
+            <description>The distance from the inside of the page (gutter) to the printable text area. Default = 10</description>
+            <key>insideMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Outside Margin</name>
+            <description>The distance from the outside of the page (left or right) to the printable text area. Default = 10</description>
+            <key>outsideMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Body Columns</name>
+            <description>The The number of columns used for body text. Default = 2</description>
+            <key>bodyColumns</key>
+            <type>integer</type>
+            <value>2</value>
+        </setting>
+        <setting>
+            <name>Introduction Columns</name>
+            <description>The The number of columns used for introduction text. Default = 1</description>
+            <key>introColumns</key>
+            <type>integer</type>
+            <value>1</value>
         </setting>
         <setting>
             <name>Cropmarks</name>

@@ -359,38 +359,38 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 400 ########################
 ###############################################################################
 
-    def makeMacLinkFile (self) :
-        '''Check for the exsistance of or the age of the macLink dependent file.
-        Create or refresh if needed. If there are any problems, report and die.'''
+#    def makeMacLinkFile (self) :
+#        '''Check for the exsistance of or the age of the macLink dependent file.
+#        Create or refresh if needed. If there are any problems, report and die.'''
 
-        description = 'This file provides a link between XeTeX and the project macro \
-            package. It should be one of the first TeX files to be read when XeTeX \
-            starts the rendering process.'
+#        description = 'This file provides a link between XeTeX and the project macro \
+#            package. It should be one of the first TeX files to be read when XeTeX \
+#            starts the rendering process.'
 
-        # Set some file names
-        if self.macroPackage == 'usfmTex' :
-            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
-        elif self.macroPackage == 'usfmTex-auto' :
-            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
-        else :
-            self.log.writeToLog(self.errorCodes['0470'], [self.macroPackage], 'xetex.makeMacLinkFile():0470')
+#        # Set some file names
+#        if self.macroPackage == 'usfmTex' :
+#            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+#        elif self.macroPackage == 'usfmTex-auto' :
+#            mainMacroFile = os.path.join(self.projMacPackFolder, 'paratext2.tex')
+#        else :
+#            self.log.writeToLog(self.errorCodes['0470'], [self.macroPackage], 'xetex.makeMacLinkFile():0470')
 
-        # Check to see if our macros are there
-        if not os.path.isdir(self.projMacPackFolder) :
-            self.copyInMacros()
+#        # Check to see if our macros are there
+#        if not os.path.isdir(self.projMacPackFolder) :
+#            self.copyInMacros()
 
-        # Check for existance and age. List any files in this next list that
-        # could require the rebuilding of the link file
-        makeLinkFile = False
-        dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.projConfFile]
-        if not os.path.isfile(self.macLinkFile) :
-            makeLinkFile = True
-            self.log.writeToLog(self.errorCodes['0465'], [self.tools.fName(self.macLinkFile)])
-        else :
-            for f in dep :
-                if self.tools.isOlder(self.macLinkFile, f) :
-                    makeLinkFile = True
-                    self.log.writeToLog(self.errorCodes['0460'], [self.tools.fName(f),self.tools.fName(self.macLinkFile)])
+#        # Check for existance and age. List any files in this next list that
+#        # could require the rebuilding of the link file
+#        makeLinkFile = False
+#        dep = [mainMacroFile, self.fontConfFile, self.layoutConfFile, self.projConfFile]
+#        if not os.path.isfile(self.macLinkFile) :
+#            makeLinkFile = True
+#            self.log.writeToLog(self.errorCodes['0465'], [self.tools.fName(self.macLinkFile)])
+#        else :
+#            for f in dep :
+#                if self.tools.isOlder(self.macLinkFile, f) :
+#                    makeLinkFile = True
+#                    self.log.writeToLog(self.errorCodes['0460'], [self.tools.fName(f),self.tools.fName(self.macLinkFile)])
 
 #        if makeLinkFile :
 #            with codecs.open(self.macLinkFile, "w", encoding='utf_8') as writeObject :
@@ -404,7 +404,7 @@ class Xetex (Manager) :
 #                    else :
 #                        self.removeMargVerse()
 
-        return True
+#        return True
 
 
 
@@ -849,7 +849,7 @@ class Xetex (Manager) :
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
-        self.makeMacLinkFile()
+#        self.makeMacLinkFile()
         self.makeSetTexFile()
         self.makeExtTexFile()
         self.checkGrpHyphExcTexFile()
