@@ -78,15 +78,13 @@ class Xetex (Manager) :
         self.layoutConfig           = self.proj_config.layoutConfig
         self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
+        self.macPackConfig          = self.proj_macro.macPackConfig
         # Some config settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
 
-        # Macro package config object
-        self.macPackConfig          = self.proj_macro.macPackConfig
-        
         # Get settings for this component
         self.managerSettings = self.projConfig['Managers'][self.manager]
         for k, v in self.managerSettings.iteritems() :
@@ -97,6 +95,8 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
+        self.useHyphenation         = self.hyphenation.useHyphenation
+        self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
         # File names
         # Some of these file names will only be used once but for consitency
@@ -104,6 +104,9 @@ class Xetex (Manager) :
         self.gidTexFileName         = self.gid + '.tex'
         self.gidPdfFileName         = self.gid + '.pdf'
         self.macLinkFileName        = self.macroPackage + '.tex'
+        self.macSettingsFileName    = 'settings.tex'
+        self.fontTexFileName        = 'fonts.tex'
+        self.extTexFileName         = 'extentions.tex'
         self.grpExtTexFileName      = self.gid + '-extentions.tex'
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
@@ -123,16 +126,15 @@ class Xetex (Manager) :
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
         self.fontConfFile           = self.proj_config.fontConfFile
-        self.illustrationConfFile   = self.proj_config.illustrationConfFile
-        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
-
-
-
-
-        self.macLinkFile            = os.path.join(self.projMacrosFolder, self.macroPackage, self.macLinkFileName)
+        self.macLinkFile            = os.path.join(self.projMacPackFolder, self.macLinkFileName)
+        self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
+        self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
+        self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
         self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
-
+        self.illustrationConfFile   = self.proj_config.illustrationConfFile
+        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
+        self.macPackConfFile        = self.proj_macro.macPackConfFile
         self.defaultStyFile         = self.proj_style.defaultStyFile
         self.glbExtStyFile          = self.proj_style.glbExtStyFile
         self.grpExtStyFile          = self.proj_style.grpExtStyFile
@@ -411,169 +413,181 @@ class Xetex (Manager) :
 
 
 
-# FIXME Need to add the mac settings file def here. This is really broken now
+    def makeSettingsTexFile (self) :
+        '''Create the primary TeX settings file.'''
+
+        description = 'This is the primary TeX settings file for the ' + self.gid + ' group. \
+        It is auto-generated so editing can be a rather futile exercise.'
+
+        # Open a fresh settings file
+        with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
+
+
+
+#        def etree_to_dict(t):
+#            d = {t.tag: {} if t.attrib else None}
+#            children = list(t)
+#            if children:
+#                dd = defaultdict(list)
+#                for dc in map(etree_to_dict, children):
+#                    for k, v in dc.iteritems():
+#                        dd[k].append(v)
+#                d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+#            if t.attrib:
+#                d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
+#            if t.text:
+#                text = t.text.strip()
+#                if children or t.attrib:
+#                    if text:
+#                      d[t.tag]['#text'] = text
+#                else:
+#                    d[t.tag] = text
+#            return d
+
+
+#        # FIXME: Temporary override because of the problem above.
+#        makeIt = True
+
+#        # Bail out here if necessary, return True because everything seems okay
+#        if not makeIt :
+#            return True
+#        else :
+#            # Otherwise make/remake the file
+#            # First read in the plain text contents
+#            contents = codecs.open(self.layoutXmlFile, "r").read()
+#            # Convert it it a dict with our internal function
+#            layoutDict = etree_to_dict(ET.XML(contents))
+#            # Create a dict that contains only the data we need here
+#            macTexVals = {}
+#            for sections in layoutDict['root']['section'] :
+#                macTexVals[sections['sectionID']] = {}
+#                for section in sections :
+#                    secItem = sections[section]
+#                    if type(secItem) is list :
+#                        for setting in secItem :
+#                            for k in setting.keys() :
+#                                if k == self.macroPackage and setting.get(k) != None :
+#                                    macTexVals[sections['sectionID']] = {'name' : setting['name']}
+#                                    if setting.get(k) and setting.get(k) != None :
+#                                        macTexVals[sections['sectionID']][k] = setting.get(k)
+#                                    if setting.has_key('boolDependTrue') and setting['boolDependTrue'] != None :
+#                                        macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+#                                    if setting.has_key('boolDependFalse') :
+#                                        macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
+#            # Delete any empty sections
+#            for i in macTexVals.keys() :
+#                if len(macTexVals[i]) == 0 :
+#                    del macTexVals[i]
+
+##            print macTexVals
+
+#            # Open a fresh settings file
+#            writeObject = codecs.open(self.macSettingsFile, "w", encoding='utf_8')
+#            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
+
+#            # The layoutConfig file is our template to populate with our current values
+#            
+## FIXME:
+## Why don't we use the macTexVals dictionary as our template instead of the layoutConfFile.
+## This way we should get exactly what we need in the settings file with a lot less work.
+#            
+#            
+#            
+#            
+#            for section in self.layoutConfig.keys() :
+#                writeObject.write('\n% ' + section + '\n')
+#                vals = {}
+
+#                # Do a precheck here for input order that could affect the section.
+#                # Be on the look out for an input ordering field. If there is one
+#                # it should have two or more items in the list this becomes the
+#                # base for our inputsOrder list used for output
+#                try :
+#                    # This setting must have a boolDepend, check what it is here
+#                    if self.tools.str2bool(self.rtnBoolDepend(macTexVals['inputsOrder']['boolDependTrue'])) :
+#                        inputsOrder = self.layoutConfig[section]['inputsOrder']
+#                    else :
+#                        inputsOrder = []
+#                except :
+#                    inputsOrder = []
+
+#                print section
+
+#                # Start gathering up all the items in this section now
+#                for k, v in self.layoutConfig[section].iteritems() :
+#                
+#                
+#                    print '\t' + k
+#                
+#                
+#                    # This will prevent output on empty fields, never output when
+#                    # there is no value
+#                    if not v :
+#                        continue
+#                    # Gather each macro package line we need to output
+##                    print k, v, self.macroPackage
 
 
 
 
 
 
-# FIXME: Change the name here to makeSetTexFile()
-
-        def etree_to_dict(t):
-            d = {t.tag: {} if t.attrib else None}
-            children = list(t)
-            if children:
-                dd = defaultdict(list)
-                for dc in map(etree_to_dict, children):
-                    for k, v in dc.iteritems():
-                        dd[k].append(v)
-                d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
-            if t.attrib:
-                d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
-            if t.text:
-                text = t.text.strip()
-                if children or t.attrib:
-                    if text:
-                      d[t.tag]['#text'] = text
-                else:
-                    d[t.tag] = text
-            return d
 
 
-        # FIXME: Temporary override because of the problem above.
-        makeIt = True
+##                    import pdb; pdb.set_trace()
 
-        # Bail out here if necessary, return True because everything seems okay
-        if not makeIt :
-            return True
-        else :
-            # Otherwise make/remake the file
-            # First read in the plain text contents
-            contents = codecs.open(self.layoutXmlFile, "r").read()
-            # Convert it it a dict with our internal function
-            layoutDict = etree_to_dict(ET.XML(contents))
-            # Create a dict that contains only the data we need here
-            macTexVals = {}
-            for sections in layoutDict['root']['section'] :
-                macTexVals[sections['sectionID']] = {}
-                for section in sections :
-                    secItem = sections[section]
-                    if type(secItem) is list :
-                        for setting in secItem :
-                            for k in setting.keys() :
-                                if k == self.macroPackage and setting.get(k) != None :
-                                    macTexVals[sections['sectionID']] = {'name' : setting['name']}
-                                    if setting.get(k) and setting.get(k) != None :
-                                        macTexVals[sections['sectionID']][k] = setting.get(k)
-                                    if setting.has_key('boolDependTrue') and setting['boolDependTrue'] != None :
-                                        macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-                                    if setting.has_key('boolDependFalse') :
-                                        macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
-            # Delete any empty sections
-            for i in macTexVals.keys() :
-                if len(macTexVals[i]) == 0 :
-                    del macTexVals[i]
-
-#            print macTexVals
-
-            # Open a fresh settings file
-            writeObject = codecs.open(self.setTexFile, "w", encoding='utf_8')
-            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.setTexFile), description))
-
-            # The layoutConfig file is our template to populate with our current values
-            
-# FIXME:
-# Why don't we use the macTexVals dictionary as our template instead of the layoutConfFile.
-# This way we should get exactly what we need in the settings file with a lot less work.
-            
-            
-            
-            
-            for section in self.layoutConfig.keys() :
-                writeObject.write('\n% ' + section + '\n')
-                vals = {}
-
-                # Do a precheck here for input order that could affect the section.
-                # Be on the look out for an input ordering field. If there is one
-                # it should have two or more items in the list this becomes the
-                # base for our inputsOrder list used for output
-                try :
-                    # This setting must have a boolDepend, check what it is here
-                    if self.tools.str2bool(self.rtnBoolDepend(macTexVals['inputsOrder']['boolDependTrue'])) :
-                        inputsOrder = self.layoutConfig[section]['inputsOrder']
-                    else :
-                        inputsOrder = []
-                except :
-                    inputsOrder = []
-
-                print section
-
-                # Start gathering up all the items in this section now
-                for k, v in self.layoutConfig[section].iteritems() :
-                
-                
-                    print '\t' + k
-                
-                
-                    # This will prevent output on empty fields, never output when
-                    # there is no value
-                    if not v :
-                        continue
-                    # Gather each macro package line we need to output
-#                    print k, v, self.macroPackage
+## FIXME: 
+## Some problem with macTexVals not aligning with the config obj.
+## More work needs to be done to syncronize the two at this point so
+## that two work better together here.
 
 
 
+#                    if macTexVals[section].has_key(k) :
+#                        print macTexVals[section][k]
+#                        macVal = (macTexVals[section][k][self.macroPackage])
+#                        # Test for boolDepend True and False. If there is a boolDepend
+#                        # then we don't need to output just yet. These next two if/elif
+#                        # statements insure that output happens in the proper condition.
+#                        # In some cases we want output only if a certain bool is set to
+#                        # true, but in a few rare cases we want output when a certain
+#                        # bool is set to false. These will screen for both cases.
+#                        if macTexVals[section].has_key('boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependTrue'])) :
+#                            continue
+#                        elif macTexVals[section].has_key('boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependFalse'])) == False :
+#                            continue
+#                        # After having made it past the previous two tests, we can ouput now.
+#                        else :
+#                            # Here we will build a dictionary for this section made up
+#                            # of all the k, v, and macVals needed. We also build a
+#                            # list of keys to be used for ordered output
+#                            vals[section] = [v, macVal]
+#                            if not section in inputsOrder :
+#                                # In case there was an inputsOrder list in the config,
+#                                # this will prepend the value to that list. The idea is
+#                                # that the ordered output goes last (or at the bottom)
+#                                inputsOrder.insert(0, section)
+
+#                # Write the lines out according to the inputsOrder
+#                for key in inputsOrder :
+#                    writeObject.write(self.configTools.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
+
+
+#            self.tools.dieNow()
 
 
 
+    def makeFontSettingsTexFile (self) :
+        '''Create the TeX font settings file.'''
 
+        description = 'This is the font extension file for the ' + self.gid + ' group. \
+        It is auto-generated so editing can be a rather futile exercise.'
 
-#                    import pdb; pdb.set_trace()
+        # Open a fresh font settings file
+        with codecs.open(self.fontTexFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.fontTexFile), description))
 
-# FIXME: 
-# Some problem with macTexVals not aligning with the config obj.
-# More work needs to be done to syncronize the two at this point so
-# that two work better together here.
-
-
-
-                    if macTexVals[section].has_key(k) :
-                        print macTexVals[section][k]
-                        macVal = (macTexVals[section][k][self.macroPackage])
-                        # Test for boolDepend True and False. If there is a boolDepend
-                        # then we don't need to output just yet. These next two if/elif
-                        # statements insure that output happens in the proper condition.
-                        # In some cases we want output only if a certain bool is set to
-                        # true, but in a few rare cases we want output when a certain
-                        # bool is set to false. These will screen for both cases.
-                        if macTexVals[section].has_key('boolDependTrue') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependTrue'])) :
-                            continue
-                        elif macTexVals[section].has_key('boolDependFalse') and not self.tools.str2bool(self.rtnBoolDepend(macTexVals[section]['boolDependFalse'])) == False :
-                            continue
-                        # After having made it past the previous two tests, we can ouput now.
-                        else :
-                            # Here we will build a dictionary for this section made up
-                            # of all the k, v, and macVals needed. We also build a
-                            # list of keys to be used for ordered output
-                            vals[section] = [v, macVal]
-                            if not section in inputsOrder :
-                                # In case there was an inputsOrder list in the config,
-                                # this will prepend the value to that list. The idea is
-                                # that the ordered output goes last (or at the bottom)
-                                inputsOrder.insert(0, section)
-
-                # Write the lines out according to the inputsOrder
-                for key in inputsOrder :
-                    writeObject.write(self.configTools.processLinePlaceholders(vals[key][1], vals[key][0]) + '\n')
-
-
-            self.tools.dieNow()
-
-
-
-            # Move on to Fonts, add all the font def commands
             def addParams (writeObject, pList, line) :
                 for k,v in pList.iteritems() :
                     if v :
@@ -588,15 +602,15 @@ class Xetex (Manager) :
                 writeObject.write(line + '\n')
 
             writeObject.write('\n% Font Definitions\n')
-            for f in self.projConfig['Managers'][self.cType + '_Font']['installedFonts'] :
+            for f in self.fontConfig['GeneralSettings']['installedFonts'] :
                 fInfo = self.fontConfig['Fonts'][f]
                 fontPath            = os.path.join(self.projFontsFolder, f)
-                useMapping          = self.projConfig['Managers'][self.cType + '_Font']['useMapping']
+                useMapping          = self.fontConfig['GeneralSettings']['useMapping']
                 if useMapping :
                     useMapping      = os.path.join(fontPath, useMapping)
-                useRenderingSystem  = self.projConfig['Managers'][self.cType + '_Font']['useRenderingSystem']
+                useRenderingSystem  = self.fontConfig['GeneralSettings']['useRenderingSystem']
 
-                useLanguage         = self.projConfig['Managers'][self.cType + '_Font']['useLanguage']
+                useLanguage         = self.fontConfig['GeneralSettings']['useLanguage']
                 params              = {}
                 if useMapping :
                     params['^^mapping^^'] = ':mapping=' + useMapping
@@ -608,7 +622,7 @@ class Xetex (Manager) :
                     params['^^path^^'] = fontPath
 
                 # Create the fonts settings that will be used with TeX
-                if self.projConfig['Managers'][self.cType + '_Font']['primaryFont'] == f :
+                if self.fontConfig['GeneralSettings']['primaryFont'] == f :
                     # Primary
                     writeObject.write('\n% These are normal use fonts for this type of component.\n')
                     for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
@@ -624,55 +638,15 @@ class Xetex (Manager) :
                 # font. For this reason, we take them all out. Only the primary font will support
                 # all font features.
                 params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.projConfig['Managers'][self.cType + '_Font']['primaryFont'] != f :
+                if self.fontConfig['GeneralSettings']['primaryFont'] != f :
                     # Secondary (only)
                     writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
                         addParams(writeObject, params, v)
 
-            # Add special custom commands (may want to parameterize and move 
-            # these to the config XML at some point)
-            writeObject.write('\n% Special commands\n')
-
-            # This will insert a code that allows the use of numbers in the source text
-            writeObject.write(u'\\catcode`@=11\n')
-            writeObject.write(u'\\def\\makedigitsother{\\m@kedigitsother}\n')
-            writeObject.write(u'\\def\\makedigitsletters{\\m@kedigitsletters}\n')
-            writeObject.write(u'\\catcode `@=12\n')
-
-            # Special space characters
-            writeObject.write(u'\\def\\nbsp{\u00a0}\n')
-            writeObject.write(u'\\def\\zwsp{\u200b}\n')
-
-            ## Baselineskip Adjustment Hook
-            # This hook provides a means to adjust the baselineskip on a
-            # specific style. It provides a place to put the initial 
-            # setting so the hook can make the change and then go back
-            # to the initial setting when done.
-            # Usage Example:
-            #   \sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
-            #   \sethook{after}{s1}{\baselineskip=\remblskip}
-            writeObject.write(u'\\newdimen\\remblskip \\remblskip=\\baselineskip\n')
-
-            # WORKING TEXT LINE SPACING
-            # Take out a little space between lines in working text
-            writeObject.write(u'\\def\\suckupline{\\vskip -\\baselineskip}\n')
-            writeObject.write(u'\\def\\suckuphalfline{\\vskip -0.5\\baselineskip}\n')
-            writeObject.write(u'\\def\\suckupqline{\\vskip -0.25\\baselineskip}\n')
-
-            # Skip some space in the working text
-            writeObject.write(u'\\def\\skipline{\\vskip\\baselineskip}\n')
-            writeObject.write(u'\\def\\skiphalfline{\\vskip 0.5\\baselineskip}\n')
-            writeObject.write(u'\\def\\skipqline{\\vskip 0.25\\baselineskip}\n')
-
-            # TOC handling
-            if self.tools.str2bool(self.projConfig['Groups'][self.gid]['tocInclude']) :
-                writeObject.write('\n% Table of Contents required\n')
-                writeObject.write('\\GenerateTOC[___toc___]{toc.usfm}\n\n')
 
             # End here
-            writeObject.close()
-            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.setTexFile)])
+            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.fontTexFile)])
             return True
 
 
@@ -696,29 +670,29 @@ class Xetex (Manager) :
         return True
 
 
-    def makeExtTexFile (self) :
-        '''Create/copy a TeX extentions file that has custom code for a project component
-        type. This will go in before the group extentions file.'''
+#    def makeExtTexFile (self) :
+#        '''Create/copy a TeX extentions file that has custom code for a project component
+#        type. This will go in before the group extentions file.'''
 
-        description = 'This the component TeX macro settings file. The settings \
-            in this file can override the main TeX settings and these settings \
-            can be overridden by the group-level settings file.'
+#        description = 'This the component TeX macro settings file. The settings \
+#            in this file can override the main TeX settings and these settings \
+#            can be overridden by the group-level settings file.'
 
-        # First look for a user file, if not, then one 
-        # from Rapuma, worse case, make a blank one
-        if not os.path.isfile(self.extTexFile) :
-            if os.path.isfile(self.usrExtTexFile) :
-                shutil.copy(self.usrExtTexFile, self.extTexFile)
-            elif os.path.isfile(self.rpmExtTexFile) :
-                shutil.copy(self.rpmExtTexFile, self.extTexFile)
-            else :
-                # Create a blank file
-                with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.extTexFileName), description, False))
-                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.extTexFile)])
+#        # First look for a user file, if not, then one 
+#        # from Rapuma, worse case, make a blank one
+#        if not os.path.isfile(self.extTexFile) :
+#            if os.path.isfile(self.usrExtTexFile) :
+#                shutil.copy(self.usrExtTexFile, self.extTexFile)
+#            elif os.path.isfile(self.rpmExtTexFile) :
+#                shutil.copy(self.rpmExtTexFile, self.extTexFile)
+#            else :
+#                # Create a blank file
+#                with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
+#                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.extTexFileName), description, False))
+#                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.extTexFile)])
 
-        # Need to return true here even if nothing was done
-        return True
+#        # Need to return true here even if nothing was done
+#        return True
 
 
     def makeGidTexFile (self, cidList) :
@@ -741,12 +715,8 @@ class Xetex (Manager) :
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
             gidTexObject.write(self.tools.makeFileHeader(self.gidTexFileName, description))
-            if self.makeMacLinkFile() :
-                gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
-            if self.makeSetTexFile() :
-                gidTexObject.write('\\input \"' + self.setTexFile + '\"\n')
-            if self.makeExtTexFile() :
-                gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
+            if self.makeSettingsTexFile() :
+                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
             if self.makeGrpExtTexFile() :
                 gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
             if self.useHyphenation :
@@ -766,7 +736,7 @@ class Xetex (Manager) :
             # Now add in each of the components
             for cid in cidList :
                 if self.cType == 'usfm' :
-                    cidSource = os.path.join(self.projComponentsFolder, cid, self.makeFileNameWithExt(cid))
+                    cidSource = os.path.join(self.projComponentsFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
@@ -850,16 +820,36 @@ class Xetex (Manager) :
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
 #        self.makeMacLinkFile()
-        self.makeSetTexFile()
-        self.makeExtTexFile()
+        self.makeSettingsTexFile()
+        self.makeFontSettingsTexFile()
         self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
         self.makeGidTexFile(cidList)
 
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         dep = [self.extTexFile, self.projConfFile, 
-                self.layoutConfFile, self.fontConfFile, 
+                self.layoutConfFile, self.fontConfFile, self.macPackConfFile,
                     self.adjustmentConfFile, self.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
