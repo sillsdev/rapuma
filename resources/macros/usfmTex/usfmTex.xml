@@ -42,7 +42,7 @@ Todo:
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:ChapterVerse:omitVerseNumberOne</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|ChapterVerse|omitVerseNumberOne]</boolDependTrue>
             <texCode>\OmitVerseNumberOnetrue</texCode>
         </setting>
         <setting>
@@ -51,7 +51,7 @@ Todo:
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:ChapterVerse:omitAllChapterNumbers</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|ChapterVerse|omitAllChapterNumbers]</boolDependTrue>
             <texCode>\OmitChapterNumbertrue</texCode>
         </setting>
         <setting>
@@ -129,7 +129,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Columns|columnGutterRule]</boolDependTrue>
             <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
         <setting>
@@ -163,7 +163,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <texCode>\ColumnGutterRuleSkip=[vm]</texCode>
-            <boolDependTrue>layoutConfig:Columns:columnGutterRule</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Columns|columnGutterRule]</boolDependTrue>
         </setting>
     </section>
     <section>
@@ -197,7 +197,7 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>layoutConfig:Crossreferences:useAutoCallerCrossrefs</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Crossreferences|useAutoCallerCrossrefs]</boolDependTrue>
             <texCode>\AutoCallers{x}{[v]}</texCode>
         </setting>
         <setting>
@@ -206,7 +206,7 @@ Todo:
             <key>useNumericCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Crossreferences:useNumericCallersCrossrefs</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Crossreferences|useNumericCallersCrossrefs]</boolDependTrue>
             <texCode>\NumericCallers{x}</texCode>
         </setting>
         <setting>
@@ -215,7 +215,7 @@ Todo:
             <key>pageResetCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Crossreferences:pageResetCallersCrossrefs</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Crossreferences|pageResetCallersCrossrefs]</boolDependTrue>
             <texCode>\PageResetCallers{x}</texCode>
         </setting>
         <setting>
@@ -224,7 +224,7 @@ Todo:
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Crossreferences:omitCallerInCrossrefs</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Crossreferences|omitCallerInCrossrefs]</boolDependTrue>
             <texCode>\OmitCallerInNote{x}</texCode>
         </setting>
         <setting>
@@ -233,7 +233,7 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:Crossreferences:paragraphedCrossrefs</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Crossreferences|paragraphedCrossrefs]</boolDependTrue>
             <texCode>\ParagraphedNotes{x}</texCode>
         </setting>
     </section>
@@ -268,7 +268,7 @@ Todo:
             <key>autoCallerListFootnotes</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>layoutConfig:Footnotes:useAutoCallerFootnotes</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Footnotes|useAutoCallerFootnotes]</boolDependTrue>
             <texCode>\AutoCallers{f}{[v]}</texCode>
         </setting>
         <setting>
@@ -277,7 +277,7 @@ Todo:
             <key>useNumericCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Footnotes:useNumericCallersFootnotes</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Footnotes|useNumericCallersFootnotes]</boolDependTrue>
             <texCode>\NumericCallers{f}</texCode>
         </setting>
         <setting>
@@ -286,7 +286,7 @@ Todo:
             <key>pageResetCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Footnotes:pageResetCallersFootnotes</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Footnotes|pageResetCallersFootnotes]</boolDependTrue>
             <texCode>\PageResetCallers{f}</texCode>
         </setting>
         <setting>
@@ -295,7 +295,7 @@ Todo:
             <key>omitCallerInFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:Footnotes:omitCallerInFootnotes</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Footnotes|omitCallerInFootnotes]</boolDependTrue>
             <texCode>\OmitCallerInNote{f}</texCode>
         </setting>
         <setting>
@@ -304,7 +304,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:Footnotes:paragraphedFootnotes</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Footnotes|paragraphedFootnotes]</boolDependTrue>
             <texCode>\ParagraphedNotes{f}</texCode>
         </setting>
         <setting>
@@ -377,7 +377,7 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
-            <boolDependTrue>layoutConfig:HeaderFooter:useRunningHeaderRule</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|HeaderFooter|useRunningHeaderRule]</boolDependTrue>
             <texCode>\RHruleposition=[vm]</texCode>
         </setting>
         <setting>
@@ -490,7 +490,7 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:HeaderContent:showVerseReferences</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|HeaderContent|showVerseReferences]</boolDependTrue>
             <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
@@ -499,7 +499,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:HeaderContent:omitBookReference</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|HeaderContent|omitBookReference]</boolDependTrue>
             <texCode>\OmitBookReftrue</texCode>
         </setting>
         <setting>
@@ -508,7 +508,7 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:HeaderContent:omitChapterNumberRH</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|HeaderContent|omitChapterNumberRH]</boolDependTrue>
             <texCode>\OmitChapterNumberRHtrue</texCode>
             <note>This is not implemented in texCode but can be found in the standard ptx2pdf macro package.</note>
         </setting>
@@ -595,7 +595,7 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\newlanguage\[v]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -605,7 +605,7 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\language=\[v]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -615,7 +615,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\defaulthyphenchar=[v]</texCode>
         </setting>
         <setting>
@@ -624,7 +624,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\hyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -633,7 +633,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
+            <boolDependFalse>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependFalse>
             <texCode>\hyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -642,7 +642,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\exhyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -651,7 +651,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
             <texCode>\pretolerance=[v]</texCode>
         </setting>
     </section>
@@ -665,7 +665,7 @@ Todo:
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:Illustrations:useFigurePlaceHolders</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|Illustrations|useFigurePlaceHolders]</boolDependTrue>
             <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
@@ -709,7 +709,7 @@ Todo:
             <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
             <key>marginUnit</key>
             <type>integer</type>
-            <value>layoutConfig:PageLayout:marginUnit</value>
+            <value>[config:layoutConfig|PageLayout|marginUnit]</value>
             <texCode>\MarginUnit=[vm]</texCode>
             <note>This will reference the margin unit in the main layout config file</note>
         </setting>
@@ -718,7 +718,7 @@ Todo:
             <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
             <key>topMarginFactor</key>
             <type>integer</type>
-            <value>(getTopMarginFactor)</value>
+            <value>[function:getTopMarginFactor]</value>
             <texCode>\def\TopMarginFactor{[v]}</texCode>
             <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
@@ -727,7 +727,7 @@ Todo:
             <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
             <key>bottomMarginFactor</key>
             <type>integer</type>
-            <value>(getBottomMarginFactor)</value>
+            <value>[function:getBottomMarginFactor]</value>
             <texCode>\def\BottomMarginFactor{[v]}</texCode>
             <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
@@ -736,7 +736,7 @@ Todo:
             <description>Relative size of side margin based on MarginUnit.  This determins the distance between the edge of the page and the body text.   Default = 0.7</description>
             <key>sideMarginFactor</key>
             <type>integer</type>
-            <value>(getSideMarginFactor)</value>
+            <value>[function:getSideMarginFactor]</value>
             <texCode>\def\SideMarginFactor{[v]}</texCode>
             <note>This will call a function that will calculate the factor setting dynamically.</note>
         </setting>
@@ -765,7 +765,7 @@ Todo:
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>
             <type>reference</type>
-            <value>layoutConfig:PageLayout:pageHeight</value>
+            <value>[config:layoutConfig|PageLayout|pageHeight]</value>
             <texCode>\PaperHeight=[vm]</texCode>
         </setting>
         <setting>
@@ -773,7 +773,7 @@ Todo:
             <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
             <key>pageWidth</key>
             <type>reference</type>
-            <value>layoutConfig:PageLayout:pageWidth</value>
+            <value>[config:layoutConfig|PageLayout|pageWidth]</value>
             <texCode>\PaperWidth=[vm]</texCode>
         </setting>
         <setting>
@@ -783,7 +783,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDependTrue>layoutConfig:PageLayout:useCropmarks</boolDependTrue>
+            <boolDependTrue>[config:usfmTex|PageLayout|useCropmarks]</boolDependTrue>
         </setting>
         <setting>
             <name>Page Border</name>

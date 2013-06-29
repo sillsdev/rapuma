@@ -237,9 +237,9 @@ class ProjBackground (object) :
         lineSpacingFactor   = float(self.macPackConfig['Fonts']['lineSpacingFactor'])
         fontSizeUnit        = float(self.macPackConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = float(self.layoutConfig['PageLayout']['marginUnit'])
-        topMarginFactor     = self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['topMarginFactor'], '')
+        topMarginFactor     = float(self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['topMarginFactor'], ''))
 #        topMarginFactor     = float(self.macPackConfig['Margins']['topMarginFactor'])
-        bottomMarginFactor  = self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['bottomMarginFactor'], '')
+        bottomMarginFactor  = float(self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['bottomMarginFactor'], ''))
 #        bottomMarginFactor  = float(self.macPackConfig['Margins']['bottomMarginFactor'])
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
@@ -264,13 +264,6 @@ class ProjBackground (object) :
 
         # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
         # converted to pixels [px]
-
-
-
-        print pageHeight, topMarginFactor, marginUnit
-
-
-
         topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
         self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
 

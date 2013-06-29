@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, ast
 from configobj                      import ConfigObj
 
 # Load the local classes
@@ -146,14 +146,16 @@ class ConfigTools (object) :
 
     def __init__(self, pid, gid) :
 
-        self.gid                    = gid
-        self.pid                    = pid
-        self.proj_config            = ProjConfig(pid)
-        self.projConfig             = self.proj_config.projConfig
-        self.csid                   = self.projConfig['Groups'][self.gid]['csid']
-        self.cType                  = self.projConfig['Groups'][self.gid]['cType']
-        self.Ctype                  = self.cType.capitalize()
-        self.layoutConfig           = ProjConfig(self.pid).layoutConfig
+        self.gid                            = gid
+        self.pid                            = pid
+        self.proj_config                    = ProjConfig(pid)
+        self.projConfig                     = self.proj_config.projConfig
+        self.csid                           = self.projConfig['Groups'][self.gid]['csid']
+        self.cType                          = self.projConfig['Groups'][self.gid]['cType']
+        self.Ctype                          = self.cType.capitalize()
+        self.layoutConfig                   = ProjConfig(self.pid).layoutConfig
+        self.local                          = ProjLocal(self.pid)
+        self.tools                          = Tools()
 
         self.errorCodes     = {
 
@@ -172,52 +174,69 @@ class ConfigTools (object) :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
-        if self.functForString(line) :
-            # Return whatever value the function gives
-            thisFunction = getattr(self, line.replace('(', '').replace(')', ''))
-            return thisFunction()
-        else :
-            # Allow for multiple placeholders with "while"
-            while self.hasPlaceHolder(line) :
-                (holderType, holderKey) = self.getPlaceHolder(line)
-                # Insert the raw value
-                if holderType == 'v' :
-                    line = self.insertValue(line, value)
-                # Go get a value from another setting in the self.layoutConfig
-                elif holderType in self.layoutConfig.keys() :
-                    holderValue = self.layoutConfig[holderType][holderKey]
-                    line = self.insertValue(line, holderValue)
-                # A value that needs a measurement unit attached
-                elif holderType == 'vm' :
-                    line = self.insertValue(line, self.addMeasureUnit(value))
-                # A value that is a path
-                elif holderType == 'path' :
-                    pth = getattr(self.project.local, holderKey)
-                    line = self.insertValue(line, pth)
-                # A value that is a path separater character
-                elif holderType == 'pathSep' :
-                    pathSep = os.sep
-                    line = self.insertValue(line, pathSep)
-                # A value that contains a system delclaired value
-                # Note this only works if the value we are looking for has
-                # been declaired above in the module init
-                elif holderType == 'self' :
-                    line = self.insertValue(line, getattr(self, holderKey))
+        # Allow for multiple placeholders with "while"
+        while self.hasPlaceHolder(line) :
+            (holderType, holderKey) = self.getPlaceHolder(line)
+            # Insert the raw value
+            if holderType == 'v' :
+                line = self.insertValue(line, value)
+            # Go get a value from another setting in the self.layoutConfig
+            elif holderType in self.layoutConfig.keys() :
+                holderValue = self.layoutConfig[holderType][holderKey]
+                line = self.insertValue(line, holderValue)
+            # A value that needs a measurement unit attached
+            elif holderType == 'vm' :
+                line = self.insertValue(line, self.addMeasureUnit(value))
+            # A value that is a path
+            elif holderType == 'path' :
+                pth = getattr(self.local, holderKey)
+                line = self.insertValue(line, pth)
+            # A value that is from a configObj
+            elif holderType == 'config' :
+                val = self.getConfigValue(holderKey)
+                line = self.insertValue(line, val)
+            # A value that is from a configObj
+            elif holderType == 'function' :
+                fnc = getattr(self, holderKey)
+                val = fnc()
+                line = self.insertValue(line, val)
+            # A value that is a path separater character
+            elif holderType == 'pathSep' :
+                pathSep = os.sep
+                line = self.insertValue(line, pathSep)
+            # A value that contains a system delclaired value
+            # Note this only works if the value we are looking for has
+            # been declaired above in the module init
+            elif holderType == 'self' :
+                line = self.insertValue(line, getattr(self, holderKey))
 
-            return line
+        return line
 
 
-    def insertValue (self, line, v) :
+    def getConfigValue (self, val) :
+        '''Return the value from a config function or just pass the
+        value through, unchanged.'''
+
+        val = val.split('|')
+        dct = ['self.' + val[0]]
+        val.remove(val[0])
+        for i in val :
+            dct.append('["' + i + '"]')
+
+        return eval(''.join(dct))
+
+
+    def insertValue (self, line, val) :
         '''Insert a value where a place holder is.'''
 
         # Handle empty values here
-        if v == '[empty]' :
-            v = ''
+        if val == '[empty]' :
+            val = ''
         begin = line.find('[')
         end = line.find(']') + 1
         ph = line[begin:end]
 
-        return line.replace(ph, v)
+        return line.replace(ph, str(val))
 
 
     def hasPlaceHolder (self, line) :
@@ -225,13 +244,6 @@ class ConfigTools (object) :
 
         # If things get more complicated we may need to beef this up a bit
         if line.find('[') > -1 and line.find(']') > -1 :
-            return True
-
-
-    def functForString (self, line) :
-        '''Check to see if the string is a function.'''
-
-        if line.find('(') > -1 and line.find(')') > -1 :
             return True
 
 
@@ -266,18 +278,18 @@ class ConfigTools (object) :
         '''Calculate the top margin factor based on what the base margin
         and top margin settings are.'''
 
-        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
-        topMargin = int(self.layoutConfig['PageLayout']['topMargin'])
-        return float(topMargin / marginUnit)
+        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
+        topMargin = float(self.layoutConfig['PageLayout']['topMargin'])
+        return topMargin / marginUnit
 
 
     def getBottomMarginFactor (self) :
         '''Calculate the bottom margin factor based on what the base margin
         and bottom margin settings are.'''
 
-        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
-        bottomMargin = int(self.layoutConfig['PageLayout']['bottomMargin'])
-        return float(bottomMargin / marginUnit)
+        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
+        bottomMargin = float(self.layoutConfig['PageLayout']['bottomMargin'])
+        return bottomMargin / marginUnit
 
 
     def getSideMarginFactor (self) :
@@ -285,9 +297,9 @@ class ConfigTools (object) :
         and side margin settings are.'''
 
         # For this we will be using the outsideMargin setting not the inside
-        marginUnit = int(self.layoutConfig['PageLayout']['marginUnit'])
-        outsideMargin = int(self.layoutConfig['PageLayout']['outsideMargin'])
-        return float(outsideMargin / marginUnit)
+        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
+        outsideMargin = float(self.layoutConfig['PageLayout']['outsideMargin'])
+        return outsideMargin / marginUnit
 
 
 

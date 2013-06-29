@@ -19,9 +19,10 @@
 
 import codecs, os, sys, re, fileinput, zipfile, shutil, stat
 import difflib, tempfile, subprocess
-from datetime                       import *
-from xml.etree                      import ElementTree
-from configobj                      import ConfigObj, Section
+from datetime                           import *
+from xml.etree                          import cElementTree as ET
+from collections                        import defaultdict
+from configobj                          import ConfigObj, Section
 
 ###############################################################################
 ############################### Group Tools Class #############################
@@ -657,7 +658,8 @@ class Tools (object) :
         '''Read in our default settings from the XML system settings file'''
 
         # Read in our XML file
-        doc = ElementTree.parse(thisFile)
+#        doc = ElementTree.parse(thisFile)
+        doc = ET.parse(thisFile)
         # Create an empty dictionary
         data = {}
         # Extract the section/key/value data
@@ -714,40 +716,40 @@ class Tools (object) :
 
 
     def xmlFileToDict (self, fileName) :
-        tree =  ElementTree.parse(fileName)
+#        tree =  ElementTree.parse(fileName)
+        tree =  ET.parse(fileName)
         root = tree.getroot()
         return self.xmlToDict(root)
 
 
-    def xmlToDict (self, element) :
-        '''This will turn a normal XML file into a standard Python dictionary.
-        I picked up this clever pice of code from here:
-            http://stackoverflow.com/questions/2148119/how-to-convert-a-xml-string-to-a-dictionary-in-python
-        A guy named josch submitted it. I have modified it a little to work in Rapuma.'''
+    def xmlToDict (self, xmlFile) :
+        '''Convert an XML file into a dictionary. The code for this was found on stackoverflow at:
+        http://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree'''
 
-        # FIXME: print 'Fix isinstance() problem in tools.xmlToDict()'
-    #    if not isinstance(element, ElementTree.Element):
-    #        raise ValueError("must pass xml.etree.ElementTree.Element object")
-
-        def xmltodict_handler(parent_element):
-            result = dict()
-            for element in parent_element:
-                if len(element):
-                    obj = xmltodict_handler(element)
+        # Define function to convert an etree object to a dictionary
+        def etree_to_dict(t):
+            d = {t.tag: {} if t.attrib else None}
+            children = list(t)
+            if children:
+                dd = defaultdict(list)
+                for dc in map(etree_to_dict, children):
+                    for k, v in dc.iteritems():
+                        dd[k].append(v)
+                d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+            if t.attrib:
+                d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
+            if t.text:
+                text = t.text.strip()
+                if children or t.attrib:
+                    if text:
+                      d[t.tag]['#text'] = text
                 else:
-                    obj = element.text
+                    d[t.tag] = text
+            return d
 
-                if result.get(element.tag):
-                    if hasattr(result[element.tag], "append"):
-                        result[element.tag].append(obj)
-                    else:
-                        result[element.tag] = [result[element.tag], obj]
-                else:
-                    result[element.tag] = obj
-            return result
-
-        # Return the dictionary
-        return {element.tag: xmltodict_handler(element)}
+        # Open and convert the XML file to an etree object
+        contents = codecs.open(xmlFile, "r").read()
+        return etree_to_dict(ET.XML(contents))
 
 
     # This will reasign the standard ConfigObj function that works much like ours
