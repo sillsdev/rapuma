@@ -220,11 +220,11 @@ class Usfm (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+                font = self.fontConfig['GeneralSettings']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
-            self.proj_font.installFont(font)
+            self.proj_font.installFont(font, True)
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now

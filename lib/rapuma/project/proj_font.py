@@ -165,9 +165,10 @@ class ProjFont (object) :
         If the force flag has been set then delete the old settings and
         install the new settings (or just reset to default settings).'''
 
+#        import pdb; pdb.set_trace()
+
         # Set vars do initial checks
         metaDataSource = os.path.join(self.local.projFontsFolder, font, font + '.xml')
-        Ctype = cType.capitalize()
         if not os.path.isfile(metaDataSource) :
             self.log.writeToLog('FONT-040', [self.tools.fName(metaDataSource)])
             self.tools.dieNow()
