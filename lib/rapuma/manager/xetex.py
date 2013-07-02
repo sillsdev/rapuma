@@ -211,57 +211,57 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
-    def rtnBoolDepend (self, bdep) :
-        '''Return the boolean value of a boolDepend target. This assumes that
-        the format is config:section:key, or config:section:section:key, if
-        it ever becomes different, this breaks. The config is expected to be 
-        the common internal reference so consitency is absolutly necessary for 
-        this to work.'''
+#    def rtnBoolDepend (self, bdep) :
+#        '''Return the boolean value of a boolDepend target. This assumes that
+#        the format is config:section:key, or config:section:section:key, if
+#        it ever becomes different, this breaks. The config is expected to be 
+#        the common internal reference so consitency is absolutly necessary for 
+#        this to work.'''
 
-        parts = bdep.split(':')
-        ptn = len(parts)
-        cfg = getattr(self, parts[0])
-        if ptn == 3 :
-            sec = parts[1]
-            key = parts[2]
-            if self.configTools.hasPlaceHolder(sec) :
-                (holderType, holderKey) = self.configTools.getPlaceHolder(sec)
-                # system (self) delclaired value
-                if holderType == 'self' :
-                    sec = self.configTools.insertValue(sec, getattr(self, holderKey))
-            return cfg[sec][key]
-        if ptn == 4 :
-            secA = parts[1]
-            secB = parts[2]
-            key = parts[3]
-            if self.configTools.hasPlaceHolder(secB) :
-                (holderType, holderKey) = self.configTools.getPlaceHolder(secB)
-                # system (self) delclaired value
-                if holderType == 'self' :
-                    secB = self.configTools.insertValue(secB, getattr(self, holderKey))
-            return cfg[secA][secB][key]
+#        parts = bdep.split(':')
+#        ptn = len(parts)
+#        cfg = getattr(self, parts[0])
+#        if ptn == 3 :
+#            sec = parts[1]
+#            key = parts[2]
+#            if self.configTools.hasPlaceHolder(sec) :
+#                (holderType, holderKey) = self.configTools.getPlaceHolder(sec)
+#                # system (self) delclaired value
+#                if holderType == 'self' :
+#                    sec = self.configTools.insertValue(sec, getattr(self, holderKey))
+#            return cfg[sec][key]
+#        if ptn == 4 :
+#            secA = parts[1]
+#            secB = parts[2]
+#            key = parts[3]
+#            if self.configTools.hasPlaceHolder(secB) :
+#                (holderType, holderKey) = self.configTools.getPlaceHolder(secB)
+#                # system (self) delclaired value
+#                if holderType == 'self' :
+#                    secB = self.configTools.insertValue(secB, getattr(self, holderKey))
+#            return cfg[secA][secB][key]
 
 
-    def copyInMacros (self) :
-        '''Copy in the right macro set for this component and renderer combination.'''
+#    def copyInMacros (self) :
+#        '''Copy in the right macro set for this component and renderer combination.'''
 
-        if self.cType.lower() in ['usfm', 'map'] :
-            # Copy in to the process folder the macro package for this component
-            if not os.path.isdir(self.projMacPackFolder) :
-                os.makedirs(self.projMacPackFolder)
+#        if self.cType.lower() in ['usfm', 'map'] :
+#            # Copy in to the process folder the macro package for this component
+#            if not os.path.isdir(self.projMacPackFolder) :
+#                os.makedirs(self.projMacPackFolder)
 
-            mCopy = False
-            for root, dirs, files in os.walk(self.rapumaMacPackFolder) :
-                for f in files :
-                    fTarget = os.path.join(self.projMacPackFolder, f)
-                    if not os.path.isfile(fTarget) :
-                        shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
-                        mCopy = True
-                        self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(fTarget)])
+#            mCopy = False
+#            for root, dirs, files in os.walk(self.rapumaMacPackFolder) :
+#                for f in files :
+#                    fTarget = os.path.join(self.projMacPackFolder, f)
+#                    if not os.path.isfile(fTarget) :
+#                        shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
+#                        mCopy = True
+#                        self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(fTarget)])
 
-            return mCopy
-        else :
-            self.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
+#            return mCopy
+#        else :
+#            self.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
 
 
     def displayPdfOutput (self, fileName) :
@@ -368,7 +368,14 @@ class Xetex (Manager) :
                                         macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
                                         if not self.tools.str2bool(realVal) :
                                             writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
-                                    elif setting.has_key('boolDependTrue') and setting['boolDependTrue'] != None :
+
+
+
+
+                                    elif setting.has_key('boolDependTrue') and self.returnConfRefValue(setting['boolDependTrue']) == True :
+
+                                        print setting['texCode'], setting['boolDependTrue']
+
                                         macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
                                         if self.tools.str2bool(realVal) :
                                             writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
@@ -377,7 +384,20 @@ class Xetex (Manager) :
                                         # We filter out zero values here (But what if we need one of them?)
                                         if not realVal == '0' :
                                             writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+
+            self.tools.dieNow()
+
             return True
+
+
+    def returnConfRefValue (self, ref) :
+        '''Return the value of a given config reference. The ref syntax is
+        as follows: [config:configObj|section|key]. This should be able to
+        recuse as deep as necessary.'''
+
+# FIXME: Do something here!
+
+
 
 
     def makeFontSettingsTexFile (self) :

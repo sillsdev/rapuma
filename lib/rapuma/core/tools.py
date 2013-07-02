@@ -580,6 +580,8 @@ class Tools (object) :
     def buildConfSection (self, confObj, section) :
         '''Build a conf object section if it doesn't exist.'''
 
+#        import pdb; pdb.set_trace()
+
         if not confObj.has_key(section) :
             confObj[section] = {}
             return True

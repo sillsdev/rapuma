@@ -165,8 +165,6 @@ class ProjFont (object) :
         If the force flag has been set then delete the old settings and
         install the new settings (or just reset to default settings).'''
 
-#        import pdb; pdb.set_trace()
-
         # Set vars do initial checks
         metaDataSource = os.path.join(self.local.projFontsFolder, font, font + '.xml')
         if not os.path.isfile(metaDataSource) :
@@ -175,6 +173,9 @@ class ProjFont (object) :
 
         # See if this font is already in the font config file
         if not self.fontConfig.has_key('Fonts') :
+            
+#            import pdb; pdb.set_trace()
+
             self.tools.buildConfSection(self.fontConfig, 'Fonts')
             if not self.fontConfig['Fonts'].has_key(font) :
                 self.tools.buildConfSection(self.fontConfig['Fonts'], font)
@@ -209,17 +210,14 @@ class ProjFont (object) :
             return True
 
         else :
-            if self.fontConfig['Fonts'].has_key(font) :
+            if len(self.fontConfig['Fonts'].get(font)) != 0 :
                 self.log.writeToLog(self.errorCodes['0247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
-                try :
-                    x = self.fontConfig['Fonts'][font]
-                except :
-                    fInfo = self.tools.getXMLSettings(metaDataSource)
-                    self.fontConfig['Fonts'][font] = fInfo.dict()
-                    self.tools.writeConfFile(self.fontConfig)
-                    self.log.writeToLog(self.errorCodes['0245'], [font])
+                fInfo = self.tools.getXMLSettings(metaDataSource)
+                self.fontConfig['Fonts'][font] = fInfo.dict()
+                self.tools.writeConfFile(self.fontConfig)
+                self.log.writeToLog(self.errorCodes['0245'], [font])
 
             # Adjust installed fonts list if needed
             if len(self.fontConfig['GeneralSettings']['installedFonts']) == 0 :
@@ -234,7 +232,7 @@ class ProjFont (object) :
                 self.fontConfig['GeneralSettings']['primaryFont'] = font
 
             self.log.writeToLog(self.errorCodes['0245'], [font])
-            self.tools.writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.fontConfig)
             return True
 
 
