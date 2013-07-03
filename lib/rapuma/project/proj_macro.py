@@ -44,7 +44,20 @@ class ProjMacro (object) :
         self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = ProjConfig(pid).projConfig
+        self.proj_config                = ProjConfig(pid, gid)
+        self.projConfig                 = self.proj_config.projConfig
+        
+        
+# FIXME: If proj_config doesn't give us the macPackConfig, what do we do?
+        
+        
+        self.macPackConfig              = self.proj_config.macPackConfig
+        
+        
+        
+        
+        
+        
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
@@ -52,8 +65,6 @@ class ProjMacro (object) :
         self.Ctype                      = self.cType.capitalize()
         self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # File names
-        self.macPackXmlConfFileName     = self.macPack + '.xml'
-        self.macPackConfFileName        = self.macPack + '.conf'
         self.macPackFileName            = self.macPack + '.zip'
         # Folder paths
         self.projConfFolder             = self.local.projConfFolder
@@ -61,9 +72,8 @@ class ProjMacro (object) :
         self.rapumaMacrosFolder         = self.local.rapumaMacrosFolder
         self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
         # File names with paths
-        self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
-        self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
-        self.macPackFile                = os.path.join(self.projMacPackFolder, self.macPackFileName)
+        self.macPackXmlConfFile         = self.proj_config.macPackXmlConfFile
+#        self.macPackFile                = os.path.join(self.projMacPackFolder, self.macPackFileName)
         self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
 
         # Log messages for this module
@@ -82,11 +92,6 @@ class ProjMacro (object) :
             '0250' : ['ERR', 'Failed to install macro package: [<<1>>]']
 
         }
-
-        # Load the macPack configuration object
-        if not os.path.exists(self.macPackXmlConfFile) :
-            self.addMacPack(self.macPack)
-        self.macPackConfig = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
 
 

@@ -362,31 +362,38 @@ class Xetex (Manager) :
                         for setting in secItem :
                             for k in setting.keys() :
                                 if k == 'texCode' :
+                                
+#                                    print setting['key']
+                                
                                     macTexVals[sections['sectionID']] = {'key' : setting['key']}
                                     realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                     if setting.has_key('boolDependFalse') :
-                                        macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
-                                        if not self.tools.str2bool(realVal) :
-                                            writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
+                                            macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
+                                            if not self.tools.str2bool(realVal) :
+                 
+#                                                print macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
+                 
+                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                    elif setting.has_key('boolDependTrue') :
+                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
+                                            macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+                                            if self.tools.str2bool(realVal) :
+                 
+#                                                print macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
+                 
+                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                    elif setting.get(k) :
+                                        if setting.get(k) != None :
+                                            macTexVals[sections['sectionID']][k] = setting.get(k)
+                                            # We filter out zero values here (But what if we need one of them?)
+                                            if not realVal == '0' :
+                 
+#                                                print setting.get(k)
+                 
+                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
 
-
-
-
-                                    elif setting.has_key('boolDependTrue') and self.returnConfRefValue(setting['boolDependTrue']) == True :
-
-                                        print setting['texCode'], setting['boolDependTrue']
-
-                                        macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-                                        if self.tools.str2bool(realVal) :
-                                            writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
-                                    elif setting.get(k) and setting.get(k) != None :
-                                        macTexVals[sections['sectionID']][k] = setting.get(k)
-                                        # We filter out zero values here (But what if we need one of them?)
-                                        if not realVal == '0' :
-                                            writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
-
-            self.tools.dieNow()
-
+#            self.tools.dieNow()
             return True
 
 
@@ -395,9 +402,16 @@ class Xetex (Manager) :
         as follows: [config:configObj|section|key]. This should be able to
         recuse as deep as necessary.'''
 
-# FIXME: Do something here!
+        (holderType, holderKey) = self.configTools.getPlaceHolder(ref)
+        if holderType.lower() == 'config' :
+            val = holderKey.split('|')
+            dct = ['self.' + val[0]]
+            val.remove(val[0])
+            for i in val :
+                i = self.configTools.processLinePlaceholders(i, '')
+                dct.append('["' + i + '"]')
 
-
+            return eval(''.join(dct))
 
 
     def makeFontSettingsTexFile (self) :

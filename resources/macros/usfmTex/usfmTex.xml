@@ -42,7 +42,7 @@ Todo:
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:usfmTex|ChapterVerse|omitVerseNumberOne]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|omitVerseNumberOne]</boolDependTrue>
             <texCode>\OmitVerseNumberOnetrue</texCode>
         </setting>
         <setting>
@@ -51,7 +51,7 @@ Todo:
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|ChapterVerse|omitAllChapterNumbers]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|omitAllChapterNumbers]</boolDependTrue>
             <texCode>\OmitChapterNumbertrue</texCode>
         </setting>
         <setting>
@@ -129,7 +129,7 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Columns|columnGutterRule]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Columns|columnGutterRule]</boolDependTrue>
             <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
         <setting>
@@ -163,7 +163,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <texCode>\ColumnGutterRuleSkip=[vm]</texCode>
-            <boolDependTrue>[config:usfmTex|Columns|columnGutterRule]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Columns|columnGutterRule]</boolDependTrue>
         </setting>
     </section>
     <section>
@@ -197,7 +197,7 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:usfmTex|Crossreferences|useAutoCallerCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Crossreferences|useAutoCallerCrossrefs]</boolDependTrue>
             <texCode>\AutoCallers{x}{[v]}</texCode>
         </setting>
         <setting>
@@ -206,7 +206,7 @@ Todo:
             <key>useNumericCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Crossreferences|useNumericCallersCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Crossreferences|useNumericCallersCrossrefs]</boolDependTrue>
             <texCode>\NumericCallers{x}</texCode>
         </setting>
         <setting>
@@ -215,7 +215,7 @@ Todo:
             <key>pageResetCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Crossreferences|pageResetCallersCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Crossreferences|pageResetCallersCrossrefs]</boolDependTrue>
             <texCode>\PageResetCallers{x}</texCode>
         </setting>
         <setting>
@@ -224,7 +224,7 @@ Todo:
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Crossreferences|omitCallerInCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDependTrue>
             <texCode>\OmitCallerInNote{x}</texCode>
         </setting>
         <setting>
@@ -233,7 +233,7 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:usfmTex|Crossreferences|paragraphedCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDependTrue>
             <texCode>\ParagraphedNotes{x}</texCode>
         </setting>
     </section>
@@ -268,7 +268,7 @@ Todo:
             <key>autoCallerListFootnotes</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:usfmTex|Footnotes|useAutoCallerFootnotes]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Footnotes|useAutoCallerFootnotes]</boolDependTrue>
             <texCode>\AutoCallers{f}{[v]}</texCode>
         </setting>
         <setting>
@@ -277,7 +277,7 @@ Todo:
             <key>useNumericCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Footnotes|useNumericCallersFootnotes]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Footnotes|useNumericCallersFootnotes]</boolDependTrue>
             <texCode>\NumericCallers{f}</texCode>
         </setting>
         <setting>
@@ -286,7 +286,7 @@ Todo:
             <key>pageResetCallersFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Footnotes|pageResetCallersFootnotes]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Footnotes|pageResetCallersFootnotes]</boolDependTrue>
             <texCode>\PageResetCallers{f}</texCode>
         </setting>
         <setting>
@@ -295,7 +295,7 @@ Todo:
             <key>omitCallerInFootnotes</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|Footnotes|omitCallerInFootnotes]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Footnotes|omitCallerInFootnotes]</boolDependTrue>
             <texCode>\OmitCallerInNote{f}</texCode>
         </setting>
         <setting>
@@ -304,7 +304,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:usfmTex|Footnotes|paragraphedFootnotes]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Footnotes|paragraphedFootnotes]</boolDependTrue>
             <texCode>\ParagraphedNotes{f}</texCode>
         </setting>
         <setting>
@@ -312,7 +312,25 @@ Todo:
             <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
             <key>defineFootnoteRule</key>
             <type>string</type>
-            <value></value>
+            <value>\hrule height 0.5pt\smallskip</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
+        </setting>
+        <setting>
+            <name>Footnote Rule On</name>
+            <description>If useFootnoteRule in the page settings is set to True, this will set \footnoterule to the setting in defineFootnoteRule.</description>
+            <key>footnoteRuleOn</key>
+            <type>boolean</type>
+            <value>[config:macPackConfig|Footnotes|defineFootnoteRule]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
+            <texCode>\def\footnoterule{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Define Footnote Rule</name>
+            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
+            <key>defineFootnoteRule</key>
+            <type>string</type>
+            <value>\hrule height 0.5pt\smallskip</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
             <texCode>\def\footnoterule{[v]}</texCode>
         </setting>
         <setting>
@@ -377,7 +395,7 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>4</value>
-            <boolDependTrue>[config:usfmTex|HeaderFooter|useRunningHeaderRule]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|HeaderFooter|useRunningHeaderRule]</boolDependTrue>
             <texCode>\RHruleposition=[vm]</texCode>
         </setting>
         <setting>
@@ -490,7 +508,7 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:usfmTex|HeaderContent|showVerseReferences]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|HeaderContent|showVerseReferences]</boolDependTrue>
             <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
@@ -499,7 +517,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|HeaderContent|omitBookReference]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|HeaderContent|omitBookReference]</boolDependTrue>
             <texCode>\OmitBookReftrue</texCode>
         </setting>
         <setting>
@@ -508,9 +526,9 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:usfmTex|HeaderContent|omitChapterNumberRH]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|HeaderContent|omitChapterNumberRH]</boolDependTrue>
             <texCode>\OmitChapterNumberRHtrue</texCode>
-            <note>This is not implemented in texCode but can be found in the standard ptx2pdf macro package.</note>
+            <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
         <setting>
             <name>Running Header Title (Left Side)</name>
@@ -665,7 +683,7 @@ Todo:
             <key>useFigurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:usfmTex|Illustrations|useFigurePlaceHolders]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|Illustrations|useFigurePlaceHolders]</boolDependTrue>
             <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
@@ -783,7 +801,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDependTrue>[config:usfmTex|PageLayout|useCropmarks]</boolDependTrue>
+            <boolDependTrue>[config:macPackConfig|PageLayout|useCropmarks]</boolDependTrue>
         </setting>
         <setting>
             <name>Page Border</name>

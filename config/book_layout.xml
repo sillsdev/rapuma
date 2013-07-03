@@ -120,6 +120,13 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
+        <setting>
+            <name>Use Footnote Rule</name>
+            <description>Set to true to be able to use a footnote rule that goes between the body text and footnotes.</description>
+            <key>useFootnoteRule</key>
+            <type>string</type>
+            <value>True</value>
+        </setting>
     </section>
     <section>
         <name>Text Elements</name>

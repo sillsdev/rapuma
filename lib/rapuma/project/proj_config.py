@@ -112,6 +112,18 @@ class ProjConfig (object) :
         self.cType                          = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                          = self.cType.capitalize()
         self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        # File Names
+        self.macPackXmlConfFileName         = self.macPack + '.xml'
+        self.macPackConfFileName            = self.macPack + '.conf'
+        # Folder paths
+        self.projMacrosFolder               = self.local.projMacrosFolder
+        self.projMacPackFolder              = os.path.join(self.local.projMacrosFolder, self.macPack)
+        # File names with paths
+        self.macPackConfFile                = os.path.join(self.projConfFolder, self.macPackConfFileName)
+        self.macPackXmlConfFile             = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
+        # Load the macro package config
+        if os.path.exists(self.macPackXmlConfFile) :
+            self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
 
 ###############################################################################
@@ -251,7 +263,7 @@ class ConfigTools (object) :
         '''Return place holder type and a key if one exists from a TeX setting line.'''
 
         begin = line.find('[')
-        end = line.find(']') + 1
+        end = line.rfind(']') + 1
         cnts = line[begin + 1:end - 1]
         if cnts.find(':') > -1 :
             return cnts.split(':')
