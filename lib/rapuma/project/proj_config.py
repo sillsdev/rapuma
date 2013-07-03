@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil, ast
+import os, shutil
 from configobj                      import ConfigObj
 
 # Load the local classes
@@ -115,15 +115,20 @@ class ProjConfig (object) :
         # File Names
         self.macPackXmlConfFileName         = self.macPack + '.xml'
         self.macPackConfFileName            = self.macPack + '.conf'
+        self.macPackFileName                = self.macPack + '.zip'
         # Folder paths
         self.projMacrosFolder               = self.local.projMacrosFolder
         self.projMacPackFolder              = os.path.join(self.local.projMacrosFolder, self.macPack)
+        self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
         # File names with paths
         self.macPackConfFile                = os.path.join(self.projConfFolder, self.macPackConfFileName)
         self.macPackXmlConfFile             = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
+        self.rapumaMacPackFile              = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
         # Load the macro package config
-        if os.path.exists(self.macPackXmlConfFile) :
-            self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
+        if not os.path.exists(self.macPackXmlConfFile) :
+            self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile)
+
+        self.macPackConfig                  = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
 
 ###############################################################################
@@ -160,12 +165,13 @@ class ConfigTools (object) :
 
         self.gid                            = gid
         self.pid                            = pid
-        self.proj_config                    = ProjConfig(pid)
+        self.proj_config                    = ProjConfig(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
+        self.layoutConfig                   = self.proj_config.layoutConfig
+        self.macPackConfig                  = self.proj_config.macPackConfig
         self.csid                           = self.projConfig['Groups'][self.gid]['csid']
         self.cType                          = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                          = self.cType.capitalize()
-        self.layoutConfig                   = ProjConfig(self.pid).layoutConfig
         self.local                          = ProjLocal(self.pid)
         self.tools                          = Tools()
 
@@ -306,14 +312,30 @@ class ConfigTools (object) :
 
     def getSideMarginFactor (self) :
         '''Calculate the side margin factor based on what the base margin
-        and side margin settings are.'''
+        and outside margin settings are.'''
 
         # For this we will be using the outsideMargin setting not the inside
         marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
         outsideMargin = float(self.layoutConfig['PageLayout']['outsideMargin'])
+        insideMargin = float(self.layoutConfig['PageLayout']['insideMargin'])
+        # Check the inside margin for changes (counts on the inside always > outside)
+        if self.getBindingGutterWidth() > 0 :
+            self.layoutConfig['PageLayout']['useBindingGutter'] = True
+        else :
+            self.layoutConfig['PageLayout']['useBindingGutter'] = False
+
+        self.tools.writeConfFile(self.layoutConfig)
+
         return outsideMargin / marginUnit
 
 
+    def getBindingGutterWidth (self) :
+        '''Calculate the binding gutter width based on any extra space added
+        to the inside margin which exceeds the outside margin.'''
+
+        insideMargin = float(self.layoutConfig['PageLayout']['insideMargin'])
+        outsideMargin = float(self.layoutConfig['PageLayout']['outsideMargin'])
+        return insideMargin - outsideMargin
 
 
 

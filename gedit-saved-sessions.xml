@@ -13,7 +13,9 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_font.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_macro.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_backup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_compare.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py"/>
@@ -22,7 +24,6 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_toc.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_maps.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_style.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>

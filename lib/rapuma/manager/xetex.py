@@ -66,7 +66,7 @@ class Xetex (Manager) :
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
-        self.proj_config            = ProjConfig(self.pid)
+        self.proj_config            = ProjConfig(self.pid, self.gid)
         self.configTools            = ConfigTools(self.pid, self.gid)
         # Bring in some manager objects we will need
         self.hyphenation            = ProjHyphenation(self.pid, self.gid)
@@ -132,7 +132,7 @@ class Xetex (Manager) :
         self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
         self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
-        self.macPackConfFile        = self.proj_macro.macPackConfFile
+        self.macPackConfFile        = self.proj_config.macPackConfFile
         self.macPackXmlConfFile     = self.proj_macro.macPackXmlConfFile
         self.defaultStyFile         = self.proj_style.defaultStyFile
         self.glbExtStyFile          = self.proj_style.glbExtStyFile
@@ -350,10 +350,10 @@ class Xetex (Manager) :
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
-            layoutDict = self.tools.xmlToDict(self.macPackXmlConfFile)
+            macPackDict = self.tools.xmlToDict(self.macPackXmlConfFile)
             # Create a dict that contains only the data we need here
             macTexVals = {}
-            for sections in layoutDict['root']['section'] :
+            for sections in macPackDict['root']['section'] :
                 macTexVals[sections['sectionID']] = {}
                 for section in sections :
                     secItem = sections[section]

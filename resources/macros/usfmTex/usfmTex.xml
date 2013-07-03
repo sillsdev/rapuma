@@ -112,7 +112,7 @@ Todo:
             <description>Number of columns used to typeset introduction material.  Introduction material is defined by USFM markers beginning with \i  Default = 1</description>
             <key>introColumns</key>
             <type>integer</type>
-            <value>1</value>
+            <value>[config:layoutConfig|PageLayout|introColumns]</value>
             <texCode>\IntroColumns=[v]</texCode>
         </setting>
         <setting>
@@ -120,7 +120,7 @@ Todo:
             <description>Number of columns used to typeset the body text.   Default = 1</description>
             <key>bodyColumns</key>
             <type>integer</type>
-            <value>1</value>
+            <value>[config:layoutConfig|PageLayout|bodyColumns]</value>
             <texCode>\BodyColumns=[v]</texCode>
         </setting>
         <setting>
@@ -323,6 +323,15 @@ Todo:
             <value>[config:macPackConfig|Footnotes|defineFootnoteRule]</value>
             <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
             <texCode>\def\footnoterule{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Footnote Rule Off</name>
+            <description>If useFootnoteRule in the page settings is set to False, this will remove any settings from \footnoterule which will remove any footnote rule.</description>
+            <key>footnoteRuleOff</key>
+            <type>boolean</type>
+            <value></value>
+            <boolDependFalse>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependFalse>
+            <texCode>\def\footnoterule{}</texCode>
         </setting>
         <setting>
             <name>Define Footnote Rule</name>
@@ -767,11 +776,22 @@ Todo:
             <texCode>\ExtraRMargin=[vm]</texCode>
         </setting>
         <setting>
+            <name>Binding Gutter On</name>
+            <description>If useBindingGutter is set to true this will turn on the binding gutter function.</description>
+            <key>bindingGutterOn</key>
+            <type>boolean</type>
+            <value>[config:layoutConfig|PageLayout|useBindingGutter]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|useBindingGutter]</boolDependTrue>
+            <texCode>\BindingGuttertrue</texCode>
+        </setting>
+        <setting>
             <name>Binding Gutter</name>
-            <description>If the amount is greater than '0' (zero) additional space will be added to the binding gutter.  This additional margin on the binding side of the page will enable printing for formats that need more space for binding like with a comb bind or hole punch.   Default = 0mm</description>
+            <description>This additional margin space on the binding side (inside) of the page which will enable printing for formats that need more space for binding like with a comb-bind or hole punch. The distance of this setting is determined by additional space added to the inside margin which exceeds the outside margin setting.</description>
             <key>bindingGutter</key>
             <type>integer</type>
-            <value>0</value>
+            <value>[function:getBindingGutterWidth]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|useBindingGutter]</boolDependTrue>
+            <texCode>\BindingGutter=[vm]</texCode>
         </setting>
     </section>
     <section>
