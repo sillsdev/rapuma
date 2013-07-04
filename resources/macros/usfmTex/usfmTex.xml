@@ -26,9 +26,47 @@ Todo:
         </setting>
     </section>
     <section>
+        <name>Project Styles</name>
+        <sectionID>ProjectStyles</sectionID>
+        <description>Parameters that covers formating styles in a project.</description>
+        <setting>
+            <name>Global Styles</name>
+            <description>This is the file that contains all global style settings for the project.</description>
+            <key>defaultStyFile</key>
+            <type>string</type>
+            <value>[self:projStylesFolder][pathSep]usfm.sty</value>
+            <texCode>\stylesheet{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Extension Styles</name>
+            <description>This is the file that contains all extension style settings for the project.</description>
+            <key>glbExtStyFile</key>
+            <type>string</type>
+            <value>[self:projStylesFolder][pathSep]usfm-ext.sty</value>
+            <texCode>\stylesheet{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Group Styles</name>
+            <description>This is the file that contains all the style settings for the current group.</description>
+            <key>grpExtStyFile</key>
+            <type>string</type>
+            <value>[self:projStylesFolder][pathSep][self:gid]-ext.sty</value>
+            <texCode>\stylesheet{[v]}</texCode>
+        </setting>
+    </section>
+    <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
-        <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
+        <description>Parameters that cover varous aspects of formating of chapter and verse layout.</description>
+        <setting>
+            <name>Marginal Verses</name>
+            <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
+            <key>useMarginalVerses</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <texCode>\input \"ptxplus-marginalverses.tex\"</texCode>
+        </setting>
         <setting>
             <name>Omit Chapter Number On Single Chapter Book</name>
             <description>Setting this to True will prevent the chapter number 1 from being displayed single chapter books.  Default = True</description>
@@ -61,13 +99,6 @@ Todo:
             <type>string</type>
             <value>\kern.1em:\kern.1em</value>
             <texCode>\def\ChapterVerseSeparator{[v]}</texCode>
-        </setting>
-        <setting>
-            <name>Marginal Verses</name>
-            <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
-            <key>useMarginalVerses</key>
-            <type>boolean</type>
-            <value>False</value>
         </setting>
         <setting>
             <name>After Verse Space Factor</name>

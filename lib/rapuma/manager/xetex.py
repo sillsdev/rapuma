@@ -211,59 +211,6 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 200 ########################
 ###############################################################################
 
-#    def rtnBoolDepend (self, bdep) :
-#        '''Return the boolean value of a boolDepend target. This assumes that
-#        the format is config:section:key, or config:section:section:key, if
-#        it ever becomes different, this breaks. The config is expected to be 
-#        the common internal reference so consitency is absolutly necessary for 
-#        this to work.'''
-
-#        parts = bdep.split(':')
-#        ptn = len(parts)
-#        cfg = getattr(self, parts[0])
-#        if ptn == 3 :
-#            sec = parts[1]
-#            key = parts[2]
-#            if self.configTools.hasPlaceHolder(sec) :
-#                (holderType, holderKey) = self.configTools.getPlaceHolder(sec)
-#                # system (self) delclaired value
-#                if holderType == 'self' :
-#                    sec = self.configTools.insertValue(sec, getattr(self, holderKey))
-#            return cfg[sec][key]
-#        if ptn == 4 :
-#            secA = parts[1]
-#            secB = parts[2]
-#            key = parts[3]
-#            if self.configTools.hasPlaceHolder(secB) :
-#                (holderType, holderKey) = self.configTools.getPlaceHolder(secB)
-#                # system (self) delclaired value
-#                if holderType == 'self' :
-#                    secB = self.configTools.insertValue(secB, getattr(self, holderKey))
-#            return cfg[secA][secB][key]
-
-
-#    def copyInMacros (self) :
-#        '''Copy in the right macro set for this component and renderer combination.'''
-
-#        if self.cType.lower() in ['usfm', 'map'] :
-#            # Copy in to the process folder the macro package for this component
-#            if not os.path.isdir(self.projMacPackFolder) :
-#                os.makedirs(self.projMacPackFolder)
-
-#            mCopy = False
-#            for root, dirs, files in os.walk(self.rapumaMacPackFolder) :
-#                for f in files :
-#                    fTarget = os.path.join(self.projMacPackFolder, f)
-#                    if not os.path.isfile(fTarget) :
-#                        shutil.copy(os.path.join(self.rapumaMacPackFolder, f), fTarget)
-#                        mCopy = True
-#                        self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(fTarget)])
-
-#            return mCopy
-#        else :
-#            self.log.writeToLog(self.errorCodes['0275'], [self.cType], 'xetex.copyInMacros():0275')
-
-
     def displayPdfOutput (self, fileName) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
@@ -346,11 +293,16 @@ class Xetex (Manager) :
         description = 'This is the primary TeX settings file for the ' + self.gid + ' group. \
         It is auto-generated so editing can be a rather futile exercise.'
 
+        # Setting for internal testing
+        outputTest = True
+
         # Open a fresh settings file
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
-            macPackDict = self.tools.xmlToDict(self.macPackXmlConfFile)
+            macPackDict = self.tools.xmlFileToDict(self.macPackXmlConfFile)
+#            macPackDict = self.tools.xmlToDict(self.macPackXmlConfFile)
+#            print macPackDict
             # Create a dict that contains only the data we need here
             macTexVals = {}
             for sections in macPackDict['root']['section'] :
@@ -358,42 +310,42 @@ class Xetex (Manager) :
                 for section in sections :
                     secItem = sections[section]
                     if type(secItem) is list :
+                        if outputTest :
+                            print sections['sectionID']
                         writeObject.write('% ' + sections['sectionID'].upper() + '\n')
                         for setting in secItem :
                             for k in setting.keys() :
                                 if k == 'texCode' :
-                                
-#                                    print setting['key']
-                                
+                                    if outputTest :
+                                        print '\t', setting['key']
                                     macTexVals[sections['sectionID']] = {'key' : setting['key']}
                                     realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                     if setting.has_key('boolDependFalse') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
                                             macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
                                             if not self.tools.str2bool(realVal) :
-                 
-#                                                print macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-                 
+                                                if outputTest :
+                                                    print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
                                                 writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
                                     elif setting.has_key('boolDependTrue') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
                                             macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
                                             if self.tools.str2bool(realVal) :
-                 
-#                                                print macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                 
+                                                if outputTest :
+                                                    print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
                                                 writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
                                     elif setting.get(k) :
                                         if setting.get(k) != None :
                                             macTexVals[sections['sectionID']][k] = setting.get(k)
                                             # We filter out zero values here (But what if we need one of them?)
                                             if not realVal == '0' :
-                 
-#                                                print setting.get(k)
-                 
+                                                if outputTest :
+                                                    print '\t', setting.get(k)
                                                 writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
-
-#            self.tools.dieNow()
+            # Die here if testing
+            if outputTest :
+                self.tools.dieNow()
+            # Report finished if not
             return True
 
 
@@ -547,6 +499,9 @@ class Xetex (Manager) :
         if os.path.exists(self.gidTexFile) :
             os.remove(self.gidTexFile)
 
+        # Create (if needed) dependent files
+        self.proj_style.checkDefaultStyFile()
+
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
@@ -559,8 +514,8 @@ class Xetex (Manager) :
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
-            if self.proj_style.checkDefaultStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+#            if self.proj_style.checkDefaultStyFile() :
+#                gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
             if self.proj_style.checkGlbExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
             if self.proj_style.checkGrpExtStyFile() :

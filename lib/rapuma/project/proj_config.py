@@ -17,13 +17,14 @@
 # this process
 
 import os, shutil
-from configobj                      import ConfigObj
+from configobj                          import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
+from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+#from rapuma.project.proj_style          import ProjStyle
 
 
 ###############################################################################
@@ -165,6 +166,7 @@ class ConfigTools (object) :
 
         self.gid                            = gid
         self.pid                            = pid
+#        self.proj_style                     = ProjStyle(pid, gid)
         self.proj_config                    = ProjConfig(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
         self.layoutConfig                   = self.proj_config.layoutConfig
@@ -174,6 +176,8 @@ class ConfigTools (object) :
         self.Ctype                          = self.cType.capitalize()
         self.local                          = ProjLocal(self.pid)
         self.tools                          = Tools()
+        # Paths we may need
+        self.projStylesFolder               = self.local.projStylesFolder
 
         self.errorCodes     = {
 
@@ -192,8 +196,16 @@ class ConfigTools (object) :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
+
+
+
+
+
+# FIXME: Need to figure out how to process embedded place holders, not just multiple ones
+
         # Allow for multiple placeholders with "while"
         while self.hasPlaceHolder(line) :
+            print line
             (holderType, holderKey) = self.getPlaceHolder(line)
             # Insert the raw value
             if holderType == 'v' :
@@ -231,6 +243,35 @@ class ConfigTools (object) :
         return line
 
 
+
+
+
+
+
+
+
+    def hasPlaceHolder (self, line) :
+        '''Return True if this line has a data place holder in it.'''
+
+        # If things get more complicated we may need to beef this up a bit
+        if line.find('[') > -1 and line.find(']') > -1 :
+            return True
+
+
+    def getPlaceHolder (self, line) :
+        '''Return place holder type and a key if one exists from a TeX setting line.'''
+
+        begin = line.find('[')
+        end = line.rfind(']') + 1
+        cnts = line[begin + 1:end - 1]
+        if cnts.find(':') > -1 :
+            return cnts.split(':')
+#        elif cnts.find('.') > -1 :
+#            return cnts.split('.')
+        else :
+            return cnts, ''
+
+
     def getConfigValue (self, val) :
         '''Return the value from a config function or just pass the
         value through, unchanged.'''
@@ -255,28 +296,6 @@ class ConfigTools (object) :
         ph = line[begin:end]
 
         return line.replace(ph, str(val))
-
-
-    def hasPlaceHolder (self, line) :
-        '''Return True if this line has a data place holder in it.'''
-
-        # If things get more complicated we may need to beef this up a bit
-        if line.find('[') > -1 and line.find(']') > -1 :
-            return True
-
-
-    def getPlaceHolder (self, line) :
-        '''Return place holder type and a key if one exists from a TeX setting line.'''
-
-        begin = line.find('[')
-        end = line.rfind(']') + 1
-        cnts = line[begin + 1:end - 1]
-        if cnts.find(':') > -1 :
-            return cnts.split(':')
-        elif cnts.find('.') > -1 :
-            return cnts.split('.')
-        else :
-            return cnts, ''
 
 
     def addMeasureUnit (self, val) :

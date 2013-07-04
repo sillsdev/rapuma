@@ -721,37 +721,37 @@ class Tools (object) :
 #        tree =  ElementTree.parse(fileName)
         tree =  ET.parse(fileName)
         root = tree.getroot()
-        return self.xmlToDict(root)
+        return self.etree_to_dict(root)
 
 
-    def xmlToDict (self, xmlFile) :
-        '''Convert an XML file into a dictionary. The code for this was found on stackoverflow at:
-        http://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree'''
+#    def xmlToDict (self, xmlFile) :
+#        '''Convert an XML file into a dictionary. The code for this was found on stackoverflow at:
+#        http://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree'''
 
         # Define function to convert an etree object to a dictionary
-        def etree_to_dict(t):
-            d = {t.tag: {} if t.attrib else None}
-            children = list(t)
-            if children:
-                dd = defaultdict(list)
-                for dc in map(etree_to_dict, children):
-                    for k, v in dc.iteritems():
-                        dd[k].append(v)
-                d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
-            if t.attrib:
-                d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
-            if t.text:
-                text = t.text.strip()
-                if children or t.attrib:
-                    if text:
-                      d[t.tag]['#text'] = text
-                else:
-                    d[t.tag] = text
-            return d
+    def etree_to_dict(self, t):
+        d = {t.tag: {} if t.attrib else None}
+        children = list(t)
+        if children:
+            dd = defaultdict(list)
+            for dc in map(self.etree_to_dict, children):
+                for k, v in dc.iteritems():
+                    dd[k].append(v)
+            d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+        if t.attrib:
+            d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
+        if t.text:
+            text = t.text.strip()
+            if children or t.attrib:
+                if text:
+                  d[t.tag]['#text'] = text
+            else:
+                d[t.tag] = text
+        return d
 
-        # Open and convert the XML file to an etree object
-        contents = codecs.open(xmlFile, "r").read()
-        return etree_to_dict(ET.XML(contents))
+#        # Open and convert the XML file to an etree object
+#        contents = codecs.open(xmlFile, "r").read()
+#        return etree_to_dict(ET.XML(contents))
 
 
     # This will reasign the standard ConfigObj function that works much like ours
