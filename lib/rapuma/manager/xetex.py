@@ -326,14 +326,14 @@ class Xetex (Manager) :
                                             if not self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
                                     elif setting.has_key('boolDependTrue') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
                                             macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
                                             if self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
                                     elif setting.get(k) :
                                         if setting.get(k) != None :
                                             macTexVals[sections['sectionID']][k] = setting.get(k)
@@ -341,7 +341,7 @@ class Xetex (Manager) :
                                             if not realVal == '0' :
                                                 if outputTest :
                                                     print '\t', setting.get(k)
-                                                writeObject.write(self.configTools.processLinePlaceholders(setting['texCode'], realVal) + '\n')
+                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
             # Die here if testing
             if outputTest :
                 self.tools.dieNow()
@@ -354,13 +354,15 @@ class Xetex (Manager) :
         as follows: [config:configObj|section|key]. This should be able to
         recuse as deep as necessary.'''
 
-        (holderType, holderKey) = self.configTools.getPlaceHolder(ref)
+        ref = ref.lstrip('[').rstrip(']')
+        (holderType, holderKey) = ref.split(':', 1)
+        #(holderType, holderKey) = self.configTools.getPlaceHolder(ref)
         if holderType.lower() == 'config' :
             val = holderKey.split('|')
             dct = ['self.' + val[0]]
             val.remove(val[0])
             for i in val :
-                i = self.configTools.processLinePlaceholders(i, '')
+                i = self.configTools.processNestedPlaceholders(i, '')
                 dct.append('["' + i + '"]')
 
             return eval(''.join(dct))

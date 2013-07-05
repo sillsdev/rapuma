@@ -49,21 +49,21 @@ import codecs, argparse
 #from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_backup        import ProjBackup
-from rapuma.core.proj_binding       import ProjBinding
-from rapuma.core.proj_compare       import ProjCompare
-from rapuma.core.proj_process       import ProjProcess
-from rapuma.core.tools              import Tools, ToolsGroup
-from rapuma.project.proj_config     import ProjConfig
-from rapuma.project.proj_setup      import ProjSetup
-from rapuma.project.proj_commander  import ProjCommander
-from rapuma.project.proj_maps       import ProjMaps
-from rapuma.project.proj_toc        import ProjToc
-from rapuma.project.proj_background import ProjBackground
-from rapuma.manager.project         import Project
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_backup            import ProjBackup
+from rapuma.core.proj_binding           import ProjBinding
+from rapuma.core.proj_compare           import ProjCompare
+from rapuma.core.proj_process           import ProjProcess
+from rapuma.core.tools                  import Tools, ToolsGroup
+from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.proj_setup          import ProjSetup
+from rapuma.project.proj_commander      import ProjCommander
+from rapuma.project.proj_maps           import ProjMaps
+from rapuma.project.proj_toc            import ProjToc
+from rapuma.project.proj_background     import ProjBackground
+from rapuma.manager.project             import Project
 
 # Instantiate User config class
 uc              = UserConfig()
@@ -71,8 +71,17 @@ tools           = Tools()
 
 # Set some global vars
 systemName      = 'Rapuma (Rapid Publication Manager)'
-systemAbout     = 'Rapuma is a publishing management system written by the friendly developers at Payap University\'s Linguistics Institute (Text Unit). Rapuma stands for Rapid Publication Manager. It is currently being deployed in MSEAG and is under heavy development. Anyone wanting to try this system should be warned that it may not work in their context. However, the underlying principals of the system should work in any long document publishing environment. Therefore the package should be evaluated with that in mind. We welcome input and participation in this project. It is our hope it will be able to serve more than just MSEAG. For questions or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r680'
+systemAbout     = 'Rapuma is a publishing management system written by the friendly \
+                    developers at Payap University\'s Linguistics Institute (Text Unit). \
+                    Rapuma stands for Rapid Publication Manager. It is currently being \
+                    deployed in MSEAG and is under heavy development. Anyone wanting to \
+                    try this system should be warned that it may not work in their context. \
+                    However, the underlying principals of the system should work in any long \
+                    document publishing environment. Therefore the package should be evaluated \
+                    with that in mind. We welcome input and participation in this project. It \
+                    is our hope it will be able to serve more than just MSEAG. For questions \
+                    or more information please write: dennis_drescher@sil.org.'
+systemVersion   = '0.6.r682'
 local           = None
 
 # Give a welcome message

@@ -192,62 +192,92 @@ class ConfigTools (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-    def processLinePlaceholders (self, line, value) :
+    def insertValue (self, line, val) :
+        '''Insert a value where a place holder is.'''
+
+        # Handle empty values here
+        if val == '[empty]' :
+            val = ''
+        begin = line.find('[')
+        end = line.find(']') + 1
+        ph = line[begin:end]
+
+        return line.replace(ph, str(val))
+
+
+    def replace_substr (self, original_line, start_idx, end_idx, replacement_text) :
+
+        return original_line[:start_idx] + \
+             unicode(replacement_text) + \
+             original_line[end_idx+1:]
+
+    def processSinglePlaceholder (self, ph, value) :
+        '''Once we are sure we have a single placeholder (noting embedded) this
+        will process it and replace it with the correct value.'''
+
+        holderType = ph.split(':')[0]
+        try :
+            holderKey = ph.split(':')[1]
+        except :
+            holderKey = ''
+
+        if self.hasPlaceHolder(value):
+            value = self.processNestedPlaceholders(value, '')
+
+        result = ph # If nothing matches below, default to returning placeholder unchanged
+        if holderType == 'v' :
+            result = value
+        # A value that is from a configObj
+        elif holderKey and holderType == 'config' :
+            result = self.getConfigValue(holderKey)
+        # A value that needs a measurement unit attached
+        elif holderType == 'vm' :
+            result = self.addMeasureUnit(value)
+        # A value that is a path
+        elif holderKey and holderType == 'path' :
+            result = getattr(self.local, holderKey)
+        # A value that is from a configObj
+        elif holderKey and holderType == 'function' :
+            fnc = getattr(self, holderKey)
+            result = fnc()
+        # A value that is a path separater character
+        elif holderType == 'pathSep' :
+            result = os.sep
+        # A value that contains a system delclaired value
+        # Note this only works if the value we are looking for has
+        # been declaired above in the module init
+        elif holderType == 'self' :
+            result = getattr(self, holderKey)
+        # Go get a value from another setting in the self.layoutConfig
+        #elif holderKey and holderType in self.layoutConfig.keys() :
+        #    holderValue = self.layoutConfig[holderType][holderKey]
+        #    result = self.insertValue(ph, holderValue)
+
+        return result
+
+
+    def processNestedPlaceholders (self, line, value = '') :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
-
-
-
-
-
-# FIXME: Need to figure out how to process embedded place holders, not just multiple ones
-
-        # Allow for multiple placeholders with "while"
-        while self.hasPlaceHolder(line) :
-            print line
-            (holderType, holderKey) = self.getPlaceHolder(line)
-            # Insert the raw value
-            if holderType == 'v' :
-                line = self.insertValue(line, value)
-            # Go get a value from another setting in the self.layoutConfig
-            elif holderType in self.layoutConfig.keys() :
-                holderValue = self.layoutConfig[holderType][holderKey]
-                line = self.insertValue(line, holderValue)
-            # A value that needs a measurement unit attached
-            elif holderType == 'vm' :
-                line = self.insertValue(line, self.addMeasureUnit(value))
-            # A value that is a path
-            elif holderType == 'path' :
-                pth = getattr(self.local, holderKey)
-                line = self.insertValue(line, pth)
-            # A value that is from a configObj
-            elif holderType == 'config' :
-                val = self.getConfigValue(holderKey)
-                line = self.insertValue(line, val)
-            # A value that is from a configObj
-            elif holderType == 'function' :
-                fnc = getattr(self, holderKey)
-                val = fnc()
-                line = self.insertValue(line, val)
-            # A value that is a path separater character
-            elif holderType == 'pathSep' :
-                pathSep = os.sep
-                line = self.insertValue(line, pathSep)
-            # A value that contains a system delclaired value
-            # Note this only works if the value we are looking for has
-            # been declaired above in the module init
-            elif holderType == 'self' :
-                line = self.insertValue(line, getattr(self, holderKey))
-
-        return line
-
-
-
-
-
-
-
+        print "Debug: line =", line
+        print "value =", value
+        result = []
+        #resultline = line
+        end_of_previous_segment = 0
+        for (ph_start, ph_end) in self.getPlaceHolder(line) :
+            unchanged_segment = line[end_of_previous_segment:ph_start]
+            result.append(unchanged_segment)
+            ph_text = line[ph_start+1:ph_end]
+            replacement = self.processNestedPlaceholders(ph_text, value)
+            #resultline = self.replace_substr(resultline, ph_start, ph_end, replacement)
+            result.append(unicode(replacement))
+            end_of_previous_segment = ph_end+1  # Skip the closing bracket
+        result.append(line[end_of_previous_segment:])
+        resultline = "".join(result)
+        result_text = self.processSinglePlaceholder(resultline, value)
+        print "result of processNestedPlaceholders =", result_text
+        return result_text
 
 
     def hasPlaceHolder (self, line) :
@@ -261,15 +291,19 @@ class ConfigTools (object) :
     def getPlaceHolder (self, line) :
         '''Return place holder type and a key if one exists from a TeX setting line.'''
 
-        begin = line.find('[')
-        end = line.rfind(']') + 1
-        cnts = line[begin + 1:end - 1]
-        if cnts.find(':') > -1 :
-            return cnts.split(':')
-#        elif cnts.find('.') > -1 :
-#            return cnts.split('.')
-        else :
-            return cnts, ''
+        nesting_level = 0
+        remembered_idx = None
+        for idx, ch in enumerate(line):
+            if ch == '[':
+                nesting_level += 1
+                if remembered_idx is None:
+                    remembered_idx = idx
+            elif ch == ']':
+                nesting_level -= 1
+                if nesting_level <= 0:
+                    found_idx = remembered_idx
+                    remembered_idx = None
+                    yield (found_idx, idx)
 
 
     def getConfigValue (self, val) :
@@ -283,19 +317,6 @@ class ConfigTools (object) :
             dct.append('["' + i + '"]')
 
         return eval(''.join(dct))
-
-
-    def insertValue (self, line, val) :
-        '''Insert a value where a place holder is.'''
-
-        # Handle empty values here
-        if val == '[empty]' :
-            val = ''
-        begin = line.find('[')
-        end = line.find(']') + 1
-        ph = line[begin:end]
-
-        return line.replace(ph, str(val))
 
 
     def addMeasureUnit (self, val) :

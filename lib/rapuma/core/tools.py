@@ -724,12 +724,10 @@ class Tools (object) :
         return self.etree_to_dict(root)
 
 
-#    def xmlToDict (self, xmlFile) :
-#        '''Convert an XML file into a dictionary. The code for this was found on stackoverflow at:
-#        http://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree'''
-
-        # Define function to convert an etree object to a dictionary
     def etree_to_dict(self, t):
+        '''Convert an XML file into a dictionary. The code for this was lifted from stackoverflow at:
+        http://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree'''
+
         d = {t.tag: {} if t.attrib else None}
         children = list(t)
         if children:
@@ -737,21 +735,25 @@ class Tools (object) :
             for dc in map(self.etree_to_dict, children):
                 for k, v in dc.iteritems():
                     dd[k].append(v)
-            d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
-        if t.attrib:
+            # The code in this function is generic in its original form
+            # however, we needed to add a Rapuma-specific value to be able
+            # to build the dictionary in a predictable way. The following
+            # line was like this:
+            #   d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+            # the modified line is as follows:
+            d = {t.tag: {k:(v[0] if (len(v) == 1 and k != "setting") else v) for k, v in dd.iteritems()}}
+
+        if t.attrib :
             d[t.tag].update(('@' + k, v) for k, v in t.attrib.iteritems())
-        if t.text:
+
+        if t.text :
             text = t.text.strip()
-            if children or t.attrib:
+            if children or t.attrib :
                 if text:
                   d[t.tag]['#text'] = text
-            else:
+            else :
                 d[t.tag] = text
         return d
-
-#        # Open and convert the XML file to an etree object
-#        contents = codecs.open(xmlFile, "r").read()
-#        return etree_to_dict(ET.XML(contents))
 
 
     # This will reasign the standard ConfigObj function that works much like ours

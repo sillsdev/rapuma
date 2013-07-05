@@ -237,10 +237,8 @@ class ProjBackground (object) :
         lineSpacingFactor   = float(self.macPackConfig['Fonts']['lineSpacingFactor'])
         fontSizeUnit        = float(self.macPackConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
         marginUnit          = float(self.layoutConfig['PageLayout']['marginUnit'])
-        topMarginFactor     = float(self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['topMarginFactor'], ''))
-#        topMarginFactor     = float(self.macPackConfig['Margins']['topMarginFactor'])
-        bottomMarginFactor  = float(self.configTools.processLinePlaceholders(self.macPackConfig['Margins']['bottomMarginFactor'], ''))
-#        bottomMarginFactor  = float(self.macPackConfig['Margins']['bottomMarginFactor'])
+        topMarginFactor     = float(self.configTools.processNestedPlaceholders(self.macPackConfig['Margins']['topMarginFactor']))
+        bottomMarginFactor  = float(self.configTools.processNestedPlaceholders(self.macPackConfig['Margins']['bottomMarginFactor']))
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,

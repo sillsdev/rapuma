@@ -653,7 +653,7 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\newlanguage\[v]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -663,7 +663,7 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\language=\[v]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -673,7 +673,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\defaulthyphenchar=[v]</texCode>
         </setting>
         <setting>
@@ -682,7 +682,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\hyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -691,7 +691,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependFalse>
+            <boolDependFalse>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependFalse>
             <texCode>\hyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -700,7 +700,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\exhyphenpenalty=[v]</texCode>
         </setting>
         <setting>
@@ -709,7 +709,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>[config:projConfig|Groups|[self.gid]|useHyphenation]</boolDependTrue>
+            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
             <texCode>\pretolerance=[v]</texCode>
         </setting>
     </section>
