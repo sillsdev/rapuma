@@ -294,7 +294,7 @@ class Xetex (Manager) :
         It is auto-generated so editing can be a rather futile exercise.'
 
         # Setting for internal testing
-        outputTest = True
+        outputTest = False
 
         # Open a fresh settings file
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
@@ -503,25 +503,29 @@ class Xetex (Manager) :
 
         # Create (if needed) dependent files
         self.proj_style.checkDefaultStyFile()
+        self.proj_style.checkGlbExtStyFile()
+        self.proj_style.checkGrpExtStyFile()
+        self.makeSettingsTexFile()
+        self.makeGrpExtTexFile()
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
             gidTexObject.write(self.tools.makeFileHeader(self.gidTexFileName, description))
             gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
-            if self.makeSettingsTexFile() :
-                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
-            if self.makeGrpExtTexFile() :
-                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
+#            if self.makeSettingsTexFile() :
+#                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
+#            if self.makeGrpExtTexFile() :
+#                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
 #            if self.proj_style.checkDefaultStyFile() :
 #                gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
-            if self.proj_style.checkGlbExtStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
-            if self.proj_style.checkGrpExtStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+#            if self.proj_style.checkGlbExtStyFile() :
+#                gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
+#            if self.proj_style.checkGrpExtStyFile() :
+#                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])

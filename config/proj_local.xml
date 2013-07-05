@@ -79,6 +79,13 @@ Todo:
             <value>Scripts</value>
         </setting>
         <setting>
+            <name>Project Helper Scripts Folder</name>
+            <key>projHelpScriptsFolder</key>
+            <description>The folder where all the project helper scripts are kept.</description>
+            <type>string</type>
+            <value>HelperScripts</value>
+        </setting>
+        <setting>
             <name>Project Styles Folder</name>
             <key>projStylesFolder</key>
             <description>The folder where all component type styles are kept.</description>

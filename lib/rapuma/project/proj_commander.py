@@ -58,8 +58,8 @@ class ProjCommander (object) :
     def updateScripts (self) :
         '''Update all the helper command scripts in a project.'''
 
-        if not os.path.isdir(self.local.projScriptsFolder) :
-            os.mkdir(self.local.projScriptsFolder)
+        if not os.path.isdir(self.local.projHelpScriptsFolder) :
+            os.mkdir(self.local.projHelpScriptsFolder)
 
         self.makeStaticScripts()
         self.makeGrpScripts()
@@ -73,7 +73,7 @@ class ProjCommander (object) :
             for gid in self.projConfig['Groups'].keys() :
                 allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
-                    fullFile = os.path.join(self.local.projScriptsFolder, key) + gid
+                    fullFile = os.path.join(self.local.projHelpScriptsFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
                         writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
                         writeObject.write(allScripts[key][1] + '\n\n')
@@ -96,7 +96,7 @@ class ProjCommander (object) :
         # Output the scripts
         allScripts = self.getStaticScripInfo()
         for key in allScripts.keys() :
-            fullFile = os.path.join(self.local.projScriptsFolder, key)
+            fullFile = os.path.join(self.local.projHelpScriptsFolder, key)
             with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
                 writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
                 writeObject.write(allScripts[key][1] + '\n\n')

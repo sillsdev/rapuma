@@ -192,24 +192,6 @@ class ConfigTools (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-    def insertValue (self, line, val) :
-        '''Insert a value where a place holder is.'''
-
-        # Handle empty values here
-        if val == '[empty]' :
-            val = ''
-        begin = line.find('[')
-        end = line.find(']') + 1
-        ph = line[begin:end]
-
-        return line.replace(ph, str(val))
-
-
-    def replace_substr (self, original_line, start_idx, end_idx, replacement_text) :
-
-        return original_line[:start_idx] + \
-             unicode(replacement_text) + \
-             original_line[end_idx+1:]
 
     def processSinglePlaceholder (self, ph, value) :
         '''Once we are sure we have a single placeholder (noting embedded) this
@@ -227,12 +209,12 @@ class ConfigTools (object) :
         result = ph # If nothing matches below, default to returning placeholder unchanged
         if holderType == 'v' :
             result = value
-        # A value that is from a configObj
-        elif holderKey and holderType == 'config' :
-            result = self.getConfigValue(holderKey)
         # A value that needs a measurement unit attached
         elif holderType == 'vm' :
             result = self.addMeasureUnit(value)
+        # A value that is from a configObj
+        elif holderKey and holderType == 'config' :
+            result = self.getConfigValue(holderKey)
         # A value that is a path
         elif holderKey and holderType == 'path' :
             result = getattr(self.local, holderKey)
@@ -248,10 +230,6 @@ class ConfigTools (object) :
         # been declaired above in the module init
         elif holderType == 'self' :
             result = getattr(self, holderKey)
-        # Go get a value from another setting in the self.layoutConfig
-        #elif holderKey and holderType in self.layoutConfig.keys() :
-        #    holderValue = self.layoutConfig[holderType][holderKey]
-        #    result = self.insertValue(ph, holderValue)
 
         return result
 
@@ -260,8 +238,8 @@ class ConfigTools (object) :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
-        print "Debug: line =", line
-        print "value =", value
+#        print "Debug: line =", line
+#        print "value =", value
         result = []
         #resultline = line
         end_of_previous_segment = 0
@@ -270,13 +248,12 @@ class ConfigTools (object) :
             result.append(unchanged_segment)
             ph_text = line[ph_start+1:ph_end]
             replacement = self.processNestedPlaceholders(ph_text, value)
-            #resultline = self.replace_substr(resultline, ph_start, ph_end, replacement)
             result.append(unicode(replacement))
             end_of_previous_segment = ph_end+1  # Skip the closing bracket
         result.append(line[end_of_previous_segment:])
         resultline = "".join(result)
         result_text = self.processSinglePlaceholder(resultline, value)
-        print "result of processNestedPlaceholders =", result_text
+#        print "result of processNestedPlaceholders =", result_text
         return result_text
 
 
@@ -289,7 +266,8 @@ class ConfigTools (object) :
 
 
     def getPlaceHolder (self, line) :
-        '''Return place holder type and a key if one exists from a TeX setting line.'''
+        '''Return place holder type and a key if one exists from a TeX setting line.
+        Pass over the line and return (yield) each placeholder found.'''
 
         nesting_level = 0
         remembered_idx = None

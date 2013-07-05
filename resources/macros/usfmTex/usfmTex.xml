@@ -50,7 +50,7 @@ Todo:
             <description>This is the file that contains all the style settings for the current group.</description>
             <key>grpExtStyFile</key>
             <type>string</type>
-            <value>[self:projStylesFolder][pathSep][self:gid]-ext.sty</value>
+            <value>[self:projStylesFolder][pathSep][self:cType]-[self:gid]-ext.sty</value>
             <texCode>\stylesheet{[v]}</texCode>
         </setting>
     </section>
@@ -65,7 +65,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
-            <texCode>\input \"ptxplus-marginalverses.tex\"</texCode>
+            <texCode>\input "ptxplus-marginalverses.tex"</texCode>
         </setting>
         <setting>
             <name>Omit Chapter Number On Single Chapter Book</name>
@@ -363,15 +363,6 @@ Todo:
             <value></value>
             <boolDependFalse>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependFalse>
             <texCode>\def\footnoterule{}</texCode>
-        </setting>
-        <setting>
-            <name>Define Footnote Rule</name>
-            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
-            <key>defineFootnoteRule</key>
-            <type>string</type>
-            <value>\hrule height 0.5pt\smallskip</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
-            <texCode>\def\footnoterule{[v]}</texCode>
         </setting>
         <setting>
             <name>Auto Caller Number Characters</name>
