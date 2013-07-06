@@ -1,4 +1,4 @@
-% xetex_settings_usfm-ext.tex
+% mapTex-ext.tex
 %
 % Custom TeX setup file for the usfmTex macro package.
 
@@ -23,6 +23,27 @@
 % Baselineskip Adjustment Hook Example
 %\sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
 %\sethook{after}{s1}{\baselineskip=\remblskip}
+
+%%%%% Additional Marginal Verse Settings
+% For marginal verse output we need to insert this right here.
+% This should be temporary. It allows one stylesheet to undo 
+% superscript in a previous one It needs to go right here to
+% keep everything else working
+%
+% This is needed to turn off superscript in the override stylesheet
+\catcode`\@=11
+\def\NoSuperscript  {\defp@ram{superscript}{false}}
+\catcode`\@=12
+%
+% In the override stylesheet (to follow) we need this to be
+% inserted for \v:
+% \Marker v
+% \sethook{start}{v}{\kern-3sp}
+% \FontSize 8
+% \Bold
+% \NoSuperscript
+
+%\def\forcehyphen{-\char"200B}
 
 %%%%% Header output
 % To adjust the size of the page number in the header or footer
@@ -102,40 +123,71 @@
 %}
 %\catcode`\@=12
 
-%%%%% Additional Marginal Verse Settings
-% For marginal verse output we need to insert this right here.
-% This should be temporary. It allows one stylesheet to undo 
-% superscript in a previous one It needs to go right here to
-% keep everything else working
-%
-% This is needed to turn off superscript in the override stylesheet
-\catcode`\@=11
-\def\NoSuperscript  {\defp@ram{superscript}{false}}
-\catcode`\@=12
-%
-% In the override stylesheet (to follow) we need this to be
-% inserted for \v:
-% \Marker v
-% \sethook{start}{v}{\kern-3sp}
-% \FontSize 8
-% \Bold
-% \NoSuperscript
+%%%%% Get Rid of Over Full Warnings
+% Surpress (if necessary) the vbox over full warning when
+% when line spacing gets tight. If you use it edit the pt
+% according to what you need. Keep in mind that you might
+% be able to prevent an overful \vbox by changing your top
+% and/or bottom margins.
+%\vfuzz = 2.5pt
 
-%\def\forcehyphen{-\char"200B}
+%%%%% Get Rid of Uggly Black Boxes
+% This might help prevent the black boxes from appearing
+% at the end of some lines if that is a problem. Edit as
+% needed.
+%\hfuzz=0.75pt
 
-% Special commands
+
+%%%%%%%%%%%%%%%%%%%%% TOC Generation %%%%%%%%%%%%%%%%%%%%%%
+
+% The following code controls the layout of the TOC file
+% This code can be addjusted to get the right look to your
+% TOC. You can also adjust the \toc<n> styles found in
+% the .sty file. The functions that are embedded in the
+% TOC file are:
+%	\tbltwowlheader{lable1}{label3}
+%	\tbltwowlrow{val1}{val3}
+% Or, if you wish a three column layout you could use this:
+%	\tblthreewlheader{lable1}{label3}
+%	\tblthreewlrow{val1}{val3}
+% Other layouts, more code will be need to be added.
+% To change the leader, leader spacing and other general
+% layout formating, adjust the settings below.
+
 \catcode`@=11
+
 \def\makedigitsother{\m@kedigitsother}
 \def\makedigitsletters{\m@kedigitsletters}
+
+% These are custom settings that can go in the .tex file to
+% adjust elements on the page
+\def\myleader{.}		% The leader character
+\def\leaderspace{0.6em}		% The space between the leader characters
+\def\tblmarginright{0in}	% The width of the table's right margin
+\def\tblheaderspace{4pt}	% The space between the header and the first row
+\def\tblrowspace{4pt}		% The space between rows of the table
+\def\tblthreewcolmngap{.75in}	% The space between col 1 & 2 on a three col table
+
+
+% Macro code for leadered two colum layout:
+\newdimen\tbltwowllabel
+\def\tbltwowlheader#1#2{\parfillskip=\tblmarginright\toch #1\toch*\hfil
+  \setbox0=\hbox{\toch #2\toch*}\tbltwowllabel=\wd0\box0\par\vskip \tblheaderspace}
+
+\def\tbltwowlrow#1#2{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\tocbn #1\tocbn*%
+  \quad\leaders\hbox to \leaderspace{\hss\myleader\hss}\hfill\hbox to \tbltwowllabel{%
+  \hfil\tocpg #2\tocpg*}\par}%
+
+% Macro code for leadered three colum layout:
+\newdimen\tblthreewllabel
+\def\tblthreewlheader#1#2#3{\parfillskip=\tblmarginright\setbox0\hbox{\toch #1\toch*\relax}\tblthreewllabel=\wd0
+  \noindent\box0\hskip\tblthreewcolmngap\toch #2\toch*\hfil\toch #3\toch*\par\vskip \tblheaderspace}
+
+\def\tblthreewlrow#1#2#3{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\hbox to \tblthreewllabel{\tocbn #1\tocbn*\hss\relax}%
+  \hskip\tblthreewcolmngap\tocba #2\tocba*
+  \leaders\hbox to \leaderspace{\hss\tocbn \myleader\tocbn*\hss}\hfil
+  \enskip\tocpg #3\tocpg*\par}%
+
 \catcode `@=12
-\def\nbsp{ }
-\def\zwsp{​}
-\newdimen\remblskip \remblskip=\baselineskip
-\def\suckupline{\vskip -\baselineskip}
-\def\suckuphalfline{\vskip -0.5\baselineskip}
-\def\suckupqline{\vskip -0.25\baselineskip}
-\def\skipline{\vskip\baselineskip}
-\def\skiphalfline{\vskip 0.5\baselineskip}
-\def\skipqline{\vskip 0.25\baselineskip}
 
 

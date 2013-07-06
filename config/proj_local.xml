@@ -13,6 +13,42 @@ Todo:
 
 
 <root>
+<!-- Experimenting with new structure...
+    <section>
+        <name>Files: ???</name>
+        <sectionID>???Files</sectionID>
+        <description></description>
+        <setting>
+            <name></name>
+            <key></key>
+            <description></description>
+            <filename></filename>
+            <path></path>
+            <preserve backup=True archive=True reap=True template=True>
+        </setting>
+    </section>
+    <section>
+        <name>Files: Project</name>
+        <sectionID>projectFiles</sectionID>
+        <description>Global level project files</description>
+        <setting>
+            <name></name>
+            <key></key>
+            <description></description>
+            <filename></filename>
+            <path></path>
+            <preserve backup=True archive=True reap=True template=True>
+        </setting>
+        <setting>
+            <name>Project Configuration File</name>
+            <key>projConfFile</key>
+            <description>The primary project configuration file.</description>
+            <filename>project.conf</filename>
+            <path>projConfFolder</path>
+            <preserve backup=True archive=True reap=True template=True>
+        </setting>
+    </section>
+-->
     <section>
         <name>User Folders</name>
         <sectionID>UserFolders</sectionID>
@@ -86,25 +122,11 @@ Todo:
             <value>HelperScripts</value>
         </setting>
         <setting>
-            <name>Project Styles Folder</name>
-            <key>projStylesFolder</key>
-            <description>The folder where all component type styles are kept.</description>
-            <type>string</type>
-            <value>Styles</value>
-        </setting>
-        <setting>
             <name>Project Macros Folder</name>
             <key>projMacrosFolder</key>
             <description>The folder where all macros, or scripts, that drive the rendering process are kept.</description>
             <type>string</type>
             <value>Macros</value>
-        </setting>
-        <setting>
-            <name>Project User Macros Folder</name>
-            <key>projUserMacrosFolder</key>
-            <description>The folder where all the user custom Rapuma macros are kept.</description>
-            <type>list</type>
-            <value>Macros,User</value>
         </setting>
         <setting>
             <name>Project Fonts Folder</name>

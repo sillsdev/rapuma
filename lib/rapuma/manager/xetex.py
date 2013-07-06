@@ -102,10 +102,10 @@ class Xetex (Manager) :
         self.gidTexFileName         = self.gid + '.tex'
         self.gidPdfFileName         = self.gid + '.pdf'
         self.macLinkFileName        = self.macroPackage + '.tex'
-        self.macSettingsFileName    = 'settings.tex'
-        self.fontTexFileName        = 'fonts.tex'
-        self.extTexFileName         = 'extentions.tex'
-        self.grpExtTexFileName      = self.gid + '-extentions.tex'
+        self.macSettingsFileName    = self.macroPackage + '-settings.tex'
+        self.fontTexFileName        = self.macroPackage + '-fonts.tex'
+        self.extTexFileName         = self.macroPackage + '-ext.tex'
+        self.grpExtTexFileName      = self.macroPackage + '-' + self.gid + '-ext.tex'
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
@@ -128,8 +128,8 @@ class Xetex (Manager) :
         self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
         self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
         self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
-        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
-        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
+#        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
+#        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
         self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
         self.macPackConfFile        = self.proj_config.macPackConfFile
@@ -440,24 +440,24 @@ class Xetex (Manager) :
             return True
 
 
-    def makeGrpExtTexFile (self) :
-        '''Create/copy a group TeX extentions file to the project for specified group.'''
+#    def makeGrpExtTexFile (self) :
+#        '''Create/copy a group TeX extentions file to the project for specified group.'''
 
-        description = 'This is the group extention file which overrides settings in \
-        the main TeX settings files and the component TeX settings.'
+#        description = 'This is the group extention file which overrides settings in \
+#        the main TeX settings files and the component TeX settings.'
 
-        # First look for a user file, if not, then make a blank one
-        if not os.path.isfile(self.grpExtTexFile) :
-            if os.path.isfile(self.usrGrpExtTexFile) :
-                shutil.copy(self.usrGrpExtTexFile, self.grpExtTexFile)
-            else :
-                # Create a blank file
-                with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
-                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
+#        # First look for a user file, if not, then make a blank one
+#        if not os.path.isfile(self.grpExtTexFile) :
+#            if os.path.isfile(self.usrGrpExtTexFile) :
+#                shutil.copy(self.usrGrpExtTexFile, self.grpExtTexFile)
+#            else :
+#                # Create a blank file
+#                with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
+#                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
+#                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
 
-        # Need to return true here even if nothing was done
-        return True
+#        # Need to return true here even if nothing was done
+#        return True
 
 
 #    def makeExtTexFile (self) :
@@ -502,11 +502,11 @@ class Xetex (Manager) :
             os.remove(self.gidTexFile)
 
         # Create (if needed) dependent files
-        self.proj_style.checkDefaultStyFile()
-        self.proj_style.checkGlbExtStyFile()
+#        self.proj_style.checkDefaultStyFile()
+#        self.proj_style.checkGlbExtStyFile()
         self.proj_style.checkGrpExtStyFile()
         self.makeSettingsTexFile()
-        self.makeGrpExtTexFile()
+#        self.makeGrpExtTexFile()
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.

@@ -21,8 +21,8 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools          import Tools
-from rapuma.core.user_config    import UserConfig
+from rapuma.core.tools              import Tools
+from rapuma.core.user_config        import UserConfig
 
 
 class ProjLocal (object) :
@@ -37,6 +37,9 @@ class ProjLocal (object) :
         self.userConfig         = self.user.userConfig
         self.projHome           = self.userConfig['Projects'][pid]['projectPath']
         self.tools              = Tools()
+
+# FIXME: Do we want to change the way we do this and add file names and
+# more sophisticated XML?
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')

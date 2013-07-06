@@ -34,7 +34,7 @@ Todo:
             <description>This is the file that contains all global style settings for the project.</description>
             <key>defaultStyFile</key>
             <type>string</type>
-            <value>[self:projStylesFolder][pathSep]usfm.sty</value>
+            <value>[self:projMacPackFolder][pathSep]usfmTex.sty</value>
             <texCode>\stylesheet{[v]}</texCode>
         </setting>
         <setting>
@@ -42,7 +42,7 @@ Todo:
             <description>This is the file that contains all extension style settings for the project.</description>
             <key>glbExtStyFile</key>
             <type>string</type>
-            <value>[self:projStylesFolder][pathSep]usfm-ext.sty</value>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-ext.sty</value>
             <texCode>\stylesheet{[v]}</texCode>
         </setting>
         <setting>
@@ -50,7 +50,7 @@ Todo:
             <description>This is the file that contains all the style settings for the current group.</description>
             <key>grpExtStyFile</key>
             <type>string</type>
-            <value>[self:projStylesFolder][pathSep][self:cType]-[self:gid]-ext.sty</value>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</value>
             <texCode>\stylesheet{[v]}</texCode>
         </setting>
     </section>
@@ -117,11 +117,19 @@ Todo:
             <texCode>\def\AfterChapterSpaceFactor{[v]}</texCode>
         </setting>
         <setting>
+            <name>Use Adorn Verse Number</name>
+            <description>Set to true to turn on adorn verse numbers.</description>
+            <key>useAdornVerseNumber</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
             <name>Adorn Verse Number Setting</name>
-            <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = nothing</description>
+            <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = (#1)</description>
             <key>adornVerseSetting</key>
             <type>string</type>
-            <value></value>
+            <value>(#1)</value>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|useAdornVerseNumber]</boolDependTrue>
             <texCode>\def\AdornVerseNumber#1{[v]}</texCode>
             <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>

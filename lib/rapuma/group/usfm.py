@@ -228,8 +228,8 @@ class Usfm (Group) :
 
         # Will need the stylesheet for copy if that has not been added
         # to the project yet, we will do that now
-        self.proj_style.checkDefaultStyFile()
-        self.proj_style.checkGlbExtStyFile()
+#        self.proj_style.checkDefaultStyFile()
+#        self.proj_style.checkGlbExtStyFile()
         self.proj_style.checkGrpExtStyFile()
 
         # Adjust the page number if necessary

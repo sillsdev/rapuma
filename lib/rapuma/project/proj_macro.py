@@ -54,10 +54,6 @@ class ProjMacro (object) :
         self.macPackConfig              = self.proj_config.macPackConfig
         
         
-        
-        
-        
-        
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)

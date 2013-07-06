@@ -33,7 +33,7 @@ from rapuma.core.proj_backup        import ProjBackup
 from rapuma.core.paratext           import Paratext
 from rapuma.manager.project         import Project
 from rapuma.project.proj_commander  import ProjCommander
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import ProjConfig, ConfigTools
 
 
 class ProjSetup (object) :
@@ -41,16 +41,16 @@ class ProjSetup (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.user                   = UserConfig()
-        self.userConfig             = self.user.userConfig
-        self.tools                  = Tools()
-        self.pid                    = pid
-        self.projHome               = None
-        self.projectMediaIDCode     = None
-        self.local                  = None
-        self.projConfig             = None
-        self.log                    = None
-        self.groups                 = {}
+        self.user                           = UserConfig()
+        self.userConfig                     = self.user.userConfig
+        self.tools                          = Tools()
+        self.pid                            = pid
+        self.projHome                       = None
+        self.projectMediaIDCode             = None
+        self.local                          = None
+        self.projConfig                     = None
+        self.log                            = None
+        self.groups                         = {}
 
         self.errorCodes     = {
 
@@ -282,9 +282,6 @@ class ProjSetup (object) :
 
         # In case all the vars are not set
         self.finishInit()
-
-        # Add the default style sheet now so components can be installed
-#        self.proj_style.makeDefaultStyFile(gid)
 
         # Install the components
         self.installGroupComps(gid, cidList, force)
@@ -672,7 +669,7 @@ class ProjSetup (object) :
 
         # To be sure nothing happens, copy from our project source
         # backup file. (Is self.style.defaultStyFile the best thing?)
-        if self.usfmCopy(targetSource, target) :
+        if self.usfmCopy(targetSource, target, gid) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
                 self.checkForPreprocessScript(gid)
@@ -701,7 +698,7 @@ class ProjSetup (object) :
             return False
 
 
-    def usfmCopy (self, source, target) :
+    def usfmCopy (self, source, target, gid) :
         '''Copy USFM text from source to target. Decode if necessary, then
         normalize. With the text in place, validate unless that is False.'''
 
@@ -729,7 +726,7 @@ class ProjSetup (object) :
 
         # Validate the target USFM text (Defalt is True)
         if validateUsfm :
-            if not self.usfmTextFileIsValid(target) :
+            if not self.usfmTextFileIsValid(target, gid) :
                 self.log.writeToLog(self.errorCodes['1090'], [source,self.tools.fName(target)])
                 return False
         else :
@@ -738,11 +735,12 @@ class ProjSetup (object) :
         return True
 
 
-    def usfmTextFileIsValid (self, source) :
+    def usfmTextFileIsValid (self, source, gid) :
         '''Use the USFM parser to validate a style file. For now,
         if a file fails, we'll just quite right away, otherwise,
-
         return True.'''
+
+#        import pdb; pdb.set_trace()
 
         # Note: Error level reporting is possible with the usfm.parser.
         # The following are the errors it can report:
@@ -755,12 +753,12 @@ class ProjSetup (object) :
         # comment markers "%" are used to comment text rather than "#".
 
         # Just use the default style file from Rapuma
-        rapumaDefaultStyFile      = os.path.join(self.local.rapumaStylesFolder, 'usfm.sty')
-
+        ct                  = ConfigTools(self.pid, gid)
+        defaultStyFile      = ct.processNestedPlaceholders(ct.macPackConfig['ProjectStyles']['defaultStyFile'])
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()
-            stylesheet_extra = style.parse(open(os.path.expanduser(rapumaDefaultStyFile),'r'))
+            stylesheet_extra = style.parse(open(os.path.expanduser(defaultStyFile),'r'))
             stylesheet.update(stylesheet_extra)
             # FIXME: Keep an eye on this: error_level=sfm.level.Structure
             # gave less than helpful feedback when a mal-formed verse was

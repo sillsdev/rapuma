@@ -24,8 +24,6 @@ from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
-#from rapuma.project.proj_style          import ProjStyle
-
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -166,7 +164,6 @@ class ConfigTools (object) :
 
         self.gid                            = gid
         self.pid                            = pid
-#        self.proj_style                     = ProjStyle(pid, gid)
         self.proj_config                    = ProjConfig(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
         self.layoutConfig                   = self.proj_config.layoutConfig
@@ -176,8 +173,10 @@ class ConfigTools (object) :
         self.Ctype                          = self.cType.capitalize()
         self.local                          = ProjLocal(self.pid)
         self.tools                          = Tools()
+        self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # Paths we may need
-        self.projStylesFolder               = self.local.projStylesFolder
+        self.projMacrosFolder               = self.local.projMacrosFolder
+        self.projMacPackFolder              = os.path.join(self.projMacrosFolder, self.macPack)
 
         self.errorCodes     = {
 
