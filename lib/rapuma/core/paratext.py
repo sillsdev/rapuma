@@ -38,9 +38,12 @@ class Paratext (object) :
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
+        self.proj_config            = ProjConfig(pid, gid)
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.local                  = ProjLocal(pid)
-        self.projConfig             = ProjConfig(pid).projConfig
+        self.projConfig             = self.proj_config.projConfig
+        self.layoutConfig           = self.proj_config.layoutConfig
+        self.illustrationConfig     = self.proj_config.illustrationConfig
         self.log                    = ProjLog(pid)
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
@@ -303,7 +306,6 @@ class Paratext (object) :
     #            ID     Comp Name                               Comp ID                         PT ID  Chps
         return {
                 '_z_' : ['USFM InternalCaller',                 'usfm_internal_caller',         '00',   0], 
-                'map' : ['Map',                                 'map',                          '00',   1], 
                 'gen' : ['Genesis',                             'genesis',                      '01',  50], 
                 'exo' : ['Exodus',                              'exodus',                       '02',  40], 
                 'lev' : ['Leviticus',                           'leviticus',                    '03',  27], 
@@ -442,9 +444,9 @@ class Paratext (object) :
         existing \fig markers with their contents will be removed. That is the default
         behavior.'''
 
-        # Get config objects unique to this function
-        layoutConfig            = ConfigObj(os.path.join(self.local.projConfFolder, self.cType + '_layout.conf'), encoding='utf-8')
-        illustrationConfig      = ConfigObj(os.path.join(self.local.projConfFolder, self.local.illustrationConfFile), encoding='utf-8')
+        # Just in case this section isn't there
+        self.tools.buildConfSection(self.illustrationConfig, gid)
+
         # Description of figKeys (in order found in \fig)
             # description = A brief description of what the illustration is about
             # file = The file name of the illustration (only the file name)
@@ -462,7 +464,7 @@ class Paratext (object) :
         # FIXME: If this is for a map and no layout information has been added
         # to the project yet, the cvSep look up will fail, get around with a try
         try :
-            cvSep = layoutConfig['Illustrations']['chapterVerseSeperator']
+            cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
         except :
             cvSep = ':'
 
@@ -493,35 +495,35 @@ class Paratext (object) :
         # If this is an update, we need to keep the original settings in case the
         # default settings have been modified for this project.
         # Illustration Scale
-        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['scale'] = illustrationConfig[gid][figDict['illustrationID']]['scale']
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['scale'] = self.illustrationConfig[gid][figDict['illustrationID']]['scale']
         else :
             figDict['scale'] = '1.0'
         # Illustration Position
-        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['position'] = illustrationConfig[gid][figDict['illustrationID']]['position']
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['position'] = self.illustrationConfig[gid][figDict['illustrationID']]['position']
         else :
             if figDict['width'] == 'col' :
                 figDict['position'] = 'tl'
             else :
                 figDict['position'] = 't'
         # Illustration Location
-        if illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['location'] = illustrationConfig[gid][figDict['illustrationID']]['location']
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['location'] = self.illustrationConfig[gid][figDict['illustrationID']]['location']
         else :
             if not figDict['location'] :
                 figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
         # Now make (update) the actual illustration section
-        if not illustrationConfig.has_key(gid) :
-            self.tools.buildConfSection(illustrationConfig, gid)
+        if not self.illustrationConfig.has_key(gid) :
+            self.tools.buildConfSection(self.illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            self.tools.buildConfSection(illustrationConfig[gid], figDict['illustrationID'])
+        if not self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            self.tools.buildConfSection(self.illustrationConfig[gid], figDict['illustrationID'])
         for k in figDict.keys() :
-            illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
+            self.illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
 
         # Write out the conf file to preserve the data found
-        self.tools.writeConfFile(illustrationConfig)
+        self.tools.writeConfFile(self.illustrationConfig)
 
         # Just incase we need to keep the fig markers intact this will
         # allow for that. However, default behavior is to strip them
@@ -544,130 +546,130 @@ class Paratext (object) :
 ###############################################################################
 
 
-    def usfmStyleFileIsValid (self, path) :
-        '''Use the USFM parser to validate a style file. This is meant to
-        be just a simple test so only return True or False.'''
+#    def usfmStyleFileIsValid (self, path) :
+#        '''Use the USFM parser to validate a style file. This is meant to
+#        be just a simple test so only return True or False.'''
 
-        try :
-            stylesheet = usfm.default_stylesheet.copy()
-            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
-            return True
-        except Exception as e :
-            return False
-
-
-    def removeUsfmStyFile (self, sType, force) :
-        '''This would be useful for a style reset. Remove a style setting
-        from the config for a component type and if force is used, remove
-        the file from the project as well.'''
-
-        sType = sType.lower()
-
-        # Make sure there is something to do
-        if sType == 'main' :
-            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-        elif sType == 'custom' :
-            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-
-        if not oldStyle :
-            self.log.writeToLog('STYL-100', [self.cType])
-            return
-        else :
-            if sType == 'main' :
-                self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] = ''
-                self.mainStyleFile = ''
-            elif sType == 'custom' :
-                self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
-                self.customStyleFile = ''
-
-            self.tools.writeConfFile(self.project.projConfig)
-
-            if force :
-                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
-                if os.path.isfile(target) :
-                    os.remove(target)
-
-                self.log.writeToLog('STYL-110', [self.tools.fName(oldStyle),self.cType])
-            else :
-                self.log.writeToLog('STYL-120', [self.tools.fName(oldStyle),self.cType])
-
-            return True
+#        try :
+#            stylesheet = usfm.default_stylesheet.copy()
+#            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
+#            return True
+#        except Exception as e :
+#            return False
 
 
-    def addExsitingUsfmStyFile (self, sFile, sType, force) :
-        '''Add a specific style file that is on the local system.'''
+#    def removeUsfmStyFile (self, sType, force) :
+#        '''This would be useful for a style reset. Remove a style setting
+#        from the config for a component type and if force is used, remove
+#        the file from the project as well.'''
 
-        sFile = self.tools.resolvePath(sFile)
-        target = os.path.join(self.project.local.projStylesFolder, self.tools.fName(sFile))
+#        sType = sType.lower()
 
-        if not force and os.path.isfile(target) :
-            self.log.writeToLog('STYL-030', [self.tools.fName(sFile)])
-            return False
-        elif os.path.isfile(sFile) :
-            # It's there? Good, we're done!
-            # If this is not an Rapuma custom style file we will validate it
-            if sType.lower() == 'main' :
-                if self.usfmStyleFileIsValid(sFile) :
-                    shutil.copy(sFile, target)
-                    self.log.writeToLog('STYL-060', [self.tools.fName(sFile)])
-                    return True
-                else :
-                    # We die if it does not validate
-                    self.log.writeToLog('STYL-070', [self.tools.fName(sFile)])
-            else :
-                # Assuming a custom style file we can grab most anything
-                # without validating it
-                shutil.copy(sFile, target)
-                self.log.writeToLog('STYL-065', [self.tools.fName(sFile)])
-                return True
-        else :
-            # Not finding the file may not be the end of the world 
-            self.log.writeToLog('STYL-020', [self.tools.fName(sFile)])
-            return False
+#        # Make sure there is something to do
+#        if sType == 'main' :
+#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
+#        elif sType == 'custom' :
+#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
+
+#        if not oldStyle :
+#            self.log.writeToLog('STYL-100', [self.cType])
+#            return
+#        else :
+#            if sType == 'main' :
+#                self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] = ''
+#                self.mainStyleFile = ''
+#            elif sType == 'custom' :
+#                self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
+#                self.customStyleFile = ''
+
+#            self.tools.writeConfFile(self.project.projConfig)
+
+#            if force :
+#                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
+#                if os.path.isfile(target) :
+#                    os.remove(target)
+
+#                self.log.writeToLog('STYL-110', [self.tools.fName(oldStyle),self.cType])
+#            else :
+#                self.log.writeToLog('STYL-120', [self.tools.fName(oldStyle),self.cType])
+
+#            return True
 
 
-    def addPtUsfmStyFile (self) :
-        '''Install a PT project style file. Merg in any custom
-        project styles too.'''
+#    def addExsitingUsfmStyFile (self, sFile, sType, force) :
+#        '''Add a specific style file that is on the local system.'''
 
-        # First pick up our PT settings
-        ptConf = self.pt_tools.getPTSettings()
-        if not ptConf :
-            return False
+#        sFile = self.tools.resolvePath(sFile)
+#        target = os.path.join(self.project.local.projStylesFolder, self.tools.fName(sFile))
 
-        # If nothing is set, give it a default to start off
-        if not self.mainStyleFile :
-            self.mainStyleFile = 'usfm.sty'
-        # Now, override default styleFile name if we found something in the PT conf
-        if ptConf['ScriptureText']['StyleSheet'] :
-            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+#        if not force and os.path.isfile(target) :
+#            self.log.writeToLog('STYL-030', [self.tools.fName(sFile)])
+#            return False
+#        elif os.path.isfile(sFile) :
+#            # It's there? Good, we're done!
+#            # If this is not an Rapuma custom style file we will validate it
+#            if sType.lower() == 'main' :
+#                if self.usfmStyleFileIsValid(sFile) :
+#                    shutil.copy(sFile, target)
+#                    self.log.writeToLog('STYL-060', [self.tools.fName(sFile)])
+#                    return True
+#                else :
+#                    # We die if it does not validate
+#                    self.log.writeToLog('STYL-070', [self.tools.fName(sFile)])
+#            else :
+#                # Assuming a custom style file we can grab most anything
+#                # without validating it
+#                shutil.copy(sFile, target)
+#                self.log.writeToLog('STYL-065', [self.tools.fName(sFile)])
+#                return True
+#        else :
+#            # Not finding the file may not be the end of the world 
+#            self.log.writeToLog('STYL-020', [self.tools.fName(sFile)])
+#            return False
 
-        # Set the target destination
-        target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
-        # As this is call is for a PT based project, it is certain the style
-        # file should be found in the source or parent folder. If that
-        # exact file is not found in either place, a substitute will be
-        # copied in from Rapuma and given the designated name.
-        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-        parent                  = os.path.dirname(self.sourcePath)
-        # If there is a "gather" folder, assume the style file is there
-        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
-            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
-        else :
-            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-        ptStyle                     = os.path.join(parent, self.mainStyleFile)
-        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
-        # We will start by searching in order from the inside out and stop
-        # as soon as we find one.
-        for sFile in searchOrder :
-            if os.path.isfile(sFile) :
-                if self.usfmStyleFileIsValid(sFile) :
-                    if not shutil.copy(sFile, target) :
-                        return self.tools.fName(target)
-                else :
-                    self.log.writeToLog('STYL-075', [sFile,self.cType])
-            else : 
-                self.log.writeToLog('STYL-090', [sFile])
+
+#    def addPtUsfmStyFile (self) :
+#        '''Install a PT project style file. Merg in any custom
+#        project styles too.'''
+
+#        # First pick up our PT settings
+#        ptConf = self.pt_tools.getPTSettings()
+#        if not ptConf :
+#            return False
+
+#        # If nothing is set, give it a default to start off
+#        if not self.mainStyleFile :
+#            self.mainStyleFile = 'usfm.sty'
+#        # Now, override default styleFile name if we found something in the PT conf
+#        if ptConf['ScriptureText']['StyleSheet'] :
+#            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
+
+#        # Set the target destination
+#        target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+#        # As this is call is for a PT based project, it is certain the style
+#        # file should be found in the source or parent folder. If that
+#        # exact file is not found in either place, a substitute will be
+#        # copied in from Rapuma and given the designated name.
+#        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
+#        parent                  = os.path.dirname(self.sourcePath)
+#        # If there is a "gather" folder, assume the style file is there
+#        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
+#            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
+#        else :
+#            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
+#        ptStyle                     = os.path.join(parent, self.mainStyleFile)
+#        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
+#        # We will start by searching in order from the inside out and stop
+#        # as soon as we find one.
+#        for sFile in searchOrder :
+#            if os.path.isfile(sFile) :
+#                if self.usfmStyleFileIsValid(sFile) :
+#                    if not shutil.copy(sFile, target) :
+#                        return self.tools.fName(target)
+#                else :
+#                    self.log.writeToLog('STYL-075', [sFile,self.cType])
+#            else : 
+#                self.log.writeToLog('STYL-090', [sFile])
 
 
 

@@ -59,13 +59,12 @@ class ProjFont (object) :
 
         # Get our component sourceEditor
         self.sourceEditor               = self.pt_tools.getSourceEditor(self.cType)
-
         if self.ptDefaultFont == '' :
             ptSet = self.pt_tools.getPTSettings()
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
                 self.fontConfig['GeneralSettings']['ptDefaultFont'] = self.ptDefaultFont
-                self.tools.writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.fontConfig)
 
         # Log messages for this module
         self.errorCodes     = {

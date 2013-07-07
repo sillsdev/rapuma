@@ -17,7 +17,8 @@ rpm group KYU-MYMR-MRKA Mark group add --component_type usfm --cid_list mrk --so
 rpm group KYU-MYMR-MRKA Intro group add --component_type usfm --cid_list int --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
 
 # Set the font to the right one
-rpm font KYU-MYMR-MRKA Mark usfm Padauk --manage primary --force
+#rpm font KYU-MYMR-MRKA Mark usfm Padauk --manage primary --force
+rpm package KYU-MYMR-MRKA Mark Padauk font primary
 
 # Turn on preprocessing for Mark group
 rpm group KYU-MYMR-MRKA Mark preprocess add
