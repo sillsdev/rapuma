@@ -57,9 +57,11 @@ from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools, ToolsGroup
-from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.proj_config         import ProjConfig, ConfigTools
 from rapuma.project.proj_setup          import ProjSetup
 from rapuma.project.proj_commander      import ProjCommander
+from rapuma.project.proj_font           import ProjFont
+from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
@@ -332,13 +334,13 @@ def userArguments (args) :
                 elif cType == 'toc' :
                     ProjToc(pid, gid).addGroup(args.force)
             elif cmdType == 'hyphenation' :
-                Project(pid, gid).manageHyphenation(cmd)
+                ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations on not completed yet')
             elif cmdType == 'preprocess' :
-                ps = ProjSetup(pid)
-                ps.turnOnOffPreprocess(gid, True)
-                ps.checkForPreprocessScript (gid)
+                prc = ProjProcess(pid)
+                prc.turnOnOffPreprocess(gid, True)
+                prc.checkForPreprocessScript (gid)
             else :
                 cmdError(cmd, cmdType)
         elif cmd in ['draft', 'final', 'proof'] :
@@ -371,7 +373,7 @@ def userArguments (args) :
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
-                Project(pid, gid).manageHyphenation(cmd)
+                ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
             elif cmdType == 'preprocess' :
@@ -392,7 +394,7 @@ def userArguments (args) :
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
-                Project(pid, gid).manageHyphenation(cmd, args.force)
+                ProjHyphenation(pid, gid).manageHyphenation(cmd, args.force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'unlock' :
@@ -432,14 +434,14 @@ def userArguments (args) :
         force       = args.force
         if cmd == 'add' :
             if cmdType == 'font' :
-                ProjFont(pid, gid).addFontPack(pkid, force)
+                ProjFont(pid, gid).installFont(pkid, force)
             elif cmdType == 'macro' :
                 ProjMacro(pid, gid).addMacPack(pkid, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'primary' :
             if cmdType == 'font' :
-                ProjFont(pid, gid).makePrimary(pkid, force)
+                ProjFont(pid, gid).setPrimaryFont(pkid, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
@@ -487,6 +489,7 @@ def userArguments (args) :
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'settings' :
         pid         = args.project_id
+#        gid         = args.group_id
         config      = args.configuration
         section     = args.section
         key         = args.key
@@ -640,6 +643,7 @@ processCommand.add_argument('-f', '--force', action='store_true', help='Force th
 # Add Settings subprocess arguments
 settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
 settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+#settingsCommand.add_argument('group_id', help='A unique ID for this group.')
 settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
 settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
 settingsCommand.add_argument('key', help='The key which has the value to be changed.')

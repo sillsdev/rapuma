@@ -15,11 +15,11 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, shutil, subprocess
 from configobj                      import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools              import Tools
+from rapuma.core.tools              import Tools, ToolsPath
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -31,15 +31,15 @@ class ProjProcess (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.pid            = pid
-        self.tools          = Tools()
-        self.rapumaHome     = os.environ.get('RAPUMA_BASE')
-        self.userHome       = os.environ.get('RAPUMA_USER')
-        self.user           = UserConfig(self.rapumaHome, self.userHome)
-        self.userConfig     = self.user.userConfig
-        self.projConfig     = ProjConfig(self.pid).projConfig
-        self.projHome       = None
-        self.local          = None
+        self.pid                    = pid
+        self.tools                  = Tools()
+        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
+        self.userHome               = os.environ.get('RAPUMA_USER')
+        self.user                   = UserConfig()
+        self.userConfig             = self.user.userConfig
+        self.projConfig             = ProjConfig(self.pid).projConfig
+        self.projHome               = None
+        self.local                  = None
         self.finishInit()
 
         # Log messages for this module
@@ -53,7 +53,11 @@ class ProjProcess (object) :
             'XPRT-040' : ['MSG', 'Beginning export, please wait...'],
             'XPRT-050' : ['MSG', 'Unassigned error message ID.'],
 
+            '1210' : ['MSG', 'Processes completed successfully on: [<<1>>] by [<<2>>]'],
+            '1220' : ['ERR', 'Processes for [<<1>>] failed. Script [<<2>>] returned this error: [<<3>>]'],
             '1240' : ['MSG', 'Component group preprocessing [<<1>>] for group [<<2>>].'],
+            '1260' : ['ERR', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
+            '1265' : ['LOG', 'Component preprocessing script is already installed.'],
 
         }
 
@@ -63,19 +67,22 @@ class ProjProcess (object) :
         functions in this module.'''
 
         # Look for an existing project home path
-        if self.tools.isProject(self.pid) :
-            localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
+        if self.userConfig['Projects'].has_key(self.pid) :
+            localProjHome           = self.userConfig['Projects'][self.pid]['projectPath']
         else :
-            localProjHome   = ''
+            localProjHome           = ''
+
         # Testing: The local project home wins over a user provided one
         if localProjHome and not projHome :
-            self.projHome   = localProjHome
+            self.projHome           = localProjHome
         elif projHome :
-            self.projHome   = projHome
+            self.projHome           = projHome
         
-        # If a projHome was succefully found, we can go on
+        # If a projHome was succefully found, we can go on and load the rest
         if self.projHome : 
-            self.local      = ProjLocal(self.rapumaHome, self.userHome, self.projHome)
+            self.local              = ProjLocal(self.pid)
+            self.log                = ProjLog(self.pid)
+            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
 
 
 ###############################################################################
@@ -188,9 +195,9 @@ class ProjProcess (object) :
         if not os.path.isfile(grpPreprocessFile) :
             shutil.copy(rpmPreprocessFile, grpPreprocessFile)
             self.tools.makeExecutable(grpPreprocessFile)
-            self.log.writeToLog(self.errorCodes['1160'])
+            self.log.writeToLog(self.errorCodes['1260'])
         else :
-            self.log.writeToLog(self.errorCodes['1165'])
+            self.log.writeToLog(self.errorCodes['1265'])
 
 
     def runProcessScript (self, target, scriptFile) :
@@ -203,9 +210,9 @@ class ProjProcess (object) :
         # been set when we did the installation.
         err = subprocess.call([scriptFile, target])
         if err == 0 :
-            self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(target), self.tools.fName(scriptFile)])
+            self.log.writeToLog(self.errorCodes['1210'], [self.tools.fName(target), self.tools.fName(scriptFile)])
         else :
-            self.log.writeToLog(self.errorCodes['1020'], [self.tools.fName(target), self.tools.fName(scriptFile), str(err)])
+            self.log.writeToLog(self.errorCodes['1220'], [self.tools.fName(target), self.tools.fName(scriptFile), str(err)])
             return False
 
         return True

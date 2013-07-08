@@ -17,7 +17,6 @@ rpm group KYU-MYMR-MRKA Mark group add --component_type usfm --cid_list mrk --so
 rpm group KYU-MYMR-MRKA Intro group add --component_type usfm --cid_list int --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
 
 # Set the font to the right one
-#rpm font KYU-MYMR-MRKA Mark usfm Padauk --manage primary --force
 rpm package KYU-MYMR-MRKA Mark Padauk font primary
 
 # Turn on preprocessing for Mark group
@@ -27,16 +26,16 @@ rpm group KYU-MYMR-MRKA Mark preprocess add
 rpm group KYU-MYMR-MRKA Mark hyphenation add
 
 # Turn on font features in Padauk & adjust default settings
-rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useRenderingSystem GR
-rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useLanguage kyu
-rpm settings KYU-MYMR-MRKA project Managers/usfm_Font useMapping kye_renumber
-rpm settings KYU-MYMR-MRKA usfm_layout Fonts fontSizeUnit 0.82pt
-rpm settings KYU-MYMR-MRKA usfm_layout Fonts lineSpacingFactor 1.3
+rpm settings KYU-MYMR-MRKA font GeneralSettings useRenderingSystem GR
+rpm settings KYU-MYMR-MRKA font GeneralSettings useLanguage kyu
+rpm settings KYU-MYMR-MRKA font GeneralSettings useMapping kye_renumber
+rpm settings KYU-MYMR-MRKA usfmTex Fonts fontSizeUnit 0.82pt
+rpm settings KYU-MYMR-MRKA usfmTex Fonts lineSpacingFactor 1.3
 
 # Adjust the publication format
-rpm settings KYU-MYMR-MRKA usfm_layout Columns bodyColumns 2
-rpm settings KYU-MYMR-MRKA usfm_layout TeXBehavior vFuzz 4.8pt
-rpm settings KYU-MYMR-MRKA usfm_layout Illustrations useFigurePlaceHolders False
+rpm settings KYU-MYMR-MRKA layout PageLayout bodyColumns 2
+rpm settings KYU-MYMR-MRKA usfmTex TeXBehavior vFuzz 4.8pt
+rpm settings KYU-MYMR-MRKA usfmTex Illustrations useFigurePlaceHolders False
 rpm settings KYU-MYMR-MRKA project Groups/Mark usePreprocessScript True
 rpm settings KYU-MYMR-MRKA project Groups/Mark useIllustrations True
 rpm settings KYU-MYMR-MRKA project Groups/Mark bindingOrder 2
@@ -44,7 +43,7 @@ rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 
 # Copy (system) some preset setting files into the project
 echo copying: extention.tex
-cp ~/Publishing/testArea/KYUM/resources/extentions.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/extentions.tex
+cp ~/Publishing/testArea/KYUM/resources/extentions.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.tex
 echo copying: MYMR_textPreprocess.py
 cp ~/Publishing/testArea/KYUM/resources/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Scripts/MYMR_textPreprocess.py
 echo copying: usfm-ext.sty
@@ -54,8 +53,8 @@ cp ~/Publishing/testArea/KYUM/resources/usfm-ext.sty ~/Publishing/testArea/KYU-M
 rpm group KYU-MYMR-MRKA Mark group update --force
 
 # Install and switch font (Padauk 2.95 has a bug)
-rpm font KYU-MYMR-MRKA Mark usfm --manage add Padauk_2.701
-rpm font KYU-MYMR-MRKA Mark usfm --manage primary --force Padauk_2.701
+rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font add
+rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font primary --force
 
 # Render the component
 rpm group KYU-MYMR-MRKA Intro group draft

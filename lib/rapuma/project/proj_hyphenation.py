@@ -45,10 +45,11 @@ class ProjHyphenation (object) :
         self.local                      = ProjLocal(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.proj_config                = ProjConfig(self.pid)
+        self.proj_config                = ProjConfig(self.pid, gid)
         self.layoutConfig               = self.proj_config.layoutConfig
         self.projConfig                 = self.proj_config.projConfig
         self.hyphenConfig               = self.proj_config.hyphenConfig
+        self.macPackConfig              = self.proj_config.macPackConfig
         self.csid                       = self.projConfig['Groups'][self.gid]['csid']
         self.log                        = ProjLog(pid)
         self.cType                      = self.projConfig['Groups'][gid]['cType']
@@ -135,6 +136,17 @@ class ProjHyphenation (object) :
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
 
+    def manageHyphenation (self, action, force = False) :
+        '''Run a hyphenation management command.'''
+
+        if action == 'add' :
+            self.turnOnHyphenation()
+        elif action == 'remove' :
+            self.turnOffHyphenation()
+        elif action == 'update' :
+            self.updateHyphenation(force)
+
+
     def compareWithSource (self) :
         '''Compare working hyphenation file with the original copied read-only
         source file found in the project. This will help to konw what preprocess
@@ -150,8 +162,8 @@ class ProjHyphenation (object) :
 
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
-            self.layoutConfig['Hyphenation']['setHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
-            self.layoutConfig['Hyphenation']['createHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
+            self.macPackConfig['Hyphenation']['setHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
+            self.macPackConfig['Hyphenation']['createHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
             self.tools.writeConfFile(self.layoutConfig)
             self.projConfig['Groups'][self.gid]['useHyphenation'] = True
             self.tools.writeConfFile(self.projConfig)

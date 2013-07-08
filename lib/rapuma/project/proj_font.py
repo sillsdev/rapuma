@@ -209,7 +209,8 @@ class ProjFont (object) :
             return True
 
         else :
-            if len(self.fontConfig['Fonts'].get(font)) != 0 :
+#            if len(self.fontConfig['Fonts'].get(font)) != 0 :
+            if self.fontConfig['Fonts'].has_key(font) :
                 self.log.writeToLog(self.errorCodes['0247'], [font])
             else :
                 # Inject the font info into the project font config file if it is not there.
@@ -383,29 +384,28 @@ class ProjFont (object) :
 ###############################################################################
 
 
-    def setPrimaryFont (self, cType, font, force = None) :
+    def setPrimaryFont (self, font, force = None) :
         '''Set the primary font for the project.'''
 
-        def setIt (Ctype, font) :
+        def setIt (font) :
             self.fontConfig['GeneralSettings']['primaryFont'] = font
-            self.tools.writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.fontConfig)
             # Sanity check
             if self.fontConfig['GeneralSettings']['primaryFont'] == font :
                 return True
 
-        Ctype = cType.capitalize()
         # First check to see if it is already has a primary font set
         if self.fontConfig['GeneralSettings']['primaryFont'] == '' :
-            if setIt(Ctype, font) :
-                self.log.writeToLog(self.errorCodes['0435'], [Ctype,font])
+            if setIt(font) :
+                self.log.writeToLog(self.errorCodes['0435'], [self.Ctype,font])
                 return True
         elif force :
-            if setIt(Ctype, font) :
-                self.log.writeToLog(self.errorCodes['0432'], [font,Ctype])
+            if setIt(font) :
+                self.log.writeToLog(self.errorCodes['0432'], [font,self.Ctype])
 
                 return True
         elif self.fontConfig['GeneralSettings']['primaryFont'] :
-            self.log.writeToLog(self.errorCodes['0437'], [self.fontConfig['GeneralSettings']['primaryFont'],Ctype])
+            self.log.writeToLog(self.errorCodes['0437'], [self.fontConfig['GeneralSettings']['primaryFont'],self.Ctype])
             return True
         else :
             self.log.writeToLog(self.errorCodes['0430'], [font,Ctype])

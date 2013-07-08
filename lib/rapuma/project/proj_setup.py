@@ -21,19 +21,20 @@ from importlib                      import import_module
 from functools                      import partial
 
 import palaso.sfm as sfm
-from palaso.sfm                     import usfm, style, element, text
+from palaso.sfm                             import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath, ToolsGroup
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
-from rapuma.core.proj_compare       import ProjCompare
-from rapuma.core.proj_backup        import ProjBackup
-from rapuma.core.paratext           import Paratext
-from rapuma.manager.project         import Project
-from rapuma.project.proj_commander  import ProjCommander
-from rapuma.project.proj_config     import ProjConfig, ConfigTools
+from rapuma.core.tools                      import Tools, ToolsPath, ToolsGroup
+from rapuma.core.user_config                import UserConfig
+from rapuma.core.proj_local                 import ProjLocal
+from rapuma.core.proj_process               import ProjProcess
+from rapuma.core.proj_log                   import ProjLog
+from rapuma.core.proj_compare               import ProjCompare
+from rapuma.core.proj_backup                import ProjBackup
+from rapuma.core.paratext                   import Paratext
+from rapuma.manager.project                 import Project
+from rapuma.project.proj_commander          import ProjCommander
+from rapuma.project.proj_config             import ProjConfig, ConfigTools
 
 
 class ProjSetup (object) :
@@ -76,13 +77,6 @@ class ProjSetup (object) :
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
-            '0810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
-            '0840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
-            '0860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
-            '0870' : ['ERR', 'No source path found for: [<<1>>], returned this error: [<<2>>]'],
-
-            '1010' : ['MSG', 'Processes completed successfully on: [<<1>>] by [<<2>>]'],
-            '1020' : ['ERR', 'Processes for [<<1>>] failed. Script [<<2>>] returned this error: [<<3>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             '1080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
             '1090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
@@ -93,8 +87,10 @@ class ProjSetup (object) :
             '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
-            '1160' : ['ERR', 'Installed the default component preprocessing script. Editing will be required for it to work with your project.'],
-            '1165' : ['LOG', 'Component preprocessing script is already installed.'],
+
+            '2810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
+            '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            '2860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
 
         }
 
@@ -104,7 +100,7 @@ class ProjSetup (object) :
     def finishInit (self) :
         '''If this is a new project we need to handle these settings special.'''
 
-        if self.userConfig['Projects'].get(self.pid) :
+        if self.userConfig['Projects'].has_key(self.pid) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.backup             = ProjBackup(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
@@ -113,6 +109,7 @@ class ProjSetup (object) :
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
             self.projConfig         = ProjConfig(self.pid).projConfig
+            self.proj_process       = ProjProcess(self.pid)
             self.log                = ProjLog(self.pid)
             self.paratext           = Paratext(self.pid)
             self.compare            = ProjCompare(self.pid)
@@ -569,55 +566,61 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0800 ########################
 ###############################################################################
 
-    def changeConfigSetting (self, config, section, key, newValue) :
-        '''Change a value in a specified config/section/key.  This will 
-        write out changes immediately. If this is called internally, the
-        calling function will need to reload to the config for the
-        changes to take place in the current session. This is currently
-        designed to work more as a single call to Rapuma.'''
+#    def changeConfigSetting (self, config, section, key, newValue) :
+#        '''Change a value in a specified config/section/key.  This will 
+#        write out changes immediately. If this is called internally, the
+#        calling function will need to reload to the config for the
+#        changes to take place in the current session. This is currently
+#        designed to work more as a single call to Rapuma.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        oldValue = ''
-        if config.lower() == 'rapuma' :
-            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
-        else :
-            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+#        config = self.configTools.processNestedPlaceholders(config, '')
+#        print config
+#        self.tools.dieNow()
+#        
 
-        # Test for existance
-        if not os.path.exists(confFile) :
-            self.log.writeToLog(self.errorCodes['0810'], [self.tools.fName(confFile)])
-            return
 
-        # Load the file and make the change
-        confObj = ConfigObj(confFile, encoding='utf-8')
-        outConfObj = confObj
-        try :
-            # Walk our confObj to get to the section we want
-            for s in section.split('/') :
-                confObj = confObj[s]
-        except :
-            self.log.writeToLog(self.errorCodes['0840'], [section])
-            return
+#        oldValue = ''
+#        if config.lower() == 'rapuma' :
+#            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
+#        else :
+#            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
 
-        # Get the old value, if there is one, for reporting
-        try :
-            oldValue = confObj[key]
-        except :
-            pass
+#        # Test for existance
+#        if not os.path.exists(confFile) :
+#            self.log.writeToLog(self.errorCodes['0810'], [self.tools.fName(confFile)])
+#            return
 
-        # Insert the new value in its proper form
-        if type(oldValue) == list :
-            newValue = newValue.split(',')
-            confObj[key] = newValue
-        else :
-            confObj[key] = newValue
+#        # Load the file and make the change
+#        confObj = ConfigObj(confFile, encoding='utf-8')
+#        outConfObj = confObj
+#        try :
+#            # Walk our confObj to get to the section we want
+#            for s in section.split('/') :
+#                confObj = confObj[s]
+#        except :
+#            self.log.writeToLog(self.errorCodes['0840'], [section])
+#            return
 
-        # Write out the original copy of the confObj which now 
-        # has the change in it, then report what we did
-        outConfObj.filename = confFile
-        if self.tools.writeConfFile(outConfObj) :
-            self.log.writeToLog(self.errorCodes['0860'], [config, section, key, unicode(oldValue), unicode(newValue)])
+#        # Get the old value, if there is one, for reporting
+#        try :
+#            oldValue = confObj[key]
+#        except :
+#            pass
+
+#        # Insert the new value in its proper form
+#        if type(oldValue) == list :
+#            newValue = newValue.split(',')
+#            confObj[key] = newValue
+#        else :
+#            confObj[key] = newValue
+
+#        # Write out the original copy of the confObj which now 
+#        # has the change in it, then report what we did
+#        outConfObj.filename = confFile
+#        if self.tools.writeConfFile(outConfObj) :
+#            self.log.writeToLog(self.errorCodes['0860'], [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
 ###############################################################################
@@ -672,8 +675,8 @@ class ProjSetup (object) :
         if self.usfmCopy(targetSource, target, gid) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
-                self.checkForPreprocessScript(gid)
-                if not self.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
+                self.proj_process.checkForPreprocessScript(gid)
+                if not self.proj_process.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
             # If this is a USFM component type we need to remove any \fig markers,
@@ -777,5 +780,59 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['1070'], [source,str(e)], 'proj_setup.usfmTextFileIsValid():1070')
             return False
 
+
+###############################################################################
+########################## Settings Change Functions ##########################
+###############################################################################
+####################### Error Code Block Series = 2000 ########################
+###############################################################################
+
+    def changeConfigSetting (self, config, section, key, newValue) :
+        '''Change a value in a specified config/section/key.  This will 
+        write out changes immediately. If this is called internally, the
+        calling function will need to reload to the config for the
+        changes to take place in the current session. This is currently
+        designed to work more as a single call to Rapuma.'''
+
+        oldValue = ''
+        if config.lower() == 'rapuma' :
+            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
+        else :
+            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
+
+        # Test for existance
+        if not os.path.exists(confFile) :
+            self.log.writeToLog(self.errorCodes['2810'], [self.tools.fName(confFile)])
+            return
+
+        # Load the file and make the change
+        confObj = ConfigObj(confFile, encoding='utf-8')
+        outConfObj = confObj
+        try :
+            # Walk our confObj to get to the section we want
+            for s in section.split('/') :
+                confObj = confObj[s]
+        except :
+            self.log.writeToLog(self.errorCodes['2840'], [section])
+            return
+
+        # Get the old value, if there is one, for reporting
+        try :
+            oldValue = confObj[key]
+        except :
+            pass
+
+        # Insert the new value in its proper form
+        if type(oldValue) == list :
+            newValue = newValue.split(',')
+            confObj[key] = newValue
+        else :
+            confObj[key] = newValue
+
+        # Write out the original copy of the confObj which now 
+        # has the change in it, then report what we did
+        outConfObj.filename = confFile
+        if self.tools.writeConfFile(outConfObj) :
+            self.log.writeToLog(self.errorCodes['2860'], [config, section, key, unicode(oldValue), unicode(newValue)])
 
 

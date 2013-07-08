@@ -99,6 +99,7 @@ class ProjConfig (object) :
             'LYOT-030' : ['LOG', 'Changes found in the default layout config model. These were merged into the exsisting layout configuration file. (layout.__init__())'],
 
             '0000' : ['MSG', 'Placeholder message'],
+
         }
 
 
@@ -162,17 +163,18 @@ class ConfigTools (object) :
 
     def __init__(self, pid, gid) :
 
-        self.gid                            = gid
         self.pid                            = pid
+        self.gid                            = gid
         self.proj_config                    = ProjConfig(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
         self.layoutConfig                   = self.proj_config.layoutConfig
         self.macPackConfig                  = self.proj_config.macPackConfig
-        self.csid                           = self.projConfig['Groups'][self.gid]['csid']
-        self.cType                          = self.projConfig['Groups'][self.gid]['cType']
+        self.csid                           = self.projConfig['Groups'][gid]['csid']
+        self.cType                          = self.projConfig['Groups'][gid]['cType']
         self.Ctype                          = self.cType.capitalize()
-        self.local                          = ProjLocal(self.pid)
+        self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
+        self.log                            = ProjLog(pid)
         self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # Paths we may need
         self.projMacrosFolder               = self.local.projMacrosFolder
@@ -306,7 +308,7 @@ class ConfigTools (object) :
 ###############################################################################
 ######################## Dynamic Config Value Functions #######################
 ###############################################################################
-####################### Error Code Block Series = 2000 ########################
+####################### Error Code Block Series = 3000 ########################
 ###############################################################################
 
     def getTopMarginFactor (self) :
