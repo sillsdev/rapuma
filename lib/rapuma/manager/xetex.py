@@ -99,13 +99,32 @@ class Xetex (Manager) :
         # File names
         # Some of these file names will only be used once but for consitency
         # we will create them all in one place.
-        self.gidTexFileName         = self.gid + '.tex'
-        self.gidPdfFileName         = self.gid + '.pdf'
-        self.macLinkFileName        = self.macroPackage + '.tex'
-        self.macSettingsFileName    = self.macroPackage + '-settings.tex'
-        self.fontTexFileName        = self.macroPackage + '-fonts.tex'
-        self.extTexFileName         = self.macroPackage + '-ext.tex'
-        self.grpExtTexFileName      = self.macroPackage + '-' + self.gid + '-ext.tex'
+
+
+
+
+#        self.gidTexFile             = 
+#        self.gidPdfFile             = 
+#        self.macSettingsFile        = 
+#        self.fontTexFile            = 
+#        self.extTexFile             = 
+#        self.grpExtTexFile          = 
+#        self.defaultStyFile         = 
+#        self.glbExtStyFile          = 
+#        self.grpExtStyFile          = 
+
+
+
+
+        print self.macPackConfig
+
+        for fid in self.macPackConfig['MacroFiles'].keys() :
+            print fid
+            setattr(self, self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles'][fid]))
+
+#        self.tools.dieNow()
+
+
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
         self.projConfFolder         = self.local.projConfFolder
@@ -118,9 +137,6 @@ class Xetex (Manager) :
         self.projMacrosFolder       = self.local.projMacrosFolder
         self.projMacPackFolder      = os.path.join(self.projMacrosFolder, self.macroPackage)
         # Set file names with full path 
-        self.gidTexFile             = os.path.join(self.gidFolder, self.gidTexFileName)
-        self.gidPdfFile             = os.path.join(self.gidFolder, self.gidPdfFileName)
-        self.layoutXmlFile          = self.proj_config.layoutXmlConfFile
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
         self.fontConfFile           = self.proj_config.fontConfFile
@@ -130,6 +146,7 @@ class Xetex (Manager) :
         self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
 #        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
 #        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
+
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
         self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
         self.macPackConfFile        = self.proj_config.macPackConfFile
@@ -502,30 +519,36 @@ class Xetex (Manager) :
             os.remove(self.gidTexFile)
 
         # Create (if needed) dependent files
-#        self.proj_style.checkDefaultStyFile()
-#        self.proj_style.checkGlbExtStyFile()
-        self.proj_style.checkGrpExtStyFile()
         self.makeSettingsTexFile()
-#        self.makeGrpExtTexFile()
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
+        # We bring in each element in the order necessary
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
             gidTexObject.write(self.tools.makeFileHeader(self.gidTexFileName, description))
-            gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
+#            gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
 #            if self.makeSettingsTexFile() :
 #                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
 #            if self.makeGrpExtTexFile() :
 #                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
+
+            # First bring in the main macro file
+            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['primaryMacroFile']) + '\"\n')
+            # Load the settings
+            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['macroSettingsFile']) + '\"\n')
+            # Load the settings extensions
+            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['primaryMacroFile']) + '\"\n')
+
+
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
-#            if self.proj_style.checkDefaultStyFile() :
-#                gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
-#            if self.proj_style.checkGlbExtStyFile() :
-#                gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
-#            if self.proj_style.checkGrpExtStyFile() :
-#                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+            # Load style files (default and extention come with the package)
+            gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['defaultStyFile']) + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['glbExtStyFile']) + '}\n')
+  
+            if self.proj_style.checkGrpExtStyFile() :
+                gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['grpExtStyFile']) + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])

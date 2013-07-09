@@ -14,28 +14,72 @@ Todo:
 
 <root>
     <section>
-        <name>Paragraph Adjustments</name>
-        <sectionID>ParagraphAdjustments</sectionID>
-        <description>Parameters that cover paragraph adjustments used in this macro pacakge.</description>
+        <name>Macro Files</name>
+        <sectionID>MacroFiles</sectionID>
+        <description>Key files for this macro.</description>
+
         <setting>
-            <name>Paragraph Adjustments File</name>
-            <description>The file that contains adjustments for components covered by this macro package.</description>
-            <key>paragraphAdjustmentsFile</key>
+            <name>Group TeX Link File</name>
+            <description>The file that links TeX to all the settings needed to render a job.</description>
+            <key>gidTexFile</key>
             <type>string</type>
-            <value>adjustment.conf</value>
+            <value>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</value>
         </setting>
-    </section>
-    <section>
-        <name>Project Styles</name>
-        <sectionID>ProjectStyles</sectionID>
-        <description>Parameters that covers formating styles in a project.</description>
+
+        <setting>
+            <name>Group PDF Output File</name>
+            <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
+            <key>gidPdfFile</key>
+            <type>string</type>
+            <value>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</value>
+        </setting>
+
+        <setting>
+            <name>Primary Macro File</name>
+            <description>The main macro file that TeX will link to first.</description>
+            <key>primaryMacroFile</key>
+            <type>string</type>
+            <value>[self:projMacPackFolder][pathSep]paratext2.tex</value>
+        </setting>
+
+        <setting>
+            <name>Main Settings File</name>
+            <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
+            <key>macSettingsFile</key>
+            <type>string</type>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-settings.tex</value>
+        </setting>
+
+        <setting>
+            <name>Settings Extension File</name>
+            <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
+            <key>extTexFile</key>
+            <type>string</type>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-ext.tex</value>
+        </setting>
+
+        <setting>
+            <name>Group Settings Extension File</name>
+            <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
+            <key>grpExtTexFile</key>
+            <type>string</type>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.tex</value>
+        </setting>
+
+        <setting>
+            <name>Font Settings File</name>
+            <description>The font settings file that TeX will link to after all the setting files are loaded.</description>
+            <key>fontTexFile</key>
+            <type>string</type>
+            <value>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</value>
+        </setting>
+
         <setting>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
             <key>defaultStyFile</key>
             <type>string</type>
             <value>[self:projMacPackFolder][pathSep]usfmTex.sty</value>
-            <texCode>\stylesheet{[v]}</texCode>
         </setting>
         <setting>
             <name>Extension Styles</name>
@@ -43,7 +87,6 @@ Todo:
             <key>glbExtStyFile</key>
             <type>string</type>
             <value>[self:projMacPackFolder][pathSep]usfmTex-ext.sty</value>
-            <texCode>\stylesheet{[v]}</texCode>
         </setting>
         <setting>
             <name>Group Styles</name>
@@ -51,7 +94,13 @@ Todo:
             <key>grpExtStyFile</key>
             <type>string</type>
             <value>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</value>
-            <texCode>\stylesheet{[v]}</texCode>
+        </setting>
+        <setting>
+            <name>Paragraph Adjustments File</name>
+            <description>The file that contains adjustments for components covered by this macro package.</description>
+            <key>paragraphAdjustmentsFile</key>
+            <type>string</type>
+            <value>adjustment.conf</value>
         </setting>
     </section>
     <section>

@@ -42,14 +42,14 @@ rpm settings KYU-MYMR-MRKA project Groups/Mark bindingOrder 2
 rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 
 # Copy (system) some preset setting files into the project
-echo copying: extention.tex
-cp ~/Publishing/testArea/KYUM/resources/extentions.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.tex
+echo copying: usfmTex-ext.tex
+cp ~/Publishing/testArea/KYUM/resources/usfmTex-ext.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.tex
 echo copying: MYMR_textPreprocess.py
 cp ~/Publishing/testArea/KYUM/resources/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Scripts/MYMR_textPreprocess.py
-echo copying: usfm-ext.sty
-cp ~/Publishing/testArea/KYUM/resources/usfm-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Styles/usfm-ext.sty
+echo copying: usfmTex-ext.sty
+cp ~/Publishing/testArea/KYUM/resources/usfmTex-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.sty
 
-# Now update the text so the prprocess is used
+# Now update the text so the customized (edited) prprocess is used
 rpm group KYU-MYMR-MRKA Mark group update --force
 
 # Install and switch font (Padauk 2.95 has a bug)
