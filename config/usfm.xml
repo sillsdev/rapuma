@@ -35,18 +35,18 @@ Todo:
         <value>xetex</value>
     </setting>
     <setting>
+        <name>Source Editor</name>
+        <key>sourceEditor</key>
+        <description>The editor the source text comes from.</description>
+        <type>string</type>
+        <value>None</value>
+    </setting>
+    <setting>
         <name>Macro Package</name>
         <key>macroPackage</key>
         <description>The macro package the XeTeX rendering engine will use to render components.</description>
         <type>string</type>
         <value>usfmTex</value>
-    </setting>
-    <setting>
-        <name>Source Editor</name>
-        <key>sourceEditor</key>
-        <description>The editor the source text comes from.</description>
-        <type>string</type>
-        <value></value>
     </setting>
 </root>
 

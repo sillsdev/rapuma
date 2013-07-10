@@ -656,18 +656,27 @@ class Tools (object) :
         return True
 
 
-    def xml_to_section (self, thisFile) :
+    def xml_to_section (self, xmlFile) :
         '''Read in our default settings from the XML system settings file'''
 
         # Read in our XML file
-#        doc = ElementTree.parse(thisFile)
-        doc = ET.parse(thisFile)
+        doc = ET.parse(xmlFile)
         # Create an empty dictionary
         data = {}
         # Extract the section/key/value data
         self.xml_add_section(data, doc)
         # Convert the extracted data to a configobj and return
         return ConfigObj(data, encoding='utf-8')
+
+
+
+
+
+
+
+# FIXME: problem with null vals causing the no key to be put in the config, why?
+
+
 
 
     def xml_add_section (self, data, doc) :
@@ -678,20 +687,31 @@ class Tools (object) :
         # Find all the key and value in a setting
         sets = doc.findall('setting')
         for s in sets :
-            val = s.find('value').text
-            # Need to treat lists special but type is not required
-            if s.find('type').text == 'list' :
-                if val :
-                    data[s.find('key').text] = val.split(',')
+            if s.find('value').text :
+                val = s.find('value').text
+                # Need to treat lists special but type is not required
+                if s.find('type').text == 'list' :
+                    if val :
+                        data[s.find('key').text] = val.split(',')
+                    else :
+                        data[s.find('key').text] = []
                 else :
-                    data[s.find('key').text] = []
-            else :
-                # We do not want "None" ending up in the config file
-                # This seems to be the best place to get rid of it.
-                if val :
-                    data[s.find('key').text] = val
-                else :
-                    data[s.find('key').text] = ''
+                    # We do not want "None" ending up in the config file
+                    # This seems to be the best place to get rid of it.
+                    if val :
+                        data[s.find('key').text] = val
+                    else :
+                        data[s.find('key').text] = ''
+
+
+
+
+                    print data[s.find('key').text]
+
+
+
+
+
 
         # Find all the sections then call this same function to grab the keys and
         # values all the settings in the section
@@ -700,6 +720,15 @@ class Tools (object) :
             nd = {}
             data[s.find('sectionID').text] = nd
             self.xml_add_section(nd, s)
+
+
+
+
+
+
+
+
+
 
 
     def override_section (self, aSection) :

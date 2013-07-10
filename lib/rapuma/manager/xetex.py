@@ -26,7 +26,6 @@ from rapuma.core.paratext               import Paratext
 from rapuma.project.proj_config         import ProjConfig, ConfigTools
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
-from rapuma.project.proj_style          import ProjStyle
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_macro          import ProjMacro
 from rapuma.project.proj_hyphenation    import ProjHyphenation
@@ -64,7 +63,6 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid, self.gid)
-        self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
         self.configTools            = ConfigTools(self.pid, self.gid)
@@ -77,6 +75,8 @@ class Xetex (Manager) :
         self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
         self.macPackConfig          = self.proj_macro.macPackConfig
+        # Load the macPackDict for finding out all default information
+        self.macPackDict = self.tools.xmlFileToDict(self.proj_macro.macPackXmlConfFile)
         # Some config settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
@@ -96,34 +96,14 @@ class Xetex (Manager) :
         self.useHyphenation         = self.hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
-        # File names
-        # Some of these file names will only be used once but for consitency
-        # we will create them all in one place.
-
-
-
-
-#        self.gidTexFile             = 
-#        self.gidPdfFile             = 
-#        self.macSettingsFile        = 
-#        self.fontTexFile            = 
-#        self.extTexFile             = 
-#        self.grpExtTexFile          = 
-#        self.defaultStyFile         = 
-#        self.glbExtStyFile          = 
-#        self.grpExtStyFile          = 
-
-
-
-
-        print self.macPackConfig
-
-        for fid in self.macPackConfig['MacroFiles'].keys() :
-            print fid
-            setattr(self, self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles'][fid]))
-
-#        self.tools.dieNow()
-
+        # File names (from a dict made from the macPack XML file)
+        for sections in self.macPackDict['root']['section'] :
+            if sections['sectionID'] == 'Files' :
+                for section in sections :
+                    secItem = sections[section]
+                    if type(secItem) is list :
+                        for f in secItem :
+                            setattr(self, f['moduleID'], self.configTools.processNestedPlaceholders(f['fileName']))
 
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
@@ -140,20 +120,20 @@ class Xetex (Manager) :
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
         self.fontConfFile           = self.proj_config.fontConfFile
-        self.macLinkFile            = os.path.join(self.projMacPackFolder, self.macLinkFileName)
-        self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
-        self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
-        self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
+#        self.macLinkFile            = os.path.join(self.projMacPackFolder, self.macLinkFileName)
+#        self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
+#        self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
+#        self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
 #        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
 #        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
 
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
-        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
+#        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
         self.macPackConfFile        = self.proj_config.macPackConfFile
-        self.macPackXmlConfFile     = self.proj_macro.macPackXmlConfFile
-        self.defaultStyFile         = self.proj_style.defaultStyFile
-        self.glbExtStyFile          = self.proj_style.glbExtStyFile
-        self.grpExtStyFile          = self.proj_style.grpExtStyFile
+#        self.macPackXmlConfFile     = self.proj_macro.macPackXmlConfFile
+#        self.defaultStyFile         = self.defaultStyFile
+#        self.glbExtStyFile          = self.glbExtStyFile
+#        self.grpExtStyFile          = self.grpExtStyFile
 #        self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
 #        self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
         # These files will not be used with the map cType
@@ -194,11 +174,10 @@ class Xetex (Manager) :
             'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
             'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
 
-            '0205' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
-            '0210' : ['LOG', 'Turned on draft background settings.'],
-            '0215' : ['LOG', 'Turned on proof background settings.'],
-            '0270' : ['LOG', 'Copied macro: <<1>>'],
-            '0275' : ['ERR', 'No macro package for : <<1>>'],
+            '1005' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
+            '1010' : ['ERR', 'Style file [<<1>>] could not be created.'],
+            '1040' : ['LOG', 'Created: [<<1>>]'],
+
 
             '0430' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
             '0440' : ['LOG', 'Created: [<<1>>]'],
@@ -225,7 +204,7 @@ class Xetex (Manager) :
 ###############################################################################
 ############################ Manager Level Functions ##########################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
     def displayPdfOutput (self, fileName) :
@@ -242,7 +221,47 @@ class Xetex (Manager) :
                 return True
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.log.writeToLog(self.errorCodes['0205'], [str(e)])
+                self.log.writeToLog(self.errorCodes['1005'], [str(e)])
+
+
+#    def getAdjustmentConfFile (self) :
+#        '''Return the full path and name of the adjustment file if the
+#        macro package requires it. Return null if not required.'''
+#        
+#        adjustmentConfFile     = ''
+#        if self.macPack in ['usfmTex', 'ptx2pdf'] :
+#            adjustmentConfFileName = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
+#            adjustmentConfFile = os.path.join(self.projConfFolder, adjustmentConfFileName)
+
+#        return adjustmentConfFile
+
+
+    def checkGrpExtStyFile (self) :
+        '''Check for the exsistance of the group extention Sty file. We need
+        to throw a stern warning if it is not there and create a blank one.'''
+
+        if not os.path.isfile(self.grpExtStyFile) :
+            if not self.makeGrpExtStyFile() :
+                self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(self.grpExtStyFile)], 'xetex.checkGrpExtStyFile():0010')
+                return False
+        else :
+            return True
+
+
+    def makeGrpExtStyFile (self) :
+        '''Create a group Style extentions file to a specified group.'''
+
+        description = 'This is the group style extention file which overrides settings in \
+        the main default component extentions settings style file.'
+
+        # Create a blank file (only if there is none)
+        if not os.path.exists(self.grpExtStyFile) :
+            with codecs.open(self.grpExtStyFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtStyFile), description, False))
+            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(self.grpExtStyFile)])
+
+        # Need to return true here even if nothing was done
+        return True
 
 
     def makeGrpHyphExcTexFile (self) :
@@ -317,12 +336,9 @@ class Xetex (Manager) :
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
-            macPackDict = self.tools.xmlFileToDict(self.macPackXmlConfFile)
-#            macPackDict = self.tools.xmlToDict(self.macPackXmlConfFile)
-#            print macPackDict
             # Create a dict that contains only the data we need here
             macTexVals = {}
-            for sections in macPackDict['root']['section'] :
+            for sections in self.macPackDict['root']['section'] :
                 macTexVals[sections['sectionID']] = {}
                 for section in sections :
                     secItem = sections[section]
@@ -547,7 +563,7 @@ class Xetex (Manager) :
             gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['defaultStyFile']) + '}\n')
             gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['glbExtStyFile']) + '}\n')
   
-            if self.proj_style.checkGrpExtStyFile() :
+            if self.checkGrpExtStyFile() :
                 gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['grpExtStyFile']) + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
@@ -662,7 +678,7 @@ class Xetex (Manager) :
 
         dep = [self.extTexFile, self.projConfFile, 
                 self.layoutConfFile, self.fontConfFile, self.macPackConfFile,
-                    self.adjustmentConfFile, self.illustrationConfFile, ]
+                    self.paragraphAdjustmentsFile, self.illustrationConfFile, ]
 
 
 

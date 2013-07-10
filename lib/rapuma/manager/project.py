@@ -264,10 +264,11 @@ class Project (object) :
 
     def setProjCurrent (self, pid) :
         '''Compare pid with the current recored pid e rapuma.conf. If it is
-
         different change to the new pid. If not, leave it alone.'''
 
-        currentPid = self.userConfig['System']['current']
+        currentPid = ''
+        if self.userConfig['System'].has_key('current') :
+            currentPid = self.userConfig['System']['current']
         if pid != currentPid :
             self.userConfig['System']['current'] = pid
             self.tools.writeConfFile(self.userConfig)

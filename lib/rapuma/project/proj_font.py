@@ -51,8 +51,20 @@ class ProjFont (object) :
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-
         self.generalSettings            = self.fontConfig['GeneralSettings']
+
+
+# FIXME: problem with null vals causing the no key to be put in the config, why?
+
+
+
+        self.ptDefaultFont              = ''
+
+
+
+
+
+
 
         for k, v in self.generalSettings.iteritems() :
             setattr(self, k, v)
@@ -370,8 +382,12 @@ class ProjFont (object) :
                 font = self.primaryFont
             else :
                 font = self.checkForSubFont('DefaultFont')
+        elif self.sourceEditor.lower() == 'none' :
+            self.pt_tools.getSourceEditor(self.cType)
+            # Try again
+            self.varifyFont()
         else :
-            self.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor], 'font.varifyFont():0210')
+            self.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor], 'proj_font.varifyFont():0210')
 
         if os.path.isdir(os.path.join(self.local.projFontsFolder, font)) and self.primaryFont == font :
             return True

@@ -31,7 +31,7 @@ Todo:
         <key>pdfViewerCommand</key>
         <description>The command needed to view the PDF output created by this module. The default is taken from the rapuma system configuration file.</description>
         <type>list</type>
-        <value></value>
+        <value>[config:userConfig|System|pdfDefaultViewerCommand]</value>
     </setting>
     <setting>
         <name>PDF Utility Command</name>
@@ -59,14 +59,14 @@ Todo:
         <key>finalBackground</key>
         <description>A list of backgounds to use for a final version of a group. Normally there are none.</description>
         <type>list</type>
-        <value></value>
+        <value>None</value>
     </setting>
     <setting>
         <name>Bind Background</name>
         <key>bindBackground</key>
         <description>A list of backgounds to use for a bound final version of the publication. Normally there are none.</description>
         <type>list</type>
-        <value></value>
+        <value>None</value>
     </setting>
 </root>
 

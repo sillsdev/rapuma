@@ -14,95 +14,109 @@ Todo:
 
 <root>
     <section>
-        <name>Macro Files</name>
-        <sectionID>MacroFiles</sectionID>
-        <description>Key files for this macro.</description>
+        <name>Files</name>
+        <sectionID>Files</sectionID>
+        <description>Key files created and used by this macro.</description>
 
-        <setting>
+        <file>
             <name>Group TeX Link File</name>
             <description>The file that links TeX to all the settings needed to render a job.</description>
-            <key>gidTexFile</key>
-            <type>string</type>
-            <value>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</value>
-        </setting>
+            <moduleID>gidTexFile</moduleID>
+            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
+            <depends></depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Group PDF Output File</name>
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
-            <key>gidPdfFile</key>
-            <type>string</type>
-            <value>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</value>
-        </setting>
+            <moduleID>gidPdfFile</moduleID>
+            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
+            <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Primary Macro File</name>
             <description>The main macro file that TeX will link to first.</description>
-            <key>primaryMacroFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]paratext2.tex</value>
-        </setting>
+            <moduleID>primaryMacroFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]paratext2.tex</fileName>
+            <depends></depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
-            <key>macSettingsFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-settings.tex</value>
-        </setting>
+            <moduleID>macSettingsFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-settings.tex</fileName>
+            <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
-            <key>extTexFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-ext.tex</value>
-        </setting>
+            <moduleID>extTexFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-ext.tex</fileName>
+            <depends></depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
-            <key>grpExtTexFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.tex</value>
-        </setting>
+            <moduleID>grpExtTexFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.tex</fileName>
+            <depends></depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Font Settings File</name>
             <description>The font settings file that TeX will link to after all the setting files are loaded.</description>
-            <key>fontTexFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</value>
-        </setting>
+            <moduleID>fontTexFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</fileName>
+            <depends></depends>
+        </file>
 
-        <setting>
+        <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
-            <key>defaultStyFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex.sty</value>
-        </setting>
-        <setting>
+            <moduleID>defaultStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex.sty</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
-            <key>glbExtStyFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-ext.sty</value>
-        </setting>
-        <setting>
+            <moduleID>glbExtStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-ext.sty</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
-            <key>grpExtStyFile</key>
-            <type>string</type>
-            <value>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</value>
-        </setting>
-        <setting>
+            <moduleID>grpExtStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
             <name>Paragraph Adjustments File</name>
             <description>The file that contains adjustments for components covered by this macro package.</description>
-            <key>paragraphAdjustmentsFile</key>
-            <type>string</type>
-            <value>adjustment.conf</value>
-        </setting>
+            <moduleID>paragraphAdjustmentsFile</moduleID>
+            <fileName>adjustment.conf</fileName>
+            <depends>adjustmentConfFile,</depends>
+        </file>
+
+        <file>
+            <name>Page Border File</name>
+            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
+            <moduleID>pageBorderFile</moduleID>
+            <fileName>page_border.pdf</fileName>
+            <depends></depends>
+        </file>
     </section>
+
+
+
     <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
@@ -908,13 +922,6 @@ Todo:
             <key>usePageBorder</key>
             <type>boolean</type>
             <value>False</value>
-        </setting>
-        <setting>
-            <name>Page Border File</name>
-            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
-            <key>pageBorderFile</key>
-            <type>string</type>
-            <value>page_border.pdf</value>
         </setting>
         <setting>
             <name>End Book No Eject</name>

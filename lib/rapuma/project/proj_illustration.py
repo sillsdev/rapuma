@@ -53,7 +53,13 @@ class ProjIllustration (object) :
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
-        self.userIllustrationsLibName   = self.illustrationConfig['GeneralSettings']['userIllustrationsLibName']
+        self.userIllustrationsLibName   = self.illustrationConfig['GeneralSettings'].get('userIllustrationsLibName')
+        # If we have nothing in the project for pointing to an illustrations
+        # lib, put the default in here
+        if not self.userIllustrationsLibName :
+            self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
+            self.illustrationConfig['GeneralSettings']['userIllustrationsLibName'] = self.userIllustrationsLibName
+            self.tools.writeConfFile(self.projConfig)
 
         # File names
 
@@ -65,12 +71,6 @@ class ProjIllustration (object) :
         self.projConfFolder             = self.local.projConfFolder
         # File names with folder paths
 
-        # If we have nothing in the project for pointing to an illustrations
-        # lib, put the default in here
-        if not self.userIllustrationsLibName :
-            self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
-            self.illustrationConfig['GeneralSettings']['userIllustrationsLibName'] = self.userIllustrationsLibName
-            self.tools.writeConfFile(self.projConfig)
 
         # Log messages for this module
         self.errorCodes     = {

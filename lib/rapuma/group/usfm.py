@@ -23,7 +23,6 @@ from configobj import ConfigObj, Section
 # Load the local classes
 from rapuma.core.tools                  import Tools
 from rapuma.group.group                 import Group
-from rapuma.project.proj_style          import ProjStyle
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_macro          import ProjMacro
 from rapuma.project.proj_config         import ProjConfig
@@ -57,7 +56,6 @@ class Usfm (Group) :
         self.project                = project
         self.local                  = project.local
         self.tools                  = Tools()
-        self.proj_style             = ProjStyle(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
@@ -227,12 +225,6 @@ class Usfm (Group) :
                 font = 'DefaultFont'
 
             self.proj_font.installFont(font, True)
-
-        # Will need the stylesheet for copy if that has not been added
-        # to the project yet, we will do that now
-#        self.proj_style.checkDefaultStyFile()
-#        self.proj_style.checkGlbExtStyFile()
-        self.proj_style.checkGrpExtStyFile()
 
         # Adjust the page number if necessary
         self.checkStartPageNumber()

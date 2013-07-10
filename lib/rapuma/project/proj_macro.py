@@ -107,18 +107,6 @@ class ProjMacro (object) :
             self.log.writeToLog(self.errorCodes['0250'], [self.macPack])
 
 
-    def getAdjustmentConfFile (self) :
-        '''Return the full path and name of the adjustment file if the
-        macro package requires it. Return null if not required.'''
-        
-        adjustmentConfFile     = ''
-        if self.macPack in ['usfmTex', 'ptx2pdf'] :
-            adjustmentConfFileName = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
-            adjustmentConfFile = os.path.join(self.projConfFolder, adjustmentConfFileName)
-
-        return adjustmentConfFile
-
-
 ###############################################################################
 ############################## Remove Functions ###############################
 ###############################################################################

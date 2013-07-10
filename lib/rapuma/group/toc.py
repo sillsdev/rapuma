@@ -25,7 +25,6 @@ from rapuma.core.tools                  import Tools
 from rapuma.group.group                 import Group
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_font           import ProjFont
-from rapuma.project.proj_style          import ProjStyle
 from rapuma.project.proj_background     import ProjBackground
 
 
@@ -57,7 +56,6 @@ class Toc (Group) :
         self.tools                  = Tools()
         self.proj_toc               = ProjToc(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
-        self.proj_style             = ProjStyle(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
         self.local                  = project.local

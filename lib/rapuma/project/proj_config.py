@@ -179,6 +179,7 @@ class ConfigTools (object) :
         # Paths we may need
         self.projMacrosFolder               = self.local.projMacrosFolder
         self.projMacPackFolder              = os.path.join(self.projMacrosFolder, self.macPack)
+        self.projComponentsFolder           = self.local.projComponentsFolder
 
         self.errorCodes     = {
 

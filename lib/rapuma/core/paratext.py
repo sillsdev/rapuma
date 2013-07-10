@@ -276,7 +276,8 @@ class Paratext (object) :
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
         if self.projConfig['CompTypes'][cType.capitalize()].has_key('sourceEditor') \
-            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != '' :
+            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != '' \
+            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != 'None' :
             se = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
         else :
             if self.findSsfFile() :
