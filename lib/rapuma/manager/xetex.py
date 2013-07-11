@@ -401,6 +401,16 @@ class Xetex (Manager) :
             return eval(''.join(dct))
 
 
+
+
+
+
+
+# FIXME: Font settings will go into the settings conf file. The next function needs
+# to be merged into makeSettingsTexFile()
+
+
+
     def makeFontSettingsTexFile (self) :
         '''Create the TeX font settings file.'''
 
@@ -471,6 +481,15 @@ class Xetex (Manager) :
             # End here
             self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.fontTexFile)])
             return True
+
+
+
+
+
+
+
+
+
 
 
 #    def makeGrpExtTexFile (self) :

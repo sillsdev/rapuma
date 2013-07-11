@@ -51,6 +51,11 @@ class ProjFont (object) :
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+
+
+# FIXME: Font info goes into the macPack conf file, the font conf will go away
+
+
         self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         self.macPackSettings            = self.fontConfig[self.macPack]
 
@@ -158,6 +163,14 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['0240'], [font + '.xml'], 'font.checkForSubFont():0240')
 
 
+
+
+
+
+
+# FIXME: Font information will be injected into the macPack conf file
+
+
     def recordFont (self, cType, font, force = None) :
         '''Check for the exsitance of the specified font in the font folder.
         Then extract the meta data into the appropreate configurations.
@@ -234,6 +247,14 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.fontConfig)
             return True
+
+
+
+
+
+
+
+
 
 
     def copyInFont (self, font, force = False) :

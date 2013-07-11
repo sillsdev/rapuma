@@ -55,8 +55,9 @@ class ProjConfig (object) :
 
 
 
-# FIXME: in a TeX world view, the fonts are tied to the macPack. Do we want to have
-# font configs that are named after the macPack? How will that work?
+# FIXME: in a TeX world view, the fonts are tied to the macPack. The font config
+# info will the macPack and the font conf will go away. The information in the
+# font xml will be merged in
 
         self.fontConfFileName               = 'font.conf'
         self.fontXmlConfFileName            = 'font.xml'
