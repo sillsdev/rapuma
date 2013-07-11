@@ -14,59 +14,54 @@ Todo:
 
 
 <root>
-    <section>
-        <name>General Settings</name>
-        <sectionID>GeneralSettings</sectionID>
-        <description>This section contains general font information and settings for this project.</description>
-        <setting>
-            <name>Use Rendering System</name>
-            <key>useRenderingSystem</key>
-            <description>The font rendering system (abbreviation) that will be used, e.g. use \"GR\" for Graphite. The supplied font rendering system must be supported by the font, otherwise the field should remain empty.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Use Language</name>
-            <key>useLanguage</key>
-            <description>The language this font will be working with. Specify the language by using its three letter Ethnologue code. The language must be supported by the font, otherwise the field should remain empty.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Use Font Mappings</name>
-            <key>useMapping</key>
-            <description>The name of the font mapping file you wish to use. Only one file per component type can be used.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Primary Font</name>
-            <key>primaryFont</key>
-            <description>The primary font used for rendering component text.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Footnote Caller Font</name>
-            <key>fnCallerFont</key>
-            <description>Footnote caller characters are normally taken from the default (body text) font. If an alternate (installed) font is specified here, that font will be used for the caller character(s).</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Installed fonts</name>
-            <key>installedFonts</key>
-            <description>All the installed font families that this component will need to render correctly.</description>
-            <type>list</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>ParaTExt Default Font</name>
-            <key>ptDefaultFont</key>
-            <description>If this project is connected to a ParaTExt project, record the default project font.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-    </section>
+    <setting>
+        <name>Use Rendering System</name>
+        <key>useRenderingSystem</key>
+        <description>The font rendering system (abbreviation) that will be used, e.g. use \"GR\" for Graphite. The supplied font rendering system must be supported by the font, otherwise the field should remain empty.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Use Language</name>
+        <key>useLanguage</key>
+        <description>The language this font will be working with. Specify the language by using its three letter Ethnologue code. The language must be supported by the font, otherwise the field should remain empty.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Use Font Mappings</name>
+        <key>useMapping</key>
+        <description>The name of the font mapping file you wish to use. Only one file per component type can be used.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Primary Font</name>
+        <key>primaryFont</key>
+        <description>The primary font used for rendering component text.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Footnote Caller Font</name>
+        <key>fnCallerFont</key>
+        <description>Footnote caller characters are normally taken from the default (body text) font. If an alternate (installed) font is specified here, that font will be used for the caller character(s).</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Installed fonts</name>
+        <key>installedFonts</key>
+        <description>All the installed font families that this component will need to render correctly.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>ParaTExt Default Font</name>
+        <key>ptDefaultFont</key>
+        <description>If this project is connected to a ParaTExt project, record the default project font.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 

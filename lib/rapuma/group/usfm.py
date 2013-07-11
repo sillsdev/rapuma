@@ -67,7 +67,7 @@ class Usfm (Group) :
         self.csid                   = project.projConfig['Groups'][self.gid]['csid']
         self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macroPackage           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPack                = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
         # If adjustments are needed in the macPack we insert into local here for down-stream use
         self.adjustmentConfig       = self.proj_config.adjustmentConfig
         self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
@@ -106,7 +106,7 @@ class Usfm (Group) :
             # If a PT project, use that font, otherwise, install default
 #            import pdb; pdb.set_trace()
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.fontConfig['GeneralSettings']['ptDefaultFont']
+                font = self.fontConfig[self.macPack]['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
@@ -220,7 +220,7 @@ class Usfm (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.fontConfig['GeneralSettings']['ptDefaultFont']
+                font = self.fontConfig[self.macPack]['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
@@ -239,7 +239,7 @@ class Usfm (Group) :
                 self.log.writeToLog(self.errorCodes['0220'], [cid], 'usfm.preProcessGroup():0220')
 
             # Add/manage the dependent files for this cid
-            if self.macroPackage == 'usfmTex' :
+            if self.macPack == 'usfmTex' :
                 # Component adjustment file
                 cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
@@ -284,7 +284,7 @@ class Usfm (Group) :
                         os.remove(cidPiclistFile)
                         self.log.writeToLog(self.errorCodes['0255'], [cid])
             else :
-                self.log.writeToLog(self.errorCodes['0220'], [self.macroPackage])
+                self.log.writeToLog(self.errorCodes['0220'], [self.macPack])
 
         # Background management
         bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']

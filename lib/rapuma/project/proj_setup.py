@@ -77,6 +77,7 @@ class ProjSetup (object) :
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
 
+            '1060' : ['LOG', 'Text validation succeeded on USFM file: [<<1>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             '1080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
             '1090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
@@ -755,9 +756,11 @@ class ProjSetup (object) :
         # For future reference, the sfm parser will fail if TeX style
         # comment markers "%" are used to comment text rather than "#".
 
-        # Just use the default style file from Rapuma
-        ct                  = ConfigTools(self.pid, gid)
-        defaultStyFile      = ct.processNestedPlaceholders(ct.macPackConfig['ProjectStyles']['defaultStyFile'])
+        # Grab the default style file from the macPack (it better be there)
+        cType          = self.projConfig['Groups'][gid]['cType']
+        Ctype          = cType.capitalize()
+        macPack        = self.projConfig['CompTypes'][Ctype]['macroPackage']
+        defaultStyFile      = os.path.join(self.local.projMacrosFolder, macPack, macPack + '.sty')
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()
@@ -772,6 +775,7 @@ class ProjSetup (object) :
             # so the parser will either pass or fail
             testlist = list(doc)
             # Good to go
+            self.log.writeToLog(self.errorCodes['1060'], [self.tools.fName(source)])
             return True
 
         except Exception as e :

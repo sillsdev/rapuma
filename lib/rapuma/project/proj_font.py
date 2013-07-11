@@ -51,22 +51,10 @@ class ProjFont (object) :
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.generalSettings            = self.fontConfig['GeneralSettings']
+        self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPackSettings            = self.fontConfig[self.macPack]
 
-
-# FIXME: problem with null vals causing the no key to be put in the config, why?
-
-
-
-        self.ptDefaultFont              = ''
-
-
-
-
-
-
-
-        for k, v in self.generalSettings.iteritems() :
+        for k, v in self.macPackSettings.iteritems() :
             setattr(self, k, v)
 
         # Get our component sourceEditor
@@ -75,7 +63,7 @@ class ProjFont (object) :
             ptSet = self.pt_tools.getPTSettings()
             if ptSet :
                 setattr(self, 'ptDefaultFont', ptSet['ScriptureText']['DefaultFont'])
-                self.fontConfig['GeneralSettings']['ptDefaultFont'] = self.ptDefaultFont
+                self.fontConfig[self.macPack]['ptDefaultFont'] = self.ptDefaultFont
                 self.tools.writeConfFile(self.fontConfig)
 
         # Log messages for this module
@@ -192,8 +180,8 @@ class ProjFont (object) :
                 self.tools.buildConfSection(self.fontConfig['Fonts'], font)
 
         # Set as primary for the calling cType if there is none now
-        if not self.fontConfig['GeneralSettings']['primaryFont'] :
-            self.fontConfig['GeneralSettings']['primaryFont'] = font
+        if not self.fontConfig[self.macPack]['primaryFont'] :
+            self.fontConfig[self.macPack]['primaryFont'] = font
 
         # If force was set, force the settings, otherwise, let them be
         if force :
@@ -206,15 +194,15 @@ class ProjFont (object) :
             self.fontConfig['Fonts'][font] = fInfo.dict()
             self.tools.writeConfFile(self.fontConfig)
             # Adjust installed fonts list if needed
-            if len(self.fontConfig['GeneralSettings']['installedFonts']) == 0 :
-                self.fontConfig['GeneralSettings']['installedFonts'] = [font]
+            if len(self.fontConfig[self.macPack]['installedFonts']) == 0 :
+                self.fontConfig[self.macPack]['installedFonts'] = [font]
             else :
-                fontList = self.fontConfig['GeneralSettings']['installedFonts']
+                fontList = self.fontConfig[self.macPack]['installedFonts']
                 if fontList != [font] :
-                    self.fontConfig['GeneralSettings']['installedFonts'] = self.tools.addToList(fontList, font)
-            primFont = self.fontConfig['GeneralSettings']['primaryFont']
+                    self.fontConfig[self.macPack]['installedFonts'] = self.tools.addToList(fontList, font)
+            primFont = self.fontConfig[self.macPack]['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
-                self.fontConfig['GeneralSettings']['primaryFont'] = font
+                self.fontConfig[self.macPack]['primaryFont'] = font
 
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.projConfig)
@@ -232,16 +220,16 @@ class ProjFont (object) :
                 self.log.writeToLog(self.errorCodes['0245'], [font])
 
             # Adjust installed fonts list if needed
-            if len(self.fontConfig['GeneralSettings']['installedFonts']) == 0 :
-                self.fontConfig['GeneralSettings']['installedFonts'] = [font]
+            if len(self.fontConfig[self.macPack]['installedFonts']) == 0 :
+                self.fontConfig[self.macPack]['installedFonts'] = [font]
             else :
-                fontList = self.fontConfig['GeneralSettings']['installedFonts']
+                fontList = self.fontConfig[self.macPack]['installedFonts']
                 if fontList != [font] :
-                    self.fontConfig['GeneralSettings']['installedFonts'] = self.tools.addToList(fontList, font)
+                    self.fontConfig[self.macPack]['installedFonts'] = self.tools.addToList(fontList, font)
 
-            primFont = self.fontConfig['GeneralSettings']['primaryFont']
+            primFont = self.fontConfig[self.macPack]['primaryFont']
             if primFont != font and (primFont == '' or primFont == 'None') :
-                self.fontConfig['GeneralSettings']['primaryFont'] = font
+                self.fontConfig[self.macPack]['primaryFont'] = font
 
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.fontConfig)
@@ -324,19 +312,19 @@ class ProjFont (object) :
 
         def removePConfSettings (Ctype, font) :
             # Adjust installed fonts list if needed
-            fontList = self.fontConfig['GeneralSettings']['installedFonts']
-            primFont = self.fontConfig['GeneralSettings']['primaryFont']
+            fontList = self.fontConfig[self.macPack]['installedFonts']
+            primFont = self.fontConfig[self.macPack]['primaryFont']
             if font in fontList :
                 fontList.remove(font)
-                self.fontConfig['GeneralSettings']['installedFonts'] = fontList
+                self.fontConfig[self.macPack]['installedFonts'] = fontList
             # There has to be a primary font no matter what. If the font being
             # removed was primary, then try setting the first 
             if primFont == font :
                 if len(fontList) == 0 :
-                    self.fontConfig['GeneralSettings']['primaryFont'] = ''
+                    self.fontConfig[self.macPack]['primaryFont'] = ''
                     self.log.writeToLog('FONT-090', [font,Ctype])
                 else :
-                    self.fontConfig['GeneralSettings']['primaryFont'] = fontList[0]
+                    self.fontConfig[self.macPack]['primaryFont'] = fontList[0]
 
         def removeFConfSettings (font) :
             if self.fontConfig['Fonts'].has_key(font) :
@@ -347,7 +335,7 @@ class ProjFont (object) :
         Ctype = cType.capitalize()
 
         # Remove settings for this font if we find it in the specified cType
-        if font in self.fontConfig['GeneralSettings']['installedFonts'] :
+        if font in self.fontConfig[self.macPack]['installedFonts'] :
             removePConfSettings(Ctype, font)
             self.log.writeToLog('FONT-080', [font,Ctype])
             if force :
@@ -389,7 +377,9 @@ class ProjFont (object) :
         else :
             self.log.writeToLog(self.errorCodes['0210'], [self.sourceEditor], 'proj_font.varifyFont():0210')
 
-        if os.path.isdir(os.path.join(self.local.projFontsFolder, font)) and self.primaryFont == font :
+        if os.path.isdir(os.path.join(self.local.projFontsFolder, font)) \
+            and self.primaryFont == font \
+            and self.fontConfig['Fonts'][font].has_key('FontInformation') :
             return True
 
 
@@ -404,14 +394,14 @@ class ProjFont (object) :
         '''Set the primary font for the project.'''
 
         def setIt (font) :
-            self.fontConfig['GeneralSettings']['primaryFont'] = font
+            self.fontConfig[self.macPack]['primaryFont'] = font
             self.tools.writeConfFile(self.fontConfig)
             # Sanity check
-            if self.fontConfig['GeneralSettings']['primaryFont'] == font :
+            if self.fontConfig[self.macPack]['primaryFont'] == font :
                 return True
 
         # First check to see if it is already has a primary font set
-        if self.fontConfig['GeneralSettings']['primaryFont'] == '' :
+        if self.fontConfig[self.macPack]['primaryFont'] == '' :
             if setIt(font) :
                 self.log.writeToLog(self.errorCodes['0435'], [self.Ctype,font])
                 return True
@@ -420,8 +410,8 @@ class ProjFont (object) :
                 self.log.writeToLog(self.errorCodes['0432'], [font,self.Ctype])
 
                 return True
-        elif self.fontConfig['GeneralSettings']['primaryFont'] :
-            self.log.writeToLog(self.errorCodes['0437'], [self.fontConfig['GeneralSettings']['primaryFont'],self.Ctype])
+        elif self.fontConfig[self.macPack]['primaryFont'] :
+            self.log.writeToLog(self.errorCodes['0437'], [self.fontConfig[self.macPack]['primaryFont'],self.Ctype])
             return True
         else :
             self.log.writeToLog(self.errorCodes['0430'], [font,Ctype])

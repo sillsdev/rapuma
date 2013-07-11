@@ -48,8 +48,25 @@ class ProjConfig (object) :
         self.progConfXmlFileName            = self.mType + '.xml'
         self.layoutConfFileName             = 'layout.conf'
         self.layoutXmlConfFileName          = self.mType + '_layout.xml'
+
+
+
+
+
+
+
+# FIXME: in a TeX world view, the fonts are tied to the macPack. Do we want to have
+# font configs that are named after the macPack? How will that work?
+
         self.fontConfFileName               = 'font.conf'
         self.fontXmlConfFileName            = 'font.xml'
+
+
+
+
+
+
+
         self.adjustmentConfFileName         = 'adjustment.conf'
         self.adjustmentXmlConfFileName      = 'adjustment.xml'
         self.hyphenConfFileName             = 'hyphenation.conf'

@@ -13,42 +13,6 @@ Todo:
 
 
 <root>
-<!-- Experimenting with new structure...
-    <section>
-        <name>Files: ???</name>
-        <sectionID>???Files</sectionID>
-        <description></description>
-        <setting>
-            <name></name>
-            <key></key>
-            <description></description>
-            <filename></filename>
-            <path></path>
-            <preserve backup=True archive=True reap=True template=True>
-        </setting>
-    </section>
-    <section>
-        <name>Files: Project</name>
-        <sectionID>projectFiles</sectionID>
-        <description>Global level project files</description>
-        <setting>
-            <name></name>
-            <key></key>
-            <description></description>
-            <filename></filename>
-            <path></path>
-            <preserve backup=True archive=True reap=True template=True>
-        </setting>
-        <setting>
-            <name>Project Configuration File</name>
-            <key>projConfFile</key>
-            <description>The primary project configuration file.</description>
-            <filename>project.conf</filename>
-            <path>projConfFolder</path>
-            <preserve backup=True archive=True reap=True template=True>
-        </setting>
-    </section>
--->
     <section>
         <name>User Folders</name>
         <sectionID>UserFolders</sectionID>
@@ -58,21 +22,21 @@ Todo:
             <key>libIllustrations</key>
             <description>Path to the local user illustrations library.</description>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
         <setting>
             <name>Fonts Library Path</name>
             <key>libFonts</key>
             <description>Path to the local user fonts library.</description>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
         <setting>
             <name>Scripts Library Path</name>
             <key>libScripts</key>
             <description>Path to the local user scripts library. This contains scripts for project text processing.</description>
             <type>string</type>
-            <value>None</value>
+            <value></value>
         </setting>
     </section>
     <section>

@@ -669,25 +669,20 @@ class Tools (object) :
         return ConfigObj(data, encoding='utf-8')
 
 
-
-
-
-
-
-# FIXME: problem with null vals causing the no key to be put in the config, why?
-
-
-
-
     def xml_add_section (self, data, doc) :
         '''Subprocess of xml_to_section().  Adds sections in the XML to conf
         object that is in memory.  It acts only on that object and does not return
         anything.'''
 
+#        import pdb; pdb.set_trace()
+
         # Find all the key and value in a setting
         sets = doc.findall('setting')
         for s in sets :
-            if s.find('value').text :
+            debug_item = s.find('value')
+            # This doesn't mean there is no value, rather, it means
+            # the "value" marker is present in the setting data set
+            if s.find('value') is not None:
                 val = s.find('value').text
                 # Need to treat lists special but type is not required
                 if s.find('type').text == 'list' :
@@ -703,32 +698,13 @@ class Tools (object) :
                     else :
                         data[s.find('key').text] = ''
 
-
-
-
-                    print data[s.find('key').text]
-
-
-
-
-
-
-        # Find all the sections then call this same function to grab the keys and
-        # values all the settings in the section
+        # Starting here, find all the sections then call this same function
+        # to grab the keys and values all the settings in the section
         sects = doc.findall('section')
         for s in sects :
             nd = {}
             data[s.find('sectionID').text] = nd
             self.xml_add_section(nd, s)
-
-
-
-
-
-
-
-
-
 
 
     def override_section (self, aSection) :

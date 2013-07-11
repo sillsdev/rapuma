@@ -425,15 +425,15 @@ class Xetex (Manager) :
                 writeObject.write(line + '\n')
 
             writeObject.write('\n% Font Definitions\n')
-            for f in self.fontConfig['GeneralSettings']['installedFonts'] :
+            for f in self.fontConfig[self.macPack]['installedFonts'] :
                 fInfo = self.fontConfig['Fonts'][f]
                 fontPath            = os.path.join(self.projFontsFolder, f)
-                useMapping          = self.fontConfig['GeneralSettings']['useMapping']
+                useMapping          = self.fontConfig[self.macPack]['useMapping']
                 if useMapping :
                     useMapping      = os.path.join(fontPath, useMapping)
-                useRenderingSystem  = self.fontConfig['GeneralSettings']['useRenderingSystem']
+                useRenderingSystem  = self.fontConfig[self.macPack]['useRenderingSystem']
 
-                useLanguage         = self.fontConfig['GeneralSettings']['useLanguage']
+                useLanguage         = self.fontConfig[self.macPack]['useLanguage']
                 params              = {}
                 if useMapping :
                     params['^^mapping^^'] = ':mapping=' + useMapping
@@ -445,7 +445,7 @@ class Xetex (Manager) :
                     params['^^path^^'] = fontPath
 
                 # Create the fonts settings that will be used with TeX
-                if self.fontConfig['GeneralSettings']['primaryFont'] == f :
+                if self.fontConfig[self.macPack]['primaryFont'] == f :
                     # Primary
                     writeObject.write('\n% These are normal use fonts for this type of component.\n')
                     for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
@@ -461,7 +461,7 @@ class Xetex (Manager) :
                 # font. For this reason, we take them all out. Only the primary font will support
                 # all font features.
                 params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.fontConfig['GeneralSettings']['primaryFont'] != f :
+                if self.fontConfig[self.macPack]['primaryFont'] != f :
                     # Secondary (only)
                     writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :

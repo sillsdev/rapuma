@@ -59,7 +59,11 @@ class ProjMacro (object) :
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.cType                      = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                      = self.cType.capitalize()
+
+
         self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+
+
         # File names
         self.macPackFileName            = self.macPack + '.zip'
         # Folder paths
