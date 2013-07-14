@@ -58,8 +58,8 @@ class Text (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        self.sourceEditor           = self.pt_tools.getSourceEditor(self.cType)
-        self.setSourceEditor(self.sourceEditor)
+        self.sourceEditor           = self.pt_tools.getSourceEditor()
+#        self.setSourceEditor(self.sourceEditor)
 
         # Get persistant values from the config if there are any
         newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
@@ -93,17 +93,17 @@ class Text (Manager) :
 ###############################################################################
 
 
-    def setSourceEditor (self, editor) :
-        '''Set the source editor for the cType. It assumes the editor is valid.
-        This cannot fail.'''
+#    def setSourceEditor (self, editor) :
+#        '''Set the source editor for the cType. It assumes the editor is valid.
+#        This cannot fail.'''
 
-        se = ''
-        if self.project.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') :
-            se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+#        se = ''
+#        if self.project.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') :
+#            se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
 
-        if se != editor :
-            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
-            self.tools.writeConfFile(self.project.projConfig)
+#        if se != editor :
+#            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
+#            self.tools.writeConfFile(self.project.projConfig)
 
 
     def updateManagerSettings (self, gid) :

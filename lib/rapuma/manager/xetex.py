@@ -72,14 +72,13 @@ class Xetex (Manager) :
         # Get config objs
         self.projConfig             = self.proj_config.projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
-        self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
         self.macPackConfig          = self.proj_macro.macPackConfig
         # Load the macPackDict for finding out all default information
         self.macPackDict = self.tools.xmlFileToDict(self.proj_macro.macPackXmlConfFile)
         # Some config settings
-        self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
-        self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
+        self.pdfViewer              = self.configTools.processNestedPlaceholders(self.projConfig['Managers'][self.manager]['pdfViewerCommand'])
+        self.pdfUtilityCommand      = self.configTools.processNestedPlaceholders(self.projConfig['Managers'][self.manager]['pdfUtilityCommand'])
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
 
@@ -119,7 +118,7 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
-        self.fontConfFile           = self.proj_config.fontConfFile
+#        self.fontConfFile           = self.proj_config.fontConfFile
 #        self.macLinkFile            = os.path.join(self.projMacPackFolder, self.macLinkFileName)
 #        self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
 #        self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
@@ -147,7 +146,7 @@ class Xetex (Manager) :
 
         # Check to see if the PDF viewer is ready to go
         if not self.pdfViewer :
-            defaultViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
+            defaultViewer = self.configTools.processNestedPlaceholders(self.project.userConfig['System']['pdfDefaultViewerCommand'])
             self.pdfViewer = defaultViewer
             self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = defaultViewer
             self.tools.writeConfFile(self.projConfig)
@@ -216,6 +215,7 @@ class Xetex (Manager) :
             # Build the viewer command
             self.pdfViewer.append(fileName)
             # Run the XeTeX and collect the return code for analysis
+            print self.pdfViewer
             try :
                 subprocess.Popen(self.pdfViewer)
                 return True
@@ -435,15 +435,15 @@ class Xetex (Manager) :
                 writeObject.write(line + '\n')
 
             writeObject.write('\n% Font Definitions\n')
-            for f in self.fontConfig[self.macPack]['installedFonts'] :
-                fInfo = self.fontConfig['Fonts'][f]
+            for f in self.macPackConfig['Fonts']['installedFonts'] :
+                fInfo = self.macPackConfig['Fonts'][f]
                 fontPath            = os.path.join(self.projFontsFolder, f)
-                useMapping          = self.fontConfig[self.macPack]['useMapping']
+                useMapping          = self.macPackConfig['Fonts']['useMapping']
                 if useMapping :
                     useMapping      = os.path.join(fontPath, useMapping)
-                useRenderingSystem  = self.fontConfig[self.macPack]['useRenderingSystem']
+                useRenderingSystem  = self.macPackConfig['Fonts']['useRenderingSystem']
 
-                useLanguage         = self.fontConfig[self.macPack]['useLanguage']
+                useLanguage         = self.macPackConfig['Fonts']['useLanguage']
                 params              = {}
                 if useMapping :
                     params['^^mapping^^'] = ':mapping=' + useMapping
@@ -455,7 +455,7 @@ class Xetex (Manager) :
                     params['^^path^^'] = fontPath
 
                 # Create the fonts settings that will be used with TeX
-                if self.fontConfig[self.macPack]['primaryFont'] == f :
+                if self.macPackConfig['Fonts']['primaryFont'] == f :
                     # Primary
                     writeObject.write('\n% These are normal use fonts for this type of component.\n')
                     for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
@@ -471,7 +471,7 @@ class Xetex (Manager) :
                 # font. For this reason, we take them all out. Only the primary font will support
                 # all font features.
                 params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.fontConfig[self.macPack]['primaryFont'] != f :
+                if self.macPackConfig['Fonts']['primaryFont'] != f :
                     # Secondary (only)
                     writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
                     for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
@@ -560,7 +560,7 @@ class Xetex (Manager) :
         # If we fail to make a dependency it will die and report during that process.
         # We bring in each element in the order necessary
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
-            gidTexObject.write(self.tools.makeFileHeader(self.gidTexFileName, description))
+            gidTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.gidTexFile), description))
 #            gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
 #            if self.makeSettingsTexFile() :
 #                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
@@ -568,22 +568,22 @@ class Xetex (Manager) :
 #                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
 
             # First bring in the main macro file
-            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['primaryMacroFile']) + '\"\n')
+            gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
             # Load the settings
-            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['macroSettingsFile']) + '\"\n')
+            gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
             # Load the settings extensions
-            gidTexObject.write('\\input \"' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['primaryMacroFile']) + '\"\n')
+#            gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
 
 
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
             # Load style files (default and extention come with the package)
-            gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['defaultStyFile']) + '}\n')
-            gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['glbExtStyFile']) + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
   
             if self.checkGrpExtStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.configTools.processNestedPlaceholders(self.macPackConfig['MacroFiles']['grpExtStyFile']) + '}\n')
+                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
@@ -695,9 +695,8 @@ class Xetex (Manager) :
 
 
 
-        dep = [self.extTexFile, self.projConfFile, 
-                self.layoutConfFile, self.fontConfFile, self.macPackConfFile,
-                    self.paragraphAdjustmentsFile, self.illustrationConfFile, ]
+        dep = [self.extTexFile, self.projConfFile, self.layoutConfFile, 
+                self.macPackConfFile, self.paragraphAdjustmentsFile, self.illustrationConfFile, ]
 
 
 
@@ -804,7 +803,7 @@ class Xetex (Manager) :
             if pdfSubFileName :
                 deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, pdfSubFileName), mode)
             else :
-                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, self.gidPdfFileName), mode)
+                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, self.tools.fName(self.gidPdfFile)), mode)
 
             shutil.move(self.gidPdfFile, deliverablePdfFile)
 

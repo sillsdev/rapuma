@@ -71,10 +71,10 @@ class Usfm (Group) :
         # If adjustments are needed in the macPack we insert into local here for down-stream use
         self.adjustmentConfig       = self.proj_config.adjustmentConfig
         self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
-        self.fontConfig             = self.proj_config.fontConfig
         # Get the comp settings
         self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
-
+        # Get macro package settings
+        self.macPackConfig          = self.proj_config.macPackConfig
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', self.renderer)
 
@@ -106,7 +106,7 @@ class Usfm (Group) :
             # If a PT project, use that font, otherwise, install default
 #            import pdb; pdb.set_trace()
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.fontConfig[self.macPack]['ptDefaultFont']
+                font = self.macPackConfig['Fonts']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
@@ -220,7 +220,7 @@ class Usfm (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.fontConfig[self.macPack]['ptDefaultFont']
+                font = self.macPackConfig['Fonts']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 

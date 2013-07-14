@@ -266,22 +266,42 @@ class Paratext (object) :
                     return self.tools.xmlFileToDict(ssfFile)
 
 
-    def getSourceEditor (self, cType) :
+    def getDefaultFont (self, macPackConfig) :
+        '''Return the default font for this project unless it is not a PT
+        project, then return None. This gets set in the macPackConfig but
+        it is hard to load that in this module so we'll pass it in.'''
+
+        ptDefaultFont = None
+        if macPackConfig['Fonts'].has_key('ptDefaultFont') :
+            ptDefaultFont = macPackConfig['Fonts']['ptDefaultFont']
+        else :
+            ptSet = self.getPTSettings()
+            if ptSet :
+                ptDefaultFont = ptSet['ScriptureText']['DefaultFont']
+                macPackConfig['Fonts']['ptDefaultFont'] = ptDefaultFont
+                self.tools.writeConfFile(macPackConfig)
+
+        return ptDefaultFont
+
+
+    def getSourceEditor (self) :
         '''Return the sourceEditor if it is set. If not try to
-        figure out what it should be and return that. Unless we
-        find we are in a PT project, we'll call it generic.'''
+        figure out what it should be and set it to that. Unless
+        we find we are in a PT project, we'll call it generic.'''
 
 #        import pdb; pdb.set_trace()
 
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if self.projConfig['CompTypes'][cType.capitalize()].has_key('sourceEditor') \
-            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != '' \
-            and self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor'] != 'None' :
-            se = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        if self.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') \
+            and self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] != '' \
+            and self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] != 'None' :
+            se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
             if self.findSsfFile() :
                 se = 'paratext'
+                self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = se
+                self.writeConfFile(self.projConfig)
 
         return se
 

@@ -48,26 +48,6 @@ class ProjConfig (object) :
         self.progConfXmlFileName            = self.mType + '.xml'
         self.layoutConfFileName             = 'layout.conf'
         self.layoutXmlConfFileName          = self.mType + '_layout.xml'
-
-
-
-
-
-
-
-# FIXME: in a TeX world view, the fonts are tied to the macPack. The font config
-# info will the macPack and the font conf will go away. The information in the
-# font xml will be merged in
-
-        self.fontConfFileName               = 'font.conf'
-        self.fontXmlConfFileName            = 'font.xml'
-
-
-
-
-
-
-
         self.adjustmentConfFileName         = 'adjustment.conf'
         self.adjustmentXmlConfFileName      = 'adjustment.xml'
         self.hyphenConfFileName             = 'hyphenation.conf'
@@ -82,8 +62,6 @@ class ProjConfig (object) :
         self.projConfXmlFile                = os.path.join(self.rapumaConfigFolder, self.progConfXmlFileName)
         self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
         self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
-        self.fontConfFile                   = os.path.join(self.projConfFolder, self.fontConfFileName)
-        self.fontXmlConfFile                = os.path.join(self.rapumaConfigFolder, self.fontXmlConfFileName)
         self.adjustmentConfFile             = os.path.join(self.projConfFolder, self.adjustmentConfFileName)
         self.adjustmentXmlConfFile          = os.path.join(self.rapumaConfigFolder, self.adjustmentXmlConfFileName)
         self.hyphenConfFile                 = os.path.join(self.projConfFolder, self.hyphenConfFileName)
@@ -93,7 +71,6 @@ class ProjConfig (object) :
         # Load the config objects
         self.adjustmentConfig               = self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
         self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
-        self.fontConfig                     = self.tools.initConfig(self.fontConfFile, self.fontXmlConfFile)
         self.projConfig                     = self.tools.initConfig(self.local.projConfFile, self.projConfXmlFile)
         self.hyphenConfig                   = self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
         self.illustrationConfig             = self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)

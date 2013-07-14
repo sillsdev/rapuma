@@ -129,17 +129,19 @@ class ToolsPath (object) :
     def getSourceFile (self, gid, cid) :
         '''Get the source file name with path.'''
 
-        # At this time, we only need this right here in this function
-        from rapuma.core.paratext           import Paratext
+#        import pdb; pdb.set_trace()
 
+        # At this time, we only need this right here in this function
+        from rapuma.core.paratext import Paratext
+        pt                  = Paratext(self.pid, gid)
         sourcePath          = self.getGroupSourcePath(gid)
         cType               = self.projConfig['Groups'][gid]['cType']
-        sourceEditor        = self.projConfig['CompTypes'][cType.capitalize()]['sourceEditor']
+        sourceEditor        = pt.getSourceEditor()
         # Build the file name
         if sourceEditor.lower() == 'paratext' :
-            sName = Paratext(self.pid, gid).formPTName(cid)
+            sName = pt.formPTName(cid)
         elif sourceEditor.lower() == 'generic' :
-            sName = Paratext(self.pid, gid).formGenericName(cid)
+            sName = pt.formGenericName(cid)
         else :
             return None
 
