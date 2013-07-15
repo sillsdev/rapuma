@@ -725,7 +725,9 @@ class Tools (object) :
 
 
     def xmlFileToDict (self, fileName) :
-#        tree =  ElementTree.parse(fileName)
+        '''This will parse an XML file and send it on to the conversion
+        function to get the results.'''
+
         tree =  ET.parse(fileName)
         root = tree.getroot()
         return self.etree_to_dict(root)

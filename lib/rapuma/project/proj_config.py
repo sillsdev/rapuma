@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, shutil
+import os, shutil, re
 from configobj                          import ConfigObj
 
 # Load the local classes
@@ -162,6 +162,7 @@ class ConfigTools (object) :
         self.gid                            = gid
         self.proj_config                    = ProjConfig(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
+        self.userConfig                     = self.proj_config.userConfig
         self.layoutConfig                   = self.proj_config.layoutConfig
         self.macPackConfig                  = self.proj_config.macPackConfig
         self.csid                           = self.projConfig['Groups'][gid]['csid']
@@ -171,10 +172,11 @@ class ConfigTools (object) :
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
         self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
-        # Paths we may need
+        # Paths we may need (FIXME: Make this more generalized)
         self.projMacrosFolder               = self.local.projMacrosFolder
         self.projMacPackFolder              = os.path.join(self.projMacrosFolder, self.macPack)
         self.projComponentsFolder           = self.local.projComponentsFolder
+        self.projFontsFolder                 = self.local.projFontsFolder
 
         self.errorCodes     = {
 
@@ -219,6 +221,16 @@ class ConfigTools (object) :
         elif holderKey and holderType == 'function' :
             fnc = getattr(self, holderKey)
             result = fnc()
+        # A value that is a special character (escaped character)
+        elif holderKey and holderType == 'esc' :
+            result = self.getEscapeCharacter(holderKey)
+        # A value that is a font setting
+        elif holderKey and holderType == 'font' :
+        
+        
+# FIXME: This returns "None" if it is not set. Should return nothing at all.
+        
+            result = self.getFontSetting(holderKey)
         # A value that is a path separater character
         elif holderType == 'pathSep' :
             result = os.sep
@@ -231,14 +243,43 @@ class ConfigTools (object) :
         return result
 
 
+    def getFontSetting (self, value) :
+        '''Get a special font setting if there is one. Otherwise
+        return null.'''
+
+        # FIXME: This may need to be moved to Fonts
+        if value == 'mapping' :
+            useMapping = self.macPackConfig['Fonts']['useMapping']
+            if useMapping :
+                return ':mapping=' + os.path.join(self.projFontsFolder, useMapping)
+        elif value == 'renderer' :
+            useRenderingSystem = self.macPackConfig['Fonts']['useRenderingSystem']
+            if useRenderingSystem :
+                return '/' + useRenderingSystem
+        elif value == 'language' :
+            useLanguage = self.macPackConfig['Fonts']['useLanguage']
+            if useLanguage :
+                return ':language=' + useLanguage
+        else :
+            return ''
+
+
+    def getEscapeCharacter (self, value) :
+        '''Return the character specified by the escape code.'''
+
+        if value == 'lsBracket' :
+            return '['
+        elif value == 'rsBracket' :
+            return ']'
+        
+        # Add more as needed...
+
+
     def processNestedPlaceholders (self, line, value = '') :
         '''Search a string (or line) for a type of Rapuma placeholder and
         insert the value. This is for building certain kinds of config values.'''
 
-#        print "Debug: line =", line
-#        print "value =", value
         result = []
-        #resultline = line
         end_of_previous_segment = 0
         for (ph_start, ph_end) in self.getPlaceHolder(line) :
             unchanged_segment = line[end_of_previous_segment:ph_start]
@@ -250,7 +291,6 @@ class ConfigTools (object) :
         result.append(line[end_of_previous_segment:])
         resultline = "".join(result)
         result_text = self.processSinglePlaceholder(resultline, value)
-#        print "result of processNestedPlaceholders =", result_text
         return result_text
 
 

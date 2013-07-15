@@ -77,8 +77,8 @@ class Xetex (Manager) :
         # Load the macPackDict for finding out all default information
         self.macPackDict = self.tools.xmlFileToDict(self.proj_macro.macPackXmlConfFile)
         # Some config settings
-        self.pdfViewer              = self.configTools.processNestedPlaceholders(self.projConfig['Managers'][self.manager]['pdfViewerCommand'])
-        self.pdfUtilityCommand      = self.configTools.processNestedPlaceholders(self.projConfig['Managers'][self.manager]['pdfUtilityCommand'])
+        self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
+        self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
         self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
 
@@ -144,12 +144,18 @@ class Xetex (Manager) :
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
 
-        # Check to see if the PDF viewer is ready to go
+        # Check to see if the PDF support is ready to go
         if not self.pdfViewer :
-            defaultViewer = self.configTools.processNestedPlaceholders(self.project.userConfig['System']['pdfDefaultViewerCommand'])
-            self.pdfViewer = defaultViewer
-            self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = defaultViewer
+            self.pdfViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
+            self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = self.pdfViewer
             self.tools.writeConfFile(self.projConfig)
+        if not self.pdfUtilityCommand :
+            self.pdfUtilityCommand = self.project.userConfig['System']['pdfDefaultUtilityCommand']
+            self.projConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
+            self.tools.writeConfFile(self.projConfig)
+
+
+
 
         # Record some error codes
         # FIXME: much more needs to be done with this
@@ -212,10 +218,12 @@ class Xetex (Manager) :
 #        import pdb; pdb.set_trace()
 
         if self.usePdfViewer :
+#            # FIXME: This check is to overcome a bug upstream
+#            if type(self.pdfViewer) != list :
+#                self.pdfViewer = eval(self.pdfViewer)
             # Build the viewer command
             self.pdfViewer.append(fileName)
             # Run the XeTeX and collect the return code for analysis
-            print self.pdfViewer
             try :
                 subprocess.Popen(self.pdfViewer)
                 return True
@@ -375,6 +383,17 @@ class Xetex (Manager) :
                                                 if outputTest :
                                                     print '\t', setting.get(k)
                                                 writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+
+            # Continue here with injecting the font settings which are guided by
+            # the config file because the XML source(s) could vary
+            writeObject.write('% INSTALLED FONTS\n')
+            installedFonts = self.macPackConfig['Fonts']['installedFonts']
+            for font in installedFonts :
+                for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'].keys() :
+                    writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'][key]) + '\n')
+                for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'].keys() :
+                    writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'][key]) + '\n')
+
             # Die here if testing
             if outputTest :
                 self.tools.dieNow()
@@ -768,7 +787,7 @@ class Xetex (Manager) :
                         self.tools.writeConfFile(self.layoutConfig)
                     continue
                 bgFile = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
-                cmd = [self.pdfUtilityCommand, self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
+                cmd = self.pdfUtilityCommand + [self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
                     shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)

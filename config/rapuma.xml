@@ -90,6 +90,13 @@ Todo:
             <value>evince,-w</value>
         </setting>
         <setting>
+            <name>Default PDF Utility Command</name>
+            <key>pdfDefaultUtilityCommand</key>
+            <description>The default command needed to operate the PDF manipulation utility. Note that currently Rapuma only supports pdftk.</description>
+            <type>list</type>
+            <value>pdftk</value>
+        </setting>
+        <setting>
             <name>Recognized Component Types</name>
             <key>recognizedComponentTypes</key>
             <description>A list of valid component types that are recognized by the Rapuma system.</description>
