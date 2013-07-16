@@ -226,10 +226,6 @@ class ConfigTools (object) :
             result = self.getEscapeCharacter(holderKey)
         # A value that is a font setting
         elif holderKey and holderType == 'font' :
-        
-        
-# FIXME: This returns "None" if it is not set. Should return nothing at all.
-        
             result = self.getFontSetting(holderKey)
         # A value that is a path separater character
         elif holderType == 'pathSep' :
@@ -248,20 +244,21 @@ class ConfigTools (object) :
         return null.'''
 
         # FIXME: This may need to be moved to Fonts
+        result = ''
         if value == 'mapping' :
             useMapping = self.macPackConfig['Fonts']['useMapping']
             if useMapping :
-                return ':mapping=' + os.path.join(self.projFontsFolder, useMapping)
+                result = ':mapping=' + os.path.join(self.projFontsFolder, useMapping)
         elif value == 'renderer' :
             useRenderingSystem = self.macPackConfig['Fonts']['useRenderingSystem']
             if useRenderingSystem :
-                return '/' + useRenderingSystem
+                result = '/' + useRenderingSystem
         elif value == 'language' :
             useLanguage = self.macPackConfig['Fonts']['useLanguage']
             if useLanguage :
-                return ':language=' + useLanguage
-        else :
-            return ''
+                result = ':language=' + useLanguage
+
+        return result
 
 
     def getEscapeCharacter (self, value) :

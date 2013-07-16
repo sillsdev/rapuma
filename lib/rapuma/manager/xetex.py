@@ -118,23 +118,10 @@ class Xetex (Manager) :
         # Set file names with full path 
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
-#        self.fontConfFile           = self.proj_config.fontConfFile
-#        self.macLinkFile            = os.path.join(self.projMacPackFolder, self.macLinkFileName)
-#        self.macSettingsFile        = os.path.join(self.projMacPackFolder, self.macSettingsFileName)
-#        self.fontTexFile            = os.path.join(self.projMacPackFolder, self.fontTexFileName)
-#        self.extTexFile             = os.path.join(self.projMacPackFolder, self.extTexFileName)
-#        self.grpExtTexFile          = os.path.join(self.projMacrosFolder, self.macroPackage, self.grpExtTexFileName)
-#        self.usrGrpExtTexFile       = os.path.join(self.project.userConfig['Resources']['macros'], self.grpExtTexFile)
 
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
-#        self.adjustmentConfFile     = self.proj_macro.getAdjustmentConfFile()
         self.macPackConfFile        = self.proj_config.macPackConfFile
-#        self.macPackXmlConfFile     = self.proj_macro.macPackXmlConfFile
-#        self.defaultStyFile         = self.defaultStyFile
-#        self.glbExtStyFile          = self.glbExtStyFile
-#        self.grpExtStyFile          = self.grpExtStyFile
-#        self.rpmExtTexFile          = os.path.join(self.rapumaMacrosFolder, self.extTexFileName)
-#        self.usrExtTexFile          = os.path.join(self.project.userConfig['Resources']['macros'], self.extTexFileName)
+
         # These files will not be used with the map cType
 #        if cType != 'map' :
 #            self.lccodeTexFile          = self.hyphenation.lccodeTexFile
@@ -232,30 +219,6 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['1005'], [str(e)])
 
 
-#    def getAdjustmentConfFile (self) :
-#        '''Return the full path and name of the adjustment file if the
-#        macro package requires it. Return null if not required.'''
-#        
-#        adjustmentConfFile     = ''
-#        if self.macPack in ['usfmTex', 'ptx2pdf'] :
-#            adjustmentConfFileName = self.macPackConfig['ParagraphAdjustments']['paragraphAdjustmentsFile']
-#            adjustmentConfFile = os.path.join(self.projConfFolder, adjustmentConfFileName)
-
-#        return adjustmentConfFile
-
-
-    def checkGrpExtStyFile (self) :
-        '''Check for the exsistance of the group extention Sty file. We need
-        to throw a stern warning if it is not there and create a blank one.'''
-
-        if not os.path.isfile(self.grpExtStyFile) :
-            if not self.makeGrpExtStyFile() :
-                self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(self.grpExtStyFile)], 'xetex.checkGrpExtStyFile():0010')
-                return False
-        else :
-            return True
-
-
     def makeGrpExtStyFile (self) :
         '''Create a group Style extentions file to a specified group.'''
 
@@ -350,10 +313,12 @@ class Xetex (Manager) :
                 macTexVals[sections['sectionID']] = {}
                 for section in sections :
                     secItem = sections[section]
+                    linesOut = []
                     if type(secItem) is list :
                         if outputTest :
                             print sections['sectionID']
-                        writeObject.write('% ' + sections['sectionID'].upper() + '\n')
+#                        writeObject.write('% ' + sections['sectionID'].upper() + '\n')
+                        linesOut.append('% ' + sections['sectionID'].upper())
                         for setting in secItem :
                             for k in setting.keys() :
                                 if k == 'texCode' :
@@ -367,14 +332,16 @@ class Xetex (Manager) :
                                             if not self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
                                     elif setting.has_key('boolDependTrue') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
                                             macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
                                             if self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
                                     elif setting.get(k) :
                                         if setting.get(k) != None :
                                             macTexVals[sections['sectionID']][k] = setting.get(k)
@@ -382,17 +349,25 @@ class Xetex (Manager) :
                                             if not realVal == '0' :
                                                 if outputTest :
                                                     print '\t', setting.get(k)
-                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
+                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
+                    # Only write out sections that have something in them
+                    if len(linesOut) > 1 :
+                        writeObject.write('\n')
+                        for line in linesOut :
+                            writeObject.write(line + '\n')
 
             # Continue here with injecting the font settings which are guided by
             # the config file because the XML source(s) could vary
-            writeObject.write('% INSTALLED FONTS\n')
+            writeObject.write('\n% INSTALLED FONTS\n')
             installedFonts = self.macPackConfig['Fonts']['installedFonts']
             for font in installedFonts :
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'].keys() :
                     writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'][key]) + '\n')
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'].keys() :
                     writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'][key]) + '\n')
+
+                writeObject.write('\n')
 
             # Die here if testing
             if outputTest :
@@ -420,140 +395,20 @@ class Xetex (Manager) :
             return eval(''.join(dct))
 
 
+    def makeGrpExtTexFile (self) :
+        '''Create/copy a group TeX extentions file to the project for specified group.'''
 
+        description = 'This is the group extention file which overrides settings in \
+        the main TeX settings files and the component TeX settings.'
 
+        # First look for a user file, if not, then make a blank one
+        if not os.path.isfile(self.grpExtTexFile) :
+            with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
+            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
 
-
-
-# FIXME: Font settings will go into the settings conf file. The next function needs
-# to be merged into makeSettingsTexFile()
-
-
-
-    def makeFontSettingsTexFile (self) :
-        '''Create the TeX font settings file.'''
-
-        description = 'This is the font extension file for the ' + self.gid + ' group. \
-        It is auto-generated so editing can be a rather futile exercise.'
-
-        # Open a fresh font settings file
-        with codecs.open(self.fontTexFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.fontTexFile), description))
-
-            def addParams (writeObject, pList, line) :
-                for k,v in pList.iteritems() :
-                    if v :
-                        line = line.replace(k, v)
-                    else :
-                        line = line.replace(k, '')
-                # Clean out unused placeholders
-                line = re.sub(u"\^\^[a-z]+\^\^", "", line)
-                # Remove unneeded colon from the end of the string
-                line = re.sub(u":\"", "\"", line)
-                # Write it out
-                writeObject.write(line + '\n')
-
-            writeObject.write('\n% Font Definitions\n')
-            for f in self.macPackConfig['Fonts']['installedFonts'] :
-                fInfo = self.macPackConfig['Fonts'][f]
-                fontPath            = os.path.join(self.projFontsFolder, f)
-                useMapping          = self.macPackConfig['Fonts']['useMapping']
-                if useMapping :
-                    useMapping      = os.path.join(fontPath, useMapping)
-                useRenderingSystem  = self.macPackConfig['Fonts']['useRenderingSystem']
-
-                useLanguage         = self.macPackConfig['Fonts']['useLanguage']
-                params              = {}
-                if useMapping :
-                    params['^^mapping^^'] = ':mapping=' + useMapping
-                if useRenderingSystem :
-                    params['^^renderer^^'] = '/' + useRenderingSystem
-                if useLanguage :
-                    params['^^language^^'] = ':language=' + useLanguage
-                if fontPath :
-                    params['^^path^^'] = fontPath
-
-                # Create the fonts settings that will be used with TeX
-                if self.macPackConfig['Fonts']['primaryFont'] == f :
-                    # Primary
-                    writeObject.write('\n% These are normal use fonts for this type of component.\n')
-                    for k, v in fInfo['UsfmTeX']['PrimaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-                    # Secondary
-                    writeObject.write('\n% These are font settings for other custom uses.\n')
-                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-                # There maybe additional fonts for this component. Their secondary settings need to be captured
-                # At this point it would be difficult to handle a full set of parms with a secondary
-                # font. For this reason, we take them all out. Only the primary font will support
-                # all font features.
-                params              = {'^^mapping^^' : '', '^^renderer^^' : '', '^^language^^' : '', '^^path^^' : fontPath}
-                if self.macPackConfig['Fonts']['primaryFont'] != f :
-                    # Secondary (only)
-                    writeObject.write('\n% These are non-primary extra font settings for other custom uses.\n')
-                    for k, v in fInfo['UsfmTeX']['SecondaryFont'].iteritems() :
-                        addParams(writeObject, params, v)
-
-
-            # End here
-            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.fontTexFile)])
+            # Need to return true here even if nothing was done
             return True
-
-
-
-
-
-
-
-
-
-
-
-#    def makeGrpExtTexFile (self) :
-#        '''Create/copy a group TeX extentions file to the project for specified group.'''
-
-#        description = 'This is the group extention file which overrides settings in \
-#        the main TeX settings files and the component TeX settings.'
-
-#        # First look for a user file, if not, then make a blank one
-#        if not os.path.isfile(self.grpExtTexFile) :
-#            if os.path.isfile(self.usrGrpExtTexFile) :
-#                shutil.copy(self.usrGrpExtTexFile, self.grpExtTexFile)
-#            else :
-#                # Create a blank file
-#                with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-#                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
-#                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
-
-#        # Need to return true here even if nothing was done
-#        return True
-
-
-#    def makeExtTexFile (self) :
-#        '''Create/copy a TeX extentions file that has custom code for a project component
-#        type. This will go in before the group extentions file.'''
-
-#        description = 'This the component TeX macro settings file. The settings \
-#            in this file can override the main TeX settings and these settings \
-#            can be overridden by the group-level settings file.'
-
-#        # First look for a user file, if not, then one 
-#        # from Rapuma, worse case, make a blank one
-#        if not os.path.isfile(self.extTexFile) :
-#            if os.path.isfile(self.usrExtTexFile) :
-#                shutil.copy(self.usrExtTexFile, self.extTexFile)
-#            elif os.path.isfile(self.rpmExtTexFile) :
-#                shutil.copy(self.rpmExtTexFile, self.extTexFile)
-#            else :
-#                # Create a blank file
-#                with codecs.open(self.extTexFile, "w", encoding='utf_8') as writeObject :
-#                    writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.extTexFileName), description, False))
-#                self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.extTexFile)])
-
-#        # Need to return true here even if nothing was done
-#        return True
 
 
     def makeGidTexFile (self, cidList) :
@@ -574,35 +429,33 @@ class Xetex (Manager) :
 
         # Create (if needed) dependent files
         self.makeSettingsTexFile()
+        self.makeGrpExtTexFile()
+        self.makeGrpExtStyFile()
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         # We bring in each element in the order necessary
         with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
+            # Write out the file header
             gidTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.gidTexFile), description))
-#            gidTexObject.write('\\input \"' + self.macLinkFile + '\"\n')
-#            if self.makeSettingsTexFile() :
-#                gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
-#            if self.makeGrpExtTexFile() :
-#                gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
-
             # First bring in the main macro file
             gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
             # Load the settings
             gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
             # Load the settings extensions
-#            gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
-
-
+            gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
+            # Load the group settings extensions
+            gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
+            # Load hyphenation data if needed
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
             # Load style files (default and extention come with the package)
             gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+            # Load the global style extensions
             gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
-  
-            if self.checkGrpExtStyFile() :
-                gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+            # Load the group style extensions
+            gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
@@ -696,7 +549,6 @@ class Xetex (Manager) :
         # First, go through and make/update any dependency files
 #        self.makeMacLinkFile()
         self.makeSettingsTexFile()
-        self.makeFontSettingsTexFile()
         self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
         self.makeGidTexFile(cidList)

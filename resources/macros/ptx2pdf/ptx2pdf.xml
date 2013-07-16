@@ -14,18 +14,6 @@ Todo:
 
 <root>
     <section>
-        <name>Paragraph Adjustments</name>
-        <sectionID>ParagraphAdjustments</sectionID>
-        <description>Parameters that cover paragraph adjustments used in this macro pacakge.</description>
-        <setting>
-            <name>Paragraph Adjustments File</name>
-            <description>The file that contains adjustments for components covered by this macro package.</description>
-            <key>paragraphAdjustmentsFile</key>
-            <type>string</type>
-            <value>adjustment.conf</value>
-        </setting>
-    </section>
-    <section>
         <name>Chapter and Verse</name>
         <sectionID>ChapterVerse</sectionID>
         <description>Parameters that cover varous aspects of formating of chapter and verse layout</description>
