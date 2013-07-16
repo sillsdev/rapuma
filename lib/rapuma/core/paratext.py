@@ -301,7 +301,7 @@ class Paratext (object) :
             if self.findSsfFile() :
                 se = 'paratext'
                 self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = se
-                self.writeConfFile(self.projConfig)
+                self.tools.writeConfFile(self.projConfig)
 
         return se
 
