@@ -16,9 +16,6 @@ rpm project KYU-MYMR-MRKA project add --target_path ~/Publishing/testArea --medi
 rpm group KYU-MYMR-MRKA Mark group add --component_type usfm --cid_list mrk --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
 rpm group KYU-MYMR-MRKA Intro group add --component_type usfm --cid_list int --source_id MYMR --source_path ~/Publishing/testArea/KYUM/pt_environ
 
-# Set the font to the right one
-rpm package KYU-MYMR-MRKA Mark Padauk font primary
-
 # Turn on preprocessing for Mark group
 rpm group KYU-MYMR-MRKA Mark preprocess add
 
@@ -26,9 +23,9 @@ rpm group KYU-MYMR-MRKA Mark preprocess add
 rpm group KYU-MYMR-MRKA Mark hyphenation add
 
 # Turn on font features in Padauk & adjust default settings
-rpm settings KYU-MYMR-MRKA font usfmTex useRenderingSystem GR
-rpm settings KYU-MYMR-MRKA font usfmTex useLanguage kyu
-rpm settings KYU-MYMR-MRKA font usfmTex useMapping kye_renumber
+rpm settings KYU-MYMR-MRKA usfmTex Fonts useRenderingSystem GR
+rpm settings KYU-MYMR-MRKA usfmTex Fonts useLanguage kyu
+rpm settings KYU-MYMR-MRKA usfmTex Fonts useMapping kye_renumber
 rpm settings KYU-MYMR-MRKA usfmTex Fonts fontSizeUnit 0.82pt
 rpm settings KYU-MYMR-MRKA usfmTex Fonts lineSpacingFactor 1.3
 

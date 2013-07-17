@@ -22,6 +22,7 @@ from configobj import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools                  import Tools
+from rapuma.core.paratext               import Paratext
 from rapuma.group.group                 import Group
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_macro          import ProjMacro
@@ -56,6 +57,7 @@ class Usfm (Group) :
         self.project                = project
         self.local                  = project.local
         self.tools                  = Tools()
+        self.pt_tools               = Paratext(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
@@ -105,8 +107,12 @@ class Usfm (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
 #            import pdb; pdb.set_trace()
+            if not self.sourceEditor :
+                self.sourceEditor = self.pt_tools.getSourceEditor()
             if self.sourceEditor.lower() == 'paratext' :
                 font = self.macPackConfig['Fonts']['ptDefaultFont']
+                if not font :
+                    font = self.pt_tools.getDefaultFont(self.macPackConfig)
             else :
                 font = 'DefaultFont'
 

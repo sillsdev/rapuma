@@ -134,10 +134,10 @@ class ProjFont (object) :
         elif os.path.isfile(rapumaSource) :
             source = rapumaSource
         else :
-            self.log.writeToLog(self.errorCodes['0220'], [userSource], 'font.checkForSubFont():0220')
+            self.log.writeToLog(self.errorCodes['0220'], [userSource], 'proj_font.checkForSubFont():0220')
         # Double check
         if not os.path.isfile(source) :
-            self.log.writeToLog(self.errorCodes['0241'], [source], 'font.checkForSubFont():0241')
+            self.log.writeToLog(self.errorCodes['0241'], [source], 'proj_font.checkForSubFont():0241')
 
         if self.tools.isInZip(font + '.xml', source) :
             xmlFile = font + '/' + font + '.xml'
@@ -159,14 +159,6 @@ class ProjFont (object) :
                 return font
         else :
             self.log.writeToLog(self.errorCodes['0240'], [font + '.xml'], 'font.checkForSubFont():0240')
-
-
-
-
-
-
-
-# FIXME: Font information will be injected into the macPack conf file
 
 
     def recordFont (self, cType, font, force = None) :
@@ -220,7 +212,6 @@ class ProjFont (object) :
             return True
 
         else :
-#            if len(self.macPackConfig['Fonts'].get(font)) != 0 :
             if self.macPackConfig['Fonts'].has_key(font) :
                 self.log.writeToLog(self.errorCodes['0247'], [font])
             else :
@@ -245,14 +236,6 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['0245'], [font])
             self.tools.writeConfFile(self.macPackConfig)
             return True
-
-
-
-
-
-
-
-
 
 
     def copyInFont (self, font, force = False) :
@@ -383,6 +366,8 @@ class ProjFont (object) :
 
         if self.sourceEditor.lower() == 'paratext' :
             # If this a PT project there should be something in ptDefaultFont
+            if not self.ptDefaultFont :
+                self.ptDefaultFont = self.pt_tools.getDefaultFont(self.macPackConfig)
             font = self.checkForSubFont(self.ptDefaultFont)
         elif self.sourceEditor.lower() == 'generic' :
             if self.primaryFont :

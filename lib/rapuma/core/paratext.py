@@ -274,7 +274,8 @@ class Paratext (object) :
         ptDefaultFont = None
         if macPackConfig['Fonts'].has_key('ptDefaultFont') :
             ptDefaultFont = macPackConfig['Fonts']['ptDefaultFont']
-        else :
+        # Now check to see if anything is really there
+        if not ptDefaultFont :
             ptSet = self.getPTSettings()
             if ptSet :
                 ptDefaultFont = ptSet['ScriptureText']['DefaultFont']
