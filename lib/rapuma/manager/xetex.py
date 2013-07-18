@@ -317,7 +317,6 @@ class Xetex (Manager) :
                     if type(secItem) is list :
                         if outputTest :
                             print sections['sectionID']
-#                        writeObject.write('% ' + sections['sectionID'].upper() + '\n')
                         linesOut.append('% ' + sections['sectionID'].upper())
                         for setting in secItem :
                             for k in setting.keys() :
@@ -332,7 +331,6 @@ class Xetex (Manager) :
                                             if not self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
                                                 linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
                                     elif setting.has_key('boolDependTrue') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
@@ -340,7 +338,6 @@ class Xetex (Manager) :
                                             if self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
                                                 linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
                                     elif setting.get(k) :
                                         if setting.get(k) != None :
@@ -349,7 +346,6 @@ class Xetex (Manager) :
                                             if not realVal == '0' :
                                                 if outputTest :
                                                     print '\t', setting.get(k)
-#                                                writeObject.write(self.configTools.processNestedPlaceholders(setting['texCode'], realVal) + '\n')
                                                 linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
                     # Only write out sections that have something in them
                     if len(linesOut) > 1 :
@@ -362,6 +358,7 @@ class Xetex (Manager) :
             writeObject.write('\n% INSTALLED FONTS\n')
             installedFonts = self.macPackConfig['Fonts']['installedFonts']
             for font in installedFonts :
+#                if font == self.macPackConfig['Fonts']['primaryFont'] :
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'].keys() :
                     writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'][key]) + '\n')
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'].keys() :

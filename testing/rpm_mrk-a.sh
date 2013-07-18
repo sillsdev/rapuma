@@ -52,14 +52,16 @@ rpm group KYU-MYMR-MRKA Mark group update --force
 # Install and switch font (Padauk 2.95 has a bug)
 rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font add
 rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font primary --force
+echo _____________ Removing Padauk_2.95 _____________ 
+rpm package KYU-MYMR-MRKA Mark Padauk_2.95 font remove --force
 
 # Render the component
 rpm group KYU-MYMR-MRKA Intro group draft
-rpm group KYU-MYMR-MRKA Mark group proof
-rpm project KYU-MYMR-MRKA project bind
+#rpm group KYU-MYMR-MRKA Mark group proof
+#rpm project KYU-MYMR-MRKA project bind
 
-# Backup the project
-rpm project KYU-MYMR-MRKA backup save
+## Backup the project
+#rpm project KYU-MYMR-MRKA backup save
 
 
 

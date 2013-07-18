@@ -103,7 +103,7 @@ class Usfm (Group) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-        # Check if there is a font installed
+        # Check if there is a primary font installed
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
 #            import pdb; pdb.set_trace()
@@ -221,16 +221,6 @@ class Usfm (Group) :
         # It is different from backgound management
         useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][gid]['useIllustrations'])
         useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][gid]['useManualAdjustments'])
-
-        # Check if there is a font installed
-        if not self.proj_font.varifyFont() :
-            # If a PT project, use that font, otherwise, install default
-            if self.sourceEditor.lower() == 'paratext' :
-                font = self.macPackConfig['Fonts']['ptDefaultFont']
-            else :
-                font = 'DefaultFont'
-
-            self.proj_font.installFont(font, True)
 
         # Adjust the page number if necessary
         self.checkStartPageNumber()
