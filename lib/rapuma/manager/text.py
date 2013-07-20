@@ -22,7 +22,6 @@ import os, shutil, codecs, re, subprocess
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
 from rapuma.core.paratext           import Paratext
-from rapuma.project.proj_config     import ConfigTools
 
 
 ###############################################################################
@@ -44,7 +43,6 @@ class Text (Manager) :
         self.pid                    = project.projectIDCode
         self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode, project.gid)
-        self.configTools            = ConfigTools(self.pid, self.gid)
         self.project                = project
         self.projConfig             = project.projConfig
         self.cfg                    = cfg

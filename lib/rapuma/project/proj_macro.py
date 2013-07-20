@@ -59,11 +59,7 @@ class ProjMacro (object) :
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.cType                      = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-
-
         self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
-
-
         # File names
         self.macPackFileName            = self.macPack + '.zip'
         # Folder paths
@@ -75,6 +71,17 @@ class ProjMacro (object) :
         self.macPackXmlConfFile         = self.proj_config.macPackXmlConfFile
 #        self.macPackFile                = os.path.join(self.projMacPackFolder, self.macPackFileName)
         self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+#        self.macPackDict                = self.tools.xmlFileToDict(self.macPackXmlConfFile)
+
+#        # File names (from a dict made from the macPack XML file)
+#        self.macPackFilesDict = {}
+#        for sections in self.macPackDict['root']['section'] :
+#            if sections['sectionID'] == 'Files' :
+#                for section in sections :
+#                    secItem = sections[section]
+#                    if type(secItem) is list :
+#                        for f in secItem :
+#                            self.macPackFilesDict[f['moduleID']] = self.proj_config.processNestedPlaceholders(f['fileName'])
 
         # Log messages for this module
         self.errorCodes     = {

@@ -17,7 +17,6 @@ Todo:
         <name>Files</name>
         <sectionID>Files</sectionID>
         <description>Key files created and used by this macro.</description>
-
         <file>
             <name>Group TeX Link File</name>
             <description>The file that links TeX to all the settings needed to render a job.</description>
@@ -25,7 +24,6 @@ Todo:
             <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Group PDF Output File</name>
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
@@ -33,7 +31,6 @@ Todo:
             <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
             <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
         </file>
-
         <file>
             <name>Primary Macro File</name>
             <description>The main macro file that TeX will link to first.</description>
@@ -41,7 +38,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]paratext2.tex</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
@@ -49,7 +45,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-settings.tex</fileName>
             <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
         </file>
-
         <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
@@ -57,7 +52,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-ext.tex</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
@@ -65,15 +59,13 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.tex</fileName>
             <depends></depends>
         </file>
-
-        <file>
-            <name>Font Settings File</name>
-            <description>The font settings file that TeX will link to after all the setting files are loaded.</description>
-            <moduleID>fontTexFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</fileName>
-            <depends></depends>
-        </file>
-
+<!--        <file>-->
+<!--            <name>Font Settings File</name>-->
+<!--            <description>The font settings file that TeX will link to after all the setting files are loaded.</description>-->
+<!--            <moduleID>fontTexFile</moduleID>-->
+<!--            <fileName>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</fileName>-->
+<!--            <depends></depends>-->
+<!--        </file>-->
         <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
@@ -81,7 +73,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex.sty</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
@@ -89,7 +80,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-ext.sty</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
@@ -97,7 +87,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Paragraph Adjustments File</name>
             <description>The file that contains adjustments for components covered by this macro package.</description>
@@ -105,7 +94,6 @@ Todo:
             <fileName>adjustment.conf</fileName>
             <depends>adjustmentConfFile,</depends>
         </file>
-
         <file>
             <name>Page Border File</name>
             <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
@@ -113,9 +101,14 @@ Todo:
             <fileName>page_border.pdf</fileName>
             <depends></depends>
         </file>
+        <file>
+            <name>Marginal Verses File</name>
+            <description>The file that contains adjustments for components covered by this macro package.</description>
+            <moduleID>marginalVersesFile</moduleID>
+            <fileName>ptxplus-marginalverses.tex</fileName>
+            <depends></depends>
+        </file>
     </section>
-
-
 
     <section>
         <name>Chapter and Verse</name>
@@ -123,12 +116,12 @@ Todo:
         <description>Parameters that cover varous aspects of formating of chapter and verse layout.</description>
         <setting>
             <name>Marginal Verses</name>
-            <description>To use marginal verses, where the verse numbers are located in the margin, otherwise known as flying verse numbers, set this to True.  Default = False</description>
+            <description>Marginal verses (a.k.a. flying verse numbers) are a specific feature of this macro package. This will place the verse number in the margin area. To use marginal verses set this to True.  Default = False</description>
             <key>useMarginalVerses</key>
             <type>boolean</type>
             <value>False</value>
             <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
-            <texCode>\input "ptxplus-marginalverses.tex"</texCode>
+            <texCode>\input "[self:marginalVersesFile]"</texCode>
         </setting>
         <setting>
             <name>Omit Chapter Number On Single Chapter Book</name>
@@ -161,7 +154,7 @@ Todo:
             <key>chapterVerseSeparator</key>
             <type>string</type>
             <value>\kern.1em:\kern.1em</value>
-            <texCode>\def\ChapterVerseSeparator{[v]}</texCode>
+            <texCode>\def\ChapterVerseSeparator{[val]}</texCode>
         </setting>
         <setting>
             <name>After Verse Space Factor</name>
@@ -169,7 +162,7 @@ Todo:
             <key>afterVerseSpaceFactor</key>
             <type>integer</type>
             <value>2</value>
-            <texCode>\def\AfterVerseSpaceFactor{[v]}</texCode>
+            <texCode>\def\AfterVerseSpaceFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>After Chapter Space Factor</name>
@@ -177,7 +170,7 @@ Todo:
             <key>afterChapterSpaceFactor</key>
             <type>integer</type>
             <value>3</value>
-            <texCode>\def\AfterChapterSpaceFactor{[v]}</texCode>
+            <texCode>\def\AfterChapterSpaceFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>Use Adorn Verse Number</name>
@@ -193,70 +186,82 @@ Todo:
             <type>string</type>
             <value>(#1)</value>
             <boolDependTrue>[config:macPackConfig|ChapterVerse|useAdornVerseNumber]</boolDependTrue>
-            <texCode>\def\AdornVerseNumber#1{[v]}</texCode>
+            <texCode>\def\AdornVerseNumber#1{[val]}</texCode>
             <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>
     </section>
+
     <section>
         <name>Columns</name>
         <sectionID>Columns</sectionID>
         <description>Parameters which have to do with column layout for Scripture publications</description>
         <setting>
             <name>Title Columns</name>
-            <description>Number of columns used to typeset the main title.   Default = 1</description>
+            <description>Number of columns used to typeset the main title.</description>
             <key>titleColumns</key>
             <type>integer</type>
-            <value>1</value>
-            <texCode>\TitleColumns=[v]</texCode>
+            <value>[function:getTitleColumns]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|titleColumnsTwo]</boolDependTrue>
+            <texCode>\TitleColumns=[val]</texCode>
         </setting>
+
         <setting>
-            <name>Intro Columns</name>
-            <description>Number of columns used to typeset introduction material.  Introduction material is defined by USFM markers beginning with \i  Default = 1</description>
+            <name>Intro Columns </name>
+            <description>Number of columns used to typeset introduction material. Introduction material is defined by USFM markers beginning with \i.</description>
             <key>introColumns</key>
             <type>integer</type>
-            <value>[config:layoutConfig|PageLayout|introColumns]</value>
-            <texCode>\IntroColumns=[v]</texCode>
+            <value>[function:getIntroColumns]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|introColumnsTwo]</boolDependTrue>
+            <texCode>\IntroColumns=[val]</texCode>
         </setting>
+
         <setting>
             <name>Body Columns</name>
-            <description>Number of columns used to typeset the body text.   Default = 1</description>
+            <description>Number of columns used to typeset the body text.</description>
             <key>bodyColumns</key>
             <type>integer</type>
-            <value>[config:layoutConfig|PageLayout|bodyColumns]</value>
-            <texCode>\BodyColumns=[v]</texCode>
+            <value>[function:getBodyColumns]</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDependTrue>
+            <texCode>\BodyColumns=[val]</texCode>
         </setting>
+
         <setting>
             <name>Column Gutter Rule</name>
             <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
             <key>columnGutterRule</key>
             <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Columns|columnGutterRule]</boolDependTrue>
+            <value>[config:layoutConfig|DocumentFeatures|columnGutterRule]</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDependTrue>
             <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
+
         <setting>
             <name>Column Gutter Factor</name>
             <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 15</description>
             <key>columnGutterFactor</key>
             <type>integer</type>
             <value>15</value>
-            <texCode>\def\ColumnGutterFactor{[v]}</texCode>
+            <texCode>\def\ColumnGutterFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>Column Shift</name>
-            <description>Column shift will shift the colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  Use this if more than one column is being used.  It will output both the \columnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
+            <description>Column shift will shift the colums (normally used in two column layout) over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>
             <key>columnShift</key>
             <type>integer</type>
-            <value>0</value>
-            <texCode>\columnshift=[vm]</texCode>
+            <value>5</value>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <texCode>\columnshift=[val][mu]</texCode>
+            <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
         <setting>
             <name>Column Shift</name>
-            <description>Single column shift will shift a colum over n units.  This is useful for marginal verse format but there might be other situations where you may need it.  It will output the \singlecolumnshift command in the TeX settings file.  Only enter the number of millimeters, do not add "mm" as That will be added by the system.  Default = 0</description>
+            <description>Single column shift will shift a colum over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>
             <key>singleColumnShift</key>
             <type>integer</type>
-            <value>0</value>
-            <texCode>%\singlecolumnshift=[vm]</texCode>
+            <value>5</value>
+            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <texCode>%\singlecolumnshift=[val][mu]</texCode>
+            <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
         <setting>
             <name>Column Gutter Rule Skip</name>
@@ -264,7 +269,7 @@ Todo:
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
-            <texCode>\ColumnGutterRuleSkip=[vm]</texCode>
+            <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>
             <boolDependTrue>[config:macPackConfig|Columns|columnGutterRule]</boolDependTrue>
         </setting>
     </section>
@@ -300,7 +305,7 @@ Todo:
             <type>string</type>
             <value></value>
             <boolDependTrue>[config:macPackConfig|Crossreferences|useAutoCallerCrossrefs]</boolDependTrue>
-            <texCode>\AutoCallers{x}{[v]}</texCode>
+            <texCode>\AutoCallers{x}{[val]}</texCode>
         </setting>
         <setting>
             <name>Numeric Callers (Crossrefs)</name>
@@ -350,13 +355,15 @@ Todo:
             <type>boolean</type>
             <value>True</value>
         </setting>
-        <setting>
-            <name>Use Auto Callers (Footnotes)</name>
-            <description>Set to true if a symbol or a csv sequence of symbols is needed for footnotes. Default = True</description>
-            <key>useAutoCallerFootnotes</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
+
+<!--        <setting>-->
+<!--            <name>Use Auto Callers (Footnotes)</name>-->
+<!--            <description>Set to true if a symbol or a csv sequence of symbols is needed for footnotes. Default = True</description>-->
+<!--            <key>useAutoCallerFootnotes</key>-->
+<!--            <type>boolean</type>-->
+<!--            <value>True</value>-->
+<!--        </setting>-->
+
         <setting>
             <name>Auto Caller Start Character</name>
             <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
@@ -364,15 +371,17 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+
         <setting>
             <name>Auto Callers (Footnotes)</name>
-            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).</description>
             <key>autoCallerListFootnotes</key>
             <type>string</type>
-            <value></value>
-            <boolDependTrue>[config:macPackConfig|Footnotes|useAutoCallerFootnotes]</boolDependTrue>
-            <texCode>\AutoCallers{f}{[v]}</texCode>
+            <value>[config:layoutConfig|DocumentFeatures|specialCallerFootnotes]</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <texCode>\AutoCallers{f}{[val]}</texCode>
         </setting>
+
         <setting>
             <name>Numeric Callers (Footnotes)</name>
             <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
@@ -415,7 +424,7 @@ Todo:
             <key>defineFootnoteRule</key>
             <type>string</type>
             <value>\hrule height 0.5pt\smallskip</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependTrue>
         </setting>
         <setting>
             <name>Footnote Rule On</name>
@@ -423,8 +432,8 @@ Todo:
             <key>footnoteRuleOn</key>
             <type>boolean</type>
             <value>[config:macPackConfig|Footnotes|defineFootnoteRule]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependTrue>
-            <texCode>\def\footnoterule{[v]}</texCode>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependTrue>
+            <texCode>\def\footnoterule{[val]}</texCode>
         </setting>
         <setting>
             <name>Footnote Rule Off</name>
@@ -432,7 +441,7 @@ Todo:
             <key>footnoteRuleOff</key>
             <type>boolean</type>
             <value></value>
-            <boolDependFalse>[config:layoutConfig|PageLayout|useFootnoteRule]</boolDependFalse>
+            <boolDependFalse>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependFalse>
             <texCode>\def\footnoterule{}</texCode>
         </setting>
         <setting>
@@ -453,7 +462,7 @@ Todo:
             <key>fontSizeUnit</key>
             <type>integer</type>
             <value>1pt</value>
-            <texCode>\FontSizeUnit=[v]</texCode>
+            <texCode>\FontSizeUnit=[val]</texCode>
         </setting>
         <setting>
             <name>Line Spacing Factor</name>
@@ -461,7 +470,7 @@ Todo:
             <key>lineSpacingFactor</key>
             <type>integer</type>
             <value>1.1</value>
-            <texCode>\def\LineSpacingFactor{[v]}</texCode>
+            <texCode>\def\LineSpacingFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>Vertical Space Factor</name>
@@ -469,46 +478,41 @@ Todo:
             <key>verticalSpaceFactor</key>
             <type>integer</type>
             <value>1</value>
-            <texCode>\def\VerticalSpaceFactor{[v]}</texCode>
+            <texCode>\def\VerticalSpaceFactor{[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Header and Footer</name>
         <sectionID>HeaderFooter</sectionID>
         <description>Header/Footer settings in this section</description>
         <setting>
-            <name>Use Running Header Rule</name>
-            <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>
-            <key>useRunningHeaderRule</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
             <name>Header Position</name>
-            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 0.5mm</description>
+            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 0.5</description>
             <key>headerPosition</key>
             <type>integer</type>
-            <value>0.5</value>
-            <texCode>\def\HeaderPosition{[v]}</texCode>
+            <value>[function:getHeaderPosition]</value>
+            <texCode>\def\HeaderPosition{[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Rule Position</name>
             <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  This is a simple dimension, not a relative "factor".   Default = 4mm</description>
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
-            <value>4</value>
-            <boolDependTrue>[config:macPackConfig|HeaderFooter|useRunningHeaderRule]</boolDependTrue>
-            <texCode>\RHruleposition=[vm]</texCode>
+            <value>[config:layoutConfig|DocumentFeatures|runningHeaderRulePosition]</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useRunningHeaderRule]</boolDependTrue>
+            <texCode>\RHruleposition=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Footer Position</name>
-            <description>Position of the baseline of the footer relative to the bottom edge of the paper (not the text area).   Default = 0.5mm</description>
+            <description>Position of the baseline of the footer relative to the bottom edge of the paper (not the text area).   Default = 0.5</description>
             <key>footerPosition</key>
             <type>integer</type>
-            <value>0.5</value>
-            <texCode>\def\FooterPosition{[v]}</texCode>
+            <value>[function:getFooterPosition]</value>
+            <texCode>\def\FooterPosition{[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Footer Content</name>
         <sectionID>FooterContent</sectionID>
@@ -526,7 +530,7 @@ Todo:
             <key>runningFooterTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFtitleleft{\[v]}</texCode>
+            <texCode>\def\RFtitleleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Title (Center)</name>
@@ -534,7 +538,7 @@ Todo:
             <key>runningFooterTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFtitlecenter{\[v]}</texCode>
+            <texCode>\def\RFtitlecenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Title (Right)</name>
@@ -542,7 +546,7 @@ Todo:
             <key>runningFooterTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFtitleright{\[v]}</texCode>
+            <texCode>\def\RFtitleright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Odd (Left)</name>
@@ -550,7 +554,7 @@ Todo:
             <key>runningFooterOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFoddleft{\[v]}</texCode>
+            <texCode>\def\RFoddleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Odd (Center)</name>
@@ -558,7 +562,7 @@ Todo:
             <key>runningFooterOddCenter</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFoddcenter{\[v]}</texCode>
+            <texCode>\def\RFoddcenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Odd (Right)</name>
@@ -566,7 +570,7 @@ Todo:
             <key>runningFooterOddRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFoddright{\[v]}</texCode>
+            <texCode>\def\RFoddright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Even (Left)</name>
@@ -574,7 +578,7 @@ Todo:
             <key>runningFooterEvenLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFevenleft{\[v]}</texCode>
+            <texCode>\def\RFevenleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Even (Center)</name>
@@ -582,7 +586,7 @@ Todo:
             <key>runningFooterEvenCenter</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFevencenter{\[v]}</texCode>
+            <texCode>\def\RFevencenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Footer Even (Right)</name>
@@ -590,7 +594,7 @@ Todo:
             <key>runningFooterEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RFevenright{\[v]}</texCode>
+            <texCode>\def\RFevenright{\[val]}</texCode>
         </setting>
     </section>
     <section>
@@ -638,7 +642,7 @@ Todo:
             <key>runningHeaderTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitleleft{\[v]}</texCode>
+            <texCode>\def\RHtitleleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Title (Center)</name>
@@ -646,7 +650,7 @@ Todo:
             <key>runningHeaderTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitlecenter{\[v]}</texCode>
+            <texCode>\def\RHtitlecenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Title (Right Side)</name>
@@ -654,7 +658,7 @@ Todo:
             <key>runningHeaderTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitleright{\[v]}</texCode>
+            <texCode>\def\RHtitleright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Left/Inside Of The Page)</name>
@@ -662,7 +666,7 @@ Todo:
             <key>runningHeaderOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHoddleft{\[v]}</texCode>
+            <texCode>\def\RHoddleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Center)</name>
@@ -670,7 +674,7 @@ Todo:
             <key>runningHeaderOddCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <texCode>\def\RHoddcenter{\[v]}</texCode>
+            <texCode>\def\RHoddcenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Right/Outside Of The Page)</name>
@@ -678,7 +682,7 @@ Todo:
             <key>runningHeaderOddRight</key>
             <type>string</type>
             <value>lastref</value>
-            <texCode>\def\RHoddright{\[v]}</texCode>
+            <texCode>\def\RHoddright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Left/Outside Of The Page)</name>
@@ -686,7 +690,7 @@ Todo:
             <key>runningHeaderEvenLeft</key>
             <type>string</type>
             <value>firstref</value>
-            <texCode>\def\RHevenleft{\[v]}</texCode>
+            <texCode>\def\RHevenleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Center)</name>
@@ -694,7 +698,7 @@ Todo:
             <key>runningHeaderEvenCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <texCode>\def\RHevencenter{\[v]}</texCode>
+            <texCode>\def\RHevencenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Right/Inside Of The Page)</name>
@@ -702,7 +706,7 @@ Todo:
             <key>runningHeaderEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHevenright{\[v]}</texCode>
+            <texCode>\def\RHevenright{\[val]}</texCode>
         </setting>
     </section>
     <section>
@@ -716,7 +720,7 @@ Todo:
             <type>string</type>
             <value></value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\newlanguage\[v]</texCode>
+            <texCode>\newlanguage\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
@@ -726,7 +730,7 @@ Todo:
             <type>string</type>
             <value></value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\language=\[v]</texCode>
+            <texCode>\language=\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
@@ -736,7 +740,7 @@ Todo:
             <type>string</type>
             <value>"002D</value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\defaulthyphenchar=[v]</texCode>
+            <texCode>\defaulthyphenchar=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Hyphenation Penalty</name>
@@ -745,7 +749,7 @@ Todo:
             <type>integer</type>
             <value>50</value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\hyphenpenalty=[v]</texCode>
+            <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Hyphenation Penalty Off</name>
@@ -754,7 +758,7 @@ Todo:
             <type>integer</type>
             <value>10000</value>
             <boolDependFalse>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependFalse>
-            <texCode>\hyphenpenalty=[v]</texCode>
+            <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Explicit Hyphenation Penalty</name>
@@ -763,7 +767,7 @@ Todo:
             <type>integer</type>
             <value>50</value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\exhyphenpenalty=[v]</texCode>
+            <texCode>\exhyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Pretolerance</name>
@@ -772,7 +776,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
-            <texCode>\pretolerance=[v]</texCode>
+            <texCode>\pretolerance=[val]</texCode>
         </setting>
     </section>
     <section>
@@ -815,78 +819,55 @@ Todo:
             <key>texPicPath</key>
             <type>string</type>
             <value>[path:projIllustrationsFolder]/</value>
-            <texCode>\PicPath={[v]}</texCode>
+            <texCode>\PicPath={[val]}</texCode>
             <note>This will insert the path dynamically when this setting is referenced.</note>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
+
+
+
+
     <section>
         <name>Margins</name>
         <sectionID>Margins</sectionID>
         <description>Here find ye settings that affect margin settings. Arrg!</description>
+
+
         <setting>
-            <name>Base Margin Unit</name>
-            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
-            <key>marginUnit</key>
-            <type>integer</type>
-            <value>[config:layoutConfig|PageLayout|marginUnit]</value>
-            <texCode>\MarginUnit=[vm]</texCode>
+            <name>Margin Settings</name>
+            <description>Output margin settings based on the master layout configuration.</description>
+            <key>marginSettings</key>
+            <type>string</type>
+            <value></value>
+            <texCode>\MarginUnit=[function:getMarginUnit][mu]</texCode>
+            <texCode>\def\TopMarginFactor{[function:getTopMarginFactor]}</texCode>
+            <texCode>\def\BottomMarginFactor{[function:getBottomMarginFactor]}</texCode>
+            <texCode>\def\SideMarginFactor{[function:getSideMarginFactor]}</texCode>
             <note>This will reference the margin unit in the main layout config file</note>
         </setting>
-        <setting>
-            <name>Top Margin Factor</name>
-            <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
-            <key>topMarginFactor</key>
-            <type>integer</type>
-            <value>[function:getTopMarginFactor]</value>
-            <texCode>\def\TopMarginFactor{[v]}</texCode>
-            <note>This will call a function that will calculate the factor setting dynamically.</note>
-        </setting>
-        <setting>
-            <name>Bottom Margin Factor</name>
-            <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
-            <key>bottomMarginFactor</key>
-            <type>integer</type>
-            <value>[function:getBottomMarginFactor]</value>
-            <texCode>\def\BottomMarginFactor{[v]}</texCode>
-            <note>This will call a function that will calculate the factor setting dynamically.</note>
-        </setting>
-        <setting>
-            <name>Side Margin Factor</name>
-            <description>Relative size of side margin based on MarginUnit.  This determins the distance between the edge of the page and the body text.   Default = 0.7</description>
-            <key>sideMarginFactor</key>
-            <type>integer</type>
-            <value>[function:getSideMarginFactor]</value>
-            <texCode>\def\SideMarginFactor{[v]}</texCode>
-            <note>This will call a function that will calculate the factor setting dynamically.</note>
-        </setting>
-        <setting>
-            <name>Extra Right Margin</name>
-            <description>For some single column publications it might be necessary to tweak the right margin to get things to line up, especialy when using marginal verses.  This setting is in mm.  Enter a number (just a number) which represents the distance in mm that you want to pull the right margin in toward the middle of the page.   Defalt = 0mm</description>
-            <key>extraRightMargin</key>
-            <type>integer</type>
-            <value>0</value>
-            <texCode>\ExtraRMargin=[vm]</texCode>
-        </setting>
-        <setting>
-            <name>Binding Gutter On</name>
-            <description>If useBindingGutter is set to true this will turn on the binding gutter function.</description>
-            <key>bindingGutterOn</key>
-            <type>boolean</type>
-            <value>[config:layoutConfig|PageLayout|useBindingGutter]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|useBindingGutter]</boolDependTrue>
-            <texCode>\BindingGuttertrue</texCode>
-        </setting>
+
         <setting>
             <name>Binding Gutter</name>
             <description>This additional margin space on the binding side (inside) of the page which will enable printing for formats that need more space for binding like with a comb-bind or hole punch. The distance of this setting is determined by additional space added to the inside margin which exceeds the outside margin setting.</description>
             <key>bindingGutter</key>
             <type>integer</type>
             <value>[function:getBindingGutterWidth]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|useBindingGutter]</boolDependTrue>
-            <texCode>\BindingGutter=[vm]</texCode>
+            <texCode>\BindingGuttertrue</texCode>
+            <texCode>\BindingGutter=[val][mu]</texCode>
+        </setting>
+
+        <setting>
+            <name>Extra Right Margin</name>
+            <description>For some single column publications it might be necessary to tweak the right margin to get things to line up, especialy when using marginal verses.  This setting is in mm.  Enter a number (just a number) which represents the distance in mm that you want to pull the right margin in toward the middle of the page.   Defalt = 0mm</description>
+            <key>extraRightMargin</key>
+            <type>integer</type>
+            <value>0</value>
+            <texCode>\ExtraRMargin=[val][mu]</texCode>
         </setting>
     </section>
+
+
     <section>
         <name>Page Layout</name>
         <sectionID>PageLayout</sectionID>
@@ -897,7 +878,7 @@ Todo:
             <key>pageHeight</key>
             <type>reference</type>
             <value>[config:layoutConfig|PageLayout|pageHeight]</value>
-            <texCode>\PaperHeight=[vm]</texCode>
+            <texCode>\PaperHeight=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Page Width</name>
@@ -905,7 +886,7 @@ Todo:
             <key>pageWidth</key>
             <type>reference</type>
             <value>[config:layoutConfig|PageLayout|pageWidth]</value>
-            <texCode>\PaperWidth=[vm]</texCode>
+            <texCode>\PaperWidth=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Cropmarks</name>
@@ -948,7 +929,7 @@ Todo:
             <key>quoteKernAmount</key>
             <type>integer</type>
             <value>0.1em</value>
-            <texCode>\quotekernamount=[v]</texCode>
+            <texCode>\quotekernamount=[val]</texCode>
         </setting>
     </section>
     <section>
@@ -961,7 +942,7 @@ Todo:
             <key>hFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <texCode>\hfuzz=[v]</texCode>
+            <texCode>\hfuzz=[val]</texCode>
         </setting>
         <setting>
             <name>Vertical Fuzz</name>
@@ -969,7 +950,7 @@ Todo:
             <key>vFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <texCode>\vfuzz=[v]</texCode>
+            <texCode>\vfuzz=[val]</texCode>
         </setting>
     </section>
 </root>

@@ -7,7 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This class will handle project configuration tasks.
 
 
 ###############################################################################
@@ -24,6 +24,7 @@ from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
+from rapuma.group.usfmTex               import UsfmTex
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -75,6 +76,7 @@ class ProjConfig (object) :
         self.hyphenConfig                   = self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
         self.illustrationConfig             = self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
 
+        self.macPackFunctions               = UsfmTex(self.layoutConfig)
         self.tools_path                     = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                    = ToolsGroup(self.local, self.projConfig, self.userConfig)
 
@@ -88,12 +90,10 @@ class ProjConfig (object) :
 
         # Log messages for this module
         self.errorCodes     = {
-            'LYOT-000' : ['MSG', 'Layout module messages'],
-            'LYOT-010' : ['LOG', 'Wrote out new layout configuration file. (layout.__init__())'],
-            'LYOT-020' : ['LOG', 'Loaded exsisting layout configuration file. (layout.__init__())'],
-            'LYOT-030' : ['LOG', 'Changes found in the default layout config model. These were merged into the exsisting layout configuration file. (layout.__init__())'],
 
-            '0000' : ['MSG', 'Placeholder message'],
+            '1000' : ['MSG', 'Placeholder message'],
+
+            '2000' : ['MSG', 'Placeholder message'],
 
         }
 
@@ -103,7 +103,7 @@ class ProjConfig (object) :
         functions in this module.'''
 
 #        import pdb; pdb.set_trace()
-
+#        self.configTools                    = ProjConfig(self.pid, self.gid)
         self.cType                          = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                          = self.cType.capitalize()
         self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
@@ -112,6 +112,7 @@ class ProjConfig (object) :
         self.macPackConfFileName            = self.macPack + '.conf'
         self.macPackFileName                = self.macPack + '.zip'
         # Folder paths
+        self.projComponentsFolder           = self.local.projComponentsFolder
         self.projMacrosFolder               = self.local.projMacrosFolder
         self.projMacPackFolder              = os.path.join(self.local.projMacrosFolder, self.macPack)
         self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
@@ -124,6 +125,22 @@ class ProjConfig (object) :
             self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile)
 
         self.macPackConfig                  = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
+
+        # File names (from a dict made from the macPack XML file)
+        # This is used in other modules so we make it a more portable dict format
+        self.macPackDict                    = self.tools.xmlFileToDict(self.macPackXmlConfFile)
+        self.macPackFilesDict = {}
+        for sections in self.macPackDict['root']['section'] :
+            if sections['sectionID'] == 'Files' :
+                for section in sections :
+                    secItem = sections[section]
+                    if type(secItem) is list :
+                        for f in secItem :
+                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+
+        # Add these file names for this module here
+        for k, v in self.macPackFilesDict.iteritems() :
+            setattr(self, k, v)
 
 
 ###############################################################################
@@ -148,47 +165,9 @@ class ProjConfig (object) :
 
 
 ###############################################################################
-###############################################################################
-############################ Config Handling Class ############################
-###############################################################################
-###############################################################################
-
-class ConfigTools (object) :
-    '''Configuration handling functions.'''
-
-    def __init__(self, pid, gid) :
-
-        self.pid                            = pid
-        self.gid                            = gid
-        self.proj_config                    = ProjConfig(pid, gid)
-        self.projConfig                     = self.proj_config.projConfig
-        self.userConfig                     = self.proj_config.userConfig
-        self.layoutConfig                   = self.proj_config.layoutConfig
-        self.macPackConfig                  = self.proj_config.macPackConfig
-        self.csid                           = self.projConfig['Groups'][gid]['csid']
-        self.cType                          = self.projConfig['Groups'][gid]['cType']
-        self.Ctype                          = self.cType.capitalize()
-        self.local                          = ProjLocal(pid)
-        self.tools                          = Tools()
-        self.log                            = ProjLog(pid)
-        self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
-        # Paths we may need (FIXME: Make this more generalized)
-        self.projMacrosFolder               = self.local.projMacrosFolder
-        self.projMacPackFolder              = os.path.join(self.projMacrosFolder, self.macPack)
-        self.projComponentsFolder           = self.local.projComponentsFolder
-        self.projFontsFolder                 = self.local.projFontsFolder
-
-        self.errorCodes     = {
-
-            '0000' : ['MSG', 'Placeholder message'],
-
-        }
-
-
-###############################################################################
 ######################## Basic Config Handling Functions ######################
 ###############################################################################
-####################### Error Code Block Series = 1000 ########################
+####################### Error Code Block Series = 2000 ########################
 ###############################################################################
 
 
@@ -206,11 +185,11 @@ class ConfigTools (object) :
             value = self.processNestedPlaceholders(value, '')
 
         result = ph # If nothing matches below, default to returning placeholder unchanged
-        if holderType == 'v' :
+        if holderType == 'val' :
             result = value
         # A value that needs a measurement unit attached
-        elif holderType == 'vm' :
-            result = self.addMeasureUnit(value)
+        elif holderType == 'mu' :
+            result = self.getMeasureUnit()
         # A value that is from a configObj
         elif holderKey and holderType == 'config' :
             result = self.getConfigValue(holderKey)
@@ -219,7 +198,7 @@ class ConfigTools (object) :
             result = getattr(self.local, holderKey)
         # A value that is from a configObj
         elif holderKey and holderType == 'function' :
-            fnc = getattr(self, holderKey)
+            fnc = getattr(self.macPackFunctions, holderKey)
             result = fnc()
         # A value that is a special character (escaped character)
         elif holderKey and holderType == 'esc' :
@@ -331,65 +310,10 @@ class ConfigTools (object) :
         return eval(''.join(dct))
 
 
-    def addMeasureUnit (self, val) :
+    def getMeasureUnit (self) :
         '''Return the value with the specified measurement unit attached.'''
         
-        mu = self.layoutConfig['GeneralSettings']['measurementUnit']
-        return val + mu
-
-
-###############################################################################
-######################## Dynamic Config Value Functions #######################
-###############################################################################
-####################### Error Code Block Series = 3000 ########################
-###############################################################################
-
-    def getTopMarginFactor (self) :
-        '''Calculate the top margin factor based on what the base margin
-        and top margin settings are.'''
-
-        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
-        topMargin = float(self.layoutConfig['PageLayout']['topMargin'])
-        return topMargin / marginUnit
-
-
-    def getBottomMarginFactor (self) :
-        '''Calculate the bottom margin factor based on what the base margin
-        and bottom margin settings are.'''
-
-        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
-        bottomMargin = float(self.layoutConfig['PageLayout']['bottomMargin'])
-        return bottomMargin / marginUnit
-
-
-    def getSideMarginFactor (self) :
-        '''Calculate the side margin factor based on what the base margin
-        and outside margin settings are.'''
-
-        # For this we will be using the outsideMargin setting not the inside
-        marginUnit = float(self.layoutConfig['PageLayout']['marginUnit'])
-        outsideMargin = float(self.layoutConfig['PageLayout']['outsideMargin'])
-        insideMargin = float(self.layoutConfig['PageLayout']['insideMargin'])
-        # Check the inside margin for changes (counts on the inside always > outside)
-        if self.getBindingGutterWidth() > 0 :
-            self.layoutConfig['PageLayout']['useBindingGutter'] = True
-        else :
-            self.layoutConfig['PageLayout']['useBindingGutter'] = False
-
-        self.tools.writeConfFile(self.layoutConfig)
-
-        return outsideMargin / marginUnit
-
-
-    def getBindingGutterWidth (self) :
-        '''Calculate the binding gutter width based on any extra space added
-        to the inside margin which exceeds the outside margin.'''
-
-        insideMargin = float(self.layoutConfig['PageLayout']['insideMargin'])
-        outsideMargin = float(self.layoutConfig['PageLayout']['outsideMargin'])
-        return insideMargin - outsideMargin
-
-
+        return self.layoutConfig['GeneralSettings']['measurementUnit']
 
 
 

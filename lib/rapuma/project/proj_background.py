@@ -22,9 +22,9 @@ from configobj                          import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
-from rapuma.project.proj_macro          import ProjMacro
 from rapuma.core.proj_log               import ProjLog
-from rapuma.project.proj_config         import ProjConfig, ConfigTools
+from rapuma.project.proj_config         import ProjConfig
+from rapuma.group.usfmTex               import UsfmTex
 
 
 class ProjBackground (object) :
@@ -41,19 +41,18 @@ class ProjBackground (object) :
         self.pid                        = pid
         self.gid                        = gid
         self.tools                      = Tools()
-        self.configTools                = ConfigTools(pid, gid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.local                      = ProjLocal(pid)
-        self.proj_config                = ProjConfig(pid)
-        self.proj_macro                 = ProjMacro(pid, gid)
+        self.proj_config                = ProjConfig(pid, gid)
         self.log                        = ProjLog(pid)
         self.projConfig                 = self.proj_config.projConfig
         self.layoutConfig               = self.proj_config.layoutConfig
-        self.macPackConfig              = self.proj_macro.macPackConfig
+        self.macPackConfig              = self.proj_config.macPackConfig
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
+        self.macPackFunctions           = UsfmTex(self.layoutConfig)
         # Paths
         self.projIllustrationsFolder    = self.local.projIllustrationsFolder
         self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
@@ -229,6 +228,9 @@ class ProjBackground (object) :
         output = os.path.join(self.projIllustrationsFolder,  'lines-grid.svg')
         final_output = bgLinesFile
 
+        # For testing
+        debug = False
+
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
         # from Rapuma usfm_layout.conf 
@@ -236,9 +238,9 @@ class ProjBackground (object) :
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
         lineSpacingFactor   = float(self.macPackConfig['Fonts']['lineSpacingFactor'])
         fontSizeUnit        = float(self.macPackConfig['Fonts']['fontSizeUnit'].replace('pt', ''))
-        marginUnit          = float(self.layoutConfig['PageLayout']['marginUnit'])
-        topMarginFactor     = float(self.configTools.processNestedPlaceholders(self.macPackConfig['Margins']['topMarginFactor']))
-        bottomMarginFactor  = float(self.configTools.processNestedPlaceholders(self.macPackConfig['Margins']['bottomMarginFactor']))
+        marginUnit          = self.macPackFunctions.getMarginUnit()
+        topMarginFactor     = self.macPackFunctions.getTopMarginFactor()
+        bottomMarginFactor  = self.macPackFunctions.getBottomMarginFactor()
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
@@ -258,22 +260,26 @@ class ProjBackground (object) :
         # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
         # [px] measurements in Inkscape
         baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
-        self.tools.terminal('Space between lines: ' + str(baselineskip) + ' px')
+        if debug :
+            self.tools.terminal('Space between lines: ' + str(baselineskip) + ' px')
 
         # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
         # converted to pixels [px]
         topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
-        self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
+        if debug :
+            self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
 
         # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
         # based on pixel [px] measurements in Inkscape 
         topskip = round((1.25 * 12 * fontSizeUnit),3)
         #topskip = round((0.8 * 12 * fontSizeUnit),3)
-        self.tools.terminal('topskipcalc: ' + str(topskip))
+        if debug :
+            self.tools.terminal('topskipcalc: ' + str(topskip))
 
         # The firstBaseLine is topMargin minus topskip in [px] 
         firstBaseLine = topMargin - topskip
-        self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
+        if debug :
+            self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
         # gridlines. 

@@ -23,13 +23,14 @@ from configobj                          import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.core.paratext               import Paratext
-from rapuma.project.proj_config         import ProjConfig, ConfigTools
+from rapuma.project.proj_config         import ProjConfig
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_macro          import ProjMacro
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
+from rapuma.group.usfmTex               import UsfmTex
 
 
 ###############################################################################
@@ -63,9 +64,7 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid, self.gid)
-        self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
-        self.configTools            = ConfigTools(self.pid, self.gid)
         # Bring in some manager objects we will need
         self.hyphenation            = ProjHyphenation(self.pid, self.gid)
         self.illustration           = ProjIllustration(self.pid, self.gid)
@@ -73,9 +72,11 @@ class Xetex (Manager) :
         self.projConfig             = self.proj_config.projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
         self.userConfig             = self.project.userConfig
-        self.macPackConfig          = self.proj_macro.macPackConfig
-        # Load the macPackDict for finding out all default information
-        self.macPackDict = self.tools.xmlFileToDict(self.proj_macro.macPackXmlConfFile)
+        self.macPackConfig          = self.proj_config.macPackConfig
+        # Load the macPackDict for finding out all default information like file names
+        self.macPackFunctions       = UsfmTex(self.layoutConfig)
+        for k, v in self.proj_config.macPackFilesDict.iteritems() :
+            setattr(self, k, v)
         # Some config settings
         self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
@@ -95,14 +96,9 @@ class Xetex (Manager) :
         self.useHyphenation         = self.hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
-        # File names (from a dict made from the macPack XML file)
-        for sections in self.macPackDict['root']['section'] :
-            if sections['sectionID'] == 'Files' :
-                for section in sections :
-                    secItem = sections[section]
-                    if type(secItem) is list :
-                        for f in secItem :
-                            setattr(self, f['moduleID'], self.configTools.processNestedPlaceholders(f['fileName']))
+        # Add the file refs that are specific to the macPack
+        for k, v in self.proj_config.macPackFilesDict.iteritems() :
+            setattr(self, k, v)
 
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
@@ -303,13 +299,21 @@ class Xetex (Manager) :
         # Setting for internal testing
         outputTest = False
 
+        def appendLine(line, realVal) :
+            '''Use this to shorten the code and look for listy things.'''
+            if type(line) == list :
+                for s in line :
+                    linesOut.append(self.proj_config.processNestedPlaceholders(s, realVal))
+            else :
+                linesOut.append(self.proj_config.processNestedPlaceholders(line, realVal))
+
         # Open a fresh settings file
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
             macTexVals = {}
-            for sections in self.macPackDict['root']['section'] :
+            for sections in self.proj_config.macPackDict['root']['section'] :
                 macTexVals[sections['sectionID']] = {}
                 for section in sections :
                     secItem = sections[section]
@@ -331,22 +335,23 @@ class Xetex (Manager) :
                                             if not self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
+                                                appendLine(setting['texCode'], realVal)
                                     elif setting.has_key('boolDependTrue') :
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
                                             macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
                                             if self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
+                                                appendLine(setting['texCode'], realVal)
                                     elif setting.get(k) :
                                         if setting.get(k) != None :
                                             macTexVals[sections['sectionID']][k] = setting.get(k)
                                             # We filter out zero values here (But what if we need one of them?)
-                                            if not realVal == '0' :
+                                            if not self.proj_config.processNestedPlaceholders(realVal) == '0' :
                                                 if outputTest :
                                                     print '\t', setting.get(k)
-                                                linesOut.append(self.configTools.processNestedPlaceholders(setting['texCode'], realVal))
+                                                appendLine(setting['texCode'], realVal)
+
                     # Only write out sections that have something in them
                     if len(linesOut) > 1 :
                         writeObject.write('\n')
@@ -358,11 +363,10 @@ class Xetex (Manager) :
             writeObject.write('\n% INSTALLED FONTS\n')
             installedFonts = self.macPackConfig['Fonts']['installedFonts']
             for font in installedFonts :
-#                if font == self.macPackConfig['Fonts']['primaryFont'] :
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'].keys() :
-                    writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'][key]) + '\n')
+                    writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['PrimaryFont'][key]) + '\n')
                 for key in self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'].keys() :
-                    writeObject.write(self.configTools.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'][key]) + '\n')
+                    writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['UsfmTeX']['SecondaryFont'][key]) + '\n')
 
                 writeObject.write('\n')
 
@@ -380,13 +384,12 @@ class Xetex (Manager) :
 
         ref = ref.lstrip('[').rstrip(']')
         (holderType, holderKey) = ref.split(':', 1)
-        #(holderType, holderKey) = self.configTools.getPlaceHolder(ref)
         if holderType.lower() == 'config' :
             val = holderKey.split('|')
             dct = ['self.' + val[0]]
             val.remove(val[0])
             for i in val :
-                i = self.configTools.processNestedPlaceholders(i, '')
+                i = self.proj_config.processNestedPlaceholders(i, '')
                 dct.append('["' + i + '"]')
 
             return eval(''.join(dct))

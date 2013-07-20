@@ -44,13 +44,6 @@ Todo:
             <value>A5</value>
         </setting>
         <setting>
-            <name>Starting Page Number</name>
-            <description>Sometimes the content should not start with the default page number of '1'. If a number is set in this field, the macro will insert a \pageno command in the control file.  Note this is for the main content section only.  Individual components in the front and back matter must have the \pageno command inserted manually into their control files.   Default = Null (which means no command output, page starts on '1')</description>
-            <key>pageNumberBegin</key>
-            <type>integer</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>Page Height</name>
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>
@@ -63,13 +56,6 @@ Todo:
             <key>pageWidth</key>
             <type>integer</type>
             <value>148</value>
-        </setting>
-        <setting>
-            <name>Base Margin Unit</name>
-            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
-            <key>marginUnit</key>
-            <type>integer</type>
-            <value>10</value>
         </setting>
         <setting>
             <name>Top Margin</name>
@@ -100,26 +86,64 @@ Todo:
             <value>10</value>
         </setting>
         <setting>
-            <name>Gutter Space</name>
-            <description>Add extra space from the inside of the printable text area. Leave it at 0 (zero) if no extra space is needed. Default = 0</description>
-            <key>gutterSpace</key>
-            <type>integer</type>
-            <value>0</value>
+            <name>Body Columns (Two)</name>
+            <description>The number of columns used for body text. Default = 2 (True)</description>
+            <key>bodyColumnsTwo</key>
+            <type>boolean</type>
+            <value>True</value>
         </setting>
         <setting>
-            <name>Body Columns</name>
-            <description>The The number of columns used for body text. Default = 2</description>
-            <key>bodyColumns</key>
-            <type>integer</type>
-            <value>2</value>
+            <name>Introduction Columns (Two)</name>
+            <description>The number of columns used for introduction text. Default = 1 (False)</description>
+            <key>introColumnsTwo</key>
+            <type>boolean</type>
+            <value>False</value>
         </setting>
         <setting>
-            <name>Introduction Columns</name>
-            <description>The The number of columns used for introduction text. Default = 1</description>
-            <key>introColumns</key>
-            <type>integer</type>
-            <value>1</value>
+            <name>Title Columns (Two)</name>
+            <description>The number of columns used for book title text. Default = 1 (False)</description>
+            <key>titleColumnsTwo</key>
+            <type>boolean</type>
+            <value>False</value>
         </setting>
+        <setting>
+            <name>Header Position</name>
+            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 5mm</description>
+            <key>headerPosition</key>
+            <type>integer</type>
+            <value>5</value>
+        </setting>
+        <setting>
+            <name>Footer Position</name>
+            <description>Relative position of the baseline of the footer to the bottom edge of the paper (not the text area)   Default = 5mm</description>
+            <key>headerPosition</key>
+            <type>integer</type>
+            <value>5</value>
+        </setting>
+    </section>
+
+
+    <section>
+        <name>Document Features</name>
+        <sectionID>DocumentFeatures</sectionID>
+        <description>Various features used in this document/publication.</description>
+
+        <setting>
+            <name>Use Running Header Rule</name>
+            <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>
+            <key>useRunningHeaderRule</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Running Header Rule Position</name>
+            <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  Default = 4mm</description>
+            <key>runningHeaderRulePosition</key>
+            <type>integer</type>
+            <value>4</value>
+        </setting>
+
         <setting>
             <name>Use Footnote Rule</name>
             <description>Set to true to be able to use a footnote rule that goes between the body text and footnotes.</description>
@@ -127,14 +151,37 @@ Todo:
             <type>boolean</type>
             <value>True</value>
         </setting>
+
         <setting>
-            <name>Use Binding Gutter</name>
-            <description>Set to true if a binding gutter is to be used on this publication.</description>
-            <key>useBindingGutter</key>
+            <name>Column Gutter Rule</name>
+            <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
+            <key>columnGutterRule</key>
             <type>boolean</type>
             <value>False</value>
         </setting>
+
+        <setting>
+            <name>Use Special Callers (Footnotes)</name>
+            <description>If set to true, a symbol or a csv sequence of symbols is needed for footnotes. Default = False</description>
+            <key>useSpecialCallerFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Special Callers (Footnotes)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <key>specialCallerFootnotes</key>
+            <type>string</type>
+            <value>\kern0.2em *\kern0.4em</value>
+        </setting>
+
+
+
+
+
     </section>
+
+
     <section>
         <name>Text Elements</name>
         <sectionID>TextElements</sectionID>

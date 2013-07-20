@@ -34,7 +34,7 @@ from rapuma.core.proj_backup                import ProjBackup
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
-from rapuma.project.proj_config             import ProjConfig, ConfigTools
+from rapuma.project.proj_config             import ProjConfig
 
 
 class ProjSetup (object) :
@@ -408,23 +408,6 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0300 ########################
 ###############################################################################
 
-#    def addComponentType (self, cType) :
-#        '''Add (register) a component type to the config if it 
-#        is not there already.'''
-
-#        Ctype = cType.capitalize()
-#        # Build the comp type config section
-#        self.tools.buildConfSection(self.projConfig, 'CompTypes')
-#        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
-
-#        # Get persistant values from the config if there are any
-#        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
-#        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
-#            self.projConfig['CompTypes'][Ctype] = newSectionSettings
-#            # Save the setting rightaway
-#            self.tools.writeConfFile(self.projConfig)
-
-
     def addCompGroupSourcePath (self, csid, source) :
         '''Add a source path for components used in a group if none
         exsist. If one exists, replace anyway. Last in wins! The 
@@ -559,69 +542,6 @@ class ProjSetup (object) :
         # Report the process is done
         self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
         return True
-
-
-###############################################################################
-########################## Config Setting Functions ###########################
-###############################################################################
-####################### Error Code Block Series = 0800 ########################
-###############################################################################
-
-#    def changeConfigSetting (self, config, section, key, newValue) :
-#        '''Change a value in a specified config/section/key.  This will 
-#        write out changes immediately. If this is called internally, the
-#        calling function will need to reload to the config for the
-#        changes to take place in the current session. This is currently
-#        designed to work more as a single call to Rapuma.'''
-
-##        import pdb; pdb.set_trace()
-
-#        config = self.configTools.processNestedPlaceholders(config, '')
-#        print config
-#        self.tools.dieNow()
-#        
-
-
-#        oldValue = ''
-#        if config.lower() == 'rapuma' :
-#            confFile = os.path.join(self.local.userHome, 'rapuma.conf')
-#        else :
-#            confFile = os.path.join(self.local.projConfFolder, config + '.conf')
-
-#        # Test for existance
-#        if not os.path.exists(confFile) :
-#            self.log.writeToLog(self.errorCodes['0810'], [self.tools.fName(confFile)])
-#            return
-
-#        # Load the file and make the change
-#        confObj = ConfigObj(confFile, encoding='utf-8')
-#        outConfObj = confObj
-#        try :
-#            # Walk our confObj to get to the section we want
-#            for s in section.split('/') :
-#                confObj = confObj[s]
-#        except :
-#            self.log.writeToLog(self.errorCodes['0840'], [section])
-#            return
-
-#        # Get the old value, if there is one, for reporting
-#        try :
-#            oldValue = confObj[key]
-#        except :
-#            pass
-
-#        # Insert the new value in its proper form
-#        if type(oldValue) == list :
-#            newValue = newValue.split(',')
-#            confObj[key] = newValue
-#        else :
-#            confObj[key] = newValue
-
-#        # Write out the original copy of the confObj which now 
-#        # has the change in it, then report what we did
-#        outConfObj.filename = confFile
-#        if self.tools.writeConfFile(outConfObj) :
-#            self.log.writeToLog(self.errorCodes['0860'], [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
 ###############################################################################

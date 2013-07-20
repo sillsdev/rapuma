@@ -22,7 +22,7 @@ import os, re, shutil, subprocess, codecs
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
-from rapuma.project.proj_config     import ProjConfig, ConfigTools
+from rapuma.project.proj_config     import ProjConfig
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
