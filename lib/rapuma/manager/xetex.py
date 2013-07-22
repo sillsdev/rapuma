@@ -66,8 +66,8 @@ class Xetex (Manager) :
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
         # Bring in some manager objects we will need
-        self.hyphenation            = ProjHyphenation(self.pid, self.gid)
-        self.illustration           = ProjIllustration(self.pid, self.gid)
+        self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
+        self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         # Get config objs
         self.projConfig             = self.proj_config.projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
@@ -93,7 +93,7 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
-        self.useHyphenation         = self.hyphenation.useHyphenation
+        self.useHyphenation         = self.proj_hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
         # Add the file refs that are specific to the macPack
@@ -118,11 +118,6 @@ class Xetex (Manager) :
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
         self.macPackConfFile        = self.proj_config.macPackConfFile
 
-        # These files will not be used with the map cType
-#        if cType != 'map' :
-#            self.lccodeTexFile          = self.hyphenation.lccodeTexFile
-#            self.compHyphFile           = self.hyphenation.compHyphFile
-#            self.grpHyphExcTexFile      = self.hyphenation.grpHyphExcTexFile
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
             os.mkdir(self.gidFolder)
@@ -136,9 +131,6 @@ class Xetex (Manager) :
             self.pdfUtilityCommand = self.project.userConfig['System']['pdfDefaultUtilityCommand']
             self.projConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
             self.tools.writeConfFile(self.projConfig)
-
-
-
 
         # Record some error codes
         # FIXME: much more needs to be done with this
@@ -242,7 +234,7 @@ class Xetex (Manager) :
         if not os.path.isfile(self.compHyphFile) :
             # Call the Hyphenation manager to create a sorted file of hyphenated words
             # We will not use force (set to False) for this.
-            self.hyphenation.updateHyphenation(False)
+            self.proj_hyphenation.updateHyphenation(False)
 
         # Create the output file here
         with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
@@ -328,22 +320,60 @@ class Xetex (Manager) :
                                     if outputTest :
                                         print '\t', setting['key']
                                     macTexVals[sections['sectionID']] = {'key' : setting['key']}
-                                    realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                     if setting.has_key('boolDependFalse') :
+                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                         if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
                                             macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
                                             if not self.tools.str2bool(realVal) :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
                                                 appendLine(setting['texCode'], realVal)
+
+
+#                                    elif setting.has_key('boolDependTrue') :
+#                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
+#                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
+#                                            macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+#                                            if self.tools.str2bool(realVal) :
+#                                                if outputTest :
+#                                                    print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
+#                                                appendLine(setting['texCode'], realVal)
+
+# FIXME: Working here
+
                                     elif setting.has_key('boolDependTrue') :
-                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
-                                            macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-                                            if self.tools.str2bool(realVal) :
+                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
+                                        if type(setting['boolDependTrue']) == list :
+                                            results = False
+                                            for i in setting['boolDependTrue'] :
+                                            
+                                                print i
+#                                                if i == '[config:layoutConfig|DocumentFeatures|bodyColumnsTwo]' :
+#                                                    import pdb; pdb.set_trace()
+
+                                                if self.tools.str2bool(self.returnConfRefValue(i)) == True :
+                                                    results = True
+                                                    
+#                                           macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+                                            if results :
                                                 if outputTest :
                                                     print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
                                                 appendLine(setting['texCode'], realVal)
+                                        
+                                        else :
+                                            if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
+#                                                macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
+                                                if self.tools.str2bool(realVal) :
+                                                    if outputTest :
+                                                        print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
+                                                    appendLine(setting['texCode'], realVal)
+
+
+#                                        self.tools.dieNow()
+                                        
+
                                     elif setting.get(k) :
+                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                         if setting.get(k) != None :
                                             macTexVals[sections['sectionID']][k] = setting.get(k)
                                             # We filter out zero values here (But what if we need one of them?)
@@ -552,34 +582,14 @@ class Xetex (Manager) :
         self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
         self.makeGidTexFile(cidList)
-
-
-
-
-
-
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
-
-
-
-
-
-
         dep = [self.extTexFile, self.projConfFile, self.layoutConfFile, 
-                self.macPackConfFile, self.paragraphAdjustmentsFile, self.illustrationConfFile, ]
-
-
-
-
-
-
-
-
+                self.macPackConfFile, self.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)
-            cidIlls = self.project.groups[gid].getCidPiclistFile(cid)
+            cidIlls = self.proj_illustration.getCidPiclistFile(cid)
             for f in [cidUsfm, cidIlls] :
                 if os.path.exists(f) :
                     dep.append(f)

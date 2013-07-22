@@ -104,18 +104,23 @@ class ProjConfig (object) :
 
 #        import pdb; pdb.set_trace()
 #        self.configTools                    = ProjConfig(self.pid, self.gid)
+        self.csid                           = self.projConfig['Groups'][self.gid]['csid']
         self.cType                          = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                          = self.cType.capitalize()
         self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.sourcePath                     = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         # File Names
         self.macPackXmlConfFileName         = self.macPack + '.xml'
         self.macPackConfFileName            = self.macPack + '.conf'
         self.macPackFileName                = self.macPack + '.zip'
         # Folder paths
         self.projComponentsFolder           = self.local.projComponentsFolder
+        self.projFontsFolder                = self.local.projFontsFolder
         self.projMacrosFolder               = self.local.projMacrosFolder
+        self.projHyphenationFolder          = self.local.projHyphenationFolder
         self.projMacPackFolder              = os.path.join(self.local.projMacrosFolder, self.macPack)
         self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
+        self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
         # File names with paths
         self.macPackConfFile                = os.path.join(self.projConfFolder, self.macPackConfFileName)
         self.macPackXmlConfFile             = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)

@@ -86,21 +86,22 @@
 % slack this code will usually help. Any adjustments needed
 % should be done in the .sty and \VerticalSpaceFactor.
 % Trying to adjust this code doesn't seem to make any dif.
-%\catcode`\@=11
-%\def\gridb@x#1{%
- %\setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
- %\dimen2=\ht0 \advance\dimen2 by \dp0
- %\dimen0=\baselineskip \vskip\baselineskip
- %\ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
+% This is normally on by default.
+\catcode`\@=11
+\def\gridb@x#1{%
+ \setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
+ \dimen2=\ht0 \advance\dimen2 by \dp0
+ \dimen0=\baselineskip \vskip\baselineskip
+ \ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
                               % when doing a picture box, because it's not part of the
                               % current page
-% \loop \ifdim\dimen0<\dimen2
-%   \advance\dimen0 by \baselineskip
-%    \line{}\nobreak \repeat
-% \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
-% \unvbox0 \nobreak
-%}
-%\catcode`\@=12
+ \loop \ifdim\dimen0<\dimen2
+   \advance\dimen0 by \baselineskip
+    \line{}\nobreak \repeat
+ \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
+ \unvbox0 \nobreak
+}
+\catcode`\@=12
 
 %%%%% Additional Marginal Verse Settings
 % For marginal verse output we need to insert this right here.

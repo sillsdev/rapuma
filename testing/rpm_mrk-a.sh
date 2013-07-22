@@ -30,7 +30,6 @@ rpm settings KYU-MYMR-MRKA usfmTex Fonts fontSizeUnit 0.82pt
 rpm settings KYU-MYMR-MRKA usfmTex Fonts lineSpacingFactor 1.3
 
 # Adjust the publication format
-rpm settings KYU-MYMR-MRKA layout PageLayout bodyColumns 2
 rpm settings KYU-MYMR-MRKA usfmTex TeXBehavior vFuzz 4.8pt
 rpm settings KYU-MYMR-MRKA usfmTex Illustrations useFigurePlaceHolders False
 rpm settings KYU-MYMR-MRKA project Groups/Mark usePreprocessScript True
@@ -39,8 +38,6 @@ rpm settings KYU-MYMR-MRKA project Groups/Mark bindingOrder 2
 rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 
 # Copy (system) some preset setting files into the project
-echo copying: usfmTex-ext.tex
-cp ~/Publishing/testArea/KYUM/resources/usfmTex-ext.tex ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.tex
 echo copying: MYMR_textPreprocess.py
 cp ~/Publishing/testArea/KYUM/resources/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Scripts/MYMR_textPreprocess.py
 echo copying: usfmTex-ext.sty

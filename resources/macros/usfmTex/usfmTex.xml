@@ -59,13 +59,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.tex</fileName>
             <depends></depends>
         </file>
-<!--        <file>-->
-<!--            <name>Font Settings File</name>-->
-<!--            <description>The font settings file that TeX will link to after all the setting files are loaded.</description>-->
-<!--            <moduleID>fontTexFile</moduleID>-->
-<!--            <fileName>[self:projMacPackFolder][pathSep]usfmTex-fonts.tex</fileName>-->
-<!--            <depends></depends>-->
-<!--        </file>-->
         <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
@@ -87,13 +80,79 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
+
+
         <file>
-            <name>Paragraph Adjustments File</name>
-            <description>The file that contains adjustments for components covered by this macro package.</description>
-            <moduleID>paragraphAdjustmentsFile</moduleID>
-            <fileName>adjustment.conf</fileName>
-            <depends>adjustmentConfFile,</depends>
+            <name>ParaTExt Project Source Hyphenation File</name>
+            <description>The source hypenation word list that is produced by ParaTExt.</description>
+            <moduleID>ptHyphFile</moduleID>
+            <fileName>[self:sourcePath][pathSep]hyphenatedWords.txt</fileName>
+            <depends></depends>
         </file>
+
+        <file>
+            <name>TeX lccode Definition File</name>
+            <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
+            <moduleID>lccodeTexFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_lccode.tex</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>Component Hyphenation Word List File</name>
+            <description>The file that contains the hypenation words that have been preprocessed and ready for the last step of being converted to a form useable by TeX.</description>
+            <moduleID>compHyphFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.txt</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>TeX Group Hyphenation Exclusions File</name>
+            <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
+            <moduleID>grpHyphExcTexFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.tex</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>ParaTExt Project Hyphenation Errors File</name>
+            <description>The file that list all the words that Rapuma could not deal with that are concidered errors.</description>
+            <moduleID>ptProjHyphErrFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWordErrors.txt</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>Hyphenation Preprocess Script File</name>
+            <description>The script used to preprocess the ParaTExt hypenation word list (if necessary).</description>
+            <moduleID>preProcessFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenPreprocess.py</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>Rapuma Defalt Hyphenation Preprocess Script</name>
+            <description>The default hypenation preprocess script that is copied into the project when necessary.</description>
+            <moduleID>rapumaPreProcessFile</moduleID>
+            <fileName>[self:rapumaScriptsFolder][pathSep]hyphenPreprocess.py</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>Project ParaTExt Hyphenation File Copy</name>
+            <description>The publishing project copy of the source hypenation word list that is produced by ParaTExt. (Note: This file can be altered by preprocesses.)</description>
+            <moduleID>ptProjHyphFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt</fileName>
+            <depends></depends>
+        </file>
+
+        <file>
+            <name>Project ParaTExt Hyphenation File Backup Copy</name>
+            <description>A read-only backup of the ParaTExt source hypenation word list that is used for comparison purposes.</description>
+            <moduleID>ptProjHyphBakFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt.bak</fileName>
+            <depends></depends>
+        </file>
+
         <file>
             <name>Page Border File</name>
             <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
@@ -105,7 +164,7 @@ Todo:
             <name>Marginal Verses File</name>
             <description>The file that contains adjustments for components covered by this macro package.</description>
             <moduleID>marginalVersesFile</moduleID>
-            <fileName>ptxplus-marginalverses.tex</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]usfmTex[pathSep]ptxplus-marginalverses.tex</fileName>
             <depends></depends>
         </file>
     </section>
@@ -204,7 +263,6 @@ Todo:
             <boolDependTrue>[config:layoutConfig|PageLayout|titleColumnsTwo]</boolDependTrue>
             <texCode>\TitleColumns=[val]</texCode>
         </setting>
-
         <setting>
             <name>Intro Columns </name>
             <description>Number of columns used to typeset introduction material. Introduction material is defined by USFM markers beginning with \i.</description>
@@ -214,7 +272,6 @@ Todo:
             <boolDependTrue>[config:layoutConfig|PageLayout|introColumnsTwo]</boolDependTrue>
             <texCode>\IntroColumns=[val]</texCode>
         </setting>
-
         <setting>
             <name>Body Columns</name>
             <description>Number of columns used to typeset the body text.</description>
@@ -224,7 +281,6 @@ Todo:
             <boolDependTrue>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDependTrue>
             <texCode>\BodyColumns=[val]</texCode>
         </setting>
-
         <setting>
             <name>Column Gutter Rule</name>
             <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
@@ -234,27 +290,27 @@ Todo:
             <boolDependTrue>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDependTrue>
             <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
-
         <setting>
             <name>Column Gutter Factor</name>
-            <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 15</description>
+            <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 20</description>
             <key>columnGutterFactor</key>
             <type>integer</type>
-            <value>15</value>
+            <value>20</value>
             <texCode>\def\ColumnGutterFactor{[val]}</texCode>
         </setting>
         <setting>
-            <name>Column Shift</name>
+            <name>Two Column Shift</name>
             <description>Column shift will shift the colums (normally used in two column layout) over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>
             <key>columnShift</key>
             <type>integer</type>
             <value>5</value>
+            <boolDependTrue>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDependTrue>
             <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
             <texCode>\columnshift=[val][mu]</texCode>
             <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
         <setting>
-            <name>Column Shift</name>
+            <name>Single Column Shift</name>
             <description>Single column shift will shift a colum over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>
             <key>singleColumnShift</key>
             <type>integer</type>
@@ -285,13 +341,6 @@ Todo:
             <value>True</value>
         </setting>
         <setting>
-            <name>Use Auto Callers (Crossrefs)</name>
-            <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
-            <key>useAutoCallerCrossrefs</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
             <name>Crossreference Auto Caller Character</name>
             <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
             <key>crossrefAutoCallerCharacter</key>
@@ -304,18 +353,20 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:macPackConfig|Crossreferences|useAutoCallerCrossrefs]</boolDependTrue>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useAutoCallerCrossrefs]</boolDependTrue>
             <texCode>\AutoCallers{x}{[val]}</texCode>
         </setting>
+
         <setting>
             <name>Numeric Callers (Crossrefs)</name>
-            <description>Use numeric callers on cross references instead of alphabetic callers.   Default = False</description>
-            <key>useNumericCallersCrossrefs</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Crossreferences|useNumericCallersCrossrefs]</boolDependTrue>
-            <texCode>\NumericCallers{x}</texCode>
+            <description>Use numeric callers on cross references instead of alphabetic callers.</description>
+            <key>numericCallersCrossrefs</key>
+            <type>string</type>
+            <value>x</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useNumericCallersCrossrefs]</boolDependTrue>
+            <texCode>\NumericCallers{[val]}</texCode>
         </setting>
+
         <setting>
             <name>Page Reset Callers (Crossrefs)</name>
             <description>Restart numbering or character sequence for cross references on each page.   Default = False</description>
@@ -349,30 +400,6 @@ Todo:
         <sectionID>Footnotes</sectionID>
         <description>This section includes all textual elements that go into the footnote area.</description>
         <setting>
-            <name>Include Footnotes</name>
-            <description>[NOT IMPLEMENTED] Include footnotes in the output. Defalt = True</description>
-            <key>includeFootnotes</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-
-<!--        <setting>-->
-<!--            <name>Use Auto Callers (Footnotes)</name>-->
-<!--            <description>Set to true if a symbol or a csv sequence of symbols is needed for footnotes. Default = True</description>-->
-<!--            <key>useAutoCallerFootnotes</key>-->
-<!--            <type>boolean</type>-->
-<!--            <value>True</value>-->
-<!--        </setting>-->
-
-        <setting>
-            <name>Auto Caller Start Character</name>
-            <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
-            <key>autoCallerStartCharacter</key>
-            <type>string</type>
-            <value></value>
-        </setting>
-
-        <setting>
             <name>Auto Callers (Footnotes)</name>
             <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).</description>
             <key>autoCallerListFootnotes</key>
@@ -381,42 +408,41 @@ Todo:
             <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
             <texCode>\AutoCallers{f}{[val]}</texCode>
         </setting>
-
         <setting>
             <name>Numeric Callers (Footnotes)</name>
             <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
-            <key>useNumericCallersFootnotes</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Footnotes|useNumericCallersFootnotes]</boolDependTrue>
-            <texCode>\NumericCallers{f}</texCode>
+            <key>numericCallersFootnotes</key>
+            <type>string</type>
+            <value>f</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useNumericCallersFootnotes]</boolDependTrue>
+            <texCode>\NumericCallers{[val]}</texCode>
         </setting>
         <setting>
             <name>Page Reset Callers (Footnotes)</name>
-            <description>Restart numbering or character sequence for footnotes on each page.   Default = False</description>
+            <description>Restart numbering or character sequence for footnotes on each page.</description>
             <key>pageResetCallersFootnotes</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Footnotes|pageResetCallersFootnotes]</boolDependTrue>
-            <texCode>\PageResetCallers{f}</texCode>
+            <type>string</type>
+            <value>f</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|pageResetCallersFootnotes]</boolDependTrue>
+            <texCode>\PageResetCallers{[val]}</texCode>
         </setting>
         <setting>
             <name>Omit Caller In Footnotes</name>
-            <description>To omit caller characters from the footnotes at the bottom of the page.   Default = False</description>
+            <description>To omit caller characters from the footnotes at the bottom of the page.</description>
             <key>omitCallerInFootnotes</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Footnotes|omitCallerInFootnotes]</boolDependTrue>
-            <texCode>\OmitCallerInNote{f}</texCode>
+            <type>string</type>
+            <value>f</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|omitCallerInFootnotes]</boolDependTrue>
+            <texCode>\OmitCallerInNote{[val]}</texCode>
         </setting>
         <setting>
             <name>Paragraphed Footnotes</name>
-            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.</description>
             <key>paragraphedFootnotes</key>
-            <type>boolean</type>
-            <value>True</value>
-            <boolDependTrue>[config:macPackConfig|Footnotes|paragraphedFootnotes]</boolDependTrue>
-            <texCode>\ParagraphedNotes{f}</texCode>
+            <type>string</type>
+            <value>f</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|paragraphedFootnotes]</boolDependTrue>
+            <texCode>\ParagraphedNotes{[val]}</texCode>
         </setting>
         <setting>
             <name>Define Footnote Rule</name>
@@ -449,9 +475,23 @@ Todo:
             <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
             <key>autoCallerMaxCharacterNumbers</key>
             <type>string</type>
-            <value></value>
+            <value>26</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <texCode>\AutoCallerNumChars=[val]</texCode>
+            <note>This has not been properly tested. It may not work right.</note>
+        </setting>
+        <setting>
+            <name>Auto Caller Start Character</name>
+            <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
+            <key>autoCallerStartCharacter</key>
+            <type>string</type>
+            <value>97</value>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <texCode>\AutoCallerStartChar=[val]</texCode>
+            <note>This has not been properly tested. It may not work right.</note>
         </setting>
     </section>
+
     <section>
         <name>Fonts</name>
         <sectionID>Fonts</sectionID>
@@ -517,13 +557,6 @@ Todo:
         <name>Footer Content</name>
         <sectionID>FooterContent</sectionID>
         <description>Footer Configuration, leave them empty if you don't want anything to show up in the footer, like page numbers on the title page.  The default is leave them all empty.  Normally we do not want to put any content in the footer as it takes up an extra line which addes up to extra pages in a publication.  It is more efficient to put information like page numbers in the running header.</description>
-        <setting>
-            <name>Use Running Footer</name>
-            <description>Set this to true if you want to have a running footer line in your document. (Defalt = False)</description>
-            <key>useRunningFooter</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
         <setting>
             <name>Running Footer Title (Left)</name>
             <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitleleft{})   Default = empty</description>
@@ -601,13 +634,6 @@ Todo:
         <name>Header Content</name>
         <sectionID>HeaderContent</sectionID>
         <description>Information to include in the running header (at top of pages, except first) We set the items to print at left/center/right of odd and even pages separately   Possible contents:      \bookname = the name of the book as defined in \h      \rangeref = Scripture reference of the range of text on the page;      \firstref = reference of the first verse on the page)      \lastref = reference of the last verse on the page)      \pagenumber = the page number      \empty = print nothing in this position To follow are each of the individual position.</description>
-        <setting>
-            <name>Use Running Header</name>
-            <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
-            <key>useRunningHeader</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
         <setting>
             <name>Show Verse References (Running Header)</name>
             <description>Set this to true if you want to include verse numbers in header/footer references, or only chapter numbers. (ptx2pdf syntax = \VerseRefstrue)   Default = False (Only chapter numbers)</description>
@@ -785,11 +811,11 @@ Todo:
         <description>Illustration resources</description>
         <setting>
             <name>Figure Placeholders</name>
-            <description>Turn On Figure Placeholders - If set to true ptx2pdf will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
-            <key>useFigurePlaceHolders</key>
+            <description>Turn On Figure Placeholders - If set to true, this macro will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
+            <key>figurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:macPackConfig|Illustrations|useFigurePlaceHolders]</boolDependTrue>
+            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFigurePlaceHolders]</boolDependTrue>
             <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
@@ -798,20 +824,6 @@ Todo:
             <key>chapterVerseSeperator</key>
             <type>string</type>
             <value>:</value>
-        </setting>
-        <setting>
-            <name>Captions</name>
-            <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
-            <key>useCaptions</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>Caption Reference</name>
-            <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
-            <key>useCaptionReferences</key>
-            <type>boolean</type>
-            <value>True</value>
         </setting>
         <setting>
             <name>Path To Illustrations</name>
@@ -824,8 +836,6 @@ Todo:
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
-
-
 
 
     <section>
@@ -896,13 +906,6 @@ Todo:
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
             <boolDependTrue>[config:macPackConfig|PageLayout|useCropmarks]</boolDependTrue>
-        </setting>
-        <setting>
-            <name>Page Border</name>
-            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
-            <key>usePageBorder</key>
-            <type>boolean</type>
-            <value>False</value>
         </setting>
         <setting>
             <name>End Book No Eject</name>

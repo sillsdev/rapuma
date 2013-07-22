@@ -59,10 +59,10 @@ Todo:
         </setting>
         <setting>
             <name>Top Margin</name>
-            <description>The distance from the top of the page to the printable text area. Default = 10</description>
+            <description>The distance from the top of the page to the printable text area. Default = 15</description>
             <key>topMargin</key>
             <type>integer</type>
-            <value>10</value>
+            <value>15</value>
         </setting>
         <setting>
             <name>Bottom Margin</name>
@@ -111,7 +111,7 @@ Todo:
             <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 5mm</description>
             <key>headerPosition</key>
             <type>integer</type>
-            <value>5</value>
+            <value>8</value>
         </setting>
         <setting>
             <name>Footer Position</name>
@@ -127,7 +127,6 @@ Todo:
         <name>Document Features</name>
         <sectionID>DocumentFeatures</sectionID>
         <description>Various features used in this document/publication.</description>
-
         <setting>
             <name>Use Running Header Rule</name>
             <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>
@@ -135,7 +134,6 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
-
         <setting>
             <name>Running Header Rule Position</name>
             <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  Default = 4mm</description>
@@ -143,15 +141,20 @@ Todo:
             <type>integer</type>
             <value>4</value>
         </setting>
-
         <setting>
+        <setting>
+            <name>Include Footnotes</name>
+            <description>[NOT IMPLEMENTED] Include footnotes in the output. Defalt = True</description>
+            <key>includeFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
             <name>Use Footnote Rule</name>
             <description>Set to true to be able to use a footnote rule that goes between the body text and footnotes.</description>
             <key>useFootnoteRule</key>
             <type>boolean</type>
             <value>True</value>
         </setting>
-
         <setting>
             <name>Column Gutter Rule</name>
             <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
@@ -159,7 +162,6 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
-
         <setting>
             <name>Use Special Callers (Footnotes)</name>
             <description>If set to true, a symbol or a csv sequence of symbols is needed for footnotes. Default = False</description>
@@ -174,10 +176,96 @@ Todo:
             <type>string</type>
             <value>\kern0.2em *\kern0.4em</value>
         </setting>
+        <setting>
+            <name>Numeric Callers (Footnotes)</name>
+            <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
+            <key>useNumericCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Footnotes)</name>
+            <description>Restart numbering or character sequence for footnotes on each page.   Default = False</description>
+            <key>pageResetCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Omit Caller In Footnotes</name>
+            <description>To omit caller characters from the footnotes at the bottom of the page.</description>
+            <key>omitCallerInFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
 
+        <setting>
+            <name>Paragraphed Footnotes</name>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <key>paragraphedFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
 
+        <setting>
+            <name>Use Running Header</name>
+            <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
+            <key>useRunningHeader</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Use Running Footer</name>
+            <description>Set this to true if you want to have a running footer line in your document. (Defalt = False)</description>
+            <key>useRunningFooter</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
 
+        <setting>
+            <name>Figure Placeholders</name>
+            <description>Turn On Figure Placeholders - If set to true, the actual picture graphic will not be output, rather a spaceholder will be output in its place. This makes processing much faster. Default = True</description>
+            <key>useFigurePlaceHolders</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
 
+        <setting>
+            <name>Captions</name>
+            <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
+            <key>useCaptions</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Caption Reference</name>
+            <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
+            <key>useCaptionReferences</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+
+        <setting>
+            <name>Page Border</name>
+            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
+            <key>usePageBorder</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Use Auto Callers (Crossrefs)</name>
+            <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
+            <key>useAutoCallerCrossrefs</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Numeric Callers (Crossrefs)</name>
+            <description>Use numeric callers on cross references instead of alphabetic callers. Default = False</description>
+            <key>useNumericCallersCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
 
     </section>
 

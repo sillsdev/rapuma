@@ -42,8 +42,9 @@ class ProjIllustration (object) :
         self.local                      = ProjLocal(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.proj_config                = ProjConfig(self.pid)
+        self.proj_config                = ProjConfig(pid, gid)
         self.layoutConfig               = self.proj_config.layoutConfig
+        self.macPackConfig              = self.proj_config.macPackConfig
         self.illustrationConfig         = self.proj_config.illustrationConfig
         self.projConfig                 = self.proj_config.projConfig
         self.csid                       = self.projConfig['Groups'][self.gid]['csid']
@@ -181,6 +182,13 @@ class ProjIllustration (object) :
             return False
 
 
+    def getCidPiclistFile (self, cid) :
+        '''Return the full path of the cName working text illustrations file. 
+        This assumes the cName is valid.'''
+
+        return os.path.join(self.local.projComponentsFolder, cid, cid + '_' + self.csid + '.piclist')
+
+
     def createPiclistFile (self, gid, cid) :
         '''Look in the cid for \fig data. Extract it from the cid and
         use it to create a piclist file for this specific cid. If
@@ -190,13 +198,13 @@ class ProjIllustration (object) :
 
         cType = self.projConfig['Groups'][gid]['cType']
         if cType == 'usfm' :
-            piclistFile = self.project.groups[gid].getCidPiclistFile(cid)
+            piclistFile = self.getCidPiclistFile(cid)
         elif cType == 'map' :
-            piclistFile = self.project.groups[gid].getCidPiclistFile(gid)
+            piclistFile = self.getCidPiclistFile(gid)
         else :
             self.log.writeToLog(self.errorCodes['0010'], [cType])
         
-        cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
+        cvSep = self.macPackConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         trueCid = cid
         obj = {}
@@ -221,13 +229,13 @@ class ProjIllustration (object) :
                 # Is a caption going to be used on this illustration?
                 caption = ''
                 if self.illustrationConfig[gid][i]['bid'] == cid :
-                    if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptions']) \
+                    if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useCaptions']) \
                         and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
                         if obj['caption'] :
                             caption = obj['caption']
                 # Work out if we want a caption reference or not for this illustration
                 if self.illustrationConfig[gid][i]['bid'] == cid :
-                    if self.tools.str2bool(self.layoutConfig['Illustrations']['useCaptionReferences']) \
+                    if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useCaptionReferences']) \
                         and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
                         if obj['location'] :
                             thisRef = obj['location']

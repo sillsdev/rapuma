@@ -26,6 +26,7 @@ from rapuma.core.paratext               import Paratext
 from rapuma.group.group                 import Group
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_macro          import ProjMacro
+from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_config         import ProjConfig
 from rapuma.project.proj_background     import ProjBackground
 
@@ -60,6 +61,7 @@ class Usfm (Group) :
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_macro             = ProjMacro(self.pid, self.gid)
+        self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
         self.pg_background          = ProjBackground(self.pid, self.gid)
         self.projConfig             = project.projConfig
@@ -179,11 +181,11 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentsFolder, cid, self.makeFileName(cid) + '.adj')
 
 
-    def getCidPiclistFile (self, cid) :
-        '''Return the full path of the cName working text illustrations file. 
-        This assumes the cName is valid.'''
+#    def getCidPiclistFile (self, cid) :
+#        '''Return the full path of the cName working text illustrations file. 
+#        This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, self.makeFileName(cid) + '.piclist')
+#        return os.path.join(self.local.projComponentsFolder, cid, self.makeFileName(cid) + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
@@ -247,16 +249,16 @@ class Usfm (Group) :
                     if os.path.isfile(cidAdjFile) :
                         os.remove(cidAdjFile)
                 # Component piclist file
-                cidPiclistFile = self.getCidPiclistFile(cid)
+                cidPiclistFile = self.proj_illustration.getCidPiclistFile(cid)
                 if useIllustrations :
-                    if self.illustration.hasIllustrations(gid, cid) :
+                    if self.proj_illustration.hasIllustrations(gid, cid) :
                         # Create if not there or if the config has changed
-                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
+                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.proj_config.illustrationConfFile) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
-                            self.illustration.getPics(gid, cid)
+                            self.proj_illustration.getPics(gid, cid)
                             # Now make a fresh version of the piclist file
-                            if self.illustration.createPiclistFile(gid, cid) :
+                            if self.proj_illustration.createPiclistFile(gid, cid) :
                                 self.log.writeToLog(self.errorCodes['0260'], [cid])
                             else :
                                 self.log.writeToLog(self.errorCodes['0265'], [cid])
@@ -264,11 +266,13 @@ class Usfm (Group) :
                             for f in [self.proj_config.layoutConfFile, self.proj_config.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
-                                    self.illustration.createPiclistFile(gid, cid)
-                                    self.log.writeToLog(self.errorCodes['0265'], [cid])
+                                    if self.proj_illustration.createPiclistFile(gid, cid) :
+                                        self.log.writeToLog(self.errorCodes['0260'], [cid])
+                                    else :
+                                        self.log.writeToLog(self.errorCodes['0265'], [cid])
                         # Do a quick check to see if the illustration files for this book
                         # are in the project. If it isn't, the run will be killed
-                        self.illustration.getPics(gid, cid)
+                        self.proj_illustration.getPics(gid, cid)
                     else :
                         # Does not seem to be any illustrations for this cid
                         # clean out any piclist file that might be there
