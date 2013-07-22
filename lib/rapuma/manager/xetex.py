@@ -320,14 +320,21 @@ class Xetex (Manager) :
                                     if outputTest :
                                         print '\t', setting['key']
                                     macTexVals[sections['sectionID']] = {'key' : setting['key']}
-                                    if setting.has_key('boolDependFalse') :
-                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
-                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
-                                            macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
-                                            if not self.tools.str2bool(realVal) :
-                                                if outputTest :
-                                                    print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-                                                appendLine(setting['texCode'], realVal)
+
+
+
+# FIXME: Working here
+# Look for just "boolDepend" in the key and then handle the true and false from there.
+
+
+#                                    if setting.has_key('boolDependFalse') :
+#                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
+#                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
+#                                            macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
+#                                            if not self.tools.str2bool(realVal) :
+#                                                if outputTest :
+#                                                    print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
+#                                                appendLine(setting['texCode'], realVal)
 
 
 #                                    elif setting.has_key('boolDependTrue') :
@@ -339,17 +346,31 @@ class Xetex (Manager) :
 #                                                    print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
 #                                                appendLine(setting['texCode'], realVal)
 
-# FIXME: Working here
 
-                                    elif setting.has_key('boolDependTrue') :
+# Need logic for this must be able to work with both true and false correctly
+
+# With multiple bools it is more like an "and" oporator
+# example:
+# SomethingBoolTrue = True and SomethingBoolFalse = False would turn out to be True over all.
+# However:
+# SomethingBoolTrue = True and SomethingBoolFalse = True would turn out to be False over all because one isn't a match
+
+# How do we do this?
+
+                                    if setting.has_key('boolDependTrue') or setting.has_key('boolDependFalse') :
                                         realVal = self.macPackConfig[sections['sectionID']][setting['key']]
-                                        if type(setting['boolDependTrue']) == list :
+                                        bTrue = False
+                                        bFalse = False
+                                        if setting.get('boolDependTrue') :
+                                            bTrue = True
+                                        if type(setting['boolDependTrue']) == list or type(setting['boolDependFalse']) :
                                             results = False
                                             for i in setting['boolDependTrue'] :
                                             
                                                 print i
-#                                                if i == '[config:layoutConfig|DocumentFeatures|bodyColumnsTwo]' :
+                                                if i == '[config:layoutConfig|DocumentFeatures|bodyColumnsTwo]' :
 #                                                    import pdb; pdb.set_trace()
+                                                   self.tools.dieNow()
 
                                                 if self.tools.str2bool(self.returnConfRefValue(i)) == True :
                                                     results = True
@@ -369,8 +390,11 @@ class Xetex (Manager) :
                                                     appendLine(setting['texCode'], realVal)
 
 
-#                                        self.tools.dieNow()
                                         
+
+
+
+
 
                                     elif setting.get(k) :
                                         realVal = self.macPackConfig[sections['sectionID']][setting['key']]
