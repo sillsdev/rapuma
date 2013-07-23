@@ -304,9 +304,7 @@ class Xetex (Manager) :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
-            macTexVals = {}
             for sections in self.proj_config.macPackDict['root']['section'] :
-                macTexVals[sections['sectionID']] = {}
                 for section in sections :
                     secItem = sections[section]
                     linesOut = []
@@ -319,87 +317,24 @@ class Xetex (Manager) :
                                 if k == 'texCode' :
                                     if outputTest :
                                         print '\t', setting['key']
-                                    macTexVals[sections['sectionID']] = {'key' : setting['key']}
-
-
-
-# FIXME: Working here
-# Look for just "boolDepend" in the key and then handle the true and false from there.
-
-
-#                                    if setting.has_key('boolDependFalse') :
-#                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
-#                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse'])) == False :
-#                                            macTexVals[sections['sectionID']]['boolDependFalse'] = str(setting.get('boolDependFalse'))
-#                                            if not self.tools.str2bool(realVal) :
-#                                                if outputTest :
-#                                                    print '\t', macTexVals[sections['sectionID']]['boolDependFalse'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependFalse']))
-#                                                appendLine(setting['texCode'], realVal)
-
-
-#                                    elif setting.has_key('boolDependTrue') :
-#                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
-#                                        if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
-#                                            macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-#                                            if self.tools.str2bool(realVal) :
-#                                                if outputTest :
-#                                                    print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-#                                                appendLine(setting['texCode'], realVal)
-
-
-# Need logic for this must be able to work with both true and false correctly
-
-# With multiple bools it is more like an "and" oporator
-# example:
-# SomethingBoolTrue = True and SomethingBoolFalse = False would turn out to be True over all.
-# However:
-# SomethingBoolTrue = True and SomethingBoolFalse = True would turn out to be False over all because one isn't a match
-
-# How do we do this?
-
-                                    if setting.has_key('boolDependTrue') or setting.has_key('boolDependFalse') :
-                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
-                                        bTrue = False
-                                        bFalse = False
-                                        if setting.get('boolDependTrue') :
-                                            bTrue = True
-                                        if type(setting['boolDependTrue']) == list or type(setting['boolDependFalse']) :
-                                            results = False
-                                            for i in setting['boolDependTrue'] :
-                                            
-                                                print i
-                                                if i == '[config:layoutConfig|DocumentFeatures|bodyColumnsTwo]' :
-#                                                    import pdb; pdb.set_trace()
-                                                   self.tools.dieNow()
-
-                                                if self.tools.str2bool(self.returnConfRefValue(i)) == True :
-                                                    results = True
-                                                    
-#                                           macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-                                            if results :
-                                                if outputTest :
-                                                    print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                                                appendLine(setting['texCode'], realVal)
-                                        
+                                    realVal = self.macPackConfig[sections['sectionID']][setting['key']]
+                                    # Test any boolDepends that this setting might have
+                                    if setting.has_key('boolDepend') :
+                                        result = []
+                                        if type(setting['boolDepend']) == list :
+                                            for i in setting['boolDepend'] :
+                                                result.append(self.affirm(i))
                                         else :
-                                            if self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue'])) == True :
-#                                                macTexVals[sections['sectionID']]['boolDependTrue'] = str(setting.get('boolDependTrue'))
-                                                if self.tools.str2bool(realVal) :
-                                                    if outputTest :
-                                                        print '\t', macTexVals[sections['sectionID']]['boolDependTrue'], self.tools.str2bool(self.returnConfRefValue(setting['boolDependTrue']))
-                                                    appendLine(setting['texCode'], realVal)
-
-
-                                        
-
-
-
-
-
+                                            result.append(self.affirm(setting['boolDepend']))
+                                        # If 'None' didn't end up in the list, that means
+                                        # every bool tested good so we can output the line
+                                        if None not in result :
+                                            if outputTest :
+                                                print '\t', setting.get(k)
+                                            appendLine(setting['texCode'], realVal)
+                                    # Normal setting output
                                     elif setting.get(k) :
-                                        realVal = self.macPackConfig[sections['sectionID']][setting['key']]
                                         if setting.get(k) != None :
-                                            macTexVals[sections['sectionID']][k] = setting.get(k)
                                             # We filter out zero values here (But what if we need one of them?)
                                             if not self.proj_config.processNestedPlaceholders(realVal) == '0' :
                                                 if outputTest :
@@ -428,6 +363,15 @@ class Xetex (Manager) :
             if outputTest :
                 self.tools.dieNow()
             # Report finished if not
+            return True
+
+
+    def affirm (self, boolDependInfo) :
+        '''Affirm by returning True if the actual bool matches its
+        state setting. Returning 'None' will cause a setting to be skipped.'''
+
+        realBool = self.returnConfRefValue(boolDependInfo['#text']).lower()
+        if boolDependInfo['@state'].lower() == realBool :
             return True
 
 

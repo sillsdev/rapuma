@@ -164,7 +164,7 @@ Todo:
             <name>Marginal Verses File</name>
             <description>The file that contains adjustments for components covered by this macro package.</description>
             <moduleID>marginalVersesFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]usfmTex[pathSep]ptxplus-marginalverses.tex</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptxplus-marginalverses.tex</fileName>
             <depends></depends>
         </file>
     </section>
@@ -179,7 +179,7 @@ Todo:
             <key>useMarginalVerses</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
             <texCode>\input "[self:marginalVersesFile]"</texCode>
         </setting>
         <setting>
@@ -195,7 +195,7 @@ Todo:
             <key>omitVerseNumberOne</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|omitVerseNumberOne]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|omitVerseNumberOne]</boolDepend>
             <texCode>\OmitVerseNumberOnetrue</texCode>
         </setting>
         <setting>
@@ -204,7 +204,7 @@ Todo:
             <key>omitAllChapterNumbers</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|omitAllChapterNumbers]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|omitAllChapterNumbers]</boolDepend>
             <texCode>\OmitChapterNumbertrue</texCode>
         </setting>
         <setting>
@@ -244,7 +244,7 @@ Todo:
             <key>adornVerseSetting</key>
             <type>string</type>
             <value>(#1)</value>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|useAdornVerseNumber]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useAdornVerseNumber]</boolDepend>
             <texCode>\def\AdornVerseNumber#1{[val]}</texCode>
             <note>Not fully tested yet. More work needs to be done on it.</note>
         </setting>
@@ -260,7 +260,7 @@ Todo:
             <key>titleColumns</key>
             <type>integer</type>
             <value>[function:getTitleColumns]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|titleColumnsTwo]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|titleColumnsTwo]</boolDepend>
             <texCode>\TitleColumns=[val]</texCode>
         </setting>
         <setting>
@@ -269,7 +269,7 @@ Todo:
             <key>introColumns</key>
             <type>integer</type>
             <value>[function:getIntroColumns]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|introColumnsTwo]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|introColumnsTwo]</boolDepend>
             <texCode>\IntroColumns=[val]</texCode>
         </setting>
         <setting>
@@ -278,7 +278,7 @@ Todo:
             <key>bodyColumns</key>
             <type>integer</type>
             <value>[function:getBodyColumns]</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>
             <texCode>\BodyColumns=[val]</texCode>
         </setting>
         <setting>
@@ -287,15 +287,15 @@ Todo:
             <key>columnGutterRule</key>
             <type>boolean</type>
             <value>[config:layoutConfig|DocumentFeatures|columnGutterRule]</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>
             <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
         <setting>
             <name>Column Gutter Factor</name>
-            <description>Used to set the size of the gutter between columns; this is relative to the font size.  Default = 20</description>
+            <description>Used to set the size of the gutter between columns; this is relative to the font size. Default = 15</description>
             <key>columnGutterFactor</key>
             <type>integer</type>
-            <value>20</value>
+            <value>15</value>
             <texCode>\def\ColumnGutterFactor{[val]}</texCode>
         </setting>
         <setting>
@@ -304,8 +304,8 @@ Todo:
             <key>columnShift</key>
             <type>integer</type>
             <value>5</value>
-            <boolDependTrue>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDependTrue>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
             <texCode>\columnshift=[val][mu]</texCode>
             <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
@@ -315,7 +315,7 @@ Todo:
             <key>singleColumnShift</key>
             <type>integer</type>
             <value>5</value>
-            <boolDependTrue>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
             <texCode>%\singlecolumnshift=[val][mu]</texCode>
             <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
@@ -326,7 +326,7 @@ Todo:
             <type>integer</type>
             <value>0</value>
             <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>
-            <boolDependTrue>[config:macPackConfig|Columns|columnGutterRule]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|Columns|columnGutterRule]</boolDepend>
         </setting>
     </section>
     <section>
@@ -353,7 +353,7 @@ Todo:
             <key>autoCallerListCrossrefs</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useAutoCallerCrossrefs]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useAutoCallerCrossrefs]</boolDepend>
             <texCode>\AutoCallers{x}{[val]}</texCode>
         </setting>
 
@@ -363,7 +363,7 @@ Todo:
             <key>numericCallersCrossrefs</key>
             <type>string</type>
             <value>x</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useNumericCallersCrossrefs]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useNumericCallersCrossrefs]</boolDepend>
             <texCode>\NumericCallers{[val]}</texCode>
         </setting>
 
@@ -373,7 +373,7 @@ Todo:
             <key>pageResetCallersCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Crossreferences|pageResetCallersCrossrefs]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|pageResetCallersCrossrefs]</boolDepend>
             <texCode>\PageResetCallers{x}</texCode>
         </setting>
         <setting>
@@ -382,7 +382,7 @@ Todo:
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDepend>
             <texCode>\OmitCallerInNote{x}</texCode>
         </setting>
         <setting>
@@ -391,7 +391,7 @@ Todo:
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDepend>
             <texCode>\ParagraphedNotes{x}</texCode>
         </setting>
     </section>
@@ -405,7 +405,7 @@ Todo:
             <key>autoCallerListFootnotes</key>
             <type>string</type>
             <value>[config:layoutConfig|DocumentFeatures|specialCallerFootnotes]</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
             <texCode>\AutoCallers{f}{[val]}</texCode>
         </setting>
         <setting>
@@ -414,7 +414,7 @@ Todo:
             <key>numericCallersFootnotes</key>
             <type>string</type>
             <value>f</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useNumericCallersFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useNumericCallersFootnotes]</boolDepend>
             <texCode>\NumericCallers{[val]}</texCode>
         </setting>
         <setting>
@@ -423,7 +423,7 @@ Todo:
             <key>pageResetCallersFootnotes</key>
             <type>string</type>
             <value>f</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|pageResetCallersFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|pageResetCallersFootnotes]</boolDepend>
             <texCode>\PageResetCallers{[val]}</texCode>
         </setting>
         <setting>
@@ -432,7 +432,7 @@ Todo:
             <key>omitCallerInFootnotes</key>
             <type>string</type>
             <value>f</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|omitCallerInFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|omitCallerInFootnotes]</boolDepend>
             <texCode>\OmitCallerInNote{[val]}</texCode>
         </setting>
         <setting>
@@ -441,7 +441,7 @@ Todo:
             <key>paragraphedFootnotes</key>
             <type>string</type>
             <value>f</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|paragraphedFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|paragraphedFootnotes]</boolDepend>
             <texCode>\ParagraphedNotes{[val]}</texCode>
         </setting>
         <setting>
@@ -450,7 +450,7 @@ Todo:
             <key>defineFootnoteRule</key>
             <type>string</type>
             <value>\hrule height 0.5pt\smallskip</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
         </setting>
         <setting>
             <name>Footnote Rule On</name>
@@ -458,7 +458,7 @@ Todo:
             <key>footnoteRuleOn</key>
             <type>boolean</type>
             <value>[config:macPackConfig|Footnotes|defineFootnoteRule]</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
             <texCode>\def\footnoterule{[val]}</texCode>
         </setting>
         <setting>
@@ -467,7 +467,7 @@ Todo:
             <key>footnoteRuleOff</key>
             <type>boolean</type>
             <value></value>
-            <boolDependFalse>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDependFalse>
+            <boolDepend state='false'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
             <texCode>\def\footnoterule{}</texCode>
         </setting>
         <setting>
@@ -476,7 +476,7 @@ Todo:
             <key>autoCallerMaxCharacterNumbers</key>
             <type>string</type>
             <value>26</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
             <texCode>\AutoCallerNumChars=[val]</texCode>
             <note>This has not been properly tested. It may not work right.</note>
         </setting>
@@ -486,7 +486,7 @@ Todo:
             <key>autoCallerStartCharacter</key>
             <type>string</type>
             <value>97</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
             <texCode>\AutoCallerStartChar=[val]</texCode>
             <note>This has not been properly tested. It may not work right.</note>
         </setting>
@@ -540,7 +540,7 @@ Todo:
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
             <value>[config:layoutConfig|DocumentFeatures|runningHeaderRulePosition]</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useRunningHeaderRule]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useRunningHeaderRule]</boolDepend>
             <texCode>\RHruleposition=[val][mu]</texCode>
         </setting>
         <setting>
@@ -640,7 +640,7 @@ Todo:
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:macPackConfig|HeaderContent|showVerseReferences]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|showVerseReferences]</boolDepend>
             <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
@@ -649,7 +649,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|HeaderContent|omitBookReference]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|omitBookReference]</boolDepend>
             <texCode>\OmitBookReftrue</texCode>
         </setting>
         <setting>
@@ -658,7 +658,7 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>[config:macPackConfig|HeaderContent|omitChapterNumberRH]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|omitChapterNumberRH]</boolDepend>
             <texCode>\OmitChapterNumberRHtrue</texCode>
             <note>This is not implemented in usfmTex but can be found in the standard ptx2pdf macro package.</note>
         </setting>
@@ -745,7 +745,7 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\newlanguage\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -755,7 +755,7 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\language=\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -765,7 +765,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\defaulthyphenchar=[val]</texCode>
         </setting>
         <setting>
@@ -774,7 +774,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -783,7 +783,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependFalse>
+            <boolDepend state='false'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -792,7 +792,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\exhyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -801,7 +801,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDependTrue>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\pretolerance=[val]</texCode>
         </setting>
     </section>
@@ -815,7 +815,7 @@ Todo:
             <key>figurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>[config:layoutConfig|DocumentFeatures|useFigurePlaceHolders]</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFigurePlaceHolders]</boolDepend>
             <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
@@ -905,7 +905,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDependTrue>[config:macPackConfig|PageLayout|useCropmarks]</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|PageLayout|useCropmarks]</boolDepend>
         </setting>
         <setting>
             <name>End Book No Eject</name>
