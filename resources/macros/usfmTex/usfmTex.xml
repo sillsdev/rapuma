@@ -179,8 +179,10 @@ Todo:
             <key>useMarginalVerses</key>
             <type>boolean</type>
             <value>False</value>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>
             <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
             <texCode>\input "[self:marginalVersesFile]"</texCode>
+            <note>At this point marginal verses are limited to two column text.</note>
         </setting>
         <setting>
             <name>Omit Chapter Number On Single Chapter Book</name>
@@ -307,18 +309,18 @@ Todo:
             <boolDepend state='true'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>
             <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
             <texCode>\columnshift=[val][mu]</texCode>
-            <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
         </setting>
-        <setting>
-            <name>Single Column Shift</name>
-            <description>Single column shift will shift a colum over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>
-            <key>singleColumnShift</key>
-            <type>integer</type>
-            <value>5</value>
-            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>
-            <texCode>%\singlecolumnshift=[val][mu]</texCode>
-            <note>FIXME: We need settings like this to be dependent on two bools, not just one.</note>
-        </setting>
+<!--        <setting>-->
+<!--            <name>Single Column Shift</name>-->
+<!--            <description>Single column shift will shift a colum over n units. This is used with marginal verse format. It will output the \singlecolumnshift command in the TeX settings file. Default = 5</description>-->
+<!--            <key>singleColumnShift</key>-->
+<!--            <type>integer</type>-->
+<!--            <value>5</value>-->
+<!--            <boolDepend state='false'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>-->
+<!--            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useMarginalVerses]</boolDepend>-->
+<!--            <texCode>\singlecolumnshift=[val][mu]</texCode>-->
+<!--            <note>This is not implemented in marginal verses yet.</note>-->
+<!--        </setting>-->
         <setting>
             <name>Column Gutter Rule Skip</name>
             <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>

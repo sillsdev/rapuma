@@ -54,7 +54,7 @@ rpm package KYU-MYMR-MRKA Mark Padauk_2.95 font remove --force
 # Render the component
 rpm group KYU-MYMR-MRKA Intro group draft
 rpm group KYU-MYMR-MRKA Mark group proof
-#rpm project KYU-MYMR-MRKA project bind
+rpm project KYU-MYMR-MRKA project bind
 
 ## Backup the project
 #rpm project KYU-MYMR-MRKA backup save
