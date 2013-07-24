@@ -170,6 +170,8 @@ def trimLog () :
 def userArguments (args) :
     '''Process incoming command arguments.'''
 
+#    import pdb; pdb.set_trace()
+
     # Common error handlers
     def cmdError (cmd, cmdType) :
         sys.exit('\nERROR: The ' + cmd + ' command is not valid to use with ' + cmdType + '. Process halting.\n')

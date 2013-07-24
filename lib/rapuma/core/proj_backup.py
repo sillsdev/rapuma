@@ -39,7 +39,6 @@ class ProjBackup (object) :
         self.userConfig     = self.user.userConfig
         self.projHome       = None
         self.local          = None
-        self.projConfig     = None
         self.log            = None
         self.finishInit()
 
@@ -77,7 +76,6 @@ class ProjBackup (object) :
         # If a projHome was succefully found, we can go on
         if self.projHome : 
             self.local      = ProjLocal(self.pid)
-            self.projConfig = ProjConfig(self.pid).projConfig
             self.log        = ProjLog(self.pid)
 
 
@@ -95,13 +93,13 @@ class ProjBackup (object) :
         # If this is a new project to the system, we should have a projHome
         # by now so we can try to get the projConfig now
         self.local          = ProjLocal(pid)
-        self.projConfig     = ProjConfig(pid).projConfig
+        projConfig          = ProjConfig(pid).projConfig
 
-        if len(self.projConfig) :
-            pName           = self.projConfig['ProjectInfo']['projectName']
-            pid             = self.projConfig['ProjectInfo']['projectIDCode']
-            pmid            = self.projConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate         = self.projConfig['ProjectInfo']['projectCreateDate']
+        if len(projConfig) :
+            pName           = projConfig['ProjectInfo']['projectName']
+            pid             = projConfig['ProjectInfo']['projectIDCode']
+            pmid            = projConfig['ProjectInfo']['projectMediaIDCode']
+            pCreate         = projConfig['ProjectInfo']['projectCreateDate']
             if not self.userConfig['Projects'].has_key(pid) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
