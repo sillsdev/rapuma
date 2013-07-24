@@ -80,8 +80,6 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
-
-
         <file>
             <name>ParaTExt Project Source Hyphenation File</name>
             <description>The source hypenation word list that is produced by ParaTExt.</description>
@@ -89,7 +87,6 @@ Todo:
             <fileName>[self:sourcePath][pathSep]hyphenatedWords.txt</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>TeX lccode Definition File</name>
             <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
@@ -97,7 +94,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep][self:csid]_lccode.tex</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Component Hyphenation Word List File</name>
             <description>The file that contains the hypenation words that have been preprocessed and ready for the last step of being converted to a form useable by TeX.</description>
@@ -112,7 +108,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.tex</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>ParaTExt Project Hyphenation Errors File</name>
             <description>The file that list all the words that Rapuma could not deal with that are concidered errors.</description>
@@ -120,7 +115,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWordErrors.txt</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Hyphenation Preprocess Script File</name>
             <description>The script used to preprocess the ParaTExt hypenation word list (if necessary).</description>
@@ -128,7 +122,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenPreprocess.py</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Rapuma Defalt Hyphenation Preprocess Script</name>
             <description>The default hypenation preprocess script that is copied into the project when necessary.</description>
@@ -136,7 +129,6 @@ Todo:
             <fileName>[self:rapumaScriptsFolder][pathSep]hyphenPreprocess.py</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Project ParaTExt Hyphenation File Copy</name>
             <description>The publishing project copy of the source hypenation word list that is produced by ParaTExt. (Note: This file can be altered by preprocesses.)</description>
@@ -144,7 +136,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Project ParaTExt Hyphenation File Backup Copy</name>
             <description>A read-only backup of the ParaTExt source hypenation word list that is used for comparison purposes.</description>
@@ -152,7 +143,6 @@ Todo:
             <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt.bak</fileName>
             <depends></depends>
         </file>
-
         <file>
             <name>Page Border File</name>
             <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
@@ -327,8 +317,8 @@ Todo:
             <key>columnGutterRuleSkip</key>
             <type>integer</type>
             <value>0</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>
             <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>
-            <boolDepend state='true'>[config:macPackConfig|Columns|columnGutterRule]</boolDepend>
         </setting>
     </section>
     <section>
@@ -358,7 +348,6 @@ Todo:
             <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useAutoCallerCrossrefs]</boolDepend>
             <texCode>\AutoCallers{x}{[val]}</texCode>
         </setting>
-
         <setting>
             <name>Numeric Callers (Crossrefs)</name>
             <description>Use numeric callers on cross references instead of alphabetic callers.</description>
@@ -368,7 +357,6 @@ Todo:
             <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useNumericCallersCrossrefs]</boolDepend>
             <texCode>\NumericCallers{[val]}</texCode>
         </setting>
-
         <setting>
             <name>Page Reset Callers (Crossrefs)</name>
             <description>Restart numbering or character sequence for cross references on each page.   Default = False</description>
