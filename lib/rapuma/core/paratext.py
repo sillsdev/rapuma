@@ -460,6 +460,15 @@ class Paratext (object) :
 ####################### Error Code Block Series = 0600 ########################
 ###############################################################################
 
+    def collectEndNotes (self, cid, endNoteConts) :
+        '''Collect the end notes from a cid.'''
+
+# FIXME: Output the endnotes to a separate file in the component folder for future processing
+
+#        print endNoteConts.group(1)
+
+        pass
+
 
     def logFigure (self, gid, cid, figConts) :
         '''Log the figure data in the illustration.conf. If nothing is returned, the

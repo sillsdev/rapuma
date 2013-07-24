@@ -609,6 +609,9 @@ class ProjSetup (object) :
                 # Note: Using partial() to allows the passing of the cid param 
                 # into logUsfmFigure()
                 contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
+                # Now remove end notes from the text
+                contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.paratext.collectEndNotes, cid), contents)
+                # Write out the remaining data to the working file
                 codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
                 # Finish by copying the tempFile to the source
                 shutil.copy(tempFile.name, target)
