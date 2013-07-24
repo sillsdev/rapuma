@@ -21,6 +21,20 @@ Todo:
         <value>True</value>
     </setting>
     <setting>
+        <name>Extract FIG Markers From Working Text</name>
+        <key>extractFigMarkers</key>
+        <description>Extract any \fig markers that are in the text which is being imported as working text.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
+        <name>Extract FE Markers From Working Text</name>
+        <key>extractFeMarkers</key>
+        <description>Extract any \fe markers that are in the text which is being imported as working text.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
         <name>Current Component</name>
         <key>current</key>
         <description>The current (perhaps more accurately the previously processed) component.</description>

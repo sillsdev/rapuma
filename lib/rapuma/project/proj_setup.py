@@ -565,6 +565,8 @@ class ProjSetup (object) :
         target              = self.tools_path.getWorkingFile(gid, cid)
         targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
         source              = self.tools_path.getSourceFile(gid, cid)
+        extractFigMarkers   = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
+        extractFeMarkers    = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
@@ -608,9 +610,11 @@ class ProjSetup (object) :
                 # logUsfmFigure() logs the fig data and strips it from the working text
                 # Note: Using partial() to allows the passing of the cid param 
                 # into logUsfmFigure()
-                contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
+                if extractFigMarkers :
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
                 # Now remove end notes from the text
-                contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.paratext.collectEndNotes, cid), contents)
+                if extractFeMarkers :
+                    contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.paratext.collectEndNotes, cid), contents)
                 # Write out the remaining data to the working file
                 codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
                 # Finish by copying the tempFile to the source
