@@ -237,7 +237,7 @@ class Usfm (Group) :
                 self.log.writeToLog(self.errorCodes['0220'], [cid], 'usfm.preProcessGroup():0220')
 
             # Add/manage the dependent files for this cid
-            if self.macPack == 'usfmTex' :
+            if self.macPack == 'usfmTex' or self.macPack == 'ptx2pdf' :
                 # Component adjustment file
                 cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
@@ -284,7 +284,7 @@ class Usfm (Group) :
                         os.remove(cidPiclistFile)
                         self.log.writeToLog(self.errorCodes['0255'], [cid])
             else :
-                self.log.writeToLog(self.errorCodes['0220'], [self.macPack])
+                self.log.writeToLog(self.errorCodes['0220'], [self.macPack], 'usfm.preProcessGroup():0220')
 
         # Background management
         bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']

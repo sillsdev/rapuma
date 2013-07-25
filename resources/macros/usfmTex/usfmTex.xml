@@ -321,6 +321,7 @@ Todo:
             <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>
         </setting>
     </section>
+
     <section>
         <name>Crossreferences</name>
         <sectionID>Crossreferences</sectionID>
@@ -385,6 +386,7 @@ Todo:
             <texCode>\ParagraphedNotes{x}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Footnotes</name>
         <sectionID>Footnotes</sectionID>
@@ -620,6 +622,7 @@ Todo:
             <texCode>\def\RFevenright{\[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Header Content</name>
         <sectionID>HeaderContent</sectionID>
@@ -725,6 +728,7 @@ Todo:
             <texCode>\def\RHevenright{\[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Hyphenation</name>
         <sectionID>Hyphenation</sectionID>
@@ -795,6 +799,7 @@ Todo:
             <texCode>\pretolerance=[val]</texCode>
         </setting>
     </section>
+
     <section>
         <name>Illustrations</name>
         <sectionID>Illustrations</sectionID>
@@ -827,13 +832,10 @@ Todo:
         </setting>
     </section>
 
-
     <section>
         <name>Margins</name>
         <sectionID>Margins</sectionID>
         <description>Here find ye settings that affect margin settings. Arrg!</description>
-
-
         <setting>
             <name>Margin Settings</name>
             <description>Output margin settings based on the master layout configuration.</description>
@@ -846,7 +848,6 @@ Todo:
             <texCode>\def\SideMarginFactor{[function:getSideMarginFactor]}</texCode>
             <note>This will reference the margin unit in the main layout config file</note>
         </setting>
-
         <setting>
             <name>Binding Gutter</name>
             <description>This additional margin space on the binding side (inside) of the page which will enable printing for formats that need more space for binding like with a comb-bind or hole punch. The distance of this setting is determined by additional space added to the inside margin which exceeds the outside margin setting.</description>
@@ -856,7 +857,6 @@ Todo:
             <texCode>\BindingGuttertrue</texCode>
             <texCode>\BindingGutter=[val][mu]</texCode>
         </setting>
-
         <setting>
             <name>Extra Right Margin</name>
             <description>For some single column publications it might be necessary to tweak the right margin to get things to line up, especialy when using marginal verses.  This setting is in mm.  Enter a number (just a number) which represents the distance in mm that you want to pull the right margin in toward the middle of the page.   Defalt = 0mm</description>
@@ -866,7 +866,6 @@ Todo:
             <texCode>\ExtraRMargin=[val][mu]</texCode>
         </setting>
     </section>
-
 
     <section>
         <name>Page Layout</name>
@@ -912,6 +911,7 @@ Todo:
             <value></value>
         </setting>
     </section>
+
     <section>
         <name>Text Elements</name>
         <sectionID>TextElements</sectionID>
@@ -925,6 +925,7 @@ Todo:
             <texCode>\quotekernamount=[val]</texCode>
         </setting>
     </section>
+
     <section>
         <name>TeX Behavior</name>
         <sectionID>TeXBehavior</sectionID>

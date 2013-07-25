@@ -51,6 +51,55 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Project Title</name>
+            <key>projectTitle</key>
+            <description>This is the actual title that will go on the book cover.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Project Translators</name>
+            <key>translators</key>
+            <description>The name of the author or translators for this publication.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Project Typesetters</name>
+            <key>typesetters</key>
+            <description>The names of the typesetter(s) for this project.</description>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>ISBN Number</name>
+            <key>isbnNumber</key>
+            <description>The ISBN identification number if this project has one.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Language Code</name>
+            <key>languageCode</key>
+            <description>The ISO/Ethnolouge langage code for the primary language of this publication.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Publication Start Date</name>
+            <key>startDate</key>
+            <description>The date this publication was started.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Publication Finish Date</name>
+            <key>finishDate</key>
+            <description>The date this publication was finished.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

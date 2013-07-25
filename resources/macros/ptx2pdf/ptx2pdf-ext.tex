@@ -1,6 +1,6 @@
-% xetex_settings_usfm-ext.tex
+% ptx2pdf-ext.tex
 %
-% Custom TeX setup file for the usfmTex macro package.
+% Custom TeX setup file for the ptx2pdf macro package.
 
 %%%%%%%%%%%%%%%%%%%%%%%  Extra Tweaks %%%%%%%%%%%%%%%%%%%%%%
 
@@ -86,41 +86,36 @@
 % slack this code will usually help. Any adjustments needed
 % should be done in the .sty and \VerticalSpaceFactor.
 % Trying to adjust this code doesn't seem to make any dif.
-%\catcode`\@=11
-%\def\gridb@x#1{%
- %\setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
- %\dimen2=\ht0 \advance\dimen2 by \dp0
- %\dimen0=\baselineskip \vskip\baselineskip
- %\ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
+% This is normally on by default.
+\catcode`\@=11
+\def\gridb@x#1{%
+ \setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
+ \dimen2=\ht0 \advance\dimen2 by \dp0
+ \dimen0=\baselineskip \vskip\baselineskip
+ \ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
                               % when doing a picture box, because it's not part of the
                               % current page
-% \loop \ifdim\dimen0<\dimen2
-%   \advance\dimen0 by \baselineskip
-%    \line{}\nobreak \repeat
-% \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
-% \unvbox0 \nobreak
-%}
-%\catcode`\@=12
-
-%%%%% Additional Marginal Verse Settings
-% For marginal verse output we need to insert this right here.
-% This should be temporary. It allows one stylesheet to undo 
-% superscript in a previous one It needs to go right here to
-% keep everything else working
-%
-% This is needed to turn off superscript in the override stylesheet
-\catcode`\@=11
-\def\NoSuperscript  {\defp@ram{superscript}{false}}
+ \loop \ifdim\dimen0<\dimen2
+   \advance\dimen0 by \baselineskip
+    \line{}\nobreak \repeat
+ \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
+ \unvbox0 \nobreak
+}
 \catcode`\@=12
-%
-% In the override stylesheet (to follow) we need this to be
-% inserted for \v:
-% \Marker v
-% \sethook{start}{v}{\kern-3sp}
-% \FontSize 8
-% \Bold
-% \NoSuperscript
 
-%\def\forcehyphen{-\char"200B}
+% Special commands (use with care, may have bad side-effects)
+\catcode`@=11
+\def\makedigitsother{\m@kedigitsother}
+\def\makedigitsletters{\m@kedigitsletters}
+\catcode `@=12
+\def\nbsp{ }
+\def\zwsp{​}
+\newdimen\remblskip \remblskip=\baselineskip
+\def\suckupline{\vskip -\baselineskip}
+\def\suckuphalfline{\vskip -0.5\baselineskip}
+\def\suckupqline{\vskip -0.25\baselineskip}
+\def\skipline{\vskip\baselineskip}
+\def\skiphalfline{\vskip 0.5\baselineskip}
+\def\skipqline{\vskip 0.25\baselineskip}
 
 

@@ -602,6 +602,13 @@ class ProjSetup (object) :
                 if not self.proj_process.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
+
+# FIXME: This entire next part should go out into a separate function to better
+# manage the process of removing extra non-Biblical text from the source, if
+# the process requires this. It should not be hard to do
+
+# Of cource this is USFM! Dah!
+
             # If this is a USFM component type we need to remove any \fig markers,
             # and record them in the illustration.conf file for later use
             if cType == 'usfm' :
