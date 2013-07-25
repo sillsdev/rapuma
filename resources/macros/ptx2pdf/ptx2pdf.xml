@@ -256,15 +256,6 @@ Todo:
             <texCode>\BodyColumns=[val]</texCode>
         </setting>
         <setting>
-            <name>Column Gutter Rule</name>
-            <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
-            <key>columnGutterRule</key>
-            <type>boolean</type>
-            <value>[config:layoutConfig|DocumentFeatures|columnGutterRule]</value>
-            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>
-            <texCode>\ColumnGutterRuletrue</texCode>
-        </setting>
-        <setting>
             <name>Column Gutter Factor</name>
             <description>Used to set the size of the gutter between columns; this is relative to the font size. Default = 15</description>
             <key>columnGutterFactor</key>
@@ -273,14 +264,24 @@ Todo:
             <texCode>\def\ColumnGutterFactor{[val]}</texCode>
         </setting>
         <setting>
-            <name>Column Gutter Rule Skip</name>
-            <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>
-            <key>columnGutterRuleSkip</key>
-            <type>integer</type>
-            <value>0</value>
+            <name>Column Gutter Rule</name>
+            <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
+            <key>columnGutterRule</key>
+            <type>boolean</type>
+            <value>[config:layoutConfig|DocumentFeatures|columnGutterRule]</value>
             <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>
-            <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>
+            <texCode>\ColumnGutterRuletrue</texCode>
         </setting>
+<!--        <setting>-->
+<!--            <name>Column Gutter Rule Skip</name>-->
+<!--            <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>-->
+<!--            <key>columnGutterRuleSkip</key>-->
+<!--            <type>integer</type>-->
+<!--            <value>0</value>-->
+<!--            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>-->
+<!--            <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>-->
+<!--            <note>This may need to be implemented in ptxplus.</note>-->
+<!--        </setting>-->
     </section>
 
     <section>
