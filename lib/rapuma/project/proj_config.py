@@ -230,15 +230,15 @@ class ProjConfig (object) :
         # FIXME: This may need to be moved to Fonts
         result = ''
         if value == 'mapping' :
-            useMapping = self.macPackConfig['Fonts']['useMapping']
+            useMapping = self.macPackConfig['FontSettings']['useMapping']
             if useMapping :
                 result = ':mapping=' + os.path.join(self.projFontsFolder, useMapping)
         elif value == 'renderer' :
-            useRenderingSystem = self.macPackConfig['Fonts']['useRenderingSystem']
+            useRenderingSystem = self.macPackConfig['FontSettings']['useRenderingSystem']
             if useRenderingSystem :
                 result = '/' + useRenderingSystem
         elif value == 'language' :
-            useLanguage = self.macPackConfig['Fonts']['useLanguage']
+            useLanguage = self.macPackConfig['FontSettings']['useLanguage']
             if useLanguage :
                 result = ':language=' + useLanguage
 

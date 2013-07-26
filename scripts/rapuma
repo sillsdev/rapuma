@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r710'
+systemVersion   = '0.6.r712'
 local           = None
 
 # Give a welcome message
@@ -448,9 +448,9 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'font' :
-                ProjFont(pid, gid).removeFontPack(pkid, force)
+                ProjFont(pid, gid).removeFontPack(pkid)
             elif cmdType == 'macro' :
-                ProjMacro(pid, gid).removeMacPack(pkid, force)
+                ProjMacro(pid, gid).removeMacPack(pkid)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :

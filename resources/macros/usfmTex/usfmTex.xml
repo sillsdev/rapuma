@@ -485,9 +485,9 @@ Todo:
     </section>
 
     <section>
-        <name>Fonts</name>
-        <sectionID>Fonts</sectionID>
-        <description>Information for fonts used in the publication project.</description>
+        <name>Font Settings</name>
+        <sectionID>FontSettings</sectionID>
+        <description>Information for fonts used in the publication project with this macro package.</description>
         <setting>
             <name>Font Size Unit</name>
             <description>Using a value in points (pt), this scales the font size of all elements according to the amount of the value. 1pt is equal to 100%. Example, to decrease the size by 5%, enter the value .095pt. Default = 1pt</description>
