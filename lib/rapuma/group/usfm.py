@@ -112,8 +112,10 @@ class Usfm (Group) :
             if not self.sourceEditor :
                 self.sourceEditor = self.pt_tools.getSourceEditor()
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.macPackConfig['Fonts']['ptDefaultFont']
-                if not font :
+                font = ''
+                if self.macPackConfig['FontSettings'].has_key('ptDefaultFont') :
+                    font = self.macPackConfig['FontSettings']['ptDefaultFont']
+                else :
                     font = self.pt_tools.getDefaultFont(self.macPackConfig)
             else :
                 font = 'DefaultFont'

@@ -272,14 +272,14 @@ class Paratext (object) :
         it is hard to load that in this module so we'll pass it in.'''
 
         ptDefaultFont = None
-        if macPackConfig['Fonts'].has_key('ptDefaultFont') :
-            ptDefaultFont = macPackConfig['Fonts']['ptDefaultFont']
+        if macPackConfig['FontSettings'].has_key('ptDefaultFont') :
+            ptDefaultFont = macPackConfig['FontSettings']['ptDefaultFont']
         # Now check to see if anything is really there
         if not ptDefaultFont :
             ptSet = self.getPTSettings()
             if ptSet :
                 ptDefaultFont = ptSet['ScriptureText']['DefaultFont']
-                macPackConfig['Fonts']['ptDefaultFont'] = ptDefaultFont
+                macPackConfig['FontSettings']['ptDefaultFont'] = ptDefaultFont
                 self.tools.writeConfFile(macPackConfig)
 
         return ptDefaultFont
