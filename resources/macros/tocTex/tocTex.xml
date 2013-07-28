@@ -14,16 +14,449 @@ Todo:
 
 <root>
     <section>
-        <name>Fonts</name>
-        <sectionID>Fonts</sectionID>
-        <description>Information for fonts used in the publication project.</description>
+        <name>Files</name>
+        <sectionID>Files</sectionID>
+        <description>Key files created and used by this macro.</description>
+        <file>
+            <name>Group TeX Link File</name>
+            <description>The file that links TeX to all the settings needed to render a job.</description>
+            <moduleID>gidTexFile</moduleID>
+            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Group PDF Output File</name>
+            <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
+            <moduleID>gidPdfFile</moduleID>
+            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
+            <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
+        </file>
+        <file>
+            <name>Primary Macro File</name>
+            <description>The main macro file that TeX will link to first.</description>
+            <moduleID>primaryMacroFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]paratext2.tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Main Settings File</name>
+            <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
+            <moduleID>macSettingsFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-settings.tex</fileName>
+            <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
+        </file>
+        <file>
+            <name>Settings Extension File</name>
+            <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
+            <moduleID>extTexFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Group Settings Extension File</name>
+            <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
+            <moduleID>grpExtTexFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Global Styles</name>
+            <description>This is the file that contains all global style settings for the project.</description>
+            <moduleID>defaultStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf.sty</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Extension Styles</name>
+            <description>This is the file that contains all extension style settings for the project.</description>
+            <moduleID>glbExtStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.sty</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Group Styles</name>
+            <description>This is the file that contains all the style settings for the current group.</description>
+            <moduleID>grpExtStyFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.sty</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>ParaTExt Project Source Hyphenation File</name>
+            <description>The source hypenation word list that is produced by ParaTExt.</description>
+            <moduleID>ptHyphFile</moduleID>
+            <fileName>[self:sourcePath][pathSep]hyphenatedWords.txt</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>TeX lccode Definition File</name>
+            <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
+            <moduleID>lccodeTexFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_lccode.tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Component Hyphenation Word List File</name>
+            <description>The file that contains the hypenation words that have been preprocessed and ready for the last step of being converted to a form useable by TeX.</description>
+            <moduleID>compHyphFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.txt</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>TeX Group Hyphenation Exclusions File</name>
+            <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
+            <moduleID>grpHyphExcTexFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.tex</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>ParaTExt Project Hyphenation Errors File</name>
+            <description>The file that list all the words that Rapuma could not deal with that are concidered errors.</description>
+            <moduleID>ptProjHyphErrFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWordErrors.txt</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Hyphenation Preprocess Script File</name>
+            <description>The script used to preprocess the ParaTExt hypenation word list (if necessary).</description>
+            <moduleID>preProcessFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenPreprocess.py</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Rapuma Defalt Hyphenation Preprocess Script</name>
+            <description>The default hypenation preprocess script that is copied into the project when necessary.</description>
+            <moduleID>rapumaPreProcessFile</moduleID>
+            <fileName>[self:rapumaScriptsFolder][pathSep]hyphenPreprocess.py</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Project ParaTExt Hyphenation File Copy</name>
+            <description>The publishing project copy of the source hypenation word list that is produced by ParaTExt. (Note: This file can be altered by preprocesses.)</description>
+            <moduleID>ptProjHyphFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Project ParaTExt Hyphenation File Backup Copy</name>
+            <description>A read-only backup of the ParaTExt source hypenation word list that is used for comparison purposes.</description>
+            <moduleID>ptProjHyphBakFile</moduleID>
+            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt.bak</fileName>
+            <depends></depends>
+        </file>
+        <file>
+            <name>Page Border File</name>
+            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
+            <moduleID>pageBorderFile</moduleID>
+            <fileName>page_border.pdf</fileName>
+            <depends></depends>
+        </file>
+    </section>
+
+    <section>
+        <name>Chapter and Verse</name>
+        <sectionID>ChapterVerse</sectionID>
+        <description>Parameters that cover varous aspects of formating of chapter and verse layout.</description>
+        <setting>
+            <name>Omit Chapter Number On Single Chapter Book</name>
+            <description>Setting this to True will prevent the chapter number 1 from being displayed single chapter books.  Default = True</description>
+            <key>omitChapterNumberOnSingleChapterBook</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Omit Verse Number One</name>
+            <description>Setting this to True will prevent verse number 1 from being displayed which is normally good for in-line verse formated Bibles that use drop chapter numbers.  Default = True</description>
+            <key>omitVerseNumberOne</key>
+            <type>boolean</type>
+            <value>True</value>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|omitVerseNumberOne]</boolDepend>
+            <texCode>\OmitVerseNumberOnetrue</texCode>
+        </setting>
+        <setting>
+            <name>Omit All Chapter Numbers</name>
+            <description>Omit all the chapter numbers in the book. (Often this is used for one-chapter books.) Default = False</description>
+            <key>omitAllChapterNumbers</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|omitAllChapterNumbers]</boolDepend>
+            <texCode>\OmitChapterNumbertrue</texCode>
+        </setting>
+        <setting>
+            <name>Chapter Verse Separator</name>
+            <description>Change the default c/v separator character or adjust the space by adding some extra code.  For example, to kern the space between the separator character you could enter: "\kern.02em:\kern.02em".  This setting primary affects the header reference. Default = ":"</description>
+            <key>chapterVerseSeparator</key>
+            <type>string</type>
+            <value>\kern.1em:\kern.1em</value>
+            <texCode>\def\ChapterVerseSeparator{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>After Verse Space Factor</name>
+            <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with in-line verse layouts.  Default = 2</description>
+            <key>afterVerseSpaceFactor</key>
+            <type>integer</type>
+            <value>2</value>
+            <texCode>\def\AfterVerseSpaceFactor{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>After Chapter Space Factor</name>
+            <description>You may need a little extra space following the Chapter numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with in-line verse layouts.  Default = 3</description>
+            <key>afterChapterSpaceFactor</key>
+            <type>integer</type>
+            <value>3</value>
+            <texCode>\def\AfterChapterSpaceFactor{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Use Adorn Verse Number</name>
+            <description>Set to true to turn on adorn verse numbers.</description>
+            <key>useAdornVerseNumber</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Adorn Verse Number Setting</name>
+            <description>By placing a properly formated setting in this field, TeX will place a verse adornment like parenthesis or anything else you may want to specify.  An example for parenthesis would be '(#1)' whereas the #1 is the verse number variable.  That must be there for the verse number to appear.  If you leave it blank no settings will be output to the settings file.   Default = (#1)</description>
+            <key>adornVerseSetting</key>
+            <type>string</type>
+            <value>(#1)</value>
+            <boolDepend state='true'>[config:macPackConfig|ChapterVerse|useAdornVerseNumber]</boolDepend>
+            <texCode>\def\AdornVerseNumber#1{[val]}</texCode>
+            <note>Not fully tested yet. More work needs to be done on it.</note>
+        </setting>
+    </section>
+
+    <section>
+        <name>Columns</name>
+        <sectionID>Columns</sectionID>
+        <description>Parameters which have to do with column layout for Scripture publications</description>
+        <setting>
+            <name>Title Columns</name>
+            <description>Number of columns used to typeset the main title.</description>
+            <key>titleColumns</key>
+            <type>integer</type>
+            <value>[function:getTitleColumns]</value>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|titleColumnsTwo]</boolDepend>
+            <texCode>\TitleColumns=[val]</texCode>
+        </setting>
+        <setting>
+            <name>Intro Columns </name>
+            <description>Number of columns used to typeset introduction material. Introduction material is defined by USFM markers beginning with \i.</description>
+            <key>introColumns</key>
+            <type>integer</type>
+            <value>[function:getIntroColumns]</value>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|introColumnsTwo]</boolDepend>
+            <texCode>\IntroColumns=[val]</texCode>
+        </setting>
+        <setting>
+            <name>Body Columns</name>
+            <description>Number of columns used to typeset the body text.</description>
+            <key>bodyColumns</key>
+            <type>integer</type>
+            <value>[function:getBodyColumns]</value>
+            <boolDepend state='true'>[config:layoutConfig|PageLayout|bodyColumnsTwo]</boolDepend>
+            <texCode>\BodyColumns=[val]</texCode>
+        </setting>
+        <setting>
+            <name>Column Gutter Factor</name>
+            <description>Used to set the size of the gutter between columns; this is relative to the font size. Default = 15</description>
+            <key>columnGutterFactor</key>
+            <type>integer</type>
+            <value>15</value>
+            <texCode>\def\ColumnGutterFactor{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Column Gutter Rule</name>
+            <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
+            <key>columnGutterRule</key>
+            <type>boolean</type>
+            <value>[config:layoutConfig|DocumentFeatures|columnGutterRule]</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>
+            <texCode>\ColumnGutterRuletrue</texCode>
+        </setting>
+<!--        <setting>-->
+<!--            <name>Column Gutter Rule Skip</name>-->
+<!--            <description>It may be necessary to push the top of the gutter rule down a few mm.  By setting the number to be greater than zero this will enable you to adjust where the line begins at the top of the page. (Not included in standard ptx2pdf macros).  Only enter the number of points, do not add "mm" as That will be added by the system.   Default = 0</description>-->
+<!--            <key>columnGutterRuleSkip</key>-->
+<!--            <type>integer</type>-->
+<!--            <value>0</value>-->
+<!--            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|columnGutterRule]</boolDepend>-->
+<!--            <texCode>\ColumnGutterRuleSkip=[val][mu]</texCode>-->
+<!--            <note>This may need to be implemented in ptxplus.</note>-->
+<!--        </setting>-->
+    </section>
+
+    <section>
+        <name>Crossreferences</name>
+        <sectionID>Crossreferences</sectionID>
+        <description>This section includes all textual elements that go into the Crossreferences area.</description>
+        <setting>
+            <name>Include Crossreferences</name>
+            <description>[NOT IMPLEMENTED] Include crossreferences in the output. Defalt = True</description>
+            <key>includeCrossreferences</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Crossreference Auto Caller Character</name>
+            <description>Define a character or sequence in this field to enable the use of auto callers in your text.  You can even add kerning control as well as in the examples By setting something in this field you will override the autoCallerStartChar setting.   A sequence = *,+,¶,§,**,++,¶¶,§§   Use only an asterisk = *   Kern an asterisk = \kern0.2em*\kern0.4em   Raise an asterisk = \raise .8em\hbox{*}   Raise and kern = \raise .8em\hbox{\kern0.2em*}   Default = *</description>
+            <key>crossrefAutoCallerCharacter</key>
+            <type>list</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Auto Callers (Crossrefs)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a crossref caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <key>autoCallerListCrossrefs</key>
+            <type>string</type>
+            <value></value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useAutoCallerCrossrefs]</boolDepend>
+            <texCode>\AutoCallers{x}{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Numeric Callers (Crossrefs)</name>
+            <description>Use numeric callers on cross references instead of alphabetic callers.</description>
+            <key>numericCallersCrossrefs</key>
+            <type>string</type>
+            <value>x</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useNumericCallersCrossrefs]</boolDepend>
+            <texCode>\NumericCallers{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Crossrefs)</name>
+            <description>Restart numbering or character sequence for cross references on each page.   Default = False</description>
+            <key>pageResetCallersCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|pageResetCallersCrossrefs]</boolDepend>
+            <texCode>\PageResetCallers{x}</texCode>
+        </setting>
+        <setting>
+            <name>Omit Caller In Crossrefs</name>
+            <description>To omit caller characters from the cross references at the bottom of the page.   Default = False</description>
+            <key>omitCallerInCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDepend>
+            <texCode>\OmitCallerInNote{x}</texCode>
+        </setting>
+        <setting>
+            <name>Paragraphed Crossrefs</name>
+            <description>Output the crossrefs on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <key>paragraphedCrossrefs</key>
+            <type>boolean</type>
+            <value>True</value>
+            <boolDepend state='true'>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDepend>
+            <texCode>\ParagraphedNotes{x}</texCode>
+        </setting>
+    </section>
+
+    <section>
+        <name>Footnotes</name>
+        <sectionID>Footnotes</sectionID>
+        <description>This section includes all textual elements that go into the footnote area.</description>
+        <setting>
+            <name>Auto Callers (Footnotes)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).</description>
+            <key>autoCallerListFootnotes</key>
+            <type>string</type>
+            <value>[config:layoutConfig|DocumentFeatures|specialCallerFootnotes]</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
+            <texCode>\AutoCallers{f}{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Numeric Callers (Footnotes)</name>
+            <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
+            <key>numericCallersFootnotes</key>
+            <type>string</type>
+            <value>f</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useNumericCallersFootnotes]</boolDepend>
+            <texCode>\NumericCallers{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Footnotes)</name>
+            <description>Restart numbering or character sequence for footnotes on each page.</description>
+            <key>pageResetCallersFootnotes</key>
+            <type>string</type>
+            <value>f</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|pageResetCallersFootnotes]</boolDepend>
+            <texCode>\PageResetCallers{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Omit Caller In Footnotes</name>
+            <description>To omit caller characters from the footnotes at the bottom of the page.</description>
+            <key>omitCallerInFootnotes</key>
+            <type>string</type>
+            <value>f</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|omitCallerInFootnotes]</boolDepend>
+            <texCode>\OmitCallerInNote{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Paragraphed Footnotes</name>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.</description>
+            <key>paragraphedFootnotes</key>
+            <type>string</type>
+            <value>f</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|paragraphedFootnotes]</boolDepend>
+            <texCode>\ParagraphedNotes{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Define Footnote Rule</name>
+            <description>Many times a horizontal line is used to separate the main text body from the footnotes.  To change the default rule that is generated from the macro, change this setting as necessary.  If you do not want a footnote rule, insert a command like \smallskip.  This will cause the default horizontal line to not be output.  Only a small space will be inserted.  The default setting will give you a horizontal line across the text area that is 0.4pt in thickness. Some examples of line definitions would be:   \hrule height 0.5pt (slightly thicker moving towards the top of the page)   \hrule depth 0.5pt (slightly thicker moving towards the bottom of the page)   \hrule height 0.5pt\smallskip (small amount of vertical space before text)   \smallskip (no rule will be output)   Default = \hrule\smallskip</description>
+            <key>defineFootnoteRule</key>
+            <type>string</type>
+            <value>\hrule height 0.5pt\smallskip</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
+        </setting>
+        <setting>
+            <name>Footnote Rule On</name>
+            <description>If useFootnoteRule in the page settings is set to True, this will set \footnoterule to the setting in defineFootnoteRule.</description>
+            <key>footnoteRuleOn</key>
+            <type>boolean</type>
+            <value>[config:macPackConfig|Footnotes|defineFootnoteRule]</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
+            <texCode>\def\footnoterule{[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Footnote Rule Off</name>
+            <description>If useFootnoteRule in the page settings is set to False, this will remove any settings from \footnoterule which will remove any footnote rule.</description>
+            <key>footnoteRuleOff</key>
+            <type>boolean</type>
+            <value></value>
+            <boolDepend state='false'>[config:layoutConfig|DocumentFeatures|useFootnoteRule]</boolDepend>
+            <texCode>\def\footnoterule{}</texCode>
+        </setting>
+        <setting>
+            <name>Auto Caller Number Characters</name>
+            <description>Number of caller characters to generate before restarting sequence.   Default = 26</description>
+            <key>autoCallerMaxCharacterNumbers</key>
+            <type>string</type>
+            <value>26</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
+            <texCode>\AutoCallerNumChars=[val]</texCode>
+            <note>This has not been properly tested. It may not work right.</note>
+        </setting>
+        <setting>
+            <name>Auto Caller Start Character</name>
+            <description>Unicode value of first character to use for auto-generated callers.  This allows the use of vernacular caller letters.  It will start at the number specified and continue until the number of characters are reached specified by AutoCallerNumChars.   Default = 97 ('a')</description>
+            <key>autoCallerStartCharacter</key>
+            <type>string</type>
+            <value>97</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useSpecialCallerFootnotes]</boolDepend>
+            <texCode>\AutoCallerStartChar=[val]</texCode>
+            <note>This has not been properly tested. It may not work right.</note>
+        </setting>
+    </section>
+
+    <section>
+        <name>Font Settings</name>
+        <sectionID>FontSettings</sectionID>
+        <description>Information for fonts used in the publication project with this macro package.</description>
         <setting>
             <name>Font Size Unit</name>
             <description>Using a value in points (pt), this scales the font size of all elements according to the amount of the value. 1pt is equal to 100%. Example, to decrease the size by 5%, enter the value .095pt. Default = 1pt</description>
             <key>fontSizeUnit</key>
             <type>integer</type>
             <value>1pt</value>
-            <texCode>\FontSizeUnit=[v]</texCode>
+            <texCode>\FontSizeUnit=[val]</texCode>
         </setting>
         <setting>
             <name>Line Spacing Factor</name>
@@ -31,7 +464,7 @@ Todo:
             <key>lineSpacingFactor</key>
             <type>integer</type>
             <value>1.1</value>
-            <texCode>\def\LineSpacingFactor{[v]}</texCode>
+            <texCode>\def\LineSpacingFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>Vertical Space Factor</name>
@@ -39,64 +472,130 @@ Todo:
             <key>verticalSpaceFactor</key>
             <type>integer</type>
             <value>1</value>
-            <texCode>\def\VerticalSpaceFactor{[v]}</texCode>
+            <texCode>\def\VerticalSpaceFactor{[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Header and Footer</name>
         <sectionID>HeaderFooter</sectionID>
         <description>Header/Footer settings in this section</description>
         <setting>
-            <name>Use Running Header Rule</name>
-            <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>
-            <key>useRunningHeaderRule</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
             <name>Header Position</name>
-            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 0.5mm</description>
+            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 0.5</description>
             <key>headerPosition</key>
             <type>integer</type>
-            <value>0.5</value>
-            <texCode>\def\HeaderPosition{[v]}</texCode>
+            <value>[function:getHeaderPosition]</value>
+            <texCode>\def\HeaderPosition{[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Rule Position</name>
             <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  This is a simple dimension, not a relative "factor".   Default = 4mm</description>
             <key>runningHeaderRulePosition</key>
             <type>integer</type>
-            <value>4</value>
-            <boolDependTrue>layoutConfig:HeaderFooter:useRunningHeaderRule</boolDependTrue>
-            <texCode>\RHruleposition=[vm]</texCode>
+            <value>[config:layoutConfig|DocumentFeatures|runningHeaderRulePosition]</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useRunningHeaderRule]</boolDepend>
+            <texCode>\RHruleposition=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Footer Position</name>
-            <description>Position of the baseline of the footer relative to the bottom edge of the paper (not the text area).   Default = 0.5mm</description>
+            <description>Position of the baseline of the footer relative to the bottom edge of the paper (not the text area).   Default = 0.5</description>
             <key>footerPosition</key>
             <type>integer</type>
-            <value>0.5</value>
-            <texCode>\def\FooterPosition{[v]}</texCode>
+            <value>[function:getFooterPosition]</value>
+            <texCode>\def\FooterPosition{[val]}</texCode>
         </setting>
     </section>
+
+    <section>
+        <name>Footer Content</name>
+        <sectionID>FooterContent</sectionID>
+        <description>Footer Configuration, leave them empty if you don't want anything to show up in the footer, like page numbers on the title page.  The default is leave them all empty.  Normally we do not want to put any content in the footer as it takes up an extra line which addes up to extra pages in a publication.  It is more efficient to put information like page numbers in the running header.</description>
+        <setting>
+            <name>Running Footer Title (Left)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitleleft{})   Default = empty</description>
+            <key>runningFooterTitleLeft</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFtitleleft{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Title (Center)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitlecenter{})   Default = empty</description>
+            <key>runningFooterTitleCenter</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFtitlecenter{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Title (Right)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFtitleright{})   Default = empty</description>
+            <key>runningFooterTitleRight</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFtitleright{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Odd (Left)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddleft{})   Default = empty</description>
+            <key>runningFooterOddLeft</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFoddleft{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Odd (Center)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddcenter{})   Default = empty</description>
+            <key>runningFooterOddCenter</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFoddcenter{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Odd (Right)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFoddright{})   Default = empty</description>
+            <key>runningFooterOddRight</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFoddright{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Even (Left)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevenleft{})   Default = empty</description>
+            <key>runningFooterEvenLeft</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFevenleft{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Even (Center)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevencenter{})   Default = empty</description>
+            <key>runningFooterEvenCenter</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFevencenter{\[val]}</texCode>
+        </setting>
+        <setting>
+            <name>Running Footer Even (Right)</name>
+            <description>This will specify what can go in the running footer at this specific position. Key words that can be used are: (bookname | rangeref | firstref | lastref | pagenumber | empty) Note: not all of the above have been tested in footer content.  Your mileage may vary! (ptx2pdf syntax = \RFevenright{})   Default = empty</description>
+            <key>runningFooterEvenRight</key>
+            <type>string</type>
+            <value>empty</value>
+            <texCode>\def\RFevenright{\[val]}</texCode>
+        </setting>
+    </section>
+
     <section>
         <name>Header Content</name>
         <sectionID>HeaderContent</sectionID>
         <description>Information to include in the running header (at top of pages, except first) We set the items to print at left/center/right of odd and even pages separately   Possible contents:      \bookname = the name of the book as defined in \h      \rangeref = Scripture reference of the range of text on the page;      \firstref = reference of the first verse on the page)      \lastref = reference of the last verse on the page)      \pagenumber = the page number      \empty = print nothing in this position To follow are each of the individual position.</description>
-        <setting>
-            <name>Use Running Header</name>
-            <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
-            <key>useRunningHeader</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
         <setting>
             <name>Show Verse References (Running Header)</name>
             <description>Set this to true if you want to include verse numbers in header/footer references, or only chapter numbers. (ptx2pdf syntax = \VerseRefstrue)   Default = False (Only chapter numbers)</description>
             <key>showVerseReferences</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:HeaderContent:showVerseReferences</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|showVerseReferences]</boolDepend>
             <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
@@ -105,7 +604,7 @@ Todo:
             <key>omitBookReference</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:HeaderContent:omitBookReference</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|omitBookReference]</boolDepend>
             <texCode>\OmitBookReftrue</texCode>
         </setting>
         <setting>
@@ -114,9 +613,8 @@ Todo:
             <key>omitChapterNumberRH</key>
             <type>boolean</type>
             <value>False</value>
-            <boolDependTrue>layoutConfig:HeaderContent:omitChapterNumberRH</boolDependTrue>
+            <boolDepend state='true'>[config:macPackConfig|HeaderContent|omitChapterNumberRH]</boolDepend>
             <texCode>\OmitChapterNumberRHtrue</texCode>
-            <note>This is not implemented in texCode but can be found in the standard ptx2pdf macro package.</note>
         </setting>
         <setting>
             <name>Running Header Title (Left Side)</name>
@@ -124,7 +622,7 @@ Todo:
             <key>runningHeaderTitleLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitleleft{\[v]}</texCode>
+            <texCode>\def\RHtitleleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Title (Center)</name>
@@ -132,7 +630,7 @@ Todo:
             <key>runningHeaderTitleCenter</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitlecenter{\[v]}</texCode>
+            <texCode>\def\RHtitlecenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Title (Right Side)</name>
@@ -140,7 +638,7 @@ Todo:
             <key>runningHeaderTitleRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHtitleright{\[v]}</texCode>
+            <texCode>\def\RHtitleright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Left/Inside Of The Page)</name>
@@ -148,7 +646,7 @@ Todo:
             <key>runningHeaderOddLeft</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHoddleft{\[v]}</texCode>
+            <texCode>\def\RHoddleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Center)</name>
@@ -156,7 +654,7 @@ Todo:
             <key>runningHeaderOddCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <texCode>\def\RHoddcenter{\[v]}</texCode>
+            <texCode>\def\RHoddcenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Odd (Right/Outside Of The Page)</name>
@@ -164,7 +662,7 @@ Todo:
             <key>runningHeaderOddRight</key>
             <type>string</type>
             <value>lastref</value>
-            <texCode>\def\RHoddright{\[v]}</texCode>
+            <texCode>\def\RHoddright{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Left/Outside Of The Page)</name>
@@ -172,7 +670,7 @@ Todo:
             <key>runningHeaderEvenLeft</key>
             <type>string</type>
             <value>firstref</value>
-            <texCode>\def\RHevenleft{\[v]}</texCode>
+            <texCode>\def\RHevenleft{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Center)</name>
@@ -180,7 +678,7 @@ Todo:
             <key>runningHeaderEvenCenter</key>
             <type>string</type>
             <value>pagenumber</value>
-            <texCode>\def\RHevencenter{\[v]}</texCode>
+            <texCode>\def\RHevencenter{\[val]}</texCode>
         </setting>
         <setting>
             <name>Running Header Even (Right/Inside Of The Page)</name>
@@ -188,9 +686,10 @@ Todo:
             <key>runningHeaderEvenRight</key>
             <type>string</type>
             <value>empty</value>
-            <texCode>\def\RHevenright{\[v]}</texCode>
+            <texCode>\def\RHevenright{\[val]}</texCode>
         </setting>
     </section>
+
     <section>
         <name>Hyphenation</name>
         <sectionID>Hyphenation</sectionID>
@@ -201,8 +700,8 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\newlanguage\[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\newlanguage\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
@@ -211,8 +710,8 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\language=\[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\language=\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
         <setting>
@@ -221,8 +720,8 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\defaulthyphenchar=[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\defaulthyphenchar=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Hyphenation Penalty</name>
@@ -230,8 +729,8 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\hyphenpenalty=[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Hyphenation Penalty Off</name>
@@ -239,8 +738,8 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDependFalse>projConfig:Groups:[self.gid]:useHyphenation</boolDependFalse>
-            <texCode>\hyphenpenalty=[v]</texCode>
+            <boolDepend state='false'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Explicit Hyphenation Penalty</name>
@@ -248,8 +747,8 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\exhyphenpenalty=[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\exhyphenpenalty=[val]</texCode>
         </setting>
         <setting>
             <name>TeX Pretolerance</name>
@@ -257,21 +756,22 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDependTrue>projConfig:Groups:[self.gid]:useHyphenation</boolDependTrue>
-            <texCode>\pretolerance=[v]</texCode>
+            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <texCode>\pretolerance=[val]</texCode>
         </setting>
     </section>
+
     <section>
         <name>Illustrations</name>
         <sectionID>Illustrations</sectionID>
         <description>Illustration resources</description>
         <setting>
             <name>Figure Placeholders</name>
-            <description>Turn On Figure Placeholders - If set to true ptx2pdf will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
-            <key>useFigurePlaceHolders</key>
+            <description>Turn On Figure Placeholders - If set to true, this macro will not output the actual picture graphic, just the space it goes in.  This makes processing much faster. Default = True</description>
+            <key>figurePlaceHolders</key>
             <type>boolean</type>
             <value>True</value>
-            <boolDependTrue>layoutConfig:Illustrations:useFigurePlaceHolders</boolDependTrue>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|useFigurePlaceHolders]</boolDepend>
             <texCode>\FigurePlaceholderstrue</texCode>
         </setting>
         <setting>
@@ -282,81 +782,44 @@ Todo:
             <value>:</value>
         </setting>
         <setting>
-            <name>Captions</name>
-            <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
-            <key>useCaptions</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
-            <name>Caption Reference</name>
-            <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
-            <key>useCaptionReferences</key>
-            <type>boolean</type>
-            <value>True</value>
-        </setting>
-        <setting>
             <name>Path To Illustrations</name>
             <description>This is the path to the project illustrations that TeX will use.</description>
             <key>texPicPath</key>
             <type>string</type>
             <value>[path:projIllustrationsFolder]/</value>
-            <texCode>\PicPath={[v]}</texCode>
+            <texCode>\PicPath={[val]}</texCode>
+            <note>This will insert the path dynamically when this setting is referenced.</note>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>
         </setting>
     </section>
+
     <section>
         <name>Margins</name>
         <sectionID>Margins</sectionID>
         <description>Here find ye settings that affect margin settings. Arrg!</description>
         <setting>
-            <name>Base Margin Unit</name>
-            <description>Basic unit for margins changing this will alter them all. Default = 12mm</description>
-            <key>marginUnit</key>
-            <type>function</type>
-            <value>layout.getBaseMarginSetting()</value>
-            <texCode>\MarginUnit=[vm]</texCode>
-        </setting>
-        <setting>
-            <name>Top Margin Factor</name>
-            <description>Relative size of the top margin based on MarginUnit will relate just to the margins of the body text area, independent of headers and footers.   Default = 1.0</description>
-            <key>topMarginFactor</key>
-            <type>function</type>
-            <value>layout.getTopMarginFactor()</value>
-            <texCode>\def\TopMarginFactor{[v]}</texCode>
-        </setting>
-        <setting>
-            <name>Bottom Margin Factor</name>
-            <description>Relative size of the bottom margin based on MarginUnit.  If undefined, the \TopMarginFactor will be used for both top and bottom margins.  You can set this to "0" to disable this setting.   Default = 0</description>
-            <key>bottomMarginFactor</key>
-            <type>function</type>
-            <value>layout.getBottomMarginFactor()</value>
-            <texCode>\def\BottomMarginFactor{[v]}</texCode>
-        </setting>
-        <setting>
-            <name>Side Margin Factor</name>
-            <description>Relative size of side margin based on MarginUnit.  This determins the distance between the edge of the page and the body text.   Default = 0.7</description>
-            <key>sideMarginFactor</key>
-            <type>function</type>
-            <value>layout.getSideMarginFactor()</value>
-            <texCode>\def\SideMarginFactor{[v]}</texCode>
-        </setting>
-        <setting>
-            <name>Extra Right Margin</name>
-            <description>For some single column publications it might be necessary to tweak the right margin to get things to line up, especialy when using marginal verses.  This setting is in mm.  Enter a number (just a number) which represents the distance in mm that you want to pull the right margin in toward the middle of the page.   Defalt = 0mm</description>
-            <key>extraRightMargin</key>
-            <type>integer</type>
-            <value>0</value>
-            <texCode>\ExtraRMargin=[vm]</texCode>
+            <name>Margin Settings</name>
+            <description>Output margin settings based on the master layout configuration.</description>
+            <key>marginSettings</key>
+            <type>string</type>
+            <value></value>
+            <texCode>\MarginUnit=[function:getMarginUnit][mu]</texCode>
+            <texCode>\def\TopMarginFactor{[function:getTopMarginFactor]}</texCode>
+            <texCode>\def\BottomMarginFactor{[function:getBottomMarginFactor]}</texCode>
+            <texCode>\def\SideMarginFactor{[function:getSideMarginFactor]}</texCode>
+            <note>This will reference the margin unit in the main layout config file</note>
         </setting>
         <setting>
             <name>Binding Gutter</name>
-            <description>If the amount is greater than '0' (zero) additional space will be added to the binding gutter.  This additional margin on the binding side of the page will enable printing for formats that need more space for binding like with a comb bind or hole punch.   Default = 0mm</description>
+            <description>This additional margin space on the binding side (inside) of the page which will enable printing for formats that need more space for binding like with a comb-bind or hole punch. The distance of this setting is determined by additional space added to the inside margin which exceeds the outside margin setting.</description>
             <key>bindingGutter</key>
             <type>integer</type>
-            <value>0</value>
+            <value>[function:getBindingGutterWidth]</value>
+            <texCode>\BindingGuttertrue</texCode>
+            <texCode>\BindingGutter=[val][mu]</texCode>
         </setting>
     </section>
+
     <section>
         <name>Page Layout</name>
         <sectionID>PageLayout</sectionID>
@@ -366,16 +829,16 @@ Todo:
             <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
             <key>pageHeight</key>
             <type>reference</type>
-            <value>layoutConfig:PageLayout:pageHeight</value>
-            <texCode>\PaperHeight=[vm]</texCode>
+            <value>[config:layoutConfig|PageLayout|pageHeight]</value>
+            <texCode>\PaperHeight=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Page Width</name>
             <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
             <key>pageWidth</key>
             <type>reference</type>
-            <value>layoutConfig:PageLayout:pageWidth</value>
-            <texCode>\PaperWidth=[vm]</texCode>
+            <value>[config:layoutConfig|PageLayout|pageWidth]</value>
+            <texCode>\PaperWidth=[val][mu]</texCode>
         </setting>
         <setting>
             <name>Cropmarks</name>
@@ -384,21 +847,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDependTrue>layoutConfig:PageLayout:useCropmarks</boolDependTrue>
-        </setting>
-        <setting>
-            <name>Page Border</name>
-            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
-            <key>usePageBorder</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Page Border File</name>
-            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
-            <key>pageBorderFile</key>
-            <type>string</type>
-            <value>page_border.pdf</value>
+            <boolDepend state='true'>[config:macPackConfig|PageLayout|useCropmarks]</boolDepend>
         </setting>
         <setting>
             <name>End Book No Eject</name>
@@ -415,19 +864,22 @@ Todo:
             <value></value>
         </setting>
     </section>
-    <section>
-        <name>Text Elements</name>
-        <sectionID>TextElements</sectionID>
-        <description>General settings for text level elements</description>
-        <setting>
-            <name>Quote Kern Amount (Em)</name>
-            <description>Often, when there are quotes within quotes, when they end the two types of quote markers are so close together that, from the reader's perspective, it is hard to tell what is going on.  To fix this kerning space is added between the two characters to make it clear which is which.  The amount is in em space measurement.  For more information on what that is, go to this address:   http://en.wikipedia.org/wiki/Em_(typography) Enter the amount in em but do not follow with "em" as the system assumes the measurement is in em.  Enter 0 if no kerning of quotes is desired.   Defalt = 0.1</description>
-            <key>quoteKernAmount</key>
-            <type>integer</type>
-            <value>0.1em</value>
-            <texCode>\quotekernamount=[v]</texCode>
-        </setting>
-    </section>
+
+<!--    <section>-->
+<!--        <name>Text Elements</name>-->
+<!--        <sectionID>TextElements</sectionID>-->
+<!--        <description>General settings for text level elements</description>-->
+<!--        <setting>-->
+<!--            <name>Quote Kern Amount (Em)</name>-->
+<!--            <description>Often, when there are quotes within quotes, when they end the two types of quote markers are so close together that, from the reader's perspective, it is hard to tell what is going on.  To fix this kerning space is added between the two characters to make it clear which is which.  The amount is in em space measurement.  For more information on what that is, go to this address:   http://en.wikipedia.org/wiki/Em_(typography) Enter the amount in em but do not follow with "em" as the system assumes the measurement is in em.  Enter 0 if no kerning of quotes is desired.   Defalt = 0.1</description>-->
+<!--            <key>quoteKernAmount</key>-->
+<!--            <type>integer</type>-->
+<!--            <value>0.1em</value>-->
+<!--            <texCode>\quotekernamount=[val]</texCode>-->
+<!--        </setting>-->
+<!--        <note>This was implemented in usfmTex (ptxplus) might be nice to have it here too.</note>-->
+<!--    </section>-->
+
     <section>
         <name>TeX Behavior</name>
         <sectionID>TeXBehavior</sectionID>
@@ -438,7 +890,7 @@ Todo:
             <key>hFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <texCode>\hfuzz=[v]</texCode>
+            <texCode>\hfuzz=[val]</texCode>
         </setting>
         <setting>
             <name>Vertical Fuzz</name>
@@ -446,7 +898,7 @@ Todo:
             <key>vFuzz</key>
             <type>integer</type>
             <value>0.1pt</value>
-            <texCode>\vfuzz=[v]</texCode>
+            <texCode>\vfuzz=[val]</texCode>
         </setting>
     </section>
 </root>

@@ -193,10 +193,7 @@ class Xetex (Manager) :
 #        import pdb; pdb.set_trace()
 
         if self.usePdfViewer :
-#            # FIXME: This check is to overcome a bug upstream
-#            if type(self.pdfViewer) != list :
-#                self.pdfViewer = eval(self.pdfViewer)
-            # Build the viewer command
+            # Add the file to the viewer command
             self.pdfViewer.append(fileName)
             # Run the XeTeX and collect the return code for analysis
             try :
