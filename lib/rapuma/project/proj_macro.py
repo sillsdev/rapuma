@@ -36,6 +36,8 @@ class ProjMacro (object) :
     def __init__(self, pid, gid) :
         '''Do the primary initialization for this class.'''
 
+#        import pdb; pdb.set_trace()
+
         self.pid                        = pid
         self.gid                        = gid
         self.tools                      = Tools()
@@ -46,42 +48,27 @@ class ProjMacro (object) :
         self.local                      = ProjLocal(pid)
         self.proj_config                = ProjConfig(pid, gid)
         self.projConfig                 = self.proj_config.projConfig
-        
-        
-# FIXME: If proj_config doesn't give us the macPackConfig, what do we do?
-        
-        
-        self.macPackConfig              = self.proj_config.macPackConfig
-        
-        
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.cType                      = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
-        # File names
-        self.macPackFileName            = self.macPack + '.zip'
         # Folder paths
         self.projConfFolder             = self.local.projConfFolder
         self.projMacrosFolder           = self.local.projMacrosFolder
         self.rapumaMacrosFolder         = self.local.rapumaMacrosFolder
-        self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
-        # File names with paths
-        self.macPackXmlConfFile         = self.proj_config.macPackXmlConfFile
-#        self.macPackFile                = os.path.join(self.projMacPackFolder, self.macPackFileName)
-        self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
-#        self.macPackDict                = self.tools.xmlFileToDict(self.macPackXmlConfFile)
 
-#        # File names (from a dict made from the macPack XML file)
-#        self.macPackFilesDict = {}
-#        for sections in self.macPackDict['root']['section'] :
-#            if sections['sectionID'] == 'Files' :
-#                for section in sections :
-#                    secItem = sections[section]
-#                    if type(secItem) is list :
-#                        for f in secItem :
-#                            self.macPackFilesDict[f['moduleID']] = self.proj_config.processNestedPlaceholders(f['fileName'])
+        # Some vars that are handled separately
+        if self.proj_config.macPack :
+            self.macPack                = self.proj_config.macPack
+            # File names
+            self.macPackFileName        = self.macPack + '.zip'
+            # Folder paths
+            self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macPack)
+            # File names with paths
+            self.macPackXmlConfFile     = self.proj_config.macPackXmlConfFile
+            self.rapumaMacPackFile      = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+            self.macPackConfig          = self.proj_config.macPackConfig
 
         # Log messages for this module
         self.errorCodes     = {
@@ -96,44 +83,101 @@ class ProjMacro (object) :
             'MCRO-060' : ['ERR', 'Macro file not found: [<<1>>]'],
             '1000' : ['MSG', 'Placeholder message'],
 
-            '0250' : ['ERR', 'Failed to install macro package: [<<1>>]']
+            '1100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. Use force (-f) to reinstall.'],
+            '1250' : ['ERR', 'Failed to install macro package: [<<1>>]'],
+
+            '2100' : ['MSG', 'Force set to True. Removed macro package configuration file: [<<1>>]'],
+            '2200' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.']
 
         }
-
 
 
 ###############################################################################
 ################################ Add Functions ################################
 ###############################################################################
-######################## Error Code Block Series = 0200 #######################
+######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def addMacPack (self, force = False) :
-        '''Add a macro package to the project.'''
+#    def initMacPackVals (self) :
+#        '''It is necessary to be able to call this at different times during
+#        the process to initialize these values.'''
 
-        if os.path.exists(self.projMacPackFolder) and force :
-            self.removeMacPack(force)
+#        self.macPack                = self.proj_config.macPack
+#        # File names
+#        self.macPackFileName        = self.macPack + '.zip'
+#        # Folder paths
+#        self.projMacPackFolder      = os.path.join(self.local.projMacrosFolder, self.macPack)
+#        # File names with paths
+#        self.macPackXmlConfFile     = self.proj_config.macPackXmlConfFile
+#        self.rapumaMacPackFile      = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+#        self.macPackConfig          = self.proj_config.macPackConfig
 
-        if not self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
-            self.log.writeToLog(self.errorCodes['0250'], [self.macPack])
+
+#    def addMacPack (self, package, force = False) :
+#        '''Add a macro package to the project. If force is set to True
+#        remove the old macPack and install. Otherwise, do not touch
+#        the existing macPack.'''
+
+#        import pdb; pdb.set_trace()
+
+#        # Set the projConf to the new/same package
+#        self.projConfig['CompTypes'][self.Ctype]['macroPackage'] = package
+#        self.tools.writeConfFile(self.projConfig)
+
+#        # Re-init to be sure all the settings are right
+#        self.__init__(self.pid, self.gid)
+
+#        # Clear out existing macPack (but not conf file)
+#        if os.path.exists(self.projMacPackFolder) :
+#            if force :
+#                self.removeMacPack(package)
+#            else :
+#                self.log.writeToLog(self.errorCodes['1100'], [package])
+
+#        # If we got this far, install the a fresh copy of the macPack
+#        if not self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
+#            self.log.writeToLog(self.errorCodes['1250'], [self.macPack])
 
 
 ###############################################################################
 ############################## Remove Functions ###############################
 ###############################################################################
-######################## Error Code Block Series = 0400 #######################
+######################## Error Code Block Series = 2000 #######################
 ###############################################################################
 
-    def removeMacPack (self, package, force = False) :
-        '''Remove a macro package from a project.'''
+#    def removeMacPack (self, package, force = False) :
+#        '''Remove a macro package from a project. Using this will break a project
+#        as installed font information will be lost from the macro config file
+#        when it is deleted if force is used. However, there may be times this
+#        is necessary. If force is not used it will retain the macro config file.
+#        This is useful when you want to freshen the macro package but bad in
+#        that custom style and TeX code.'''
 
-        return True
+#        # Set names and path for specified package
+#        macPackConfFile     = os.path.join(self.local.projConfFolder, package + '.conf')
+#        macPackFolder       = os.path.join(self.proj_config.projMacrosFolder, package)
 
+#        # Remove the macPack config file if required
+#        if os.path.exists(macPackConfFile) and force :
+#            os.remove(macPackConfFile)
+#            self.log.writeToLog(self.errorCodes['2100'], [self.tools.fName(macPackConfFile)])
+
+#        # Now remove the macro folder (with all its contents)
+#        if os.path.exists(macPackFolder) :
+#            shutil.rmtree(macPackFolder)
+#            self.log.writeToLog(self.errorCodes['2200'], [package])
+
+#        # Remove the reference for this macro package from any component type
+#        # that uses it. Normally that would probably be just be one of them.
+#        for comp in self.projConfig['CompTypes'].keys() :
+#            if self.projConfig['CompTypes'][comp]['macroPackage'] == package :
+#                self.projConfig['CompTypes'][comp]['macroPackage'] = ''
+#                self.tools.writeConfFile(self.projConfig)
 
 ###############################################################################
 ############################## Update Functions ###############################
 ###############################################################################
-######################## Error Code Block Series = 0600 #######################
+######################## Error Code Block Series = 3000 #######################
 ###############################################################################
 
     def updateMacPack (self, package, force = False) :
@@ -145,7 +189,7 @@ class ProjMacro (object) :
 ###############################################################################
 ########################### TeX Handling Functions ############################
 ###############################################################################
-######################## Error Code Block Series = 0800 #######################
+######################## Error Code Block Series = 4000 #######################
 ###############################################################################
 
 
@@ -155,7 +199,7 @@ class ProjMacro (object) :
 ###############################################################################
 ######################## User Macro Handling Functions ########################
 ###############################################################################
-######################## Error Code Block Series = 1000 #######################
+######################## Error Code Block Series = 5000 #######################
 ###############################################################################
 
 # FIXME: All the code below is not currently working, needs rewriting

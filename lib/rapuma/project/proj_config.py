@@ -91,9 +91,12 @@ class ProjConfig (object) :
         # Log messages for this module
         self.errorCodes     = {
 
-            '1000' : ['MSG', 'Placeholder message'],
-
-            '2000' : ['MSG', 'Placeholder message'],
+            '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. Use force (-f) to reinstall.'],
+            '3200' : ['ERR', 'Failed to install macro package: [<<1>>]'],
+            '3300' : ['MSG', 'Install macro package: [<<1>>], Reinitialized [<<2>>]'],
+            '3400' : ['MSG', 'Force set to True. Removed macro package configuration file: [<<1>>]'],
+            '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
+            '3600' : ['MSG', 'Updated macro package [<<1>>]']
 
         }
 
@@ -103,49 +106,55 @@ class ProjConfig (object) :
         functions in this module.'''
 
 #        import pdb; pdb.set_trace()
-#        self.configTools                    = ProjConfig(self.pid, self.gid)
         self.csid                           = self.projConfig['Groups'][self.gid]['csid']
         self.cType                          = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                          = self.cType.capitalize()
-        self.macPack                        = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
         self.sourcePath                     = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-        # File Names
-        self.macPackXmlConfFileName         = self.macPack + '.xml'
-        self.macPackConfFileName            = self.macPack + '.conf'
-        self.macPackFileName                = self.macPack + '.zip'
         # Folder paths
         self.projComponentsFolder           = self.local.projComponentsFolder
         self.projFontsFolder                = self.local.projFontsFolder
         self.projMacrosFolder               = self.local.projMacrosFolder
         self.projHyphenationFolder          = self.local.projHyphenationFolder
-        self.projMacPackFolder              = os.path.join(self.local.projMacrosFolder, self.macPack)
         self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
         self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
-        # File names with paths
-        self.macPackConfFile                = os.path.join(self.projConfFolder, self.macPackConfFileName)
-        self.macPackXmlConfFile             = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
-        self.rapumaMacPackFile              = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
-        # Load the macro package config
-        if not os.path.exists(self.macPackXmlConfFile) :
-            self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile)
+        # Handle macPack data separately
+        self.macPack                        = None
+        if self.projConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+            self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        if self.macPack :
+            # File Names
+            self.macPackXmlConfFileName     = self.macPack + '.xml'
+            self.macPackConfFileName        = self.macPack + '.conf'
+            self.macPackFileName            = self.macPack + '.zip'
+            # Folder
+            self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
 
-        self.macPackConfig                  = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
+            # File names with paths
+            self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+            self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
+            self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+            # Load the macro package config
+            if not os.path.exists(self.macPackXmlConfFile) :
+                self.addMacPack(self.macPack)
+#                self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile)
 
-        # File names (from a dict made from the macPack XML file)
-        # This is used in other modules so we make it a more portable dict format
-        self.macPackDict                    = self.tools.xmlFileToDict(self.macPackXmlConfFile)
-        self.macPackFilesDict = {}
-        for sections in self.macPackDict['root']['section'] :
-            if sections['sectionID'] == 'Files' :
-                for section in sections :
-                    secItem = sections[section]
-                    if type(secItem) is list :
-                        for f in secItem :
-                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+            self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
-        # Add these file names for this module here
-        for k, v in self.macPackFilesDict.iteritems() :
-            setattr(self, k, v)
+            # File names (from a dict made from the macPack XML file)
+            # This is used in other modules so we make it a more portable dict format
+            self.macPackDict                = self.tools.xmlFileToDict(self.macPackXmlConfFile)
+            self.macPackFilesDict = {}
+            for sections in self.macPackDict['root']['section'] :
+                if sections['sectionID'] == 'Files' :
+                    for section in sections :
+                        secItem = sections[section]
+                        if type(secItem) is list :
+                            for f in secItem :
+                                self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+
+            # Add these file names for this module here
+            for k, v in self.macPackFilesDict.iteritems() :
+                setattr(self, k, v)
 
 
 ###############################################################################
@@ -319,6 +328,97 @@ class ProjConfig (object) :
         '''Return the value with the specified measurement unit attached.'''
         
         return self.layoutConfig['GeneralSettings']['measurementUnit']
+
+
+###############################################################################
+###################### Macro Package Handling Functions #######################
+###############################################################################
+######################## Error Code Block Series = 3000 #######################
+###############################################################################
+
+    def addMacPack (self, package, force = False) :
+        '''Add a macro package to the project. If force is set to True
+        remove the old macPack and install. Otherwise, do not touch
+        the existing macPack.'''
+
+#        import pdb; pdb.set_trace()
+
+        # Set the projConf to the new/same package
+        self.projConfig['CompTypes'][self.Ctype]['macroPackage'] = package
+        self.tools.writeConfFile(self.projConfig)
+
+        # Recreate some necessary values
+        self.macPackFileName            = package + '.zip'
+        self.macPackXmlConfFileName     = package + '.xml'
+        self.macPackConfFileName        = package + '.conf'
+        self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+        self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, package, self.macPackXmlConfFileName)
+        self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+        self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, package)
+
+
+        # Update existing macPack (but not conf file)
+        if os.path.exists(self.projMacPackFolder) :
+            self.updateMacPack(package, force)
+
+        # If we got this far, install the a fresh copy of the macPack
+        self.installMacPackOnly(package)
+        self.macPackConfig = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
+        self.log.writeToLog(self.errorCodes['3300'], [package,self.macPackConfFileName])
+
+
+    def removeMacPack (self, package, force = False) :
+        '''Remove a macro package from a project. Using this will break a project
+        as installed font information will be lost from the macro config file
+        when it is deleted if force is used. However, there may be times this
+        is necessary. If force is not used it will retain the macro config file.
+        This is useful when you want to freshen the macro package but bad in
+        that custom style and TeX code.'''
+
+        # Set names and path for specified package
+        macPackConfFile     = os.path.join(self.local.projConfFolder, package + '.conf')
+        macPackFolder       = os.path.join(self.projMacrosFolder, package)
+
+        # Remove the macPack config file if required
+        if os.path.exists(macPackConfFile) and force :
+            os.remove(macPackConfFile)
+            self.log.writeToLog(self.errorCodes['3400'], [self.tools.fName(macPackConfFile)])
+
+        # Now remove the macro folder (with all its contents)
+        if os.path.exists(macPackFolder) :
+            shutil.rmtree(macPackFolder)
+            self.log.writeToLog(self.errorCodes['3500'], [package])
+
+        # Remove the reference for this macro package from any component type
+        # that uses it. Normally that would probably be just be one of them.
+        for comp in self.projConfig['CompTypes'].keys() :
+            if self.projConfig['CompTypes'][comp]['macroPackage'] == package :
+                self.projConfig['CompTypes'][comp]['macroPackage'] = ''
+                self.tools.writeConfFile(self.projConfig)
+
+
+    def updateMacPack (self, package, force = False) :
+        '''Update a macro package with the latest version from Rapuma
+        but do not touch the config file. Force must be used.'''
+
+        if force :
+            self.installMacPackOnly(package)
+            self.log.writeToLog(self.errorCodes['3600'], [package])
+        else :
+            self.log.writeToLog(self.errorCodes['3100'], [package])
+
+
+    def installMacPackOnly (self, package) :
+        '''Install macro package.'''
+
+        if self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
+            return True
+        else :
+            self.log.writeToLog(self.errorCodes['3200'], [package])
+            return False
+
+
+
 
 
 
