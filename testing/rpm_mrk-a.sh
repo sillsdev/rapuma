@@ -22,12 +22,21 @@ rpm group KYU-MYMR-MRKA Mark preprocess add
 # Turn on hyphenation for Mark group
 rpm group KYU-MYMR-MRKA Mark hyphenation add
 
+# Install the correct macro package for this job
+rpm package KYU-MYMR-MRKA Mark ptx2pdf macro remove --force
+rpm package KYU-MYMR-MRKA Mark usfmTex macro add
+
+# Install and switch font (Padauk 2.95 has a bug)
+rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font add
+rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font primary --force
+rpm package KYU-MYMR-MRKA Mark Padauk_2.95 font remove --force
+
 # Turn on font features in Padauk & adjust default settings
-rpm settings KYU-MYMR-MRKA usfmTex Fonts useRenderingSystem GR
-rpm settings KYU-MYMR-MRKA usfmTex Fonts useLanguage kyu
-rpm settings KYU-MYMR-MRKA usfmTex Fonts useMapping kye_renumber
-rpm settings KYU-MYMR-MRKA usfmTex Fonts fontSizeUnit 0.82pt
-rpm settings KYU-MYMR-MRKA usfmTex Fonts lineSpacingFactor 1.3
+rpm settings KYU-MYMR-MRKA usfmTex FontSettings useRenderingSystem GR
+rpm settings KYU-MYMR-MRKA usfmTex FontSettings useLanguage kyu
+rpm settings KYU-MYMR-MRKA usfmTex FontSettings useMapping kye_renumber
+rpm settings KYU-MYMR-MRKA usfmTex FontSettings fontSizeUnit 0.82pt
+rpm settings KYU-MYMR-MRKA usfmTex FontSettings lineSpacingFactor 1.3
 
 # Adjust the publication format
 rpm settings KYU-MYMR-MRKA usfmTex TeXBehavior vFuzz 4.8pt
@@ -45,11 +54,6 @@ cp ~/Publishing/testArea/KYUM/resources/usfmTex-ext.sty ~/Publishing/testArea/KY
 
 # Now update the text so the customized (edited) prprocess is used
 rpm group KYU-MYMR-MRKA Mark group update --force
-
-# Install and switch font (Padauk 2.95 has a bug)
-rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font add
-rpm package KYU-MYMR-MRKA Mark Padauk_2.701 font primary --force
-rpm package KYU-MYMR-MRKA Mark Padauk_2.95 font remove --force
 
 # Render the component
 rpm group KYU-MYMR-MRKA Intro group draft

@@ -25,7 +25,6 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.paratext               import Paratext
 from rapuma.group.group                 import Group
 from rapuma.project.proj_font           import ProjFont
-from rapuma.project.proj_macro          import ProjMacro
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_config         import ProjConfig
 from rapuma.project.proj_background     import ProjBackground
@@ -60,7 +59,6 @@ class Usfm (Group) :
         self.tools                  = Tools()
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
-        self.proj_macro             = ProjMacro(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = ProjConfig(self.pid, self.gid)
         self.pg_background          = ProjBackground(self.pid, self.gid)

@@ -76,7 +76,7 @@ class ProjFont (object) :
             '0010' : ['LOG', 'Wrote out new font configuration (font.__init__())'],
 
             '1220' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted.'],
-            '1235' : ['LOG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+            '1235' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
             '1240' : ['ERR', 'Font bundle file [<<1>>] not found.'],
             '1241' : ['ERR', 'Font bundle [<<1>>] not found.'],
             '1245' : ['LOG', '<<1>> font setup information added to project config'],
@@ -88,6 +88,8 @@ class ProjFont (object) :
             '1380' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - proj_font.removeFont()'],
             '1382' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - proj_font.removeFont()'],
             '1385' : ['ERR', 'Could not remove! The [<<1>>] font is not listed in the configuration settings.'],
+            '1390' : ['MSG', 'Force was set to true, removed the [<<1>>] font package.'],
+            '1395' : ['MSG', 'Could not remove the [<<1>>] font package. It may be used by another group. Use force (-f) to remove the package from the font folder.'],
 
             '2430' : ['ERR', 'Font [<<1>>] is already the primary font for the [<<2>>] component type.'],
             '2432' : ['MSG', 'Force switch was set (-f). Forced font [<<1>>] to be the primary font for the [<<2>>] component type.'],
@@ -190,7 +192,7 @@ class ProjFont (object) :
         else :
             # If force was set, remove the exsisting font info if it is there
             if force :
-                self.removeFontPack(font)
+                self.removeFontPack(font, True)
 
         # (Re)Inject the font info into the macPack config file.
         fInfo = self.tools.getXMLSettings(metaDataSource)
@@ -287,20 +289,25 @@ class ProjFont (object) :
                     return True
 
 
-    def removeFontPack (self, font) :
+    def removeFontPack (self, font, force = False) :
         '''Remove a font from a component type which will virtually disconnect 
         it from the calling component type. However, if the force switch is set,
         then remove the font, regardless as to if it is used by another component
         or not. This is useful for purging a font from a project but should be
         used with care.'''
 
-        if self.macPackConfig['Fonts'].has_key(font) :
+        # First purge the font if force is set
+        if force :
             fontDir = os.path.join(self.local.projFontsFolder, font)
-            del self.macPackConfig['Fonts'][font]
             if os.path.exists(fontDir) :
                 shutil.rmtree(fontDir)
-            self.log.writeToLog(self.errorCodes['1380'], [font,self.Ctype])
+                self.log.writeToLog(self.errorCodes['1390'], [font])
+        else :
+            self.log.writeToLog(self.errorCodes['1395'], [font])
 
+        if self.macPackConfig['Fonts'].has_key(font) :
+            del self.macPackConfig['Fonts'][font]
+            self.log.writeToLog(self.errorCodes['1380'], [font,self.Ctype])
             # Adjust installed fonts list if needed
             primFont = self.macPackConfig['FontSettings']['primaryFont']
             # There has to be a primary font no matter what. If the font being

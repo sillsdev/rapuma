@@ -80,14 +80,6 @@ class ProjConfig (object) :
         self.tools_path                     = ToolsPath(self.local, self.projConfig, self.userConfig)
         self.tools_group                    = ToolsGroup(self.local, self.projConfig, self.userConfig)
 
-        # For a cleaner init we will test for gid
-        if gid :
-            self.finishInit()
-        else :
-            self.cType                      = ''
-            self.Ctype                      = ''
-            self.macPack                    = ''
-
         # Log messages for this module
         self.errorCodes     = {
 
@@ -100,61 +92,60 @@ class ProjConfig (object) :
 
         }
 
+        # Test for gid before trying to finish the init
+        if gid :
+            self.csid                           = self.projConfig['Groups'][self.gid]['csid']
+            self.cType                          = self.projConfig['Groups'][self.gid]['cType']
+            self.Ctype                          = self.cType.capitalize()
+            self.sourcePath                     = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
+            # Folder paths
+            self.projComponentsFolder           = self.local.projComponentsFolder
+            self.projFontsFolder                = self.local.projFontsFolder
+            self.projMacrosFolder               = self.local.projMacrosFolder
+            self.projHyphenationFolder          = self.local.projHyphenationFolder
+            self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
+            self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
+            # Handle macPack data separately
+            self.macPack                        = None
+            if self.projConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+                self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+            if self.macPack :
+                # File Names
+                self.macPackXmlConfFileName     = self.macPack + '.xml'
+                self.macPackConfFileName        = self.macPack + '.conf'
+                self.macPackFileName            = self.macPack + '.zip'
+                # Folder
+                self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
 
-    def finishInit (self) :
-        '''Finishing collecting settings that would be needed for most
-        functions in this module.'''
+                # File names with paths
+                self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+                self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
+                self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+                # Load the macro package config
+                if not os.path.exists(self.macPackXmlConfFile) :
+                    self.addMacPack(self.macPack)
 
-#        import pdb; pdb.set_trace()
-        self.csid                           = self.projConfig['Groups'][self.gid]['csid']
-        self.cType                          = self.projConfig['Groups'][self.gid]['cType']
-        self.Ctype                          = self.cType.capitalize()
-        self.sourcePath                     = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-        # Folder paths
-        self.projComponentsFolder           = self.local.projComponentsFolder
-        self.projFontsFolder                = self.local.projFontsFolder
-        self.projMacrosFolder               = self.local.projMacrosFolder
-        self.projHyphenationFolder          = self.local.projHyphenationFolder
-        self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
-        self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
-        # Handle macPack data separately
-        self.macPack                        = None
-        if self.projConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPack                    = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
-        if self.macPack :
-            # File Names
-            self.macPackXmlConfFileName     = self.macPack + '.xml'
-            self.macPackConfFileName        = self.macPack + '.conf'
-            self.macPackFileName            = self.macPack + '.zip'
-            # Folder
-            self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
+                self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
-            # File names with paths
-            self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
-            self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
-            self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
-            # Load the macro package config
-            if not os.path.exists(self.macPackXmlConfFile) :
-                self.addMacPack(self.macPack)
-#                self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile)
+                # File names (from a dict made from the macPack XML file)
+                # This is used in other modules so we make it a more portable dict format
+                self.macPackDict                = self.tools.xmlFileToDict(self.macPackXmlConfFile)
+                self.macPackFilesDict = {}
+                for sections in self.macPackDict['root']['section'] :
+                    if sections['sectionID'] == 'Files' :
+                        for section in sections :
+                            secItem = sections[section]
+                            if type(secItem) is list :
+                                for f in secItem :
+                                    self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
 
-            self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
-
-            # File names (from a dict made from the macPack XML file)
-            # This is used in other modules so we make it a more portable dict format
-            self.macPackDict                = self.tools.xmlFileToDict(self.macPackXmlConfFile)
-            self.macPackFilesDict = {}
-            for sections in self.macPackDict['root']['section'] :
-                if sections['sectionID'] == 'Files' :
-                    for section in sections :
-                        secItem = sections[section]
-                        if type(secItem) is list :
-                            for f in secItem :
-                                self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-
-            # Add these file names for this module here
-            for k, v in self.macPackFilesDict.iteritems() :
-                setattr(self, k, v)
+                # Add these file names for this module here
+                for k, v in self.macPackFilesDict.iteritems() :
+                    setattr(self, k, v)
+        else :
+            self.cType                      = ''
+            self.Ctype                      = ''
+            self.macPack                    = ''
 
 
 ###############################################################################
