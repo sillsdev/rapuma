@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r716'
+systemVersion   = '0.6.r717'
 local           = None
 
 # Give a welcome message
@@ -258,11 +258,11 @@ def userArguments (args) :
                         sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
             elif cmdType == 'cloud' :
                 if uc.userConfig['Projects'].has_key(pid) :
-                    ProjBackup(pid).pullFromCloud()
+                    ProjBackup(pid).pullFromCloud(args.force)
                 else :
                     if args.target_path :
                         if os.path.exists(tools.resolvePath(args.target_path)) :
-                            ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid))
+                            ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid), args.force)
                         else :
                             sys.exit('\nERROR: Path is not valid. Process halting.\n')
                     else :
@@ -277,7 +277,7 @@ def userArguments (args) :
             elif cmdType == 'backup' :
                 ProjBackup(pid).backupProject()
             elif cmdType == 'cloud' :
-                ProjBackup(pid).pushToCloud()
+                ProjBackup(pid).pushToCloud(args.force)
             elif cmdType == 'template' :
                 if isTemplate(args.template) :
                     sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')

@@ -38,7 +38,14 @@ Todo:
             <key>userName</key>
             <description>The name of the person using this system.</description>
             <type>string</type>
-            <value>Default User</value>
+            <value></value>
+        </setting>
+        <setting>
+            <name>User Identification</name>
+            <key>userID</key>
+            <description>The identification tag of the person using this system.</description>
+            <type>string</type>
+            <value></value>
         </setting>
         <setting>
             <name>Interface Language ID Code</name>
