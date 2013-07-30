@@ -45,6 +45,13 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Creator Identification</name>
+            <key>creatorID</key>
+            <description>The ID of the user who created this project.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Rapuma Creator Version</name>
             <key>projectCreatorVersion</key>
             <description>The version of Rapuma that last worked with, or created this project.</description>
@@ -97,6 +104,25 @@ Todo:
             <name>Publication Finish Date</name>
             <key>finishDate</key>
             <description>The date this publication was finished.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
+    <section>
+        <name>Project Backup Information</name>
+        <sectionID>Backup</sectionID>
+        <description>This section contains information about project backup routines like cloud pushes, backups, templates and archives.</description>
+        <setting>
+            <name>Owner Identification</name>
+            <key>ownerID</key>
+            <description>The user ID code of the owner of the backup data. Only one user can own a project at a time.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Owner Identification</name>
+            <key>lastCloudPush</key>
+            <description>A time stamp of when the project was last pushed to the cloud.</description>
             <type>string</type>
             <value></value>
         </setting>

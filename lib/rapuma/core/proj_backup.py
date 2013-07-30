@@ -554,53 +554,15 @@ class ProjBackup (object) :
         self.registerProject(self.pid)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def isNewerThanCloud (self, cloud, projConfig) :
         '''Compare time stamps between the cloud and the local project.
-        Return True if the local project is newer than the copy in the
-        cloud.'''
+        Return True if the local project is newer or the same age as
+        the copy in the cloud.'''
 
-        # If this project has not pushed to the cloud, return
-        # false so the user thinks about what they are doing.
-        if not projConfig.has_key('Cloud') :
-            return False
-
-        if getCloudConfig(cloud) :
-            # If it doesn't have a cloud section, it is older.
-            if not cnf.has_key('Cloud') :
-                return True
-
-
-        # If we made it this far, do the compare
-
-
-
-
-# FIXME: Working here!
-
-
-
-
-
-
-
-
-
-
-
+        cStamp = self.getCloudConfig(cloud)['Backup']['lastCloudPush']
+        pStamp = projConfig['Backup']['lastCloudPush']
+        if pStamp >= cStamp :
+            return True
 
 
     def getCloudConfig (self, cloud) :
@@ -615,20 +577,19 @@ class ProjBackup (object) :
         '''Return True if the owner of a given cloud is the same as
         the system user.'''
 
-        if getCloudConfig(cloud) :
-            if cnf.has_key('Cloud') :
-                cloudOwnerID = cnf['Cloud']['ownerID']
-                projOwnerID = self.userConfig['System']['userID']
-                if cloudOwnerID == projOwnerID :
-                    return True
+        try :
+            cloudOwnerID = self.getCloudConfig(cloud)['Backup']['ownerID']
+            projOwnerID = self.userConfig['System']['userID']
+            if cloudOwnerID == projOwnerID :
+                return True
+        except :
+            return False
 
 
     def setCloudPushTime (self, projConfig) :
         '''Set/reset the lastPush time stamp setting.'''
 
-        if not projConfig.has_key('Cloud') :
-            self.tools.buildConfSection(projConfig, 'Cloud')
-        projConfig['Cloud']['lastPush'] = self.tools.fullFileTimeStamp()
+        projConfig['Backup']['lastCloudPush'] = self.tools.fullFileTimeStamp()
         self.tools.writeConfFile(projConfig)
 
 
@@ -638,9 +599,7 @@ class ProjBackup (object) :
         the next time the project is pushed to the cloud, you will own it.'''
 
         projOwnerID = self.userConfig['System']['userID']
-        if not projConfig.has_key('Cloud') :
-            self.tools.buildConfSection(projConfig, 'Cloud')
-        projConfig['Cloud']['ownerID'] = projOwnerID
+        projConfig['Backup']['ownerID'] = projOwnerID
         self.tools.writeConfFile(projConfig)
 
 

@@ -162,6 +162,7 @@ class ProjConfig (object) :
         # Insert intitial project settings
         self.projConfig['ProjectInfo']['projectMediaIDCode']        = pmid
         self.projConfig['ProjectInfo']['projectName']               = pname
+        self.projConfig['ProjectInfo']['creatorID']                 = self.userConfig['System']['userID']
         self.projConfig['ProjectInfo']['projectCreatorVersion']     = cVersion
         self.projConfig['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         self.projConfig['ProjectInfo']['projectIDCode']             = pid

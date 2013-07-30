@@ -465,7 +465,6 @@ class ProjSetup (object) :
         # Load a couple necessary modules
         self.local              = ProjLocal(self.pid)
 
-
         # Run some basic tests to see if this project can be created
         # Look for project in current folder
         if not os.path.isfile(self.local.projConfFile) :
