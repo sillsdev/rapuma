@@ -35,7 +35,9 @@ class ProjLocal (object) :
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
+        self.projHome           = ''
+        if self.userConfig['Projects'].has_key(pid) :
+            self.projHome       = self.userConfig['Projects'][pid]['projectPath']
         self.tools              = Tools()
 
 # FIXME: Do we want to change the way we do this and add file names and
@@ -79,10 +81,11 @@ class ProjLocal (object) :
         self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
         self.userConfFileName       = 'rapuma.conf'
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
-        self.projLogFileName        = 'rapuma.log'
-        self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
-        self.projErrorLogFileName   = 'error.log'
-        self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
+        if self.projHome :
+            self.projLogFileName        = 'rapuma.log'
+            self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
+            self.projErrorLogFileName   = 'error.log'
+            self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :

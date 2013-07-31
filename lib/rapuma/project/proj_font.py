@@ -52,7 +52,7 @@ class ProjFont (object) :
         self.Ctype                          = self.cType.capitalize()
         self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         # Get our component sourceEditor
-        self.sourceEditor                   = self.pt_tools.getSourceEditor()
+#        self.sourceEditor                   = self.pt_tools.getSourceEditor()
         # The first time this is initialized make sure we have a FontSettings section
         if not self.macPackConfig.has_key('FontSettings') :
             self.tools.buildConfSection(self.macPackConfig, 'FontSettings')

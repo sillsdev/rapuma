@@ -39,11 +39,11 @@ class ProjConfig (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = self.userConfig['Projects'][self.pid]['projectPath']
-        self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                          = ProjLocal(self.pid)
+        self.projHome                       = self.userConfig['Projects'][pid]['projectPath']
+        self.mType                          = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
-        self.log                            = ProjLog(self.pid)
+        self.log                            = ProjLog(pid)
         # File names
         self.projConfFileName               = 'project.conf'
         self.progConfXmlFileName            = self.mType + '.xml'
@@ -94,10 +94,9 @@ class ProjConfig (object) :
 
         # Test for gid before trying to finish the init
         if gid :
-            self.csid                           = self.projConfig['Groups'][self.gid]['csid']
-            self.cType                          = self.projConfig['Groups'][self.gid]['cType']
+            self.csid                           = self.projConfig['Groups'][gid]['csid']
+            self.cType                          = self.projConfig['Groups'][gid]['cType']
             self.Ctype                          = self.cType.capitalize()
-            self.sourcePath                     = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
             # Folder paths
             self.projComponentsFolder           = self.local.projComponentsFolder
             self.projFontsFolder                = self.local.projFontsFolder
@@ -105,6 +104,11 @@ class ProjConfig (object) :
             self.projHyphenationFolder          = self.local.projHyphenationFolder
             self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
             self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
+            # Just in case source path has not been defined
+            try :
+                self.sourcePath                 = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
+            except :
+                self.sourcePath                 = ''
             # Handle macPack data separately
             self.macPack                        = None
             if self.projConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
@@ -166,6 +170,9 @@ class ProjConfig (object) :
         self.projConfig['ProjectInfo']['projectCreatorVersion']     = cVersion
         self.projConfig['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         self.projConfig['ProjectInfo']['projectIDCode']             = pid
+        self.projConfig['Backup']['ownerID']                        = self.userConfig['System']['userID']
+        # Even though there was no push, we need a time stamp to avoid confusion
+        self.projConfig['Backup']['lastCloudPush']                  = self.tools.fullFileTimeStamp()
         self.projConfig.filename                                    = local.projConfFile
         self.projConfig.write()
 

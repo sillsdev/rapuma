@@ -53,11 +53,17 @@ class ProjBackup (object) :
             '0630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
             '4110' : ['MSG', 'Completed pushing/saving data to the cloud.'],
-            '4120' : ['ERR', 'No files updated.'],
-            '4130' : ['ERR', 'Added: <<1>> file(s).'],
-            '4140' : ['ERR', 'Updated: <<1>> file(s)'],
-            '4150' : ['ERR', 'The cloud project [<<1>>] you want to push to is not owned by you. Use force (-f) to change the owner to your user ID.'],
-            '4160' : ['ERR', 'The cloud project [<<1>>] is newer than the local copy. If you seriously want to overwrite it, use force (-f) to do so.']
+            '4120' : ['MSG', 'No files updated.'],
+            '4130' : ['MSG', 'Added: <<1>> file(s).'],
+            '4140' : ['MSG', 'Updated: <<1>> file(s)'],
+            '4150' : ['ERR', 'The cloud project [<<1>>] you want to push to is owned by [<<2>>]. Use force (-f) to change the owner to your user ID.'],
+            '4160' : ['ERR', 'The cloud project [<<1>>] is newer than the local copy. If you seriously want to overwrite it, use force (-f) to do so.'],
+
+            '4210' : ['MSG', 'Completed pulling/restoring data from the cloud.'],
+            '4220' : ['ERR', 'Cannot resolve provided path: [<<1>>]'],
+            '4250' : ['ERR', 'The cloud project [<<1>>] you want to pull from is owned by [<<2>>]. Use force (-f) to pull the project and change the local owner ID.'],
+            '4260' : ['ERR', 'The local project [<<1>>] is newer than the cloud copy. If you seriously want to overwrite it, use force (-f) to do so.'],
+            '4270' : ['MSG', 'Restored the project [<<1>>] from the cloud copy. Local copy is owned by [<<2>>].']
 
         }
 
@@ -75,7 +81,7 @@ class ProjBackup (object) :
         # Testing: The local project home wins over a user provided one
         if localProjHome :
             self.projHome   = localProjHome
-        elif projHome :
+        elif self.projHome :
             self.projHome   = projHome
 
         # If a projHome was succefully found, we can go on
@@ -91,14 +97,12 @@ class ProjBackup (object) :
 ###############################################################################
 
 
-    def registerProject (self, pid) :
+    def registerProject (self, projHome) :
         '''Do a basic project registration with information available in a
-        project backup.'''
+        project config file found in projHome.'''
 
-        # If this is a new project to the system, we should have a projHome
-        # by now so we can try to get the projConfig now
-        self.local          = ProjLocal(pid)
-        projConfig          = ProjConfig(pid).projConfig
+        pid                 = os.path.basename(projHome)
+        projConfig          = self.getConfig(projHome)
 
         if len(projConfig) :
             pName           = projConfig['ProjectInfo']['projectName']
@@ -109,7 +113,7 @@ class ProjBackup (object) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
                 self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
-                self.userConfig['Projects'][pid]['projectPath']         = self.projHome
+                self.userConfig['Projects'][pid]['projectPath']         = projHome
                 self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
                 self.tools.writeConfFile(self.userConfig)
             else :
@@ -509,63 +513,41 @@ class ProjBackup (object) :
 ###############################################################################
 
 
-    def pullFromCloud (self, projHome = None, force = False) :
-        '''Pull data from cloud storage and merge/replace local data.
-        Do a full backup first before starting the actual pull operation.'''
-
-        # In case there was not enough info at init time
-        if projHome :
-            self.finishInit(projHome)
-
-        # Do not do anything until we have done a backup
-        self.backupProject()
-
-        # Get the paths we need
-        cloud               = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
-
-        # Get a total list of files from the project
-        cn = 0
-        cr = 0
-        for folder, subs, files in os.walk(cloud):
-            for fileName in files:
-                if not os.path.isdir(folder.replace(cloud, self.projHome)) :
-                    os.makedirs(folder.replace(cloud, self.projHome))
-                cFile = os.path.join(folder, fileName)
-                pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
-                if not os.path.isfile(pFile) :
-                    shutil.copy(cFile, pFile)
-                    cn +=1
-                elif self.tools.isOlder(pFile, cFile) :
-                    if os.path.isfile(pFile) :
-                        os.remove(pFile)
-                    shutil.copy(cFile, pFile)
-                    cr +=1
-        # Report what happened
-        self.tools.terminal('\nCompleted pulling data from the cloud.\n')
-        if cn == 0 and cr == 0 :
-            self.tools.terminal('\tNo files updated.\n')
-        else :
-            if cn > 0 :
-                self.tools.terminal('\tAdded: ' + str(cn) + ' file(s).\n')
-            if cr > 0 :
-                self.tools.terminal('\tUpdated: ' + str(cr) + ' file(s).\n')
-
-        # If this is a new project we will need to register it now
-        self.registerProject(self.pid)
-
-
     def isNewerThanCloud (self, cloud, projConfig) :
         '''Compare time stamps between the cloud and the local project.
         Return True if the local project is newer or the same age as
-        the copy in the cloud.'''
+        the copy in the cloud. Return True if the project does not
+        exist in the local copy of the cloud.'''
 
-        cStamp = self.getCloudConfig(cloud)['Backup']['lastCloudPush']
-        pStamp = projConfig['Backup']['lastCloudPush']
-        if pStamp >= cStamp :
+        # First see if it exists
+        cConfig = self.getConfig(cloud)
+        if not cConfig :
+            return True
+        # Compare if we made it this far
+        cStamp = cConfig['Backup']['lastCloudPush']
+        lStamp = projConfig['Backup']['lastCloudPush']
+        if lStamp >= cStamp :
             return True
 
 
-    def getCloudConfig (self, cloud) :
+    def isNewerThanLocal (self, cloud, projConfig) :
+        '''Compare time stamps between the cloud and the local project.
+        Return True if the cloud project is newer or the same age as
+        the local copy. Return True if the project does not exist in
+        as a local copy.'''
+
+        # First see if the local exists
+        if not projConfig :
+            return True
+
+        # Compare if we made it this far
+        cStamp = self.getConfig(cloud)['Backup']['lastCloudPush']
+        pStamp = projConfig['Backup']['lastCloudPush']
+        if cStamp >= pStamp :
+            return True
+
+
+    def getConfig (self, cloud) :
         '''Return a valid config object from cloud project.'''
 
         projCloudConfig = os.path.join(cloud, 'Config', 'project.conf')
@@ -573,17 +555,29 @@ class ProjBackup (object) :
             return ConfigObj(projCloudConfig, encoding='utf-8')
 
 
+    def getCloudOwner (self, cloud) :
+        '''Return the owner of a specified cloud project.'''
+
+        return self.getConfig(cloud)['Backup']['ownerID']
+
+
+    def getLocalOwner (self) :
+        '''Return the owner of a specified cloud project.'''
+
+        return self.userConfig['System']['userID']
+
+
     def sameOwner (self, cloud) :
         '''Return True if the owner of a given cloud is the same as
-        the system user.'''
+        the system user. Also return True if the cloud owner is not
+        present.'''
 
-        try :
-            cloudOwnerID = self.getCloudConfig(cloud)['Backup']['ownerID']
-            projOwnerID = self.userConfig['System']['userID']
-            if cloudOwnerID == projOwnerID :
-                return True
-        except :
-            return False
+        # First check for existence
+        if not self.getCloudOwner(cloud) :
+            return True
+        # Compare if we made it to this point
+        if self.getCloudOwner(cloud) == self.getLocalOwner() :
+            return True
 
 
     def setCloudPushTime (self, projConfig) :
@@ -603,13 +597,22 @@ class ProjBackup (object) :
         self.tools.writeConfFile(projConfig)
 
 
+    def buyLocal (self, projConfig) :
+        '''Change the ownership on a local project by assigning your
+        userID to it.'''
+
+        projOwnerID = self.userConfig['System']['userID']
+        projConfig['Backup']['ownerID'] = projOwnerID
+        self.tools.writeConfFile(projConfig)
+
+
     def pushToCloud (self, force = False) :
         '''Push local project data to the cloud. If a file in the cloud is
         older than the project file, it will be sent. Otherwise, it will
         be skipped.'''
 
+        # Make a cloud reference
         cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
-        # Make a cloud
         if not os.path.isdir(cloud) :
             os.makedirs(cloud)
 
@@ -661,7 +664,7 @@ class ProjBackup (object) :
                 self.buyCloud(projConfig)
                 doPush(cloud)
             else :
-                self.log.writeToLog(self.errorCodes['4150'], [self.pid])
+                self.log.writeToLog(self.errorCodes['4150'], [self.pid, self.getCloudOwner(cloud)])
         else :
             if force :
                 self.setCloudPushTime(projConfig)
@@ -672,6 +675,76 @@ class ProjBackup (object) :
                     doPush(cloud)
                 else :
                     self.log.writeToLog(self.errorCodes['4160'], [self.pid])
+
+
+    def pullFromCloud (self, force = False, tPath = None) :
+        '''Pull data from cloud storage and merge/replace local data.
+        Do a full backup first before starting the actual pull operation.'''
+
+        # Make the cloud reference
+        cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+        # Make the project home reference
+        if tPath :
+            if self.tools.resolvePath(tPath) :
+                tPath = self.tools.resolvePath(tPath)
+                lastFolder = os.path.basename(tPath)
+                if lastFolder == self.pid :
+                    projHome = tPath
+                else :
+                    projHome = os.path.join(tPath, self.pid)
+            else :
+                self.log.writeToLog(self.errorCodes['4220'], [tPath])
+        elif self.projHome :
+            projHome = self.projHome
+        else :
+            projHome = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['projects'], self.pid))
+
+        def doPull () :
+            # Get a total list of files from the project
+            cn = 0
+            cr = 0
+            for folder, subs, files in os.walk(cloud):
+                for fileName in files:
+                    if not os.path.isdir(folder.replace(cloud, projHome)) :
+                        os.makedirs(folder.replace(cloud, projHome))
+                    cFile = os.path.join(folder, fileName)
+                    pFile = os.path.join(folder, fileName).replace(cloud, projHome)
+                    if not os.path.isfile(pFile) :
+                        shutil.copy(cFile, pFile)
+                        cn +=1
+                    elif self.tools.isOlder(pFile, cFile) :
+                        if os.path.isfile(pFile) :
+                            os.remove(pFile)
+                        shutil.copy(cFile, pFile)
+                        cr +=1
+            # Report what happened
+            self.log.writeToLog(self.errorCodes['4210'])
+            if cn == 0 and cr == 0 :
+                self.log.writeToLog(self.errorCodes['4120'])
+            else :
+                if cn > 0 :
+                    self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
+                if cr > 0 :
+                    self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
+
+        # This is a new project to this system
+        if not os.path.exists(projHome) :
+            shutil.copytree(cloud, projHome)
+            self.registerProject(projHome)
+            self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
+        # For anything else more testing will be needed
+        else :
+            if force :
+                doPull()
+                self.buyLocal(self.getConfig(projHome))
+            else :
+                if self.sameOwner(cloud) :
+                    if self.isNewerThanLocal(cloud, self.getConfig(projHome)) :
+                        doPull()
+                    else :
+                        self.log.writeToLog(self.errorCodes['4260'], [self.pid])
+                else :
+                    self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
 
 
 

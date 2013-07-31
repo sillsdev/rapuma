@@ -56,9 +56,6 @@ class Text (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        self.sourceEditor           = self.pt_tools.getSourceEditor()
-#        self.setSourceEditor(self.sourceEditor)
-
         # Get persistant values from the config if there are any
         newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
         if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
@@ -109,10 +106,12 @@ class Text (Manager) :
 
 #        import pdb; pdb.set_trace()
 
+        sourceEditor = self.pt_tools.getSourceEditor()
+
         # If the source editor is PT, then a lot of information can be
         # gleaned from the .ssf file. Otherwise we will go pretty much with
         # the defaults and hope for the best.
-        if self.sourceEditor.lower() == 'paratext' :
+        if sourceEditor.lower() == 'paratext' :
             # Do a compare on the settings
             ptSet = self.pt_tools.getPTSettings()
             oldCompSet = self.compSettings.dict()
@@ -131,7 +130,7 @@ class Text (Manager) :
                     setattr(self, k, v)
         # A generic editor means we really do not know where the text came
         # from. In that case, we just do the best we can.
-        elif self.sourceEditor.lower() == 'generic' :
+        elif sourceEditor.lower() == 'generic' :
             if not self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
                 not self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] :
                 self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
@@ -139,7 +138,7 @@ class Text (Manager) :
 
                 self.tools.writeConfFile(self.project.projConfig)
         else :
-            self.project.log.writeToLog('TEXT-010', [self.sourceEditor])
+            self.project.log.writeToLog('TEXT-010', [sourceEditor])
             self.tools.dieNow()
 
         return True

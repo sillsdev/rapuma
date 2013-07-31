@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r717'
+systemVersion   = '0.6.r718'
 local           = None
 
 # Give a welcome message
@@ -257,16 +257,7 @@ def userArguments (args) :
                     else :
                         sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
             elif cmdType == 'cloud' :
-                if uc.userConfig['Projects'].has_key(pid) :
-                    ProjBackup(pid).pullFromCloud(args.force)
-                else :
-                    if args.target_path :
-                        if os.path.exists(tools.resolvePath(args.target_path)) :
-                            ProjBackup(pid).pullFromCloud(os.path.join(tools.resolvePath(args.target_path), pid), args.force)
-                        else :
-                            sys.exit('\nERROR: Path is not valid. Process halting.\n')
-                    else :
-                        sys.exit('\nERROR: To get rain from this cloud, a target path must be provided with -t. Process halting.\n')
+                ProjBackup(pid).pullFromCloud(args.force, args.target_path)
             elif cmdType == 'template' :
                 ProjBackup(pid).templateToProject(args.name)
             else :
