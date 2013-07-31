@@ -44,13 +44,11 @@ class ProjBackup (object) :
         # Log messages for this module
         self.errorCodes     = {
 
-            '0000' : ['MSG', 'Placeholder message'],
-            '0220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
-            '0240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!'],
+            '1220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
+            '1240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!'],
 
-            '0610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
-            '0620' : ['ERR', 'User backup storage path not yet configured!'],
-            '0630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
+            '3610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
+            '3630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
             '4110' : ['MSG', 'Completed pushing/saving data to the cloud.'],
             '4120' : ['MSG', 'No files updated.'],
@@ -93,7 +91,7 @@ class ProjBackup (object) :
 ###############################################################################
 ############################## General Functions ##############################
 ###############################################################################
-####################### Error Code Block Series = 0200 ########################
+####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
 
@@ -117,18 +115,17 @@ class ProjBackup (object) :
                 self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
                 self.tools.writeConfFile(self.userConfig)
             else :
-                self.log.writeToLog(self.errorCodes['0220'], [pid])
+                self.log.writeToLog(self.errorCodes['1220'], [pid])
         else :
-            self.log.writeToLog(self.errorCodes['0240'], [pid])
+            self.log.writeToLog(self.errorCodes['1240'], [pid])
 
 
 
 ###############################################################################
 ########################## Archive Project Functions ##########################
 ###############################################################################
-####################### Error Code Block Series = 0400 ########################
+####################### Error Code Block Series = 2000 ########################
 ###############################################################################
-
 
     def makeExcludeFileList (self) :
         '''Return a list of files that are not necessary to be included in a backup
@@ -137,43 +134,23 @@ class ProjBackup (object) :
 
         excludeFiles        = []
         excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj', 'zip']
+        excludeFolders      = ['Backups', 'Proofs', 'Drafts', 'HelperScripts']
 
-        # Process the components folder
-        for root, dirs, files in os.walk(self.local.projComponentsFolder) :
+        # Process the excluded folders
+        for root, dirs, files in os.walk(self.local.projHome) :
             for fileName in files :
-                # Get rid of backup files
-                if fileName[-1] == '~' :
+                if os.path.basename(root) in excludeFolders :
                     excludeFiles.append(os.path.join(root, fileName))
-                    continue
-                ext = os.path.splitext(fileName)[1][1:]
-                if ext in excludeTypes :
-                    # A special indicator for file we want to keep
-                    if fileName.find('-ext.') > 0 :
+                else :
+                    # Get rid of edited backup files
+                    if fileName[-1] == '~' :
+                        excludeFiles.append(os.path.join(root, fileName))
                         continue
-                    excludeFiles.append(os.path.join(root, fileName))
-
-        # Special processing of the Macros folder (in this case we
-        # want to keep most of the .tex files.)
-        for root, dirs, files in os.walk(self.local.projMacrosFolder) :
-            # These are specific files in the macro folder we don't want
-            excludeFiles.append(os.path.join(root, 'macLink.tex'))
-            excludeFiles.append(os.path.join(root, 'settings.tex'))
-            # Now do a more general search
-            for fileName in files :
-                # Get rid of backup files
-                if fileName[-1] == '~' :
-                    excludeFiles.append(os.path.join(root, fileName))
-                    continue
-                ext = os.path.splitext(fileName)[1][1:]
-                if ext in excludeTypes :
-                    # A special indicator for file we want to keep
-                    if fileName.find('-ext.') > 0 :
-                        continue
-
-        # Exclude all PDFs from the Deliverables folder
-        for root, dirs, files in os.walk(self.local.projDeliverablesFolder) :
-            for fileName in files :
-                excludeFiles.append(os.path.join(root, fileName))
+                    ext = os.path.splitext(fileName)[1][1:]
+                    if ext in excludeTypes :
+                        # A special indicator for file we want to keep
+                        if fileName.find('-ext.') > 0 :
+                            continue
 
         return excludeFiles
 
@@ -246,6 +223,9 @@ class ProjBackup (object) :
         root_len = len(self.projHome)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
             for root, dirs, files in os.walk(self.projHome) :
+                # Do not include anything in the Backups folder
+                if os.path.basename(root) == 'Backups' :
+                    continue
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
                 for f in files :
@@ -321,33 +301,26 @@ class ProjBackup (object) :
 ###############################################################################
 ########################### Backup Project Functions ##########################
 ###############################################################################
-####################### Error Code Block Series = 0600 ########################
+####################### Error Code Block Series = 3000 ########################
 ###############################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: Working here
-
-
-
 
     def cullBackups (self) :
         '''Remove any excess backups from the backup folder in
         this project.'''
 
         files = os.listdir(self.local.projBackupFolder)
-        maxStoreBackups = ProjConfig(self.pid).projConfig['Backup']['maxStoreBackups']
-        
-        print maxStoreBackups, files
+        maxStoreBackups = int(ProjConfig(self.pid).projConfig['Backup']['maxStoreBackups'])
+        if not maxStoreBackups or maxStoreBackups == 0 :
+            maxStoreBackups = 1
+        # Build the cullList
+        cullList = []
+        for f in files :
+            cullList.append(int(f.split('.')[0]))
+        # Remove oldest file(s)
+        while len(cullList)+1 > maxStoreBackups :
+            fn = min(cullList)
+            cullList.remove(min(cullList))
+            os.remove(os.path.join(self.local.projBackupFolder, str(fn) + '.zip'))
 
 
     def backupProject (self) :
@@ -359,7 +332,7 @@ class ProjBackup (object) :
 
         # First see if this is even a valid project
         if not self.userConfig['Projects'].has_key(self.pid) :
-            self.log.writeToLog(self.errorCodes['0610'], [self.pid])
+            self.log.writeToLog(self.errorCodes['3610'], [self.pid])
 
         # Set some paths and file names
         projBackupFolder    = self.local.projBackupFolder
@@ -376,9 +349,25 @@ class ProjBackup (object) :
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
+
+
+
+
         # Finish here
-        self.log.writeToLog(self.errorCodes['0630'], [self.pid,backupTarget])
+        
+# FIXME: Write to proj conf the time stamp of this backup
+        
+        
+        self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupName])
         return True
+
+
+
+
+
+
+
+
 
 
     def restoreBackup (self, projHome = None) :
