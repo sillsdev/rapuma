@@ -72,6 +72,34 @@ Todo:
             <value>Deliverables</value>
         </setting>
         <setting>
+            <name>Project Proofs Folder</name>
+            <key>projProofsFolder</key>
+            <description>The folder were project proof files (rendered) items are kept.</description>
+            <type>string</type>
+            <value>Proofs</value>
+        </setting>
+        <setting>
+            <name>Project Drafts Folder</name>
+            <key>projDraftsFolder</key>
+            <description>The folder were project draft files (rendered) items are kept.</description>
+            <type>string</type>
+            <value>Drafts</value>
+        </setting>
+        <setting>
+            <name>Project Styles Folder</name>
+            <key>projStylesFolder</key>
+            <description>The folder were project style files are kept.</description>
+            <type>string</type>
+            <value>Styles</value>
+        </setting>
+        <setting>
+            <name>Project TeX Extensions Folder</name>
+            <key>projTexFolder</key>
+            <description>The folder were project TeX extension files are kept.</description>
+            <type>string</type>
+            <value>TeX</value>
+        </setting>
+        <setting>
             <name>Project Scripts Folder</name>
             <key>projScriptsFolder</key>
             <description>The folder where all the project custom processing scripts are kept.</description>
@@ -112,6 +140,13 @@ Todo:
             <description>The folder where project illustration files are kept.</description>
             <type>string</type>
             <value>Illustrations</value>
+        </setting>
+        <setting>
+            <name>Project Backup Folder</name>
+            <key>projBackupFolder</key>
+            <description>The folder where project backup files are kept.</description>
+            <type>string</type>
+            <value>Backups</value>
         </setting>
     </section>
     <section>

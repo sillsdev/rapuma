@@ -136,7 +136,7 @@ class ProjBackup (object) :
         specific paths, etc.'''
 
         excludeFiles        = []
-        excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj']
+        excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj', 'zip']
 
         # Process the components folder
         for root, dirs, files in os.walk(self.local.projComponentsFolder) :
@@ -325,6 +325,31 @@ class ProjBackup (object) :
 ###############################################################################
 
 
+
+
+
+
+
+
+
+
+
+
+# FIXME: Working here
+
+
+
+
+    def cullBackups (self) :
+        '''Remove any excess backups from the backup folder in
+        this project.'''
+
+        files = os.listdir(self.local.projBackupFolder)
+        maxStoreBackups = ProjConfig(self.pid).projConfig['Backup']['maxStoreBackups']
+        
+        print maxStoreBackups, files
+
+
     def backupProject (self) :
         '''Backup a project. Send the compressed backup file to the user-specified
         backup folder. If none is specified, put the archive in cwd. If a valid
@@ -337,17 +362,16 @@ class ProjBackup (object) :
             self.log.writeToLog(self.errorCodes['0610'], [self.pid])
 
         # Set some paths and file names
-        backupTarget = ''
-        userBackups = ''
-        backupName = self.pid + '.zip'
-        if self.userConfig['Resources'].has_key('backups') :
-            userBackups = self.tools.resolvePath(self.userConfig['Resources']['backups'])
-        else :
-            self.log.writeToLog(self.errorCodes['0620'])
+        projBackupFolder    = self.local.projBackupFolder
+        backupName          = self.tools.fullFileTimeStamp() + '.zip'
+        backupTarget        = os.path.join(projBackupFolder, backupName)
+
         # Make sure the dir is there
-        if not os.path.isdir(userBackups) :
-            os.makedirs(userBackups)
-        backupTarget = os.path.join(userBackups, backupName)
+        if not os.path.isdir(projBackupFolder) :
+            os.makedirs(projBackupFolder)
+
+        # Cull out any excess backups
+        self.cullBackups()
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
