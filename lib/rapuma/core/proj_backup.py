@@ -304,12 +304,12 @@ class ProjBackup (object) :
 ####################### Error Code Block Series = 3000 ########################
 ###############################################################################
 
-    def cullBackups (self) :
+    def cullBackups (self, projConfig) :
         '''Remove any excess backups from the backup folder in
         this project.'''
 
         files = os.listdir(self.local.projBackupFolder)
-        maxStoreBackups = int(ProjConfig(self.pid).projConfig['Backup']['maxStoreBackups'])
+        maxStoreBackups = int(projConfig['Backup']['maxStoreBackups'])
         if not maxStoreBackups or maxStoreBackups == 0 :
             maxStoreBackups = 1
         # Build the cullList
@@ -338,26 +338,21 @@ class ProjBackup (object) :
         projBackupFolder    = self.local.projBackupFolder
         backupName          = self.tools.fullFileTimeStamp() + '.zip'
         backupTarget        = os.path.join(projBackupFolder, backupName)
+        projConfig          = ProjConfig(self.pid).projConfig
 
         # Make sure the dir is there
         if not os.path.isdir(projBackupFolder) :
             os.makedirs(projBackupFolder)
 
         # Cull out any excess backups
-        self.cullBackups()
+        self.cullBackups(projConfig)
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
-
-
-
-
         # Finish here
-        
-# FIXME: Write to proj conf the time stamp of this backup
-        
-        
+        projConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
+        self.tools.writeConfFile(projConfig)
         self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupName])
         return True
 
@@ -368,6 +363,7 @@ class ProjBackup (object) :
 
 
 
+# FIXME: Start working on backup here
 
 
     def restoreBackup (self, projHome = None) :
@@ -553,8 +549,13 @@ class ProjBackup (object) :
         if not projConfig :
             return True
 
+        # See if cloud is there and up-to-date
+        cloudConfig = self.getConfig(cloud)
+        if not cloudConfig :
+            return False
+
         # Compare if we made it this far
-        cStamp = self.getConfig(cloud)['Backup']['lastCloudPush']
+        cStamp = cloudConfig['Backup']['lastCloudPush']
         pStamp = projConfig['Backup']['lastCloudPush']
         if cStamp >= pStamp :
             return True
@@ -571,7 +572,10 @@ class ProjBackup (object) :
     def getCloudOwner (self, cloud) :
         '''Return the owner of a specified cloud project.'''
 
-        return self.getConfig(cloud)['Backup']['ownerID']
+        try :
+            return self.getConfig(cloud)['Backup']['ownerID']
+        except :
+            return None
 
 
     def getLocalOwner (self) :
