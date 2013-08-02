@@ -129,6 +129,7 @@ class ProjConfig (object) :
                 if not os.path.exists(self.macPackXmlConfFile) :
                     self.addMacPack(self.macPack)
 
+                # Load macPackConfig
                 self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
                 # File names (from a dict made from the macPack XML file)
@@ -415,6 +416,48 @@ class ProjConfig (object) :
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])
             return False
+
+
+###############################################################################
+############################ Config Loader Functions ##########################
+###############################################################################
+####################### Error Code Block Series = 4000 ########################
+###############################################################################
+
+    def getAdjustmentConfig (self) :
+        '''Load the adjustment config file.'''
+
+        return self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
+
+
+    def getLayoutConfig (self) :
+        '''Load the layout config file.'''
+
+        return self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
+
+
+    def getProjConfig (self) :
+        '''Load the proj config file.'''
+
+        return self.tools.initConfig(self.projConfFile, self.projXmlConfFile)
+
+
+    def getHyphenConfig (self) :
+        '''Load the hyphen config file.'''
+
+        return self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
+
+
+    def getIllustrationConfig (self) :
+        '''Load the illustration config file.'''
+
+        return self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
+
+
+    def getMacPackConfig (self) :
+        '''Load the macPack config file.'''
+
+        return self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
 
 
 

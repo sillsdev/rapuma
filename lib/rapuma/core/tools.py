@@ -206,6 +206,29 @@ class Tools (object) :
                     return int(line.split(':')[1].strip())
 
 
+    def incrementFileName (self, fileName) :
+        '''If a file of the same name already exists, increment the
+        name by one by adding (1) to the end of the name before the
+        extension. If an increment number already exsists, increase
+        it by one (+1).'''
+
+        def addOne (nobj) :
+            n = int(nobj.group(1))
+            return '(' + str(n+1) + ')'
+
+        if os.path.exists(fileName) :
+            path, fn = os.path.split(fileName)
+            # Search for a previous increment number
+            if re.search('\([0-9]+\)', fn) :
+                fn = re.sub('\(([0-9]+)\)', addOne, fn)
+            else :
+                fn = re.sub('(.)\.(.)', r'\1(1).\2', fn)
+            # Before returning, call itself to have the right number
+            return self.incrementFileName(os.path.join(path, fn))
+        else :
+            return fileName
+
+
     def modeFileName (self, fileName, mode = 'draft') :
         '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
         

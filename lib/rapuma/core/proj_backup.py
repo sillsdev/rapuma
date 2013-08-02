@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, zipfile, shutil
+import codecs, os, zipfile, shutil, re
 from configobj import ConfigObj
 
 # Load the local classes
@@ -24,6 +24,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_commander  import ProjCommander
 
 
 class ProjBackup (object) :
@@ -37,6 +38,7 @@ class ProjBackup (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
+        self.projCommand    = ProjCommander(pid)
         self.projHome       = None
         self.local          = None
         self.log            = None
@@ -47,6 +49,9 @@ class ProjBackup (object) :
             '1220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
             '1240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!'],
 
+            '3510' : ['ERR', 'The path (or name) given is not valid: [<<1>>].'],
+            '3530' : ['MSG', 'Project backup: [<<1>>] has been restored to: [<<2>>]. A backup of the orginal project remains and must be manually removed.'],
+            '3550' : ['ERR', 'Project backup version request: [<<1>>] exceeds the maxium number which could be in storage which is: [<<2>>]. Request an earlier (lesser) version.'],
             '3610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
             '3630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
@@ -280,7 +285,7 @@ class ProjBackup (object) :
 
         # Permission for executables is lost in the zip, fix it here
         for folder in ['Scripts', os.path.join('Macros', 'User')] :
-            fixExecutables(os.path.join(archTarget, folder))
+            self.tools.fixExecutables(os.path.join(archTarget, folder))
 
 # FIXME: This will need some work 
 
@@ -304,108 +309,157 @@ class ProjBackup (object) :
 ####################### Error Code Block Series = 3000 ########################
 ###############################################################################
 
-    def cullBackups (self, projConfig) :
+    def cullBackups (self, maxBak, bakDir) :
         '''Remove any excess backups from the backup folder in
         this project.'''
 
-        files = os.listdir(self.local.projBackupFolder)
-        maxStoreBackups = int(projConfig['Backup']['maxStoreBackups'])
+        # Get number of maximum backups to store
+        maxStoreBackups = int(maxBak)
         if not maxStoreBackups or maxStoreBackups == 0 :
             maxStoreBackups = 1
+
         # Build the cullList
         cullList = []
+        files = os.listdir(bakDir)
         for f in files :
             cullList.append(int(f.split('.')[0]))
         # Remove oldest file(s)
-        while len(cullList)+1 > maxStoreBackups :
+        while len(cullList) > maxStoreBackups :
             fn = min(cullList)
             cullList.remove(min(cullList))
-            os.remove(os.path.join(self.local.projBackupFolder, str(fn) + '.zip'))
+            os.remove(os.path.join(bakDir, str(fn) + '.zip'))
 
 
-    def backupProject (self) :
-        '''Backup a project. Send the compressed backup file to the user-specified
-        backup folder. If none is specified, put the archive in cwd. If a valid
-        path is specified, send it to that location. This is a very simplified
-        backup so it will only keep one copy in any given location. If another
-        copy exists, it will overwrite it.'''
+    def backupProject (self, targetPath) :
+        '''Backup a project. Send the compressed backup file with a date-stamp
+        file name to the user-specified backup folder. If a target path is 
+        specified, put the archive there but use the PID in the name. If other
+        backups with the same name exist there, increment with a number.'''
 
         # First see if this is even a valid project
         if not self.userConfig['Projects'].has_key(self.pid) :
             self.log.writeToLog(self.errorCodes['3610'], [self.pid])
 
         # Set some paths and file names
-        projBackupFolder    = self.local.projBackupFolder
-        backupName          = self.tools.fullFileTimeStamp() + '.zip'
-        backupTarget        = os.path.join(projBackupFolder, backupName)
-        projConfig          = ProjConfig(self.pid).projConfig
+        if not targetPath :
+            projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backups'], self.pid))
+            backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
+        else :
+            projBackupFolder    = targetPath
+            backupTarget        = self.tools.incrementFileName(os.path.join(projBackupFolder, self.pid + '.zip'))
 
         # Make sure the dir is there
-        if not os.path.isdir(projBackupFolder) :
+        if not os.path.exists(projBackupFolder) :
             os.makedirs(projBackupFolder)
-
-        # Cull out any excess backups
-        self.cullBackups(projConfig)
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
 
+        # Cull out any excess backups
+        if not targetPath :
+            self.cullBackups(self.userConfig['System']['maxStoreBackups'], projBackupFolder)
+
         # Finish here
+        projConfig = ProjConfig(self.pid).projConfig
         projConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
         self.tools.writeConfFile(projConfig)
-        self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupName])
+        self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupTarget])
         return True
 
 
+    def backupRestore (self, backup, projHome) :
+        '''Restore a backup to a specified projHome folder.'''
 
-
-
-
-
-
-# FIXME: Start working on backup here
-
-
-    def restoreBackup (self, projHome = None) :
-        '''Restore a project from the user specified storage area. If that
-        is not set, it will fail. The project will be restored to the default
-        project area as specified in the Rapuma config. Rapuma will register 
-        the project there.'''
-
-        if projHome :
-            self.finishInit(projHome)
-
-        # Assuming the above, this will be the archive file name
-        # Check to see if the archive exsists
-        backup = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['backups']), self.pid + '.zip')
-        if not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['backups'])) :
-            self.tools.terminal('\nError: The path (or name) given is not valid: [' + backup + ']\n')
-            self.tools.dieNow()
-
-#        import pdb; pdb.set_trace()
         # If there is an exsiting project make a temp backup in 
         # case something goes dreadfully wrong
-        if os.path.isdir(self.projHome) :
-            # Remove old backup-backup
-            if os.path.exists(self.projHome + '.bak') :
-                shutil.rmtree(self.projHome + '.bak')
-            # Make a fresh copy of the backup-backup
-            shutil.copytree(self.projHome, self.projHome + '.bak')
-            # For succeful extraction we need to delete the target
-            if os.path.exists(self.projHome) :
-                shutil.rmtree(self.projHome)
+        if os.path.exists(projHome) :
+            if os.path.isdir(projHome) :
+                shutil.copytree(projHome, self.tools.incrementFileName(projHome + '.bak'))
 
-#        import pdb; pdb.set_trace()
+            # For succeful extraction we need to delete the target
+            if os.path.exists(projHome) :
+                shutil.rmtree(projHome)
+        else :
+            os.makedirs(projHome)
 
         # If we made it this far, extract the archive
         with zipfile.ZipFile(backup, 'r') as myzip :
-            myzip.extractall(self.projHome)
+            myzip.extractall(projHome)
+
+
+    def restoreLocalBackup (self, bNum) :
+        '''Restore from a project backup. As a project may have multiple backups in
+        its backup folder, the user will need to provide a number from 1 to n (n being
+        the number of backups in the folder, 1 being the most recent and n being the
+        oldest). If no number is provided, 1, (the most recent) will be restored.'''
+
+        # Adjust bNum if needed
+        maxBak = int(self.userConfig['System']['maxStoreBackups'])
+        if not bNum :
+            bNum = 1
+        else :
+            bNum = int(bNum)
+            if bNum <= 0 :
+                bNum = 0
+            elif bNum > maxBak :
+                self.log.writeToLog(self.errorCodes['3550'], [str(bNum), str(maxBak)])
+            else :
+                bNum = bNum-1
+
+        # Get vals we need
+        projHome            = self.getProjHome()
+        projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backups'], self.pid))
+
+        # Get the archive file name
+        files = os.listdir(projBackupFolder)
+        fns = []
+        for f in files :
+            fns.append(int(f.split('.')[0]))
+        # Sort the list, last (latest) first
+        fns.sort(reverse=True)
+        # Make file path/name
+        backup = os.path.join(projBackupFolder, str(fns[bNum]) + '.zip')
+        if not os.path.exists(backup) :
+            self.log.writeToLog(self.errorCodes['3510'], [backup])
+
+        # Restore the backup
+        self.backupRestore(backup, projHome)
 
         # Permission for executables is lost in the zip, fix them here
-        fixExecutables(self.projHome)
+        self.tools.fixExecutables(projHome)
 
         # If this is a new project we will need to register it now
-        self.registerProject(self.pid)
+        self.registerProject(projHome)
+
+        # Add helper scripts if needed
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+            self.projCommand.updateScripts()
+
+        # Finish here (We will leave the project backup in place)
+        self.log.writeToLog(self.errorCodes['3530'], [self.tools.fName(backup),projHome])
+
+
+    def restoreExternalBackup (self, source, target = None, force = False) :
+        '''Restore a non-existant project from an external backup to a target folder.
+        If no target is provided the project will be installed in the default project
+        folder. The source path
+        and ZIP file must be valid'''
+
+        # Get/make the project home reference
+        projHome = self.getProjHome(source)
+
+        # Restore the backup
+        self.backupRestore(source, projHome)
+
+        # Permission for executables is lost in the zip, fix them here
+        self.tools.fixExecutables(self.projHome)
+
+        # If this is a new project we will need to register it now
+        self.registerProject(self.projHome)
+
+        # Add helper scripts if needed
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+            self.projCommand.updateScripts()
 
         # Finish here (We will leave the backup-backup in place)
         self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
@@ -700,21 +754,8 @@ class ProjBackup (object) :
 
         # Make the cloud reference
         cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
-        # Make the project home reference
-        if tPath :
-            if self.tools.resolvePath(tPath) :
-                tPath = self.tools.resolvePath(tPath)
-                lastFolder = os.path.basename(tPath)
-                if lastFolder == self.pid :
-                    projHome = tPath
-                else :
-                    projHome = os.path.join(tPath, self.pid)
-            else :
-                self.log.writeToLog(self.errorCodes['4220'], [tPath])
-        elif self.projHome :
-            projHome = self.projHome
-        else :
-            projHome = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['projects'], self.pid))
+        # Get the project home reference
+        projHome = self.getProjHome(tPath)
 
         def doPull () :
             # Get a total list of files from the project
@@ -763,6 +804,27 @@ class ProjBackup (object) :
                 else :
                     self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
 
+
+    def getProjHome (self, tPath = None) :
+        '''Return a project home path by checking to see what the best path
+        might be. Provided path gets first dibs, then '''
+
+        if tPath :
+            if os.path.isfile(tPath) :
+                return self.projHome
+            elif self.tools.resolvePath(tPath) :
+                tPath = self.tools.resolvePath(tPath)
+                lastFolder = os.path.basename(tPath)
+                if lastFolder == self.pid :
+                    return tPath
+                else :
+                    return os.path.join(tPath, self.pid)
+            else :
+                self.log.writeToLog(self.errorCodes['4220'], [tPath])
+        elif self.projHome :
+            return self.projHome
+        else :
+            return self.tools.resolvePath(os.path.join(self.userConfig['Resources']['projects'], self.pid))
 
 
 

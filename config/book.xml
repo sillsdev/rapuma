@@ -126,13 +126,6 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
-        <setting>
-            <name>Maximum Stored Backups</name>
-            <key>maxStoreBackups</key>
-            <description>The maximum number of backups that can be stored in the project backup folder.</description>
-            <type>int</type>
-            <value>5</value>
-        </setting>
     </section>
 </root>
 

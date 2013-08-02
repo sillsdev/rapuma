@@ -214,6 +214,8 @@ def userArguments (args) :
         pid         = args.project_id
         cmdType     = args.command_type
         cmd         = args.command
+        sourcePath  = ''
+        targetPath  = ''
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
@@ -249,15 +251,15 @@ def userArguments (args) :
             if cmdType == 'archive' :
                 ProjBackup(pid).restoreArchive(targetPath, sourcePath)
             elif cmdType == 'backup' :
-                if uc.userConfig['Projects'].has_key(pid) :
-                    ProjBackup(pid).restoreBackup()
+                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
+                    ProjBackup(pid).restoreLocalBackup(args.bak_num)
                 else :
-                    if args.target_path :
-                        ProjBackup(pid).restoreBackup(os.path.join(targetPath))
+                    if sourcePath :
+                        ProjBackup(pid).restoreExternalBackup(sourcePath, targetPath)
                     else :
                         sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
             elif cmdType == 'cloud' :
-                ProjBackup(pid).pullFromCloud(args.force, args.target_path)
+                ProjBackup(pid).pullFromCloud(args.force, targetPath)
             elif cmdType == 'template' :
                 ProjBackup(pid).templateToProject(args.name)
             else :
@@ -266,7 +268,7 @@ def userArguments (args) :
             if cmdType == 'archive' :
                 ProjBackup(pid).archiveProject()
             elif cmdType == 'backup' :
-                ProjBackup(pid).backupProject()
+                ProjBackup(pid).backupProject(targetPath)
             elif cmdType == 'cloud' :
                 ProjBackup(pid).pushToCloud(args.force)
             elif cmdType == 'template' :
@@ -589,10 +591,11 @@ projCommand.add_argument('project_id', help='Project ID (a positional argument r
 projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
 projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
 projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
-projCommand.add_argument('-t', '--target_path', help='Path to the project home folder. This can be used for specifying the location of new projects based on templates, archives or just a standard new project. Do not provide the name of the project folder, just the path to where you want it to be.')
+projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
 projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
 projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
 projCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
+projCommand.add_argument('-b', '--bak_num', help='Specify the number (version) of backup you want to restore.')
 
 # Add Group subprocess arguments
 groupCommand = subparsers.add_parser('group', help='General project group management commands help')

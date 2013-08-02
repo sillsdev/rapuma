@@ -34,7 +34,7 @@ class ProjCommander (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projConfig         = ProjConfig(pid).projConfig
+#        self.projConfig         = ProjConfig(pid).projConfig
         self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local              = ProjLocal(self.pid)
@@ -68,10 +68,13 @@ class ProjCommander (object) :
     def makeGrpScripts (self) :
         '''Create scripts that process specific group components.'''
 
+        # Load projConfig now to prevent conflicts
+        projConfig = ProjConfig(self.pid).projConfig
+
         # Output the scripts (If this is a new project we need to pass)
-        if self.projConfig.has_key('Groups') :
-            for gid in self.projConfig['Groups'].keys() :
-                allScripts = self.getGrpScripInfo(gid)
+        if projConfig.has_key('Groups') :
+            for gid in projConfig['Groups'].keys() :
+                allScripts = self.getGrpScripInfo(gid, projConfig)
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projHelpScriptsFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
@@ -138,12 +141,12 @@ class ProjCommander (object) :
             }
 
 
-    def getGrpScripInfo (self, gid) :
+    def getGrpScripInfo (self, gid, projConfig) :
         '''Create a dictionary of the auxillary group script information used in
         most projects.'''
 
         pid     = self.pid
-        cType   = self.projConfig['Groups'][gid]['cType']
+        cType   = projConfig['Groups'][gid]['cType']
         mid     = self.projectMediaIDCode
 
         return {

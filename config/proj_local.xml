@@ -141,13 +141,6 @@ Todo:
             <type>string</type>
             <value>Illustrations</value>
         </setting>
-        <setting>
-            <name>Project Backup Folder</name>
-            <key>projBackupFolder</key>
-            <description>The folder where project backup files are kept.</description>
-            <type>string</type>
-            <value>Backups</value>
-        </setting>
     </section>
     <section>
         <name>Rapuma Folders</name>
