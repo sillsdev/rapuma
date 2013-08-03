@@ -86,6 +86,7 @@ class ProjConfig (object) :
             '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. Use force (-f) to reinstall.'],
             '3200' : ['ERR', 'Failed to install macro package: [<<1>>]'],
             '3300' : ['MSG', 'Install macro package: [<<1>>], Reinitialized [<<2>>]'],
+            '3310' : ['ERR', 'Failed to copy [<<1>>] to folder [<<2>>].'],
             '3400' : ['MSG', 'Force set to True. Removed macro package configuration file: [<<1>>]'],
             '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
             '3600' : ['MSG', 'Updated macro package [<<1>>]']
@@ -100,6 +101,8 @@ class ProjConfig (object) :
             # Folder paths
             self.projComponentsFolder           = self.local.projComponentsFolder
             self.projFontsFolder                = self.local.projFontsFolder
+            self.projStylesFolder               = self.local.projStylesFolder
+            self.projTexFolder                  = self.local.projTexFolder
             self.projMacrosFolder               = self.local.projMacrosFolder
             self.projHyphenationFolder          = self.local.projHyphenationFolder
             self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
@@ -336,10 +339,10 @@ class ProjConfig (object) :
 ######################## Error Code Block Series = 3000 #######################
 ###############################################################################
 
+
     def addMacPack (self, package, force = False) :
         '''Add a macro package to the project. If force is set to True
-        remove the old macPack and install. Otherwise, do not touch
-        the existing macPack.'''
+        user style and TeX files will be overwritten.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -363,8 +366,59 @@ class ProjConfig (object) :
 
         # If we got this far, install the a fresh copy of the macPack
         self.installMacPackOnly(package)
+        # Move the style files and custom TeX files out of the macPack
+        self.moveMacStyles(force)
+        self.moveMacTex(force)
         self.macPackConfig = self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
         self.log.writeToLog(self.errorCodes['3300'], [package,self.macPackConfFileName])
+
+
+    def moveMacStyles (self, force) :
+        '''Move the default macro package styles out of the freshly installed
+        project macro package folder to the project Style folder.'''
+
+        # Get a list of style files to copy
+        styFiles = []
+        macPackFiles = os.listdir(self.projMacPackFolder)
+        for f in macPackFiles :
+            if f.split('.')[1].lower() == 'sty' :
+                styFiles.append(f)
+        # Collect the style files to copy
+        for f in styFiles :
+            source = os.path.join(self.projMacPackFolder, f)
+            target = os.path.join(self.local.projStylesFolder, f)
+            # Do not overwrite existing files unless force is used
+            if not os.path.exists(target) or force :
+                shutil.copy(source, target)
+            # Remove the source to avoid confusion
+            if os.path.exists(target) :
+                os.remove(source)
+            else :
+                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStylesFolder])
+
+
+    def moveMacTex (self, force) :
+        '''Move the custom macro package TeX out of the freshly installed
+        project macro package folder to the project TeX folder.'''
+
+        # Get a list of style files to copy
+        texFiles = []
+        macPackFiles = os.listdir(self.projMacPackFolder)
+        for f in macPackFiles :
+            if f.find('-ext.tex') > 0 :
+                texFiles.append(f)
+        # Collect the style files to copy
+        for f in texFiles :
+            source = os.path.join(self.projMacPackFolder, f)
+            target = os.path.join(self.local.projTexFolder, f)
+            # Do not overwrite existing files unless force is used
+            if not os.path.exists(target) or force :
+                shutil.copy(source, target)
+            # Remove the source to avoid confusion
+            if os.path.exists(target) :
+                os.remove(source)
+            else :
+                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStylesFolder])
 
 
     def removeMacPack (self, package, force = False) :
@@ -416,51 +470,6 @@ class ProjConfig (object) :
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])
             return False
-
-
-###############################################################################
-############################ Config Loader Functions ##########################
-###############################################################################
-####################### Error Code Block Series = 4000 ########################
-###############################################################################
-
-    def getAdjustmentConfig (self) :
-        '''Load the adjustment config file.'''
-
-        return self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
-
-
-    def getLayoutConfig (self) :
-        '''Load the layout config file.'''
-
-        return self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
-
-
-    def getProjConfig (self) :
-        '''Load the proj config file.'''
-
-        return self.tools.initConfig(self.projConfFile, self.projXmlConfFile)
-
-
-    def getHyphenConfig (self) :
-        '''Load the hyphen config file.'''
-
-        return self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
-
-
-    def getIllustrationConfig (self) :
-        '''Load the illustration config file.'''
-
-        return self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
-
-
-    def getMacPackConfig (self) :
-        '''Load the macPack config file.'''
-
-        return self.tools.initConfig(self.macPackConfFile, self.macPackXmlConfFile)
-
-
-
 
 
 

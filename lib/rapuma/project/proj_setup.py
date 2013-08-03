@@ -693,7 +693,7 @@ class ProjSetup (object) :
         cType          = self.projConfig['Groups'][gid]['cType']
         Ctype          = cType.capitalize()
         macPack        = self.projConfig['CompTypes'][Ctype]['macroPackage']
-        defaultStyFile      = os.path.join(self.local.projMacrosFolder, macPack, macPack + '.sty')
+        defaultStyFile      = os.path.join(self.local.projStylesFolder, macPack + '.sty')
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()

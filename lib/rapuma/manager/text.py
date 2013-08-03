@@ -69,6 +69,7 @@ class Text (Manager) :
 
         # Log messages for this module
         self.errorCodes     = {
+
             'TEXT-000' : ['MSG', 'Text module messages'],
             'TEXT-005' : ['ERR', 'Component type [<<1>>] is not supported by the text manager.'],
             'TEXT-015' : ['MSG', 'TEXT-015 - Unassigned error message ID.'],
@@ -81,6 +82,7 @@ class Text (Manager) :
             'TEXT-160' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
 
             '0000' : ['MSG', 'Placeholder message'],
+
         }
 
 ###############################################################################

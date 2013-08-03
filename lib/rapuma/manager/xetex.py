@@ -98,6 +98,7 @@ class Xetex (Manager) :
         # Add the file refs that are specific to the macPack
         for k, v in self.proj_config.macPackFilesDict.iteritems() :
             setattr(self, k, v)
+#            print k, ' =', getattr(self, k, v)
 
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
@@ -109,6 +110,8 @@ class Xetex (Manager) :
         self.projIllustrationsFolder= self.local.projIllustrationsFolder
         self.projFontsFolder        = self.local.projFontsFolder
         self.projMacrosFolder       = self.local.projMacrosFolder
+        self.projStylesFolder       = self.local.projStylesFolder
+        self.projTexFolder          = self.local.projTexFolder
         self.projMacPackFolder      = os.path.join(self.projMacrosFolder, self.macroPackage)
         # Set file names with full path 
         self.projConfFile           = self.proj_config.projConfFile
@@ -140,6 +143,7 @@ class Xetex (Manager) :
 
         # Log messages for this module
         self.errorCodes     = {
+
             'XTEX-000' : ['MSG', 'XeTeX module messages'],
             'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
             'XTEX-010' : ['LOG', 'Version number: [<<1>>], was found. Assumed persistent values have been merged.'],
@@ -177,6 +181,7 @@ class Xetex (Manager) :
             '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
+
         }
 
 
@@ -578,6 +583,8 @@ class Xetex (Manager) :
             # Create the environment that XeTeX will use. This will be temporarily set
             # by subprocess.call() just before XeTeX is run.
             texInputsLine = self.project.local.projHome + ':' \
+                            + self.projStylesFolder + ':' \
+                            + self.projTexFolder + ':' \
                             + self.projMacPackFolder + ':' \
                             + self.projMacrosFolder + ':' \
                             + self.gidFolder + ':.'

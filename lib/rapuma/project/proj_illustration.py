@@ -7,7 +7,7 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# This class will handle book project tasks.
+# This class will handle book project illustration tasks.
 
 
 ###############################################################################

@@ -37,8 +37,6 @@ from rapuma.project.proj_background     import ProjBackground
 # As we load the module we will bring in all the common information about all the
 # components this type will handle.
 
-
-
 class Usfm (Group) :
     '''This class contains information about a type of component 
     used in a type of project.'''
