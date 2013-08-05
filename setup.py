@@ -19,7 +19,7 @@ setup(name = 'rapuma',
         maintainer_email = "dennis_drescher@sil.org",
         package_dir = {'':'lib'},
         packages = ["rapuma", 'rapuma.core', 'rapuma.project', 'rapuma.group', 'rapuma.manager'],
-        scripts = glob("script/rapuma*"),
+        scripts = glob("scripts/rapuma*"),
         license = 'LGPL',
         data_files = datafiles
      )
