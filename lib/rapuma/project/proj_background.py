@@ -54,8 +54,8 @@ class ProjBackground (object) :
         self.Ctype                      = self.cType.capitalize()
         self.macPackFunctions           = UsfmTex(self.layoutConfig)
         # Paths
-        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
-        self.rpmIllustrationsFolder     = self.local.rapumaIllustrationsFolder
+        self.projIllustrationFolder     = self.local.projIllustrationFolder
+        self.rpmIllustrationFolder      = self.local.rapumaIllustrationFolder
 
         # Log messages for this module
         self.errorCodes     = {
@@ -144,7 +144,7 @@ class ProjBackground (object) :
         '''Check to see if a required backgound file is present. If not,
         make it so.'''
 
-        projBgFile      = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
+        projBgFile      = os.path.join(self.projIllustrationFolder, bg + '.pdf')
         if not os.path.exists(projBgFile) or force :
             if bg.find('lines') >= 0 :
                 if self.createLinesFile(projBgFile) :
@@ -160,7 +160,7 @@ class ProjBackground (object) :
         '''Install a default Rapuma watermark file into the project.'''
 
         # FIXME: A custom watermark creation function is needed here, load default for now
-        rpmDefWatermarkFile = os.path.join(self.rpmIllustrationsFolder, mode + 'Watermark.pdf')
+        rpmDefWatermarkFile = os.path.join(self.rpmIllustrationFolder, mode + 'Watermark.pdf')
 
         try :
             shutil.copy(rpmDefWatermarkFile, target)
@@ -174,8 +174,8 @@ class ProjBackground (object) :
         '''Create a border backgound file used for proof reading.'''
 
         # Set our file names
-        source = os.path.join(self.rpmIllustrationsFolder, 'border.svg')
-        output = os.path.join(self.projIllustrationsFolder,  'pageborder.svg')
+        source = os.path.join(self.rpmIllustrationFolder, 'border.svg')
+        output = os.path.join(self.projIllustrationFolder,  'pageborder.svg')
         final_output = bgLinesFile
 
         # input and calculation
@@ -224,8 +224,8 @@ class ProjBackground (object) :
         in this file came from Flip Wester (flip_wester@sil.org)'''
 
         # Set our file names
-        source = os.path.join(self.rpmIllustrationsFolder, 'grid.svg')
-        output = os.path.join(self.projIllustrationsFolder,  'lines-grid.svg')
+        source = os.path.join(self.rpmIllustrationFolder, 'grid.svg')
+        output = os.path.join(self.projIllustrationFolder,  'lines-grid.svg')
         final_output = bgLinesFile
 
         # For testing

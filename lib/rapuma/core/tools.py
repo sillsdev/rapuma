@@ -153,7 +153,7 @@ class ToolsPath (object) :
 
         csid            = self.projConfig['Groups'][gid]['csid']
         cType           = self.projConfig['Groups'][gid]['cType']
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
         return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
 
 
@@ -166,7 +166,7 @@ class ToolsPath (object) :
     def getWorkingSourceFile (self, gid, cid) :
         '''Get the working source file name with path.'''
 
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
         source          = self.getSourceFile(gid, cid)
         sName           = os.path.split(source)[1]
         return os.path.join(targetFolder, sName + '.source')
@@ -176,7 +176,7 @@ class ToolsPath (object) :
         '''Get the file name and path to the group's preprocess script.'''
 
         csid            = self.projConfig['Groups'][gid]['csid']
-        return os.path.join(self.local.projScriptsFolder, csid + '_textPreprocess.py')
+        return os.path.join(self.local.projScriptFolder, csid + '_textPreprocess.py')
 
 
 ###############################################################################

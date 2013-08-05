@@ -3,7 +3,7 @@
 # For this to work the following path is needed: ~/Publishing/testArea
 
 # Copy into the testArea folder and extract the files
-cp ~/Projects/rapuma/resources/examples/KYUM.zip ~/Publishing/testArea
+cp ~/Projects/rapuma/resource/example/KYUM.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/KYUM.zip -d ~/Publishing/testArea
 
 # Remove any exsiting project of the same ID
@@ -48,9 +48,9 @@ rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 
 # Copy (system) some preset setting files into the project
 echo copying: MYMR_textPreprocess.py
-cp ~/Publishing/testArea/KYUM/resources/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Scripts/MYMR_textPreprocess.py
+cp ~/Publishing/testArea/KYUM/resource/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Script/MYMR_textPreprocess.py
 echo copying: usfmTex-ext.sty
-cp ~/Publishing/testArea/KYUM/resources/usfmTex-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Macros/usfmTex/usfmTex-ext.sty
+cp ~/Publishing/testArea/KYUM/resource/usfmTex-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Macro/usfmTex/usfmTex-ext.sty
 
 # Now update the text so the customized (edited) prprocess is used
 rpm group KYU-MYMR-MRKA Mark group update --force

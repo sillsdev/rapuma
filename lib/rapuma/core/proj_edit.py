@@ -124,8 +124,8 @@ class ProjEdit (object) :
                 if files.endswith(".conf"):
                     editDocs.append(os.path.join(self.local.projConfFolder, files))
 
-            globSty = os.path.join(self.local.projStylesFolder, self.projConfig['Managers']['usfm_Style']['mainStyleFile'])
-            custSty = os.path.join(self.local.projStylesFolder, self.projConfig['Managers']['usfm_Style']['customStyleFile'])
+            globSty = os.path.join(self.local.projStyleFolder, self.projConfig['Managers']['usfm_Style']['mainStyleFile'])
+            custSty = os.path.join(self.local.projStyleFolder, self.projConfig['Managers']['usfm_Style']['customStyleFile'])
             if os.path.isfile(globSty) :
                 editDocs.append(globSty)
             if os.path.isfile(custSty) :
@@ -133,7 +133,7 @@ class ProjEdit (object) :
 
             # FIXME: This next part is hard-wired, be nice to do better
             fileName = 'xetex_settings_usfm-ext.tex'
-            macExt = os.path.join(self.local.projMacrosFolder, 'usfmTex', fileName)
+            macExt = os.path.join(self.local.projMacroFolder, 'usfmTex', fileName)
             editDocs.append(macExt)
 
         # Look at system setting files

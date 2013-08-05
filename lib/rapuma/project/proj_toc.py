@@ -57,8 +57,8 @@ class ProjToc (object) :
         # File names
         self.tocWorkFileName            = self.pid + '.toc'
         # Folder paths
-        self.projComponentsFolder       = self.local.projComponentsFolder
-        self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
+        self.projComponentFolder       = self.local.projComponentFolder
+        self.gidFolder                  = os.path.join(self.projComponentFolder, self.gid)
         # File names with paths
         self.tocWorkFile                = os.path.join(self.gidFolder, self.tocWorkFileName)
 
@@ -176,7 +176,7 @@ class ProjToc (object) :
     def createTocFolder (self) :
         '''Create a project TOC folder if one is not there.'''
 
-        folder = os.path.join(self.projComponentsFolder, self.gid)
+        folder = os.path.join(self.projComponentFolder, self.gid)
         if not os.path.exists(folder) :
             os.makedirs(folder)
             self.log.writeToLog(self.errorCodes['0250'], [self.gid])
@@ -186,7 +186,7 @@ class ProjToc (object) :
         '''Create the TOC style file.'''
 
 #        styFileName     = 'usfm-grp-ext.sty'
-#        styFile         = os.path.join(self.projComponentsFolder, self.gid, styFileName)
+#        styFile         = os.path.join(self.projComponentFolder, self.gid, styFileName)
 
 #        # Lets start with just a simple file and go from there
 #        # This should go in before any other auto-generated sty
@@ -272,7 +272,7 @@ class ProjToc (object) :
     def getTocData (self, gid) :
         '''Return a list of TOC lines from this group TOC file.'''
 
-        tocFile = os.path.join(self.projComponentsFolder, gid, 'toc.usfm')
+        tocFile = os.path.join(self.projComponentFolder, gid, 'toc.usfm')
         
         if os.path.exists(tocFile) :
             contents = codecs.open(tocFile, "rt", encoding="utf_8_sig").read()

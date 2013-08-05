@@ -161,12 +161,12 @@ class ProjBinding (object) :
         confCommand = ['pdftk']
         # Append each of the input files
         for key in keyList :
-            gidPdf = os.path.join(self.local.projComponentsFolder, bindOrder[key], bindOrder[key] + '.pdf')
+            gidPdf = os.path.join(self.local.projComponentFolder, bindOrder[key], bindOrder[key] + '.pdf')
             confCommand.append(gidPdf)
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(self.local.projDeliverablesFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
+        output = os.path.join(self.local.projDeliverableFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)

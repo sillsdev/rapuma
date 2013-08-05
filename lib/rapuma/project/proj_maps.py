@@ -58,9 +58,9 @@ class ProjMaps (object) :
         self.gidTexFileName             = self.gid + '.tex'
         # Folder paths
         self.projConfFolder             = self.local.projConfFolder
-        self.projComponentsFolder       = self.local.projComponentsFolder
-        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
-        self.gidFolder                  = os.path.join(self.projComponentsFolder, gid)
+        self.projComponentFolder        = self.local.projComponentFolder
+        self.projIllustrationFolder     = self.local.projIllustrationFolder
+        self.gidFolder                  = os.path.join(self.projComponentFolder, gid)
         # File names with paths
         self.illustrationConfFile       = os.path.join(self.projConfFolder, self.illustrationConfFileName)
         self.gidTexFile                 = os.path.join(self.gidFolder, self.gidTexFileName)
@@ -207,9 +207,9 @@ class ProjMaps (object) :
         self.illustrationConfig[self.gid][cid]['chapter'] = pgOrder
         self.tools.writeConfFile(self.illustrationConfig)
         # Copy the file into the project illustration folder
-        if not os.path.exists(self.projIllustrationsFolder) :
-            os.makedirs(self.projIllustrationsFolder)
-        shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projIllustrationsFolder, fileName))
+        if not os.path.exists(self.projIllustrationFolder) :
+            os.makedirs(self.projIllustrationFolder)
+        shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projIllustrationFolder, fileName))
 
          # Create a component folder and its contents
 #        self.createComponentFolder(cid)
@@ -221,7 +221,7 @@ class ProjMaps (object) :
     def createGroupFolder (self) :
         '''Create a project maps folder if one is not there.'''
 
-        folder = os.path.join(self.projComponentsFolder, self.gid)
+        folder = os.path.join(self.projComponentFolder, self.gid)
         if not os.path.exists(folder) :
             os.makedirs(folder)
             self.log.writeToLog(self.errorCodes['0250'], [self.gid])
@@ -230,7 +230,7 @@ class ProjMaps (object) :
 #    def createComponentFolder (self, cid) :
 #        '''Create a project maps folder if one is not there.'''
 
-#        folder = os.path.join(self.projComponentsFolder, cid)
+#        folder = os.path.join(self.projComponentFolder, cid)
 #        if not os.path.exists(folder) :
 #            os.makedirs(folder)
 #            self.log.writeToLog(self.errorCodes['0260'], [cid])
@@ -245,7 +245,7 @@ class ProjMaps (object) :
     def getGidContainerFile (self) :
         '''Create the gid container file name. '''
 
-        return os.path.join(self.projComponentsFolder, self.gid, self.getGidContainerFileName())
+        return os.path.join(self.projComponentFolder, self.gid, self.getGidContainerFileName())
 
 
     def createComponentContainerFile (self, cidList, force) :
@@ -276,7 +276,7 @@ class ProjMaps (object) :
         map processing different than text, this file is auto-generated.'''
 
         styFileName     = 'usfm-grp-ext.sty'
-        styFile         = os.path.join(self.projComponentsFolder, self.gid, styFileName)
+        styFile         = os.path.join(self.projComponentFolder, self.gid, styFileName)
 
         # Lets start with just a simple file and go from there
         # This should go in before any other auto-generated sty
@@ -307,7 +307,7 @@ class ProjMaps (object) :
         cidList         = self.projConfig['Groups'][gid]['cidList']
         cType           = self.projConfig['Groups'][gid]['cType']
         csid            = self.projConfig['Groups'][gid]['csid']
-        groupFolder     = os.path.join(self.local.projComponentsFolder, gid)
+        groupFolder     = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
         if self.tools_group.isLocked(gid) and force == False :
@@ -342,7 +342,7 @@ class ProjMaps (object) :
 #       import pdb; pdb.set_trace()
 
         # Remove the files by removing the entire component folder
-        targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
         if os.path.exists(targetFolder) :
             shutil.rmtree(targetFolder)
             self.log.writeToLog(self.errorCodes['0460'], [cid])
@@ -389,7 +389,7 @@ class ProjMaps (object) :
         pgOrder = 0
         for cid in cidList :
             pgOrder +=1
-            targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
             fileName        = self.mapsConfig['Groups'][gid][cid]['mapFileName']
             target          = os.path.join(targetFolder, fileName)
             source          = os.path.join(sourcePath, fileName)
@@ -447,10 +447,10 @@ class ProjMaps (object) :
         
         # Create the file names we will need
         fileName = self.mapsConfig['Groups'][self.gid][cid]['mapFileName']
-        inFile = os.path.join(self.projComponentsFolder, cid, fileName)
-        outOne = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '-1.png'))
-        outTwo = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '-2.png'))
-        outThree = os.path.join(self.projComponentsFolder, cid, fileName.replace('.png', '.pdf'))
+        inFile = os.path.join(self.projComponentFolder, cid, fileName)
+        outOne = os.path.join(self.projComponentFolder, cid, fileName.replace('.png', '-1.png'))
+        outTwo = os.path.join(self.projComponentFolder, cid, fileName.replace('.png', '-2.png'))
+        outThree = os.path.join(self.projComponentFolder, cid, fileName.replace('.png', '.pdf'))
 
         # Create the ImageMagick rendering commands
         cmdOne = ['convert', '-border', '5', '-bordercolor', 'black', inFile, '-density', '150', '-rotate', '-90', outOne]

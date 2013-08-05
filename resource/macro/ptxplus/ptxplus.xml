@@ -2,7 +2,7 @@
 
 
 <!--
-File: ptx2pdf.xml
+File: ptxplus.xml
 Description:
 This contains all the layout and format values for a book publication.
 
@@ -21,14 +21,14 @@ Todo:
             <name>Group TeX Link File</name>
             <description>The file that links TeX to all the settings needed to render a job.</description>
             <moduleID>gidTexFile</moduleID>
-            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
+            <fileName>[self:projComponentFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group PDF Output File</name>
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
             <moduleID>gidPdfFile</moduleID>
-            <fileName>[self:projComponentsFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
+            <fileName>[self:projComponentFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
             <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
         </file>
         <file>
@@ -42,42 +42,42 @@ Todo:
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
             <moduleID>macSettingsFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]ptx2pdf-settings.tex</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-settings.tex</fileName>
             <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
         </file>
         <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>extTexFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]ptx2pdf-ext.tex</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>grpExtTexFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]ptx2pdf-[self:gid]-ext.tex</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
             <moduleID>defaultStyFile</moduleID>
-            <fileName>[self:projStylesFolder][pathSep]ptx2pdf.sty</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
             <moduleID>glbExtStyFile</moduleID>
-            <fileName>[self:projStylesFolder][pathSep]ptx2pdf-ext.sty</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
             <moduleID>grpExtStyFile</moduleID>
-            <fileName>[self:projStylesFolder][pathSep]ptx2pdf-[self:gid]-ext.sty</fileName>
+            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>
@@ -126,7 +126,7 @@ Todo:
             <name>Rapuma Defalt Hyphenation Preprocess Script</name>
             <description>The default hypenation preprocess script that is copied into the project when necessary.</description>
             <moduleID>rapumaPreProcessFile</moduleID>
-            <fileName>[self:rapumaScriptsFolder][pathSep]hyphenPreprocess.py</fileName>
+            <fileName>[self:rapumaScriptFolder][pathSep]hyphenPreprocess.py</fileName>
             <depends></depends>
         </file>
         <file>
@@ -783,10 +783,10 @@ Todo:
         </setting>
         <setting>
             <name>Path To Illustrations</name>
-            <description>This is the path to the project illustrations that TeX will use.</description>
+            <description>This is the path to the project illustrations collection that TeX will use.</description>
             <key>texPicPath</key>
             <type>string</type>
-            <value>[path:projIllustrationsFolder]/</value>
+            <value>[path:projIllustrationFolder]/</value>
             <texCode>\PicPath={[val]}</texCode>
             <note>This will insert the path dynamically when this setting is referenced.</note>
             <note>WARNING: The use of '/' at the end of the picPath will probably cause problems cross-platform.</note>

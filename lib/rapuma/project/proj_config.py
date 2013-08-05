@@ -99,14 +99,14 @@ class ProjConfig (object) :
             self.cType                          = self.projConfig['Groups'][gid]['cType']
             self.Ctype                          = self.cType.capitalize()
             # Folder paths
-            self.projComponentsFolder           = self.local.projComponentsFolder
-            self.projFontsFolder                = self.local.projFontsFolder
-            self.projStylesFolder               = self.local.projStylesFolder
+            self.projComponentFolder            = self.local.projComponentFolder
+            self.projFontFolder                 = self.local.projFontFolder
+            self.projStyleFolder                = self.local.projStyleFolder
             self.projTexFolder                  = self.local.projTexFolder
-            self.projMacrosFolder               = self.local.projMacrosFolder
+            self.projMacroFolder                = self.local.projMacroFolder
             self.projHyphenationFolder          = self.local.projHyphenationFolder
-            self.rapumaMacrosFolder             = self.local.rapumaMacrosFolder
-            self.rapumaScriptsFolder            = self.local.rapumaScriptsFolder
+            self.rapumaMacroFolder              = self.local.rapumaMacroFolder
+            self.rapumaScriptFolder             = self.local.rapumaScriptFolder
             # Just in case source path has not been defined
             try :
                 self.sourcePath                 = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
@@ -122,12 +122,12 @@ class ProjConfig (object) :
                 self.macPackConfFileName        = self.macPack + '.conf'
                 self.macPackFileName            = self.macPack + '.zip'
                 # Folder
-                self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, self.macPack)
+                self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, self.macPack)
 
                 # File names with paths
                 self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
-                self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, self.macPack, self.macPackXmlConfFileName)
-                self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
+                self.macPackXmlConfFile         = os.path.join(self.projMacroFolder, self.macPack, self.macPackXmlConfFileName)
+                self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
                 # Load the macro package config
                 if not os.path.exists(self.macPackXmlConfFile) :
                     self.addMacPack(self.macPack)
@@ -244,7 +244,7 @@ class ProjConfig (object) :
         if value == 'mapping' :
             useMapping = self.macPackConfig['FontSettings']['useMapping']
             if useMapping :
-                result = ':mapping=' + os.path.join(self.projFontsFolder, useMapping)
+                result = ':mapping=' + os.path.join(self.projFontFolder, useMapping)
         elif value == 'renderer' :
             useRenderingSystem = self.macPackConfig['FontSettings']['useRenderingSystem']
             if useRenderingSystem :
@@ -355,9 +355,9 @@ class ProjConfig (object) :
         self.macPackXmlConfFileName     = package + '.xml'
         self.macPackConfFileName        = package + '.conf'
         self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
-        self.macPackXmlConfFile         = os.path.join(self.projMacrosFolder, package, self.macPackXmlConfFileName)
-        self.rapumaMacPackFile          = os.path.join(self.rapumaMacrosFolder, self.macPackFileName)
-        self.projMacPackFolder          = os.path.join(self.local.projMacrosFolder, package)
+        self.macPackXmlConfFile         = os.path.join(self.projMacroFolder, package, self.macPackXmlConfFileName)
+        self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
+        self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, package)
 
 
         # Update existing macPack (but not conf file)
@@ -386,7 +386,7 @@ class ProjConfig (object) :
         # Collect the style files to copy
         for f in styFiles :
             source = os.path.join(self.projMacPackFolder, f)
-            target = os.path.join(self.local.projStylesFolder, f)
+            target = os.path.join(self.local.projStyleFolder, f)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)
@@ -394,7 +394,7 @@ class ProjConfig (object) :
             if os.path.exists(target) :
                 os.remove(source)
             else :
-                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStylesFolder])
+                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
 
 
     def moveMacTex (self, force) :
@@ -418,7 +418,7 @@ class ProjConfig (object) :
             if os.path.exists(target) :
                 os.remove(source)
             else :
-                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStylesFolder])
+                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
 
 
     def removeMacPack (self, package, force = False) :
@@ -431,7 +431,7 @@ class ProjConfig (object) :
 
         # Set names and path for specified package
         macPackConfFile     = os.path.join(self.local.projConfFolder, package + '.conf')
-        macPackFolder       = os.path.join(self.projMacrosFolder, package)
+        macPackFolder       = os.path.join(self.projMacroFolder, package)
 
         # Remove the macPack config file if required
         if os.path.exists(macPackConfFile) and force :
@@ -465,7 +465,7 @@ class ProjConfig (object) :
     def installMacPackOnly (self, package) :
         '''Install macro package.'''
 
-        if self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacrosFolder, self.macPackXmlConfFile) :
+        if self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacroFolder, self.macPackXmlConfFile) :
             return True
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])

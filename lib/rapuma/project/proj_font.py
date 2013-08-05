@@ -120,7 +120,7 @@ class ProjFont (object) :
 
         # Check for the font family bundle, look in user resources first
         userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['fonts']), font + '.zip')
-        rapumaSource = os.path.join(self.local.rapumaFontsFolder, font + '.zip')
+        rapumaSource = os.path.join(self.local.rapumaFontFolder, font + '.zip')
         source = ''
         if os.path.isfile(userSource) :
             source = userSource
@@ -173,7 +173,7 @@ class ProjFont (object) :
 #       import pdb; pdb.set_trace()
 
         # Set vars do initial checks
-        metaDataSource = os.path.join(self.local.projFontsFolder, font, font + '.xml')
+        metaDataSource = os.path.join(self.local.projFontFolder, font, font + '.xml')
         if not os.path.isfile(metaDataSource) :
             self.log.writeToLog(self.errorCodes['1240'], [font + '.xml', 'proj_font.recordFont():1240'])
             self.tools.dieNow()
@@ -223,8 +223,8 @@ class ProjFont (object) :
 
         # Look in user resources first
         userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['fonts']), font + '.zip')
-        rapumaSource = os.path.join(self.local.rapumaFontsFolder, font + '.zip')
-        confXml = os.path.join(self.local.projFontsFolder, font, font + '.xml')
+        rapumaSource = os.path.join(self.local.rapumaFontFolder, font + '.zip')
+        confXml = os.path.join(self.local.projFontFolder, font, font + '.xml')
         if os.path.isfile(userSource) :
             source = userSource
         elif os.path.isfile(rapumaSource) :
@@ -235,10 +235,10 @@ class ProjFont (object) :
         # When is force is used, delete the existing font to ensure a clean copy
         if force :
             try :
-                shutil.rmtree(os.path.join(self.local.projFontsFolder, font))
+                shutil.rmtree(os.path.join(self.local.projFontFolder, font))
             except :
                 pass
-            if self.tools.pkgExtract(source, self.local.projFontsFolder, confXml) :
+            if self.tools.pkgExtract(source, self.local.projFontFolder, confXml) :
                 self.log.writeToLog(self.errorCodes['1260'], [self.tools.fName(source)])
                 return True
             else :
@@ -250,7 +250,7 @@ class ProjFont (object) :
                 self.log.writeToLog(self.errorCodes['1262'], [self.tools.fName(source)])
                 return True
             else :
-                if self.tools.pkgExtract(source, self.local.projFontsFolder, confXml) :
+                if self.tools.pkgExtract(source, self.local.projFontFolder, confXml) :
                     self.log.writeToLog(self.errorCodes['1267'], [self.tools.fName(source)])
                     return True
                 else :
@@ -284,7 +284,7 @@ class ProjFont (object) :
         if self.macPackConfig['FontSettings'].has_key('primaryFont') :
             if self.macPackConfig['FontSettings']['primaryFont'] :
                 font = self.macPackConfig['FontSettings']['primaryFont']
-                if os.path.isdir(os.path.join(self.local.projFontsFolder, font)) \
+                if os.path.isdir(os.path.join(self.local.projFontFolder, font)) \
                     and self.macPackConfig['Fonts'][font].has_key('FontInformation') :
                     return True
 
@@ -298,7 +298,7 @@ class ProjFont (object) :
 
         # First purge the font if force is set
         if force :
-            fontDir = os.path.join(self.local.projFontsFolder, font)
+            fontDir = os.path.join(self.local.projFontFolder, font)
             if os.path.exists(fontDir) :
                 shutil.rmtree(fontDir)
                 self.log.writeToLog(self.errorCodes['1390'], [font])

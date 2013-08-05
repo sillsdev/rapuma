@@ -616,7 +616,7 @@ class Paratext (object) :
 #            self.tools.writeConfFile(self.project.projConfig)
 
 #            if force :
-#                target = os.path.join(self.project.local.projStylesFolder, oldStyle)
+#                target = os.path.join(self.project.local.projStyleFolder, oldStyle)
 #                if os.path.isfile(target) :
 #                    os.remove(target)
 
@@ -631,7 +631,7 @@ class Paratext (object) :
 #        '''Add a specific style file that is on the local system.'''
 
 #        sFile = self.tools.resolvePath(sFile)
-#        target = os.path.join(self.project.local.projStylesFolder, self.tools.fName(sFile))
+#        target = os.path.join(self.project.local.projStyleFolder, self.tools.fName(sFile))
 
 #        if not force and os.path.isfile(target) :
 #            self.log.writeToLog('STYL-030', [self.tools.fName(sFile)])
@@ -676,7 +676,7 @@ class Paratext (object) :
 #            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
 
 #        # Set the target destination
-#        target = os.path.join(self.project.local.projStylesFolder, self.mainStyleFile)
+#        target = os.path.join(self.project.local.projStyleFolder, self.mainStyleFile)
 #        # As this is call is for a PT based project, it is certain the style
 #        # file should be found in the source or parent folder. If that
 #        # exact file is not found in either place, a substitute will be

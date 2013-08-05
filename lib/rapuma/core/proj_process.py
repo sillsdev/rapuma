@@ -120,7 +120,7 @@ class ProjProcess (object) :
 
         # Will need the stylesheet for copy
         projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
-        projSty = os.path.join(self.local.projStylesFolder, projSty)
+        projSty = os.path.join(self.local.projStyleFolder, projSty)
         # Process as list of components
 
         self.log.writeToLog('XPRT-040')
@@ -133,7 +133,7 @@ class ProjProcess (object) :
                 self.tools.dieNow()
 
             target = os.path.join(path, ptName)
-            source = os.path.join(self.local.projComponentsFolder, cidCName, cid + '.' + cType)
+            source = os.path.join(self.local.projComponentFolder, cidCName, cid + '.' + cType)
             # If shutil.copy() spits anything back its bad news
             if shutil.copy(source, target) :
                 self.log.writeToLog('XPRT-020', [self.tools.fName(target)])
@@ -189,7 +189,7 @@ class ProjProcess (object) :
         default script and give a warning that the script is not complete.'''
 
         cType = self.projConfig['Groups'][gid]['cType']
-        rpmPreprocessFile = os.path.join(self.local.rapumaScriptsFolder, 'textPreprocess.py')
+        rpmPreprocessFile = os.path.join(self.local.rapumaScriptFolder, 'textPreprocess.py')
         grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
         # Check and copy if needed
         if not os.path.isfile(grpPreprocessFile) :
@@ -262,7 +262,7 @@ class ProjProcess (object) :
         oldScript           = ''
         scriptName          = os.path.split(script)[1]
         scriptSourceFolder  = os.path.split(script)[0]
-        scriptTarget        = os.path.join(self.local.projScriptsFolder, self.tools.fName(script).split('.')[0] + '.py')
+        scriptTarget        = os.path.join(self.local.projScriptFolder, self.tools.fName(script).split('.')[0] + '.py')
         if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
             oldScript = scriptName
 
@@ -278,8 +278,8 @@ class ProjProcess (object) :
             self.tools.addComponentType(self.projConfig, self.local, cType)
 
         # Make the target folder if needed
-        if not os.path.isdir(self.local.projScriptsFolder) :
-            os.makedirs(self.local.projScriptsFolder)
+        if not os.path.isdir(self.local.projScriptFolder) :
+            os.makedirs(self.local.projScriptFolder)
 
         # First check to see if there already is a script file, return if there is
         if os.path.isfile(scriptTarget) and not force :

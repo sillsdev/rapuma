@@ -102,17 +102,18 @@ class Xetex (Manager) :
 
         # Folder paths
         self.rapumaConfigFolder     = self.local.rapumaConfigFolder
+        self.projHome               = self.local.projHome
         self.projConfFolder         = self.local.projConfFolder
-        self.projComponentsFolder   = self.local.projComponentsFolder
-        self.projDeliverablesFolder = self.local.projDeliverablesFolder
-        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
+        self.projComponentFolder    = self.local.projComponentFolder
+        self.projDeliverableFolder  = self.local.projDeliverableFolder
+        self.gidFolder              = os.path.join(self.projComponentFolder, self.gid)
         self.projHyphenationFolder  = self.local.projHyphenationFolder
-        self.projIllustrationsFolder= self.local.projIllustrationsFolder
-        self.projFontsFolder        = self.local.projFontsFolder
-        self.projMacrosFolder       = self.local.projMacrosFolder
-        self.projStylesFolder       = self.local.projStylesFolder
+        self.projIllustrationFolder = self.local.projIllustrationFolder
+        self.projFontFolder         = self.local.projFontFolder
+        self.projMacroFolder        = self.local.projMacroFolder
+        self.projStyleFolder        = self.local.projStyleFolder
         self.projTexFolder          = self.local.projTexFolder
-        self.projMacPackFolder      = os.path.join(self.projMacrosFolder, self.macroPackage)
+        self.projMacPackFolder      = os.path.join(self.projMacroFolder, self.macroPackage)
         # Set file names with full path 
         self.projConfFile           = self.proj_config.projConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
@@ -463,7 +464,7 @@ class Xetex (Manager) :
             # Now add in each of the components
             for cid in cidList :
                 if self.cType == 'usfm' :
-                    cidSource = os.path.join(self.projComponentsFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
+                    cidSource = os.path.join(self.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
@@ -583,10 +584,10 @@ class Xetex (Manager) :
             # Create the environment that XeTeX will use. This will be temporarily set
             # by subprocess.call() just before XeTeX is run.
             texInputsLine = self.project.local.projHome + ':' \
-                            + self.projStylesFolder + ':' \
+                            + self.projStyleFolder + ':' \
                             + self.projTexFolder + ':' \
                             + self.projMacPackFolder + ':' \
-                            + self.projMacrosFolder + ':' \
+                            + self.projMacroFolder + ':' \
                             + self.gidFolder + ':.'
 
             # Create the environment dictionary that will be fed into subprocess.call()
@@ -619,7 +620,7 @@ class Xetex (Manager) :
                         self.layoutConfig['PageLayout']['useCropmarks'] = False
                         self.tools.writeConfFile(self.layoutConfig)
                     continue
-                bgFile = os.path.join(self.projIllustrationsFolder, bg + '.pdf')
+                bgFile = os.path.join(self.projIllustrationFolder, bg + '.pdf')
                 cmd = self.pdfUtilityCommand + [self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
@@ -650,21 +651,21 @@ class Xetex (Manager) :
         else :
             self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])
 
-        # Move to the Deliverables folder for easier access
+        # Move to the output folder according to mode for easier access
         if os.path.isfile(self.gidPdfFile) :
             if pdfSubFileName :
-                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, pdfSubFileName), mode)
+                outputPdfFile = self.tools.modeFileName(os.path.join(self.projHome, mode.capitalize(), pdfSubFileName), mode)
             else :
-                deliverablePdfFile = self.tools.modeFileName(os.path.join(self.projDeliverablesFolder, self.tools.fName(self.gidPdfFile)), mode)
+                outputPdfFile = self.tools.modeFileName(os.path.join(self.projHome, mode.capitalize(), self.tools.fName(self.gidPdfFile)), mode)
 
-            shutil.move(self.gidPdfFile, deliverablePdfFile)
+            shutil.move(self.gidPdfFile, outputPdfFile)
 
         # Review the results if desired
-        if os.path.isfile(deliverablePdfFile) :
-            if self.displayPdfOutput(deliverablePdfFile) :
-                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(deliverablePdfFile)])
+        if os.path.isfile(outputPdfFile) :
+            if self.displayPdfOutput(outputPdfFile) :
+                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(outputPdfFile)])
             else :
-                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(deliverablePdfFile)])
+                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(outputPdfFile)])
 
         return True
 

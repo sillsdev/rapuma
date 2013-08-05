@@ -1,0 +1,36 @@
+<ScriptureText>
+  <Versification>4</Versification>
+  <CreatedWithPTW6>T</CreatedWithPTW6>
+  <Name>KYUM</Name>
+  <Encoding>65001</Encoding>
+  <Language>Kayah_MYMR</Language>
+  <DefaultFont>Padauk</DefaultFont>
+  <DefaultFontSize>16</DefaultFontSize>
+  <FileNamePostPart>KYUM.SFM</FileNamePostPart>
+  <FileNameBookNameForm>41MAT</FileNameBookNameForm>
+  <StyleSheet>usfm.sty</StyleSheet>
+  <ChapterMarker>c</ChapterMarker>
+  <VerseMarker>v</VerseMarker>
+  <FullName>KYU Burmese NT</FullName>
+  <BiblicalTermsListSetting>Major::BiblicalTerms.xml</BiblicalTermsListSetting>
+  <Editable>T</Editable>
+  <NeedsEnglishLanguageFix>No</NeedsEnglishLanguageFix>
+  <NeedsPortugueseLanguageFix>No</NeedsPortugueseLanguageFix>
+  <InitialImportBooksDirectory>/home/dennis/Publishing/KYU/MYMR-NTBAP2/Texts</InitialImportBooksDirectory>
+  <Guid>ef0dde770b090e35d55381f798b108f4359cb3f6</Guid>
+  <TextEntryFontSizeAdjustment>0</TextEntryFontSizeAdjustment>
+  <LanguageIsoCode>my:::</LanguageIsoCode>
+  <EthnologueCode>my</EthnologueCode>
+  <FileNamePrePart />
+  <FileNameChapterNumberForm />
+  <Quotes>“ ”</Quotes>
+  <InnerQuotes>‘ ’</InnerQuotes>
+  <InnerInnerQuotes>“ ”</InnerInnerQuotes>
+  <ContinueQuotes>Yes</ContinueQuotes>
+  <VerboseQuotes>No</VerboseQuotes>
+  <ContinueAt>p p/q p/q1</ContinueAt>
+  <AdvancedView>False</AdvancedView>
+  <ValidPunctuation>!_ ’_ _‘ :_ ?_ _( ,_ ။_ ”_ _“ )_</ValidPunctuation>
+  <InvalidPunctuation>_‘_ -</InvalidPunctuation>
+  <Naming PrePart="" PostPart="KYUM.SFM" BookNameForm="41MAT" ChapterNumberForm="" />
+</ScriptureText>

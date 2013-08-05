@@ -54,21 +54,21 @@ class ProjIllustration (object) :
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
-        self.userIllustrationsLibName   = self.illustrationConfig['GeneralSettings'].get('userIllustrationsLibName')
-        # If we have nothing in the project for pointing to an illustrations
+        self.userIllustrationLibName    = self.illustrationConfig['GeneralSettings'].get('userIllustrationsLibName')
+        # If we have nothing in the project for pointing to an illustration
         # lib, put the default in here
-        if not self.userIllustrationsLibName :
-            self.userIllustrationsLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
-            self.illustrationConfig['GeneralSettings']['userIllustrationsLibName'] = self.userIllustrationsLibName
+        if not self.userIllustrationLibName :
+            self.userIllustrationLibName = self.userConfig['Resources']['defaultIllustrationsLibraryName']
+            self.illustrationConfig['GeneralSettings']['userIllustrationsLibName'] = self.userIllustrationLibName
             self.tools.writeConfFile(self.projConfig)
 
         # File names
 
         # Folder paths
-        self.projComponentsFolder       = self.local.projComponentsFolder
-        self.projIllustrationsFolder    = self.local.projIllustrationsFolder
-        self.userIllustrationsLibFolder = self.userConfig['Resources']['illustrations']
-        self.userIllustrationsLib       = os.path.join(self.userIllustrationsLibFolder, self.userIllustrationsLibName)
+        self.projComponentFolder        = self.local.projComponentFolder
+        self.projIllustrationFolder     = self.local.projIllustrationFolder
+        self.userIllustrationLibFolder  = self.userConfig['Resources']['illustrations']
+        self.userIllustrationLib        = os.path.join(self.userIllustrationLibFolder, self.userIllustrationLibName)
         self.projConfFolder             = self.local.projConfFolder
         # File names with folder paths
 
@@ -77,17 +77,17 @@ class ProjIllustration (object) :
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],
             '0010' : ['ERR', 'Component type [<<1>>] not recognized!'],
-            '0240' : ['ERR', 'Failed to copy [<<1>>] into the project illustrations folder.'],
-            '0220' : ['LOG', 'Copied [<<1>>] into the project illustrations folder. Force was set to [<<2>>].'],
-            '0230' : ['LOG', 'Did not copy [<<1>>] into the project illustrations folder. File already exsits.'],
+            '0240' : ['ERR', 'Failed to copy [<<1>>] into the project illustration folder.'],
+            '0220' : ['LOG', 'Copied [<<1>>] into the project illustration folder. Force was set to [<<2>>].'],
+            '0230' : ['LOG', 'Did not copy [<<1>>] into the project illustration folder. File already exsits.'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
 
             'ILUS-000' : ['MSG', 'Illustration module messages'],
             'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
-            'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustrations folder.'],
-            'ILUS-055' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] component folder.'],
+            'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustration folder.'],
+            'ILUS-055' : ['LOG', 'Illustration not being used. The piclist file has been removed from the [<<1>>] component folder.'],
             'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
-            'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustrations folder. Will try to revert to default watermark.'],
+            'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustration folder. Will try to revert to default watermark.'],
             'ILUS-080' : ['LOG', 'Installed watermark file [<<1>>] into the project.'],
             'ILUS-090' : ['LOG', 'Changed watermark config file name to [<<1>>].'],
             'ILUS-100' : ['ERR', 'Unknown background file type: [<<1>>]'],
@@ -103,8 +103,8 @@ class ProjIllustration (object) :
     def installIllustrationFile (self, fileName, path = None, force = False) :
         '''Install into the project the specified illustration file. If
         force is not set to True and no path has been specified, this 
-        function will look into the project Illustrations folder first.
-        Failing that, it will look in the user resources illustrations
+        function will look into the project Illustration folder first.
+        Failing that, it will look in the user resources illustration
         folder, and if found, copy it into the project. If a path is
         specified it will look there first and use that file.'''
 
@@ -114,8 +114,8 @@ class ProjIllustration (object) :
         places = []
         if path :
             places.append(os.path.join(path, fileName))
-        places.append(os.path.join(self.tools.resolvePath(self.userIllustrationsLib), fileName))
-        target = os.path.join(self.projIllustrationsFolder, fileName)
+        places.append(os.path.join(self.tools.resolvePath(self.userIllustrationLib), fileName))
+        target = os.path.join(self.projIllustrationFolder, fileName)
         # See if the file is there or not
         for p in places :
             if os.path.isfile(p) :
@@ -137,15 +137,15 @@ class ProjIllustration (object) :
 
 
     def getPics (self, gid, cid) :
-        '''Figure out what pics/illustrations we need for a given
+        '''Figure out what pics/illustration we need for a given
         component and install them. It is assumed that this was 
-        called because the user wants illustrations. Therefore, 
+        called because the user wants illustration. Therefore, 
         this will kill the current session if it fails.'''
 
         for i in self.illustrationConfig[gid].keys() :
             if self.illustrationConfig[gid][i]['bid'] == cid :
                 fileName = self.illustrationConfig[gid][i]['fileName']
-                if not os.path.isfile(os.path.join(self.projIllustrationsFolder, fileName)) :
+                if not os.path.isfile(os.path.join(self.projIllustrationFolder, fileName)) :
                     self.installIllustrationFile (fileName, '', False)
 
 
@@ -153,7 +153,7 @@ class ProjIllustration (object) :
         '''Remove an Illustration file from the project and conf file.'''
 
         # Remove the file
-        projIll = os.path.join(self.projIllustrationsFolder, fileName)
+        projIll = os.path.join(self.projIllustrationFolder, fileName)
         if os.path.isfile(projIll) :
             os.remove(projIll)
             self.log.writeToLog('ILUS-050', [fileName])
@@ -167,7 +167,7 @@ class ProjIllustration (object) :
 
 
     def hasIllustrations (self, gid, bid) :
-        '''Return True if this component as any illustrations associated with it.'''
+        '''Return True if this component as any illustration associated with it.'''
 
         # Adjustment for Map cType
         if self.cType == 'map' :
@@ -183,10 +183,10 @@ class ProjIllustration (object) :
 
 
     def getCidPiclistFile (self, cid) :
-        '''Return the full path of the cName working text illustrations file. 
+        '''Return the full path of the cName working text illustration file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, cid, cid + '_' + self.csid + '.piclist')
+        return os.path.join(self.local.projComponentFolder, cid, cid + '_' + self.csid + '.piclist')
 
 
     def createPiclistFile (self, gid, cid) :

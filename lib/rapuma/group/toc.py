@@ -80,9 +80,9 @@ class Toc (Group) :
         # File names
 
         # Folder paths
-        self.projScriptsFolder      = self.local.projScriptsFolder
-        self.projComponentsFolder   = self.local.projComponentsFolder
-        self.gidFolder              = os.path.join(self.projComponentsFolder, self.gid)
+        self.projScriptFolder       = self.local.projScriptFolder
+        self.projComponentFolder    = self.local.projComponentFolder
+        self.gidFolder              = os.path.join(self.projComponentFolder, self.gid)
         # File names with folder paths
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
 
@@ -138,13 +138,13 @@ class Toc (Group) :
         '''Return the full path of the cName working text file. This assumes
         the cid is valid.'''
 
-        return os.path.join(self.local.projComponentsFolder, gid, self.component.makeFileNameWithExt(gid))
+        return os.path.join(self.local.projComponentFolder, gid, self.component.makeFileNameWithExt(gid))
 
 
     def getCidPiclistFile (self, gid) :
         '''Return the full path and name of the toc group piclist file.'''
 
-        return os.path.join(self.local.projComponentsFolder, gid, 'toc' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
+        return os.path.join(self.local.projComponentFolder, gid, 'toc' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
@@ -245,6 +245,6 @@ class Toc (Group) :
         for a given cName.'''
 
         cType = self.projConfig['Groups'][gid]['cType']
-        return os.path.isfile(os.path.join(self.local.projComponentsFolder, cid, cid + '.' + cType))
+        return os.path.isfile(os.path.join(self.local.projComponentFolder, cid, cid + '.' + cType))
 
 

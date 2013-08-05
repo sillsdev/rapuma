@@ -139,7 +139,7 @@ class ProjBackup (object) :
 
         excludeFiles        = []
         excludeTypes        = ['delayed', 'log', 'notepages', 'parlocs', 'pdf', 'tex', 'piclist', 'adj', 'zip']
-        excludeFolders      = ['Backups', 'Proofs', 'Drafts', 'HelperScripts']
+        excludeFolders      = ['Draft', 'Final', 'HelperScript', 'Proof']
 
         # Process the excluded folders
         for root, dirs, files in os.walk(self.local.projHome) :
@@ -396,7 +396,7 @@ class ProjBackup (object) :
         # Adjust bNum if needed
         maxBak = int(self.userConfig['System']['maxStoreBackups'])
         if not bNum :
-            bNum = 1
+            bNum = 0
         else :
             bNum = int(bNum)
             if bNum <= 0 :

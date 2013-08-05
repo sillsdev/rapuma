@@ -45,44 +45,12 @@ class ProjHyphenation (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = ProjConfig(self.pid, gid)
-#        self.layoutConfig               = self.proj_config.layoutConfig
         self.projConfig                 = self.proj_config.projConfig
         self.hyphenConfig               = self.proj_config.hyphenConfig
         self.macPackConfig              = self.proj_config.macPackConfig
-#        self.csid                       = self.projConfig['Groups'][self.gid]['csid']
         self.log                        = ProjLog(pid)
         self.cType                      = self.projConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-#        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-
-        # File Names
-        # Some of these file names are dependent on Paratext, such as the ptHyphFileName
-        # Others are dependent on the macro package used in TeX. If these change, it must
-        # change here. If other modules need these values, they must get them here.
-#        self.ptHyphFileName             = 'hyphenatedWords.txt'
-#        self.lccodeTexFileName          = self.csid + '_lccode.tex'
-#        self.compHyphFileName           = self.csid + '_hyphenation.txt'
-#        self.grpHyphExcTexFileName      = self.csid + '_hyphenation.tex'
-#        self.ptProjHyphErrFileName      = 'hyphenatedWordErrors.txt'
-#        self.preProcessFileName         = self.csid + '_hyphenPreprocess.py'
-#        self.rapumaPreProcessFileName   = 'hyphenPreprocess.py'
-        # Folder Paths
-#        self.projScriptsFolder          = self.local.projScriptsFolder
-#        self.projHyphenationFolder      = self.local.projHyphenationFolder
-#        self.rapumaScriptsFolder        = self.local.rapumaScriptsFolder
-#        self.projComponentsFolder       = self.local.projComponentsFolder
-#        self.gidFolder                  = os.path.join(self.projComponentsFolder, self.gid)
-#        self.sourcePath                 = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-        # Set file names with full path 
-#        self.lccodeTexFile              = os.path.join(self.projHyphenationFolder, self.lccodeTexFileName)
-#        self.compHyphFile               = os.path.join(self.projHyphenationFolder, self.compHyphFileName)
-#        self.grpHyphExcTexFile          = os.path.join(self.projHyphenationFolder, self.grpHyphExcTexFileName)
-#        self.ptProjHyphErrFile          = os.path.join(self.projHyphenationFolder, self.ptProjHyphErrFileName)
-#        self.preProcessFile             = os.path.join(self.projHyphenationFolder, self.preProcessFileName)
-#        self.rapumaPreProcessFile       = os.path.join(self.rapumaScriptsFolder, self.rapumaPreProcessFileName)
-#        self.ptHyphFile                 = os.path.join(self.sourcePath, self.ptHyphFileName)
-#        self.ptProjHyphFile             = os.path.join(self.projHyphenationFolder, self.ptHyphFileName)
-#        self.ptProjHyphBakFile          = os.path.join(self.projHyphenationFolder, self.ptHyphFileName + '.bak')
 
         # Add the file refs that are specific to the macPack
         for k, v in self.proj_config.macPackFilesDict.iteritems() :

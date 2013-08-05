@@ -147,33 +147,33 @@ class UserConfig (object) :
             else :
                 self.tools.terminal('\nSame name given, nothing to changed.\n\n')
 
-        elif cmdType == 'resources' :
-            # Before starting, check the path
-            path = self.tools.resolvePath(value)
-            if not os.path.isdir(path) :
-                sys.exit('\nERROR: Invalid path: '  + path + '\n\nProcess halted.\n')
+#        elif cmdType == 'resource' :
+#            # Before starting, check the path
+#            path = self.tools.resolvePath(value)
+#            if not os.path.isdir(path) :
+#                sys.exit('\nERROR: Invalid path: '  + path + '\n\nProcess halted.\n')
 
-            # Make a list of sub-folders to make in the Rapuma resources folder
-            resources = ['archives', 'backups', 'fonts', 'examples', 'illustrations', 'macros', \
-                            'scripts', 'templates']
-            for r in resources :
-                thisPath = os.path.join(path, 'Rapuma', r)
-                # Create the folder if needed
-                if not os.path.isdir(thisPath) :
-                    os.makedirs(thisPath)
+#            # Make a list of sub-folders to make in the Rapuma resourcs folder
+#            resource = ['archive', 'backup', 'font', 'example', 'illustration', 'macro', \
+#                            'script', 'template']
+#            for r in resource :
+#                thisPath = os.path.join(path, 'Rapuma', r)
+#                # Create the folder if needed
+#                if not os.path.isdir(thisPath) :
+#                    os.makedirs(thisPath)
 
-                # Copy in the Rapuma example zip files
-                if r == 'examples' :
-                    exampleFiles = os.listdir(self.local.rapumaExamplesFolder)
-                    for f in exampleFiles :
-                        try :
-                            if f.split('.')[1].lower() == 'zip' :
-                                shutil.copy(os.path.join(self.rapumaExamplesFolder, f), thisPath)
-                        except :
-                            pass
-                    
-                # Record the path
-                self.userConfig['Resources'][r] = thisPath
+#                # Copy in the Rapuma example zip files
+#                if r == 'example' :
+#                    exampleFiles = os.listdir(self.local.rapumaExampleFolder)
+#                    for f in exampleFiles :
+#                        try :
+#                            if f.split('.')[1].lower() == 'zip' :
+#                                shutil.copy(os.path.join(self.rapumaExampleFolder, f), thisPath)
+#                        except :
+#                            pass
+#                    
+#                # Record the path
+#                self.userConfig['Resource'][r] = thisPath
 
             # Write out the results
             self.userConfig.write()

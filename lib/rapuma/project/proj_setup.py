@@ -290,7 +290,7 @@ class ProjSetup (object) :
 
         cidList     = self.projConfig['Groups'][gid]['cidList']
         cType     = self.projConfig['Groups'][gid]['cType']
-        groupFolder = os.path.join(self.local.projComponentsFolder, gid)
+        groupFolder = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
         if self.tools_path.isLocked(gid) and force == False :
@@ -330,7 +330,7 @@ class ProjSetup (object) :
 
         # Remove the files
         if force :
-            targetFolder    = os.path.join(self.local.projComponentsFolder, cid)
+            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
             workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
             working         = self.tools_path.getWorkingFile(gid, cid)
 
@@ -369,8 +369,8 @@ class ProjSetup (object) :
 #        import pdb; pdb.set_trace()
 
         # Make sure our group folder is there
-        if not os.path.exists(os.path.join(self.local.projComponentsFolder, gid)) :
-            os.makedirs(os.path.join(self.local.projComponentsFolder, gid))
+        if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
+            os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
@@ -560,7 +560,7 @@ class ProjSetup (object) :
 
         cType               = self.projConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
-        targetFolder        = os.path.join(self.local.projComponentsFolder, cid)
+        targetFolder        = os.path.join(self.local.projComponentFolder, cid)
         target              = self.tools_path.getWorkingFile(gid, cid)
         targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
         source              = self.tools_path.getSourceFile(gid, cid)
@@ -690,10 +690,10 @@ class ProjSetup (object) :
         # comment markers "%" are used to comment text rather than "#".
 
         # Grab the default style file from the macPack (it better be there)
-        cType          = self.projConfig['Groups'][gid]['cType']
-        Ctype          = cType.capitalize()
-        macPack        = self.projConfig['CompTypes'][Ctype]['macroPackage']
-        defaultStyFile      = os.path.join(self.local.projStylesFolder, macPack + '.sty')
+        cType           = self.projConfig['Groups'][gid]['cType']
+        Ctype           = cType.capitalize()
+        macPack         = self.projConfig['CompTypes'][Ctype]['macroPackage']
+        defaultStyFile  = os.path.join(self.local.projStyleFolder, macPack + '.sty')
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()

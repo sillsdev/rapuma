@@ -19,21 +19,21 @@ Todo:
         <description>User folders that are used in the system are stored here.</description>
         <setting>
             <name>Illustrations Library Path</name>
-            <key>libIllustrations</key>
-            <description>Path to the local user illustrations library.</description>
+            <key>libIllustration</key>
+            <description>Path to the local user illustration library.</description>
             <type>string</type>
             <value></value>
         </setting>
         <setting>
             <name>Fonts Library Path</name>
-            <key>libFonts</key>
+            <key>libFont</key>
             <description>Path to the local user fonts library.</description>
             <type>string</type>
             <value></value>
         </setting>
         <setting>
             <name>Scripts Library Path</name>
-            <key>libScripts</key>
+            <key>libScript</key>
             <description>Path to the local user scripts library. This contains scripts for project text processing.</description>
             <type>string</type>
             <value></value>
@@ -58,39 +58,46 @@ Todo:
             <value>Config</value>
         </setting>
         <setting>
-            <name>Project Components Folder</name>
-            <key>projComponentsFolder</key>
+            <name>Project Component Folder</name>
+            <key>projComponentFolder</key>
             <description>The folder were project components are kept.</description>
             <type>string</type>
-            <value>Components</value>
+            <value>Component</value>
         </setting>
         <setting>
-            <name>Project Deliverables Folder</name>
-            <key>projDeliverablesFolder</key>
-            <description>The folder were project deliverable (rendered) items are kept.</description>
+            <name>Project Deliverable Folder</name>
+            <key>projDeliverableFolder</key>
+            <description>The folder were final rendered versions of project material goes. This folder will be backed up, unlike the draft and proof folders.</description>
             <type>string</type>
-            <value>Deliverables</value>
+            <value>Deliverable</value>
         </setting>
         <setting>
-            <name>Project Proofs Folder</name>
-            <key>projProofsFolder</key>
-            <description>The folder were project proof files (rendered) items are kept.</description>
+            <name>Project Final Folder</name>
+            <key>projFinalFolder</key>
+            <description>The folder were final rendered versions of project material goes. This folder will be backed up, unlike the draft and proof folders.</description>
             <type>string</type>
-            <value>Proofs</value>
+            <value>Final</value>
         </setting>
         <setting>
-            <name>Project Drafts Folder</name>
-            <key>projDraftsFolder</key>
-            <description>The folder were project draft files (rendered) items are kept.</description>
+            <name>Project Proof Folder</name>
+            <key>projProofFolder</key>
+            <description>The folder were project proof files (rendered) items are kept. This folder is not backed up.</description>
             <type>string</type>
-            <value>Drafts</value>
+            <value>Proof</value>
         </setting>
         <setting>
-            <name>Project Styles Folder</name>
-            <key>projStylesFolder</key>
+            <name>Project Draft Folder</name>
+            <key>projDraftFolder</key>
+            <description>The folder were project draft files (rendered) items are kept. This folder is not backed up.</description>
+            <type>string</type>
+            <value>Draft</value>
+        </setting>
+        <setting>
+            <name>Project Style Folder</name>
+            <key>projStyleFolder</key>
             <description>The folder were project style files are kept.</description>
             <type>string</type>
-            <value>Styles</value>
+            <value>Style</value>
         </setting>
         <setting>
             <name>Project TeX Extensions Folder</name>
@@ -100,32 +107,32 @@ Todo:
             <value>TeX</value>
         </setting>
         <setting>
-            <name>Project Scripts Folder</name>
-            <key>projScriptsFolder</key>
+            <name>Project Script Folder</name>
+            <key>projScriptFolder</key>
             <description>The folder where all the project custom processing scripts are kept.</description>
             <type>string</type>
-            <value>Scripts</value>
+            <value>Script</value>
         </setting>
         <setting>
-            <name>Project Helper Scripts Folder</name>
-            <key>projHelpScriptsFolder</key>
+            <name>Project Helper Script Folder</name>
+            <key>projHelpScriptFolder</key>
             <description>The folder where all the project helper scripts are kept.</description>
             <type>string</type>
-            <value>HelperScripts</value>
+            <value>HelperScript</value>
         </setting>
         <setting>
-            <name>Project Macros Folder</name>
-            <key>projMacrosFolder</key>
+            <name>Project Macro Folder</name>
+            <key>projMacroFolder</key>
             <description>The folder where all macros, or scripts, that drive the rendering process are kept.</description>
             <type>string</type>
-            <value>Macros</value>
+            <value>Macro</value>
         </setting>
         <setting>
-            <name>Project Fonts Folder</name>
-            <key>projFontsFolder</key>
+            <name>Project Font Folder</name>
+            <key>projFontFolder</key>
             <description>The folder where all the fonts for a project are kept.</description>
             <type>string</type>
-            <value>Fonts</value>
+            <value>Font</value>
         </setting>
         <setting>
             <name>Project Hyphenation Folder</name>
@@ -135,11 +142,11 @@ Todo:
             <value>Hyphenation</value>
         </setting>
         <setting>
-            <name>Project Illustrations Folder</name>
-            <key>projIllustrationsFolder</key>
+            <name>Project Illustration Folder</name>
+            <key>projIllustrationFolder</key>
             <description>The folder where project illustration files are kept.</description>
             <type>string</type>
-            <value>Illustrations</value>
+            <value>Illustration</value>
         </setting>
     </section>
     <section>
@@ -158,63 +165,49 @@ Todo:
             <key>rapumaResourceFolder</key>
             <description>The rapuma resource folder where various Rapuma system resources are kept.</description>
             <type>string</type>
-            <value>resources</value>
-        </setting>
-        <setting>
-            <name>Rapuma Component Type Folder</name>
-            <key>rapumaCompTypeFolder</key>
-            <description>The Rapuma component type folder where component resources are kept.</description>
-            <type>list</type>
-            <value>resources,compTypes</value>
+            <value>resource</value>
         </setting>
         <setting>
             <name>Rapuma Documentation Folder</name>
             <key>rapumaDocumentFolder</key>
             <description>The Rapuma document docs folder where Rapuma documentation is kept.</description>
             <type>list</type>
-            <value>docs</value>
+            <value>doc</value>
         </setting>
         <setting>
-            <name>Rapuma Fonts Folder</name>
-            <key>rapumaFontsFolder</key>
-            <description>The Rapuma resource fonts folder where various Rapuma system resources are kept.</description>
+            <name>Rapuma Font Folder</name>
+            <key>rapumaFontFolder</key>
+            <description>The Rapuma resource font folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,fonts</value>
+            <value>resource,font</value>
         </setting>
         <setting>
-            <name>Rapuma Macros Folder</name>
-            <key>rapumaMacrosFolder</key>
-            <description>The Rapuma resource macros folder where various Rapuma system resources are kept.</description>
+            <name>Rapuma Macro Folder</name>
+            <key>rapumaMacroFolder</key>
+            <description>The Rapuma resource macro folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,macros</value>
+            <value>resource,macro</value>
         </setting>
         <setting>
-            <name>Rapuma Scripts Folder</name>
-            <key>rapumaScriptsFolder</key>
-            <description>The Rapuma resource scripts folder where various Rapuma system resources are kept.</description>
+            <name>Rapuma Script Folder</name>
+            <key>rapumaScriptFolder</key>
+            <description>The Rapuma resource script folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,scripts</value>
+            <value>resource,script</value>
         </setting>
         <setting>
-            <name>Rapuma Styles Folder</name>
-            <key>rapumaStylesFolder</key>
-            <description>The Rapuma resource styles folder where various Rapuma system resources are kept.</description>
+            <name>Rapuma Example Folder</name>
+            <key>rapumaExampleFolder</key>
+            <description>The Rapuma resource example folder where various Rapuma project examples are kept.</description>
             <type>list</type>
-            <value>resources,styles</value>
-        </setting>
-        <setting>
-            <name>Rapuma Examples Folder</name>
-            <key>rapumaExamplesFolder</key>
-            <description>The Rapuma resource examples folder where various Rapuma project examples are kept.</description>
-            <type>list</type>
-            <value>resources,examples</value>
+            <value>resource,example</value>
         </setting>
         <setting>
             <name>Rapuma Illustrations Folder</name>
-            <key>rapumaIllustrationsFolder</key>
+            <key>rapumaIllustrationFolder</key>
             <description>The Rapuma resource illustrations folder where various Rapuma system resources are kept.</description>
             <type>list</type>
-            <value>resources,illustrations</value>
+            <value>resource,illustration</value>
         </setting>
     </section>
 </root>
