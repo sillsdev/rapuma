@@ -34,7 +34,6 @@ class ProjLog (object) :
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projHome           = self.userConfig['Projects'][pid]['projectPath']
         self.local              = ProjLocal(pid)
 
 

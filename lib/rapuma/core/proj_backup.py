@@ -38,7 +38,6 @@ class ProjBackup (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
-        self.projCommand    = ProjCommander(pid)
         self.projHome       = None
         self.local          = None
         self.log            = None
@@ -433,7 +432,7 @@ class ProjBackup (object) :
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            self.projCommand.updateScripts()
+            ProjCommander(self.pid).updateScripts()
 
         # Finish here (We will leave the project backup in place)
         self.log.writeToLog(self.errorCodes['3530'], [self.tools.fName(backup),projHome])
@@ -459,7 +458,7 @@ class ProjBackup (object) :
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            self.projCommand.updateScripts()
+            ProjCommander(self.pid).updateScripts()
 
         # Finish here (We will leave the backup-backup in place)
         self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
@@ -615,12 +614,24 @@ class ProjBackup (object) :
             return True
 
 
-    def getConfig (self, cloud) :
+
+
+
+
+
+    def getConfig (self, projHome) :
         '''Return a valid config object from cloud project.'''
 
-        projCloudConfig = os.path.join(cloud, 'Config', 'project.conf')
-        if os.path.exists(projCloudConfig) :
-            return ConfigObj(projCloudConfig, encoding='utf-8')
+#        import pdb; pdb.set_trace()
+
+        projConfigFile = os.path.join(projHome, 'Config', 'project.conf')
+        if os.path.exists(projConfigFile) :
+            return ConfigObj(projConfigFile, encoding='utf-8')
+
+
+
+
+
 
 
     def getCloudOwner (self, cloud) :
@@ -755,7 +766,13 @@ class ProjBackup (object) :
         # Make the cloud reference
         cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
         # Get the project home reference
-        projHome = self.getProjHome(tPath)
+        self.projHome = self.getProjHome(tPath)
+
+        if self.projHome :
+            self.local      = ProjLocal(self.pid)
+            self.log        = ProjLog(self.pid)
+
+        print self.projHome
 
         def doPull () :
             # Get a total list of files from the project
@@ -763,10 +780,10 @@ class ProjBackup (object) :
             cr = 0
             for folder, subs, files in os.walk(cloud):
                 for fileName in files:
-                    if not os.path.isdir(folder.replace(cloud, projHome)) :
-                        os.makedirs(folder.replace(cloud, projHome))
+                    if not os.path.isdir(folder.replace(cloud, self.projHome)) :
+                        os.makedirs(folder.replace(cloud, self.projHome))
                     cFile = os.path.join(folder, fileName)
-                    pFile = os.path.join(folder, fileName).replace(cloud, projHome)
+                    pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
                     if not os.path.isfile(pFile) :
                         shutil.copy(cFile, pFile)
                         cn +=1
@@ -786,18 +803,34 @@ class ProjBackup (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         # This is a new project to this system
-        if not os.path.exists(projHome) :
-            shutil.copytree(cloud, projHome)
-            self.registerProject(projHome)
-            self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
+        if not os.path.exists(self.projHome) :
+
+
+
+            print self.projHome
+
+            import pdb; pdb.set_trace()
+
+            if self.sameOwner(cloud) or force :
+                shutil.copytree(cloud, self.projHome)
+                self.registerProject(self.projHome)
+                self.buyLocal(self.getConfig(self.projHome))
+                self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
+            else :
+                self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
+
+
+
+
+
         # For anything else more testing will be needed
         else :
             if force :
                 doPull()
-                self.buyLocal(self.getConfig(projHome))
+                self.buyLocal(self.getConfig(self.projHome))
             else :
                 if self.sameOwner(cloud) :
-                    if self.isNewerThanLocal(cloud, self.getConfig(projHome)) :
+                    if self.isNewerThanLocal(cloud, self.getConfig(self.projHome)) :
                         doPull()
                     else :
                         self.log.writeToLog(self.errorCodes['4260'], [self.pid])
