@@ -61,6 +61,9 @@ class Paratext (object) :
             self.csid                   = self.projConfig['Groups'][self.gid]['csid']
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         except :
+        
+            print 'Error: source path not found. (BTW, fix this message, will ya!)'
+        
             pass
 
 
@@ -257,6 +260,8 @@ class Paratext (object) :
         '''Return the data into a dictionary for the system to use.'''
 
 #        import pdb; pdb.set_trace()
+
+        print self.sourcePath
 
         # Return the dictionary
         if os.path.isdir(self.sourcePath) :

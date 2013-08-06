@@ -104,12 +104,15 @@ class Usfm (Group) :
         # Check if there is a primary font installed
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
+
 #            import pdb; pdb.set_trace()
+
             if not self.sourceEditor :
                 self.sourceEditor = self.pt_tools.getSourceEditor()
             if self.sourceEditor.lower() == 'paratext' :
                 font = ''
-                if self.macPackConfig['FontSettings'].has_key('ptDefaultFont') :
+                if self.macPackConfig['FontSettings'].has_key('ptDefaultFont') \
+                    and self.macPackConfig['FontSettings']['ptDefaultFont'] :
                     font = self.macPackConfig['FontSettings']['ptDefaultFont']
                 else :
                     font = self.pt_tools.getDefaultFont(self.macPackConfig)
