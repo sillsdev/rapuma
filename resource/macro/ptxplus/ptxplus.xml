@@ -42,42 +42,42 @@ Todo:
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
             <moduleID>macSettingsFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-settings.tex</fileName>
+            <fileName>[self:projTexFolder][pathSep]ptx2pdf-settings.tex</fileName>
             <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
         </file>
         <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>extTexFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.tex</fileName>
+            <fileName>[self:projTexFolder][pathSep]ptx2pdf-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>grpExtTexFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.tex</fileName>
+            <fileName>[self:projTexFolder][pathSep]ptx2pdf-[self:gid]-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
             <moduleID>defaultStyFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf.sty</fileName>
+            <fileName>[self:projStyleFolder][pathSep]ptx2pdf.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
             <moduleID>glbExtStyFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-ext.sty</fileName>
+            <fileName>[self:projStyleFolder][pathSep]ptx2pdf-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
             <moduleID>grpExtStyFile</moduleID>
-            <fileName>[self:projMacPackFolder][pathSep]ptx2pdf-[self:gid]-ext.sty</fileName>
+            <fileName>[self:projStyleFolder][pathSep]ptx2pdf-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cp ~/Projects/rapuma/resources/examples/MBJAS.zip ~/Publishing/testArea
+cp ~/Projects/rapuma/resource/example/MBJAS.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/MBJAS.zip -d ~/Publishing/testArea
 
 rpm project ENG-LATN-JAS project remove

@@ -172,7 +172,7 @@ class ProjBackup (object) :
         aProject = initProject(pid)
         # Set some paths and file names
         archName = aProject.projectIDCode + '.rapuma'
-        userArchives = uc.userConfig['Resources']['archives']
+        userArchives = uc.userConfig['Resources']['archive']
         archTarget = ''
         if path :
             path = self.tools.resolvePath(path)
@@ -264,8 +264,8 @@ class ProjBackup (object) :
         if sourcePath :
             if os.path.isdir(sourcePath) :
                 archSource = os.path.join(sourcePath, archName)
-        elif os.path.isdir(uc.userConfig['Resources']['archives']) :
-            userArchives = uc.userConfig['Resources']['archives']
+        elif os.path.isdir(uc.userConfig['Resources']['archive']) :
+            userArchives = uc.userConfig['Resources']['archive']
             archSource = os.path.join(userArchives, archName)
         else :
             self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
@@ -342,7 +342,7 @@ class ProjBackup (object) :
 
         # Set some paths and file names
         if not targetPath :
-            projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backups'], self.pid))
+            projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'], self.pid))
             backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
         else :
             projBackupFolder    = targetPath
@@ -408,7 +408,7 @@ class ProjBackup (object) :
 
         # Get vals we need
         projHome            = self.getProjHome()
-        projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backups'], self.pid))
+        projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'], self.pid))
 
         # Get the archive file name
         files = os.listdir(projBackupFolder)
@@ -479,7 +479,7 @@ class ProjBackup (object) :
 
         # Set source and target
         projHome            = uc.userConfig['Projects'][pid]['projectPath']
-        templateDir         = uc.userConfig['Resources']['templates']
+        templateDir         = uc.userConfig['Resources']['template']
         targetDir           = os.path.join(templateDir, tid)
         target              = os.path.join(templateDir, tid + '.zip')
         source              = projHome

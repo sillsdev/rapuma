@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, sys
 from configobj import ConfigObj
 
 # Load the local classes
@@ -134,50 +134,42 @@ class UserConfig (object) :
             return True
 
 
-    def setSystemSettings (self, cmdType, value) :
+    def setSystemSettings (self, section, key, value) :
         '''Function to make system settings.'''
 
-        if cmdType == 'userName' :
-            oldName = self.userConfig['System']['userName']
-            if oldName != value :
-                self.userConfig['System']['userName'] = value
-                # Write out the results
-                self.userConfig.write()
-                self.tools.terminal('\nRapuma user name setting changed from [' + oldName + '] to [' + value + '].\n\n')
-            else :
-                self.tools.terminal('\nSame name given, nothing to changed.\n\n')
-
-#        elif cmdType == 'resource' :
-#            # Before starting, check the path
-#            path = self.tools.resolvePath(value)
-#            if not os.path.isdir(path) :
-#                sys.exit('\nERROR: Invalid path: '  + path + '\n\nProcess halted.\n')
-
-#            # Make a list of sub-folders to make in the Rapuma resourcs folder
-#            resource = ['archive', 'backup', 'font', 'example', 'illustration', 'macro', \
-#                            'script', 'template']
-#            for r in resource :
-#                thisPath = os.path.join(path, 'Rapuma', r)
-#                # Create the folder if needed
-#                if not os.path.isdir(thisPath) :
-#                    os.makedirs(thisPath)
-
-#                # Copy in the Rapuma example zip files
-#                if r == 'example' :
-#                    exampleFiles = os.listdir(self.local.rapumaExampleFolder)
-#                    for f in exampleFiles :
-#                        try :
-#                            if f.split('.')[1].lower() == 'zip' :
-#                                shutil.copy(os.path.join(self.rapumaExampleFolder, f), thisPath)
-#                        except :
-#                            pass
-#                    
-#                # Record the path
-#                self.userConfig['Resource'][r] = thisPath
-
+        oldValue = self.userConfig[section][key]
+        if oldValue != value :
+            self.userConfig[section][key] = value
             # Write out the results
             self.userConfig.write()
-            self.tools.terminal('\nRapuma resource folder setting created/updated.\n\n')
+            self.tools.terminal('\nRapuma user name setting changed from [' + oldValue + '] to [' + value + '].\n\n')
+        else :
+            self.tools.terminal('\nSame value given, nothing to changed.\n\n')
+
+
+    def makeDefaultFolders (self) :
+        '''Setup the default Rapuma resource folders.'''
+
+        if not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
+            sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '.\n\nProcess halted.\n')
+        else :
+            projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
+
+        # Make a list of sub-folders to make in the Rapuma resourcs folder
+        resource = ['archive', 'backup', 'font', 'illustration', 'macro', \
+                        'script', 'template']
+        for r in resource :
+            thisPath = os.path.join(projects, 'Rapuma', r)
+            # Create the folder if needed
+            if not os.path.isdir(thisPath) :
+                os.makedirs(thisPath)
+
+            # Record the path
+            self.userConfig['Resources'][r] = thisPath
+
+        # Write out the results
+        self.userConfig.write()
+        self.tools.terminal('\nRapuma resource folder setting created/updated.\n\n')
 
 
 

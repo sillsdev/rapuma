@@ -130,60 +130,53 @@ Todo:
             <value>~/Publishing</value>
         </setting>
         <setting>
-            <name>Fonts Collection Path</name>
-            <key>fonts</key>
+            <name>Font Collection Path</name>
+            <key>font</key>
             <description>The full path to where fonts are kept on this system that the user would like to access. Note that there must be a valid XML description file for each font family.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/fonts</value>
+            <value>~/Publishing/Rapuma/font</value>
         </setting>
         <setting>
-            <name>Illustrations Collection Path</name>
-            <key>illustrations</key>
+            <name>Illustration Collection Path</name>
+            <key>illustration</key>
             <description>The full path to where illustrations are kept on this system that the user would like to access. Note that there must be a valid XML description file for each illustration collection.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/illustrations</value>
+            <value>~/Publishing/Rapuma/illustration</value>
         </setting>
         <setting>
-            <name>Custom Macros Collection Path</name>
-            <key>macros</key>
+            <name>Custom Macro Collection Path</name>
+            <key>macro</key>
             <description>The full path to where macros are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/macros</value>
+            <value>~/Publishing/Rapuma/macro</value>
         </setting>
         <setting>
-            <name>Custom Scripts Collection Path</name>
-            <key>scripts</key>
+            <name>Custom Script Collection Path</name>
+            <key>script</key>
             <description>The full path to where scripts are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/scripts</value>
-        </setting>
-        <setting>
-            <name>Custom Styles Collection Path</name>
-            <key>styles</key>
-            <description>The full path to where styles are kept on this system that the user would like to access.</description>
-            <type>string</type>
-            <value>~/Publishing/Rapuma/styles</value>
+            <value>~/Publishing/Rapuma/script</value>
         </setting>
         <setting>
             <name>Archived Projects Path</name>
-            <key>archives</key>
+            <key>archive</key>
             <description>The full path to where archives are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/archives</value>
+            <value>~/Publishing/Rapuma/archive</value>
         </setting>
         <setting>
             <name>Backup Projects Path</name>
-            <key>backups</key>
+            <key>backup</key>
             <description>The full path to where backups are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/backups</value>
+            <value>~/Publishing/Rapuma/backup</value>
         </setting>
         <setting>
-            <name>Project Templates Path</name>
-            <key>templates</key>
+            <name>Project Template Path</name>
+            <key>template</key>
             <description>The full path to where templates are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>templates</value>
+            <value>~/Publishing/Rapuma/template</value>
         </setting>
         <setting>
             <name>Project Cloud Path</name>
@@ -194,8 +187,8 @@ Todo:
         </setting>
         <setting>
             <name>Default Illustrations Library Name</name>
-            <key>defaultIllustrationsLibraryName</key>
-            <description>The name of the illustrations library that is most commonly used. This will go into all new projects but can be easily changed at the project level.</description>
+            <key>defaultIllustrationLibraryName</key>
+            <description>The name of the illustrations collection library that is most commonly used. This will go into all new projects but can be easily changed at the project level.</description>
             <type>string</type>
             <value>Knowles-600</value>
         </setting>

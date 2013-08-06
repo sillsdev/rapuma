@@ -124,7 +124,7 @@ def isTemplate (tid) :
     '''Check to see if a template exsists in the user's template store area.'''
 
     try :
-        templates = uc.userConfig['Resources']['templates']
+        templates = uc.userConfig['Resources']['template']
         if tid + '.zip' in os.listdir(templates) :
             return True
     except :
@@ -188,11 +188,36 @@ def userArguments (args) :
 
     ##### SYSTEM
     # Pre-command process: System level commands
+    # FIXME: I think this section can be simplified, not sure how yet
     if sys.argv[1].lower() == 'system' :
-        if args.user_name :
-            uc.setSystemSettings('userName', args.user_name)
-        elif args.resources :
-            uc.setSystemSettings('resources', args.resources)
+        cmdType     = args.command_type
+        cmd         = args.command
+        setting     = args.setting
+        if cmdType == 'setup' :
+            if not setting :
+                sys.exit('\nERROR: No setting was given. Process halting.\n')
+            # Path checking
+            if cmd in ['cloud', 'projects'] :
+                if not os.path.exists(tools.resolvePath(setting)) :
+                    sys.exit('\nERROR: Path given is not valid. Process halting.\n')
+                else :
+                    path = tools.resolvePath(setting)
+            if cmd == 'name' :
+                uc.setSystemSettings('System', 'userName', setting)
+            elif cmd == 'uid' :
+                uc.setSystemSettings('System', 'userID', setting)
+            elif cmd == 'project' :
+                uc.setSystemSettings('Resources', 'project', path)
+            elif cmd == 'cloud' :
+                uc.setSystemSettings('Resources', 'cloud', path)
+            elif cmd == 'folders' :
+                if setting == 'default' :
+                    uc.makeDefaultFolders()
+                else :
+                    sys.exit('\nERROR: Command not supported. (I realize this is not helpful but neither was your command! ;-) Process halting.\n')
+            else :
+                sys.exit('\nERROR: Command not supported. Process halting.\n')
+
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
         if not uc.userConfig['Projects'].has_key(args.project_id) :
@@ -518,9 +543,12 @@ def userArguments (args) :
     # Look for an error log file and notify the user if one is found that there
     # were errors in the process. This might have failed because we loose our 
     # project object some times. For now, we'll put a 'try' around it.
-    if not sys.argv[1].lower() == 'project' :
-        if local and os.path.isfile(local.projErrorLogFile) :
-            tools.terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+    if sys.argv[1].lower() == 'project' :
+        try :
+            if os.path.isfile(local.projErrorLogFile) :
+                tools.terminal('\n\t*** ERRORS OCCURRED. PLEASE CHECK ERROR LOG ***\n')
+        except :
+            pass
 
     # Do some project log maintenance
     trimLog()
@@ -550,6 +578,9 @@ subparsers = parser.add_subparsers(help='sub-command help')
 helpCommand = subparsers.add_parser('help', help='General system help')
 
 # Available choices
+# System
+syCommandTypes          = ['setup']
+syCommands              = ['name', 'uid', 'project', 'cloud', 'folders']
 # Project
 prCommandTypes          = ['archive', 'backup', 'cloud', 'groups', 'helper', 'project', 'template']
 prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
@@ -578,8 +609,9 @@ parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma h
 
 # Add project subprocess arguments
 sysCommand = subparsers.add_parser('system', help='General system management commands help')
-sysCommand.add_argument('-n', '--user_name', help='Proved a name of the user who will be using this system.')
-sysCommand.add_argument('-r', '--resources', help='Proved a valid path to where the user resources, such as backups, archives, etc., will be located.')
+sysCommand.add_argument('command_type', choices=syCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+sysCommand.add_argument('command', choices=syCommands, help='The setting command for managing user and system settings.')
+sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
 
 # FIXME: Restore from template will not work. The pid is the new project name but we
 # currently do not have any means to specify the template. The same will be true for

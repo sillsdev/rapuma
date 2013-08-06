@@ -8,11 +8,23 @@ RAPUMA SETUP
 -----------------------------------------
 Once Rapuma is installed, there really is not much setup to do. The first thing you will want to do is set the user name. To do that, use this command:
 
-    rapuma system -u "<Your Name>"
+    rapuma system setup name -s "<Your Name>"
 
-Rapuma manages a number of resources. It is often nice to put those in the folder where your publishing projects are, but that is not strictly necessary. To create the group of folders where the Rapuma resources will be kept, use this command:
+Set your user ID (no spaces) with...
 
-    rapuma system -r "<valid path>"
+    rapuma system setup uid -s <user_id>
+
+Set the default path to your publishing projects folder:
+
+    rapuma system setup projects -s "~/Publishing"
+
+Set the path to the "Cloud" (Internet storage like Dropbox):
+
+    rapuma system setup cloud -s "~/Dropbox/MSEAG_Publishing"
+
+Rapuma manages a number of resources. It is often nice to put those in the folder where your publishing projects are, that is the default but that is not strictly necessary and can be changed by editing the Rapuma system configuration file located in ~/.config/rapuma. To create the default group of folders where the Rapuma resources will be kept, use this command:
+
+    rapuma system setup folders -s default
 
 Rapuma will create a folder named "Rapuma" following the path you gave it. Inside that folder will be a number of other folders for things such as backups, archives, templates, etc.
 
@@ -21,6 +33,9 @@ This completes the basic setup routine for Rapuma. Now you can try the examples.
 
 RAPUMA EXAMPLES
 -----------------------------------------
-Rapuma comes with a couple example projects that help demonstrate what it can do and also test the system when revisions are made. If you ran the resources setup as noted above you will find several ZIP files in your Rapuma examples folder. Copy those compressed files to a folder where you can extract each of them. Then follow the readme file directions that are included with each example file.
+Rapuma comes with a couple example projects that help demonstrate what it can do and also test the system when revisions are made. Currently there are two demos that are found in the rapuma program directory that was downloaded from the Palaso projects repository. They are:
 
-This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.
+example-jas.sh (A paraphase of the book of James in English.)
+example-mrk.sh (The Book of Mark in a language that uses Burmese script.)
+
+The examples will be refined further and more will be added as development continues. This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.

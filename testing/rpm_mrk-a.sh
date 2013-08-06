@@ -50,7 +50,7 @@ rpm settings KYU-MYMR-MRKA project Groups/Intro bindingOrder 1
 echo copying: MYMR_textPreprocess.py
 cp ~/Publishing/testArea/KYUM/resource/MYMR_textPreprocess.py ~/Publishing/testArea/KYU-MYMR-MRKA/Script/MYMR_textPreprocess.py
 echo copying: usfmTex-ext.sty
-cp ~/Publishing/testArea/KYUM/resource/usfmTex-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Macro/usfmTex/usfmTex-ext.sty
+cp ~/Publishing/testArea/KYUM/resource/usfmTex-ext.sty ~/Publishing/testArea/KYU-MYMR-MRKA/Style/usfmTex-ext.sty
 
 # Now update the text so the customized (edited) prprocess is used
 rpm group KYU-MYMR-MRKA Mark group update --force

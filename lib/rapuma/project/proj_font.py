@@ -119,7 +119,7 @@ class ProjFont (object) :
 #        import pdb; pdb.set_trace()
 
         # Check for the font family bundle, look in user resources first
-        userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['fonts']), font + '.zip')
+        userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['font']), font + '.zip')
         rapumaSource = os.path.join(self.local.rapumaFontFolder, font + '.zip')
         source = ''
         if os.path.isfile(userSource) :
@@ -222,7 +222,7 @@ class ProjFont (object) :
 #        import pdb; pdb.set_trace()
 
         # Look in user resources first
-        userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['fonts']), font + '.zip')
+        userSource = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['font']), font + '.zip')
         rapumaSource = os.path.join(self.local.rapumaFontFolder, font + '.zip')
         confXml = os.path.join(self.local.projFontFolder, font, font + '.xml')
         if os.path.isfile(userSource) :

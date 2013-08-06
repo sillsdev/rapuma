@@ -301,6 +301,11 @@ class Xetex (Manager) :
             else :
                 linesOut.append(self.proj_config.processNestedPlaceholders(line, realVal))
 
+
+
+        print self.macSettingsFile
+
+
         # Open a fresh settings file
         with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
