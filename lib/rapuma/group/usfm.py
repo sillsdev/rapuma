@@ -235,7 +235,7 @@ class Usfm (Group) :
             cidUsfm = self.getCidPath(cid)
             # Test for source here and die if it isn't there
             if not os.path.isfile(cidUsfm) :
-                self.log.writeToLog(self.errorCodes['0220'], [cid], 'usfm.preProcessGroup():0220')
+                self.log.writeToLog(self.errorCodes['0220'], [cidUsfm], 'usfm.preProcessGroup():0220')
 
             # Add/manage the dependent files for this cid
             if self.macPack == 'usfmTex' or self.macPack == 'ptx2pdf' :
@@ -284,6 +284,12 @@ class Usfm (Group) :
                     if os.path.isfile(cidPiclistFile) :
                         os.remove(cidPiclistFile)
                         self.log.writeToLog(self.errorCodes['0255'], [cid])
+
+
+# FIXME: This error message is all wrong.
+
+
+
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macPack], 'usfm.preProcessGroup():0220')
 
