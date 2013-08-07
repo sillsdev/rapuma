@@ -353,11 +353,14 @@ class Xetex (Manager) :
             # the config file because the XML source(s) could vary
             writeObject.write('\n% INSTALLED FONTS\n')
             installedFonts = self.macPackConfig['Fonts'].keys()
+            primaryFont = self.macPackConfig['FontSettings']['primaryFont']
             for font in installedFonts :
-                for key in self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'].keys() :
-                    writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'][key]) + '\n')
-                for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
-                    writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
+                if font == primaryFont :
+                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'][key]) + '\n')
+                if not font == primaryFont :
+                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
 
                 writeObject.write('\n')
 
