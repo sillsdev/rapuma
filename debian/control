@@ -1,0 +1,12 @@
+Source: rapuma
+Maintainer: Robin Munn <robin_munn@sil.org>
+Section: python
+Priority: optional
+Build-Depends: python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
+Standards-Version: 3.9.1
+
+Package: python-rapuma
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Rapid Publication Manager
+ Rapuma is a publication management application.
