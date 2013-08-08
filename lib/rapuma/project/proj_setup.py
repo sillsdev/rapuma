@@ -99,7 +99,14 @@ class ProjSetup (object) :
         self.finishInit()
 
     def finishInit (self) :
-        '''If this is a new project we need to handle these settings special.'''
+        '''If this is a new project (or system) we need to handle these settings special.'''
+
+#            import pdb; pdb.set_trace()
+
+        # Catch if we have a Projects key sooner than later
+        if not self.userConfig.has_key('Projects') :
+            self.tools.buildConfSection(self.userConfig, 'Projects')
+            self.tools.writeConfFile(self.userConfig)
 
         if self.userConfig['Projects'].has_key(self.pid) :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
@@ -112,7 +119,6 @@ class ProjSetup (object) :
             self.projConfig         = ProjConfig(self.pid).projConfig
             self.proj_process       = ProjProcess(self.pid)
             self.log                = ProjLog(self.pid)
-            self.paratext           = Paratext(self.pid)
             self.compare            = ProjCompare(self.pid)
             self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
             self.tools_group        = ToolsGroup(self.local, self.projConfig, self.userConfig)
@@ -509,7 +515,8 @@ class ProjSetup (object) :
 
 
     def deleteProject (self) :
-        '''Delete a project fromthe Rapuma system registry and from the hard drive.'''
+        '''Delete a project fromthe Rapuma system registry and create a 
+        backup on the hard drive.'''
 
         # If no pid was given this fails
         if not self.pid :
@@ -526,11 +533,10 @@ class ProjSetup (object) :
             else :
                 self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
 
-        # Delete everything in the project path
-        # FIXME: If the project was not found in the config, but was actually physically present,
-        # This next part of the process gets skipped which can cause a problem if a new project
-        # of the same name is being setup. Is there a way around this?
+        # If force is used, backup the project then delete everything in the project path.
+        # If no force, then just do a simple (numbered) backup.
         if self.projHome :
+            self.tools.makeFolderBackup(self.projHome)
             if os.path.exists(self.projHome) :
                 shutil.rmtree(self.projHome)
                 self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
@@ -557,6 +563,9 @@ class ProjSetup (object) :
         was done previous to the call.'''
 
 #        import pdb; pdb.set_trace()
+
+        # To prevent loading errors, bring in the ParaTExt mod now
+        paratext           = Paratext(self.pid, gid)
 
         cType               = self.projConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
@@ -617,10 +626,10 @@ class ProjSetup (object) :
                 # Note: Using partial() to allows the passing of the cid param 
                 # into logUsfmFigure()
                 if extractFigMarkers :
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.paratext.logFigure, gid, cid), contents)
+                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(paratext.logFigure, gid, cid), contents)
                 # Now remove end notes from the text
                 if extractFeMarkers :
-                    contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.paratext.collectEndNotes, cid), contents)
+                    contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(paratext.collectEndNotes, cid), contents)
                 # Write out the remaining data to the working file
                 codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
                 # Finish by copying the tempFile to the source

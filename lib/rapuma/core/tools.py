@@ -38,7 +38,6 @@ class ToolsGroup (object) :
         self.projConfig             = projConfig
         self.userConfig             = userConfig
         self.pid                    = None
-        self.log                    = None
         self.tools                  = Tools()
 
         try :
@@ -204,6 +203,21 @@ class Tools (object) :
             for line in contents :
                 if line.split(':')[0] == 'NumberOfPages' :
                     return int(line.split(':')[1].strip())
+
+
+    def makeFolderBackup (self, source) :
+        '''Make a backup of a folder (and its subfolders).'''
+
+        if os.path.exists(source) :
+            if os.path.isdir(source) :
+                target = self.incrementFileName(source + '.bak')
+                shutil.copytree(source, target)
+                self.terminal('Backedup ' + source + ' to ' + target + '.')
+                return True
+            else :
+                self.terminal('Error: Source ' + source + ' is not a folder. Cannot backup folder.')
+        else :
+            self.terminal('Error: Source ' + source + ' does not exist. Cannot backup folder.')
 
 
     def incrementFileName (self, fileName) :

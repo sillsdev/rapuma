@@ -67,9 +67,6 @@ class ProjBackup (object) :
             '4250' : ['ERR', 'The cloud project [<<1>>] you want to pull from is owned by [<<2>>]. Use force (-f) to pull the project and change the local owner ID.'],
             '4260' : ['ERR', 'The local project [<<1>>] is newer than the cloud copy. If you seriously want to overwrite it, use force (-f) to do so.'],
             '4270' : ['MSG', 'Restored the project [<<1>>] from the cloud copy. Local copy is owned by [<<2>>].'],
-            '4280' : ['MSG', 'Backedup [<<1>>] to [<<2>>].'],
-            '4290' : ['WRN', 'Source [<<1>>] is not a folder. Cannot backup folder.'],
-            '4300' : ['MSG', 'Source [<<1>>] does not exist. Cannot backup folder.']
 
         }
 
@@ -130,7 +127,10 @@ class ProjBackup (object) :
                 self.userConfig['Projects'][pid]['projectPath'] = projHome
                 self.tools.writeConfFile(self.userConfig)
                 # Backup the oldPath if it is there
-                self.makeFolderBackup(oldPath)
+                self.tools.makeFolderBackup(oldPath)
+                # Now remove the orginal
+                if os.path.exists(oldPath) :
+                    shutil.rmtree(oldPath)
         else :
             self.log.writeToLog(self.errorCodes['1240'], [pid])
 
@@ -382,7 +382,11 @@ class ProjBackup (object) :
 
         # If there is an exsiting project make a temp backup in 
         # case something goes dreadfully wrong
-        self.makeFolderBackup(projHome)
+        self.tools.makeFolderBackup(projHome)
+        # Now remove the orginal
+        if os.path.exists(projHome) :
+            shutil.rmtree(projHome)
+        # Create an empty folder to restore to
         os.makedirs(projHome)
 
         # If we made it this far, extract the archive
@@ -682,23 +686,6 @@ class ProjBackup (object) :
         self.tools.writeConfFile(projConfig)
 
 
-    def makeFolderBackup (self, source) :
-        '''Make a backup of a folder (and its subfolders), then remove
-        the original folder.'''
-
-        if os.path.exists(source) :
-            if os.path.isdir(source) :
-                target = self.tools.incrementFileName(source + '.bak')
-                shutil.copytree(source, target)
-                shutil.rmtree(source)
-                self.log.writeToLog(self.errorCodes['4280'], [source,target])
-                return True
-            else :
-                self.log.writeToLog(self.errorCodes['4290'], [source])
-        else :
-            self.log.writeToLog(self.errorCodes['4300'], [source])
-
-
     def pushToCloud (self, force = False) :
         '''Push local project data to the cloud. If a file in the cloud is
         older than the project file, it will be sent. Otherwise, it will
@@ -825,7 +812,10 @@ class ProjBackup (object) :
             if self.isNewerThanLocal(cloud, self.getConfig(self.projHome)) and not force :
                 self.log.writeToLog(self.errorCodes['4260'], [self.pid])
             # Is the project physically present? To be safe, backup the old one
-            self.makeFolderBackup(self.projHome)
+            self.tools.makeFolderBackup(self.projHome)
+            # Now remove the orginal
+            if os.path.exists(self.projHome) :
+                shutil.rmtree(self.projHome)
             # If force is used then owner and age makes no difference
             doPull()
             self.buyLocal(self.getConfig(self.projHome))
@@ -838,7 +828,10 @@ class ProjBackup (object) :
         # This project is new to the system (registry)
         else :
             # Is the project physically present? Backup the old one if so
-            self.makeFolderBackup(self.projHome)
+            self.tools.makeFolderBackup(self.projHome)
+            # Now remove the orginal
+            if os.path.exists(self.projHome) :
+                shutil.rmtree(self.projHome)
             # Check owner
             if self.sameOwner(cloud) :
                 shutil.copytree(cloud, self.projHome)

@@ -150,22 +150,38 @@ class UserConfig (object) :
     def makeDefaultFolders (self) :
         '''Setup the default Rapuma resource folders.'''
 
+        # Get the user config project folder location
         if not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
-            sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '.\n\nProcess halted.\n')
+            sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '\n\nProcess halted.\n')
         else :
             projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
+            self.userConfig['Resources']['projects'] = projects
 
+        # Get the user config Rapuma resouce folder location
+        if self.userConfig['Resources']['rapumaResouce'] == '' :
+            rapumaResouce = os.path.join(projects, 'Rapuma')
+            self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
+        elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])) :
+            sys.exit('\nERROR: Invalid Rapuma resource folder path: ' + self.userConfig['Resources']['rapumaResouce'] + '\n\nProcess halted.\n')
+        else :
+            rapumaResouce = self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])
+            self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
+     
         # Make a list of sub-folders to make in the Rapuma resourcs folder
-        resource = ['archive', 'backup', 'font', 'illustration', 'macro', \
-                        'script', 'template']
-        for r in resource :
-            thisPath = os.path.join(projects, 'Rapuma', r)
-            # Create the folder if needed
-            if not os.path.isdir(thisPath) :
-                os.makedirs(thisPath)
+        resourceFolders = ['archive', 'backup', 'cloud', 'font', 'illustration', \
+                            'macro','script', 'template']
+        for r in resourceFolders :
+            thisPath = os.path.join(rapumaResouce, r)
+            if self.userConfig['Resources'].has_key(r) and self.userConfig['Resources'][r] != '' :
+                if os.path.exists(self.userConfig['Resources'][r]) :
+                    self.tools.terminal('Warning: Cannot create, ' + r + ' folder already exists at: ' + self.userConfig['Resources'][r])
+            else :
+                # Create the folder if needed
+                if not os.path.isdir(thisPath) :
+                    os.makedirs(thisPath)
 
-            # Record the path
-            self.userConfig['Resources'][r] = thisPath
+                # Record the path
+                self.userConfig['Resources'][r] = thisPath
 
         # Write out the results
         self.userConfig.write()

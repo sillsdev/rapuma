@@ -130,60 +130,67 @@ Todo:
             <value>~/Publishing</value>
         </setting>
         <setting>
+            <name>Rapuma Resource Path</name>
+            <key>rapumaResouce</key>
+            <description>The full path to where Rapuma resources like fonts, backups, etc. are kept. They can go any where but if it is not specified, Rapuma will look under Publishing first.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Font Collection Path</name>
             <key>font</key>
             <description>The full path to where fonts are kept on this system that the user would like to access. Note that there must be a valid XML description file for each font family.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/font</value>
+            <value></value>
         </setting>
         <setting>
             <name>Illustration Collection Path</name>
             <key>illustration</key>
             <description>The full path to where illustrations are kept on this system that the user would like to access. Note that there must be a valid XML description file for each illustration collection.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/illustration</value>
+            <value></value>
         </setting>
         <setting>
             <name>Custom Macro Collection Path</name>
             <key>macro</key>
             <description>The full path to where macros are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/macro</value>
+            <value></value>
         </setting>
         <setting>
             <name>Custom Script Collection Path</name>
             <key>script</key>
             <description>The full path to where scripts are kept on this system that the user would like to access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/script</value>
+            <value></value>
         </setting>
         <setting>
             <name>Archived Projects Path</name>
             <key>archive</key>
             <description>The full path to where archives are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/archive</value>
+            <value></value>
         </setting>
         <setting>
             <name>Backup Projects Path</name>
             <key>backup</key>
             <description>The full path to where backups are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/backup</value>
+            <value></value>
         </setting>
         <setting>
             <name>Project Template Path</name>
             <key>template</key>
             <description>The full path to where templates are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/template</value>
+            <value></value>
         </setting>
         <setting>
             <name>Project Cloud Path</name>
             <key>cloud</key>
             <description>The full path to where cloud backups are kept on this system that the user will need access.</description>
             <type>string</type>
-            <value>~/Publishing/Rapuma/cloud</value>
+            <value></value>
         </setting>
         <setting>
             <name>Default Illustrations Library Name</name>

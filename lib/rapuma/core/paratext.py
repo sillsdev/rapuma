@@ -51,20 +51,22 @@ class Paratext (object) :
         self.sourcePath             = None
 
         self.errorCodes     = {
+
             '0000' : ['MSG', 'Group processing messages'],
             '0005' : ['LOG', 'Paratext module finishInit() failed. No GID provided'],
             '0010' : ['WRN', 'Paratext module finishInit() failed with this error: [<<1>>]'],
+            '0020' : ['WRN', 'No source path is registered for this project. Some functions may not work properly.'],
+
         }
+
+#        import pdb; pdb.set_trace()
 
         # A source path is often important, try to get that now
         try :
             self.csid                   = self.projConfig['Groups'][self.gid]['csid']
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         except :
-        
-            print 'Error: source path not found. (BTW, fix this message, will ya!)'
-        
-            pass
+            self.log.writeToLog(self.errorCodes['0020'])
 
 
 ###############################################################################
