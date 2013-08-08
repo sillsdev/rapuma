@@ -12,6 +12,7 @@
 # folder configuration. Otherwise, this script will not work.
 cp ~/Projects/rapuma/resource/example/MBJAS.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/MBJAS.zip -d ~/Publishing/testArea
+rm -rf ~/Publishing/testArea/ENG-LATN-JAS
 
 # This first Rapuma command is for deleting any previous copies of this example project
 # on your system. It will first backup project data, then remove the current working copy.

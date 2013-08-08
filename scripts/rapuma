@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r736'
+systemVersion   = '0.6.r740'
 local           = None
 
 # Give a welcome message
@@ -197,7 +197,7 @@ def userArguments (args) :
             if not setting :
                 sys.exit('\nERROR: No setting was given. Process halting.\n')
             # Path checking
-            if cmd in ['cloud', 'projects'] :
+            if cmd in ['cloud', 'project'] :
                 if not os.path.exists(tools.resolvePath(setting)) :
                     sys.exit('\nERROR: Path given is not valid. Process halting.\n')
                 else :
@@ -207,12 +207,12 @@ def userArguments (args) :
             elif cmd == 'uid' :
                 uc.setSystemSettings('System', 'userID', setting)
             elif cmd == 'project' :
-                uc.setSystemSettings('Resources', 'project', path)
+                uc.setSystemSettings('Resources', 'projects', path)
             elif cmd == 'cloud' :
                 uc.setSystemSettings('Resources', 'cloud', path)
             elif cmd == 'folders' :
                 if setting == 'default' :
-                    uc.makeDefaultFolders()
+                    uc.makeDefaultFolders(args.force)
                 else :
                     sys.exit('\nERROR: Command not supported. (I realize this is not helpful but neither was your command! ;-) Process halting.\n')
             else :
@@ -303,7 +303,7 @@ def userArguments (args) :
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
-            if cmdType == 'groups' :
+            if cmdType == 'group' :
                 ProjSetup(pid).updateAllGroups(args.force)
             elif cmdType == 'helper' :
                 ProjCommander(pid).updateScripts()
@@ -580,9 +580,9 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Available choices
 # System
 syCommandTypes          = ['setup']
-syCommands              = ['name', 'uid', 'project', 'cloud', 'folders']
+syCommands              = ['name', 'uid', 'projects', 'cloud', 'folders']
 # Project
-prCommandTypes          = ['archive', 'backup', 'cloud', 'groups', 'helper', 'project', 'template']
+prCommandTypes          = ['archive', 'backup', 'cloud', 'group', 'helper', 'project', 'template']
 prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
 mediaTypes              = ['book']
 # Group
@@ -612,6 +612,7 @@ sysCommand = subparsers.add_parser('system', help='General system management com
 sysCommand.add_argument('command_type', choices=syCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
 sysCommand.add_argument('command', choices=syCommands, help='The setting command for managing user and system settings.')
 sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
+sysCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
 
 # FIXME: Restore from template will not work. The pid is the new project name but we
 # currently do not have any means to specify the template. The same will be true for

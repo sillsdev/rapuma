@@ -35,7 +35,12 @@ RAPUMA EXAMPLES
 -----------------------------------------
 Rapuma comes with a couple example projects that help demonstrate what it can do and also test the system when revisions are made. Currently there are two demos that are found in the rapuma program directory that was downloaded from the Palaso projects repository. They are:
 
-example-jas.sh (A paraphase of the book of James in English.)
-example-mrk.sh (The Book of Mark in a language that uses Burmese script.)
+File: example-jas.sh (A paraphase of the book of James in English.)
 
-The examples will be refined further and more will be added as development continues. This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial available.
+File: example-mrk.sh * (The Book of Mark in a language that uses Burmese script.)
+
+* Note this script is not fully working yet
+
+To get a better idea of what Rapuma does, read the comments that accompany each demo script. There is an explanation for each command. The examples will be refined further and more will be added as development continues. This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial material available.
+
+

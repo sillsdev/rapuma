@@ -109,7 +109,6 @@ class ProjSetup (object) :
             self.tools.writeConfFile(self.userConfig)
 
         if self.userConfig['Projects'].has_key(self.pid) :
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.backup             = ProjBackup(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
@@ -515,7 +514,7 @@ class ProjSetup (object) :
 
 
     def deleteProject (self) :
-        '''Delete a project fromthe Rapuma system registry and create a 
+        '''Delete a project from the Rapuma system registry and create a 
         backup on the hard drive.'''
 
         # If no pid was given this fails
@@ -533,8 +532,7 @@ class ProjSetup (object) :
             else :
                 self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
 
-        # If force is used, backup the project then delete everything in the project path.
-        # If no force, then just do a simple (numbered) backup.
+        # Do a simple (numbered) backup.
         if self.projHome :
             self.tools.makeFolderBackup(self.projHome)
             if os.path.exists(self.projHome) :
@@ -543,6 +541,9 @@ class ProjSetup (object) :
             else :
                 self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
                 return
+        else :
+            self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
+            return False
 
         # Report the process is done
         self.tools.terminal('Removal process for [' + self.pid + '] is completed.')

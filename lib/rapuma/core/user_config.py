@@ -147,7 +147,7 @@ class UserConfig (object) :
             self.tools.terminal('\nSame value given, nothing to changed.\n\n')
 
 
-    def makeDefaultFolders (self) :
+    def makeDefaultFolders (self, force = False) :
         '''Setup the default Rapuma resource folders.'''
 
         # Get the user config project folder location
@@ -158,7 +158,7 @@ class UserConfig (object) :
             self.userConfig['Resources']['projects'] = projects
 
         # Get the user config Rapuma resouce folder location
-        if self.userConfig['Resources']['rapumaResouce'] == '' :
+        if self.userConfig['Resources']['rapumaResouce'] == '' or force :
             rapumaResouce = os.path.join(projects, 'Rapuma')
             self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
         elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])) :
@@ -166,15 +166,15 @@ class UserConfig (object) :
         else :
             rapumaResouce = self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])
             self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
-     
+
         # Make a list of sub-folders to make in the Rapuma resourcs folder
         resourceFolders = ['archive', 'backup', 'cloud', 'font', 'illustration', \
                             'macro','script', 'template']
         for r in resourceFolders :
             thisPath = os.path.join(rapumaResouce, r)
-            if self.userConfig['Resources'].has_key(r) and self.userConfig['Resources'][r] != '' :
+            if self.userConfig['Resources'].has_key(r) and self.userConfig['Resources'][r] != '' and not force :
                 if os.path.exists(self.userConfig['Resources'][r]) :
-                    self.tools.terminal('Warning: Cannot create, ' + r + ' folder already exists at: ' + self.userConfig['Resources'][r])
+                    self.tools.terminal('Cannot create [' + r + '] folder. It already exists at:\n' + self.userConfig['Resources'][r] + '\nUse force (-f) to override.\n')
             else :
                 # Create the folder if needed
                 if not os.path.isdir(thisPath) :
