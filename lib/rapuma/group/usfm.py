@@ -179,7 +179,7 @@ class Usfm (Group) :
         '''Return the full path of the cName working text adjustments file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentFolder, cid, self.makeFileNameWithExt(cid) + '.adj')
+        return os.path.join(self.local.projComponentFolder, cid, self.makeFileName(cid) + '.adj')
 
 
 #    def getCidPiclistFile (self, cid) :

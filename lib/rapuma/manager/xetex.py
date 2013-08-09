@@ -443,6 +443,14 @@ class Xetex (Manager) :
             gidTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.gidTexFile), description))
             # First bring in the main macro file
             gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
+
+            # Load style files (default and extention come with the package)
+            gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+            # Load the global style extensions
+            gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
+            # Load the group style extensions
+            gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+
             # Load the settings
             gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
             # Load the settings extensions
@@ -453,12 +461,16 @@ class Xetex (Manager) :
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
-            # Load style files (default and extention come with the package)
-            gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
-            # Load the global style extensions
-            gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
-            # Load the group style extensions
-            gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+
+
+#            # Load style files (default and extention come with the package)
+#            gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+#            # Load the global style extensions
+#            gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
+#            # Load the group style extensions
+#            gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+
+
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
