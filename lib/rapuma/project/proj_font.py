@@ -77,6 +77,7 @@ class ProjFont (object) :
 
             '1220' : ['ERR', 'The Font bundle file [<<1>>] could not be found. Process halted.'],
             '1235' : ['MSG', 'Font [<<1>>] has been (or was already) installed into the project.'],
+            '1237' : ['MSG', 'Font [<<1>>] has been updated.'],
             '1240' : ['ERR', 'Font bundle file [<<1>>] not found.'],
             '1241' : ['ERR', 'Font bundle [<<1>>] not found.'],
             '1245' : ['LOG', '<<1>> font setup information added to project config'],
@@ -271,6 +272,20 @@ class ProjFont (object) :
         rRes = self.recordFont(self.cType, font, force)
         if cRes and rRes :
             self.log.writeToLog(self.errorCodes['1235'], [font])
+            return True
+
+
+    def updateFontPack (self, font) :
+        '''Update a font package but do not change any of the existing settings.'''
+
+        # Delete the existing font package (but not the settings)
+        fontDir = os.path.join(self.local.projFontFolder, font)
+        if os.path.exists(fontDir) :
+            shutil.rmtree(fontDir)
+        # Bring in a fresh copy
+        cRes = self.copyInFont(font)
+        if cRes :
+            self.log.writeToLog(self.errorCodes['1237'], [font])
             return True
 
 

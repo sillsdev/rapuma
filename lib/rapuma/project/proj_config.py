@@ -377,14 +377,8 @@ class ProjConfig (object) :
         '''Move the default macro package styles out of the freshly installed
         project macro package folder to the project Style folder.'''
 
-        # Get a list of style files to copy
-        styFiles = []
-        macPackFiles = os.listdir(self.projMacPackFolder)
-        for f in macPackFiles :
-            if f.split('.')[1].lower() == 'sty' :
-                styFiles.append(f)
         # Collect the style files to copy
-        for f in styFiles :
+        for f in self.getMacStyExtFiles() :
             source = os.path.join(self.projMacPackFolder, f)
             target = os.path.join(self.local.projStyleFolder, f)
             # Do not overwrite existing files unless force is used
@@ -397,18 +391,23 @@ class ProjConfig (object) :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
 
 
+    def getMacStyExtFiles (self) :
+        '''Return a list of macro package style extention files.'''
+
+        sFiles = []
+        macPackFiles = os.listdir(self.projMacPackFolder)
+        for f in macPackFiles :
+            if f.split('.')[1].lower() == 'sty' :
+                sFiles.append(f)
+        return sFiles
+
+
     def moveMacTex (self, force) :
         '''Move the custom macro package TeX out of the freshly installed
         project macro package folder to the project TeX folder.'''
 
-        # Get a list of style files to copy
-        texFiles = []
-        macPackFiles = os.listdir(self.projMacPackFolder)
-        for f in macPackFiles :
-            if f.find('-ext.tex') > 0 :
-                texFiles.append(f)
-        # Collect the style files to copy
-        for f in texFiles :
+        # Collect the TeX extention files to copy
+        for f in self.getMacTexExtFiles() :
             source = os.path.join(self.projMacPackFolder, f)
             target = os.path.join(self.local.projTexFolder, f)
             # Do not overwrite existing files unless force is used
@@ -419,6 +418,17 @@ class ProjConfig (object) :
                 os.remove(source)
             else :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
+
+
+    def getMacTexExtFiles (self) :
+        '''Return a list of macro package TeX extention files.'''
+
+        tFiles = []
+        macPackFiles = os.listdir(self.projMacPackFolder)
+        for f in macPackFiles :
+            if f.find('-ext.tex') > 0 :
+                tFiles.append(f)
+        return tFiles
 
 
     def removeMacPack (self, package, force = False) :
@@ -451,15 +461,27 @@ class ProjConfig (object) :
                 self.tools.writeConfFile(self.projConfig)
 
 
-    def updateMacPack (self, package, force = False) :
+    def updateMacPack (self, macPack) :
         '''Update a macro package with the latest version from Rapuma
-        but do not touch the config file. Force must be used.'''
+        but do not touch the config file.'''
 
-        if force :
-            self.installMacPackOnly(package)
-            self.log.writeToLog(self.errorCodes['3600'], [package])
-        else :
-            self.log.writeToLog(self.errorCodes['3100'], [package])
+        # Delete the existing macro package (but not the settings)
+        macDir = os.path.join(self.local.projMacroFolder, macPack)
+        if os.path.exists(macDir) :
+            shutil.rmtree(macDir)
+        # Reinstall the macPack
+        self.installMacPackOnly(macPack)
+        # Remove un-needed sty and tex files (to avoid confusion)
+        for f in self.getMacStyExtFiles() :
+            source = os.path.join(self.projMacPackFolder, f)
+            if os.path.exists(source) :
+                os.remove(source)
+        for f in self.getMacTexExtFiles() :
+            source = os.path.join(self.projMacPackFolder, f)
+            if os.path.exists(source) :
+                os.remove(source)
+
+        self.log.writeToLog(self.errorCodes['3600'], [macPack])
 
 
     def installMacPackOnly (self, package) :
