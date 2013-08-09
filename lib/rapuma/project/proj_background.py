@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, difflib, subprocess, shutil, re
+import codecs, os, difflib, subprocess, shutil, re, tempfile
 from configobj                          import ConfigObj
 
 # Load the local classes
@@ -225,7 +225,7 @@ class ProjBackground (object) :
 
         # Set our file names
         source = os.path.join(self.rpmIllustrationFolder, 'grid.svg')
-        output = os.path.join(self.projIllustrationFolder,  'lines-grid.svg')
+        output = tempfile.NamedTemporaryFile()
         final_output = bgLinesFile
 
         # For testing
@@ -238,9 +238,16 @@ class ProjBackground (object) :
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
         lineSpacingFactor   = float(self.macPackConfig['FontSettings']['lineSpacingFactor'])
         fontSizeUnit        = float(self.macPackConfig['FontSettings']['fontSizeUnit'].replace('pt', ''))
+
         marginUnit          = self.macPackFunctions.getMarginUnit()
         topMarginFactor     = self.macPackFunctions.getTopMarginFactor()
         bottomMarginFactor  = self.macPackFunctions.getBottomMarginFactor()
+
+        topMargin           = float(self.layoutConfig['PageLayout']['topMargin'])
+        bottomMargin        = float(self.layoutConfig['PageLayout']['bottomMargin'])
+        outsideMargin       = float(self.layoutConfig['PageLayout']['outsideMargin'])
+        insideMargin        = float(self.layoutConfig['PageLayout']['insideMargin'])
+        textWidth           = pageWidth - (outsideMargin + insideMargin)
 
         # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
         # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
@@ -248,14 +255,33 @@ class ProjBackground (object) :
 
         # The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
         # The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
+        
+        def mmToPx (mm) :
+            return round(mm * 90 / 25.4, 2)
+
+        def mmToPt (mm) :
+            return int(mm * 72 / 25.4)
+
         # paper height [px]
-        paperHeight = round(pageHeight*90/25.4, 2)
+        #paperHeight = round(pageHeight*90/25.4, 2)
+        paperPxHeight = mmToPx(pageHeight)
         # paper height [pt]
-        paperPointsHeight = int(pageHeight*72/25.4)
+        #paperPtHeight = int(pageHeight*72/25.4)
+        paperPtHeight = mmToPt(pageHeight)
         # paper width [px]
-        paperWidth = round(pageWidth*90/25.4, 2)
+        #paperPxWidth = round(pageWidth*90/25.4, 2)
+        paperPxWidth = mmToPx(pageWidth)
         # paper width [pt]
-        paperPointsWidth = int(pageWidth*72/25.4)
+        #paperPtWidth = int(pageWidth*72/25.4)
+        paperPtWidth = mmToPt(pageWidth)
+        # text width [px]
+        textPxWidth = mmToPx(textWidth)
+        # text width [pt]
+        textPtWidth = mmToPt(textWidth)
+        # top margin [px]
+        topPxMargin = mmToPx(topMargin)
+        # outside margin [px]
+        outsidePxMargin = mmToPx(outsideMargin)
 
         # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
         # [px] measurements in Inkscape
@@ -278,16 +304,31 @@ class ProjBackground (object) :
 
         # The firstBaseLine is topMargin minus topskip in [px] 
         firstBaseLine = topMargin - topskip
+#        firstBaseLine = topPxMargin - topskip
         if debug :
             self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
         # gridlines. 
         lineGridHeight = round(firstBaseLine - bottomMarginFactor * marginUnit*90/25.40, 3)
+        if debug :
+            self.tools.terminal('lineGridHeight: ' + str(lineGridHeight))
 
-        lineGridWidth = int((pageWidth-marginUnit*1.5)*90/25.4)
+#        lineGridWidth = int((pageWidth-marginUnit*1.5)*90/25.4)
+        lineGridWidth = textPxWidth
+        if debug :
+            self.tools.terminal('lineGridWidth: ' + str(lineGridWidth))
 
-        lineGridMargin = int(marginUnit*45/25.4)
+#        lineGridMargin = int(marginUnit*45/25.4)
+        lineGridMargin = outsidePxMargin
+        if debug :
+            self.tools.terminal('lineGridMargin: ' + str(lineGridMargin))
+
+
+
+#        self.tools.dieNow()
+
+
 
         # Read in the source file
         contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
@@ -297,23 +338,23 @@ class ProjBackground (object) :
         # 01 enter paper dimensions
         # paper height [px]
         # SearchText: @pH
-        # ReplaceText: variable paperHeight
-        contents = re.sub(ur'@pH', ur'%r' % paperHeight, contents)
+        # ReplaceText: variable paperPxHeight
+        contents = re.sub(ur'@pH', ur'%r' % paperPxHeight, contents)
 
         # 02 paper height [pt]
         # SearchText: @pPH
-        # ReplaceText: variable paperPointsHeight
-        contents = re.sub(ur'@pPH', ur'%r' % paperPointsHeight, contents)
+        # ReplaceText: variable paperPtHeight
+        contents = re.sub(ur'@pPH', ur'%r' % paperPtHeight, contents)
 
         # 03 paper width [px]
         # SearchText: @pW
-        # ReplaceText: variable paperWidth
-        contents = re.sub(ur'@pW', ur'%r' % paperWidth, contents)
+        # ReplaceText: variable paperPxWidth
+        contents = re.sub(ur'@pW', ur'%r' % paperPxWidth, contents)
 
         # 04 paper height [pt]
         # SearchText: @pPW
-        # ReplaceText: variable paperPointsWidth
-        contents = re.sub(ur'@pPW', ur'%r' % paperPointsWidth, contents)
+        # ReplaceText: variable paperPtWidth
+        contents = re.sub(ur'@pPW', ur'%r' % paperPtWidth, contents)
 
         # 05 Enter the position first base line
         # SearchText: @fBL
@@ -340,11 +381,10 @@ class ProjBackground (object) :
         # ReplaceText: variable baselineskip
         contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
 
-        # Write out a temp file so we can do some checks
-        codecs.open(output, "wt", encoding="utf_8_sig").write(contents)
+        # Write out a temp file so we are ready for the final process
+        codecs.open(output.name + '.svg', "wt", encoding="utf_8_sig").write(contents)
 
-        # commands = ['inkscape', output, final_output]
-        commands = ['inkscape', '-f', output, '-A', final_output]
+        commands = ['inkscape', '-f', output.name + '.svg', '-A', final_output]
 
 #        import pdb; pdb.set_trace()
 
