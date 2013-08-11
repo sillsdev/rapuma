@@ -137,7 +137,7 @@ class ProjCommander (object) :
                 'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
-                'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '], 
+                'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
             }
 
 
@@ -145,9 +145,12 @@ class ProjCommander (object) :
         '''Create a dictionary of the auxillary group script information used in
         most projects.'''
 
-        pid     = self.pid
-        cType   = projConfig['Groups'][gid]['cType']
-        mid     = self.projectMediaIDCode
+        pid         = self.pid
+        cType       = projConfig['Groups'][gid]['cType']
+        renderer    = projConfig['CompTypes'][cType.capitalize()]['renderer']
+        font        = projConfig['Managers'][cType + '_Font']['primaryFont']
+        macro       = projConfig['Managers'][cType + '_' + renderer.capitalize()]['macroPackage']
+        mid         = self.projectMediaIDCode
 
         return {
                 'compareSource' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare source'], 
@@ -160,6 +163,8 @@ class ProjCommander (object) :
                 'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group '     + pid + ' ' + gid + ' group         proof   --cid_list \"$1\" --force '], 
                 'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group '     + pid + ' ' + gid + ' group         final   --cid_list \"$1\" --force '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group '     + pid + ' ' + gid + ' group         update  --cid_list \"$1\" $2 '], 
+                'updateFont'    : ['Update the ' + gid + ' font.',                  'rapuma package '   + pid + ' ' + gid + ' \"' + font + '\" font update '], 
+                'updateMacro'   : ['Update the ' + gid + ' macro package.',         'rapuma package '   + pid + ' ' + gid + ' \"' + macro + '\" macro update '] 
             }
 
 
