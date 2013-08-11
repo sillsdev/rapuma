@@ -90,7 +90,7 @@ class UsfmTex (object) :
         on the bottom margin setting.'''
 
         bm              = float(self.layoutConfig['PageLayout']['bottomMargin'])
-        hp              = float(self.layoutConfig['PageLayout']['headerPosition'])
+        hp              = float(self.layoutConfig['PageLayout']['footerPosition'])
 
         return float("{0:.2f}".format(round(hp / bm, 2)))
 

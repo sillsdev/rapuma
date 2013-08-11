@@ -111,12 +111,12 @@ Todo:
             <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 5mm</description>
             <key>headerPosition</key>
             <type>integer</type>
-            <value>8</value>
+            <value>5</value>
         </setting>
         <setting>
             <name>Footer Position</name>
             <description>Relative position of the baseline of the footer to the bottom edge of the paper (not the text area)   Default = 5mm</description>
-            <key>headerPosition</key>
+            <key>footerPosition</key>
             <type>integer</type>
             <value>5</value>
         </setting>

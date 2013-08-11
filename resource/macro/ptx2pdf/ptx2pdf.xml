@@ -599,15 +599,6 @@ Todo:
             <texCode>\VerseRefstrue</texCode>
         </setting>
         <setting>
-            <name>Omit Book Reference (Running Header)</name>
-            <description>Omit the book name in the running header (RH). Default = False</description>
-            <key>omitBookReference</key>
-            <type>boolean</type>
-            <value>False</value>
-            <boolDepend state='true'>[config:macPackConfig|HeaderContent|omitBookReference]</boolDepend>
-            <texCode>\OmitBookReftrue</texCode>
-        </setting>
-        <setting>
             <name>Omit Chapter Number (Running Header)</name>
             <description>Omit the chapter numbers in the running header (RH). Default = False</description>
             <key>omitChapterNumberRH</key>
