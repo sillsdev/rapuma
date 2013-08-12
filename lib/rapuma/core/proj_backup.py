@@ -380,6 +380,8 @@ class ProjBackup (object) :
     def backupRestore (self, backup, projHome) :
         '''Restore a backup to a specified projHome folder.'''
 
+#        import pdb; pdb.set_trace()
+
         # If there is an exsiting project make a temp backup in 
         # case something goes dreadfully wrong
         self.tools.makeFolderBackup(projHome)
@@ -449,27 +451,31 @@ class ProjBackup (object) :
     def restoreExternalBackup (self, source, target = None, force = False) :
         '''Restore a non-existant project from an external backup to a target folder.
         If no target is provided the project will be installed in the default project
-        folder. The source path
-        and ZIP file must be valid'''
+        folder. The source path and ZIP file must be valid'''
 
-        # Get/make the project home reference
-        projHome = self.getProjHome(source)
+        # Get/make the (localized) project home reference
+        projHome = self.getProjHome(target)
+
+#        import pdb; pdb.set_trace()
+
+        # Create the source backup file name
+        source = os.path.join(source, self.pid + '.zip')
 
         # Restore the backup
         self.backupRestore(source, projHome)
 
         # Permission for executables is lost in the zip, fix them here
-        self.tools.fixExecutables(self.projHome)
+        self.tools.fixExecutables(projHome)
 
         # If this is a new project we will need to register it now
-        self.registerProject(self.projHome)
+        self.registerProject(projHome)
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             ProjCommander(self.pid).updateScripts()
 
         # Finish here (We will leave the backup-backup in place)
-        self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + self.projHome + '\n')
+        self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + projHome + '\n')
 
 
 ###############################################################################

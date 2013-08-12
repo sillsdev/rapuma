@@ -1,10 +1,12 @@
 #!/bin/sh
 
-##### Book of James Project Example #####
+# NOTE: This script is desined to work on the Linux operating system (Ubuntu 12.04).
+
+##### Book of James Basic Project Example #####
 # This example Rapuma project is the most basic set of commands needed to create output
-# with the Rapuma publishing system. This will create an example project on your system
-# and create a rough draft of the Book of James. A basic explanation of how it works is
-# explained in the following steps
+# with the Rapuma publishing system. Using the commands in this script, this will create
+# an example project on your system and create a rough draft of the Book of James. A basic
+# explanation of how it works is explained in the comments that precede each command.
 
 # Fetch and unpack the raw data for this project
 # These are not Rapuma commands, just basic terminal commands. Be sure that your system

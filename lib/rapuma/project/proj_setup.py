@@ -115,6 +115,10 @@ class ProjSetup (object) :
             # These could be initialized above but because it might be necessary
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
+
+
+# FIXME: See note at deleteProject()
+
             self.projConfig         = ProjConfig(self.pid).projConfig
             self.proj_process       = ProjProcess(self.pid)
             self.log                = ProjLog(self.pid)
@@ -516,6 +520,15 @@ class ProjSetup (object) :
     def deleteProject (self) :
         '''Delete a project from the Rapuma system registry and create a 
         backup on the hard drive.'''
+
+
+# FIXME: projConfig is being loaded in init. This causes a dummy project to be made if it is
+# present in the registry. To fix this, ProjConfig(self.pid).projConfig will need to be loaded
+# localy on each function that needs the projConfig or some other config that comes from it.
+
+
+
+#        import pdb; pdb.set_trace()
 
         # If no pid was given this fails
         if not self.pid :

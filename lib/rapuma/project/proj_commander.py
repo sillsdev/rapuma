@@ -34,7 +34,6 @@ class ProjCommander (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-#        self.projConfig         = ProjConfig(pid).projConfig
         self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local              = ProjLocal(self.pid)
@@ -69,12 +68,12 @@ class ProjCommander (object) :
         '''Create scripts that process specific group components.'''
 
         # Load projConfig now to prevent conflicts
-        projConfig = ProjConfig(self.pid).projConfig
+        projConfig      = ProjConfig(self.pid).projConfig
 
         # Output the scripts (If this is a new project we need to pass)
         if projConfig.has_key('Groups') :
             for gid in projConfig['Groups'].keys() :
-                allScripts = self.getGrpScripInfo(gid, projConfig)
+                allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projHelpScriptFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
@@ -141,17 +140,22 @@ class ProjCommander (object) :
             }
 
 
-    def getGrpScripInfo (self, gid, projConfig) :
+    def getGrpScripInfo (self, gid) :
         '''Create a dictionary of the auxillary group script information used in
         most projects.'''
 
+        # Load local versions of the config files
+        proj_config     = ProjConfig(self.pid, gid)
+        projConfig      = proj_config.projConfig
+        macPackConfig   = proj_config.macPackConfig
+        # Set the vars for this function
         pid         = self.pid
         cType       = projConfig['Groups'][gid]['cType']
         renderer    = projConfig['CompTypes'][cType.capitalize()]['renderer']
-        font        = projConfig['Managers'][cType + '_Font']['primaryFont']
-        macro       = projConfig['Managers'][cType + '_' + renderer.capitalize()]['macroPackage']
+        font        = macPackConfig['FontSettings']['primaryFont']
+        macro       = projConfig['CompTypes'][cType.capitalize()]['macroPackage']
         mid         = self.projectMediaIDCode
-
+        # Return a dictionary of all the commands we generate
         return {
                 'compareSource' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare source'], 
                 'compareWork'   : ['Compare working text with previous version.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare working'], 

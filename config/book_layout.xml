@@ -162,6 +162,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
+
         <setting>
             <name>Use Special Callers (Footnotes)</name>
             <description>If set to true, a symbol or a csv sequence of symbols is needed for footnotes. Default = False</description>
@@ -176,6 +177,22 @@ Todo:
             <type>string</type>
             <value>\kern0.2em *\kern0.4em</value>
         </setting>
+
+        <setting>
+            <name>Use Special Callers (Crossreferences)</name>
+            <description>If set to true, a symbol or a csv sequence of symbols is needed for crossreference. Default = False</description>
+            <key>useSpecialCallerCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Special Callers (Crossreferences)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a crossreference caller character, rather than the default incremental character(s). Default = \kern0.2em *\kern0.4em</description>
+            <key>specialCallerCrossrefs</key>
+            <type>string</type>
+            <value>\kern0.2em *\kern0.4em</value>
+        </setting>
+
         <setting>
             <name>Numeric Callers (Footnotes)</name>
             <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
@@ -197,11 +214,25 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
+        <setting>
+            <name>Omit Caller In Crossreferences</name>
+            <description>To omit caller characters from the crossreferences at the bottom of the page.</description>
+            <key>omitCallerInCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
 
         <setting>
             <name>Paragraphed Footnotes</name>
-            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one. Default = True</description>
             <key>paragraphedFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Paragraphed Crossreferences</name>
+            <description>Output the crossreferences on the bottom of the page in paragraph format rather than one line for each one. Default = True</description>
+            <key>paragraphedCrossrefs</key>
             <type>boolean</type>
             <value>True</value>
         </setting>

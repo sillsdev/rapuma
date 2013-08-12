@@ -334,18 +334,18 @@ Todo:
             <description>To omit caller characters from the cross references at the bottom of the page.   Default = False</description>
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
-            <value>False</value>
-            <boolDepend state='true'>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDepend>
-            <texCode>\OmitCallerInNote{x}</texCode>
+            <value>x</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|omitCallerInCrossrefs]</boolDepend>
+            <texCode>\OmitCallerInNote{[val]}</texCode>
         </setting>
         <setting>
             <name>Paragraphed Crossrefs</name>
             <description>Output the crossrefs on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
-            <value>True</value>
-            <boolDepend state='true'>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDepend>
-            <texCode>\ParagraphedNotes{x}</texCode>
+            <value>x</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|paragraphedCrossrefs]</boolDepend>
+            <texCode>\ParagraphedNotes{[val]}</texCode>
         </setting>
     </section>
 
