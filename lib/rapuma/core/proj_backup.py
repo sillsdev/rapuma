@@ -617,7 +617,12 @@ class ProjBackup (object) :
 
         # Compare if we made it this far
         cStamp = cloudConfig['Backup']['lastCloudPush']
-        pStamp = projConfig['Backup']['lastCloudPush']
+        # It is possible the local has never been pushed
+        # If that is the case, local is assumed older
+        try :
+            pStamp = projConfig['Backup']['lastCloudPush']
+        except :
+            return False
         if cStamp >= pStamp :
             return True
 
@@ -846,6 +851,10 @@ class ProjBackup (object) :
                     self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
                 else :
                     self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
+
+        # Add helper scripts if needed
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+            ProjCommander(self.pid).updateScripts()
 
 
     def getProjHome (self, tPath = None) :
