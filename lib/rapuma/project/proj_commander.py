@@ -19,10 +19,11 @@ import codecs, os
 from configobj import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools              import Tools
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.load_projconfig     import LoadProjConfig
 
 
 class ProjCommander (object) :
@@ -37,6 +38,8 @@ class ProjCommander (object) :
         self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local              = ProjLocal(self.pid)
+        self.projConfig         = LoadProjConfig(self.pid).projConfig
+
 
         # Log messages for this module
         self.errorCodes     = {
@@ -67,12 +70,9 @@ class ProjCommander (object) :
     def makeGrpScripts (self) :
         '''Create scripts that process specific group components.'''
 
-        # Load projConfig now to prevent conflicts
-        projConfig      = ProjConfig(self.pid).projConfig
-
         # Output the scripts (If this is a new project we need to pass)
-        if projConfig.has_key('Groups') :
-            for gid in projConfig['Groups'].keys() :
+        if self.projConfig.has_key('Groups') :
+            for gid in self.projConfig['Groups'].keys() :
                 allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projHelpScriptFolder, key) + gid
@@ -144,16 +144,14 @@ class ProjCommander (object) :
         '''Create a dictionary of the auxillary group script information used in
         most projects.'''
 
-        # Load local versions of the config files
-        proj_config     = ProjConfig(self.pid, gid)
-        projConfig      = proj_config.projConfig
-        macPackConfig   = proj_config.macPackConfig
+        # Load local versions of the macPack config
+        macPackConfig   = ProjConfig(self.pid, gid).macPackConfig
         # Set the vars for this function
         pid         = self.pid
-        cType       = projConfig['Groups'][gid]['cType']
-        renderer    = projConfig['CompTypes'][cType.capitalize()]['renderer']
+        cType       = self.projConfig['Groups'][gid]['cType']
+        renderer    = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
         font        = macPackConfig['FontSettings']['primaryFont']
-        macro       = projConfig['CompTypes'][cType.capitalize()]['macroPackage']
+        macro       = self.projConfig['CompTypes'][cType.capitalize()]['macroPackage']
         mid         = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {

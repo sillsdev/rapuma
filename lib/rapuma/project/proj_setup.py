@@ -24,7 +24,7 @@ import palaso.sfm as sfm
 from palaso.sfm                             import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools                      import Tools, ToolsPath, ToolsGroup
+from rapuma.core.tools                      import Tools, ToolsPath
 from rapuma.core.user_config                import UserConfig
 from rapuma.core.proj_local                 import ProjLocal
 from rapuma.core.proj_process               import ProjProcess
@@ -35,6 +35,7 @@ from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
 from rapuma.project.proj_config             import ProjConfig
+from rapuma.project.load_projconfig         import LoadProjConfig
 
 
 class ProjSetup (object) :
@@ -49,7 +50,6 @@ class ProjSetup (object) :
         self.projHome                       = None
         self.projectMediaIDCode             = None
         self.local                          = None
-        self.projConfig                     = None
         self.log                            = None
         self.groups                         = {}
 
@@ -115,16 +115,9 @@ class ProjSetup (object) :
             # These could be initialized above but because it might be necessary
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
-
-
-# FIXME: See note at deleteProject()
-
-            self.projConfig         = ProjConfig(self.pid).projConfig
-            self.proj_process       = ProjProcess(self.pid)
             self.log                = ProjLog(self.pid)
+            self.projConfig         = LoadProjConfig(self.pid).projConfig
             self.compare            = ProjCompare(self.pid)
-            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
-            self.tools_group        = ToolsGroup(self.local, self.projConfig, self.userConfig)
             return True
         else :
             return False
@@ -149,6 +142,9 @@ class ProjSetup (object) :
         check if there is any difference between the cid project backup
         copy and the proposed source. If there is, then it will perform
         the update. If not, it will require force to do the update.'''
+
+        # Grab the tools_path mod here to avoid conflict
+        tools_path         = ToolsPath(self.local, self.userConfig)
 
         # Just in case there are any problems with the source path
         # resolve it here before going on.
@@ -182,10 +178,10 @@ class ProjSetup (object) :
 
         # Process each cid
         for cid in cidList :
-            target          = self.tools_path.getWorkingFile(gid, cid)
-            targetSource    = self.tools_path.getWorkingSourceFile(gid, cid)
-            source          = self.tools_path.getSourceFile(gid, cid)
-            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
+            target          = tools_path.getWorkingFile(gid, cid)
+            targetSource    = tools_path.getWorkingSourceFile(gid, cid)
+            source          = tools_path.getSourceFile(gid, cid)
+            workingComp     = tools_path.getWorkCompareFile(gid, cid)
             # Set aside a tmp backup of the target
             targetBackup    = tempfile.NamedTemporaryFile(delete=True)
             if os.path.exists(target) :
@@ -210,7 +206,7 @@ class ProjSetup (object) :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
         # Now be sure the group is locked down before we go
-        if self.projConfig['Groups'][gid]['isLocked'] == 'False' :
+        if not self.isLocked(gid) :
             self.lockUnlock(gid, True)
 
 
@@ -298,18 +294,18 @@ class ProjSetup (object) :
         '''Handler to remove a group. If it is not found return True anyway.'''
 
         cidList     = self.projConfig['Groups'][gid]['cidList']
-        cType     = self.projConfig['Groups'][gid]['cType']
+        cType       = self.projConfig['Groups'][gid]['cType']
         groupFolder = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
-        if self.tools_path.isLocked(gid) and force == False :
+        if self.isLocked(gid) and force == False :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Remove subcomponents from the target if there are any
         self.tools.buildConfSection(self.projConfig, 'Groups')
         if self.projConfig['Groups'].has_key(gid) :
             for cid in cidList :
-                self.uninstallGroupComponent(gid, cid, force)
+                self.uninstallGroupComponent(gid, cid, self.projConfig, force)
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
                 self.log.writeToLog(self.errorCodes['0290'], [gid])
@@ -329,6 +325,9 @@ class ProjSetup (object) :
 
 #       import pdb; pdb.set_trace()
 
+        # Load mod here to avoid conflict
+        tools_path  = ToolsPath(self.local, self.userConfig)
+
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
         fileHandle  = cid + '_' + csid
@@ -340,8 +339,8 @@ class ProjSetup (object) :
         # Remove the files
         if force :
             targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
-            working         = self.tools_path.getWorkingFile(gid, cid)
+            workingComp     = tools_path.getWorkCompareFile(gid, cid)
+            working         = tools_path.getWorkingFile(gid, cid)
 
             if os.path.isfile(working) :
                 # First a comparison backup needs to be made of the working text
@@ -377,13 +376,16 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # To avoid conflicts, load mods here
+        tools_path  = ToolsPath(self.local, self.userConfig)
+
         # Make sure our group folder is there
         if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
-        sourcePath  = self.tools_path.getGroupSourcePath(gid)
+        sourcePath  = tools_path.getGroupSourcePath(gid)
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -442,10 +444,40 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0400 ########################
 ###############################################################################
 
-    def lockUnlock (self, gid, lock) :
-        '''This is a placeholder for a shared function.'''
+    def isLocked (self, gid) :
+        '''Test to see if a group is locked. Return True if the group is 
+        locked. However, if the group doesn't even exsist, it is assumed
+        that it is unlocked and return False. :-)'''
 
-        self.tools_group.lockUnlock(gid, lock)
+        if not self.projConfig['Groups'][gid].has_key('isLocked') :
+            return False
+        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
+            return True
+        else :
+            return False
+
+
+    def lockUnlock (self, gid, lock = True) :
+        '''Lock or unlock to enable or disable actions to be taken on a group.'''
+
+        try :
+            self.setLock(gid, lock)
+            return True
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            sys.exit('\nERROR: The group [' + gid + '] lock/unlock function failed with this error: [' + str(e) + ']')
+
+
+    def setLock (self, gid, lock) :
+        '''Set a group lock to True or False.'''
+
+        if self.projConfig['Groups'].has_key(gid) :
+            self.projConfig['Groups'][gid]['isLocked'] = lock
+            # Update the projConfig
+            if self.tools.writeConfFile(self.projConfig) :
+                return True
+        else :
+            return False
 
 
 ###############################################################################
@@ -578,15 +610,17 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # To prevent loading errors, bring in the ParaTExt mod now
-        paratext           = Paratext(self.pid, gid)
+        # To prevent loading errors, bring these mods now
+        paratext            = Paratext(self.pid, gid)
+        proj_process        = ProjProcess(self.pid)
+        tools_path          = ToolsPath(self.local, self.userConfig)
 
         cType               = self.projConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
-        target              = self.tools_path.getWorkingFile(gid, cid)
-        targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
-        source              = self.tools_path.getSourceFile(gid, cid)
+        target              = tools_path.getWorkingFile(gid, cid)
+        targetSource        = tools_path.getWorkingSourceFile(gid, cid)
+        source              = tools_path.getSourceFile(gid, cid)
         extractFigMarkers   = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
         extractFeMarkers    = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
@@ -620,8 +654,8 @@ class ProjSetup (object) :
         if self.usfmCopy(targetSource, target, gid) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
-                self.proj_process.checkForPreprocessScript(gid)
-                if not self.proj_process.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
+                proj_process.checkForPreprocessScript(gid)
+                if not proj_process.runProcessScript(target, tools_path.getGroupPreprocessFile(gid)) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
 

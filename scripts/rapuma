@@ -56,8 +56,8 @@ from rapuma.core.proj_backup            import ProjBackup
 from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
-from rapuma.core.tools                  import Tools, ToolsGroup
-from rapuma.project.proj_config         import ProjConfig
+from rapuma.core.tools                  import Tools
+from rapuma.project.load_projconfig     import LoadProjConfig
 from rapuma.project.proj_setup          import ProjSetup
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
@@ -225,7 +225,7 @@ def userArguments (args) :
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
-        pc          = ProjConfig(pid)
+        pc          = LoadProjConfig(pid)
         checkCreatorVersion(pid, pc.projConfig, systemVersion)
 
     # Command processing

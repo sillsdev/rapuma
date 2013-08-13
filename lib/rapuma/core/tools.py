@@ -19,74 +19,10 @@
 
 import codecs, os, sys, re, fileinput, zipfile, shutil, stat
 import difflib, tempfile, subprocess
-from datetime                           import *
-from xml.etree                          import cElementTree as ET
-from collections                        import defaultdict
-from configobj                          import ConfigObj, Section
-
-###############################################################################
-############################### Group Tools Class #############################
-###############################################################################
-
-class ToolsGroup (object) :
-    '''This is a special set of tools for working with groups.'''
-
-    def __init__(self, local, projConfig, userConfig) :
-        '''Do the primary initialization for this manager.'''
-
-        self.local                  = local
-        self.projConfig             = projConfig
-        self.userConfig             = userConfig
-        self.pid                    = None
-        self.tools                  = Tools()
-
-        try :
-            self.pid                = projConfig['ProjectInfo']['projectIDCode']
-        except :
-            pass
-
-###############################################################################
-########################### Group Locking Functions ###########################
-###############################################################################
-####################### Error Code Block Series = 0200 ########################
-###############################################################################
-
-
-    def isLocked (self, gid) :
-        '''Test to see if a group is locked. Return True if the group is 
-        locked. However, if the group doesn't even exsist, it is assumed
-        that it is unlocked and return False. :-)'''
-
-        if not self.projConfig['Groups'][gid].has_key('isLocked') :
-            return False
-        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
-            return True
-        else :
-            return False
-
-
-    def lockUnlock (self, gid, lock = True) :
-        '''Lock or unlock to enable or disable actions to be taken on a group.'''
-
-        try :
-            self.setLock(gid, lock)
-            return True
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            sys.exit('\nERROR: The group [' + gid + '] lock/unlock function failed with this error: [' + str(e) + ']')
-
-
-    def setLock (self, gid, lock) :
-        '''Set a group lock to True or False.'''
-
-        if self.projConfig['Groups'].has_key(gid) :
-            self.projConfig['Groups'][gid]['isLocked'] = lock
-            # Update the projConfig
-            if self.tools.writeConfFile(self.projConfig) :
-                return True
-        else :
-            return False
-
+from datetime                               import *
+from xml.etree                              import cElementTree as ET
+from collections                            import defaultdict
+from configobj                              import ConfigObj, Section
 
 ###############################################################################
 ################################ Path Tools Class #############################

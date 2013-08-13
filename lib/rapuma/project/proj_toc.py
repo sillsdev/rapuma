@@ -22,7 +22,7 @@ from configobj                          import ConfigObj, Section
 from functools                          import partial
 
 # Load the local classes
-from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.tools                  import Tools, ToolsPath
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
@@ -51,7 +51,6 @@ class ProjToc (object) :
         self.projConfig                 = ProjConfig(pid).projConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
-        self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.tocData                    = {}
         self.columns                    = str(0)
         # File names

@@ -20,11 +20,12 @@ import os, shutil, re
 from configobj                          import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.tools                  import Tools, ToolsPath
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.group.usfmTex               import UsfmTex
+from rapuma.project.load_projconfig     import LoadProjConfig
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -42,11 +43,10 @@ class ProjConfig (object) :
         self.projHome                       = self.userConfig['Projects'][pid]['projectPath']
         self.mType                          = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                          = ProjLocal(pid)
+        self.projConfig                     = LoadProjConfig(pid).projConfig
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
         # File names
-        self.projConfFileName               = 'project.conf'
-        self.progConfXmlFileName            = self.mType + '.xml'
         self.layoutConfFileName             = 'layout.conf'
         self.layoutXmlConfFileName          = self.mType + '_layout.xml'
         self.adjustmentConfFileName         = 'adjustment.conf'
@@ -59,8 +59,6 @@ class ProjConfig (object) :
         self.projConfFolder                 = self.local.projConfFolder
         self.rapumaConfigFolder             = self.local.rapumaConfigFolder
         # Files with paths
-        self.projConfFile                   = os.path.join(self.projConfFolder, self.projConfFileName)
-        self.projConfXmlFile                = os.path.join(self.rapumaConfigFolder, self.progConfXmlFileName)
         self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
         self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
         self.adjustmentConfFile             = os.path.join(self.projConfFolder, self.adjustmentConfFileName)
@@ -72,13 +70,10 @@ class ProjConfig (object) :
         # Load the config objects
         self.adjustmentConfig               = self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
         self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
-        self.projConfig                     = self.tools.initConfig(self.local.projConfFile, self.projConfXmlFile)
         self.hyphenConfig                   = self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
         self.illustrationConfig             = self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
 
         self.macPackFunctions               = UsfmTex(self.layoutConfig)
-        self.tools_path                     = ToolsPath(self.local, self.projConfig, self.userConfig)
-        self.tools_group                    = ToolsGroup(self.local, self.projConfig, self.userConfig)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -359,7 +354,6 @@ class ProjConfig (object) :
         self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
         self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, package)
 
-
         # Update existing macPack (but not conf file)
         if os.path.exists(self.projMacPackFolder) :
             self.updateMacPack(package, force)
@@ -373,9 +367,30 @@ class ProjConfig (object) :
         self.log.writeToLog(self.errorCodes['3300'], [package,self.macPackConfFileName])
 
 
+
+
+
+
+
+
+
+
+
+
     def moveMacStyles (self, force) :
         '''Move the default macro package styles out of the freshly installed
         project macro package folder to the project Style folder.'''
+
+
+
+
+# FIXME: For some reason the project folders have not been made so this fails at this point
+
+
+
+
+
+
 
         # Collect the style files to copy
         for f in self.getMacStyExtFiles() :
@@ -389,6 +404,16 @@ class ProjConfig (object) :
                 os.remove(source)
             else :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
+
+
+
+
+
+
+
+
+
+
 
 
     def getMacStyExtFiles (self) :

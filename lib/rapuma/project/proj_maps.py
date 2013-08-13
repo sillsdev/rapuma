@@ -22,7 +22,7 @@ from configobj                          import ConfigObj, Section
 from functools                          import partial
 
 # Load the local classes
-from rapuma.core.tools                  import Tools, ToolsPath, ToolsGroup
+from rapuma.core.tools                  import Tools, ToolsPath
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
@@ -51,7 +51,7 @@ class ProjMaps (object) :
         self.projConfig                 = ProjConfig(pid).projConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
-        self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
+#        self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
         self.paratext                   = Paratext(pid)
         # File names
         self.illustrationConfFileName   = 'illustration.conf'
@@ -310,6 +310,9 @@ class ProjMaps (object) :
         groupFolder     = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
+
+# FIXME: Locking may need to be local
+
         if self.tools_group.isLocked(gid) and force == False :
             self.log.writeToLog(self.errorCodes['0050'], [gid])
 
@@ -395,6 +398,9 @@ class ProjMaps (object) :
             source          = os.path.join(sourcePath, fileName)
 
             if force :
+
+# FIXME: Locking may need to be local
+
                 self.tools_group.lockUnlock(gid, False)
                 self.uninstallGroupComponent(gid, cid)
                 self.addComponent(gid, fileName, sourcePath, pgOrder)
@@ -404,6 +410,9 @@ class ProjMaps (object) :
 
         # Now be sure the group is locked down before we go
         if self.projConfig['Groups'][gid]['isLocked'] == 'False' :
+
+# FIXME: Locking may need to be local
+
             self.tools_group.lockUnlock(gid, True)
 
 
