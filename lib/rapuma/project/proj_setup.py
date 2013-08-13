@@ -532,6 +532,11 @@ class ProjSetup (object) :
         # If we made it to this point, we need to make a new project folder
         if not os.path.exists(self.local.projConfFolder) :
             os.makedirs(self.local.projConfFolder)
+            # Create all normal project folders
+            for fld in self.local.projFolders :
+                folder = os.path.join(self.local.projHome, fld)
+                if not os.path.exists(folder) :
+                    os.makedirs(folder)
 
         # Create the project depeding on if it is from a template or not
         if tid :

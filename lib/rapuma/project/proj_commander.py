@@ -150,7 +150,9 @@ class ProjCommander (object) :
         pid         = self.pid
         cType       = self.projConfig['Groups'][gid]['cType']
         renderer    = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
-        font        = macPackConfig['FontSettings']['primaryFont']
+        font        = ''
+        if macPackConfig['FontSettings'].has_key('primaryFont') :
+            font    = macPackConfig['FontSettings']['primaryFont']
         macro       = self.projConfig['CompTypes'][cType.capitalize()]['macroPackage']
         mid         = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate

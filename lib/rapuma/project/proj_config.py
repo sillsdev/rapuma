@@ -367,30 +367,9 @@ class ProjConfig (object) :
         self.log.writeToLog(self.errorCodes['3300'], [package,self.macPackConfFileName])
 
 
-
-
-
-
-
-
-
-
-
-
     def moveMacStyles (self, force) :
         '''Move the default macro package styles out of the freshly installed
         project macro package folder to the project Style folder.'''
-
-
-
-
-# FIXME: For some reason the project folders have not been made so this fails at this point
-
-
-
-
-
-
 
         # Collect the style files to copy
         for f in self.getMacStyExtFiles() :
@@ -404,16 +383,6 @@ class ProjConfig (object) :
                 os.remove(source)
             else :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
-
-
-
-
-
-
-
-
-
-
 
 
     def getMacStyExtFiles (self) :

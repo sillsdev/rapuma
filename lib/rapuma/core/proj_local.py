@@ -40,18 +40,18 @@ class ProjLocal (object) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
         self.tools              = Tools()
 
-# FIXME: Do we want to change the way we do this and add file names and
-# more sophisticated XML?
-
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
         if os.path.exists(rapumaXMLDefaults) :
             lc = self.tools.xml_to_section(rapumaXMLDefaults)
         else :
             raise IOError, "Can't open " + rapumaXMLDefaults
-            
+
         # Create a list of project folders for later processing
-        self.projFolders = lc['ProjFolders'].keys()
+        self.projFolders = []
+        for fldID in lc['ProjFolders'].keys() :
+            if not lc['ProjFolders'][fldID] in self.projFolders and lc['ProjFolders'][fldID] != '..' :
+                self.projFolders.append(lc['ProjFolders'][fldID])
 
         # Do a loopy thingy and pull out all the known folder names
         localTypes = ['ProjFolders', 'UserFolders', 'RapumaFolders']

@@ -46,7 +46,7 @@ class LoadProjConfig (object) :
         projConfFile                   = os.path.join(projConfFolder, projConfFileName)
         projConfXmlFile                = os.path.join(rapumaConfigFolder, progConfXmlFileName)
         # The proj config obj is really the only thing we want
-        self.projConfig                     = tools.initConfig(local.projConfFile, projConfXmlFile)
+        self.projConfig                = tools.initConfig(local.projConfFile, projConfXmlFile)
 
 ###############################################################################
 ############################ Manager Level Functions ##########################
