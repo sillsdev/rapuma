@@ -25,7 +25,6 @@ from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.group.usfmTex               import UsfmTex
-from rapuma.project.load_projconfig     import LoadProjConfig
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -486,6 +485,79 @@ class ProjConfig (object) :
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])
             return False
+
+
+###############################################################################
+######################### Configuration Loading Classes #######################
+###############################################################################
+
+class LoadProjConfig (object) :
+    '''Load project Configuration file for this project.'''
+
+    def __init__(self, pid) :
+        '''Do the primary initialization for this class.'''
+
+        userConfig                     = UserConfig().userConfig
+        mType                          = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                          = ProjLocal(pid)
+        tools                          = Tools()
+        # File names
+        projConfFileName               = 'project.conf'
+        progConfXmlFileName            = mType + '.xml'
+        # Paths
+        projConfFolder                 = local.projConfFolder
+        rapumaConfigFolder             = local.rapumaConfigFolder
+        # Files with paths
+        projConfFile                   = os.path.join(projConfFolder, projConfFileName)
+        projConfXmlFile                = os.path.join(rapumaConfigFolder, progConfXmlFileName)
+        # The proj config obj is really the only thing we want
+        self.projConfig                = tools.initConfig(local.projConfFile, projConfXmlFile)
+
+
+class LoadAdjustmentConfig (object) :
+    '''Load adjustment Configuration file for this project.'''
+
+    def __init__(self, pid) :
+        '''Do the primary initialization for this class.'''
+
+        pass
+
+
+class LoadLayoutConfig (object) :
+    '''Load layout Configuration file for this project.'''
+
+    def __init__(self, pid) :
+        '''Do the primary initialization for this class.'''
+
+        pass
+
+
+class LoadHyphenConfig (object) :
+    '''Load hyphen Configuration file for this project.'''
+
+    def __init__(self, pid) :
+        '''Do the primary initialization for this class.'''
+
+        pass
+
+
+class LoadIllustrationConfig (object) :
+    '''Load illustration Configuration file for this project.'''
+
+    def __init__(self, pid) :
+        '''Do the primary initialization for this class.'''
+
+        pass
+
+
+class LoadMacPackConfig (object) :
+    '''Load macro package Configuration file for this project.'''
+
+    def __init__(self, pid, gid) :
+        '''Do the primary initialization for this class.'''
+
+        pass
+
 
 
 
