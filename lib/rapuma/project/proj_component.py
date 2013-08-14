@@ -41,12 +41,12 @@ class ProjComponent (object) :
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.pmid                       = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local                      = ProjLocal(self.pid)
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.pmid                       = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.local                      = ProjLocal(pid)
         self.projConfig                 = ProjConfig(self.local).projConfig
-        self.log                        = ProjLog(self.pid)
-        self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
+        self.log                        = ProjLog(pid)
+        self.tools_path                 = ToolsPath(pid)
         # File names
 
         # Folder paths
@@ -54,19 +54,12 @@ class ProjComponent (object) :
         # File names with paths
 
 
-        self.finishInit()
-
         # Log messages for this module
         self.errorCodes     = {
 
             '0050' : ['MSG', 'Placeholder message'],
 
         }
-
-    def finishInit (self) :
-        '''If this is a new project some settings need to be handled special.'''
-
-        pass
 
 
 ###############################################################################

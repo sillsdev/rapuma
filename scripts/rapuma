@@ -58,7 +58,7 @@ from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
 from rapuma.project.load_projconfig     import LoadProjConfig
-from rapuma.project.proj_setup          import ProjSetup
+from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r747'
+systemVersion   = '0.6.r750'
 local           = None
 
 # Give a welcome message
@@ -269,7 +269,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'project' :
-                ProjSetup(pid).deleteProject()
+                ProjDelete(pid).deleteProject()
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'restore' :

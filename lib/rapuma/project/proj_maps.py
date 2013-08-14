@@ -45,13 +45,12 @@ class ProjMaps (object) :
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.mType                      = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
         self.projConfig                 = ProjConfig(pid).projConfig
         self.log                        = ProjLog(pid)
-        self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
-#        self.tools_group                = ToolsGroup(self.local, self.projConfig, self.userConfig)
+        self.tools_path                 = ToolsPath(pid)
         self.paratext                   = Paratext(pid)
         # File names
         self.illustrationConfFileName   = 'illustration.conf'

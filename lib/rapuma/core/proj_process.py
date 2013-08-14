@@ -82,7 +82,7 @@ class ProjProcess (object) :
         if self.projHome : 
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
-            self.tools_path         = ToolsPath(self.local, self.projConfig, self.userConfig)
+            self.tools_path         = ToolsPath(self.pid)
 
 
 ###############################################################################

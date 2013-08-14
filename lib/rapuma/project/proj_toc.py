@@ -45,19 +45,19 @@ class ProjToc (object) :
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode         = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.projectMediaIDCode         = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
         self.projConfig                 = ProjConfig(pid).projConfig
         self.log                        = ProjLog(pid)
-        self.tools_path                 = ToolsPath(self.local, self.projConfig, self.userConfig)
+        self.tools_path                 = ToolsPath(pid)
         self.tocData                    = {}
         self.columns                    = str(0)
         # File names
-        self.tocWorkFileName            = self.pid + '.toc'
+        self.tocWorkFileName            = pid + '.toc'
         # Folder paths
         self.projComponentFolder       = self.local.projComponentFolder
-        self.gidFolder                  = os.path.join(self.projComponentFolder, self.gid)
+        self.gidFolder                  = os.path.join(self.projComponentFolder, gid)
         # File names with paths
         self.tocWorkFile                = os.path.join(self.gidFolder, self.tocWorkFileName)
 

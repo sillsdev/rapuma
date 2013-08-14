@@ -117,6 +117,7 @@ class ProjSetup (object) :
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
             self.projConfig         = LoadProjConfig(self.pid).projConfig
+            self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True
         else :
@@ -142,9 +143,6 @@ class ProjSetup (object) :
         check if there is any difference between the cid project backup
         copy and the proposed source. If there is, then it will perform
         the update. If not, it will require force to do the update.'''
-
-        # Grab the tools_path mod here to avoid conflict
-        tools_path         = ToolsPath(self.local, self.userConfig)
 
         # Just in case there are any problems with the source path
         # resolve it here before going on.
@@ -178,10 +176,10 @@ class ProjSetup (object) :
 
         # Process each cid
         for cid in cidList :
-            target          = tools_path.getWorkingFile(gid, cid)
-            targetSource    = tools_path.getWorkingSourceFile(gid, cid)
-            source          = tools_path.getSourceFile(gid, cid)
-            workingComp     = tools_path.getWorkCompareFile(gid, cid)
+            target          = self.tools_path.getWorkingFile(gid, cid)
+            targetSource    = self.tools_path.getWorkingSourceFile(gid, cid)
+            source          = self.tools_path.getSourceFile(gid, cid)
+            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
             # Set aside a tmp backup of the target
             targetBackup    = tempfile.NamedTemporaryFile(delete=True)
             if os.path.exists(target) :
@@ -325,9 +323,6 @@ class ProjSetup (object) :
 
 #       import pdb; pdb.set_trace()
 
-        # Load mod here to avoid conflict
-        tools_path  = ToolsPath(self.local, self.userConfig)
-
         cType       = self.projConfig['Groups'][gid]['cType']
         csid        = self.projConfig['Groups'][gid]['csid']
         fileHandle  = cid + '_' + csid
@@ -339,8 +334,8 @@ class ProjSetup (object) :
         # Remove the files
         if force :
             targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-            workingComp     = tools_path.getWorkCompareFile(gid, cid)
-            working         = tools_path.getWorkingFile(gid, cid)
+            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
+            working         = self.tools_path.getWorkingFile(gid, cid)
 
             if os.path.isfile(working) :
                 # First a comparison backup needs to be made of the working text
@@ -376,16 +371,12 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # To avoid conflicts, load mods here
-        tools_path  = ToolsPath(self.local, self.userConfig)
-
         # Make sure our group folder is there
         if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
         # Get some group settings
         cType       = self.projConfig['Groups'][gid]['cType']
-        sourcePath  = tools_path.getGroupSourcePath(gid)
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -554,52 +545,6 @@ class ProjSetup (object) :
         return True
 
 
-    def deleteProject (self) :
-        '''Delete a project from the Rapuma system registry and create a 
-        backup on the hard drive.'''
-
-
-# FIXME: projConfig is being loaded in init. This causes a dummy project to be made if it is
-# present in the registry. To fix this, ProjConfig(self.pid).projConfig will need to be loaded
-# localy on each function that needs the projConfig or some other config that comes from it.
-
-
-
-#        import pdb; pdb.set_trace()
-
-        # If no pid was given this fails
-        if not self.pid :
-            self.tools.terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
-            return
-
-        # Check if project is registered with Rapuma
-        if not self.userConfig['Projects'].get(self.pid) :
-            self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
-        else :
-            # Remove references from user rapuma.conf
-            if self.user.unregisterProject(self.pid) :
-                self.tools.terminal('Removed [' + self.pid + '] from user configuration.')
-            else :
-                self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
-
-        # Do a simple (numbered) backup.
-        if self.projHome :
-            self.tools.makeFolderBackup(self.projHome)
-            if os.path.exists(self.projHome) :
-                shutil.rmtree(self.projHome)
-                self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
-            else :
-                self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
-                return
-        else :
-            self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
-            return False
-
-        # Report the process is done
-        self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
-        return True
-
-
 ###############################################################################
 ######################## USFM Component Text Functions ########################
 ###############################################################################
@@ -618,14 +563,13 @@ class ProjSetup (object) :
         # To prevent loading errors, bring these mods now
         paratext            = Paratext(self.pid, gid)
         proj_process        = ProjProcess(self.pid)
-        tools_path          = ToolsPath(self.local, self.userConfig)
 
         cType               = self.projConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
-        target              = tools_path.getWorkingFile(gid, cid)
-        targetSource        = tools_path.getWorkingSourceFile(gid, cid)
-        source              = tools_path.getSourceFile(gid, cid)
+        target              = self.tools_path.getWorkingFile(gid, cid)
+        targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
+        source              = self.tools_path.getSourceFile(gid, cid)
         extractFigMarkers   = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
         extractFeMarkers    = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
@@ -660,7 +604,7 @@ class ProjSetup (object) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
                 proj_process.checkForPreprocessScript(gid)
-                if not proj_process.runProcessScript(target, tools_path.getGroupPreprocessFile(gid)) :
+                if not proj_process.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
 
@@ -833,5 +777,64 @@ class ProjSetup (object) :
         outConfObj.filename = confFile
         if self.tools.writeConfFile(outConfObj) :
             self.log.writeToLog(self.errorCodes['2860'], [config, section, key, unicode(oldValue), unicode(newValue)])
+
+
+
+###############################################################################
+############################# Project Delete Class ############################
+###############################################################################
+
+# This class was created to prevent conflicts from the main class in this module.
+
+class ProjDelete (object) :
+
+    def __init__(self, pid) :
+        '''Intitate the whole class and create the object.'''
+
+        self.user                           = UserConfig()
+        self.userConfig                     = self.user.userConfig
+        self.tools                          = Tools()
+        self.pid                            = pid
+
+# Currently there is only this function in this class
+
+    def deleteProject (self) :
+        '''Delete a project from the Rapuma system registry and create a 
+        backup on the hard drive.'''
+
+#        import pdb; pdb.set_trace()
+
+        # If no pid was given this fails
+        if not self.pid :
+            self.tools.terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
+            return
+
+        # Check if project is registered with Rapuma
+        if not self.userConfig['Projects'].get(self.pid) :
+            self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
+        else :
+            # Remove references from user rapuma.conf
+            if self.user.unregisterProject(self.pid) :
+                self.tools.terminal('Removed [' + self.pid + '] from user configuration.')
+            else :
+                self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
+
+        # Do a simple (numbered) backup.
+        if self.projHome :
+            self.tools.makeFolderBackup(self.projHome)
+            if os.path.exists(self.projHome) :
+                shutil.rmtree(self.projHome)
+                self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
+            else :
+                self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
+                return
+        else :
+            self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
+            return False
+
+        # Report the process is done
+        self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
+        return True
+
 
 

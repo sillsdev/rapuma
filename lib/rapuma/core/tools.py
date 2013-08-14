@@ -31,35 +31,21 @@ from configobj                              import ConfigObj, Section
 class ToolsPath (object) :
     '''This is a special set of shared path tools.'''
 
-    def __init__(self, local, projConfig, userConfig) :
+    def __init__(self, pid) :
         '''Do the primary initialization for this manager.'''
 
-        self.local                  = local
-        self.projConfig             = projConfig
-        self.userConfig             = userConfig
-        self.pid                    = None
-        self.tools                  = Tools()
-        try :
-            self.pid                = projConfig['ProjectInfo']['projectIDCode']
-        except :
-            pass
+        # Rapuma libs
+        from rapuma.core.proj_local         import ProjLocal
+        from rapuma.project.load_projconfig import LoadProjConfig
+
+        self.local                          = ProjLocal(pid)
+        self.projConfig                     = LoadProjConfig(pid).projConfig
+        self.pid                            = pid
+        self.tools                          = Tools()
 
 ###############################################################################
 ############################ Functions Begin Here #############################
 ###############################################################################
-
-    def getGroupSourcePath (self, gid) :
-        '''Get the source path for a specified group.'''
-
-#        import pdb; pdb.set_trace()
-
-        csid = self.projConfig['Groups'][gid]['csid']
-        try :
-            return self.userConfig['Projects'][self.pid][csid + '_sourcePath']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            print 'ERROR: Could not find the path for group: [' + gid + '], This was the error: ' + str(e)
-
 
     def getSourceFile (self, gid, cid) :
         '''Get the source file name with path.'''
@@ -69,7 +55,7 @@ class ToolsPath (object) :
         # At this time, we only need this right here in this function
         from rapuma.core.paratext import Paratext
         pt                  = Paratext(self.pid, gid)
-        sourcePath          = self.getGroupSourcePath(gid)
+        sourcePath          = pt.getGroupSourcePath()
         cType               = self.projConfig['Groups'][gid]['cType']
         sourceEditor        = pt.getSourceEditor()
         # Build the file name
