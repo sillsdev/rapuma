@@ -57,7 +57,7 @@ from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
-from rapuma.project.proj_config         import Config, LoadProjConfig
+from rapuma.project.proj_config         import Config, ProjectConfiguration
 from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r763'
+systemVersion   = '0.6.r764'
 local           = None
 
 # Give a welcome message
@@ -225,7 +225,7 @@ def userArguments (args) :
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
-        pc          = LoadProjConfig(pid)
+        pc          = ProjectConfiguration(pid)
         checkCreatorVersion(pid, pc.projConfig, systemVersion)
 
     # Command processing

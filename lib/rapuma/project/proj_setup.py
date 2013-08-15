@@ -34,7 +34,7 @@ from rapuma.core.proj_backup                import ProjBackup
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
-from rapuma.project.proj_config             import Config, LoadProjConfig
+from rapuma.project.proj_config             import Config, ProjectConfiguration
 
 
 class ProjSetup (object) :
@@ -115,7 +115,7 @@ class ProjSetup (object) :
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
-            self.projConfig         = LoadProjConfig(self.pid).projConfig
+            self.projConfig         = ProjectConfiguration(self.pid).projConfig
             self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True

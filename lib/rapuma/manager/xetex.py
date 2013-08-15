@@ -23,7 +23,7 @@ from configobj                          import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.core.paratext               import Paratext
-from rapuma.project.proj_config         import Config, LoadProjConfig
+from rapuma.project.proj_config         import Config, ProjectConfiguration
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
@@ -68,7 +68,7 @@ class Xetex (Manager) :
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         # Get config objs
-        self.projConfig             = LoadProjConfig(self.pid).projConfig
+        self.projConfig             = ProjectConfiguration(self.pid).projConfig
         self.layoutConfig           = self.proj_config.layoutConfig
         self.userConfig             = self.project.userConfig
         self.macPackConfig          = self.proj_config.macPackConfig

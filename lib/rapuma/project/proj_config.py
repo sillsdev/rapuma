@@ -35,47 +35,25 @@ class Config (object) :
     def __init__(self, pid, gid = None) :
         '''Do the primary initialization for this class.'''
 
-
-# FIXME: Need to move all config loading out to seperate classes found below in this mod
-
-
         self.pid                            = pid
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
         self.projHome                       = self.userConfig['Projects'][pid]['projectPath']
-        self.mType                          = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                          = ProjLocal(pid)
-        self.projConfig                     = LoadProjConfig(pid).projConfig
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
-        # File names
-        self.layoutConfFileName             = 'layout.conf'
-        self.layoutXmlConfFileName          = self.mType + '_layout.xml'
-        self.adjustmentConfFileName         = 'adjustment.conf'
-        self.adjustmentXmlConfFileName      = 'adjustment.xml'
-        self.hyphenConfFileName             = 'hyphenation.conf'
-        self.hyphenXmlConfFileName          = 'hyphenation.xml'
-        self.illustrationConfFileName       = 'illustration.conf'
-        self.illustrationXmlConfFileName    = 'illustration.xml'
-        # Paths
-        self.projConfFolder                 = self.local.projConfFolder
-        self.rapumaConfigFolder             = self.local.rapumaConfigFolder
-        # Files with paths
-        self.layoutConfFile                 = os.path.join(self.projConfFolder, self.layoutConfFileName)
-        self.layoutXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.layoutXmlConfFileName)
-        self.adjustmentConfFile             = os.path.join(self.projConfFolder, self.adjustmentConfFileName)
-        self.adjustmentXmlConfFile          = os.path.join(self.rapumaConfigFolder, self.adjustmentXmlConfFileName)
-        self.hyphenConfFile                 = os.path.join(self.projConfFolder, self.hyphenConfFileName)
-        self.hyphenXmlConfFile              = os.path.join(self.rapumaConfigFolder, self.hyphenXmlConfFileName)
-        self.illustrationConfFile           = os.path.join(self.projConfFolder, self.illustrationConfFileName)
-        self.illustrationXmlConfFile        = os.path.join(self.rapumaConfigFolder, self.illustrationXmlConfFileName)
-        # Load the config objects
-        self.adjustmentConfig               = self.tools.initConfig(self.adjustmentConfFile, self.adjustmentXmlConfFile)
-        self.layoutConfig                   = self.tools.initConfig(self.layoutConfFile, self.layoutXmlConfFile)
-        self.hyphenConfig                   = self.tools.initConfig(self.hyphenConfFile, self.hyphenXmlConfFile)
-        self.illustrationConfig             = self.tools.initConfig(self.illustrationConfFile, self.illustrationXmlConfFile)
 
+        self.projConfig                     = ProjectConfiguration(pid).projConfig
+        self.adjustmentConfig               = AdjustmentConfiguration(pid).adjustmentConfig
+        self.layoutConfig                   = LayoutConfiguration(pid).layoutConfig
+        self.hyphenConfig                   = HyphenConfiguration(pid).hyphenConfig
+        self.illustrationConfig             = IllustrationConfiguration(pid).illustrationConfig
+
+# FIXME: Need to finish this class
+#        self.macPackConfig                  = MacroPackageConfiguration(pid, gid).macPackConfig
+
+# FIXME: This needs to be macPack specific
         self.macPackFunctions               = UsfmTex(self.layoutConfig)
 
         # Log messages for this module
@@ -123,7 +101,7 @@ class Config (object) :
                 self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, self.macPack)
 
                 # File names with paths
-                self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+                self.macPackConfFile            = os.path.join(self.local.projConfFolder, self.macPackConfFileName)
                 self.macPackXmlConfFile         = os.path.join(self.projMacroFolder, self.macPack, self.macPackXmlConfFileName)
                 self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
                 # Load the macro package config
@@ -352,7 +330,7 @@ class Config (object) :
         self.macPackFileName            = package + '.zip'
         self.macPackXmlConfFileName     = package + '.xml'
         self.macPackConfFileName        = package + '.conf'
-        self.macPackConfFile            = os.path.join(self.projConfFolder, self.macPackConfFileName)
+        self.macPackConfFile            = os.path.join(self.local.projConfFolder, self.macPackConfFileName)
         self.macPackXmlConfFile         = os.path.join(self.projMacroFolder, package, self.macPackXmlConfFileName)
         self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
         self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, package)
@@ -495,73 +473,118 @@ class Config (object) :
 ######################### Configuration Loading Classes #######################
 ###############################################################################
 
-class LoadProjConfig (object) :
+class ProjectConfiguration (object) :
     '''Load project Configuration file for this project.'''
 
     def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
-        userConfig                     = UserConfig().userConfig
-        mType                          = userConfig['Projects'][pid]['projectMediaIDCode']
-        local                          = ProjLocal(pid)
-        tools                          = Tools()
+        userConfig                      = UserConfig().userConfig
+        mType                           = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                           = ProjLocal(pid)
+        tools                           = Tools()
         # File names
-        projConfFileName               = 'project.conf'
-        progConfXmlFileName            = mType + '.xml'
+        projConfFileName                = 'project.conf'
+        progConfXmlFileName             = mType + '.xml'
         # Paths
-        projConfFolder                 = local.projConfFolder
-        rapumaConfigFolder             = local.rapumaConfigFolder
+        projConfFolder                  = local.projConfFolder
+        rapumaConfigFolder              = local.rapumaConfigFolder
         # Files with paths
-        projConfFile                   = os.path.join(projConfFolder, projConfFileName)
-        projConfXmlFile                = os.path.join(rapumaConfigFolder, progConfXmlFileName)
+        projConfFile                    = os.path.join(projConfFolder, projConfFileName)
+        projConfXmlFile                 = os.path.join(rapumaConfigFolder, progConfXmlFileName)
         # The proj config obj is really the only thing we want
-        self.projConfig                = tools.initConfig(local.projConfFile, projConfXmlFile)
+        self.projConfig                 = tools.initConfig(local.projConfFile, projConfXmlFile)
 
 
-
-
-
-
-# FIXME: Finish moving the following config loader code down here to the classes
-
-
-class LoadAdjustmentConfig (object) :
+class AdjustmentConfiguration (object) :
     '''Load adjustment Configuration file for this project.'''
 
     def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
-        pass
+        userConfig                      = UserConfig().userConfig
+        mType                           = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                           = ProjLocal(pid)
+        tools                           = Tools()
+        # File names
+        adjustmentConfFileName          = 'adjustment.conf'
+        adjustmentXmlConfFileName       = 'adjustment.xml'
+        # Paths
+        projConfFolder                  = local.projConfFolder
+        rapumaConfigFolder              = local.rapumaConfigFolder
+        # Files with paths
+        adjustmentConfFile              = os.path.join(projConfFolder, adjustmentConfFileName)
+        adjustmentXmlConfFile           = os.path.join(rapumaConfigFolder, adjustmentXmlConfFileName)
+        self.adjustmentConfig           = self.tools.initConfig(adjustmentConfFile, adjustmentXmlConfFile)
 
 
-class LoadLayoutConfig (object) :
+class LayoutConfiguration (object) :
     '''Load layout Configuration file for this project.'''
 
     def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
-        pass
+        userConfig                      = UserConfig().userConfig
+        mType                           = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                           = ProjLocal(pid)
+        tools                           = Tools()
+        # File names
+        layoutConfFileName              = 'layout.conf'
+        layoutXmlConfFileName           = mType + '_layout.xml'
+        # Paths
+        projConfFolder                  = local.projConfFolder
+        rapumaConfigFolder              = local.rapumaConfigFolder
+        # Files with paths
+        layoutConfFile                  = os.path.join(projConfFolder, layoutConfFileName)
+        layoutXmlConfFile               = os.path.join(rapumaConfigFolder, layoutXmlConfFileName)
+        self.layoutConfig               = self.tools.initConfig(layoutConfFile, layoutXmlConfFile)
 
 
-class LoadHyphenConfig (object) :
+class HyphenConfiguration (object) :
     '''Load hyphen Configuration file for this project.'''
 
     def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
-        pass
+        userConfig                      = UserConfig().userConfig
+        mType                           = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                           = ProjLocal(pid)
+        tools                           = Tools()
+        # File names
+        hyphenConfFileName              = 'hyphenation.conf'
+        hyphenXmlConfFileName           = 'hyphenation.xml'
+        # Paths
+        projConfFolder                  = local.projConfFolder
+        rapumaConfigFolder              = local.rapumaConfigFolder
+        # Files with paths
+        hyphenConfFile                  = os.path.join(projConfFolder, hyphenConfFileName)
+        hyphenXmlConfFile               = os.path.join(rapumaConfigFolder, hyphenXmlConfFileName)
+        self.hyphenConfig               = self.tools.initConfig(hyphenConfFile, hyphenXmlConfFile)
 
 
-class LoadIllustrationConfig (object) :
+class IllustrationConfiguration (object) :
     '''Load illustration Configuration file for this project.'''
 
     def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
-        pass
+        userConfig                      = UserConfig().userConfig
+        mType                           = userConfig['Projects'][pid]['projectMediaIDCode']
+        local                           = ProjLocal(pid)
+        tools                           = Tools()
+        # File names
+        illustrationConfFileName        = 'illustration.conf'
+        illustrationXmlConfFileName     = 'illustration.xml'
+        # Paths
+        projConfFolder                  = local.projConfFolder
+        rapumaConfigFolder              = local.rapumaConfigFolder
+        # Files with paths
+        illustrationConfFile            = os.path.join(projConfFolder, illustrationConfFileName)
+        illustrationXmlConfFile         = os.path.join(rapumaConfigFolder, illustrationXmlConfFileName)
+        self.illustrationConfig         = self.tools.initConfig(illustrationConfFile, illustrationXmlConfFile)
 
 
-class LoadMacPackConfig (object) :
+class MacroPackageConfiguration (object) :
     '''Load macro package Configuration file for this project.'''
 
     def __init__(self, pid, gid) :

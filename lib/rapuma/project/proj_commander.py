@@ -22,7 +22,7 @@ from configobj import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
-from rapuma.project.proj_config         import Config, LoadProjConfig
+from rapuma.project.proj_config         import Config, ProjectConfiguration
 
 
 class ProjCommander (object) :
@@ -37,7 +37,7 @@ class ProjCommander (object) :
         self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local              = ProjLocal(self.pid)
-        self.projConfig         = LoadProjConfig(self.pid).projConfig
+        self.projConfig         = ProjectConfiguration(self.pid).projConfig
 
 
         # Log messages for this module
