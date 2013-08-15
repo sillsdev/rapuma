@@ -53,6 +53,7 @@ class ProjBackup (object) :
             '3550' : ['ERR', 'Project backup version request: [<<1>>] exceeds the maxium number which could be in storage which is: [<<2>>]. Request an earlier (lesser) version.'],
             '3610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
             '3620' : ['ERR', 'The path to the backup folder is not valid [<<1>>]. Please try again.'],
+            '3622' : ['ERR', 'The path to the backup folder is not set. Please set it and try again.'],
             '3625' : ['ERR', 'The path given to the backup folder is not valid [<<1>>]. Please set the system backup path.'],
             '3630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
@@ -356,7 +357,9 @@ class ProjBackup (object) :
         if not targetPath :
             sysBackupFolder = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup']))
             # Now check for a valid location to backup to
-            if not os.path.exists(sysBackupFolder) :
+            if self.userConfig['Resources']['backup'] == '' :
+                self.log.writeToLog(self.errorCodes['3622'])
+            elif not os.path.exists(sysBackupFolder) :
                 self.log.writeToLog(self.errorCodes['3620'], [sysBackupFolder])
             projBackupFolder    = os.path.join(sysBackupFolder, self.pid)
             backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
@@ -366,6 +369,11 @@ class ProjBackup (object) :
             if not os.path.exists(projBackupFolder) :
                 self.log.writeToLog(self.errorCodes['3625'], [targetPath])
             backupTarget        = self.tools.incrementFileName(os.path.join(projBackupFolder, self.pid + '.zip'))
+
+        print ':::', self.userConfig['Resources']['backup']
+        print ':::', sysBackupFolder
+
+        self.tools.dieNow(projBackupFolder)
 
         # Make sure the dir is there
         if not os.path.exists(projBackupFolder) :
