@@ -138,7 +138,6 @@ class ProjBackup (object) :
             self.log.writeToLog(self.errorCodes['1240'], [pid])
 
 
-
 ###############################################################################
 ########################## Archive Project Functions ##########################
 ###############################################################################
@@ -712,12 +711,15 @@ class ProjBackup (object) :
             # Get a total list of files from the project
             cn = 0
             cr = 0
+            sys.stdout.write('\nPulling files from the cloud')
+            sys.stdout.flush()
             for folder, subs, files in os.walk(cloud):
                 for fileName in files:
                     if not os.path.isdir(folder.replace(cloud, self.projHome)) :
                         os.makedirs(folder.replace(cloud, self.projHome))
                     cFile = os.path.join(folder, fileName)
                     pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
+                    print cFile
                     if not os.path.isfile(pFile) :
                         shutil.copy(cFile, pFile)
                         cn +=1
@@ -726,6 +728,11 @@ class ProjBackup (object) :
                             os.remove(pFile)
                         shutil.copy(cFile, pFile)
                         cr +=1
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+            # Add space for next message
+            sys.stdout.write('\n')
+
             # Report what happened
             self.log.writeToLog(self.errorCodes['4210'])
             if cn == 0 and cr == 0 :
