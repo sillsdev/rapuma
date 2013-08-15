@@ -52,6 +52,8 @@ class ProjBackup (object) :
             '3530' : ['MSG', 'Project backup: [<<1>>] has been restored to: [<<2>>]. A backup of the orginal project remains and must be manually removed.'],
             '3550' : ['ERR', 'Project backup version request: [<<1>>] exceeds the maxium number which could be in storage which is: [<<2>>]. Request an earlier (lesser) version.'],
             '3610' : ['ERR', 'The [<<1>>]. project is not registered. No backup was done.'],
+            '3620' : ['ERR', 'The path to the backup folder is not valid [<<1>>]. Please try again.'],
+            '3625' : ['ERR', 'The path given to the backup folder is not valid [<<1>>]. Please set the system backup path.'],
             '3630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
             '4110' : ['MSG', 'Completed pushing/saving data to the cloud.'],
@@ -352,10 +354,17 @@ class ProjBackup (object) :
 
         # Set some paths and file names
         if not targetPath :
-            projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'], self.pid))
+            sysBackupFolder = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'])
+            # Now check for a valid location to backup to
+            if not os.path.exists(sysBackupFolder) :
+                self.log.writeToLog(self.errorCodes['3620'], [sysBackupFolder])
+            projBackupFolder    = os.path.join(sysBackupFolder, self.pid))
             backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
         else :
-            projBackupFolder    = targetPath
+            projBackupFolder    = self.tools.resolvePath(targetPath)
+            # Now check for a valid target path
+            if not os.path.exists(projBackupFolder) :
+                self.log.writeToLog(self.errorCodes['3625'], [targetPath])
             backupTarget        = self.tools.incrementFileName(os.path.join(projBackupFolder, self.pid + '.zip'))
 
         # Make sure the dir is there
