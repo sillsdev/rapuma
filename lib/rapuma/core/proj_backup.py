@@ -358,7 +358,7 @@ class ProjBackup (object) :
             # Now check for a valid location to backup to
             if not os.path.exists(sysBackupFolder) :
                 self.log.writeToLog(self.errorCodes['3620'], [sysBackupFolder])
-            projBackupFolder    = os.path.join(sysBackupFolder, self.pid))
+            projBackupFolder    = os.path.join(sysBackupFolder, self.pid)
             backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
         else :
             projBackupFolder    = self.tools.resolvePath(targetPath)
