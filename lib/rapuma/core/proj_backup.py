@@ -370,11 +370,6 @@ class ProjBackup (object) :
                 self.log.writeToLog(self.errorCodes['3625'], [targetPath])
             backupTarget        = self.tools.incrementFileName(os.path.join(projBackupFolder, self.pid + '.zip'))
 
-        print ':::', self.userConfig['Resources']['backup']
-        print ':::', sysBackupFolder
-
-        self.tools.dieNow(projBackupFolder)
-
         # Make sure the dir is there
         if not os.path.exists(projBackupFolder) :
             os.makedirs(projBackupFolder)
