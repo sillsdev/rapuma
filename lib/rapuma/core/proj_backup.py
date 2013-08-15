@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, zipfile, shutil, re
+import codecs, os, zipfile, shutil, re, sys
 from configobj import ConfigObj
 
 # Load the local classes
@@ -240,10 +240,9 @@ class ProjBackup (object) :
         # Do the zip magic here
         root_len = len(self.projHome)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
+            sys.stdout.write('Backing up files')
+            sys.stdout.flush()
             for root, dirs, files in os.walk(self.projHome) :
-                # Do not include anything in the Backups folder
-                if os.path.basename(root) == 'Backups' :
-                    continue
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
                 for f in files :
@@ -253,7 +252,11 @@ class ProjBackup (object) :
                         fn, fx = os.path.splitext(f)
                         fullpath = os.path.join(root, f)
                         zip_name = os.path.join(zip_root, f)
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
                         myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
+            # Add a space before the next message
+            print '\n'
 
 
     def restoreArchive (self, pid, targetPath, sourcePath = None) :
@@ -633,6 +636,8 @@ class ProjBackup (object) :
             # Get a total list of files from the project
             cn = 0
             cr = 0
+            sys.stdout.write('Pushing files to the cloud')
+            sys.stdout.flush()
             for folder, subs, files in os.walk(self.projHome):
                 for fileName in files:
                     # Do not include any backup files we find
@@ -644,6 +649,8 @@ class ProjBackup (object) :
                         cFile = os.path.join(folder, fileName).replace(self.projHome, cloud)
                         pFile = os.path.join(folder, fileName)
                         if not os.path.isfile(cFile) :
+                            sys.stdout.write('.')
+                            sys.stdout.flush()
                             shutil.copy(pFile, cFile)
                             cn +=1
                         # Otherwise if the cloud file is older than
@@ -651,8 +658,12 @@ class ProjBackup (object) :
                         elif self.tools.isOlder(cFile, pFile) :
                             if os.path.isfile(cFile) :
                                 os.remove(cFile)
+                            sys.stdout.write('.')
+                            sys.stdout.flush()
                             shutil.copy(pFile, cFile)
                             cr +=1
+            # Add space for next message
+            sys.stdout.write('\n')
 
             # Report what happened
             self.log.writeToLog(self.errorCodes['4110'])
