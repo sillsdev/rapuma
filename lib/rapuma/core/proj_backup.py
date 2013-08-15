@@ -495,6 +495,8 @@ class ProjBackup (object) :
         cConfig = self.getConfig(cloud)
         if not cConfig :
             return True
+        elif not cConfig.has_key('Backup') :
+            return True
         elif not cConfig['Backup'].has_key('lastCloudPush') :
             return True
         # Check local for key
