@@ -34,8 +34,7 @@ from rapuma.core.proj_backup                import ProjBackup
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
-from rapuma.project.proj_config             import ProjConfig
-from rapuma.project.load_projconfig         import LoadProjConfig
+from rapuma.project.proj_config             import ProjConfig, LoadProjConfig
 
 
 class ProjSetup (object) :
@@ -795,6 +794,9 @@ class ProjDelete (object) :
         self.userConfig                     = self.user.userConfig
         self.tools                          = Tools()
         self.pid                            = pid
+        self.projHome                       = None
+        if self.userConfig['Projects'].has_key(pid) :
+            self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
 
 # Currently there is only this function in this class
 

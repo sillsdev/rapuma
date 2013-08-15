@@ -35,6 +35,10 @@ class ProjConfig (object) :
     def __init__(self, pid, gid = None) :
         '''Do the primary initialization for this class.'''
 
+
+# FIXME: Need to move all config loading out to seperate classes found below in this mod
+
+
         self.pid                            = pid
         self.gid                            = gid
         self.user                           = UserConfig()
@@ -512,6 +516,13 @@ class LoadProjConfig (object) :
         projConfXmlFile                = os.path.join(rapumaConfigFolder, progConfXmlFileName)
         # The proj config obj is really the only thing we want
         self.projConfig                = tools.initConfig(local.projConfFile, projConfXmlFile)
+
+
+
+
+
+
+# FIXME: Finish moving the following config loader code down here to the classes
 
 
 class LoadAdjustmentConfig (object) :

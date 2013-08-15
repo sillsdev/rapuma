@@ -36,7 +36,7 @@ class ToolsPath (object) :
 
         # Rapuma libs
         from rapuma.core.proj_local         import ProjLocal
-        from rapuma.project.load_projconfig import LoadProjConfig
+        from rapuma.project.proj_config     import LoadProjConfig
 
         self.local                          = ProjLocal(pid)
         self.projConfig                     = LoadProjConfig(pid).projConfig

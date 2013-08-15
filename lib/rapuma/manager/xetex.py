@@ -23,8 +23,7 @@ from configobj                          import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.core.paratext               import Paratext
-from rapuma.project.proj_config         import ProjConfig
-from rapuma.project.load_projconfig     import LoadProjConfig
+from rapuma.project.proj_config         import ProjConfig, LoadProjConfig
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
@@ -665,11 +664,16 @@ class Xetex (Manager) :
 
         # Move to the output folder according to mode for easier access
         if os.path.isfile(self.gidPdfFile) :
+            # Build the name
+            outputFolder = os.path.join(self.projHome, mode.capitalize())
             if pdfSubFileName :
-                outputPdfFile = self.tools.modeFileName(os.path.join(self.projHome, mode.capitalize(), pdfSubFileName), mode)
+                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, pdfSubFileName), mode)
             else :
-                outputPdfFile = self.tools.modeFileName(os.path.join(self.projHome, mode.capitalize(), self.tools.fName(self.gidPdfFile)), mode)
-
+                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, self.tools.fName(self.gidPdfFile)), mode)
+            # Make sure there is a folder there to put it in
+            if not os.path.exists(outputFolder) :
+                os.makedirs(outputFolder)
+            # Move, not copy to the outputFolder
             shutil.move(self.gidPdfFile, outputPdfFile)
 
         # Review the results if desired

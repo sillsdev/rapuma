@@ -22,8 +22,7 @@ from configobj import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
-from rapuma.project.proj_config         import ProjConfig
-from rapuma.project.load_projconfig     import LoadProjConfig
+from rapuma.project.proj_config         import ProjConfig, LoadProjConfig
 
 
 class ProjCommander (object) :
