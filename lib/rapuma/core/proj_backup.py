@@ -354,7 +354,7 @@ class ProjBackup (object) :
 
         # Set some paths and file names
         if not targetPath :
-            sysBackupFolder = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'])
+            sysBackupFolder = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup']))
             # Now check for a valid location to backup to
             if not os.path.exists(sysBackupFolder) :
                 self.log.writeToLog(self.errorCodes['3620'], [sysBackupFolder])
