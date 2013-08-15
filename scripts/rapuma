@@ -52,7 +52,7 @@ import codecs, argparse
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.core.user_config            import UserConfig
-from rapuma.core.proj_backup            import ProjBackup
+from rapuma.core.proj_backup            import ProjBackup, Template
 from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r752'
+systemVersion   = '0.6.r753'
 local           = None
 
 # Give a welcome message
@@ -286,7 +286,7 @@ def userArguments (args) :
             elif cmdType == 'cloud' :
                 ProjBackup(pid).pullFromCloud(args.force, targetPath)
             elif cmdType == 'template' :
-                ProjBackup(pid).templateToProject(args.name)
+                Template(pid).templateToProject(args.name)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'save' :
@@ -299,7 +299,7 @@ def userArguments (args) :
             elif cmdType == 'template' :
                 if isTemplate(args.template) :
                     sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')
-                ProjBackup(pid).projectToTemplate(args.template)
+                Template(pid).projectToTemplate(args.template)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
