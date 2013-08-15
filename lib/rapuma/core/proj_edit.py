@@ -19,7 +19,7 @@ from configobj                  import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import ProjConfig
+from rapuma.core.proj_config    import Config
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_log       import ProjLog
@@ -36,7 +36,7 @@ class ProjEdit (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
-        self.projConfig     = ProjConfig(pid).projConfig
+        self.projConfig     = Config(pid).projConfig
         self.projHome       = None
         self.local          = None
 

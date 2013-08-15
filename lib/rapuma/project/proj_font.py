@@ -25,7 +25,7 @@ from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 
 ###############################################################################
@@ -43,7 +43,7 @@ class ProjFont (object) :
         self.pt_tools                       = Paratext(pid, gid)
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.proj_config                    = ProjConfig(pid, gid)
+        self.proj_config                    = Config(pid, gid)
         self.projConfig                     = self.proj_config.projConfig
         self.macPackConfig                  = self.proj_config.macPackConfig
         self.local                          = ProjLocal(pid)

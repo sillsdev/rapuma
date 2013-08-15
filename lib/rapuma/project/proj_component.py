@@ -21,7 +21,7 @@ import os, shutil, codecs
 
 # Load the local classes
 from rapuma.core.tools              import Tools, ToolsPath
-from rapuma.core.proj_config        import ProjConfig
+from rapuma.core.proj_config        import Config
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -44,7 +44,7 @@ class ProjComponent (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.pmid                       = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = ProjConfig(self.local).projConfig
+        self.projConfig                 = Config(self.local).projConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(pid)
         # File names

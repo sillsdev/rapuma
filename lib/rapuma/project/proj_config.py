@@ -30,7 +30,7 @@ from rapuma.group.usfmTex               import UsfmTex
 ################################## Begin Class ################################
 ###############################################################################
 
-class ProjConfig (object) :
+class Config (object) :
 
     def __init__(self, pid, gid = None) :
         '''Do the primary initialization for this class.'''

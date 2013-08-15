@@ -28,7 +28,7 @@ from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.core.paratext               import Paratext
 from rapuma.manager.project             import Project
-from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.proj_config         import Config
 
 
 ###############################################################################
@@ -48,7 +48,7 @@ class ProjToc (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.projectMediaIDCode         = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = ProjConfig(pid).projConfig
+        self.projConfig                 = Config(pid).projConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(pid)
         self.tocData                    = {}

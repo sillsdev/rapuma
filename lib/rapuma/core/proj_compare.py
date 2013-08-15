@@ -23,7 +23,7 @@ from rapuma.core.tools              import Tools, ToolsPath
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 
 class ProjCompare (object) :
@@ -35,7 +35,7 @@ class ProjCompare (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projConfig         = ProjConfig(pid).projConfig
+        self.projConfig         = Config(pid).projConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None

@@ -25,7 +25,7 @@ from importlib                      import import_module
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -43,7 +43,7 @@ class Project (object) :
         self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local                  = ProjLocal(self.pid)
-        self.projConfig             = ProjConfig(self.pid).projConfig
+        self.projConfig             = Config(self.pid).projConfig
         self.cType                  = self.projConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
         self.log                    = ProjLog(self.pid)

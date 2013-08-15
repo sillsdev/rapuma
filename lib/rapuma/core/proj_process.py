@@ -23,7 +23,7 @@ from rapuma.core.tools              import Tools, ToolsPath
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 
 class ProjProcess (object) :
@@ -37,7 +37,7 @@ class ProjProcess (object) :
         self.userHome               = os.environ.get('RAPUMA_USER')
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projConfig             = ProjConfig(self.pid).projConfig
+        self.projConfig             = Config(self.pid).projConfig
         self.projHome               = None
         self.local                  = None
         self.finishInit()

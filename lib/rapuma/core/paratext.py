@@ -25,7 +25,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.proj_compare       import ProjCompare
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 
 class Paratext (object) :
@@ -38,7 +38,7 @@ class Paratext (object) :
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.proj_config            = ProjConfig(pid, gid)
+        self.proj_config            = Config(pid, gid)
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.local                  = ProjLocal(pid)
         self.projConfig             = self.proj_config.projConfig

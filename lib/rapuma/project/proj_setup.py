@@ -34,7 +34,7 @@ from rapuma.core.proj_backup                import ProjBackup
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
-from rapuma.project.proj_config             import ProjConfig, LoadProjConfig
+from rapuma.project.proj_config             import Config, LoadProjConfig
 
 
 class ProjSetup (object) :
@@ -533,7 +533,7 @@ class ProjSetup (object) :
             self.backup.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
         else :
             # If not from a template, just create a new version of the project config file
-            ProjConfig(self.pid).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
+            Config(self.pid).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :

@@ -21,7 +21,7 @@ import os, re, shutil, subprocess, codecs
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 from rapuma.core.proj_compare       import ProjCompare
 from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
@@ -44,7 +44,7 @@ class ProjHyphenation (object) :
         self.local                      = ProjLocal(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.proj_config                = ProjConfig(self.pid, gid)
+        self.proj_config                = Config(self.pid, gid)
         self.projConfig                 = self.proj_config.projConfig
         self.hyphenConfig               = self.proj_config.hyphenConfig
         self.macPackConfig              = self.proj_config.macPackConfig

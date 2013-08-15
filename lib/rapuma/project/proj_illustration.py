@@ -22,7 +22,7 @@ from configobj                      import ConfigObj
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
@@ -42,7 +42,7 @@ class ProjIllustration (object) :
         self.local                      = ProjLocal(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.proj_config                = ProjConfig(pid, gid)
+        self.proj_config                = Config(pid, gid)
         self.layoutConfig               = self.proj_config.layoutConfig
         self.macPackConfig              = self.proj_config.macPackConfig
         self.illustrationConfig         = self.proj_config.illustrationConfig

@@ -22,7 +22,7 @@ from configobj import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
-from rapuma.project.proj_config         import ProjConfig, LoadProjConfig
+from rapuma.project.proj_config         import Config, LoadProjConfig
 
 
 class ProjCommander (object) :
@@ -144,7 +144,7 @@ class ProjCommander (object) :
         most projects.'''
 
         # Load local versions of the macPack config
-        macPackConfig   = ProjConfig(self.pid, gid).macPackConfig
+        macPackConfig   = Config(self.pid, gid).macPackConfig
         # Set the vars for this function
         pid         = self.pid
         cType       = self.projConfig['Groups'][gid]['cType']

@@ -20,7 +20,7 @@
 # set the base path
 
 import os, sys, timeit, datetime
-from functools          import partial
+from functools                  import partial
 
 startTime = timeit.default_timer()
 
@@ -57,7 +57,7 @@ from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
-from rapuma.project.proj_config         import ProjConfig, LoadProjConfig
+from rapuma.project.proj_config         import Config, LoadProjConfig
 from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r762'
+systemVersion   = '0.6.r763'
 local           = None
 
 # Give a welcome message
@@ -456,7 +456,7 @@ def userArguments (args) :
             if cmdType == 'font' :
                 ProjFont(pid, gid).installFont(pkid, force)
             elif cmdType == 'macro' :
-                ProjConfig(pid, gid).addMacPack(pkid, force)
+                Config(pid, gid).addMacPack(pkid, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'primary' :
@@ -468,14 +468,14 @@ def userArguments (args) :
             if cmdType == 'font' :
                 ProjFont(pid, gid).removeFontPack(pkid, force)
             elif cmdType == 'macro' :
-                ProjConfig(pid, gid).removeMacPack(pkid, force)
+                Config(pid, gid).removeMacPack(pkid, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
             if cmdType == 'font' :
                 ProjFont(pid, gid).updateFontPack(pkid)
             elif cmdType == 'macro' :
-                ProjConfig(pid, gid).updateMacPack(pkid)
+                Config(pid, gid).updateMacPack(pkid)
             else :
                 cmdError(cmd, cmdType)
 

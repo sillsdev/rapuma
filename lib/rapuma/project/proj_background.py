@@ -23,7 +23,7 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
-from rapuma.project.proj_config         import ProjConfig
+from rapuma.project.proj_config         import Config
 from rapuma.group.usfmTex               import UsfmTex
 
 
@@ -45,7 +45,7 @@ class ProjBackground (object) :
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.local                      = ProjLocal(pid)
-        self.proj_config                = ProjConfig(pid, gid)
+        self.proj_config                = Config(pid, gid)
         self.log                        = ProjLog(pid)
         self.projConfig                 = self.proj_config.projConfig
         self.layoutConfig               = self.proj_config.layoutConfig

@@ -23,7 +23,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 from rapuma.project.proj_commander  import ProjCommander
 
 
@@ -308,7 +308,7 @@ class ProjBackup (object) :
         # To do this we need to open up the restored project config file
         # and pull out some settings.
         local       = ProjLocal(rapumaHome, userHome, archTarget)
-        pc          = ProjConfig(pid)
+        pc          = Config(pid)
         log         = ProjLog(pid)
         aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
     #    import pdb; pdb.set_trace()
@@ -384,7 +384,7 @@ class ProjBackup (object) :
             self.cullBackups(self.userConfig['System']['maxStoreBackups'], projBackupFolder)
 
         # Finish here
-        projConfig = ProjConfig(self.pid).projConfig
+        projConfig = Config(self.pid).projConfig
         projConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
         self.tools.writeConfFile(projConfig)
         self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupTarget])
@@ -675,7 +675,7 @@ class ProjBackup (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         # Check for existence of this project in the cloud and who owns it
-        projConfig = ProjConfig(self.pid).projConfig
+        projConfig = Config(self.pid).projConfig
         if not self.sameOwner(cloud) :
             if force :
                 self.setCloudPushTime(projConfig)

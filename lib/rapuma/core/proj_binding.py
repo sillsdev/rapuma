@@ -25,7 +25,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.manager.project         import Project
-from rapuma.project.proj_config     import ProjConfig
+from rapuma.project.proj_config     import Config
 
 
 ###############################################################################
@@ -41,7 +41,7 @@ class ProjBinding (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projConfig         = ProjConfig(pid).projConfig
+        self.projConfig         = Config(pid).projConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -92,7 +92,7 @@ class ProjBinding (object) :
 #        This is slightly different from the one in the main rapuma script.'''
 
 #        local       = ProjLocal(pid)
-#        pc          = ProjConfig(local)
+#        pc          = Config(local)
 #        log         = ProjLog(pid)
 #        return        Project(pid, gid)
 
