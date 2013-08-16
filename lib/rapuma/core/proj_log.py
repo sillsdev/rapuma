@@ -94,7 +94,7 @@ class ProjLog (object) :
 
         # Test to see if this is a live project by seeing if the project conf is
         # there.  If it is, we can write out log files.  Otherwise, why bother?
-        if os.path.isfile(self.local.projConfFile) :
+        if os.path.isfile(self.local.projectConfFile) :
 
             # Build the event line
             eventLine = '\"' + self.tools.tStamp() + '\", \"' + code + '\", \"' + msg + '\"'

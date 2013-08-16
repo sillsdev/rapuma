@@ -39,7 +39,7 @@ class ToolsPath (object) :
         from rapuma.project.proj_config     import ProjectConfiguration
 
         self.local                          = ProjLocal(pid)
-        self.projConfig                     = ProjectConfiguration(pid).projConfig
+        self.projectConfig                  = ProjectConfiguration(pid).projectConfig
         self.pid                            = pid
         self.tools                          = Tools()
 
@@ -56,7 +56,7 @@ class ToolsPath (object) :
         from rapuma.core.paratext import Paratext
         pt                  = Paratext(self.pid, gid)
         sourcePath          = pt.getGroupSourcePath()
-        cType               = self.projConfig['Groups'][gid]['cType']
+        cType               = self.projectConfig['Groups'][gid]['cType']
         sourceEditor        = pt.getSourceEditor()
         # Build the file name
         if sourceEditor.lower() == 'paratext' :
@@ -72,8 +72,8 @@ class ToolsPath (object) :
     def getWorkingFile (self, gid, cid) :
         '''Return the working file name with path.'''
 
-        csid            = self.projConfig['Groups'][gid]['csid']
-        cType           = self.projConfig['Groups'][gid]['cType']
+        csid            = self.projectConfig['Groups'][gid]['csid']
+        cType           = self.projectConfig['Groups'][gid]['cType']
         targetFolder    = os.path.join(self.local.projComponentFolder, cid)
         return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
 
@@ -96,7 +96,7 @@ class ToolsPath (object) :
     def getGroupPreprocessFile (self, gid) :
         '''Get the file name and path to the group's preprocess script.'''
 
-        csid            = self.projConfig['Groups'][gid]['csid']
+        csid            = self.projectConfig['Groups'][gid]['csid']
         return os.path.join(self.local.projScriptFolder, csid + '_textPreprocess.py')
 
 

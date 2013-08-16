@@ -108,13 +108,13 @@ class ProjBackup (object) :
         project config file found in projHome.'''
 
         pid                 = os.path.basename(projHome)
-        projConfig          = self.getConfig(projHome)
+        projectConfig          = self.getConfig(projHome)
 
-        if len(projConfig) :
-            pName           = projConfig['ProjectInfo']['projectName']
-            pid             = projConfig['ProjectInfo']['projectIDCode']
-            pmid            = projConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate         = projConfig['ProjectInfo']['projectCreateDate']
+        if len(projectConfig) :
+            pName           = projectConfig['ProjectInfo']['projectName']
+            pid             = projectConfig['ProjectInfo']['projectIDCode']
+            pmid            = projectConfig['ProjectInfo']['projectMediaIDCode']
+            pCreate         = projectConfig['ProjectInfo']['projectCreateDate']
             if not self.userConfig['Projects'].has_key(pid) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
                 self.userConfig['Projects'][pid]['projectName']         = pName
@@ -310,7 +310,7 @@ class ProjBackup (object) :
         local       = ProjLocal(rapumaHome, userHome, archTarget)
         pc          = Config(pid)
         log         = ProjLog(pid)
-        aProject    = Project(uc.userConfig, pc.projConfig, local, log, systemVersion)
+        aProject    = Project(uc.userConfig, pc.projectConfig, local, log, systemVersion)
     #    import pdb; pdb.set_trace()
         uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
 
@@ -384,9 +384,9 @@ class ProjBackup (object) :
             self.cullBackups(self.userConfig['System']['maxStoreBackups'], projBackupFolder)
 
         # Finish here
-        projConfig = Config(self.pid).projConfig
-        projConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
-        self.tools.writeConfFile(projConfig)
+        projectConfig = Config(self.pid).projectConfig
+        projectConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
+        self.tools.writeConfFile(projectConfig)
         self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupTarget])
         return True
 
@@ -499,7 +499,7 @@ class ProjBackup (object) :
 ###############################################################################
 
 
-    def isNewerThanCloud (self, cloud, projConfig) :
+    def isNewerThanCloud (self, cloud, projectConfig) :
         '''Compare time stamps between the cloud and the local project.
         Return True if the local project is newer or the same age as
         the copy in the cloud. Return True if the project does not
@@ -514,25 +514,25 @@ class ProjBackup (object) :
         elif not cConfig['Backup'].has_key('lastCloudPush') :
             return True
         # Check local for key
-        if not projConfig.has_key('Backup') :
+        if not projectConfig.has_key('Backup') :
             return False
-        elif not projConfig['Backup'].has_key('lastCloudPush') :
+        elif not projectConfig['Backup'].has_key('lastCloudPush') :
             return False
         # Compare if we made it this far
         cStamp = cConfig['Backup']['lastCloudPush']
-        lStamp = projConfig['Backup']['lastCloudPush']
+        lStamp = projectConfig['Backup']['lastCloudPush']
         if lStamp >= cStamp :
             return True
 
 
-    def isNewerThanLocal (self, cloud, projConfig) :
+    def isNewerThanLocal (self, cloud, projectConfig) :
         '''Compare time stamps between the cloud and the local project.
         Return True if the cloud project is newer or the same age as
         the local copy. Return True if the project does not exist in
         as a local copy.'''
 
         # First see if the local exists
-        if not projConfig :
+        if not projectConfig :
             return True
 
         # See if cloud is there and up-to-date
@@ -545,7 +545,7 @@ class ProjBackup (object) :
         # It is possible the local has never been pushed
         # If that is the case, local is assumed older
         try :
-            pStamp = projConfig['Backup']['lastCloudPush']
+            pStamp = projectConfig['Backup']['lastCloudPush']
         except :
             return False
         if cStamp >= pStamp :
@@ -557,9 +557,9 @@ class ProjBackup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        projConfigFile = os.path.join(projHome, 'Config', 'project.conf')
-        if os.path.exists(projConfigFile) :
-            return ConfigObj(projConfigFile, encoding='utf-8')
+        projectConfigFile = os.path.join(projHome, 'Config', 'project.conf')
+        if os.path.exists(projectConfigFile) :
+            return ConfigObj(projectConfigFile, encoding='utf-8')
 
 
     def getCloudOwner (self, cloud) :
@@ -590,30 +590,30 @@ class ProjBackup (object) :
             return True
 
 
-    def setCloudPushTime (self, projConfig) :
+    def setCloudPushTime (self, projectConfig) :
         '''Set/reset the lastPush time stamp setting.'''
 
-        projConfig['Backup']['lastCloudPush'] = self.tools.fullFileTimeStamp()
-        self.tools.writeConfFile(projConfig)
+        projectConfig['Backup']['lastCloudPush'] = self.tools.fullFileTimeStamp()
+        self.tools.writeConfFile(projectConfig)
 
 
-    def buyCloud (self, projConfig) :
+    def buyCloud (self, projectConfig) :
         '''Change the ownership on a project in the cloud by assigning
         your userID to the local project cloudOwnerID. Then, using force
         the next time the project is pushed to the cloud, you will own it.'''
 
         projOwnerID = self.userConfig['System']['userID']
-        projConfig['Backup']['ownerID'] = projOwnerID
-        self.tools.writeConfFile(projConfig)
+        projectConfig['Backup']['ownerID'] = projOwnerID
+        self.tools.writeConfFile(projectConfig)
 
 
-    def buyLocal (self, projConfig) :
+    def buyLocal (self, projectConfig) :
         '''Change the ownership on a local project by assigning your
         userID to it.'''
 
         projOwnerID = self.userConfig['System']['userID']
-        projConfig['Backup']['ownerID'] = projOwnerID
-        self.tools.writeConfFile(projConfig)
+        projectConfig['Backup']['ownerID'] = projOwnerID
+        self.tools.writeConfFile(projectConfig)
 
 
     def pushToCloud (self, force = False) :
@@ -675,21 +675,21 @@ class ProjBackup (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         # Check for existence of this project in the cloud and who owns it
-        projConfig = Config(self.pid).projConfig
+        projectConfig = Config(self.pid).projectConfig
         if not self.sameOwner(cloud) :
             if force :
-                self.setCloudPushTime(projConfig)
-                self.buyCloud(projConfig)
+                self.setCloudPushTime(projectConfig)
+                self.buyCloud(projectConfig)
                 doPush(cloud)
             else :
                 self.log.writeToLog(self.errorCodes['4150'], [self.pid, self.getCloudOwner(cloud)])
         else :
             if force :
-                self.setCloudPushTime(projConfig)
+                self.setCloudPushTime(projectConfig)
                 doPush(cloud)
             else :
-                if self.isNewerThanCloud(cloud, projConfig) :
-                    self.setCloudPushTime(projConfig)
+                if self.isNewerThanCloud(cloud, projectConfig) :
+                    self.setCloudPushTime(projectConfig)
                     doPush(cloud)
                 else :
                     self.log.writeToLog(self.errorCodes['4160'], [self.pid])
@@ -719,7 +719,6 @@ class ProjBackup (object) :
                         os.makedirs(folder.replace(cloud, self.projHome))
                     cFile = os.path.join(folder, fileName)
                     pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
-                    print cFile
                     if not os.path.isfile(pFile) :
                         shutil.copy(cFile, pFile)
                         cn +=1

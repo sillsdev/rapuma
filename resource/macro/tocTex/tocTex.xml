@@ -22,7 +22,7 @@ Todo:
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
             <moduleID>gidPdfFile</moduleID>
             <fileName>[self:projComponentFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
-            <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
+            <depends>projectConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
         </file>
         <file>
             <name>Primary Macro File</name>
@@ -684,7 +684,7 @@ Todo:
             <key>createHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\newlanguage\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -694,7 +694,7 @@ Todo:
             <key>setHyphenLanguage</key>
             <type>string</type>
             <value></value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\language=\[val]</texCode>
             <note>This arrangement seems to work but it has not been fully tested. It is not clear why the \def statement is needed. This arrangement may not be effective.</note>
         </setting>
@@ -704,7 +704,7 @@ Todo:
             <key>setHyphenCharacter</key>
             <type>string</type>
             <value>"002D</value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\defaulthyphenchar=[val]</texCode>
         </setting>
         <setting>
@@ -713,7 +713,7 @@ Todo:
             <key>setHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -722,7 +722,7 @@ Todo:
             <key>texHyphenOff</key>
             <type>integer</type>
             <value>10000</value>
-            <boolDepend state='false'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='false'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\hyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -731,7 +731,7 @@ Todo:
             <key>setExHyphenPenalty</key>
             <type>integer</type>
             <value>50</value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\exhyphenpenalty=[val]</texCode>
         </setting>
         <setting>
@@ -740,7 +740,7 @@ Todo:
             <key>pretolerance</key>
             <type>integer</type>
             <value>0</value>
-            <boolDepend state='true'>[config:projConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|Groups|[self:gid]|useHyphenation]</boolDepend>
             <texCode>\pretolerance=[val]</texCode>
         </setting>
     </section>

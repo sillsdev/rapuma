@@ -44,7 +44,7 @@ class ProjComponent (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.pmid                       = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = Config(self.local).projConfig
+        self.projectConfig              = Config(self.local).projectConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(pid)
         # File names

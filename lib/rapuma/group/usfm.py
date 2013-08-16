@@ -59,20 +59,21 @@ class Usfm (Group) :
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
+        self.projectConfig          = self.proj_config.getProjectConfig()
+        self.adjustmentConfig       = self.proj_config.getAdjustmentConfig()
         self.pg_background          = ProjBackground(self.pid, self.gid)
-        self.projConfig             = project.projConfig
         self.log                    = project.log
         self.cfg                    = cfg
         self.mType                  = project.projectMediaIDCode
-        self.csid                   = project.projConfig['Groups'][self.gid]['csid']
-        self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macPack                = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.csid                   = project.projectConfig['Groups'][self.gid]['csid']
+        self.renderer               = project.projectConfig['CompTypes'][self.Ctype]['renderer']
+        self.sourceEditor           = project.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.macPack                = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # If adjustments are needed in the macPack we insert into local here for down-stream use
-        self.adjustmentConfig       = self.proj_config.adjustmentConfig
-        self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
+#        self.adjustmentConfig       = self.proj_config.adjustmentConfig
+#        self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
         # Get the comp settings
-        self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
+        self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
         # Get macro package settings
         self.macPackConfig          = self.proj_config.macPackConfig
         # Build a tuple of managers this component type needs to use
@@ -94,9 +95,9 @@ class Usfm (Group) :
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
-        if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
-            self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
+        newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        if newSectionSettings != self.projectConfig['CompTypes'][self.Ctype] :
+            self.projectConfig['CompTypes'][self.Ctype] = newSectionSettings
         # Set them here
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -197,7 +198,7 @@ class Usfm (Group) :
         # If the whole group is being rendered, we need to preprocess it
         cids = []
         if not cidList :
-            cids = self.projConfig['Groups'][gid]['cidList']
+            cids = self.projectConfig['Groups'][gid]['cidList']
         else :
             cids = cidList
 
@@ -222,8 +223,8 @@ class Usfm (Group) :
         # Get some relevant settings
         # FIXME: Note page border has not really been implemented yet.
         # It is different from backgound management
-        useIllustrations        = self.tools.str2bool(self.projConfig['Groups'][gid]['useIllustrations'])
-        useManualAdjustments    = self.tools.str2bool(self.projConfig['Groups'][gid]['useManualAdjustments'])
+        useIllustrations        = self.tools.str2bool(self.projectConfig['Groups'][gid]['useIllustrations'])
+        useManualAdjustments    = self.tools.str2bool(self.projectConfig['Groups'][gid]['useManualAdjustments'])
 
         # Adjust the page number if necessary
         self.checkStartPageNumber()
@@ -294,7 +295,7 @@ class Usfm (Group) :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macPack], 'usfm.preProcessGroup():0220')
 
         # Background management
-        bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
+        bgList = self.projectConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
         for bg in bgList :
             self.pg_background.checkForBackground(bg, mode)
 
@@ -312,31 +313,31 @@ class Usfm (Group) :
 #        import pdb; pdb.set_trace()
 
         # If none, that means it hasn't been set or it is first
-        pGrp = str(self.projConfig['Groups'][self.gid]['precedingGroup'])
+        pGrp = str(self.projectConfig['Groups'][self.gid]['precedingGroup'])
         if pGrp == 'None' :
             return False
 
-        cStrPgNo = str(self.projConfig['Groups'][self.gid]['startPageNumber'])
-        pGrpStrPgNo = int(self.projConfig['Groups'][pGrp]['startPageNumber'])
-        pGrpPgs     = int(self.projConfig['Groups'][pGrp]['totalPages'])
+        cStrPgNo = str(self.projectConfig['Groups'][self.gid]['startPageNumber'])
+        pGrpStrPgNo = int(self.projectConfig['Groups'][pGrp]['startPageNumber'])
+        pGrpPgs     = int(self.projectConfig['Groups'][pGrp]['totalPages'])
         nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
         if cStrPgNo != nStrPgNo :
-            self.projConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
+            self.tools.writeConfFile(self.projectConfig)
 
 
     def checkStartPageNumberSettings (self) :
         '''Make sure the page number settings are in place. This may be deprecated later.'''
 
         change = False
-        if not self.projConfig['Groups'][self.gid].has_key('precedingGroup') :
-            self.projConfig['Groups'][self.gid]['precedingGroup'] = None
+        if not self.projectConfig['Groups'][self.gid].has_key('precedingGroup') :
+            self.projectConfig['Groups'][self.gid]['precedingGroup'] = None
             change = True
-        if not self.projConfig['Groups'][self.gid].has_key('startPageNumber') :
-            self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
+        if not self.projectConfig['Groups'][self.gid].has_key('startPageNumber') :
+            self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
             change = True
         if change :
-            self.tools.writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projectConfig)
 
 
     def createCompAdjustmentFile (self, cid) :
@@ -396,12 +397,12 @@ class Usfm (Group) :
 
 
     def updateCompAdjustmentConf (self) :
-        '''Update an adjustmentConfig based on changes in the projConfig.'''
+        '''Update an adjustmentConfig based on changes in the projectConfig.'''
 
-        for gid in self.projConfig['Groups'].keys() :
+        for gid in self.projectConfig['Groups'].keys() :
             if gid not in self.adjustmentConfig.keys() :
                 self.tools.buildConfSection(self.adjustmentConfig, gid)
-            for comp in self.projConfig['Groups'][gid]['cidList'] :
+            for comp in self.projectConfig['Groups'][gid]['cidList'] :
                 if not self.adjustmentConfig[gid].has_key(comp) :
                     self.tools.buildConfSection(self.adjustmentConfig[gid], comp)
                 self.adjustmentConfig[gid][comp]['%1.1'] = '1'
@@ -422,7 +423,7 @@ class Usfm (Group) :
 #        import pdb; pdb.set_trace()
 
         try :
-            cType = self.projConfig['Groups'][gid]['cType']
+            cType = self.projectConfig['Groups'][gid]['cType']
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
@@ -449,7 +450,7 @@ class Usfm (Group) :
         '''Return True or False depending on if a working file exists 
         for a given cName.'''
 
-        cType = self.projConfig['Groups'][gid]['cType']
+        cType = self.projectConfig['Groups'][gid]['cType']
         return os.path.isfile(os.path.join(self.local.projComponentFolder, cid, cid + '.' + cType))
 
 

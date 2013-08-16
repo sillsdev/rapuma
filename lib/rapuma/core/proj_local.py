@@ -35,6 +35,7 @@ class ProjLocal (object) :
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
+        mType                   = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.projHome           = ''
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
@@ -76,11 +77,29 @@ class ProjLocal (object) :
         # Add some additional necessary params
         self.lockExt = '.lock'
         
-        # Add necessary file names
-        self.projConfFileName       = 'project.conf'
-        self.projConfFile           = os.path.join(self.projConfFolder, self.projConfFileName)
+        # Add configuation file names
+        configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
+        for cf in configFiles :
+            # Set the config path/file value
+            setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
+            # Set the xml config file name (project is according to media type)
+            if cf == 'project' :
+                setattr(self, cf + 'ConfXmlFileName', mType + '.xml')
+            elif cf == 'layout' :
+                setattr(self, cf + 'ConfXmlFileName', mType + '_layout.xml')
+            else :
+                setattr(self, cf + 'ConfXmlFileName', cf + '.xml')
+            # Set the full path/file value
+            setattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
+
+        # For testing
+#        for cf in configFiles :
+#            print getattr(self, cf + 'ConfXmlFileName')
+
+        # Set Rapuma User config file name
         self.userConfFileName       = 'rapuma.conf'
         self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
+        # Add log file names
         if self.projHome :
             self.projLogFileName        = 'rapuma.log'
             self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
@@ -93,14 +112,6 @@ class ProjLocal (object) :
                 os.remove(self.projErrorLogFile)
         except :
             pass
-
-        # Load the Rapuma conf file into an object
-        self.localUserConfig = ConfigObj(self.userConfFile, encoding='utf-8')
-
-        # Create a fresh projConfig object
-        if os.path.isfile(self.projConfFile) :
-            self.localProjConfig = ConfigObj(self.projConfFile, encoding='utf-8')
-
 
 ###############################################################################
 ########################### Project Local Functions ###########################

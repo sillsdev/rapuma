@@ -35,7 +35,9 @@ class ProjCompare (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projConfig         = Config(pid).projConfig
+# FIXME
+        self.projectConfig      = Config(pid).projectConfig
+
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None

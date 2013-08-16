@@ -44,11 +44,11 @@ class Text (Manager) :
         self.tools                  = Tools()
         self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.project                = project
-        self.projConfig             = project.projConfig
+        self.projectConfig          = project.projectConfig
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
-        self.csid                   = project.projConfig['Groups'][self.gid]['csid']
+        self.csid                   = project.projectConfig['Groups'][self.gid]['csid']
         self.log                    = project.log
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
@@ -57,12 +57,12 @@ class Text (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.project.projConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
-        if newSectionSettings != self.project.projConfig['Managers'][self.manager] :
-            self.project.projConfig['Managers'][self.manager] = newSectionSettings
-            self.tools.writeConfFile(self.project.projConfig)
+        newSectionSettings = self.tools.getPersistantSettings(self.project.projectConfig['Managers'][self.manager], self.rapumaXmlTextConfig)
+        if newSectionSettings != self.project.projectConfig['Managers'][self.manager] :
+            self.project.projectConfig['Managers'][self.manager] = newSectionSettings
+            self.tools.writeConfFile(self.project.projectConfig)
 
-        self.compSettings = self.project.projConfig['Managers'][self.manager]
+        self.compSettings = self.project.projectConfig['Managers'][self.manager]
 
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -95,12 +95,12 @@ class Text (Manager) :
 #        This cannot fail.'''
 
 #        se = ''
-#        if self.project.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') :
-#            se = self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+#        if self.project.projectConfig['CompTypes'][self.Ctype].has_key('sourceEditor') :
+#            se = self.project.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
 
 #        if se != editor :
-#            self.project.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
-#            self.tools.writeConfFile(self.project.projConfig)
+#            self.project.projectConfig['CompTypes'][self.Ctype]['sourceEditor'] = editor
+#            self.tools.writeConfFile(self.project.projectConfig)
 
 
     def updateManagerSettings (self, gid) :
@@ -119,26 +119,26 @@ class Text (Manager) :
             oldCompSet = self.compSettings.dict()
             # Don't overwrite manager settings (default sets reset to False) if
             # there already is a setting present on the nameFormID.
-            if self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] :
+            if self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] :
                 newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
             else :
                 newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet, True)
 
             if not newCompSet == oldCompSet :
                 self.compSettings.merge(newCompSet)
-                self.tools.writeConfFile(self.project.projConfig)
+                self.tools.writeConfFile(self.project.projectConfig)
                 # Be sure to update the current session settings
                 for k, v in self.compSettings.iteritems() :
                     setattr(self, k, v)
         # A generic editor means we really do not know where the text came
         # from. In that case, we just do the best we can.
         elif sourceEditor.lower() == 'generic' :
-            if not self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
-                not self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] :
-                self.project.projConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
-                self.project.projConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
+            if not self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
+                not self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] :
+                self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
+                self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
 
-                self.tools.writeConfFile(self.project.projConfig)
+                self.tools.writeConfFile(self.project.projectConfig)
         else :
             self.project.log.writeToLog('TEXT-010', [sourceEditor])
             self.tools.dieNow()

@@ -43,17 +43,17 @@ class Project (object) :
         self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local                  = ProjLocal(self.pid)
-        self.projConfig             = Config(self.pid).projConfig
-        self.cType                  = self.projConfig['Groups'][self.gid]['cType']
+        self.projectConfig          = Config(self.pid).getProjectConfig()
+        self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
         self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()
         self.groups                 = {}
         self.components             = {}
         self.managers               = {}
-        self.projectMediaIDCode     = self.projConfig['ProjectInfo']['projectMediaIDCode']
-        self.projectIDCode          = self.projConfig['ProjectInfo']['projectIDCode']
-        self.projectName            = self.projConfig['ProjectInfo']['projectName']
+        self.projectMediaIDCode     = self.projectConfig['ProjectInfo']['projectMediaIDCode']
+        self.projectIDCode          = self.projectConfig['ProjectInfo']['projectIDCode']
+        self.projectName            = self.projectConfig['ProjectInfo']['projectName']
         # The gid cannot generally be set yet but we will make a placeholder
         # for it here and the functions below will set it. (I'm just say'n)
 
@@ -66,16 +66,16 @@ class Project (object) :
         # if needed
         newXmlDefaults = os.path.join(self.local.rapumaConfigFolder, self.projectMediaIDCode + '.xml')
         xmlConfig = self.tools.getXMLSettings(newXmlDefaults)
-        newConf = ConfigObj(xmlConfig.dict(), encoding='utf-8').override(self.projConfig)
-        for s,v in self.projConfig.items() :
+        newConf = ConfigObj(xmlConfig.dict(), encoding='utf-8').override(self.projectConfig)
+        for s,v in self.projectConfig.items() :
             if s not in newConf :
                 newConf[s] = v
 
         # Replace with new conf if new is different from old
         # Rem new conf doesn't have a filename, give it one
-        if self.projConfig != newConf :
-            self.projConfig = newConf
-            self.projConfig.filename = self.local.projConfFile
+        if self.projectConfig != newConf :
+            self.projectConfig = newConf
+            self.projectConfig.filename = self.local.projectConfFile
 
         # If this is a valid project we might as well put in the folders
 #        for folder in self.local.projFolders :
@@ -125,7 +125,7 @@ class Project (object) :
         '''Do basic load on a manager.'''
 
         fullName = self.cType + '_' + mType.capitalize()
-        cfg = self.projConfig['Managers'][fullName]
+        cfg = self.projectConfig['Managers'][fullName]
         module = import_module('rapuma.manager.' + mType)
         ManagerClass = getattr(module, mType.capitalize())
         manobj = ManagerClass(self, cfg, self.cType)
@@ -141,17 +141,17 @@ class Project (object) :
         fullName = self.cType + '_' + mType.capitalize()
         managerDefaults = None
         # Insert the Manager section if it is not already there
-        self.tools.buildConfSection(self.projConfig, 'Managers')
-        if not self.projConfig['Managers'].has_key(fullName) :
-            self.tools.buildConfSection(self.projConfig['Managers'], fullName)
+        self.tools.buildConfSection(self.projectConfig, 'Managers')
+        if not self.projectConfig['Managers'].has_key(fullName) :
+            self.tools.buildConfSection(self.projectConfig['Managers'], fullName)
 
         # Update settings if needed
         update = False
         managerDefaults = self.tools.getXMLSettings(os.path.join(self.local.rapumaConfigFolder, mType + '.xml'))
         for k, v, in managerDefaults.iteritems() :
             # Do not overwrite if a value is already there
-            if not self.projConfig['Managers'][fullName].has_key(k) :
-                self.projConfig['Managers'][fullName][k] = v
+            if not self.projectConfig['Managers'][fullName].has_key(k) :
+                self.projectConfig['Managers'][fullName][k] = v
                 # If we are dealing with an empty string, don't bother writing out
                 # Trying to avoid needless conf updating here. Just in case we are
                 # working with a list, we'll use len()
@@ -159,7 +159,7 @@ class Project (object) :
                     update = True
         # Update the conf if one or more settings were changed
         if update :
-            if self.tools.writeConfFile(self.projConfig) :
+            if self.tools.writeConfFile(self.projectConfig) :
                 self.log.writeToLog(self.errorCodes['0210'],[fullName])
             else :
                 self.log.writeToLog(self.errorCodes['0211'],[fullName])
@@ -202,7 +202,7 @@ class Project (object) :
             self.isValidCidList(cidList)
 
         # Otherwise, do a basic test for exsistance and move on
-        if self.projConfig['Groups'].has_key(self.gid) :
+        if self.projectConfig['Groups'].has_key(self.gid) :
 
             # Now create the group and pass the params on
             self.createGroup().render(self.gid, mode, cidList, force)
@@ -220,9 +220,9 @@ class Project (object) :
 
 #        import pdb; pdb.set_trace()
 
-        cType = self.projConfig['Groups'][self.gid]['cType']
+        cType = self.projectConfig['Groups'][self.gid]['cType']
         # Create a special component object if called
-        cfg = self.projConfig['Groups'][self.gid]
+        cfg = self.projectConfig['Groups'][self.gid]
         module = import_module('rapuma.group.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         groupObj = ManagerClass(self, cfg)
@@ -234,7 +234,7 @@ class Project (object) :
     def isValidCidList (self, thisCidlist) :
         '''Check to see if all the components in the list are in the group.'''
 
-        cidList = self.projConfig['Groups'][self.gid]['cidList']
+        cidList = self.projectConfig['Groups'][self.gid]['cidList']
         for cid in thisCidlist :
             # If this is not a usfm type we do not need to validate
             if self.cType == 'usfm' :

@@ -45,20 +45,25 @@ class ProjHyphenation (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(self.pid, gid)
-        self.projConfig                 = self.proj_config.projConfig
-        self.hyphenConfig               = self.proj_config.hyphenConfig
-        self.macPackConfig              = self.proj_config.macPackConfig
-        self.log                        = ProjLog(pid)
-        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.projectConfig              = self.proj_config.getProjectConfig()
+        self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
+        self.hyphenConfig               = self.proj_config.getHyphenationConfig()
+        self.macPack                    = None
+        self.macPackConfig              = None
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+            self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.macPackConfig          = self.proj_config.getMacPackConfig(self.macPack)
+            self.macPackFunctions       = self.proj_config.loadMacPackFunctions(self.macPack)
+        self.log                        = ProjLog(pid)
 
         # Add the file refs that are specific to the macPack
         for k, v in self.proj_config.macPackFilesDict.iteritems() :
             setattr(self, k, v)
 
         # Misc Settings
-        self.sourceEditor               = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.useHyphenation             = self.tools.str2bool(self.projConfig['Groups'][self.gid]['useHyphenation'])
+        self.sourceEditor               = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.useHyphenation             = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
         self.useSourcePreprocess        = self.tools.str2bool(self.hyphenConfig['GeneralSettings']['useHyphenSourcePreprocess'])
         # Data containers for this module
         self.allHyphenWords             = set()
@@ -134,11 +139,11 @@ class ProjHyphenation (object) :
 
         # Make sure we turn it on if it isn't already
         if not self.useHyphenation :
-            self.macPackConfig['Hyphenation']['setHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
-            self.macPackConfig['Hyphenation']['createHyphenLanguage'] = self.projConfig['Groups'][self.gid]['csid']
+            self.macPackConfig['Hyphenation']['setHyphenLanguage'] = self.projectConfig['Groups'][self.gid]['csid']
+            self.macPackConfig['Hyphenation']['createHyphenLanguage'] = self.projectConfig['Groups'][self.gid]['csid']
             self.tools.writeConfFile(self.macPackConfig)
-            self.projConfig['Groups'][self.gid]['useHyphenation'] = True
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Groups'][self.gid]['useHyphenation'] = True
+            self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0250'], [self.gid])
         else :
             self.log.writeToLog(self.errorCodes['0255'], [self.gid])
@@ -151,8 +156,8 @@ class ProjHyphenation (object) :
 
         # Make sure we turn it on if it isn't already
         if self.useHyphenation :
-            self.projConfig['Groups'][self.gid]['useHyphenation'] = False
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Groups'][self.gid]['useHyphenation'] = False
+            self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0260'], [self.gid])
         else :
             self.log.writeToLog(self.errorCodes['0265'], [self.gid])

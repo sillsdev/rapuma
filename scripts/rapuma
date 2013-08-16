@@ -57,7 +57,7 @@ from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
-from rapuma.project.proj_config         import Config, ProjectConfiguration
+from rapuma.project.proj_config         import Config
 from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r764'
+systemVersion   = '0.6.r765'
 local           = None
 
 # Give a welcome message
@@ -94,16 +94,16 @@ tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 ########################### Rapuma Functions ##############################
 ###########################################################################
 
-def checkCreatorVersion (pid, projConfig, systemVersion) :
+def checkCreatorVersion (pid, projectConfig, systemVersion) :
     '''Keep track of the version of Rapuma used in the current project.'''
 
-    if not projConfig['ProjectInfo'].has_key('projectCreatorVersion') :
-        projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
-        tools.writeConfFile(projConfig)
+    if not projectConfig['ProjectInfo'].has_key('projectCreatorVersion') :
+        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
+        tools.writeConfFile(projectConfig)
 
-    if projConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
-        projConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
-        tools.writeConfFile(projConfig)
+    if projectConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
+        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
+        tools.writeConfFile(projectConfig)
         # Now update the scripts if that is needed
         ProjCommander(pid).updateScripts()
 
@@ -225,8 +225,7 @@ def userArguments (args) :
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
-        pc          = ProjectConfiguration(pid)
-        checkCreatorVersion(pid, pc.projConfig, systemVersion)
+        checkCreatorVersion(pid, Config(pid).getProjectConfig(), systemVersion)
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -323,7 +322,7 @@ def userArguments (args) :
             cType = args.component_type
         else :
             try :
-                cType = Project(pid, gid).projConfig['Groups'][gid]['cType']
+                cType = Config(pid).getProjectConfig()['Groups'][gid]['cType']
             except :
                 sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
         if args.cid_list :

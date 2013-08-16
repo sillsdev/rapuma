@@ -47,15 +47,17 @@ class ProjBackground (object) :
         self.local                      = ProjLocal(pid)
         self.proj_config                = Config(pid, gid)
         self.log                        = ProjLog(pid)
-        self.projConfig                 = self.proj_config.projConfig
-        self.layoutConfig               = self.proj_config.layoutConfig
-        self.macPackConfig              = self.proj_config.macPackConfig
-        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.projectConfig              = self.proj_config.getProjectConfig()
+        self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.macPackFunctions           = UsfmTex(self.layoutConfig)
-        # Paths
-        self.projIllustrationFolder     = self.local.projIllustrationFolder
-        self.rpmIllustrationFolder      = self.local.rapumaIllustrationFolder
+        self.layoutConfig               = self.proj_config.getLayoutConfig()
+        self.macPack                    = None
+        self.macPackConfig              = None
+        self.macPackFunctions           = None
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+            self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.macPackConfig          = self.proj_config.getMacPackConfig(self.macPack)
+            self.macPackFunctions       = self.proj_config.loadMacPackFunctions(self.macPack)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -93,11 +95,11 @@ class ProjBackground (object) :
         if bgrd != 'cropmarks' :
             bgName = bgrd + 'Watermark'
 
-        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
         if not bgName in bgList :
             bgList.append(bgName)
-            self.projConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
+            self.tools.writeConfFile(self.projectConfig)
             if bgrd != 'cropmarks' :
                 self.checkForBackground(bgName, outType)
             self.log.writeToLog(self.errorCodes['0230'], [bgName, outType])
@@ -113,11 +115,11 @@ class ProjBackground (object) :
         if bgrd != 'cropmarks' :
             bgName = bgrd + 'Watermark'
 
-        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
         if bgName in bgList :
             bgList.remove(bgName)
-            self.projConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
+            self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0240'], [bgName, outType])
         else :
             self.log.writeToLog(self.errorCodes['0250'], [bgName, outType])
@@ -131,7 +133,7 @@ class ProjBackground (object) :
         if bgrd != 'cropmarks' :
             bgName = bgrd + 'Watermark'
 
-        bgList = self.projConfig['Managers']['usfm_Xetex'][outType + 'Background']
+        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
         if bgName in bgList :
             if bgrd != 'cropmarks' :
                 self.checkForBackground(bgName, outType, True)
@@ -144,7 +146,7 @@ class ProjBackground (object) :
         '''Check to see if a required backgound file is present. If not,
         make it so.'''
 
-        projBgFile      = os.path.join(self.projIllustrationFolder, bg + '.pdf')
+        projBgFile      = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
         if not os.path.exists(projBgFile) or force :
             if bg.find('lines') >= 0 :
                 if self.createLinesFile(projBgFile) :
@@ -160,7 +162,7 @@ class ProjBackground (object) :
         '''Install a default Rapuma watermark file into the project.'''
 
         # FIXME: A custom watermark creation function is needed here, load default for now
-        rpmDefWatermarkFile = os.path.join(self.rpmIllustrationFolder, mode + 'Watermark.pdf')
+        rpmDefWatermarkFile = os.path.join(self.local.rapumaIllustrationFolder, mode + 'Watermark.pdf')
 
         try :
             shutil.copy(rpmDefWatermarkFile, target)
@@ -174,8 +176,8 @@ class ProjBackground (object) :
         '''Create a border backgound file used for proof reading.'''
 
         # Set our file names
-        source = os.path.join(self.rpmIllustrationFolder, 'border.svg')
-        output = os.path.join(self.projIllustrationFolder,  'pageborder.svg')
+        source = os.path.join(self.local.rapumaIllustrationFolder, 'border.svg')
+        output = os.path.join(self.local.projIllustrationFolder,  'pageborder.svg')
         final_output = bgLinesFile
 
         # input and calculation
@@ -224,7 +226,7 @@ class ProjBackground (object) :
         in this file came from Flip Wester (flip_wester@sil.org)'''
 
         # Set our file names
-        source = os.path.join(self.rpmIllustrationFolder, 'grid.svg')
+        source = os.path.join(self.local.rapumaIllustrationFolder, 'grid.svg')
         output = tempfile.NamedTemporaryFile()
         final_output = bgLinesFile
 

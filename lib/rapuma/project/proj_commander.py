@@ -22,7 +22,7 @@ from configobj import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
-from rapuma.project.proj_config         import Config, ProjectConfiguration
+from rapuma.project.proj_config         import Config
 
 
 class ProjCommander (object) :
@@ -37,8 +37,7 @@ class ProjCommander (object) :
         self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local              = ProjLocal(self.pid)
-        self.projConfig         = ProjectConfiguration(self.pid).projConfig
-
+        self.projectConfig      = Config(self.pid).getProjectConfig()
 
         # Log messages for this module
         self.errorCodes     = {
@@ -70,8 +69,8 @@ class ProjCommander (object) :
         '''Create scripts that process specific group components.'''
 
         # Output the scripts (If this is a new project we need to pass)
-        if self.projConfig.has_key('Groups') :
-            for gid in self.projConfig['Groups'].keys() :
+        if self.projectConfig.has_key('Groups') :
+            for gid in self.projectConfig['Groups'].keys() :
                 allScripts = self.getGrpScripInfo(gid)
                 for key in allScripts.keys() :
                     fullFile = os.path.join(self.local.projHelpScriptFolder, key) + gid
@@ -147,12 +146,12 @@ class ProjCommander (object) :
         macPackConfig   = Config(self.pid, gid).macPackConfig
         # Set the vars for this function
         pid         = self.pid
-        cType       = self.projConfig['Groups'][gid]['cType']
-        renderer    = self.projConfig['CompTypes'][cType.capitalize()]['renderer']
+        cType       = self.projectConfig['Groups'][gid]['cType']
+        renderer    = self.projectConfig['CompTypes'][cType.capitalize()]['renderer']
         font        = ''
         if macPackConfig['FontSettings'].has_key('primaryFont') :
             font    = macPackConfig['FontSettings']['primaryFont']
-        macro       = self.projConfig['CompTypes'][cType.capitalize()]['macroPackage']
+        macro       = self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage']
         mid         = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {

@@ -57,15 +57,15 @@ class Toc (Group) :
         self.proj_toc               = ProjToc(self.pid, self.gid)
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.project                = project
-        self.projConfig             = project.projConfig
+        self.projectConfig          = project.projectConfig
         self.local                  = project.local
         self.log                    = project.log
         self.cfg                    = cfg
-        self.renderer               = project.projConfig['CompTypes'][self.Ctype]['renderer']
-        self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.sourceEditor           = project.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.renderer               = project.projectConfig['CompTypes'][self.Ctype]['renderer']
+        self.sourceEditor           = project.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.sourceEditor           = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
-        self.compSettings           = project.projConfig['CompTypes'][self.Ctype]
+        self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
 
         # Build a tuple of managers this component type needs to use
         self.tocManagers = ('text', 'illustration', self.renderer)
@@ -87,9 +87,9 @@ class Toc (Group) :
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
-        if newSectionSettings != self.projConfig['CompTypes'][self.Ctype] :
-            self.projConfig['CompTypes'][self.Ctype] = newSectionSettings
+        newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
+        if newSectionSettings != self.projectConfig['CompTypes'][self.Ctype] :
+            self.projectConfig['CompTypes'][self.Ctype] = newSectionSettings
         # Set them here
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
@@ -98,7 +98,7 @@ class Toc (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.project.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+                font = self.project.projectConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
@@ -144,7 +144,7 @@ class Toc (Group) :
     def getCidPiclistFile (self, gid) :
         '''Return the full path and name of the toc group piclist file.'''
 
-        return os.path.join(self.local.projComponentFolder, gid, 'toc' + '_' + self.projConfig['Groups'][gid]['csid'] + '.piclist')
+        return os.path.join(self.local.projComponentFolder, gid, 'toc' + '_' + self.projectConfig['Groups'][gid]['csid'] + '.piclist')
 
 
     def render(self, gid, mode, cidList, force) :
@@ -155,7 +155,7 @@ class Toc (Group) :
         # If the whole group is being rendered, we need to preprocess it
         cids = []
         if not cidList :
-            cids = self.projConfig['Groups'][gid]['cidList']
+            cids = self.projectConfig['Groups'][gid]['cidList']
         else :
             cids = cidList
 
@@ -181,7 +181,7 @@ class Toc (Group) :
         if not self.proj_font.varifyFont() :
             # If a PT project, use that font, otherwise, install default
             if self.sourceEditor.lower() == 'paratext' :
-                font = self.projConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
+                font = self.projectConfig['Managers'][self.cType + '_Font']['ptDefaultFont']
             else :
                 font = 'DefaultFont'
 
@@ -200,7 +200,7 @@ class Toc (Group) :
             self.log.writeToLog(self.errorCodes['0220'], [self.gid], 'toc.preProcessGroup():0220')
 
         # Background management
-        bgList = self.projConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
+        bgList = self.projectConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
         for bg in bgList :
             # For some reason it is best to load the mod right here
             ProjBackground(self.pid).checkForBackground(bg, mode)
@@ -224,7 +224,7 @@ class Toc (Group) :
 #        import pdb; pdb.set_trace()
 
         try :
-            cType = self.projConfig['Groups'][gid]['cType']
+            cType = self.projectConfig['Groups'][gid]['cType']
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog('COMP-200', ['Key not found ' + str(e)])
@@ -244,7 +244,7 @@ class Toc (Group) :
         '''Return True or False depending on if a working file exists 
         for a given cName.'''
 
-        cType = self.projConfig['Groups'][gid]['cType']
+        cType = self.projectConfig['Groups'][gid]['cType']
         return os.path.isfile(os.path.join(self.local.projComponentFolder, cid, cid + '.' + cType))
 
 

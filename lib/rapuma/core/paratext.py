@@ -41,9 +41,9 @@ class Paratext (object) :
         self.proj_config            = Config(pid, gid)
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.local                  = ProjLocal(pid)
-        self.projConfig             = self.proj_config.projConfig
-        self.layoutConfig           = self.proj_config.layoutConfig
-        self.illustrationConfig     = self.proj_config.illustrationConfig
+        self.projectConfig          = self.proj_config.getProjectConfig()
+        self.layoutConfig           = self.proj_config.getLayoutConfig()
+        self.illustrationConfig     = self.proj_config.getIllustrationConfig()
         self.log                    = ProjLog(pid)
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
@@ -63,7 +63,7 @@ class Paratext (object) :
 
         # A source path is often important, try to get that now
         try :
-            self.csid                   = self.projConfig['Groups'][self.gid]['csid']
+            self.csid                   = self.projectConfig['Groups'][self.gid]['csid']
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         except :
             self.log.writeToLog(self.errorCodes['0020'])
@@ -122,13 +122,13 @@ class Paratext (object) :
         # Assumed that this is for a ParaTExt USFM file, there should be
         # a nameFormID setting. If not, try updating the manager. If there
         # still is not a nameFormID, die in a very spectacular way.
-        if not self.projConfig['Managers']['usfm_Text']['nameFormID'] :
+        if not self.projectConfig['Managers']['usfm_Text']['nameFormID'] :
             self.project.managers['usfm_Text'].updateManagerSettings(gid)
 
         # Hopefully all is well now
-        nameFormID  = self.projConfig['Managers']['usfm_Text']['nameFormID']
-        postPart    = self.projConfig['Managers']['usfm_Text']['postPart']
-        prePart     = self.projConfig['Managers']['usfm_Text']['prePart']
+        nameFormID  = self.projectConfig['Managers']['usfm_Text']['nameFormID']
+        postPart    = self.projectConfig['Managers']['usfm_Text']['postPart']
+        prePart     = self.projectConfig['Managers']['usfm_Text']['prePart']
 
         # Sanity test
         if not nameFormID :
@@ -157,7 +157,7 @@ class Paratext (object) :
         impossible to do because of all the different possibilities. We
         will just try to make our best guess. A better way will be needed.'''
 
-        postPart = self.projConfig['Managers']['usfm_Text']['postPart']
+        postPart = self.projectConfig['Managers']['usfm_Text']['postPart']
         if postPart == '' :
             postPart = self.cType
 
@@ -301,15 +301,15 @@ class Paratext (object) :
 
         se = 'generic'
         # FIXME: This may need expanding as more use cases arrise
-        if self.projConfig['CompTypes'][self.Ctype].has_key('sourceEditor') \
-            and self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] != '' \
-            and self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] != 'None' :
-            se = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('sourceEditor') \
+            and self.projectConfig['CompTypes'][self.Ctype]['sourceEditor'] != '' \
+            and self.projectConfig['CompTypes'][self.Ctype]['sourceEditor'] != 'None' :
+            se = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         else :
             if self.findSsfFile() :
                 se = 'paratext'
-                self.projConfig['CompTypes'][self.Ctype]['sourceEditor'] = se
-                self.tools.writeConfFile(self.projConfig)
+                self.projectConfig['CompTypes'][self.Ctype]['sourceEditor'] = se
+                self.tools.writeConfFile(self.projectConfig)
 
         return se
 
@@ -571,143 +571,10 @@ class Paratext (object) :
         # usfm to be the only cType. This breaks if you are working with
         # something else. To get around it we will use a try statement
         try :
-            if self.tools.str2bool(self.projConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+            if self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
                 return '\\fig ' + figConts.group(1) + '\\fig*'
         except :
             return None
-
-
-###############################################################################
-########################### ParaTExt Style Functions ##########################
-###############################################################################
-####################### Error Code Block Series = 0800 ########################
-###############################################################################
-
-
-#    def usfmStyleFileIsValid (self, path) :
-#        '''Use the USFM parser to validate a style file. This is meant to
-#        be just a simple test so only return True or False.'''
-
-#        try :
-#            stylesheet = usfm.default_stylesheet.copy()
-#            stylesheet_extra = usfm.style.parse(open(os.path.expanduser(path),'r'), usfm.style.level.Content)
-#            return True
-#        except Exception as e :
-#            return False
-
-
-#    def removeUsfmStyFile (self, sType, force) :
-#        '''This would be useful for a style reset. Remove a style setting
-#        from the config for a component type and if force is used, remove
-#        the file from the project as well.'''
-
-#        sType = sType.lower()
-
-#        # Make sure there is something to do
-#        if sType == 'main' :
-#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile']
-#        elif sType == 'custom' :
-#            oldStyle = self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile']
-
-#        if not oldStyle :
-#            self.log.writeToLog('STYL-100', [self.cType])
-#            return
-#        else :
-#            if sType == 'main' :
-#                self.project.projConfig['Managers'][self.cType + '_Style']['mainStyleFile'] = ''
-#                self.mainStyleFile = ''
-#            elif sType == 'custom' :
-#                self.project.projConfig['Managers'][self.cType + '_Style']['customStyleFile'] = ''
-#                self.customStyleFile = ''
-
-#            self.tools.writeConfFile(self.project.projConfig)
-
-#            if force :
-#                target = os.path.join(self.project.local.projStyleFolder, oldStyle)
-#                if os.path.isfile(target) :
-#                    os.remove(target)
-
-#                self.log.writeToLog('STYL-110', [self.tools.fName(oldStyle),self.cType])
-#            else :
-#                self.log.writeToLog('STYL-120', [self.tools.fName(oldStyle),self.cType])
-
-#            return True
-
-
-#    def addExsitingUsfmStyFile (self, sFile, sType, force) :
-#        '''Add a specific style file that is on the local system.'''
-
-#        sFile = self.tools.resolvePath(sFile)
-#        target = os.path.join(self.project.local.projStyleFolder, self.tools.fName(sFile))
-
-#        if not force and os.path.isfile(target) :
-#            self.log.writeToLog('STYL-030', [self.tools.fName(sFile)])
-#            return False
-#        elif os.path.isfile(sFile) :
-#            # It's there? Good, we're done!
-#            # If this is not an Rapuma custom style file we will validate it
-#            if sType.lower() == 'main' :
-#                if self.usfmStyleFileIsValid(sFile) :
-#                    shutil.copy(sFile, target)
-#                    self.log.writeToLog('STYL-060', [self.tools.fName(sFile)])
-#                    return True
-#                else :
-#                    # We die if it does not validate
-#                    self.log.writeToLog('STYL-070', [self.tools.fName(sFile)])
-#            else :
-#                # Assuming a custom style file we can grab most anything
-#                # without validating it
-#                shutil.copy(sFile, target)
-#                self.log.writeToLog('STYL-065', [self.tools.fName(sFile)])
-#                return True
-#        else :
-#            # Not finding the file may not be the end of the world 
-#            self.log.writeToLog('STYL-020', [self.tools.fName(sFile)])
-#            return False
-
-
-#    def addPtUsfmStyFile (self) :
-#        '''Install a PT project style file. Merg in any custom
-#        project styles too.'''
-
-#        # First pick up our PT settings
-#        ptConf = self.pt_tools.getPTSettings()
-#        if not ptConf :
-#            return False
-
-#        # If nothing is set, give it a default to start off
-#        if not self.mainStyleFile :
-#            self.mainStyleFile = 'usfm.sty'
-#        # Now, override default styleFile name if we found something in the PT conf
-#        if ptConf['ScriptureText']['StyleSheet'] :
-#            self.mainStyleFile = ptConf['ScriptureText']['StyleSheet']
-
-#        # Set the target destination
-#        target = os.path.join(self.project.local.projStyleFolder, self.mainStyleFile)
-#        # As this is call is for a PT based project, it is certain the style
-#        # file should be found in the source or parent folder. If that
-#        # exact file is not found in either place, a substitute will be
-#        # copied in from Rapuma and given the designated name.
-#        sourceStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-#        parent                  = os.path.dirname(self.sourcePath)
-#        # If there is a "gather" folder, assume the style file is there
-#        if os.path.isdir(os.path.join(self.sourcePath, 'gather')) :
-#            ptProjStyle             = os.path.join(self.sourcePath, 'gather', self.mainStyleFile)
-#        else :
-#            ptProjStyle             = os.path.join(self.sourcePath, self.mainStyleFile)
-#        ptStyle                     = os.path.join(parent, self.mainStyleFile)
-#        searchOrder                 = [sourceStyle, ptProjStyle, ptStyle]
-#        # We will start by searching in order from the inside out and stop
-#        # as soon as we find one.
-#        for sFile in searchOrder :
-#            if os.path.isfile(sFile) :
-#                if self.usfmStyleFileIsValid(sFile) :
-#                    if not shutil.copy(sFile, target) :
-#                        return self.tools.fName(target)
-#                else :
-#                    self.log.writeToLog('STYL-075', [sFile,self.cType])
-#            else : 
-#                self.log.writeToLog('STYL-090', [sFile])
 
 
 

@@ -34,7 +34,7 @@ from rapuma.core.proj_backup                import ProjBackup
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
-from rapuma.project.proj_config             import Config, ProjectConfiguration
+from rapuma.project.proj_config             import Config
 
 
 class ProjSetup (object) :
@@ -115,7 +115,7 @@ class ProjSetup (object) :
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
-            self.projConfig         = ProjectConfiguration(self.pid).projConfig
+            self.projectConfig      = Config(self.pid).getProjectConfig()
             self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True
@@ -132,7 +132,7 @@ class ProjSetup (object) :
     def updateAllGroups (self, force = False) :
         '''Run the update on all the groups in a project.'''
 
-        for gid in self.projConfig['Groups'].keys() :
+        for gid in self.projectConfig['Groups'].keys() :
             self.updateGroup(gid, force)
 
 
@@ -145,7 +145,7 @@ class ProjSetup (object) :
 
         # Just in case there are any problems with the source path
         # resolve it here before going on.
-        csid = self.projConfig['Groups'][gid]['csid']
+        csid = self.projectConfig['Groups'][gid]['csid']
         if not sourcePath :
             sourcePath  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
             if not os.path.exists(sourcePath) :
@@ -161,13 +161,13 @@ class ProjSetup (object) :
 
         # Sort out the list
         if not cidList :
-            cidList = self.projConfig['Groups'][gid]['cidList']
+            cidList = self.projectConfig['Groups'][gid]['cidList']
         else :
             if type(cidList) != list :
                  cidList = cidList.split()
                  # Do a quick validity test
                  for cid in cidList :
-                    if not cid in self.projConfig['Groups'][gid]['cidList'] :
+                    if not cid in self.projectConfig['Groups'][gid]['cidList'] :
                         self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
 
         # Unlock the group so it can be worked on
@@ -213,8 +213,8 @@ class ProjSetup (object) :
         the vars here are pretty good.'''
 
         # Do not want to add this group, non-force, if it already exsists.
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        if self.projConfig['Groups'].has_key(gid) and not force :
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        if self.projectConfig['Groups'].has_key(gid) and not force :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         sourceKey = csid + '_sourcePath'
@@ -240,33 +240,33 @@ class ProjSetup (object) :
         # a previous attempt to add the same group. But if
         # it is new, we can just pass
         try :
-            del self.projConfig['Groups'][gid]
+            del self.projectConfig['Groups'][gid]
         except :
             pass
 
         # Get persistant values from the config
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        self.tools.buildConfSection(self.projConfig['Groups'], gid)
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
-        if newSectionSettings != self.projConfig['Groups'][gid] :
-            self.projConfig['Groups'][gid] = newSectionSettings
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        self.tools.buildConfSection(self.projectConfig['Groups'], gid)
+        newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
+        if newSectionSettings != self.projectConfig['Groups'][gid] :
+            self.projectConfig['Groups'][gid] = newSectionSettings
 
         # Add/Modify the info to the group config info
-        self.projConfig['Groups'][gid]['cType']                 = cType
-        self.projConfig['Groups'][gid]['csid']                  = csid
-        self.projConfig['Groups'][gid]['cidList']               = cidList
-        self.projConfig['Groups'][gid]['bindingOrder']          = 0
+        self.projectConfig['Groups'][gid]['cType']                 = cType
+        self.projectConfig['Groups'][gid]['csid']                  = csid
+        self.projectConfig['Groups'][gid]['cidList']               = cidList
+        self.projectConfig['Groups'][gid]['bindingOrder']          = 0
 
         # Here we need to "inject" cType information into the config
         # If we don't createGroup() will fail badly.
         self.cType = cType
 
 #        import pdb; pdb.set_trace()
-        self.tools.addComponentType(self.projConfig, self.local, cType)
+        self.tools.addComponentType(self.projectConfig, self.local, cType)
 
         # Lock and save our config settings
-        self.projConfig['Groups'][gid]['isLocked']  = True
-        if self.tools.writeConfFile(self.projConfig) :
+        self.projectConfig['Groups'][gid]['isLocked']  = True
+        if self.tools.writeConfFile(self.projectConfig) :
             self.log.writeToLog(self.errorCodes['0240'], [gid])
 
         # Update helper scripts
@@ -290,8 +290,8 @@ class ProjSetup (object) :
     def removeGroup (self, gid, force = False) :
         '''Handler to remove a group. If it is not found return True anyway.'''
 
-        cidList     = self.projConfig['Groups'][gid]['cidList']
-        cType       = self.projConfig['Groups'][gid]['cType']
+        cidList     = self.projectConfig['Groups'][gid]['cidList']
+        cType       = self.projectConfig['Groups'][gid]['cType']
         groupFolder = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
@@ -299,10 +299,10 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['0210'], [gid])
 
         # Remove subcomponents from the target if there are any
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        if self.projConfig['Groups'].has_key(gid) :
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        if self.projectConfig['Groups'].has_key(gid) :
             for cid in cidList :
-                self.uninstallGroupComponent(gid, cid, self.projConfig, force)
+                self.uninstallGroupComponent(gid, cid, self.projectConfig, force)
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
                 self.log.writeToLog(self.errorCodes['0290'], [gid])
@@ -310,8 +310,8 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['0250'], [gid])
             
         # Now remove the config entry
-        del self.projConfig['Groups'][gid]
-        if self.tools.writeConfFile(self.projConfig) :
+        del self.projectConfig['Groups'][gid]
+        if self.tools.writeConfFile(self.projectConfig) :
             self.log.writeToLog(self.errorCodes['0220'], [gid])
 
 
@@ -322,8 +322,8 @@ class ProjSetup (object) :
 
 #       import pdb; pdb.set_trace()
 
-        cType       = self.projConfig['Groups'][gid]['cType']
-        csid        = self.projConfig['Groups'][gid]['csid']
+        cType       = self.projectConfig['Groups'][gid]['cType']
+        csid        = self.projectConfig['Groups'][gid]['csid']
         fileHandle  = cid + '_' + csid
 
         # Test to see if it is shared
@@ -354,9 +354,9 @@ class ProjSetup (object) :
         '''If the cid is shared by any other groups, return True.'''
 
         try :
-            for g in self.projConfig['Groups'].keys() :
+            for g in self.projectConfig['Groups'].keys() :
                 if g != gid :
-                    if cid in self.projConfig['Groups'][g]['cidList'] :
+                    if cid in self.projectConfig['Groups'][g]['cidList'] :
                         return True
         except :
             return False
@@ -375,7 +375,7 @@ class ProjSetup (object) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
         # Get some group settings
-        cType       = self.projConfig['Groups'][gid]['cType']
+        cType       = self.projectConfig['Groups'][gid]['cType']
 
         for cid in cidList :
             # See if the working text is present, quite if it is not
@@ -439,9 +439,9 @@ class ProjSetup (object) :
         locked. However, if the group doesn't even exsist, it is assumed
         that it is unlocked and return False. :-)'''
 
-        if not self.projConfig['Groups'][gid].has_key('isLocked') :
+        if not self.projectConfig['Groups'][gid].has_key('isLocked') :
             return False
-        elif self.tools.str2bool(self.projConfig['Groups'][gid]['isLocked']) == True :
+        elif self.tools.str2bool(self.projectConfig['Groups'][gid]['isLocked']) == True :
             return True
         else :
             return False
@@ -461,10 +461,10 @@ class ProjSetup (object) :
     def setLock (self, gid, lock) :
         '''Set a group lock to True or False.'''
 
-        if self.projConfig['Groups'].has_key(gid) :
-            self.projConfig['Groups'][gid]['isLocked'] = lock
-            # Update the projConfig
-            if self.tools.writeConfFile(self.projConfig) :
+        if self.projectConfig['Groups'].has_key(gid) :
+            self.projectConfig['Groups'][gid]['isLocked'] = lock
+            # Update the projectConfig
+            if self.tools.writeConfFile(self.projectConfig) :
                 return True
         else :
             return False
@@ -498,17 +498,17 @@ class ProjSetup (object) :
 
         # Run some basic tests to see if this project can be created
         # Look for project in current folder
-        if not os.path.isfile(self.local.projConfFile) :
+        if not os.path.isfile(self.local.projectConfFile) :
             # Look for locked project in current folder
-            if os.path.isfile(self.local.projConfFile + self.local.lockExt) :
+            if os.path.isfile(self.local.projectConfFile + self.local.lockExt) :
                 self.tools.terminal('ERR: Halt! Locked project already defined in target folder')
                 return
             # Look for project in parent folder (don't want project in project)
-            elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projConfFileName)) :
+            elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projectConfFileName)) :
                 self.tools.terminal('ERR: Halt! Live project already defined in parent folder')
                 return
             # Look for locked project in parent folder (prevent project in project)
-            elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projConfFileName + self.local.lockExt)) :
+            elif os.path.isfile(os.path.join(os.path.dirname(self.local.projHome), self.local.projectConfFileName + self.local.lockExt)) :
                 self.tools.terminal('ERR: Halt! Locked project already defined in parent folder')
                 return
             # Check if path to parent is valid
@@ -533,7 +533,7 @@ class ProjSetup (object) :
             self.backup.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
         else :
             # If not from a template, just create a new version of the project config file
-            Config(self.pid).makeNewProjConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
+            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -563,14 +563,14 @@ class ProjSetup (object) :
         paratext            = Paratext(self.pid, gid)
         proj_process        = ProjProcess(self.pid)
 
-        cType               = self.projConfig['Groups'][gid]['cType']
-        usePreprocessScript = self.tools.str2bool(self.projConfig['Groups'][gid]['usePreprocessScript'])
+        cType               = self.projectConfig['Groups'][gid]['cType']
+        usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
         target              = self.tools_path.getWorkingFile(gid, cid)
         targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
         source              = self.tools_path.getSourceFile(gid, cid)
-        extractFigMarkers   = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
-        extractFeMarkers    = self.tools.str2bool(self.projConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
+        extractFigMarkers   = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
+        extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
@@ -644,10 +644,10 @@ class ProjSetup (object) :
         '''Copy USFM text from source to target. Decode if necessary, then
         normalize. With the text in place, validate unless that is False.'''
 
-        sourceEncode        = self.projConfig['Managers']['usfm_Text']['sourceEncode']
-        workEncode          = self.projConfig['Managers']['usfm_Text']['workEncode']
-        unicodeNormalForm   = self.projConfig['Managers']['usfm_Text']['unicodeNormalForm']
-        validateUsfm        = self.tools.str2bool(self.projConfig['CompTypes']['Usfm']['validateUsfm'])
+        sourceEncode        = self.projectConfig['Managers']['usfm_Text']['sourceEncode']
+        workEncode          = self.projectConfig['Managers']['usfm_Text']['workEncode']
+        unicodeNormalForm   = self.projectConfig['Managers']['usfm_Text']['unicodeNormalForm']
+        validateUsfm        = self.tools.str2bool(self.projectConfig['CompTypes']['Usfm']['validateUsfm'])
 
         # Bring in our source text
         if sourceEncode == workEncode :
@@ -695,9 +695,9 @@ class ProjSetup (object) :
         # comment markers "%" are used to comment text rather than "#".
 
         # Grab the default style file from the macPack (it better be there)
-        cType           = self.projConfig['Groups'][gid]['cType']
+        cType           = self.projectConfig['Groups'][gid]['cType']
         Ctype           = cType.capitalize()
-        macPack         = self.projConfig['CompTypes'][Ctype]['macroPackage']
+        macPack         = self.projectConfig['CompTypes'][Ctype]['macroPackage']
         defaultStyFile  = os.path.join(self.local.projStyleFolder, macPack + '.sty')
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')

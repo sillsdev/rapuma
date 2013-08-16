@@ -41,7 +41,7 @@ class ProjBinding (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projConfig         = Config(pid).projConfig
+        self.projectConfig      = Config(pid).projectConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -125,12 +125,12 @@ class ProjBinding (object) :
 
         # Get the order of the groups to be bound.
         bindOrder = {}
-        for grp in self.projConfig['Groups'].keys() :
-            if not self.projConfig['Groups'][grp].has_key('bindingOrder') :
-                self.projConfig['Groups'][grp]['bindingOrder'] = 0
-                self.tools.writeConfFile(self.projConfig)
-            if int(self.projConfig['Groups'][grp]['bindingOrder']) > 0 :
-                bindOrder[self.projConfig['Groups'][grp]['bindingOrder']] = grp
+        for grp in self.projectConfig['Groups'].keys() :
+            if not self.projectConfig['Groups'][grp].has_key('bindingOrder') :
+                self.projectConfig['Groups'][grp]['bindingOrder'] = 0
+                self.tools.writeConfFile(self.projectConfig)
+            if int(self.projectConfig['Groups'][grp]['bindingOrder']) > 0 :
+                bindOrder[self.projectConfig['Groups'][grp]['bindingOrder']] = grp
         bindGrpNum = len(bindOrder)
         # Need not keep going if nothing was found
         if bindGrpNum == 0 :
@@ -180,19 +180,19 @@ class ProjBinding (object) :
         newPages = self.tools.getPdfPages(output)
         # FIXME: For now, we need to hard-code the manager name
         manager = 'usfm_Xetex'
-        if self.projConfig['Managers'][manager].has_key('totalBoundPages') :
-            oldPages = int(self.projConfig['Managers'][manager]['totalBoundPages'])
+        if self.projectConfig['Managers'][manager].has_key('totalBoundPages') :
+            oldPages = int(self.projectConfig['Managers'][manager]['totalBoundPages'])
             if oldPages != newPages or oldPages == 'None' :
-                self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
-                self.tools.writeConfFile(self.projConfig)
+                self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
+                self.tools.writeConfFile(self.projectConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(output)])
         else :
-            self.projConfig['Managers'][manager]['totalBoundPages'] = newPages
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
+            self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(output)])
 
         # Build the viewer command
-        pdfViewer = self.projConfig['Managers'][manager]['pdfViewerCommand']
+        pdfViewer = self.projectConfig['Managers'][manager]['pdfViewerCommand']
         pdfViewer.append(output)
         # Run the viewer and collect the return code for analysis
         try :

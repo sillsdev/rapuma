@@ -37,7 +37,9 @@ class ProjProcess (object) :
         self.userHome               = os.environ.get('RAPUMA_USER')
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projConfig             = Config(self.pid).projConfig
+# FIXME
+        self.projectConfig          = Config(self.pid).projectConfig
+
         self.projHome               = None
         self.local                  = None
         self.finishInit()
@@ -119,7 +121,7 @@ class ProjProcess (object) :
         fList = []
 
         # Will need the stylesheet for copy
-        projSty = self.projConfig['Managers'][cType + '_Style']['mainStyleFile']
+        projSty = self.projectConfig['Managers'][cType + '_Style']['mainStyleFile']
         projSty = os.path.join(self.local.projStyleFolder, projSty)
         # Process as list of components
 
@@ -179,8 +181,8 @@ class ProjProcess (object) :
     def turnOnOffPreprocess (self, gid, onOff) :
         '''Turn on or off preprocessing on incoming component text.'''
 
-        self.projConfig['Groups'][gid]['usePreprocessScript'] = onOff
-        self.tools.writeConfFile(self.projConfig)
+        self.projectConfig['Groups'][gid]['usePreprocessScript'] = onOff
+        self.tools.writeConfFile(self.projectConfig)
         self.log.writeToLog(self.errorCodes['1240'], [str(onOff), gid])
 
 
@@ -188,7 +190,7 @@ class ProjProcess (object) :
         '''Check to see if a preprocess script is installed. If not, install the
         default script and give a warning that the script is not complete.'''
 
-        cType = self.projConfig['Groups'][gid]['cType']
+        cType = self.projectConfig['Groups'][gid]['cType']
         rpmPreprocessFile = os.path.join(self.local.rapumaScriptFolder, 'textPreprocess.py')
         grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
         # Check and copy if needed
@@ -263,7 +265,7 @@ class ProjProcess (object) :
         scriptName          = os.path.split(script)[1]
         scriptSourceFolder  = os.path.split(script)[0]
         scriptTarget        = os.path.join(self.local.projScriptFolder, self.tools.fName(script).split('.')[0] + '.py')
-        if scriptName in self.projConfig['CompTypes'][Ctype]['postprocessScripts'] :
+        if scriptName in self.projectConfig['CompTypes'][Ctype]['postprocessScripts'] :
             oldScript = scriptName
 
         # First check for prexsisting script record
@@ -275,7 +277,7 @@ class ProjProcess (object) :
         # In case this is a new project we may need to install a component
         # type and make a process (components) folder
         if not self.components[cType] :
-            self.tools.addComponentType(self.projConfig, self.local, cType)
+            self.tools.addComponentType(self.projectConfig, self.local, cType)
 
         # Make the target folder if needed
         if not os.path.isdir(self.local.projScriptFolder) :
@@ -299,10 +301,10 @@ class ProjProcess (object) :
             self.log.writeToLog('POST-115', [self.tools.fName(scriptTarget)])
 
         # Record the script with the cType post process scripts list
-        scriptList = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
+        scriptList = self.projectConfig['CompTypes'][Ctype]['postprocessScripts']
         if self.tools.fName(scriptTarget) not in scriptList :
-            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = self.tools.addToList(scriptList, self.tools.fName(scriptTarget))
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['CompTypes'][Ctype]['postprocessScripts'] = self.tools.addToList(scriptList, self.tools.fName(scriptTarget))
+            self.tools.writeConfFile(self.projectConfig)
 
         return True
 
@@ -317,11 +319,11 @@ class ProjProcess (object) :
 
         Ctype = cType.capitalize()
         # Get old setting
-        old = self.projConfig['CompTypes'][Ctype]['postprocessScripts']
+        old = self.projectConfig['CompTypes'][Ctype]['postprocessScripts']
         # Reset the field to ''
         if old != '' :
-            self.projConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['CompTypes'][Ctype]['postprocessScripts'] = ''
+            self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog('POST-130', [old,Ctype])
 
         else :

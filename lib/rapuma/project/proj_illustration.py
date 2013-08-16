@@ -43,15 +43,19 @@ class ProjIllustration (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(pid, gid)
-        self.layoutConfig               = self.proj_config.layoutConfig
-        self.macPackConfig              = self.proj_config.macPackConfig
-        self.illustrationConfig         = self.proj_config.illustrationConfig
-        self.projConfig                 = self.proj_config.projConfig
-        self.csid                       = self.projConfig['Groups'][self.gid]['csid']
-        self.log                        = ProjLog(pid)
-        self.cType                      = self.projConfig['Groups'][gid]['cType']
+        self.projectConfig              = self.proj_config.getProjectConfig()
+        self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.csid                       = self.projectConfig['Groups'][self.gid]['csid']
+        self.layoutConfig               = self.proj_config.getLayoutConfig()
+        self.illustrationConfig         = self.proj_config.getIllustrationConfig()
+        self.macPack                    = None
+        self.macPackConfig              = None
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+            self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.macPackConfig          = self.proj_config.getMacPackConfig(self.macPack)
+        self.log                        = ProjLog(pid)
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
         self.userIllustrationLibName    = self.illustrationConfig['GeneralSettings'].get('userIllustrationLibName')
@@ -60,7 +64,7 @@ class ProjIllustration (object) :
         if not self.userIllustrationLibName :
             self.userIllustrationLibName = self.userConfig['Resources']['defaultIllustrationLibraryName']
             self.illustrationConfig['GeneralSettings']['userIllustrationLibName'] = self.userIllustrationLibName
-            self.tools.writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projectConfig)
 
         # File names
 
@@ -159,11 +163,11 @@ class ProjIllustration (object) :
             self.log.writeToLog('ILUS-050', [fileName])
 
         # Check to see if this is a watermark file, if it is, remove config setting
-        if self.projConfig['CompTypes'][self.Ctype].has_key('pageWatermarkFile') :
-            org = self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('pageWatermarkFile') :
+            org = self.projectConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
             if org == fileName :
-                self.projConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
-                self.tools.writeConfFile(self.projConfig)
+                self.projectConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
+                self.tools.writeConfFile(self.projectConfig)
 
 
     def hasIllustrations (self, gid, bid) :
@@ -196,7 +200,7 @@ class ProjIllustration (object) :
 
 #        import pdb; pdb.set_trace()
 
-        cType = self.projConfig['Groups'][gid]['cType']
+        cType = self.projectConfig['Groups'][gid]['cType']
         if cType == 'usfm' :
             piclistFile = self.getCidPiclistFile(cid)
         elif cType == 'map' :

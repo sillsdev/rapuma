@@ -48,7 +48,7 @@ class ProjMaps (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.mType                      = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = Config(pid).projConfig
+        self.projectConfig                 = Config(pid).projectConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(pid)
         self.paratext                   = Paratext(pid)
@@ -56,7 +56,7 @@ class ProjMaps (object) :
         self.illustrationConfFileName   = 'illustration.conf'
         self.gidTexFileName             = self.gid + '.tex'
         # Folder paths
-        self.projConfFolder             = self.local.projConfFolder
+        self.projConfFolder          = self.local.projConfFolder
         self.projComponentFolder        = self.local.projComponentFolder
         self.projIllustrationFolder     = self.local.projIllustrationFolder
         self.gidFolder                  = os.path.join(self.projComponentFolder, gid)
@@ -99,8 +99,8 @@ class ProjMaps (object) :
 
         # A source path is often important, try to get that now
         try :
-            self.csid                   = self.projConfig['Groups'][self.gid]['csid']
-            self.cType                  = self.projConfig['Groups'][self.gid]['cType']
+            self.csid                   = self.projectConfig['Groups'][self.gid]['csid']
+            self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
             self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         except :
             pass
@@ -120,22 +120,22 @@ class ProjMaps (object) :
 
         Ctype = cType.capitalize()
         # Build the comp type config section
-        self.tools.buildConfSection(self.projConfig, 'CompTypes')
-        self.tools.buildConfSection(self.projConfig['CompTypes'], Ctype)
+        self.tools.buildConfSection(self.projectConfig, 'CompTypes')
+        self.tools.buildConfSection(self.projectConfig['CompTypes'], Ctype)
 
         # Get persistant values from the config if there are any
-        newSectionSettings = self.tools.getPersistantSettings(self.projConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
-        if newSectionSettings != self.projConfig['CompTypes'][Ctype] :
-            self.projConfig['CompTypes'][Ctype] = newSectionSettings
+        newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['CompTypes'][Ctype], os.path.join(self.local.rapumaConfigFolder, cType + '.xml'))
+        if newSectionSettings != self.projectConfig['CompTypes'][Ctype] :
+            self.projectConfig['CompTypes'][Ctype] = newSectionSettings
             # Save the setting rightaway
-            self.tools.writeConfFile(self.projConfig)
+            self.tools.writeConfFile(self.projectConfig)
 
 
     def addGroup (self, mapFileList, csid, csidPath, force = False) :
         '''Add maps to the project.'''
 
         # First be sure the component type exists in the conf
-        self.projConfig = self.tools.addComponentType(self.projConfig, self.local, 'map')
+        self.projectConfig = self.tools.addComponentType(self.projectConfig, self.local, 'map')
 
 #        import pdb; pdb.set_trace()
         
@@ -153,21 +153,21 @@ class ProjMaps (object) :
         cidList = self.illustrationConfig[self.gid].keys()
         self.createGroupFolder()
         self.createMapGroupStyleFile(force)
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        self.projConfig['Groups'][self.gid] = {}
-#        self.projConfig['Groups'][self.gid]['cidList'] = cidList
-        self.projConfig['Groups'][self.gid]['cidList'] = [self.gid]
-        self.projConfig['Groups'][self.gid]['startPageNumber'] = 1
-        self.projConfig['Groups'][self.gid]['cType'] = 'map'
-        self.projConfig['Groups'][self.gid]['isLocked'] = True
-        self.projConfig['Groups'][self.gid]['csid'] = csid
-        self.projConfig['Groups'][self.gid]['totalPages'] = pgOrder
-        self.projConfig['Groups'][self.gid]['precedingGroup'] = None
-        self.projConfig['Groups'][self.gid]['bindingOrder'] = 0
-        self.tools.buildConfSection(self.projConfig, 'Managers')
-        self.tools.buildConfSection(self.projConfig['Managers'], 'map_Xetex')
-        self.projConfig['Managers']['map_Xetex']['draftBackground'] = ['draftWatermark']
-        self.tools.writeConfFile(self.projConfig)
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        self.projectConfig['Groups'][self.gid] = {}
+#        self.projectConfig['Groups'][self.gid]['cidList'] = cidList
+        self.projectConfig['Groups'][self.gid]['cidList'] = [self.gid]
+        self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
+        self.projectConfig['Groups'][self.gid]['cType'] = 'map'
+        self.projectConfig['Groups'][self.gid]['isLocked'] = True
+        self.projectConfig['Groups'][self.gid]['csid'] = csid
+        self.projectConfig['Groups'][self.gid]['totalPages'] = pgOrder
+        self.projectConfig['Groups'][self.gid]['precedingGroup'] = None
+        self.projectConfig['Groups'][self.gid]['bindingOrder'] = 0
+        self.tools.buildConfSection(self.projectConfig, 'Managers')
+        self.tools.buildConfSection(self.projectConfig['Managers'], 'map_Xetex')
+        self.projectConfig['Managers']['map_Xetex']['draftBackground'] = ['draftWatermark']
+        self.tools.writeConfFile(self.projectConfig)
 
         # Make a container file for the images
         self.createComponentContainerFile(cidList, force)
@@ -238,7 +238,7 @@ class ProjMaps (object) :
     def getGidContainerFileName (self) :
         '''Create the gid container file name. '''
 
-        return 'map' + '_' + self.projConfig['Groups'][self.gid]['csid'] + '.map'
+        return 'map' + '_' + self.projectConfig['Groups'][self.gid]['csid'] + '.map'
 
 
     def getGidContainerFile (self) :
@@ -303,9 +303,9 @@ class ProjMaps (object) :
     def removeGroup (self, gid, force = False) :
         '''Remove the maps from a project.'''
 
-        cidList         = self.projConfig['Groups'][gid]['cidList']
-        cType           = self.projConfig['Groups'][gid]['cType']
-        csid            = self.projConfig['Groups'][gid]['csid']
+        cidList         = self.projectConfig['Groups'][gid]['cidList']
+        cType           = self.projectConfig['Groups'][gid]['cType']
+        csid            = self.projectConfig['Groups'][gid]['csid']
         groupFolder     = os.path.join(self.local.projComponentFolder, gid)
 
         # First test for lock
@@ -316,15 +316,15 @@ class ProjMaps (object) :
             self.log.writeToLog(self.errorCodes['0050'], [gid])
 
         # Remove subcomponents from the target if there are any
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        if self.projConfig['Groups'].has_key(gid) :
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        if self.projectConfig['Groups'].has_key(gid) :
             for cid in cidList :
                 self.uninstallGroupComponent(gid, cid)
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
             # Now remove the config entry
-            del self.projConfig['Groups'][gid]
-            if self.tools.writeConfFile(self.projConfig) :
+            del self.projectConfig['Groups'][gid]
+            if self.tools.writeConfFile(self.projectConfig) :
                 # Clean up the maps config file
                 del self.mapsConfig['Groups'][gid]
                 self.tools.writeConfFile(self.mapsConfig)
@@ -364,7 +364,7 @@ class ProjMaps (object) :
 
         # Just in case there are any problems with the source path
         # resolve it here before going on.
-        csid        = self.projConfig['Groups'][gid]['csid']
+        csid        = self.projectConfig['Groups'][gid]['csid']
         if not self.tools.resolvePath(sourcePath) :
             if self.userConfig['Projects'][self.pid].has_key(csid + '_sourcePath') :
                 sourcePath = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
@@ -378,13 +378,13 @@ class ProjMaps (object) :
 
         # Sort out the list
         if not cidList :
-            cidList = self.projConfig['Groups'][gid]['cidList']
+            cidList = self.projectConfig['Groups'][gid]['cidList']
         else :
             if type(cidList) != list :
                  cidList = cidList.split()
                  # Do a quick validity test
                  for cid in cidList :
-                    if not cid in self.projConfig['Groups'][gid]['cidList'] :
+                    if not cid in self.projectConfig['Groups'][gid]['cidList'] :
                         self.log.writeToLog(self.errorCodes['0630'], [cid,gid])
 
         # Process each cid
@@ -408,7 +408,7 @@ class ProjMaps (object) :
                 self.log.writeToLog(self.errorCodes['0050'], [cid])
 
         # Now be sure the group is locked down before we go
-        if self.projConfig['Groups'][gid]['isLocked'] == 'False' :
+        if self.projectConfig['Groups'][gid]['isLocked'] == 'False' :
 
 # FIXME: Locking may need to be local
 
@@ -428,7 +428,7 @@ class ProjMaps (object) :
         if cidList :
             self.isValidCidList(cidList)
         else :
-            cidList = self.projConfig['Groups'][self.gid]['cidList']
+            cidList = self.projectConfig['Groups'][self.gid]['cidList']
 
         # Be sure all the images are preprocessed
 #        for cid in cidList :
@@ -444,7 +444,7 @@ class ProjMaps (object) :
     def isValidCidList (self, thisCidlist) :
         '''Check to see if all the components in the list are in the group.'''
 
-        cidList = self.projConfig['Groups'][self.gid]['cidList']
+        cidList = self.projectConfig['Groups'][self.gid]['cidList']
         for cid in thisCidlist :
             if not cid in cidList :
                 self.log.writeToLog(self.errorCodes['0860'],[cid])

@@ -48,7 +48,7 @@ class ProjToc (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.projectMediaIDCode         = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projConfig                 = Config(pid).projConfig
+        self.projectConfig                 = Config(pid).projectConfig
         self.log                        = ProjLog(pid)
         self.tools_path                 = ToolsPath(pid)
         self.tocData                    = {}
@@ -88,8 +88,8 @@ class ProjToc (object) :
 
     def finishInit (self) :
         '''If this is a new project we need to handle these settings special.'''
-        if self.projConfig['Groups'].has_key(self.gid) :
-            self.columns                = str(self.projConfig['Groups'][self.gid]['columns'])
+        if self.projectConfig['Groups'].has_key(self.gid) :
+            self.columns                = str(self.projectConfig['Groups'][self.gid]['columns'])
 
 
 ###############################################################################
@@ -105,23 +105,23 @@ class ProjToc (object) :
 #        import pdb; pdb.set_trace()
 
         # First be sure the component type exists in the conf
-        self.projConfig = self.tools.addComponentType(self.projConfig, self.local, 'toc')
+        self.projectConfig = self.tools.addComponentType(self.projectConfig, self.local, 'toc')
 
         # Having made it this far we can output information to the project config
         self.createTocFolder()
         self.createTocStyleFile(force)
-        self.tools.buildConfSection(self.projConfig, 'Groups')
-        self.projConfig['Groups'][self.gid] = {}
-        self.projConfig['Groups'][self.gid]['startPageNumber'] = 0
-        self.projConfig['Groups'][self.gid]['cType'] = 'toc'
-        self.projConfig['Groups'][self.gid]['isLocked'] = True
-        self.projConfig['Groups'][self.gid]['bindingOrder'] = 2
-        self.projConfig['Groups'][self.gid]['mainTitle'] = 'Table of Contents'
-        self.projConfig['Groups'][self.gid]['hdrName'] = 'Book Name'
-        self.projConfig['Groups'][self.gid]['hdrAbbr'] = 'Abbreviation'
-        self.projConfig['Groups'][self.gid]['hdrPgNum'] = 'Page Number'
-        self.projConfig['Groups'][self.gid]['columns'] = 2
-        self.tools.writeConfFile(self.projConfig)
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        self.projectConfig['Groups'][self.gid] = {}
+        self.projectConfig['Groups'][self.gid]['startPageNumber'] = 0
+        self.projectConfig['Groups'][self.gid]['cType'] = 'toc'
+        self.projectConfig['Groups'][self.gid]['isLocked'] = True
+        self.projectConfig['Groups'][self.gid]['bindingOrder'] = 2
+        self.projectConfig['Groups'][self.gid]['mainTitle'] = 'Table of Contents'
+        self.projectConfig['Groups'][self.gid]['hdrName'] = 'Book Name'
+        self.projectConfig['Groups'][self.gid]['hdrAbbr'] = 'Abbreviation'
+        self.projectConfig['Groups'][self.gid]['hdrPgNum'] = 'Page Number'
+        self.projectConfig['Groups'][self.gid]['columns'] = 2
+        self.tools.writeConfFile(self.projectConfig)
 
         # With the group installed we can finish the initialization
         self.finishInit()
@@ -144,12 +144,12 @@ class ProjToc (object) :
             if os.path.exists(self.tocWorkFile) :
                 os.remove(self.tocWorkFile)
 
-        if self.projConfig['Groups'].has_key(self.gid) :
+        if self.projectConfig['Groups'].has_key(self.gid) :
             if not os.path.exists(self.tocWorkFile) or force :
-                mainTitle = self.projConfig['Groups'][self.gid]['mainTitle']
-                hdrName = self.projConfig['Groups'][self.gid]['hdrName']
-                hdrAbbr = self.projConfig['Groups'][self.gid]['hdrAbbr']
-                hdrPgNum = self.projConfig['Groups'][self.gid]['hdrPgNum']
+                mainTitle = self.projectConfig['Groups'][self.gid]['mainTitle']
+                hdrName = self.projectConfig['Groups'][self.gid]['hdrName']
+                hdrAbbr = self.projectConfig['Groups'][self.gid]['hdrAbbr']
+                hdrPgNum = self.projectConfig['Groups'][self.gid]['hdrPgNum']
                 with codecs.open(self.tocWorkFile, "w", encoding="utf_8_sig") as contents :
                     contents.write('\\id TOC - Rapuma TOC working file, edit as needed.\n')
                     contents.write('\\rem Generated on: ' + self.tools.tStamp() + '\n')
@@ -258,12 +258,12 @@ class ProjToc (object) :
         '''Go through the groups and collect any TOC information that
         exsists and return it in a dictionary.'''
 
-        for gid in self.projConfig['Groups'].keys() :
-            if self.projConfig['Groups'][gid].has_key('tocInclude') :
-                if self.tools.str2bool(self.projConfig['Groups'][gid]['tocInclude']) :
-                    bg = 'bindGroup{}'.format(self.projConfig['Groups'][gid]['bindingOrder'])
+        for gid in self.projectConfig['Groups'].keys() :
+            if self.projectConfig['Groups'][gid].has_key('tocInclude') :
+                if self.tools.str2bool(self.projectConfig['Groups'][gid]['tocInclude']) :
+                    bg = 'bindGroup{}'.format(self.projectConfig['Groups'][gid]['bindingOrder'])
                     self.tocData[bg] = {}
-                    self.tocData[bg]['title'] = self.projConfig['Groups'][gid]['tocSectionTitle']
+                    self.tocData[bg]['title'] = self.projectConfig['Groups'][gid]['tocSectionTitle']
                     self.tocData[bg] = {'lines' : self.getTocData(gid)}
                     return True
 

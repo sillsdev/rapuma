@@ -23,7 +23,7 @@ from configobj                          import ConfigObj
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.core.paratext               import Paratext
-from rapuma.project.proj_config         import Config, ProjectConfiguration
+from rapuma.project.proj_config         import Config
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
@@ -68,22 +68,25 @@ class Xetex (Manager) :
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         # Get config objs
-        self.projConfig             = ProjectConfiguration(self.pid).projConfig
-        self.layoutConfig           = self.proj_config.layoutConfig
+        self.projectConfig          = self.proj_config.getProjectConfig()
+        self.layoutConfig           = self.proj_config.getLayoutConfig()
         self.userConfig             = self.project.userConfig
-        self.macPackConfig          = self.proj_config.macPackConfig
-        # Load the macPackDict for finding out all default information like file names
-        self.macPackFunctions       = UsfmTex(self.layoutConfig)
+        self.macPack                = None
+        self.macPackConfig          = None
+        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
+            self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.macPackConfig      = self.proj_config.getMacPackConfig(self.macPack)
+            self.macPackFunctions   = self.proj_config.loadMacPackFunctions(self.macPack)
         for k, v in self.proj_config.macPackFilesDict.iteritems() :
             setattr(self, k, v)
         # Some config settings
-        self.pdfViewer              = self.projConfig['Managers'][self.manager]['pdfViewerCommand']
-        self.pdfUtilityCommand      = self.projConfig['Managers'][self.manager]['pdfUtilityCommand']
-        self.sourceEditor           = self.projConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macroPackage           = self.projConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.pdfViewer              = self.projectConfig['Managers'][self.manager]['pdfViewerCommand']
+        self.pdfUtilityCommand      = self.projectConfig['Managers'][self.manager]['pdfUtilityCommand']
+        self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
+        self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
 
         # Get settings for this component
-        self.managerSettings = self.projConfig['Managers'][self.manager]
+        self.managerSettings = self.projectConfig['Managers'][self.manager]
         for k, v in self.managerSettings.iteritems() :
             if v == 'True' or v == 'False' :
                 setattr(self, k, self.tools.str2bool(v))
@@ -91,7 +94,7 @@ class Xetex (Manager) :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
-        self.usePdfViewer           = self.tools.str2bool(self.projConfig['Managers'][self.manager]['usePdfViewer'])
+        self.usePdfViewer           = self.tools.str2bool(self.projectConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = self.proj_hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
@@ -115,7 +118,7 @@ class Xetex (Manager) :
         self.projTexFolder          = self.local.projTexFolder
         self.projMacPackFolder      = os.path.join(self.projMacroFolder, self.macroPackage)
         # Set file names with full path 
-        self.projConfFile           = self.local.projConfFile
+        self.projectConfFile           = self.local.projectConfFile
         self.layoutConfFile         = self.proj_config.layoutConfFile
 
         self.illustrationConfFile   = self.proj_config.illustrationConfFile
@@ -128,12 +131,12 @@ class Xetex (Manager) :
         # Check to see if the PDF support is ready to go
         if not self.pdfViewer :
             self.pdfViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
-            self.projConfig['Managers'][self.manager]['pdfViewerCommand'] = self.pdfViewer
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Managers'][self.manager]['pdfViewerCommand'] = self.pdfViewer
+            self.tools.writeConfFile(self.projectConfig)
         if not self.pdfUtilityCommand :
             self.pdfUtilityCommand = self.project.userConfig['System']['pdfDefaultUtilityCommand']
-            self.projConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
-            self.tools.writeConfFile(self.projConfig)
+            self.projectConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
+            self.tools.writeConfFile(self.projectConfig)
 
         # Record some error codes
         # FIXME: much more needs to be done with this
@@ -467,8 +470,8 @@ class Xetex (Manager) :
             # FIXME: Previously style files were loaded here
             ########
             # If this is less than a full group render, just go with default pg num (1)
-            if cidList == self.projConfig['Groups'][self.gid]['cidList'] :
-                startPageNumber = int(self.projConfig['Groups'][self.gid]['startPageNumber'])
+            if cidList == self.projectConfig['Groups'][self.gid]['cidList'] :
+                startPageNumber = int(self.projectConfig['Groups'][self.gid]['startPageNumber'])
                 if startPageNumber > 1 :
                     gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
             # Now add in each of the components
@@ -538,14 +541,14 @@ class Xetex (Manager) :
         if cidList :
             pdfSubFileName = gid + '-' + '-'.join(cidList) + '.pdf'
         else :
-            cidList = self.projConfig['Groups'][gid]['cidList']
+            cidList = self.projectConfig['Groups'][gid]['cidList']
 
         # Background management (Phase one)
         # Much of the backgound handeling happens after rendering but
         # if cropmarks are desired, they must be turned on before the
         # document is rendered. We turn that on here before and turn
         # it off below when backgounds are being added.
-        if 'cropmarks' in self.projConfig['Managers'][self.manager][mode + 'Background'] :
+        if 'cropmarks' in self.projectConfig['Managers'][self.manager][mode + 'Background'] :
             if not self.tools.str2bool(self.layoutConfig['PageLayout']['useCropmarks']) :
                 self.layoutConfig['PageLayout']['useCropmarks'] = True
                 self.tools.writeConfFile(self.layoutConfig)
@@ -564,7 +567,7 @@ class Xetex (Manager) :
         self.makeGidTexFile(cidList)
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
-        dep = [self.extTexFile, self.projConfFile, self.layoutConfFile, 
+        dep = [self.extTexFile, self.projectConfFile, self.layoutConfFile, 
                 self.macPackConfFile, self.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
@@ -621,7 +624,7 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
             # Background management (Phase 2)
-            bgList = self.projConfig['Managers'][self.manager][mode + 'Background']
+            bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
             for bg in bgList :
                 # Special handling for cropmarks happened before rendering
                 # Turn off cropmarks here because it is done already
@@ -643,15 +646,15 @@ class Xetex (Manager) :
 
             # Collect the page count and record in group
             newPages = self.tools.getPdfPages(self.gidPdfFile)
-            if self.projConfig['Groups'][gid].has_key('totalPages') :
-                oldPages = int(self.projConfig['Groups'][gid]['totalPages'])
+            if self.projectConfig['Groups'][gid].has_key('totalPages') :
+                oldPages = int(self.projectConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
-                    self.projConfig['Groups'][gid]['totalPages'] = newPages
-                    self.tools.writeConfFile(self.projConfig)
+                    self.projectConfig['Groups'][gid]['totalPages'] = newPages
+                    self.tools.writeConfFile(self.projectConfig)
                     self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
             else :
-                self.projConfig['Groups'][gid]['totalPages'] = newPages
-                self.tools.writeConfFile(self.projConfig)
+                self.projectConfig['Groups'][gid]['totalPages'] = newPages
+                self.tools.writeConfFile(self.projectConfig)
                 self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
 
             # If we are in bind mode we will finish up here

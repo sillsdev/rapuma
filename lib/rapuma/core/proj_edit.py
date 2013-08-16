@@ -36,7 +36,7 @@ class ProjEdit (object) :
         self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig(self.rapumaHome, self.userHome)
         self.userConfig     = self.user.userConfig
-        self.projConfig     = Config(pid).projConfig
+        self.projectConfig     = Config(pid).projectConfig
         self.projHome       = None
         self.local          = None
 
@@ -124,8 +124,8 @@ class ProjEdit (object) :
                 if files.endswith(".conf"):
                     editDocs.append(os.path.join(self.local.projConfFolder, files))
 
-            globSty = os.path.join(self.local.projStyleFolder, self.projConfig['Managers']['usfm_Style']['mainStyleFile'])
-            custSty = os.path.join(self.local.projStyleFolder, self.projConfig['Managers']['usfm_Style']['customStyleFile'])
+            globSty = os.path.join(self.local.projStyleFolder, self.projectConfig['Managers']['usfm_Style']['mainStyleFile'])
+            custSty = os.path.join(self.local.projStyleFolder, self.projectConfig['Managers']['usfm_Style']['customStyleFile'])
             if os.path.isfile(globSty) :
                 editDocs.append(globSty)
             if os.path.isfile(custSty) :
