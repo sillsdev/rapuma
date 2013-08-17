@@ -41,9 +41,14 @@ class Paratext (object) :
         self.proj_config            = Config(pid, gid)
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
         self.local                  = ProjLocal(pid)
-        self.projectConfig          = self.proj_config.getProjectConfig()
-        self.layoutConfig           = self.proj_config.getLayoutConfig()
-        self.illustrationConfig     = self.proj_config.getIllustrationConfig()
+        self.proj_config            = Config(self.pid, self.gid)
+        self.proj_config.getProjectConfig()
+        self.proj_config.getLayoutConfig()
+        self.proj_config.getIllustrationConfig()
+        # Get config objs
+        self.projectConfig          = self.proj_config.projectConfig
+        self.layoutConfig           = self.proj_config.layoutConfig
+        self.illustrationConfig     = self.proj_config.illustrationConfig
         self.log                    = ProjLog(pid)
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()

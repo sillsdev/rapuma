@@ -30,6 +30,7 @@ class ProjLocal (object) :
     def __init__(self, pid) :
         '''Intitate a class object which contains all the project folder locations.'''
 
+        self.tools              = Tools()
         self.pid                = pid
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
@@ -39,7 +40,6 @@ class ProjLocal (object) :
         self.projHome           = ''
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
-        self.tools              = Tools()
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
@@ -81,6 +81,7 @@ class ProjLocal (object) :
         configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
         for cf in configFiles :
             # Set the config path/file value
+            setattr(self, cf + 'ConfFileName', cf + '.conf')
             setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
             # Set the xml config file name (project is according to media type)
             if cf == 'project' :
@@ -97,8 +98,8 @@ class ProjLocal (object) :
 #            print getattr(self, cf + 'ConfXmlFileName')
 
         # Set Rapuma User config file name
-        self.userConfFileName       = 'rapuma.conf'
-        self.userConfFile           = os.path.join(self.userHome, self.userConfFileName)
+        self.userConfFileName           = 'rapuma.conf'
+        self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
         # Add log file names
         if self.projHome :
             self.projLogFileName        = 'rapuma.log'

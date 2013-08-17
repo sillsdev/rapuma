@@ -43,18 +43,22 @@ class ProjIllustration (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(pid, gid)
-        self.projectConfig              = self.proj_config.getProjectConfig()
+        self.proj_config.getProjectConfig()
+        self.proj_config.getLayoutConfig()
+        self.proj_config.getIllustrationConfig()
+        self.projectConfig              = self.proj_config.projectConfig
+        self.layoutConfig               = self.proj_config.layoutConfig
+        self.illustrationConfig         = self.proj_config.illustrationConfig
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.csid                       = self.projectConfig['Groups'][self.gid]['csid']
-        self.layoutConfig               = self.proj_config.getLayoutConfig()
-        self.illustrationConfig         = self.proj_config.getIllustrationConfig()
         self.macPack                    = None
         self.macPackConfig              = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.macPackConfig          = self.proj_config.getMacPackConfig(self.macPack)
+            self.proj_config.getMacPackConfig(self.macPack)
+            self.macPackConfig          = self.proj_config.macPackConfig
         self.log                        = ProjLog(pid)
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings

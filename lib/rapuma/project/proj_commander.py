@@ -30,14 +30,16 @@ class ProjCommander (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.pid                = pid
-        self.tools              = Tools()
-        self.user               = UserConfig()
-        self.userConfig         = self.user.userConfig
-        self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.local              = ProjLocal(self.pid)
-        self.projectConfig      = Config(self.pid).getProjectConfig()
+        self.pid                    = pid
+        self.tools                  = Tools()
+        self.user                   = UserConfig()
+        self.userConfig             = self.user.userConfig
+        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.local                  = ProjLocal(self.pid)
+        self.proj_config            = Config(pid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig          = self.proj_config.projectConfig
 
         # Log messages for this module
         self.errorCodes     = {
@@ -149,7 +151,7 @@ class ProjCommander (object) :
         cType       = self.projectConfig['Groups'][gid]['cType']
         renderer    = self.projectConfig['CompTypes'][cType.capitalize()]['renderer']
         font        = ''
-        if macPackConfig['FontSettings'].has_key('primaryFont') :
+        if macPackConfig and macPackConfig['FontSettings'].has_key('primaryFont') :
             font    = macPackConfig['FontSettings']['primaryFont']
         macro       = self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage']
         mid         = self.projectMediaIDCode

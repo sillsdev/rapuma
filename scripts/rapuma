@@ -225,7 +225,9 @@ def userArguments (args) :
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
-        checkCreatorVersion(pid, Config(pid).getProjectConfig(), systemVersion)
+        pc          = Config(pid)
+        pc.getProjectConfig()
+        checkCreatorVersion(pid, pc.projectConfig, systemVersion)
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -322,7 +324,9 @@ def userArguments (args) :
             cType = args.component_type
         else :
             try :
-                cType = Config(pid).getProjectConfig()['Groups'][gid]['cType']
+                pc = Config(pid)
+                pc.getProjectConfig()
+                cType = pc.projectConfig['Groups'][gid]['cType']
             except :
                 sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
         if args.cid_list :

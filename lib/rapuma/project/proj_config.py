@@ -44,7 +44,13 @@ class Config (object) :
         self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
+        self.projectConfig                  = None
+        self.adjustmentConfig               = None
+        self.layoutConfig                   = None
+        self.hyphenationConfig              = None
+        self.illustrationConfig             = None
         self.macPackConfig                  = None
+        self.macPackFilesDict               = None
 
         # Log messages for this module
         self.errorCodes     = {
@@ -60,34 +66,22 @@ class Config (object) :
         }
 
         # Test for gid before trying to finish the init
-#        if gid :
-#            self.csid                           = self.projectConfig['Groups'][gid]['csid']
-#            self.cType                          = self.projectConfig['Groups'][gid]['cType']
-#            self.Ctype                          = self.cType.capitalize()
-#            # Folder paths
-#            self.projComponentFolder            = self.local.projComponentFolder
-#            self.projFontFolder                 = self.local.projFontFolder
-#            self.projStyleFolder                = self.local.projStyleFolder
-#            self.projTexFolder                  = self.local.projTexFolder
-#            self.projMacroFolder                = self.local.projMacroFolder
-#            self.projHyphenationFolder          = self.local.projHyphenationFolder
-#            self.rapumaMacroFolder              = self.local.rapumaMacroFolder
-#            self.rapumaScriptFolder             = self.local.rapumaScriptFolder
-#            # Just in case source path has not been defined
-#            try :
-#                self.sourcePath                 = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
-#            except :
-#                self.sourcePath                 = ''
+        if gid :
+            if not self.projectConfig :
+                self.getProjectConfig()
 
-#            # Handle macPack data separately
-##            self.macPack                        = None
-##            if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-##                self.macPack                    = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-
-#        else :
-#            self.cType                      = None
-#            self.Ctype                      = None
-#            self.csid                       = None
+            self.csid                           = self.projectConfig['Groups'][gid]['csid']
+            self.cType                          = self.projectConfig['Groups'][gid]['cType']
+            self.Ctype                          = self.cType.capitalize()
+            # Just in case source path has not been defined
+            try :
+                self.sourcePath                 = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
+            except :
+                self.sourcePath                 = ''
+        else :
+            self.cType                      = None
+            self.Ctype                      = None
+            self.csid                       = None
 
 
 ###############################################################################
@@ -100,31 +94,33 @@ class Config (object) :
     def getProjectConfig (self) :
         '''Load/return the project configuation object.'''
 
-        return self.tools.initConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
+#        import pdb; pdb.set_trace()
+
+        self.projectConfig = self.tools.initConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
 
 
     def getAdjustmentConfig (self) :
         '''Load/return the adjustment configuation object.'''
 
-        return self.tools.initConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
+        self.adjustmentConfig = self.tools.initConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
 
 
     def getLayoutConfig (self) :
         '''Load/return the layout configuation object.'''
 
-        return self.tools.initConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
+        self.layoutConfig = self.tools.initConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
 
 
     def getHyphenationConfig (self) :
         '''Load/return the hyphen configuation object.'''
 
-        return self.tools.initConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
+        self.hyphenationConfig = self.tools.initConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
 
 
     def getIllustrationConfig (self) :
         '''Load/return the illustration configuation object.'''
 
-        return self.tools.initConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
+        self.illustrationConfig = self.tools.initConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
 
 
     def initMacPack (self, macPack) :
@@ -132,7 +128,6 @@ class Config (object) :
 
         self.getMacPackConfig(macPack)
         self.getMacPackDict(macPack)
-        self.setMacPackFiles(macPack)
         self.loadMacPackFunctions(macPack)
 
 
@@ -163,28 +158,24 @@ class Config (object) :
         This is used in other modules so we make it a more portable dict format.'''
 
         # We are loading the macPack object just to get the xml config file name
-        if not macPackConfig :
+        if not self.macPackConfig :
             self.getMacPackConfig(macPack)
         # Return the dictionary
         return self.tools.xmlFileToDict(self.macPackConfXmlFile)
 
 
-    def setMacPackFiles (self, macPack) :
+    def getMacPackFilesDict (self, macPack) :
         '''Set file names needed for a macPack. The file names come from a dict 
         made from the macPack XML file. '''
 
-        macPackFilesDict = {}
+        self.macPackFilesDict = {}
         for sections in self.getMacPackDict(macPack)['root']['section'] :
             if sections['sectionID'] == 'Files' :
                 for section in sections :
                     secItem = sections[section]
                     if type(secItem) is list :
                         for f in secItem :
-                            macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-
-        # Add these file names for this module here
-        for k, v in macPackFilesDict.iteritems() :
-            setattr(self, k, v)
+                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -192,7 +183,8 @@ class Config (object) :
 
         # Create an object that contains the macPack functions
 # FIXME: This needs to be macPack specific
-        self.macPackFunctions = UsfmTex(self.getLayoutConfig())
+        self.getLayoutConfig()
+        self.macPackFunctions = UsfmTex(self.layoutConfig)
 
 
 
@@ -270,7 +262,12 @@ class Config (object) :
         # Note this only works if the value we are looking for has
         # been declaired above in the module init
         elif holderType == 'self' :
-            result = getattr(self, holderKey)
+            if holderKey.find('.') >= 0 :
+                splitKey = holderKey.split('.')
+                if splitKey[0] == 'local' :
+                    result = getattr(self.local, splitKey[1])
+            else :
+                result = getattr(self, holderKey)
 
         return result
 
@@ -395,8 +392,8 @@ class Config (object) :
         self.macPackConfXmlFileName     = package + '.xml'
         self.macPackConfFileName        = package + '.conf'
         self.macPackConfFile            = os.path.join(self.local.projConfFolder, self.macPackConfFileName)
-        self.macPackConfXmlFile         = os.path.join(self.projMacroFolder, package, self.macPackConfXmlFileName)
-        self.rapumaMacPackFile          = os.path.join(self.rapumaMacroFolder, self.macPackFileName)
+        self.macPackConfXmlFile         = os.path.join(self.local.projMacroFolder, package, self.macPackConfXmlFileName)
+        self.rapumaMacPackFile          = os.path.join(self.local.rapumaMacroFolder, self.macPackFileName)
         self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, package)
 
         # Update existing macPack (but not conf file)
@@ -526,7 +523,7 @@ class Config (object) :
     def installMacPackOnly (self, package) :
         '''Install macro package.'''
 
-        if self.tools.pkgExtract(self.rapumaMacPackFile, self.projMacroFolder, self.macPackConfXmlFile) :
+        if self.tools.pkgExtract(self.rapumaMacPackFile, self.local.projMacroFolder, self.macPackConfXmlFile) :
             return True
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])

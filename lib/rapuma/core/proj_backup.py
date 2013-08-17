@@ -384,9 +384,10 @@ class ProjBackup (object) :
             self.cullBackups(self.userConfig['System']['maxStoreBackups'], projBackupFolder)
 
         # Finish here
-        projectConfig = Config(self.pid).projectConfig
-        projectConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
-        self.tools.writeConfFile(projectConfig)
+        pc = Config(self.pid)
+        pc.getProjectConfig()
+        pc.projectConfig['Backup']['lastBackup'] = self.tools.fullFileTimeStamp()
+        self.tools.writeConfFile(pc.projectConfig)
         self.log.writeToLog(self.errorCodes['3630'], [self.pid,backupTarget])
         return True
 

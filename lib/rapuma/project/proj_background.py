@@ -46,18 +46,22 @@ class ProjBackground (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.local                      = ProjLocal(pid)
         self.proj_config                = Config(pid, gid)
+        self.proj_config.getProjectConfig()
+        self.proj_config.getLayoutConfig()
+        self.projectConfig              = self.proj_config.projectConfig
+        self.layoutConfig               = self.proj_config.layoutConfig
         self.log                        = ProjLog(pid)
-        self.projectConfig              = self.proj_config.getProjectConfig()
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.layoutConfig               = self.proj_config.getLayoutConfig()
         self.macPack                    = None
         self.macPackConfig              = None
         self.macPackFunctions           = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.macPackConfig          = self.proj_config.getMacPackConfig(self.macPack)
-            self.macPackFunctions       = self.proj_config.loadMacPackFunctions(self.macPack)
+            self.proj_config.getMacPackConfig(self.macPack)
+            self.proj_config.loadMacPackFunctions(self.macPack)
+            self.macPackConfig          = self.proj_config.macPackConfig
+            self.macPackFunctions       = self.proj_config.macPackFunctions
 
         # Log messages for this module
         self.errorCodes     = {

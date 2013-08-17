@@ -36,10 +36,12 @@ class ToolsPath (object) :
 
         # Rapuma libs
         from rapuma.core.proj_local         import ProjLocal
-        from rapuma.project.proj_config     import ProjectConfiguration
+        from rapuma.project.proj_config     import Config
 
         self.local                          = ProjLocal(pid)
-        self.projectConfig                  = ProjectConfiguration(pid).projectConfig
+        self.proj_config                    = Config(pid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig                  = self.proj_config.projectConfig
         self.pid                            = pid
         self.tools                          = Tools()
 
@@ -472,7 +474,7 @@ class Tools (object) :
         If one does not exist a new one will be created based on system default
         settings.'''
 
-    #    projConfFolder = os.path.split(confFile)[0]
+#        import pdb; pdb.set_trace()
 
         if not os.path.isfile(confFile) :
             configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')

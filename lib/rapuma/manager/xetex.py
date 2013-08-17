@@ -46,6 +46,9 @@ class Xetex (Manager) :
 
         super(Xetex, self).__init__(project, cfg)
 
+
+#        import pdb; pdb.set_trace()
+
         # Create all the values we can right now for this manager.
         # Others will be created at run time when we know the cid.
         self.tools                  = Tools()
@@ -64,21 +67,26 @@ class Xetex (Manager) :
         self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
+        self.proj_config.getProjectConfig()
+        self.proj_config.getLayoutConfig()
         # Bring in some manager objects we will need
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         # Get config objs
-        self.projectConfig          = self.proj_config.getProjectConfig()
-        self.layoutConfig           = self.proj_config.getLayoutConfig()
+        self.projectConfig          = self.proj_config.projectConfig
+        self.layoutConfig           = self.proj_config.layoutConfig
         self.userConfig             = self.project.userConfig
         self.macPack                = None
         self.macPackConfig          = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.macPackConfig      = self.proj_config.getMacPackConfig(self.macPack)
-            self.macPackFunctions   = self.proj_config.loadMacPackFunctions(self.macPack)
-        for k, v in self.proj_config.macPackFilesDict.iteritems() :
-            setattr(self, k, v)
+            self.proj_config.getMacPackConfig(self.macPack)
+            self.proj_config.getMacPackFilesDict(self.macPack)
+            self.proj_config.loadMacPackFunctions(self.macPack)
+            self.macPackConfig      = self.proj_config.macPackConfig
+            self.macPackFunctions   = self.proj_config.macPackFunctions
+            for k, v in self.proj_config.macPackFilesDict.iteritems() :
+                setattr(self, k, v)
         # Some config settings
         self.pdfViewer              = self.projectConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projectConfig['Managers'][self.manager]['pdfUtilityCommand']
@@ -98,31 +106,8 @@ class Xetex (Manager) :
         self.useHyphenation         = self.proj_hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
-        # Add the file refs that are specific to the macPack
-        for k, v in self.proj_config.macPackFilesDict.iteritems() :
-            setattr(self, k, v)
-#            print k, ' =', getattr(self, k, v)
-
-        # Folder paths
-        self.rapumaConfigFolder     = self.local.rapumaConfigFolder
-        self.projHome               = self.local.projHome
-        self.projConfFolder         = self.local.projConfFolder
-        self.projComponentFolder    = self.local.projComponentFolder
-        self.projDeliverableFolder  = self.local.projDeliverableFolder
-        self.gidFolder              = os.path.join(self.projComponentFolder, self.gid)
-        self.projHyphenationFolder  = self.local.projHyphenationFolder
-        self.projIllustrationFolder = self.local.projIllustrationFolder
-        self.projFontFolder         = self.local.projFontFolder
-        self.projMacroFolder        = self.local.projMacroFolder
-        self.projStyleFolder        = self.local.projStyleFolder
-        self.projTexFolder          = self.local.projTexFolder
-        self.projMacPackFolder      = os.path.join(self.projMacroFolder, self.macroPackage)
-        # Set file names with full path 
-        self.projectConfFile           = self.local.projectConfFile
-        self.layoutConfFile         = self.proj_config.layoutConfFile
-
-        self.illustrationConfFile   = self.proj_config.illustrationConfFile
-        self.macPackConfFile        = self.proj_config.macPackConfFile
+        # Special folder paths
+        self.gidFolder              = os.path.join(self.local.projComponentFolder, self.gid)
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.gidFolder) :
@@ -309,7 +294,8 @@ class Xetex (Manager) :
             writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
-            for sections in self.proj_config.macPackDict['root']['section'] :
+            macPackDict = self.proj_config.getMacPackDict(self.macPack)
+            for sections in macPackDict['root']['section'] :
                 for section in sections :
                     secItem = sections[section]
                     linesOut = []
@@ -477,7 +463,7 @@ class Xetex (Manager) :
             # Now add in each of the components
             for cid in cidList :
                 if self.cType == 'usfm' :
-                    cidSource = os.path.join(self.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
+                    cidSource = os.path.join(self.local.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                         gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
@@ -567,8 +553,8 @@ class Xetex (Manager) :
         self.makeGidTexFile(cidList)
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
-        dep = [self.extTexFile, self.projectConfFile, self.layoutConfFile, 
-                self.macPackConfFile, self.illustrationConfFile, ]
+        dep = [self.extTexFile, self.local.projectConfFile, self.local.layoutConfFile, 
+                self.proj_config.macPackConfFile, self.local.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)
@@ -597,10 +583,10 @@ class Xetex (Manager) :
             # Create the environment that XeTeX will use. This will be temporarily set
             # by subprocess.call() just before XeTeX is run.
             texInputsLine = self.project.local.projHome + ':' \
-                            + self.projStyleFolder + ':' \
-                            + self.projTexFolder + ':' \
-                            + self.projMacPackFolder + ':' \
-                            + self.projMacroFolder + ':' \
+                            + self.local.projStyleFolder + ':' \
+                            + self.local.projTexFolder + ':' \
+                            + self.proj_config.projMacPackFolder + ':' \
+                            + self.local.projMacroFolder + ':' \
                             + self.gidFolder + ':.'
 
             # Create the environment dictionary that will be fed into subprocess.call()
@@ -633,7 +619,7 @@ class Xetex (Manager) :
                         self.layoutConfig['PageLayout']['useCropmarks'] = False
                         self.tools.writeConfFile(self.layoutConfig)
                     continue
-                bgFile = os.path.join(self.projIllustrationFolder, bg + '.pdf')
+                bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
                 cmd = self.pdfUtilityCommand + [self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
@@ -667,7 +653,7 @@ class Xetex (Manager) :
         # Move to the output folder according to mode for easier access
         if os.path.isfile(self.gidPdfFile) :
             # Build the name
-            outputFolder = os.path.join(self.projHome, mode.capitalize())
+            outputFolder = os.path.join(self.local.projHome, mode.capitalize())
             if pdfSubFileName :
                 outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, pdfSubFileName), mode)
             else :

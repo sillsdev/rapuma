@@ -59,8 +59,10 @@ class Usfm (Group) :
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
-        self.projectConfig          = self.proj_config.getProjectConfig()
-        self.adjustmentConfig       = self.proj_config.getAdjustmentConfig()
+        self.proj_config.getProjectConfig()
+        self.proj_config.getAdjustmentConfig()
+        self.projectConfig          = self.proj_config.projectConfig
+        self.adjustmentConfig       = self.proj_config.adjustmentConfig
         self.pg_background          = ProjBackground(self.pid, self.gid)
         self.log                    = project.log
         self.cfg                    = cfg
@@ -69,12 +71,10 @@ class Usfm (Group) :
         self.renderer               = project.projectConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macPack                = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-        # If adjustments are needed in the macPack we insert into local here for down-stream use
-#        self.adjustmentConfig       = self.proj_config.adjustmentConfig
-#        self.adjustmentConfFile     = self.proj_config.adjustmentConfFile
         # Get the comp settings
         self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
         # Get macro package settings
+        self.proj_config.getMacPackConfig(self.macPack)
         self.macPackConfig          = self.proj_config.macPackConfig
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', self.renderer)
@@ -243,7 +243,7 @@ class Usfm (Group) :
                 # Component adjustment file
                 cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
-                    if not os.path.isfile(cidAdjFile) or self.tools.isOlder(cidAdjFile, self.adjustmentConfFile) :
+                    if not os.path.isfile(cidAdjFile) or self.tools.isOlder(cidAdjFile, self.local.adjustmentConfFile) :
                         # Remake the adjustment file (if needed)
                         self.createCompAdjustmentFile(cid)
                 else :
@@ -349,7 +349,7 @@ class Usfm (Group) :
 #        import pdb; pdb.set_trace()
 
         # Check for a master adj conf file
-        if os.path.exists(self.adjustmentConfFile) :
+        if os.path.exists(self.local.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
             if not self.adjustmentConfig.has_key(self.gid) :
                 self.tools.buildConfSection(self.adjustmentConfig, self.gid)

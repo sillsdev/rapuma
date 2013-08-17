@@ -115,7 +115,9 @@ class ProjSetup (object) :
             # to reinitialize, we put them here
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
-            self.projectConfig      = Config(self.pid).getProjectConfig()
+            self.proj_config        = Config(self.pid)
+            self.proj_config.getProjectConfig()
+            self.projectConfig      = self.proj_config.projectConfig
             self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True

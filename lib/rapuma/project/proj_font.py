@@ -42,9 +42,12 @@ class ProjFont (object) :
         self.tools                          = Tools()
         self.pt_tools                       = Paratext(pid, gid)
         self.user                           = UserConfig()
+        self.local                          = ProjLocal(pid)
+        self.log                            = ProjLog(pid)
         self.userConfig                     = self.user.userConfig
         self.proj_config                    = Config(pid, gid)
-        self.projectConfig                  = self.proj_config.getProjectConfig()
+        self.proj_config.getProjectConfig()
+        self.projectConfig                  = self.proj_config.projectConfig
         self.cType                          = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                          = self.cType.capitalize()
         self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
@@ -52,10 +55,10 @@ class ProjFont (object) :
         self.macPackConfig                  = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                    = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.macPackConfig              = self.proj_config.getMacPackConfig(self.macPack)
-            self.macPackFunctions           = self.proj_config.loadMacPackFunctions(self.macPack)
-        self.local                          = ProjLocal(pid)
-        self.log                            = ProjLog(pid)
+            self.proj_config.getMacPackConfig(self.macPack)
+            self.proj_config.getMacPackFilesDict(self.macPack)
+            self.proj_config.loadMacPackFunctions(self.macPack)
+            self.macPackConfig      = self.proj_config.macPackConfig
         # Get our component sourceEditor
 #        self.sourceEditor                   = self.pt_tools.getSourceEditor()
         # The first time this is initialized make sure we have a FontSettings section

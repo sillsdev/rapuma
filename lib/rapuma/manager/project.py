@@ -43,7 +43,9 @@ class Project (object) :
         self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
         self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.local                  = ProjLocal(self.pid)
-        self.projectConfig          = Config(self.pid).getProjectConfig()
+        self.config                 = Config(self.pid)
+        self.config.getProjectConfig()
+        self.projectConfig          = self.config.projectConfig
         self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
         self.log                    = ProjLog(self.pid)
