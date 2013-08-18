@@ -30,7 +30,7 @@ from rapuma.core.proj_local                 import ProjLocal
 from rapuma.core.proj_process               import ProjProcess
 from rapuma.core.proj_log                   import ProjLog
 from rapuma.core.proj_compare               import ProjCompare
-from rapuma.core.proj_backup                import ProjBackup
+from rapuma.core.proj_data                  import ProjData
 from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
@@ -108,7 +108,7 @@ class ProjSetup (object) :
             self.tools.writeConfFile(self.userConfig)
 
         if self.userConfig['Projects'].has_key(self.pid) :
-            self.backup             = ProjBackup(self.pid)
+            self.data               = ProjData(self.pid)
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
             # These could be initialized above but because it might be necessary
@@ -532,7 +532,7 @@ class ProjSetup (object) :
 
         # Create the project depeding on if it is from a template or not
         if tid :
-            self.backup.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
+            self.data.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
         else :
             # If not from a template, just create a new version of the project config file
             Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)

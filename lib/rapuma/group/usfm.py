@@ -255,7 +255,7 @@ class Usfm (Group) :
                 if useIllustrations :
                     if self.proj_illustration.hasIllustrations(gid, cid) :
                         # Create if not there or if the config has changed
-                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.proj_config.illustrationConfFile) :
+                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
                             # First check if we have the illustrations we think we need
                             # and get them if we do not.
                             self.proj_illustration.getPics(gid, cid)
@@ -265,7 +265,7 @@ class Usfm (Group) :
                             else :
                                 self.log.writeToLog(self.errorCodes['0265'], [cid])
                         else :
-                            for f in [self.proj_config.layoutConfFile, self.proj_config.illustrationConfFile] :
+                            for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
                                     if self.proj_illustration.createPiclistFile(gid, cid) :

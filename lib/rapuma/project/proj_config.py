@@ -49,8 +49,16 @@ class Config (object) :
         self.layoutConfig                   = None
         self.hyphenationConfig              = None
         self.illustrationConfig             = None
+        # Create macPack file names
         self.macPackConfig                  = None
         self.macPackFilesDict               = None
+        self.macPackFileName                = None
+        self.macPackConfXmlFileName         = None
+        self.macPackConfFileName            = None
+        self.macPackConfFile                = None
+        self.macPackConfXmlFile             = None
+        self.rapumaMacPackFile              = None
+        self.projMacPackFolder              = None
 
         # Log messages for this module
         self.errorCodes     = {
@@ -477,7 +485,7 @@ class Config (object) :
 
         # Set names and path for specified package
         macPackConfFile     = os.path.join(self.local.projConfFolder, package + '.conf')
-        macPackFolder       = os.path.join(self.projMacroFolder, package)
+        macPackFolder       = os.path.join(self.local.projMacroFolder, package)
 
         # Remove the macPack config file if required
         if os.path.exists(macPackConfFile) and force :
@@ -501,6 +509,8 @@ class Config (object) :
         '''Update a macro package with the latest version from Rapuma
         but do not touch the config file.'''
 
+        # Be sure we have file names
+        self.getMacPackConfig(macPack)
         # Delete the existing macro package (but not the settings)
         macDir = os.path.join(self.local.projMacroFolder, macPack)
         if os.path.exists(macDir) :

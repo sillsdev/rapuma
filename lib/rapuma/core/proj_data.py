@@ -27,7 +27,7 @@ from rapuma.project.proj_config     import Config
 from rapuma.project.proj_commander  import ProjCommander
 
 
-class ProjBackup (object) :
+class ProjData (object) :
 
     def __init__(self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
@@ -676,7 +676,10 @@ class ProjBackup (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         # Check for existence of this project in the cloud and who owns it
-        projectConfig = Config(self.pid).projectConfig
+        pc = Config(self.pid)
+        pc.getProjectConfig()
+        projectConfig = 
+        pc.projectConfig
         if not self.sameOwner(cloud) :
             if force :
                 self.setCloudPushTime(projectConfig)

@@ -7,12 +7,12 @@ rm -rf ~/Publishing/testArea/ENG-LATN-JAS
 echo rpm project ENG-LATN-JAS project remove
 rpm project ENG-LATN-JAS project remove
 
-echo rpm project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
-rpm project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
+echo rpm project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
+rpm project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
 
 echo rpm group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
 rpm group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
 
-echo rpm group ENG-LATN-JAS james group draft
-rpm group ENG-LATN-JAS james group draft
+echo rpm group ENG-LATN-JAS james group final
+rpm group ENG-LATN-JAS james group final
 

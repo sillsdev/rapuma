@@ -52,7 +52,7 @@ import codecs, argparse
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.core.user_config            import UserConfig
-from rapuma.core.proj_backup            import ProjBackup, Template
+from rapuma.core.proj_data              import ProjData, Template
 from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
@@ -275,28 +275,28 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'restore' :
             if cmdType == 'archive' :
-                ProjBackup(pid).restoreArchive(targetPath, sourcePath)
+                ProjData(pid).restoreArchive(targetPath, sourcePath)
             elif cmdType == 'backup' :
                 if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
-                    ProjBackup(pid).restoreLocalBackup(args.bak_num)
+                    ProjData(pid).restoreLocalBackup(args.bak_num)
                 else :
                     if sourcePath :
-                        ProjBackup(pid).restoreExternalBackup(sourcePath, targetPath)
+                        ProjData(pid).restoreExternalBackup(sourcePath, targetPath)
                     else :
                         sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
             elif cmdType == 'cloud' :
-                ProjBackup(pid).pullFromCloud(args.force, targetPath)
+                ProjData(pid).pullFromCloud(args.force, targetPath)
             elif cmdType == 'template' :
                 Template(pid).templateToProject(args.name)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'save' :
             if cmdType == 'archive' :
-                ProjBackup(pid).archiveProject()
+                ProjData(pid).archiveProject()
             elif cmdType == 'backup' :
-                ProjBackup(pid).backupProject(targetPath)
+                ProjData(pid).backupProject(targetPath)
             elif cmdType == 'cloud' :
-                ProjBackup(pid).pushToCloud(args.force)
+                ProjData(pid).pushToCloud(args.force)
             elif cmdType == 'template' :
                 if isTemplate(args.template) :
                     sys.exit('\nError: This template [' + args.template + '] already exsists. Process halted.\n')

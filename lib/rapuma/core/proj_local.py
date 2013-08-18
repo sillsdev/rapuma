@@ -27,7 +27,7 @@ from rapuma.core.user_config        import UserConfig
 
 class ProjLocal (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid = None) :
         '''Intitate a class object which contains all the project folder locations.'''
 
         self.tools              = Tools()
@@ -114,10 +114,29 @@ class ProjLocal (object) :
         except :
             pass
 
+
+
+# FIXME: Move the group path functions to be here
+
+        # Load the Group path settings if there is a gid passed
+        if gid :
+            self.loadGidPaths(gid)
+
 ###############################################################################
 ########################### Project Local Functions ###########################
 ###############################################################################
 
-# Maybe we should try to put something here?
+
+    def loadGidPaths (self, gid) :
+        '''Load up all the file paths for this group.'''
+
+        pass
+
+
+
+
+
+
+
 
 

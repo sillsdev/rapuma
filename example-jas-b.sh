@@ -21,18 +21,22 @@ rm -rf ~/Publishing/testArea/ENG-LATN-JAS
 
 # This first Rapuma command is for deleting any previous copies of this example project
 # on your system. It will first backup project data, then remove the current working copy.
+echo rapuma project ENG-LATN-JAS project remove
 rapuma project ENG-LATN-JAS project remove
 
 # Restore the backup with the following command. Rapuma will expect to find a backup file
 # named ENG-LATN-JAS.zip in the source path specified.
+echo rapuma project ENG-LATN-JAS backup restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
 rapuma project ENG-LATN-JAS backup restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
 
 # Link up the project with its source. This change is made directly to the Rapuma system
 # configuration file and will prevent warnings from being given on other operations.
+echo rapuma settings ENG-LATN-JAS rapuma Projects/ENG-LATN-JAS mb_sourcePath ~/Publishing/testArea/MBJAS
 rapuma settings ENG-LATN-JAS rapuma Projects/ENG-LATN-JAS mb_sourcePath ~/Publishing/testArea/MBJAS
 
 # With the project restored, you can now run the "final" command. This will create a PDF
 # that should be identical to the one found in the Deliverable folder which was made on
 # another system.
+echo rapuma group ENG-LATN-JAS james group final
 rapuma group ENG-LATN-JAS james group final
 
