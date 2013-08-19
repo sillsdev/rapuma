@@ -29,7 +29,7 @@ Todo:
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
             <moduleID>gidPdfFile</moduleID>
             <fileName>[self:local.projComponentFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
-            <depends>projConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
+            <depends>projectConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
         </file>
         <file>
             <name>Primary Macro File</name>

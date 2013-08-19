@@ -21,14 +21,14 @@ Todo:
             <name>Group TeX Link File</name>
             <description>The file that links TeX to all the settings needed to render a job.</description>
             <moduleID>gidTexFile</moduleID>
-            <fileName>[self:projComponentFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
+            <fileName>[self:local.projComponentFolder][pathSep][self:gid][pathSep][self:gid].tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group PDF Output File</name>
             <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
             <moduleID>gidPdfFile</moduleID>
-            <fileName>[self:projComponentFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
+            <fileName>[self:local.projComponentFolder][pathSep][self:gid][pathSep][self:gid].pdf</fileName>
             <depends>projectConfFile,adjustmentConfFile,hyphenationConfFile,illustrationConfFile,layoutConfFile,macPackConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
         </file>
         <file>
@@ -42,42 +42,42 @@ Todo:
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
             <moduleID>macSettingsFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]usfmTex-settings.tex</fileName>
+            <fileName>[self:local.projTexFolder][pathSep]usfmTex-settings.tex</fileName>
             <depends>layoutConfFile,macPackConfFile,fontConfFile</depends>
         </file>
         <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>extTexFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]usfmTex-ext.tex</fileName>
+            <fileName>[self:local.projTexFolder][pathSep]usfmTex-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
             <moduleID>grpExtTexFile</moduleID>
-            <fileName>[self:projTexFolder][pathSep]usfmTex-[self:gid]-ext.tex</fileName>
+            <fileName>[self:local.projTexFolder][pathSep]usfmTex-[self:gid]-ext.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
             <moduleID>defaultStyFile</moduleID>
-            <fileName>[self:projStyleFolder][pathSep]usfmTex.sty</fileName>
+            <fileName>[self:local.projStyleFolder][pathSep]usfmTex.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
             <moduleID>glbExtStyFile</moduleID>
-            <fileName>[self:projStyleFolder][pathSep]usfmTex-ext.sty</fileName>
+            <fileName>[self:local.projStyleFolder][pathSep]usfmTex-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
             <moduleID>grpExtStyFile</moduleID>
-            <fileName>[self:projStyleFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
+            <fileName>[self:local.projStyleFolder][pathSep]usfmTex-[self:gid]-ext.sty</fileName>
             <depends></depends>
         </file>
         <file>
@@ -91,61 +91,61 @@ Todo:
             <name>TeX lccode Definition File</name>
             <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
             <moduleID>lccodeTexFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_lccode.tex</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep][self:csid]_lccode.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Component Hyphenation Word List File</name>
             <description>The file that contains the hypenation words that have been preprocessed and ready for the last step of being converted to a form useable by TeX.</description>
             <moduleID>compHyphFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.txt</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep][self:csid]_hyphenation.txt</fileName>
             <depends></depends>
         </file>
         <file>
             <name>TeX Group Hyphenation Exclusions File</name>
             <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
             <moduleID>grpHyphExcTexFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenation.tex</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep][self:csid]_hyphenation.tex</fileName>
             <depends></depends>
         </file>
         <file>
             <name>ParaTExt Project Hyphenation Errors File</name>
             <description>The file that list all the words that Rapuma could not deal with that are concidered errors.</description>
             <moduleID>ptProjHyphErrFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWordErrors.txt</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep]hyphenatedWordErrors.txt</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Hyphenation Preprocess Script File</name>
             <description>The script used to preprocess the ParaTExt hypenation word list (if necessary).</description>
             <moduleID>preProcessFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep][self:csid]_hyphenPreprocess.py</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep][self:csid]_hyphenPreprocess.py</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Rapuma Defalt Hyphenation Preprocess Script</name>
             <description>The default hypenation preprocess script that is copied into the project when necessary.</description>
             <moduleID>rapumaPreProcessFile</moduleID>
-            <fileName>[self:rapumaScriptFolder][pathSep]hyphenPreprocess.py</fileName>
+            <fileName>[self:local.rapumaScriptFolder][pathSep]hyphenPreprocess.py</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Project ParaTExt Hyphenation File Copy</name>
             <description>The publishing project copy of the source hypenation word list that is produced by ParaTExt. (Note: This file can be altered by preprocesses.)</description>
             <moduleID>ptProjHyphFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep]hyphenatedWords.txt</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Project ParaTExt Hyphenation File Backup Copy</name>
             <description>A read-only backup of the ParaTExt source hypenation word list that is used for comparison purposes.</description>
             <moduleID>ptProjHyphBakFile</moduleID>
-            <fileName>[self:projHyphenationFolder][pathSep]hyphenatedWords.txt.bak</fileName>
+            <fileName>[self:local.projHyphenationFolder][pathSep]hyphenatedWords.txt.bak</fileName>
             <depends></depends>
         </file>
         <file>
             <name>Page Border File</name>
-            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustrations folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
+            <description>[NOT IMPLEMENTED] Page border default file name.  If a page border is used this is the default file name.  Change as necessary.  This file should be kept in the shared illustration folder and the system will link it to the Process folder.   Default = pageborder.pdf</description>
             <moduleID>pageBorderFile</moduleID>
             <fileName>page_border.pdf</fileName>
             <depends></depends>
@@ -209,7 +209,7 @@ Todo:
         </setting>
         <setting>
             <name>After Verse Space Factor</name>
-            <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with both in-line and marginal verse layouts.  Default = 2</description>
+            <description>You may need a little extra space following the verse numbers.  This will add space in this context with a factore that is related to the \FontSizeUnit, this way it scales with the text.  This can be used with in-line verse layouts.  Default = 2</description>
             <key>afterVerseSpaceFactor</key>
             <type>integer</type>
             <value>2</value>
@@ -372,18 +372,18 @@ Todo:
             <description>To omit caller characters from the cross references at the bottom of the page.   Default = False</description>
             <key>omitCallerInCrossrefs</key>
             <type>boolean</type>
-            <value>False</value>
-            <boolDepend state='true'>[config:macPackConfig|Crossreferences|omitCallerInCrossrefs]</boolDepend>
-            <texCode>\OmitCallerInNote{x}</texCode>
+            <value>x</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|omitCallerInCrossrefs]</boolDepend>
+            <texCode>\OmitCallerInNote{[val]}</texCode>
         </setting>
         <setting>
             <name>Paragraphed Crossrefs</name>
             <description>Output the crossrefs on the bottom of the page in paragraph format rather than one line for each one.   Default = True</description>
             <key>paragraphedCrossrefs</key>
             <type>boolean</type>
-            <value>True</value>
-            <boolDepend state='true'>[config:macPackConfig|Crossreferences|paragraphedCrossrefs]</boolDepend>
-            <texCode>\ParagraphedNotes{x}</texCode>
+            <value>x</value>
+            <boolDepend state='true'>[config:layoutConfig|DocumentFeatures|paragraphedCrossrefs]</boolDepend>
+            <texCode>\ParagraphedNotes{[val]}</texCode>
         </setting>
     </section>
 
@@ -815,7 +815,7 @@ Todo:
         </setting>
         <setting>
             <name>Chapter Verse Seperator</name>
-            <description>A reference can be included with the illustrations and the seperator can be changed with this setting.  The default is ":"</description>
+            <description>A reference can be included with the illustration and the seperator can be changed with this setting.  The default is ":"</description>
             <key>chapterVerseSeperator</key>
             <type>string</type>
             <value>:</value>

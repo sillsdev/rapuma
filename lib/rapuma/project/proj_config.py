@@ -44,15 +44,21 @@ class Config (object) :
         self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
+        # Create config placeholders
         self.projectConfig                  = None
         self.adjustmentConfig               = None
         self.layoutConfig                   = None
         self.hyphenationConfig              = None
         self.illustrationConfig             = None
-        # Create macPack file names
         self.macPackConfig                  = None
+
+
+# FIXME: Need to move all the macPack file/folder creation out to local
+
+
+        # Create macPack file names
         self.macPackFilesDict               = None
-        self.macPackFileName                = None
+        self.macPackZipFileName             = None
         self.macPackConfXmlFileName         = None
         self.macPackConfFileName            = None
         self.macPackConfFile                = None
@@ -78,14 +84,20 @@ class Config (object) :
             if not self.projectConfig :
                 self.getProjectConfig()
 
-            self.csid                           = self.projectConfig['Groups'][gid]['csid']
-            self.cType                          = self.projectConfig['Groups'][gid]['cType']
-            self.Ctype                          = self.cType.capitalize()
+
+
+# FIXME: Need to move all the macPack file/folder creation out to local
+
+
+
+            self.csid                       = self.projectConfig['Groups'][gid]['csid']
+            self.cType                      = self.projectConfig['Groups'][gid]['cType']
+            self.Ctype                      = self.cType.capitalize()
             # Just in case source path has not been defined
             try :
-                self.sourcePath                 = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
+                self.sourcePath             = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
             except :
-                self.sourcePath                 = ''
+                self.sourcePath             = ''
         else :
             self.cType                      = None
             self.Ctype                      = None
@@ -143,22 +155,29 @@ class Config (object) :
         '''Load/return the macPack configuration object. This is handled different from
         other configs.'''
 
-        # File Names
-        self.macPackConfXmlFileName     = macPack + '.xml'
-        self.macPackConfFileName        = macPack + '.conf'
-        self.macPackFileName            = macPack + '.zip'
-        # Folder
-        self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, macPack)
-        # File names with paths
-        self.macPackConfFile            = os.path.join(self.local.projConfFolder, self.macPackConfFileName)
-        self.macPackConfXmlFile         = os.path.join(self.local.projMacroFolder, macPack, self.macPackConfXmlFileName)
-        self.rapumaMacPackFile          = os.path.join(self.local.rapumaMacroFolder, self.macPackFileName)
         # Load the macro package config
-        if not os.path.exists(self.macPackConfXmlFile) :
+        self.local = ProjLocal(self.pid, self.gid, macPack)
+        if not os.path.exists(self.local.macPackConfXmlFile) :
             self.addMacPack(macPack)
 
         # Load macPackConfig
-        self.macPackConfig              = self.tools.initConfig(self.macPackConfFile, self.macPackConfXmlFile)
+        self.macPackConfig              = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+
+
+    def getMacPackFilesDict (self, macPack) :
+        '''Set file names needed for a macPack. The file names come from a dict 
+        made from the macPack XML file. '''
+
+# FIXME: Should be moved common file names to local
+
+        self.macPackFilesDict = {}
+        for sections in self.getMacPackDict(macPack)['root']['section'] :
+            if sections['sectionID'] == 'Files' :
+                for section in sections :
+                    secItem = sections[section]
+                    if type(secItem) is list :
+                        for f in secItem :
+                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
 
 
     def getMacPackDict (self, macPack) :
@@ -169,21 +188,7 @@ class Config (object) :
         if not self.macPackConfig :
             self.getMacPackConfig(macPack)
         # Return the dictionary
-        return self.tools.xmlFileToDict(self.macPackConfXmlFile)
-
-
-    def getMacPackFilesDict (self, macPack) :
-        '''Set file names needed for a macPack. The file names come from a dict 
-        made from the macPack XML file. '''
-
-        self.macPackFilesDict = {}
-        for sections in self.getMacPackDict(macPack)['root']['section'] :
-            if sections['sectionID'] == 'Files' :
-                for section in sections :
-                    secItem = sections[section]
-                    if type(secItem) is list :
-                        for f in secItem :
-                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+        return self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -385,36 +390,27 @@ class Config (object) :
 ###############################################################################
 
 
-    def addMacPack (self, package, force = False) :
+    def addMacPack (self, macPack, force = False) :
         '''Add a macro package to the project. If force is set to True
         user style and TeX files will be overwritten.'''
 
 #        import pdb; pdb.set_trace()
 
         # Set the projectConf to the new/same package
-        self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = package
+        self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
         self.tools.writeConfFile(self.projectConfig)
 
-        # Recreate some necessary values
-        self.macPackFileName            = package + '.zip'
-        self.macPackConfXmlFileName     = package + '.xml'
-        self.macPackConfFileName        = package + '.conf'
-        self.macPackConfFile            = os.path.join(self.local.projConfFolder, self.macPackConfFileName)
-        self.macPackConfXmlFile         = os.path.join(self.local.projMacroFolder, package, self.macPackConfXmlFileName)
-        self.rapumaMacPackFile          = os.path.join(self.local.rapumaMacroFolder, self.macPackFileName)
-        self.projMacPackFolder          = os.path.join(self.local.projMacroFolder, package)
-
         # Update existing macPack (but not conf file)
-        if os.path.exists(self.projMacPackFolder) :
-            self.updateMacPack(package, force)
+        if os.path.exists(self.local.projMacPackFolder) :
+            self.updateMacPack(macPack, force)
 
         # If we got this far, install the a fresh copy of the macPack
-        self.installMacPackOnly(package)
+        self.installMacPackOnly(macPack)
         # Move the style files and custom TeX files out of the macPack
         self.moveMacStyles(force)
         self.moveMacTex(force)
-        self.macPackConfig = self.tools.initConfig(self.macPackConfFile, self.macPackConfXmlFile)
-        self.log.writeToLog(self.errorCodes['3300'], [package,self.macPackConfFileName])
+        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.log.writeToLog(self.errorCodes['3300'], [macPack,self.local.macPackConfFileName])
 
 
     def moveMacStyles (self, force) :

@@ -107,11 +107,11 @@ class Xetex (Manager) :
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
         # Special folder paths
-        self.gidFolder              = os.path.join(self.local.projComponentFolder, self.gid)
+#        self.projGidFolder              = os.path.join(self.local.projComponentFolder, self.gid)
 
         # Make any dependent folders if needed
-        if not os.path.isdir(self.gidFolder) :
-            os.mkdir(self.gidFolder)
+        if not os.path.isdir(self.local.projGidFolder) :
+            os.mkdir(self.local.projGidFolder)
 
         # Check to see if the PDF support is ready to go
         if not self.pdfViewer :
@@ -580,14 +580,17 @@ class Xetex (Manager) :
 
         # Call the renderer
         if render :
+        
+            print 'zzzzzzzzzzzz', self.local.projGidFolder
+        
             # Create the environment that XeTeX will use. This will be temporarily set
             # by subprocess.call() just before XeTeX is run.
             texInputsLine = self.project.local.projHome + ':' \
                             + self.local.projStyleFolder + ':' \
                             + self.local.projTexFolder + ':' \
-                            + self.proj_config.projMacPackFolder + ':' \
+                            + self.local.projMacPackFolder + ':' \
                             + self.local.projMacroFolder + ':' \
-                            + self.gidFolder + ':.'
+                            + self.local.projGidFolder + ':.'
 
             # Create the environment dictionary that will be fed into subprocess.call()
             envDict = dict(os.environ)
@@ -595,7 +598,7 @@ class Xetex (Manager) :
 
             # Create the XeTeX command argument list that subprocess.call()
             # will run with
-            cmds = ['xetex', '-output-directory=' + self.gidFolder, self.gidTexFile]
+            cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.gidTexFile]
 
             # Run the XeTeX and collect the return code for analysis
 #                self.tools.dieNow()

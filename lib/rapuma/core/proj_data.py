@@ -678,8 +678,7 @@ class ProjData (object) :
         # Check for existence of this project in the cloud and who owns it
         pc = Config(self.pid)
         pc.getProjectConfig()
-        projectConfig = 
-        pc.projectConfig
+        projectConfig = pc.projectConfig
         if not self.sameOwner(cloud) :
             if force :
                 self.setCloudPushTime(projectConfig)

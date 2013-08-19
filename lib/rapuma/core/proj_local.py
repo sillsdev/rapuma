@@ -8,7 +8,7 @@
 ###############################################################################
 
 # This class will create an object that will hold all the general local info
-# for a project.
+# files and folders in the Rapuma system and for a given project.
 
 
 ###############################################################################
@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, site
 from configobj import ConfigObj
 
 # Load the local classes
@@ -27,85 +27,129 @@ from rapuma.core.user_config        import UserConfig
 
 class ProjLocal (object) :
 
-    def __init__(self, pid, gid = None) :
-        '''Intitate a class object which contains all the project folder locations.'''
+    def __init__(self, pid, gid = None, projectConf = None) :
+        '''Intitate a class object which contains all the project file folder locations.
+        The files and folders are processed by state. If the system is in a state where
+        certain parent files or folders do not exist, the child file or folder will be
+        set to None. This should only cause problems when certain proecess are attempted
+        that should not be given a particular state. For example, a render process should
+        fail if a group/component was never added.'''
 
+        debug                   = True
         self.tools              = Tools()
         self.pid                = pid
+        self.gid                = gid
+        self.projectConf        = projectConf
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        mType                   = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        self.projHome           = ''
+        self.mType              = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma','resource')
+        self.projHome           = None
+        self.localDict          = None
+        self.cType              = None
+        self.macPack            = None
+        self.csid               = None
+        self.sourcePath         = None
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
+        if projectConf :
+            self.cType          = projectConf['Groups'][gid]['cType']
+            self.csid           = projectConf['Groups'][gid]['csid']
+            self.macPack        = projectConf['CompTypes'][self.cType.capitalize()]['macroPackage']
+            if self.userConfig['Projects'][pid].has_key(self.csid + '_sourcePath') :
+                self.sourcePath = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
         if os.path.exists(rapumaXMLDefaults) :
-            lc = self.tools.xml_to_section(rapumaXMLDefaults)
+            self.localDict = self.tools.xmlFileToDict(rapumaXMLDefaults)
         else :
             raise IOError, "Can't open " + rapumaXMLDefaults
 
-        # Create a list of project folders for later processing
-        self.projFolders = []
-        for fldID in lc['ProjFolders'].keys() :
-            if not lc['ProjFolders'][fldID] in self.projFolders and lc['ProjFolders'][fldID] != '..' :
-                self.projFolders.append(lc['ProjFolders'][fldID])
+        # Create the user resources dir under .local/share
+        if not os.path.isdir(self.userResouce) :
+            os.makedirs(self.userResouce)
 
-        # Do a loopy thingy and pull out all the known folder names
-        localTypes = ['ProjFolders', 'UserFolders', 'RapumaFolders']
-        for t in localTypes :
-            if t[:3].lower() == 'pro' :
-                home = getattr(self, 'projHome')
-            elif t[:3].lower() == 'use' :
-                home = getattr(self, 'userHome')
-            elif t[:3].lower() == 'rap' :
-                home = getattr(self, 'rapumaHome')
-            # Combine folder names with paths and set vars
-            for key in lc[t] :
-                setattr(self, key + 'Name', lc[t][key])
-                if type(lc[t][key]) == list :
-                    setattr(self, key, os.path.join(home, *lc[t][key]))
-                else :
-                    setattr(self, key, os.path.join(home, lc[t][key]))
+        # Troll through the localDict and create the file and folder defs we need
+        for sections in self.localDict['root']['section'] :
+            for section in sections :
+                secItems = sections[section]
+                if type(secItems) is list :
+                    for item in secItems :
+                        if item.has_key('folderID') :
+                            # First make a placeholder and set to None if it doesn't exist already
+                            try :
+                                getattr(self, str(item['folderID']))
+                            except :
+                                setattr(self, item['folderID'], None)
+                            # Next, if the 'relies' exists, set the value
+                            if item['relies'] :
+                                if getattr(self, item['relies']) :
+                                    setattr(self, item['folderID'], self.processNestedPlaceholders(item['folderPath']))
+                                    if debug :
+                                        print item['folderID'] + ' = ' + getattr(self, item['folderID'])
+                            else :
+                                setattr(self, item['folderID'], self.processNestedPlaceholders(item['folderPath']))
+                                if debug :
+                                    print item['folderID'] + ' = ' + getattr(self, item['folderID'])
+                        elif item.has_key('fileID') :
+                            if item['relies'] :
+                                if getattr(self, item['relies']) :
+                                    setattr(self, item['fileID'] + 'Name', self.processNestedPlaceholders(item['fileName']))
+                                    setattr(self, item['fileID'], os.path.join(self.processNestedPlaceholders(item['filePath']), self.processNestedPlaceholders(item['fileName'])))
+                                    if debug :
+                                            print  item['fileID'] + ' = ' + getattr(self, item['fileID'] + 'Name')
+                                            print  item['fileID'] + ' = ' + getattr(self, item['fileID'])
+                            else :
+                                setattr(self, item['fileID'] + 'Name', self.processNestedPlaceholders(item['filePath']))
+                                setattr(self, item['fileID'], os.path.join(self.processNestedPlaceholders(item['filePath']), self.processNestedPlaceholders(item['fileName'])))
+                                if debug :
+                                    print  item['fileID'] + ' = ' + getattr(self, item['fileID'] + 'Name')
+                                    print  item['fileID'] + ' = ' + getattr(self, item['fileID'])
 
-                # Uncomment for testing
-#                print key + ' = ', getattr(self, key)
+#                            self.tools.dieNow()
 
-        # Add some additional necessary params
-        self.lockExt = '.lock'
-        
+
         # Add configuation file names
-        configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
-        for cf in configFiles :
-            # Set the config path/file value
-            setattr(self, cf + 'ConfFileName', cf + '.conf')
-            setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
-            # Set the xml config file name (project is according to media type)
-            if cf == 'project' :
-                setattr(self, cf + 'ConfXmlFileName', mType + '.xml')
-            elif cf == 'layout' :
-                setattr(self, cf + 'ConfXmlFileName', mType + '_layout.xml')
-            else :
-                setattr(self, cf + 'ConfXmlFileName', cf + '.xml')
-            # Set the full path/file value
-            setattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
-
-        # For testing
-#        for cf in configFiles :
-#            print getattr(self, cf + 'ConfXmlFileName')
-
-        # Set Rapuma User config file name
-        self.userConfFileName           = 'rapuma.conf'
-        self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
-        # Add log file names
         if self.projHome :
-            self.projLogFileName        = 'rapuma.log'
-            self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
-            self.projErrorLogFileName   = 'error.log'
-            self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
+            configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
+            for cf in configFiles :
+                # Set the config path/file value
+                setattr(self, cf + 'ConfFileName', cf + '.conf')
+                if debug :
+                    print cf + 'ConfFileName' + ' = ' + getattr(self, cf + 'ConfFileName', cf + '.conf')
+                setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
+                if debug :
+                    print cf + 'ConfFile' + ' = ' + getattr(self, cf + 'ConfFile', cf + '.conf')
+                # Set the xml config file name (project is according to media type)
+                if cf == 'project' :
+                    setattr(self, cf + 'ConfXmlFileName', self.mType + '.xml')
+                    if debug :
+                        print cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '.xml')
+                elif cf == 'layout' :
+                    setattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml')
+                    if debug :
+                        print cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml')
+                else :
+                    setattr(self, cf + 'ConfXmlFileName', cf + '.xml')
+                    if debug :
+                        print cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', cf + '.xml')
+                # Set the full path/file value
+                setattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
+                if debug :
+                    print cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
+
+            # Set Rapuma User config file name
+            self.userConfFileName           = 'rapuma.conf'
+            self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
+            # Add log file names
+            if self.projHome :
+                self.projLogFileName        = 'rapuma.log'
+                self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
+                self.projErrorLogFileName   = 'error.log'
+                self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :
@@ -115,28 +159,77 @@ class ProjLocal (object) :
             pass
 
 
-
-# FIXME: Move the group path functions to be here
-
-        # Load the Group path settings if there is a gid passed
-        if gid :
-            self.loadGidPaths(gid)
+#        self.tools.dieNow()
 
 ###############################################################################
-########################### Project Local Functions ###########################
+############################### Local Functions ###############################
 ###############################################################################
 
+    def processNestedPlaceholders (self, line) :
+        '''Search a string (or line) for a type of Rapuma placeholder and
+        insert the value.'''
 
-    def loadGidPaths (self, gid) :
-        '''Load up all the file paths for this group.'''
+        result = []
+        end_of_previous_segment = 0
+        for (ph_start, ph_end) in self.getPlaceHolder(line) :
+            unchanged_segment = line[end_of_previous_segment:ph_start]
+            result.append(unchanged_segment)
+            ph_text = line[ph_start+1:ph_end]
+            replacement = self.processNestedPlaceholders(ph_text)
+            result.append(unicode(replacement))
+            end_of_previous_segment = ph_end+1  # Skip the closing bracket
+        result.append(line[end_of_previous_segment:])
+        resultline = "".join(result)
+        result_text = self.processSinglePlaceholder(resultline)
+        return result_text
 
-        pass
+
+    def processSinglePlaceholder (self, ph) :
+        '''Once we are sure we have a single placeholder (noting embedded) this
+        will process it and replace it with the correct value.'''
+
+        holderType = ph.split(':')[0]
+        try :
+            holderKey = ph.split(':')[1]
+        except :
+            holderKey = ''
+
+        result = ph # If nothing matches below, default to returning placeholder unchanged
+
+        # The following placeholders are supported
+        if holderType == 'pathSep' :
+            result = os.sep
+        elif holderType == 'self' :
+            result = getattr(self, holderKey)
+
+        return result
 
 
+    def hasPlaceHolder (self, line) :
+        '''Return True if this line has a data place holder in it.'''
+
+        # If things get more complicated we may need to beef this up a bit
+        if line.find('[') > -1 and line.find(']') > -1 :
+            return True
 
 
+    def getPlaceHolder (self, line) :
+        '''Return place holder type and a key if one exists from a TeX setting line.
+        Pass over the line and return (yield) each placeholder found.'''
 
-
+        nesting_level = 0
+        remembered_idx = None
+        for idx, ch in enumerate(line):
+            if ch == '[':
+                nesting_level += 1
+                if remembered_idx is None:
+                    remembered_idx = idx
+            elif ch == ']':
+                nesting_level -= 1
+                if nesting_level <= 0:
+                    found_idx = remembered_idx
+                    remembered_idx = None
+                    yield (found_idx, idx)
 
 
 
