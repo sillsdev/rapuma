@@ -52,20 +52,6 @@ class Config (object) :
         self.illustrationConfig             = None
         self.macPackConfig                  = None
 
-
-# FIXME: Need to move all the macPack file/folder creation out to local
-
-
-        # Create macPack file names
-        self.macPackFilesDict               = None
-        self.macPackZipFileName             = None
-        self.macPackConfXmlFileName         = None
-        self.macPackConfFileName            = None
-        self.macPackConfFile                = None
-        self.macPackConfXmlFile             = None
-        self.rapumaMacPackFile              = None
-        self.projMacPackFolder              = None
-
         # Log messages for this module
         self.errorCodes     = {
 
@@ -83,13 +69,8 @@ class Config (object) :
         if gid :
             if not self.projectConfig :
                 self.getProjectConfig()
-
-
-
-# FIXME: Need to move all the macPack file/folder creation out to local
-
-
-
+            # Reinitialize local
+            self.local                      = ProjLocal(pid, gid, self.projectConfig)
             self.csid                       = self.projectConfig['Groups'][gid]['csid']
             self.cType                      = self.projectConfig['Groups'][gid]['cType']
             self.Ctype                      = self.cType.capitalize()
@@ -143,52 +124,25 @@ class Config (object) :
         self.illustrationConfig = self.tools.initConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
 
 
-    def initMacPack (self, macPack) :
-        '''Initialize the components of a macro package.'''
+#    def initMacPack (self, macPack) :
+#        '''Initialize the components of a macro package.'''
 
-        self.getMacPackConfig(macPack)
-        self.getMacPackDict(macPack)
-        self.loadMacPackFunctions(macPack)
+#        self.getMacPackConfig(macPack)
+#        self.getMacPackDict(macPack)
+#        self.loadMacPackFunctions(macPack)
 
 
     def getMacPackConfig (self, macPack) :
         '''Load/return the macPack configuration object. This is handled different from
         other configs.'''
 
-        # Load the macro package config
-        self.local = ProjLocal(self.pid, self.gid, macPack)
+        # Re/Load the macro package config
+        self.local = ProjLocal(self.pid, self.gid, self.projectConfig)
         if not os.path.exists(self.local.macPackConfXmlFile) :
             self.addMacPack(macPack)
 
         # Load macPackConfig
         self.macPackConfig              = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-
-
-    def getMacPackFilesDict (self, macPack) :
-        '''Set file names needed for a macPack. The file names come from a dict 
-        made from the macPack XML file. '''
-
-# FIXME: Should be moved common file names to local
-
-        self.macPackFilesDict = {}
-        for sections in self.getMacPackDict(macPack)['root']['section'] :
-            if sections['sectionID'] == 'Files' :
-                for section in sections :
-                    secItem = sections[section]
-                    if type(secItem) is list :
-                        for f in secItem :
-                            self.macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-
-
-    def getMacPackDict (self, macPack) :
-        '''Create/return a dictionary object of a macPack XML configuation file.
-        This is used in other modules so we make it a more portable dict format.'''
-
-        # We are loading the macPack object just to get the xml config file name
-        if not self.macPackConfig :
-            self.getMacPackConfig(macPack)
-        # Return the dictionary
-        return self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -275,12 +229,13 @@ class Config (object) :
         # Note this only works if the value we are looking for has
         # been declaired above in the module init
         elif holderType == 'self' :
-            if holderKey.find('.') >= 0 :
-                splitKey = holderKey.split('.')
-                if splitKey[0] == 'local' :
-                    result = getattr(self.local, splitKey[1])
-            else :
-                result = getattr(self, holderKey)
+#            if holderKey.find('.') >= 0 :
+#                splitKey = holderKey.split('.')
+#                if splitKey[0] == 'local' :
+#                    result = getattr(self.local, splitKey[1])
+#            else :
+#                result = getattr(self, holderKey)
+            result = getattr(self.local, holderKey)
 
         return result
 
@@ -294,7 +249,7 @@ class Config (object) :
         if value == 'mapping' :
             useMapping = self.macPackConfig['FontSettings']['useMapping']
             if useMapping :
-                result = ':mapping=' + os.path.join(self.projFontFolder, useMapping)
+                result = ':mapping=' + os.path.join(self.local.projFontFolder, useMapping)
         elif value == 'renderer' :
             useRenderingSystem = self.macPackConfig['FontSettings']['useRenderingSystem']
             if useRenderingSystem :
@@ -419,7 +374,7 @@ class Config (object) :
 
         # Collect the style files to copy
         for f in self.getMacStyExtFiles() :
-            source = os.path.join(self.projMacPackFolder, f)
+            source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projStyleFolder, f)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
@@ -435,7 +390,7 @@ class Config (object) :
         '''Return a list of macro package style extention files.'''
 
         sFiles = []
-        macPackFiles = os.listdir(self.projMacPackFolder)
+        macPackFiles = os.listdir(self.local.projMacPackFolder)
         for f in macPackFiles :
             if f.split('.')[1].lower() == 'sty' :
                 sFiles.append(f)
@@ -448,7 +403,7 @@ class Config (object) :
 
         # Collect the TeX extention files to copy
         for f in self.getMacTexExtFiles() :
-            source = os.path.join(self.projMacPackFolder, f)
+            source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projTexFolder, f)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
@@ -464,7 +419,7 @@ class Config (object) :
         '''Return a list of macro package TeX extention files.'''
 
         tFiles = []
-        macPackFiles = os.listdir(self.projMacPackFolder)
+        macPackFiles = os.listdir(self.local.projMacPackFolder)
         for f in macPackFiles :
             if f.find('-ext.tex') > 0 :
                 tFiles.append(f)
@@ -479,18 +434,14 @@ class Config (object) :
         This is useful when you want to freshen the macro package but bad in
         that custom style and TeX code.'''
 
-        # Set names and path for specified package
-        macPackConfFile     = os.path.join(self.local.projConfFolder, package + '.conf')
-        macPackFolder       = os.path.join(self.local.projMacroFolder, package)
-
         # Remove the macPack config file if required
-        if os.path.exists(macPackConfFile) and force :
-            os.remove(macPackConfFile)
-            self.log.writeToLog(self.errorCodes['3400'], [self.tools.fName(macPackConfFile)])
+        if os.path.exists(self.local.macPackConfFile) and force :
+            os.remove(self.local.macPackConfFile)
+            self.log.writeToLog(self.errorCodes['3400'], [self.local.macPackConfFileName])
 
         # Now remove the macro folder (with all its contents)
-        if os.path.exists(macPackFolder) :
-            shutil.rmtree(macPackFolder)
+        if os.path.exists(self.local.projMacPackFolder) :
+            shutil.rmtree(self.local.projMacPackFolder)
             self.log.writeToLog(self.errorCodes['3500'], [package])
 
         # Remove the reference for this macro package from any component type
@@ -515,11 +466,11 @@ class Config (object) :
         self.installMacPackOnly(macPack)
         # Remove un-needed sty and tex files (to avoid confusion)
         for f in self.getMacStyExtFiles() :
-            source = os.path.join(self.projMacPackFolder, f)
+            source = os.path.join(self.local.projMacPackFolder, f)
             if os.path.exists(source) :
                 os.remove(source)
         for f in self.getMacTexExtFiles() :
-            source = os.path.join(self.projMacPackFolder, f)
+            source = os.path.join(self.local.projMacPackFolder, f)
             if os.path.exists(source) :
                 os.remove(source)
 
@@ -529,7 +480,7 @@ class Config (object) :
     def installMacPackOnly (self, package) :
         '''Install macro package.'''
 
-        if self.tools.pkgExtract(self.rapumaMacPackFile, self.local.projMacroFolder, self.macPackConfXmlFile) :
+        if self.tools.pkgExtract(self.local.rapumaMacPackFile, self.local.projMacroFolder, self.local.macPackConfXmlFile) :
             return True
         else :
             self.log.writeToLog(self.errorCodes['3200'], [package])

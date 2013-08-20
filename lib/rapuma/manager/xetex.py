@@ -81,12 +81,9 @@ class Xetex (Manager) :
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
             self.proj_config.getMacPackConfig(self.macPack)
-            self.proj_config.getMacPackFilesDict(self.macPack)
             self.proj_config.loadMacPackFunctions(self.macPack)
             self.macPackConfig      = self.proj_config.macPackConfig
             self.macPackFunctions   = self.proj_config.macPackFunctions
-            for k, v in self.proj_config.macPackFilesDict.iteritems() :
-                setattr(self, k, v)
         # Some config settings
         self.pdfViewer              = self.projectConfig['Managers'][self.manager]['pdfViewerCommand']
         self.pdfUtilityCommand      = self.projectConfig['Managers'][self.manager]['pdfUtilityCommand']
@@ -204,10 +201,10 @@ class Xetex (Manager) :
         the main default component extentions settings style file.'
 
         # Create a blank file (only if there is none)
-        if not os.path.exists(self.grpExtStyFile) :
-            with codecs.open(self.grpExtStyFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtStyFile), description, False))
-            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(self.grpExtStyFile)])
+        if not os.path.exists(self.local.grpExtStyFile) :
+            with codecs.open(self.local.grpExtStyFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(self.local.grpExtStyFileName, description, False))
+            self.log.writeToLog(self.errorCodes['1040'], [self.local.grpExtStyFileName])
 
         # Need to return true here even if nothing was done
         return True
@@ -249,8 +246,8 @@ class Xetex (Manager) :
             Please refer to the documentation for details on how to make changes.'
 
         # Create the file and put default settings in it
-        with codecs.open(self.lccodeTexFile, "w", encoding='utf_8') as lccodeObject :
-            lccodeObject.write(self.tools.makeFileHeader(self.tools.fName(self.lccodeTexFile), description))
+        with codecs.open(self.local.lccodeTexFile, "w", encoding='utf_8') as lccodeObject :
+            lccodeObject.write(self.tools.makeFileHeader(self.local.lccodeTexFileName, description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
             for c in self.pt_tools.getNWFChars() :
@@ -287,14 +284,15 @@ class Xetex (Manager) :
                 for s in line :
                     linesOut.append(self.proj_config.processNestedPlaceholders(s, realVal))
             else :
+                print line, realVal
                 linesOut.append(self.proj_config.processNestedPlaceholders(line, realVal))
 
         # Open a fresh settings file
-        with codecs.open(self.macSettingsFile, "w", encoding='utf_8') as writeObject :
-            writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.macSettingsFile), description))
+        with codecs.open(self.local.macSettingsFile, "w", encoding='utf_8') as writeObject :
+            writeObject.write(self.tools.makeFileHeader(self.local.macSettingsFileName, description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
-            macPackDict = self.proj_config.getMacPackDict(self.macPack)
+            macPackDict = self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
             for sections in macPackDict['root']['section'] :
                 for section in sections :
                     secItem = sections[section]
@@ -394,10 +392,10 @@ class Xetex (Manager) :
         the main TeX settings files and the component TeX settings.'
 
         # First look for a user file, if not, then make a blank one
-        if not os.path.isfile(self.grpExtTexFile) :
-            with codecs.open(self.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpExtTexFile), description, False))
-            self.log.writeToLog(self.errorCodes['0440'], [self.tools.fName(self.grpExtTexFile)])
+        if not os.path.isfile(self.local.grpExtTexFile) :
+            with codecs.open(self.local.grpExtTexFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(self.local.grpExtTexFileName, description, False))
+            self.log.writeToLog(self.errorCodes['0440'], [self.local.grpExtTexFile])
 
             # Need to return true here even if nothing was done
             return True
@@ -416,8 +414,8 @@ class Xetex (Manager) :
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
         # for dependency checking
-        if os.path.exists(self.gidTexFile) :
-            os.remove(self.gidTexFile)
+        if os.path.exists(self.local.gidTexFile) :
+            os.remove(self.local.gidTexFile)
 
         # Create (if needed) dependent files
         self.makeSettingsTexFile()
@@ -427,31 +425,31 @@ class Xetex (Manager) :
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
         # We bring in each element in the order necessary
-        with codecs.open(self.gidTexFile, "w", encoding='utf_8') as gidTexObject :
+        with codecs.open(self.local.gidTexFile, "w", encoding='utf_8') as gidTexObject :
             # Write out the file header
-            gidTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.gidTexFile), description))
+            gidTexObject.write(self.tools.makeFileHeader(self.local.gidTexFileName, description))
             # First bring in the main macro file
-            gidTexObject.write('\\input \"' + self.primaryMacroFile + '\"\n')
+            gidTexObject.write('\\input \"' + self.local.primaryMacroFile + '\"\n')
             ########
             # FIXME? To avoid problems with the usfmTex marginalverses macro code, we bring
             # in the stylesheets now. Will this cause any problems with other macPacks?
             ########
             # Load style files (default and extention come with the package)
-            gidTexObject.write('\\stylesheet{' + self.defaultStyFile + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.local.defaultStyFile + '}\n')
             # Load the global style extensions
-            gidTexObject.write('\\stylesheet{' + self.glbExtStyFile + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.local.glbExtStyFile + '}\n')
             # Load the group style extensions
-            gidTexObject.write('\\stylesheet{' + self.grpExtStyFile + '}\n')
+            gidTexObject.write('\\stylesheet{' + self.local.grpExtStyFile + '}\n')
             # Load the settings (usfmTex: if marginalverses, load code in this)
-            gidTexObject.write('\\input \"' + self.macSettingsFile + '\"\n')
+            gidTexObject.write('\\input \"' + self.local.macSettingsFile + '\"\n')
             # Load the settings extensions
-            gidTexObject.write('\\input \"' + self.extTexFile + '\"\n')
+            gidTexObject.write('\\input \"' + self.local.extTexFile + '\"\n')
             # Load the group settings extensions
-            gidTexObject.write('\\input \"' + self.grpExtTexFile + '\"\n')
+            gidTexObject.write('\\input \"' + self.local.grpExtTexFile + '\"\n')
             # Load hyphenation data if needed
             if self.useHyphenation :
-                gidTexObject.write('\\input \"' + self.lccodeTexFile + '\"\n')
-                gidTexObject.write('\\input \"' + self.grpHyphExcTexFile + '\"\n')
+                gidTexObject.write('\\input \"' + self.local.lccodeTexFile + '\"\n')
+                gidTexObject.write('\\input \"' + self.local.grpHyphExcTexFile + '\"\n')
             ########
             # FIXME: Previously style files were loaded here
             ########
@@ -488,20 +486,20 @@ class Xetex (Manager) :
 
         if self.useHyphenation :
             # The TeX group hyphen exceptions file
-            if not os.path.isfile(self.grpHyphExcTexFile) or self.tools.isOlder(self.grpHyphExcTexFile, self.compHyphFile) :
+            if not os.path.isfile(self.local.grpHyphExcTexFile) or self.tools.isOlder(self.local.grpHyphExcTexFile, self.local.compHyphFile) :
                 if self.makeGrpHyphExcTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [self.local.grpHyphExcTexFileName])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [self.tools.fName(self.grpHyphExcTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [self.local.grpHyphExcTexFile])
                     return False
             # The TeX lccode file
-            if not os.path.exists(self.lccodeTexFile) or self.tools.isOlder(self.lccodeTexFile, self.grpHyphExcTexFile) :
+            if not os.path.exists(self.local.lccodeTexFile) or self.tools.isOlder(self.local.lccodeTexFile, self.local.grpHyphExcTexFile) :
                 if self.makeLccodeTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [self.tools.fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0430'], [self.local.lccodeTexFileName])
                 else :
                     # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [self.tools.fName(self.lccodeTexFile)])
+                    self.log.writeToLog(self.errorCodes['0480'], [self.local.lccodeTexFileName])
                     return False
             return True
         else :
@@ -541,8 +539,8 @@ class Xetex (Manager) :
 
         # This is the file we will make. If force is set, delete the old one.
         if force :
-            if os.path.isfile(self.gidPdfFile) :
-                os.remove(self.gidPdfFile)
+            if os.path.isfile(self.local.gidPdfFile) :
+                os.remove(self.local.gidPdfFile)
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
@@ -553,8 +551,8 @@ class Xetex (Manager) :
         self.makeGidTexFile(cidList)
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
-        dep = [self.extTexFile, self.local.projectConfFile, self.local.layoutConfFile, 
-                self.proj_config.macPackConfFile, self.local.illustrationConfFile, ]
+        dep = [self.local.extTexFile, self.local.projectConfFile, self.local.layoutConfFile, 
+                self.local.macPackConfFile, self.local.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)
@@ -570,19 +568,16 @@ class Xetex (Manager) :
 
         # Render if gidPdf is older or is missing
         render = False
-        if not os.path.isfile(self.gidPdfFile) :
+        if not os.path.isfile(self.local.gidPdfFile) :
             render = True
         else :
             for d in dep :
-                if self.tools.isOlder(self.gidPdfFile, d) :
+                if self.tools.isOlder(self.local.gidPdfFile, d) :
                     render = True
                     break
 
         # Call the renderer
         if render :
-        
-            print 'zzzzzzzzzzzz', self.local.projGidFolder
-        
             # Create the environment that XeTeX will use. This will be temporarily set
             # by subprocess.call() just before XeTeX is run.
             texInputsLine = self.project.local.projHome + ':' \
@@ -598,7 +593,7 @@ class Xetex (Manager) :
 
             # Create the XeTeX command argument list that subprocess.call()
             # will run with
-            cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.gidTexFile]
+            cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
 
             # Run the XeTeX and collect the return code for analysis
 #                self.tools.dieNow()
@@ -606,9 +601,9 @@ class Xetex (Manager) :
 
             # Analyse the return code
             if rCode == int(0) :
-                self.log.writeToLog(self.errorCodes['0625'], [self.tools.fName(self.gidTexFile)])
+                self.log.writeToLog(self.errorCodes['0625'], [self.local.gidTexFileName])
             elif rCode in self.xetexErrorCodes :
-                self.log.writeToLog(self.errorCodes['0630'], [self.tools.fName(self.gidTexFile), self.xetexErrorCodes[rCode], str(rCode)])
+                self.log.writeToLog(self.errorCodes['0630'], [self.local.gidTexFileName, self.xetexErrorCodes[rCode], str(rCode)])
             else :
                 self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
 
@@ -623,18 +618,18 @@ class Xetex (Manager) :
                         self.tools.writeConfFile(self.layoutConfig)
                     continue
                 bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
-                cmd = self.pdfUtilityCommand + [self.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.gidPdfFile)]
+                cmd = self.pdfUtilityCommand + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
-                    shutil.copy(self.tools.tempName(self.gidPdfFile), self.gidPdfFile)
-                    os.remove(self.tools.tempName(self.gidPdfFile))
+                    shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
+                    os.remove(self.tools.tempName(self.local.gidPdfFile))
                     self.log.writeToLog(self.errorCodes['0665'])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
-                    self.log.writeToLog(self.errorCodes['0640'], [self.gidPdfFile, str(e)])
+                    self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
 
             # Collect the page count and record in group
-            newPages = self.tools.getPdfPages(self.gidPdfFile)
+            newPages = self.tools.getPdfPages(self.local.gidPdfFile)
             if self.projectConfig['Groups'][gid].has_key('totalPages') :
                 oldPages = int(self.projectConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
@@ -651,21 +646,21 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0670'], [gid])
                 return True
         else :
-            self.log.writeToLog(self.errorCodes['0690'], [self.tools.fName(self.gidPdfFile)])
+            self.log.writeToLog(self.errorCodes['0690'], [self.local.gidPdfFileName])
 
         # Move to the output folder according to mode for easier access
-        if os.path.isfile(self.gidPdfFile) :
+        if os.path.isfile(self.local.gidPdfFile) :
             # Build the name
             outputFolder = os.path.join(self.local.projHome, mode.capitalize())
             if pdfSubFileName :
                 outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, pdfSubFileName), mode)
             else :
-                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, self.tools.fName(self.gidPdfFile)), mode)
+                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, self.local.gidPdfFile), mode)
             # Make sure there is a folder there to put it in
             if not os.path.exists(outputFolder) :
                 os.makedirs(outputFolder)
             # Move, not copy to the outputFolder
-            shutil.move(self.gidPdfFile, outputPdfFile)
+            shutil.move(self.local.gidPdfFile, outputPdfFile)
 
         # Review the results if desired
         if os.path.isfile(outputPdfFile) :

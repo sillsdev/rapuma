@@ -56,7 +56,6 @@ class ProjFont (object) :
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                    = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
             self.proj_config.getMacPackConfig(self.macPack)
-            self.proj_config.getMacPackFilesDict(self.macPack)
             self.proj_config.loadMacPackFunctions(self.macPack)
             self.macPackConfig      = self.proj_config.macPackConfig
         # Get our component sourceEditor
