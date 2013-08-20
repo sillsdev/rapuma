@@ -35,8 +35,6 @@ class ProjLocal (object) :
         that should not be given a particular state. For example, a render process should
         fail if a group/component was never added.'''
 
-        debug                   = True
-        debugOutput             = os.path.join(os.getcwd(), 'local_path.log')
         self.tools              = Tools()
         self.pid                = pid
         self.gid                = gid
@@ -54,6 +52,10 @@ class ProjLocal (object) :
         self.macPack            = None
         self.csid               = None
         self.sourcePath         = None
+        debug                   = False
+        debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
+        if debug and not os.path.exists(debugOutput) :
+            os.makedirs(debugOutput)
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
         if projectConf :
@@ -75,103 +77,108 @@ class ProjLocal (object) :
             os.makedirs(self.userResouce)
 
         # Troll through the localDict and create the file and folder defs we need
-        with codecs.open(debugOutput, "w", encoding='utf_8') as debugObj :
-            for sections in self.localDict['root']['section'] :
-                for section in sections :
-                    secItems = sections[section]
-                    if type(secItems) is list :
-                        for item in secItems :
-                            if item.has_key('folderID') :
-                                # First make a placeholder and set to None if it doesn't exist already
-                                try :
-                                    getattr(self, str(item['folderID']))
-                                except :
-                                    setattr(self, item['folderID'], None)
-                                # Next, if the 'relies' exists, set the value
-                                val = self.processNestedPlaceholders(item['folderPath'])
-                                if item['relies'] :
-                                    if getattr(self, item['relies']) :
-                                        setattr(self, item['folderID'], val)
-                                        self.projFolders.append(val)
-                                        if debug :
-                                            debugObj.write(item['folderID'] + ' = ' + val + '\n')
-                                else :
+        if debug :
+            debugObj = codecs.open(debugOutput, "w", encoding='utf_8')
+        for sections in self.localDict['root']['section'] :
+            for section in sections :
+                secItems = sections[section]
+                if type(secItems) is list :
+                    for item in secItems :
+                        if item.has_key('folderID') :
+                            # First make a placeholder and set to None if it doesn't exist already
+                            try :
+                                getattr(self, str(item['folderID']))
+                            except :
+                                setattr(self, item['folderID'], None)
+                            # Next, if the 'relies' exists, set the value
+                            val = self.processNestedPlaceholders(item['folderPath'])
+                            if item['relies'] :
+                                if getattr(self, item['relies']) :
                                     setattr(self, item['folderID'], val)
+                                    self.projFolders.append(val)
                                     if debug :
                                         debugObj.write(item['folderID'] + ' = ' + val + '\n')
-                            elif item.has_key('fileID') :
-                                valName = self.processNestedPlaceholders(item['fileName'])
-                                valPath = self.processNestedPlaceholders(item['filePath'])
-                                if item['relies'] :
-                                    if getattr(self, item['relies']) :
-                                        setattr(self, item['fileID'] + 'Name', valName)
-                                        setattr(self, item['fileID'], os.path.join(valPath, valName))
-                                        if debug :
-                                                debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
-                                                debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
-                                else :
+                            else :
+                                setattr(self, item['folderID'], val)
+                                if debug :
+                                    debugObj.write(item['folderID'] + ' = ' + val + '\n')
+                        elif item.has_key('fileID') :
+                            valName = self.processNestedPlaceholders(item['fileName'])
+                            valPath = self.processNestedPlaceholders(item['filePath'])
+                            if item['relies'] :
+                                if getattr(self, item['relies']) :
                                     setattr(self, item['fileID'] + 'Name', valName)
                                     setattr(self, item['fileID'], os.path.join(valPath, valName))
                                     if debug :
-                                        debugObj.write(item['fileID'] + 'Name = ' + valName)
-                                        debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
+                                            debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
+                                            debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
+                            else :
+                                setattr(self, item['fileID'] + 'Name', valName)
+                                setattr(self, item['fileID'], os.path.join(valPath, valName))
+                                if debug :
+                                    debugObj.write(item['fileID'] + 'Name = ' + valName)
+                                    debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
 
-            # Add configuation file names
-            if self.projHome :
-                configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
-                for cf in configFiles :
-                    # Set the config path/file value
-                    setattr(self, cf + 'ConfFileName', cf + '.conf')
+        # Add configuation file names
+        if self.projHome :
+            configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
+            for cf in configFiles :
+                # Set the config path/file value
+                setattr(self, cf + 'ConfFileName', cf + '.conf')
+                if debug :
+                    debugObj.write(cf + 'ConfFileName' + ' = ' + getattr(self, cf + 'ConfFileName', cf + '.conf') + '\n')
+                setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
+                if debug :
+                    debugObj.write(cf + 'ConfFile' + ' = ' + getattr(self, cf + 'ConfFile', cf + '.conf') + '\n')
+                # Set the xml config file name (project is according to media type)
+                if cf == 'project' :
+                    setattr(self, cf + 'ConfXmlFileName', self.mType + '.xml')
                     if debug :
-                        debugObj.write(cf + 'ConfFileName' + ' = ' + getattr(self, cf + 'ConfFileName', cf + '.conf') + '\n')
-                    setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
+                        debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '.xml') + '\n')
+                elif cf == 'layout' :
+                    setattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml')
                     if debug :
-                        debugObj.write(cf + 'ConfFile' + ' = ' + getattr(self, cf + 'ConfFile', cf + '.conf') + '\n')
-                    # Set the xml config file name (project is according to media type)
-                    if cf == 'project' :
-                        setattr(self, cf + 'ConfXmlFileName', self.mType + '.xml')
-                        if debug :
-                            debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '.xml') + '\n')
-                    elif cf == 'layout' :
-                        setattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml')
-                        if debug :
-                            debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml') + '\n')
-                    else :
-                        setattr(self, cf + 'ConfXmlFileName', cf + '.xml')
-                        if debug :
-                            debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', cf + '.xml') + '\n')
-                    # Set the full path/file value
-                    setattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
+                        debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', self.mType + '_layout.xml') + '\n')
+                else :
+                    setattr(self, cf + 'ConfXmlFileName', cf + '.xml')
                     if debug :
-                        debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName'))) + '\n')
+                        debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFileName', cf + '.xml') + '\n')
+                # Set the full path/file value
+                setattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName')))
+                if debug :
+                    debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName'))) + '\n')
 
-            # Add macPack files
-            if self.macPack :
-                macPackDict = self.tools.xmlFileToDict(self.macPackConfXmlFile)
-                macPackFilesDict = {}
-                for sections in macPackDict['root']['section'] :
-                    if sections['sectionID'] == 'Files' :
-                        for section in sections :
-                            secItem = sections[section]
-                            if type(secItem) is list :
-                                for f in secItem :
-                                    macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-                for f in macPackFilesDict.keys() :
-                    setattr(self, f, macPackFilesDict[f])
-                    if debug :
-                        debugObj.write(f + ' = ' + getattr(self, f) + '\n')
+        # Add macPack files
+        if self.macPack and os.path.exists(self.macPackConfXmlFile) :
+            macPackDict = self.tools.xmlFileToDict(self.macPackConfXmlFile)
+            macPackFilesDict = {}
+            for sections in macPackDict['root']['section'] :
+                if sections['sectionID'] == 'Files' :
+                    for section in sections :
+                        secItem = sections[section]
+                        if type(secItem) is list :
+                            for f in secItem :
+                                macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+            for f in macPackFilesDict.keys() :
+                setattr(self, f, macPackFilesDict[f])
+                if debug :
+                    debugObj.write(f + ' = ' + getattr(self, f) + '\n')
 
-            # Set Rapuma User config file name
-            self.userConfFileName           = 'rapuma.conf'
-            self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
-            # Add log file names
-            if self.projHome :
-                self.projLogFileName        = 'rapuma.log'
-                self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
-                self.projErrorLogFileName   = 'error.log'
-                self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
-            # Other info vals to set
-            self.lockExt                    = '.lck'
+        # Close the debug file if we need to
+        if debug :
+            debugObj.close()
+
+        # Set Rapuma User config file name
+        self.userConfFileName           = 'rapuma.conf'
+        self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
+        # Add log file names
+        if self.projHome :
+            self.projLogFileName        = 'rapuma.log'
+            self.projLogFile            = os.path.join(self.projHome, self.projLogFileName)
+            self.projErrorLogFileName   = 'error.log'
+            self.projErrorLogFile       = os.path.join(self.projHome, self.projErrorLogFileName)
+        # Other info vals to set
+        self.lockExt                    = '.lck'
 
         # Do some cleanup like getting rid of the last sessions error log file.
         try :

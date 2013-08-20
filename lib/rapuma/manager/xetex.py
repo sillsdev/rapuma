@@ -284,7 +284,6 @@ class Xetex (Manager) :
                 for s in line :
                     linesOut.append(self.proj_config.processNestedPlaceholders(s, realVal))
             else :
-                print line, realVal
                 linesOut.append(self.proj_config.processNestedPlaceholders(line, realVal))
 
         # Open a fresh settings file
