@@ -94,7 +94,7 @@ class ProjLog (object) :
 
         # Test to see if this is a live project by seeing if the project conf is
         # there.  If it is, we can write out log files.  Otherwise, why bother?
-        if os.path.isfile(self.local.projectConfFile) :
+        if self.local.projectConfFile and os.path.exists(self.local.projectConfFile) :
 
             # Build the event line
             eventLine = '\"' + self.tools.tStamp() + '\", \"' + code + '\", \"' + msg + '\"'
@@ -125,11 +125,11 @@ class ProjLog (object) :
                 self.tools.terminal('Internal error: [' + str(e) + ']')
                 self.tools.dieNow()
             
-            # Halt the process if this was an 'ERR' level type code
-            if code == 'ERR' :
-                self.tools.dieNow('Unrecoverable error.')
-
-        return
+        # Halt the process if this was an 'ERR' level type code
+        if code == 'ERR' :
+            self.tools.dieNow('Sorry, I have to stop.')
+        else :
+            return
 
 
     def writeToErrorLog (self, errorLog, eventLine) :

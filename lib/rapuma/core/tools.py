@@ -136,12 +136,12 @@ class Tools (object) :
             if os.path.isdir(source) :
                 target = self.incrementFileName(source + '.bak')
                 shutil.copytree(source, target)
-                self.terminal('Backedup ' + source + ' to ' + target + '.')
+                self.terminal('Backup complete from: [' + source + '] to [' + target + '].')
                 return True
             else :
-                self.terminal('Error: Source ' + source + ' is not a folder. Cannot backup folder.')
+                self.terminal('Warning: Source ' + source + ' is not a folder. Cannot backup folder.')
         else :
-            self.terminal('Error: Source ' + source + ' does not exist. Cannot backup folder.')
+            self.terminal('FYI: Project [' + source + '] not found. Cannot backup.')
 
 
     def incrementFileName (self, fileName) :

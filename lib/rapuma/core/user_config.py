@@ -29,7 +29,8 @@ class UserConfig (object) :
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
-        self.userConfFile       = os.path.join(self.userHome, 'rapuma.conf')
+        self.userConfFileName   = 'rapuma.conf'
+        self.userConfFile       = os.path.join(self.userHome, self.userConfFileName)
         self.tools              = Tools()
 
         # Check to see if the file is there, then read it in and break it into

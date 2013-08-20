@@ -268,10 +268,8 @@ class Paratext (object) :
 
 #        import pdb; pdb.set_trace()
 
-        print self.sourcePath
-
         # Return the dictionary
-        if os.path.isdir(self.sourcePath) :
+        if self.sourcePath and os.path.exists(self.sourcePath) :
             ssfFile = self.findSsfFile()
             if ssfFile :
                 if os.path.isfile(ssfFile) :

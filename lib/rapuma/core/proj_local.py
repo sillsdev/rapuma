@@ -43,21 +43,22 @@ class ProjLocal (object) :
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.mType              = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma','resource')
         self.projFolders        = []
         self.projHome           = None
         self.localDict          = None
         self.cType              = None
+        self.mType              = None
         self.macPack            = None
         self.csid               = None
         self.sourcePath         = None
-        debug                   = False
+        debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
-        if debug and not os.path.exists(debugOutput) :
-            os.makedirs(debugOutput)
+        if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
+            os.makedirs(os.path.join(self.userResouce, 'debug'))
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
+            self.mType          = self.userConfig['Projects'][pid]['projectMediaIDCode']
         if projectConf :
             self.cType          = projectConf['Groups'][gid]['cType']
             self.csid           = projectConf['Groups'][gid]['csid']
@@ -120,8 +121,12 @@ class ProjLocal (object) :
                                     debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
 
         # Add configuation file names
+        configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
+        # Create placeholders for basic conf file names
+        for cf in configFiles :
+            setattr(self, cf + 'ConfFile', None)
+        # Add the real settings if we can
         if self.projHome :
-            configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']
             for cf in configFiles :
                 # Set the config path/file value
                 setattr(self, cf + 'ConfFileName', cf + '.conf')
@@ -148,7 +153,7 @@ class ProjLocal (object) :
                 if debug :
                     debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName'))) + '\n')
 
-        # Add macPack files
+        # Add macPack files via a specific macPack XML configuation file
         if self.macPack and os.path.exists(self.macPackConfXmlFile) :
             macPackDict = self.tools.xmlFileToDict(self.macPackConfXmlFile)
             macPackFilesDict = {}
@@ -168,9 +173,9 @@ class ProjLocal (object) :
         if debug :
             debugObj.close()
 
-        # Set Rapuma User config file name
-        self.userConfFileName           = 'rapuma.conf'
-        self.userConfFile               = os.path.join(self.userHome, self.userConfFileName)
+        # Set Rapuma User config file name (already defined in user_config)
+        self.userConfFileName           = self.user.userConfFileName
+        self.userConfFile               = self.user.userConfFile
         # Add log file names
         if self.projHome :
             self.projLogFileName        = 'rapuma.log'
@@ -187,8 +192,6 @@ class ProjLocal (object) :
         except :
             pass
 
-
-#        self.tools.dieNow()
 
 ###############################################################################
 ############################### Local Functions ###############################
