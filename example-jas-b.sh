@@ -15,7 +15,8 @@
 # just basic terminal commands. Be sure that your system is setup to work with these
 # commands or edit the following lines to reflect your system's folder configuration.
 # Otherwise, this script will not work.
-cp ~/Projects/rapuma/resource/example/MBJAS.zip ~/Publishing/testArea
+mkdir ~/Publishing/testArea
+cp resource/example/MBJAS.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/MBJAS.zip -d ~/Publishing/testArea
 rm -rf ~/Publishing/testArea/ENG-LATN-JAS
 

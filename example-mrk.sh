@@ -3,7 +3,8 @@
 # For this to work the following path is needed: ~/Publishing/testArea
 
 # Copy into the testArea folder and extract the files
-cp ~/Projects/rapuma/resource/example/KYUM.zip ~/Publishing/testArea
+mkdir ~/Publishing/testArea
+cp resource/example/KYUM.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/KYUM.zip -d ~/Publishing/testArea
 
 # Remove any exsiting project of the same ID

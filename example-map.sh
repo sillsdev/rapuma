@@ -1,6 +1,7 @@
 #!/bin/sh
 
-cp ~/Projects/rapuma/resources/examples/MAPS.zip ~/Publishing/testArea
+mkdir ~/Publishing/testArea
+cp resources/examples/MAPS.zip ~/Publishing/testArea
 unzip -o ~/Publishing/testArea/MAPS.zip -d ~/Publishing/testArea
 
 rapuma project MAPTEST project remove
