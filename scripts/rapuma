@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r775'
+systemVersion   = '0.6.r776'
 local           = None
 
 # Give a welcome message
@@ -350,7 +350,7 @@ def userArguments (args) :
                         sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                     elif not cType :
                         sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                    elif source_path :
+                    elif not source_path :
                         sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     elif not args.source_id :
                         sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')

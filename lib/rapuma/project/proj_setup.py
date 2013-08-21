@@ -217,7 +217,7 @@ class ProjSetup (object) :
         # If the new source is valid, we will add that to the config now
         # so that processes to follow will have that setting available.
         if sourcePath :
-            self.addCompGroupSourcePath(gid, sourcePath)
+            self.addCompGroupSourcePath(gid, csid, sourcePath)
             setattr(self, sourceKey, sourcePath)
 
         # The cList can be one or more valid component IDs
@@ -328,8 +328,8 @@ class ProjSetup (object) :
         # Remove the files
         if force :
             targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
-            working         = self.tools_path.getWorkingFile(gid, cid)
+            workingComp     = self.getWorkCompareFile(gid, cid)
+            working         = self.getWorkingFile(gid, cid)
 
             if os.path.isfile(working) :
                 # First a comparison backup needs to be made of the working text
@@ -409,8 +409,9 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # At this time, we only need this right here in this function
-        # Do not bother if there is not source path set
+        # Just in case there are any problems with the source path
+        # Reset the local mod first
+        self.local = ProjLocal(self.pid, gid, self.projectConfig)
         if self.local.sourcePath :
             paratext            = Paratext(self.pid, gid)
             sourcePath          = self.local.sourcePath
@@ -445,7 +446,9 @@ class ProjSetup (object) :
     def getWorkingSourceFile (self, gid, cid) :
         '''Get the working source file name with path.'''
 
-        # Do not bother if no source path exists
+        # Just in case there are any problems with the source path
+        # Reset the local mod first
+        self.local = ProjLocal(self.pid, gid, self.projectConfig)
         if self.local.sourcePath :
             targetFolder    = os.path.join(self.local.projComponentFolder, cid)
             source          = self.getSourceFile(gid, cid)
@@ -453,13 +456,13 @@ class ProjSetup (object) :
             return os.path.join(targetFolder, sName + '.source')
 
 
-    def addCompGroupSourcePath (self, gid, source) :
+    def addCompGroupSourcePath (self, gid, csid, source) :
         '''Add a source path for components used in a group if none
         exsist. If one exists, replace anyway. Last in wins! The 
         assumption is only one path per component group.'''
 
-        # Get the csid
-        csid = self.projectConfig['Groups'][gid]['csid']
+#        # Get the csid
+#        csid = self.projectConfig['Groups'][gid]['csid']
 
         # Path has been resolved in Rapuma, we assume it should be valid.
         # But it could be a full file name. We need to sort that out.

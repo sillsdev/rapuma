@@ -40,8 +40,7 @@ class Paratext (object) :
         self.userConfig             = self.user.userConfig
         self.proj_config            = Config(pid, gid)
         self.projHome               = self.userConfig['Projects'][pid]['projectPath']
-        self.local                  = ProjLocal(pid)
-        self.proj_config            = Config(self.pid, self.gid)
+        self.proj_config            = Config(pid, gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
         self.proj_config.getIllustrationConfig()
@@ -53,6 +52,7 @@ class Paratext (object) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.csid                   = None
+        self.local                  = ProjLocal(pid, gid, self.projectConfig)
 
         self.errorCodes     = {
 

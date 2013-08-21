@@ -80,11 +80,6 @@ class Project (object) :
             self.projectConfig = newConf
             self.projectConfig.filename = self.local.projectConfFile
 
-        # If this is a valid project we might as well put in the folders
-#        for folder in self.local.projFolders :
-#            if not os.path.isdir(getattr(self.local, folder)) :
-#                os.makedirs(getattr(self.local, folder))
-
         # Go ahead and set this as the current project
         self.setProjCurrent(self.projectIDCode)
 
