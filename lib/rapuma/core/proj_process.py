@@ -37,9 +37,9 @@ class ProjProcess (object) :
         self.userHome               = os.environ.get('RAPUMA_USER')
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-# FIXME
-        self.projectConfig          = Config(self.pid).projectConfig
-
+        self.proj_config            = Config(self.pid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig          = self.proj_config.projectConfig
         self.projHome               = None
         self.local                  = None
         self.finishInit()
@@ -190,13 +190,10 @@ class ProjProcess (object) :
         '''Check to see if a preprocess script is installed. If not, install the
         default script and give a warning that the script is not complete.'''
 
-        cType = self.projectConfig['Groups'][gid]['cType']
-        rpmPreprocessFile = os.path.join(self.local.rapumaScriptFolder, 'textPreprocess.py')
-        grpPreprocessFile = self.tools_path.getGroupPreprocessFile(gid)
         # Check and copy if needed
-        if not os.path.isfile(grpPreprocessFile) :
-            shutil.copy(rpmPreprocessFile, grpPreprocessFile)
-            self.tools.makeExecutable(grpPreprocessFile)
+        if not os.path.isfile(self.local.groupPreprocessFile) :
+            shutil.copy(self.local.rpmPreprocessFile, self.local.groupPreprocessFile)
+            self.tools.makeExecutable(self.local.groupPreprocessFile)
             self.log.writeToLog(self.errorCodes['1260'])
         else :
             self.log.writeToLog(self.errorCodes['1265'])

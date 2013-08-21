@@ -49,57 +49,62 @@ class ToolsPath (object) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-    def getSourceFile (self, gid, cid) :
-        '''Get the source file name with path.'''
+#    def getSourceFile (self, gid, cid) :
+#        '''Get the source file name with path.'''
 
-#        import pdb; pdb.set_trace()
+##        import pdb; pdb.set_trace()
 
-        # At this time, we only need this right here in this function
-        from rapuma.core.paratext import Paratext
-        pt                  = Paratext(self.pid, gid)
-        sourcePath          = pt.getGroupSourcePath()
-        cType               = self.projectConfig['Groups'][gid]['cType']
-        sourceEditor        = pt.getSourceEditor()
-        # Build the file name
-        if sourceEditor.lower() == 'paratext' :
-            sName = pt.formPTName(cid)
-        elif sourceEditor.lower() == 'generic' :
-            sName = pt.formGenericName(cid)
-        else :
-            return None
+#        # At this time, we only need this right here in this function
+#        # Do not bother if there is not source path set
+#        if self.local.sourcePath :
+#            print 'mmmmmmmmmmmmmmmmmmm'
+#            from rapuma.core.paratext import Paratext
+#            pt                  = Paratext(self.pid, gid)
+#            sourcePath          = self.local.sourcePath
+#            cType               = self.projectConfig['Groups'][gid]['cType']
+#            sourceEditor        = pt.getSourceEditor()
+#            # Build the file name
+#            if sourceEditor.lower() == 'paratext' :
+#                sName = pt.formPTName(cid)
+#            elif sourceEditor.lower() == 'generic' :
+#                sName = pt.formGenericName(cid)
+#            else :
+#                return None
 
-        return os.path.join(sourcePath, sName)
-
-
-    def getWorkingFile (self, gid, cid) :
-        '''Return the working file name with path.'''
-
-        csid            = self.projectConfig['Groups'][gid]['csid']
-        cType           = self.projectConfig['Groups'][gid]['cType']
-        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+#            return os.path.join(sourcePath, sName)
 
 
-    def getWorkCompareFile (self, gid, cid) :
-        '''Return the working compare file (saved from last update) name with path.'''
+#    def getWorkingFile (self, gid, cid) :
+#        '''Return the working file name with path.'''
 
-        return self.getWorkingFile(gid, cid) + '.cv1'
-
-
-    def getWorkingSourceFile (self, gid, cid) :
-        '''Get the working source file name with path.'''
-
-        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-        source          = self.getSourceFile(gid, cid)
-        sName           = os.path.split(source)[1]
-        return os.path.join(targetFolder, sName + '.source')
+#        csid            = self.projectConfig['Groups'][gid]['csid']
+#        cType           = self.projectConfig['Groups'][gid]['cType']
+#        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+#        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
 
 
-    def getGroupPreprocessFile (self, gid) :
-        '''Get the file name and path to the group's preprocess script.'''
+#    def getWorkCompareFile (self, gid, cid) :
+#        '''Return the working compare file (saved from last update) name with path.'''
 
-        csid            = self.projectConfig['Groups'][gid]['csid']
-        return os.path.join(self.local.projScriptFolder, csid + '_textPreprocess.py')
+#        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+#    def getWorkingSourceFile (self, gid, cid) :
+#        '''Get the working source file name with path.'''
+
+#        # Do not bother if no source path exists
+#        if self.local.sourcePath :
+#            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+#            source          = self.getSourceFile(gid, cid)
+#            sName           = os.path.split(source)[1]
+#            return os.path.join(targetFolder, sName + '.source')
+
+
+#    def getGroupPreprocessFile (self, gid) :
+#        '''Get the file name and path to the group's preprocess script.'''
+
+#        csid            = self.projectConfig['Groups'][gid]['csid']
+#        return os.path.join(self.local.projScriptFolder, csid + '_textPreprocess.py')
 
 
 ###############################################################################

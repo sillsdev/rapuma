@@ -84,29 +84,7 @@ class ProjCompare (object) :
         when the component was created. This will pull up the user's differential
         viewer and compare the two files.'''
 
-        # Comare between real source and copied (backup) working source
-        if test == 'source' :
-            new = self.tools_path.getSourceFile(gid, cid)
-            old = self.tools_path.getWorkingSourceFile(gid, cid)
-        # Comare between working text and the last backup of that text
-        elif test == 'working' :
-            new = self.tools_path.getWorkingFile(gid, cid)
-            old = self.tools_path.getWorkCompareFile(gid, cid)
-        # Comare between working text and the copied (backup) source
-        elif test == 'source-working' :
-            new = self.tools_path.getWorkingFile(gid, cid)
-            old = self.tools_path.getWorkingSourceFile(gid, cid)
-        else :
-            self.log.writeToLog(self.errorCodes['290'], [test])
-
-        # Test to be sure the files are valid
-        if not os.path.exists(new) :
-            self.log.writeToLog(self.errorCodes['210'], [new])
-        elif not os.path.exists(old) :
-            self.log.writeToLog(self.errorCodes['210'], [old])
-        else :
-            # Turn it over to the generic compare tool
-            self.compare(new, old)
+        print 'ERROR: proj_compare.compareComponent() needs to be rewritten!'
 
 
     def isDifferent (self, new, old) :

@@ -53,7 +53,6 @@ class Paratext (object) :
         self.cType                  = 'usfm'
         self.Ctype                  = self.cType.capitalize()
         self.csid                   = None
-        self.sourcePath             = None
 
         self.errorCodes     = {
 
@@ -220,7 +219,7 @@ class Paratext (object) :
         # .ssf file.
         ssfFileName = ''
         ptPath = ''
-        parentFolder = self.getGroupSourcePath()
+        parentFolder = self.local.sourcePath
         grandparentFolder = os.path.dirname(parentFolder)
         gatherFolder = os.path.join(parentFolder, 'gather')
 
@@ -269,7 +268,7 @@ class Paratext (object) :
 #        import pdb; pdb.set_trace()
 
         # Return the dictionary
-        if self.sourcePath and os.path.exists(self.sourcePath) :
+        if self.local.sourcePath and os.path.exists(self.local.sourcePath) :
             ssfFile = self.findSsfFile()
             if ssfFile :
                 if os.path.isfile(ssfFile) :
@@ -315,20 +314,6 @@ class Paratext (object) :
                 self.tools.writeConfFile(self.projectConfig)
 
         return se
-
-
-    def getGroupSourcePath (self) :
-        '''Get the source path for a specified group.'''
-
-#        import pdb; pdb.set_trace()
-
-        try :
-            return self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.tools.terminal('No source path found for: [' + str(e) + ']')
-            self.tools.terminal('Please add a source path for this component type.')
-            self.tools.dieNow()
 
 
     def usfmCidInfo (self) :

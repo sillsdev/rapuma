@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r774'
+systemVersion   = '0.6.r775'
 local           = None
 
 # Give a welcome message
@@ -108,16 +108,16 @@ def checkCreatorVersion (pid, projectConfig, systemVersion) :
         ProjCommander(pid).updateScripts()
 
 
-def hasValidSourcePath (pid, gid, csid) :
-    '''Check if there is one, see if it is valid.'''
+#def hasValidSourcePath (pid, gid, csid) :
+#    '''Check if there is one, see if it is valid.'''
 
-#    import pdb; pdb.set_trace()
+##    import pdb; pdb.set_trace()
 
-    try :
-        path = uc.userConfig['Projects'][pid][csid + '_sourcePath']
-        return os.path.isdir(tools.resolvePath(path))
-    except :
-        return False
+#    try :
+#        path = uc.userConfig['Projects'][pid][csid + '_sourcePath']
+#        return os.path.isdir(tools.resolvePath(path))
+#    except :
+#        return False
 
 
 def isTemplate (tid) :
@@ -318,6 +318,7 @@ def userArguments (args) :
         cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
+        source_path = None
         cid_list    = None
         cType       = None
         if args.component_type :
@@ -334,6 +335,11 @@ def userArguments (args) :
                 cid_list = args.cid_list.split()
             else :
                 cid_list = args.cid_list
+        # Source path is optional but if given, resolve it
+        if args.source_path :
+            source_path = tools.resolvePath(args.source_path)
+            if not os.path.exists(source_path) :
+                sys.exit('\nERROR: Path is not valid. Process halting.\n')
         # Figure out what manage command this is and do it
         if cmd == 'add' :
 #            import pdb; pdb.set_trace()
@@ -344,16 +350,15 @@ def userArguments (args) :
                         sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
                     elif not cType :
                         sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                    elif args.source_path :
-                        if not tools.resolvePath(args.source_path) :
-                            sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
+                    elif source_path :
+                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
                     elif not args.source_id :
                         sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
                 if cType == 'usfm' :
-                    ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+                    ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, source_path, args.force)
                 elif cType == 'map' :
-                    ProjMaps(pid, gid).addGroup(cid_list, args.source_id, tools.resolvePath(args.source_path), args.force)
+                    ProjMaps(pid, gid).addGroup(cid_list, args.source_id, source_path, args.force)
                 elif cType == 'toc' :
                     ProjToc(pid, gid).addGroup(args.force)
             elif cmdType == 'hyphenation' :
@@ -406,12 +411,14 @@ def userArguments (args) :
         elif cmd == 'update' :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    if args.source_id :
-                        if not hasValidSourcePath(pid, gid, args.source_id) :
-                            sys.exit('\nERROR: Not valid: [' + args.source_path + ']. Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    ProjSetup(pid).updateGroup(gid, cid_list, args.source_path, args.force)
+                    # This assumes that if a source path was given in this context
+                    # the user only wants to update the source path.
+                    if source_path :
+                        ProjSetup(pid).addCompGroupSourcePath(gid, source_path)
+                    else :
+                        ProjSetup(pid).updateGroup(gid, cid_list, args.force)
                 elif cType == 'map' :
-                    ProjMaps(pid, gid).updateGroup(cid_list, args.source_path, args.force)
+                    ProjMaps(pid, gid).updateGroup(cid_list, args.force)
                 elif cType == 'toc' :
                     ProjToc(pid, gid).updateToc(args.force)
                 else :

@@ -54,6 +54,7 @@ class ProjSetup (object) :
 
         self.errorCodes     = {
 
+            '0200' : ['ERR', 'No source path exists. Cannot update group. Use -s (source) to indicate where the source files are for this component source ID.'],
             '0201' : ['ERR', 'Source path given for source ID [<<1>>] group not valid! Use -s (source) to indicate where the source files are for this component source ID.'],
             '0203' : ['ERR', 'Component group source path not valid. Use -s (source) to provide a valid source path.'],
             '0205' : ['ERR', 'Component type [<<1>>] is not supported by the system.'],
@@ -75,6 +76,7 @@ class ProjSetup (object) :
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
+            '0320' : ['MSG', 'Set/reset source path to: [<<1>>]'],
 
             '1060' : ['LOG', 'Text validation succeeded on USFM file: [<<1>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
@@ -113,11 +115,11 @@ class ProjSetup (object) :
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
             # These could be initialized above but because it might be necessary
             # to reinitialize, we put them here
-            self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
             self.proj_config        = Config(self.pid)
             self.proj_config.getProjectConfig()
             self.projectConfig      = self.proj_config.projectConfig
+            self.local              = ProjLocal(self.pid)
             self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True
@@ -138,7 +140,7 @@ class ProjSetup (object) :
             self.updateGroup(gid, force)
 
 
-    def updateGroup (self, gid, cidList = None, sourcePath = None, force = False) :
+    def updateGroup (self, gid, cidList = None, force = False) :
         '''Update a group, --source is optional but if given it will
         overwrite the current setting. Normal behavior is to have it 
         check if there is any difference between the cid project backup
@@ -146,20 +148,11 @@ class ProjSetup (object) :
         the update. If not, it will require force to do the update.'''
 
         # Just in case there are any problems with the source path
-        # resolve it here before going on.
-        csid = self.projectConfig['Groups'][gid]['csid']
-        if not sourcePath :
-            sourcePath  = self.userConfig['Projects'][self.pid][csid + '_sourcePath']
-            if not os.path.exists(sourcePath) :
-                self.log.writeToLog(self.errorCodes['0201'], [csid])
-        else :
-            sourcePath = self.tools.resolvePath(sourcePath)
-            if not os.path.exists(sourcePath) :
-                self.log.writeToLog(self.errorCodes['0203'])
-
-            # Reset the source path for this csid
-            self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = sourcePath
-            self.tools.writeConfFile(self.userConfig)
+        # Reset the local mod first
+        self.local = ProjLocal(self.pid, gid, self.projectConfig)
+        # Look for it now
+        if not self.local.sourcePath :
+            self.log.writeToLog(self.errorCodes['0200'])
 
         # Sort out the list
         if not cidList :
@@ -177,10 +170,10 @@ class ProjSetup (object) :
 
         # Process each cid
         for cid in cidList :
-            target          = self.tools_path.getWorkingFile(gid, cid)
-            targetSource    = self.tools_path.getWorkingSourceFile(gid, cid)
-            source          = self.tools_path.getSourceFile(gid, cid)
-            workingComp     = self.tools_path.getWorkCompareFile(gid, cid)
+            target          = self.getWorkingFile(gid, cid)
+            targetSource    = self.getWorkingSourceFile(gid, cid)
+            source          = self.getSourceFile(gid, cid)
+            workingComp     = self.getWorkCompareFile(gid, cid)
             # Set aside a tmp backup of the target
             targetBackup    = tempfile.NamedTemporaryFile(delete=True)
             if os.path.exists(target) :
@@ -200,7 +193,7 @@ class ProjSetup (object) :
                 self.tools.makeReadOnly(workingComp)
                 if force :
                     self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
-                self.compare.compareComponent(gid, cid, 'working')
+                self.compare.compare(source, target)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
@@ -224,7 +217,7 @@ class ProjSetup (object) :
         # If the new source is valid, we will add that to the config now
         # so that processes to follow will have that setting available.
         if sourcePath :
-            self.addCompGroupSourcePath(csid, sourcePath)
+            self.addCompGroupSourcePath(gid, sourcePath)
             setattr(self, sourceKey, sourcePath)
 
         # The cList can be one or more valid component IDs
@@ -411,10 +404,62 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0300 ########################
 ###############################################################################
 
-    def addCompGroupSourcePath (self, csid, source) :
+    def getSourceFile (self, gid, cid) :
+        '''Get the source file name with path.'''
+
+#        import pdb; pdb.set_trace()
+
+        # At this time, we only need this right here in this function
+        # Do not bother if there is not source path set
+        if self.local.sourcePath :
+            paratext            = Paratext(self.pid, gid)
+            sourcePath          = self.local.sourcePath
+            cType               = self.projectConfig['Groups'][gid]['cType']
+            sourceEditor        = paratext.getSourceEditor()
+            # Build the file name
+            if sourceEditor.lower() == 'paratext' :
+                sName = paratext.formPTName(cid)
+            elif sourceEditor.lower() == 'generic' :
+                sName = paratext.formGenericName(cid)
+            else :
+                return None
+
+            return os.path.join(sourcePath, sName)
+
+
+    def getWorkingFile (self, gid, cid) :
+        '''Return the working file name with path.'''
+
+        csid            = self.projectConfig['Groups'][gid]['csid']
+        cType           = self.projectConfig['Groups'][gid]['cType']
+        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
+
+
+    def getWorkCompareFile (self, gid, cid) :
+        '''Return the working compare file (saved from last update) name with path.'''
+
+        return self.getWorkingFile(gid, cid) + '.cv1'
+
+
+    def getWorkingSourceFile (self, gid, cid) :
+        '''Get the working source file name with path.'''
+
+        # Do not bother if no source path exists
+        if self.local.sourcePath :
+            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+            source          = self.getSourceFile(gid, cid)
+            sName           = os.path.split(source)[1]
+            return os.path.join(targetFolder, sName + '.source')
+
+
+    def addCompGroupSourcePath (self, gid, source) :
         '''Add a source path for components used in a group if none
         exsist. If one exists, replace anyway. Last in wins! The 
         assumption is only one path per component group.'''
+
+        # Get the csid
+        csid = self.projectConfig['Groups'][gid]['csid']
 
         # Path has been resolved in Rapuma, we assume it should be valid.
         # But it could be a full file name. We need to sort that out.
@@ -425,9 +470,10 @@ class ProjSetup (object) :
                 self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = os.path.split(source)[0]
 
             self.tools.writeConfFile(self.userConfig)
+            self.log.writeToLog(self.errorCodes['0320'], [source])
         except Exception as e :
             # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['300'], [str(e)])
+            self.log.writeToLog(self.errorCodes['0300'], [str(e)])
 
 
 ###############################################################################
@@ -568,9 +614,9 @@ class ProjSetup (object) :
         cType               = self.projectConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
-        target              = self.tools_path.getWorkingFile(gid, cid)
-        targetSource        = self.tools_path.getWorkingSourceFile(gid, cid)
-        source              = self.tools_path.getSourceFile(gid, cid)
+        target              = self.getWorkingFile(gid, cid)
+        targetSource        = self.getWorkingSourceFile(gid, cid)
+        source              = self.getSourceFile(gid, cid)
         extractFigMarkers   = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
         extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
@@ -605,7 +651,7 @@ class ProjSetup (object) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
                 proj_process.checkForPreprocessScript(gid)
-                if not proj_process.runProcessScript(target, self.tools_path.getGroupPreprocessFile(gid)) :
+                if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
 

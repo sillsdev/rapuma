@@ -88,7 +88,8 @@ class ProjLocal (object) :
                 if type(secItems) is list :
                     for item in secItems :
                         if item.has_key('folderID') :
-                            # First make a placeholder and set to None if it doesn't exist already
+                            # First make a folder name placeholder and set 
+                            # to None if it doesn't exist already
                             try :
                                 getattr(self, str(item['folderID']))
                             except :
@@ -106,6 +107,15 @@ class ProjLocal (object) :
                                 if debug :
                                     debugObj.write(item['folderID'] + ' = ' + val + '\n')
                         elif item.has_key('fileID') :
+                            # First make a file name placeholder and set 
+                            # to None if it doesn't exist already
+                            try :
+                                getattr(self, str(item['fileID']))
+                                getattr(self, str(item['fileID'] + 'Name'))
+                            except :
+                                setattr(self, item['fileID'], None)
+                                setattr(self, item['fileID'] + 'Name', None)
+                            # Get the two values we need
                             valName = self.processNestedPlaceholders(item['fileName'])
                             valPath = self.processNestedPlaceholders(item['filePath'])
                             if item['relies'] :
@@ -113,8 +123,8 @@ class ProjLocal (object) :
                                     setattr(self, item['fileID'] + 'Name', valName)
                                     setattr(self, item['fileID'], os.path.join(valPath, valName))
                                     if debug :
-                                            debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
-                                            debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
+                                        debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
+                                        debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
                             else :
                                 setattr(self, item['fileID'] + 'Name', valName)
                                 setattr(self, item['fileID'], os.path.join(valPath, valName))
