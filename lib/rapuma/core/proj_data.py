@@ -66,7 +66,6 @@ class ProjData (object) :
 
             '4210' : ['MSG', 'Completed pulling/restoring data from the cloud.'],
             '4220' : ['ERR', 'Cannot resolve path: [<<1>>]'],
-            '4230' : ['ERR', 'No path to the cloud has been configured.'],
             '4250' : ['ERR', 'The cloud project [<<1>>] you want to pull from is owned by [<<2>>]. Use force (-f) to pull the project and change the local owner ID.'],
             '4260' : ['ERR', 'The local project [<<1>>] is newer than the cloud copy. If you seriously want to overwrite it, use force (-f) to do so.'],
             '4270' : ['MSG', 'Restored the project [<<1>>] from the cloud copy. Local copy is owned by [<<2>>].'],
@@ -704,13 +703,15 @@ class ProjData (object) :
         '''Pull data from cloud storage and merge/replace local data.
         Do a full backup first before starting the actual pull operation.'''
 
-        # Make the cloud path
+        # Make the cloud path (output errors to terminal as log may not be working at this point)
         if self.userConfig['Resources']['cloud'] != '' :
             cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
             if not os.path.exists(cloud) :
-                self.log.writeToLog(self.errorCodes['4220'])
+                self.tools.terminal('Error: Path to cloud not valid: [' + cloud + ']')
+                self.tools.dieNow()
         else :
-            self.log.writeToLog(self.errorCodes['4230'])
+            self.tools.terminal('Error: No path to the cloud has been configured.')
+            self.tools.dieNow()
 
         def doPull () :
             # Get a total list of files from the project
@@ -747,7 +748,7 @@ class ProjData (object) :
                 if cr > 0 :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # Get the project home reference
+        # Get the project home reference and reset the log
         self.projHome = self.getProjHome(tPath)
         if self.projHome :
             self.local      = ProjLocal(self.pid)
