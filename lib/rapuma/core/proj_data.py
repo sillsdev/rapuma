@@ -79,6 +79,8 @@ class ProjData (object) :
 #        import pdb; pdb.set_trace()
 
         # Look for an existing project home path
+        if not self.userConfig.has_key('Projects') :
+            self.tools.buildConfSection(self.userConfig, 'Projects')
         if self.userConfig['Projects'].has_key(self.pid) :
             localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
         else :

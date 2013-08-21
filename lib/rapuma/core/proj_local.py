@@ -56,6 +56,8 @@ class ProjLocal (object) :
         debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
             os.makedirs(os.path.join(self.userResouce, 'debug'))
+        if not self.userConfig.has_key('Projects') :
+            self.tools.buildConfSection(self.userConfig, 'Projects')
         if self.userConfig['Projects'].has_key(pid) :
             self.projHome       = self.userConfig['Projects'][pid]['projectPath']
             self.mType          = self.userConfig['Projects'][pid]['projectMediaIDCode']
