@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys
+import codecs, os, sys, site
 from configobj import ConfigObj
 
 # Load the local classes
@@ -40,6 +40,8 @@ class UserConfig (object) :
             self.tools.sysXmlConfig = self.tools.xml_to_section(rapumaXMLDefaults)
         else :
             raise IOError, "Can't open " + rapumaXMLDefaults
+
+#        import pdb; pdb.set_trace()
 
         # Now make the users local rapuma.conf file if it isn't there
         if not os.path.exists(self.userConfFile) :
@@ -152,8 +154,6 @@ class UserConfig (object) :
     def makeHomeFolders (self, force = False) :
         '''Setup the default Rapuma resource folders.'''
 
-        import pdb; pdb.set_trace()
-
         # Setup Resources section if needed
         if not self.userConfig.has_key('Resources') :
             self.tools.buildConfSection(self.userConfig, 'Resources')
@@ -162,13 +162,7 @@ class UserConfig (object) :
         if not self.userConfig['Resources'].has_key('projects') :
             self.tools.buildConfSection(self.userConfig['Resources'], 'projects')
         if not self.userConfig['Resources']['projects'] :
-        
-        
-        
-        # environ not working here
-        
-        
-            projects = os.path.join(os.environ('HOME'), Projects)
+            projects = os.path.join(os.environ.get('HOME'), 'Publishing')
             if not os.path.exists(projects) :
                 os.makedirs(projects)
             self.userConfig['Resources']['projects'] = projects
@@ -177,16 +171,18 @@ class UserConfig (object) :
         else :
             projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
 
+#        import pdb; pdb.set_trace()
+
         # Get the user config Rapuma resouce folder location
-        if self.userConfig['Resources']['rapumaResouce'] == '' or force :
+        if not self.userConfig['Resources'].has_key('rapumaResouce') :
+            self.tools.buildConfSection(self.userConfig['Resources'], 'rapumaResouce')
+        if not self.userConfig['Resources']['rapumaResouce'] or force :
             rapumaResouce = os.path.join(site.USER_BASE, 'share', 'rapuma','resource')
             self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
         elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])) :
             sys.exit('\nERROR: Invalid Rapuma resource folder path: ' + self.userConfig['Resources']['rapumaResouce'] + '\n\nProcess halted.\n')
         else :
             rapumaResouce = self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])
-
-        print 'aaaaaaaaaaaaaaaaaaaa', rapumaResouce
 
         # Make a list of sub-folders to make in the Rapuma resourcs folder
         resourceFolders = ['archive', 'backup', 'font', 'illustration', \

@@ -28,7 +28,7 @@ startTime = timeit.default_timer()
 rapumaHome = os.environ.get('RAPUMA_BASE')
 sysHome = os.environ.get('HOME')
 if not rapumaHome :
-    for t in (os.path.join(sysHome, '.local'), '/usr/local', '/usr') :
+    for t in ('/usr/local', '/usr') :
         rapumaHome = os.path.join(t, 'share', 'rapuma')
         if os.path.exists(os.path.join(rapumaHome, 'resource')) :
             os.environ['RAPUMA_BASE'] = rapumaHome
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r778'
+systemVersion   = '0.6.r779'
 local           = None
 
 # Give a welcome message
@@ -106,18 +106,6 @@ def checkCreatorVersion (pid, projectConfig, systemVersion) :
         tools.writeConfFile(projectConfig)
         # Now update the scripts if that is needed
         ProjCommander(pid).updateScripts()
-
-
-#def hasValidSourcePath (pid, gid, csid) :
-#    '''Check if there is one, see if it is valid.'''
-
-##    import pdb; pdb.set_trace()
-
-#    try :
-#        path = uc.userConfig['Projects'][pid][csid + '_sourcePath']
-#        return os.path.isdir(tools.resolvePath(path))
-#    except :
-#        return False
 
 
 def isTemplate (tid) :
@@ -212,6 +200,12 @@ def userArguments (args) :
                 uc.setSystemSettings('Resources', 'cloud', path)
             else :
                 sys.exit('\nERROR: Command not supported. Process halting.\n')
+
+    ###### EXAMPLE
+    # Run example scripts
+    elif sys.argv[1].lower() == 'example' :
+        if args.script :
+            os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
 
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
@@ -607,6 +601,8 @@ pcCommands              = ['add', 'remove', 'update']
 bgCommandType           = ['bind', 'draft', 'final', 'proof']
 bgCommands              = ['add', 'remove', 'update']
 backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
+# Example
+examples                = ['jas', 'jas-b']
 
 # Add main arguments (first postion options)
 parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -689,6 +685,10 @@ backgroundCommand.add_argument('project_id', help='A project ID for the project 
 backgroundCommand.add_argument('output_type', choices=bgCommandType, help='The type of (rendered) output a background will be applied to or removed from.')
 backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
 backgroundCommand.add_argument('command', choices=bgCommands, help='The general commands that can be used for managing backgound.')
+
+# Add example subprocess arguments
+exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
+exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
 
 # Send the collected arguments to the handler
 userArguments(parser.parse_args())

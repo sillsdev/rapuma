@@ -846,7 +846,7 @@ class ProjDelete (object) :
         self.tools                          = Tools()
         self.pid                            = pid
         self.projHome                       = None
-        if self.userConfig['Projects'].has_key(pid) :
+        if self.userConfig.has_key('Projects') and self.userConfig['Projects'].has_key(pid) :
             self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
 
 # Currently there is only this function in this class
@@ -863,7 +863,7 @@ class ProjDelete (object) :
             return
 
         # Check if project is registered with Rapuma
-        if not self.userConfig['Projects'].get(self.pid) :
+        if not self.projHome :
             self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
         else :
             # Remove references from user rapuma.conf
