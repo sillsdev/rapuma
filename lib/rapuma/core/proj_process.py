@@ -33,8 +33,12 @@ class ProjProcess (object) :
 
         self.pid                    = pid
         self.tools                  = Tools()
+
+
         self.rapumaHome             = os.environ.get('RAPUMA_BASE')
         self.userHome               = os.environ.get('RAPUMA_USER')
+
+
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.proj_config            = Config(self.pid)

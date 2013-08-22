@@ -34,12 +34,16 @@ class ProjData (object) :
 
         self.pid            = pid
         self.tools          = Tools()
+        self.local          = pid
+
+
         self.rapumaHome     = os.environ.get('RAPUMA_BASE')
         self.userHome       = os.environ.get('RAPUMA_USER')
+
+
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
         self.projHome       = None
-        self.local          = None
         self.log            = None
 
         # Log messages for this module
@@ -308,7 +312,7 @@ class ProjData (object) :
         # Add project to local Rapuma project registry
         # To do this we need to open up the restored project config file
         # and pull out some settings.
-        local       = ProjLocal(rapumaHome, userHome, archTarget)
+        local       = ProjLocal(pid)
         pc          = Config(pid)
         log         = ProjLog(pid)
         aProject    = Project(uc.userConfig, pc.projectConfig, local, log, systemVersion)

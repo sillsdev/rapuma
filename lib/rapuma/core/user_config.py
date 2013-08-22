@@ -44,6 +44,7 @@ class UserConfig (object) :
         # Now make the users local rapuma.conf file if it isn't there
         if not os.path.exists(self.userConfFile) :
             self.initUserHome()
+            self.makeHomeFolders()
 
         # Load the Rapuma conf file into an object
         self.userConfig = ConfigObj(self.userConfFile, encoding='utf-8')
@@ -148,28 +149,47 @@ class UserConfig (object) :
             self.tools.terminal('\nSame value given, nothing to changed.\n\n')
 
 
-    def makeDefaultFolders (self, force = False) :
+    def makeHomeFolders (self, force = False) :
         '''Setup the default Rapuma resource folders.'''
 
-        # Get the user config project folder location
-        if not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
+        import pdb; pdb.set_trace()
+
+        # Setup Resources section if needed
+        if not self.userConfig.has_key('Resources') :
+            self.tools.buildConfSection(self.userConfig, 'Resources')
+
+        # Get the user config project folder location (or set a default)
+        if not self.userConfig['Resources'].has_key('projects') :
+            self.tools.buildConfSection(self.userConfig['Resources'], 'projects')
+        if not self.userConfig['Resources']['projects'] :
+        
+        
+        
+        # environ not working here
+        
+        
+            projects = os.path.join(os.environ('HOME'), Projects)
+            if not os.path.exists(projects) :
+                os.makedirs(projects)
+            self.userConfig['Resources']['projects'] = projects
+        elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
             sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '\n\nProcess halted.\n')
         else :
             projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
-            self.userConfig['Resources']['projects'] = projects
 
         # Get the user config Rapuma resouce folder location
         if self.userConfig['Resources']['rapumaResouce'] == '' or force :
-            rapumaResouce = os.path.join(projects, 'Rapuma')
+            rapumaResouce = os.path.join(site.USER_BASE, 'share', 'rapuma','resource')
             self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
         elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])) :
             sys.exit('\nERROR: Invalid Rapuma resource folder path: ' + self.userConfig['Resources']['rapumaResouce'] + '\n\nProcess halted.\n')
         else :
             rapumaResouce = self.tools.resolvePath(self.userConfig['Resources']['rapumaResouce'])
-            self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
+
+        print 'aaaaaaaaaaaaaaaaaaaa', rapumaResouce
 
         # Make a list of sub-folders to make in the Rapuma resourcs folder
-        resourceFolders = ['archive', 'backup', 'cloud', 'font', 'illustration', \
+        resourceFolders = ['archive', 'backup', 'font', 'illustration', \
                             'macro','script', 'template']
         for r in resourceFolders :
             thisPath = os.path.join(rapumaResouce, r)

@@ -30,7 +30,7 @@ sysHome = os.environ.get('HOME')
 if not rapumaHome :
     for t in (os.path.join(sysHome, '.local'), '/usr/local', '/usr') :
         rapumaHome = os.path.join(t, 'share', 'rapuma')
-        if os.path.exists(os.path.join(rapumaHome, 'resources')) :
+        if os.path.exists(os.path.join(rapumaHome, 'resource')) :
             os.environ['RAPUMA_BASE'] = rapumaHome
             break
 
@@ -83,7 +83,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r777'
+systemVersion   = '0.6.r778'
 local           = None
 
 # Give a welcome message
@@ -210,11 +210,6 @@ def userArguments (args) :
                 uc.setSystemSettings('Resources', 'projects', path)
             elif cmd == 'cloud' :
                 uc.setSystemSettings('Resources', 'cloud', path)
-            elif cmd == 'folders' :
-                if setting == 'default' :
-                    uc.makeDefaultFolders(args.force)
-                else :
-                    sys.exit('\nERROR: Command not supported. (I realize this is not helpful but neither was your command! ;-) Process halting.\n')
             else :
                 sys.exit('\nERROR: Command not supported. Process halting.\n')
 
@@ -590,7 +585,7 @@ helpCommand = subparsers.add_parser('help', help='General system help')
 # Available choices
 # System
 syCommandTypes          = ['setup']
-syCommands              = ['name', 'uid', 'projects', 'cloud', 'folders']
+syCommands              = ['name', 'uid', 'projects', 'cloud']
 # Project
 prCommandTypes          = ['archive', 'backup', 'cloud', 'group', 'helper', 'project', 'template']
 prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
