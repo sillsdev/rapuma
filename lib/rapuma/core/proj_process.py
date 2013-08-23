@@ -28,22 +28,18 @@ from rapuma.project.proj_config     import Config
 
 class ProjProcess (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
 
         self.pid                    = pid
         self.tools                  = Tools()
-#        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
-#        self.userHome               = os.environ.get('RAPUMA_USER')
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.proj_config            = Config(self.pid)
         self.proj_config.getProjectConfig()
         self.projectConfig          = self.proj_config.projectConfig
-        self.local                  = ProjLocal(pid)
+        self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
-
-#        self.finishInit()
 
         # Log messages for this module
         self.errorCodes     = {
@@ -63,23 +59,6 @@ class ProjProcess (object) :
             '1265' : ['LOG', 'Component preprocessing script is already installed.'],
 
         }
-
-
-#    def finishInit (self, projHome = None) :
-#        '''Finishing collecting settings that would be needed for most
-#        functions in this module.'''
-
-#        # Look for an existing project home path
-#        if self.userConfig['Projects'].has_key(self.pid) :
-#            localProjHome           = self.userConfig['Projects'][self.pid]['projectPath']
-#        else :
-#            localProjHome           = ''
-
-#        # Testing: The local project home wins over a user provided one
-#        if localProjHome and not projHome :
-#            self.projHome           = localProjHome
-#        elif projHome :
-#            self.projHome           = projHome
 
 
 ###############################################################################

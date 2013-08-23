@@ -611,7 +611,7 @@ class ProjSetup (object) :
 
         # To prevent loading errors, bring these mods now
         paratext            = Paratext(self.pid, gid)
-        proj_process        = ProjProcess(self.pid)
+        proj_process        = ProjProcess(self.pid, gid)
 
         cType               = self.projectConfig['Groups'][gid]['cType']
         usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
