@@ -43,7 +43,7 @@ class ProjLocal (object) :
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma','resource')
+        self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
         self.projFolders        = []
         self.projHome           = None
         self.localDict          = None
@@ -124,13 +124,13 @@ class ProjLocal (object) :
                                     setattr(self, item['fileID'], os.path.join(valPath, valName))
                                     if debug :
                                         debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
-                                        debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
+                                        debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']) + '\n')
                             else :
                                 setattr(self, item['fileID'] + 'Name', valName)
                                 setattr(self, item['fileID'], os.path.join(valPath, valName))
                                 if debug :
-                                    debugObj.write(item['fileID'] + 'Name = ' + valName)
-                                    debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']))
+                                    debugObj.write(item['fileID'] + 'Name = ' + valName + '\n')
+                                    debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']) + '\n')
 
         # Add configuation file names
         configFiles = ['project', 'adjustment', 'layout', 'hyphenation', 'illustration']

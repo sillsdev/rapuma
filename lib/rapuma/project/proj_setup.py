@@ -24,7 +24,7 @@ import palaso.sfm as sfm
 from palaso.sfm                             import usfm, style, element, text
 
 # Load the local classes
-from rapuma.core.tools                      import Tools, ToolsPath
+from rapuma.core.tools                      import Tools
 from rapuma.core.user_config                import UserConfig
 from rapuma.core.proj_local                 import ProjLocal
 from rapuma.core.proj_process               import ProjProcess
@@ -120,7 +120,6 @@ class ProjSetup (object) :
             self.proj_config.getProjectConfig()
             self.projectConfig      = self.proj_config.projectConfig
             self.local              = ProjLocal(self.pid)
-            self.tools_path         = ToolsPath(self.pid)
             self.compare            = ProjCompare(self.pid)
             return True
         else :

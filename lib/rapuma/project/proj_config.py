@@ -20,7 +20,7 @@ import os, shutil, re
 from configobj                          import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools                  import Tools, ToolsPath
+from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog

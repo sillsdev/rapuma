@@ -22,7 +22,7 @@ from configobj                          import ConfigObj, Section
 from functools                          import partial
 
 # Load the local classes
-from rapuma.core.tools                  import Tools, ToolsPath
+from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
@@ -48,15 +48,14 @@ class ProjMaps (object) :
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
         self.mType                      = self.userConfig['Projects'][pid]['projectMediaIDCode']
         self.local                      = ProjLocal(pid)
-        self.projectConfig                 = Config(pid).projectConfig
+        self.projectConfig              = Config(pid).projectConfig
         self.log                        = ProjLog(pid)
-        self.tools_path                 = ToolsPath(pid)
         self.paratext                   = Paratext(pid)
         # File names
         self.illustrationConfFileName   = 'illustration.conf'
         self.gidTexFileName             = self.gid + '.tex'
         # Folder paths
-        self.projConfFolder          = self.local.projConfFolder
+        self.projConfFolder             = self.local.projConfFolder
         self.projComponentFolder        = self.local.projComponentFolder
         self.projIllustrationFolder     = self.local.projIllustrationFolder
         self.gidFolder                  = os.path.join(self.projComponentFolder, gid)

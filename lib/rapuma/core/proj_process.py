@@ -19,7 +19,7 @@ import codecs, os, shutil, subprocess
 from configobj                      import ConfigObj
 
 # Load the local classes
-from rapuma.core.tools              import Tools, ToolsPath
+from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -33,20 +33,17 @@ class ProjProcess (object) :
 
         self.pid                    = pid
         self.tools                  = Tools()
-
-
-        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
-        self.userHome               = os.environ.get('RAPUMA_USER')
-
-
+#        self.rapumaHome             = os.environ.get('RAPUMA_BASE')
+#        self.userHome               = os.environ.get('RAPUMA_USER')
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.proj_config            = Config(self.pid)
         self.proj_config.getProjectConfig()
         self.projectConfig          = self.proj_config.projectConfig
-        self.projHome               = None
-        self.local                  = None
-        self.finishInit()
+        self.local                  = ProjLocal(pid)
+        self.log                    = ProjLog(pid)
+
+#        self.finishInit()
 
         # Log messages for this module
         self.errorCodes     = {
@@ -68,27 +65,21 @@ class ProjProcess (object) :
         }
 
 
-    def finishInit (self, projHome = None) :
-        '''Finishing collecting settings that would be needed for most
-        functions in this module.'''
+#    def finishInit (self, projHome = None) :
+#        '''Finishing collecting settings that would be needed for most
+#        functions in this module.'''
 
-        # Look for an existing project home path
-        if self.userConfig['Projects'].has_key(self.pid) :
-            localProjHome           = self.userConfig['Projects'][self.pid]['projectPath']
-        else :
-            localProjHome           = ''
+#        # Look for an existing project home path
+#        if self.userConfig['Projects'].has_key(self.pid) :
+#            localProjHome           = self.userConfig['Projects'][self.pid]['projectPath']
+#        else :
+#            localProjHome           = ''
 
-        # Testing: The local project home wins over a user provided one
-        if localProjHome and not projHome :
-            self.projHome           = localProjHome
-        elif projHome :
-            self.projHome           = projHome
-        
-        # If a projHome was succefully found, we can go on and load the rest
-        if self.projHome : 
-            self.local              = ProjLocal(self.pid)
-            self.log                = ProjLog(self.pid)
-            self.tools_path         = ToolsPath(self.pid)
+#        # Testing: The local project home wins over a user provided one
+#        if localProjHome and not projHome :
+#            self.projHome           = localProjHome
+#        elif projHome :
+#            self.projHome           = projHome
 
 
 ###############################################################################
