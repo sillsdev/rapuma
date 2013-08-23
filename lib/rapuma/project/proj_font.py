@@ -42,12 +42,12 @@ class ProjFont (object) :
         self.tools                          = Tools()
         self.pt_tools                       = Paratext(pid, gid)
         self.user                           = UserConfig()
-        self.local                          = ProjLocal(pid)
         self.log                            = ProjLog(pid)
         self.userConfig                     = self.user.userConfig
         self.proj_config                    = Config(pid, gid)
         self.proj_config.getProjectConfig()
         self.projectConfig                  = self.proj_config.projectConfig
+        self.local                          = ProjLocal(pid, gid, self.projectConfig)
         self.cType                          = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                          = self.cType.capitalize()
         self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']

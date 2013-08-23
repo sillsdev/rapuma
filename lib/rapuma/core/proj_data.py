@@ -35,16 +35,10 @@ class ProjData (object) :
         self.pid            = pid
         self.tools          = Tools()
         self.local          = pid
-
-
-        self.rapumaHome     = os.environ.get('RAPUMA_BASE')
-        self.userHome       = os.environ.get('RAPUMA_USER')
-
-
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
-        self.projHome       = None
-        self.log            = None
+        self.local          = ProjLocal(pid)
+        self.log            = ProjLog(pid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -75,30 +69,6 @@ class ProjData (object) :
             '4270' : ['MSG', 'Restored the project [<<1>>] from the cloud copy. Local copy is owned by [<<2>>].'],
 
         }
-
-        # Finishing collecting settings that would be needed for most
-        # functions in this module.
-
-#        import pdb; pdb.set_trace()
-
-        # Look for an existing project home path
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-        if self.userConfig['Projects'].has_key(self.pid) :
-            localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
-        else :
-            localProjHome   = ''
-
-        # Testing: The local project home wins over a user provided one
-        if localProjHome :
-            self.projHome   = localProjHome
-        elif self.projHome :
-            self.projHome   = projHome
-
-        # If a projHome was succefully found, we can go on
-        if self.projHome : 
-            self.local      = ProjLocal(self.pid)
-            self.log        = ProjLog(self.pid)
 
 
 ###############################################################################
@@ -242,11 +212,11 @@ class ProjData (object) :
             excludeFiles = []
 
         # Do the zip magic here
-        root_len = len(self.projHome)
+        root_len = len(self.local.projHome)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
             sys.stdout.write('Backing up files')
             sys.stdout.flush()
-            for root, dirs, files in os.walk(self.projHome) :
+            for root, dirs, files in os.walk(self.local.projHome) :
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
                 for f in files :
@@ -643,15 +613,15 @@ class ProjData (object) :
             cr = 0
             sys.stdout.write('Pushing files to the cloud')
             sys.stdout.flush()
-            for folder, subs, files in os.walk(self.projHome):
+            for folder, subs, files in os.walk(self.local.projHome):
                 for fileName in files:
                     # Do not include any backup files we find
                     if fileName[-1] == '~' :
                         continue
                     if os.path.join(folder, fileName) not in excludeFiles :
-                        if not os.path.isdir(folder.replace(self.projHome, cloud)) :
-                            os.makedirs(folder.replace(self.projHome, cloud))
-                        cFile = os.path.join(folder, fileName).replace(self.projHome, cloud)
+                        if not os.path.isdir(folder.replace(self.local.projHome, cloud)) :
+                            os.makedirs(folder.replace(self.local.projHome, cloud))
+                        cFile = os.path.join(folder, fileName).replace(self.local.projHome, cloud)
                         pFile = os.path.join(folder, fileName)
                         if not os.path.isfile(cFile) :
                             sys.stdout.write('.')
@@ -725,10 +695,10 @@ class ProjData (object) :
             sys.stdout.flush()
             for folder, subs, files in os.walk(cloud):
                 for fileName in files:
-                    if not os.path.isdir(folder.replace(cloud, self.projHome)) :
-                        os.makedirs(folder.replace(cloud, self.projHome))
+                    if not os.path.isdir(folder.replace(cloud, self.local.projHome)) :
+                        os.makedirs(folder.replace(cloud, self.local.projHome))
                     cFile = os.path.join(folder, fileName)
-                    pFile = os.path.join(folder, fileName).replace(cloud, self.projHome)
+                    pFile = os.path.join(folder, fileName).replace(cloud, self.local.projHome)
                     if not os.path.isfile(pFile) :
                         shutil.copy(cFile, pFile)
                         cn +=1
@@ -753,8 +723,8 @@ class ProjData (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         # Get the project home reference and reset the log
-        self.projHome = self.getProjHome(tPath)
-        if self.projHome :
+        self.local.projHome = self.getProjHome(tPath)
+        if self.local.projHome :
             self.local      = ProjLocal(self.pid)
             self.log        = ProjLog(self.pid)
 
@@ -764,40 +734,40 @@ class ProjData (object) :
             if not self.sameOwner(cloud) and not force :
                 self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
             # It (the cloud) needs to be newer
-            if self.isNewerThanLocal(cloud, self.getConfig(self.projHome)) and not force :
+            if self.isNewerThanLocal(cloud, self.getConfig(self.local.projHome)) and not force :
                 self.log.writeToLog(self.errorCodes['4260'], [self.pid])
             # Is the project physically present? To be safe, backup the old one
-            self.tools.makeFolderBackup(self.projHome)
+            self.tools.makeFolderBackup(self.local.projHome)
             # Now remove the orginal
-            if os.path.exists(self.projHome) :
-                shutil.rmtree(self.projHome)
+            if os.path.exists(self.local.projHome) :
+                shutil.rmtree(self.local.projHome)
             # If force is used then owner and age makes no difference
             doPull()
-            self.buyLocal(self.getConfig(self.projHome))
+            self.buyLocal(self.getConfig(self.local.projHome))
             # If a tPath was given register the project
             if tPath :
-                self.registerProject(self.projHome)
+                self.registerProject(self.local.projHome)
             # Report
             self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
 
         # This project is new to the system (registry)
         else :
             # Is the project physically present? Backup the old one if so
-            self.tools.makeFolderBackup(self.projHome)
+            self.tools.makeFolderBackup(self.local.projHome)
             # Now remove the orginal
-            if os.path.exists(self.projHome) :
-                shutil.rmtree(self.projHome)
+            if os.path.exists(self.local.projHome) :
+                shutil.rmtree(self.local.projHome)
             # Check owner
             if self.sameOwner(cloud) :
-                shutil.copytree(cloud, self.projHome)
-                self.registerProject(self.projHome)
-                self.buyLocal(self.getConfig(self.projHome))
+                shutil.copytree(cloud, self.local.projHome)
+                self.registerProject(self.local.projHome)
+                self.buyLocal(self.getConfig(self.local.projHome))
                 self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
             else :
                 if force :
-                    shutil.copytree(cloud, self.projHome)
-                    self.registerProject(self.projHome)
-                    self.buyLocal(self.getConfig(self.projHome))
+                    shutil.copytree(cloud, self.local.projHome)
+                    self.registerProject(self.local.projHome)
+                    self.buyLocal(self.getConfig(self.local.projHome))
                     self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
                 else :
                     self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
@@ -813,7 +783,7 @@ class ProjData (object) :
 
         if tPath :
             if os.path.isfile(tPath) :
-                return self.projHome
+                return self.local.projHome
             elif self.tools.resolvePath(tPath) :
                 tPath = self.tools.resolvePath(tPath)
                 lastFolder = os.path.basename(tPath)
@@ -823,8 +793,8 @@ class ProjData (object) :
                     return os.path.join(tPath, self.pid)
             else :
                 self.log.writeToLog(self.errorCodes['4220'], [tPath])
-        elif self.projHome :
-            return self.projHome
+        elif self.local.projHome :
+            return self.local.projHome
         else :
             return self.tools.resolvePath(os.path.join(self.userConfig['Resources']['projects'], self.pid))
 
@@ -842,8 +812,6 @@ class Template (object) :
 
         self.pid            = pid
         self.tools          = Tools()
-        self.rapumaHome     = os.environ.get('RAPUMA_BASE')
-        self.userHome       = os.environ.get('RAPUMA_USER')
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
         self.projHome       = None

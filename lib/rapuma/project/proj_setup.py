@@ -179,10 +179,7 @@ class ProjSetup (object) :
                 shutil.copy(target, targetBackup.name)
 
             # The use of force is for if the group is locked or source is
-            # matching but you want to rerun a preprocess on the text to update it.
-            # In the past the component was pretty much removed with the function
-            # uninstallGroupComponent() that practice has been discontinued as it
-            # doesn't seem to make sense anymore
+            # matching and you want to rerun a preprocess on the text to update it.
             if force or self.compare.isDifferent(source, targetSource) :
                 self.installUsfmWorkingText(gid, cid, force)
                 # Update our compare for next time
@@ -192,7 +189,8 @@ class ProjSetup (object) :
                 self.tools.makeReadOnly(workingComp)
                 if force :
                     self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
-                self.compare.compare(source, target)
+                # Compare the new working file with the previous
+                self.compare.compare(target, workingComp)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 

@@ -21,9 +21,7 @@ from configobj import ConfigObj
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.project.proj_config     import Config
 
 
 class ProjCompare (object) :
@@ -31,52 +29,33 @@ class ProjCompare (object) :
     def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
 
-        self.pid                = pid
-        self.tools              = Tools()
-        self.user               = UserConfig()
-        self.userConfig         = self.user.userConfig
-# FIXME
-        self.projectConfig      = Config(pid).projectConfig
+        self.pid                            = pid
+        self.log                            = ProjLog(self.pid)
+        self.tools                          = Tools()
+        self.user                           = UserConfig()
+        self.userConfig                     = self.user.userConfig
+        self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.diffViewCmd                    = self.userConfig['System']['textDifferentialViewerCommand']
 
-        self.projHome           = None
-        self.projectMediaIDCode = None
-        self.local              = None
-        self.diffViewCmd        = self.userConfig['System']['textDifferentialViewerCommand']
         # Make sure the diff view command is a list
         if type(self.diffViewCmd) != list :
             self.diffViewCmd = [self.userConfig['System']['textDifferentialViewerCommand']]
-        # In case there is not enough information for every function we will
-        # finish with this and quit safely if necessary
-        self.finishInit()
 
         # Log messages for this module
         self.errorCodes     = {
-            '210' : ['WRN', 'File does not exist: [<<1>>] compare cannot be done.'],
-            '280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
-            '285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
-            '290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
-            '295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
-            '220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
+            '0210' : ['WRN', 'File does not exist: [<<1>>] compare cannot be done.'],
+            '0280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
+            '0285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
+            '0290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
+            '0295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
+            '0220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
         }
-
-    def finishInit (self, projHome = None) :
-        '''Finishing collecting settings that would be needed for most
-        functions in this module.'''
-
-        try :
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            self.local              = ProjLocal(self.pid)
-            self.log                = ProjLog(self.pid)
-            self.tools_path         = ToolsPath(self.pid)
-        except :
-            pass
 
 
 ###############################################################################
 ############################## Compare Functions ##############################
 ###############################################################################
-######################## Error Code Block Series = 200 ########################
+######################## Error Code Block Series = 0200 ########################
 ###############################################################################
 
     def compareComponent (self, gid, cid, test) :
@@ -117,13 +96,13 @@ class ProjCompare (object) :
             cmd.extend(self.diffViewCmd)
             cmd.extend([new, old])
             try :
-                self.log.writeToLog(self.errorCodes['295'], [self.tools.fName(new),self.tools.fName(old)])
+                self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(new),self.tools.fName(old)])
                 subprocess.call(cmd)
             except Exception as e :
                 # If we don't succeed, we should probably quite here
-                self.log.writeToLog(self.errorCodes['280'], [str(e)])
+                self.log.writeToLog(self.errorCodes['0280'], [str(e)])
         else :
-            self.log.writeToLog(self.errorCodes['220'])
+            self.log.writeToLog(self.errorCodes['0220'])
 
 
 
