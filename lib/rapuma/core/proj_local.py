@@ -38,9 +38,9 @@ class ProjLocal (object) :
         self.tools              = Tools()
         self.pid                = pid
         self.gid                = gid
-        self.projectConf        = projectConf
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
+        self.projectConf        = projectConf
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
@@ -245,6 +245,8 @@ class ProjLocal (object) :
             result = os.sep
         elif holderType == 'self' :
             result = getattr(self, holderKey)
+        elif holderType == 'config' :
+            result = self.getConfigValue(holderKey)
 
         return result
 
@@ -255,6 +257,20 @@ class ProjLocal (object) :
         # If things get more complicated we may need to beef this up a bit
         if line.find('[') > -1 and line.find(']') > -1 :
             return True
+
+
+    def getConfigValue (self, val) :
+        '''Return the value from a config function or just pass the
+        value through, unchanged.'''
+
+        val = val.split('|')
+        dct = ['self.' + val[0]]
+        val.remove(val[0])
+        for i in val :
+            dct.append('["' + i + '"]')
+
+        return eval(''.join(dct))
+
 
 
     def getPlaceHolder (self, line) :

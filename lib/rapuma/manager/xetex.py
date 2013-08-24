@@ -108,7 +108,7 @@ class Xetex (Manager) :
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :
-            os.mkdir(self.local.projGidFolder)
+            os.makedirs(self.local.projGidFolder)
 
         # Check to see if the PDF support is ready to go
         if not self.pdfViewer :

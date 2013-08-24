@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, zipfile, shutil, re, sys
+import codecs, os, zipfile, shutil, re, sys, tempfile
 from configobj import ConfigObj
 
 # Load the local classes
@@ -814,51 +814,63 @@ class Template (object) :
         self.tools          = Tools()
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
-        self.projHome       = None
-        self.local          = None
-        self.log            = None
+        self.local          = ProjLocal(pid)
+        self.log            = ProjLog(pid)
+        self.projData       = ProjData(pid)
 
 
-
-    def projectToTemplate (self, pid, tid) :
+    def projectToTemplate (self, tid = None) :
         '''Preserve critical project information in a template. The pid is the project
-        that the template will be bassed from. The tid will be provided by the user for
-        this operation and used to create new projects.'''
+        that the template will be bassed from. The template will go in the template lib.'''
 
-        # Set source and target
-        projHome            = uc.userConfig['Projects'][pid]['projectPath']
-        templateDir         = uc.userConfig['Resources']['template']
-        targetDir           = os.path.join(templateDir, tid)
-        target              = os.path.join(templateDir, tid + '.zip')
-        source              = projHome
+        # Set needed vals
+        if not tid :
+            tid             = self.pid
+        tempDir             = os.path.join(tempfile.mkdtemp(), tid)
+        target              = os.path.join(self.local.userLibTemplate, tid + '.zip')
 
         # Make a temp copy of the project that we can manipulate
-        shutil.copytree(source, targetDir)
+        shutil.copytree(self.local.projHome, tempDir)
 
         # Now make the config files generic for use with any project
-        pc = ConfigObj(os.path.join(targetDir, 'Config', 'project.conf'), encoding='utf-8')
-        aProject = initProject(pc['ProjectInfo']['projectIDCode'])
-        pc['ProjectInfo']['projectName']                = ''
-        pc['ProjectInfo']['projectIDCode']              = ''
-        pc['ProjectInfo']['projectCreateDate']          = ''
-        pc['ProjectInfo']['projectCreateDate']          = ''
-        for c in pc['Components'].keys() :
-            compDir = os.path.join(targetDir, 'Components', c)
-            if os.path.isdir(compDir) :
-                shutil.rmtree(compDir)
-            del pc['Components'][c]
-        pc.filename                                     = os.path.join(targetDir, 'Config', 'project.conf')
-        pc.write()
+        tc = ConfigObj(os.path.join(tempDir, 'Config', 'project.conf'), encoding='utf-8')
+        tc['ProjectInfo']['projectName']                = ''
+        tc['ProjectInfo']['projectIDCode']              = ''
+        tc['ProjectInfo']['projectCreateDate']          = ''
+        tc['ProjectInfo']['projectCreateDate']          = ''
+        # Remove unnecessary folders
+        needNot = ['Component', 'Deliverable', 'Draft', 'Proof', 'Final', 'Illustration', 'Hyphenation']
+        for f in needNot :
+            fld = os.path.join(tempDir, f)
+            if os.path.exists(fld) :
+                shutil.rmtree(fld)
+        # Remove unnecessary config files
+        needNot = ['adjustment', 'hyphenation', 'illustration']
+        for f in needNot :
+            fl = os.path.join(tempDir, 'Config', f + '.conf')
+            if os.path.exists(fl) :
+                os.remove(fl)
+        # Remove unnecessary project config stuff
+        needNot = ['Groups', 'Backup']
+        for s in needNot :
+            if tc.has_key(s) :
+                del tc[s]
+        # Write out the new template project config file
+        tc.filename = os.path.join(tempDir, 'Config', 'project.conf')
+        tc.write()
+
         # Kill the log file
-        os.remove(os.path.join(targetDir, 'rapuma.log'))
+        os.remove(os.path.join(tempDir, 'rapuma.log'))
 
         # Exclude files
-        excludeFiles = makeExcludeFileList()
+        excludeFiles = self.projData.makeExcludeFileList()
 
         # Zip it up using the above params
-        root_len = len(targetDir)
+        root_len = len(tempDir)
         with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
-            for root, dirs, files in os.walk(targetDir):
+            sys.stdout.write('Creating template')
+            sys.stdout.flush()
+            for root, dirs, files in os.walk(tempDir):
                 # Chop off the part of the path we do not need to store
                 zip_root = os.path.abspath(root)[root_len:]
                 for f in files:
@@ -869,41 +881,57 @@ class Template (object) :
                     elif f.rfind('.') != -1 :
                         fullpath = os.path.join(root, f)
                         zip_name = os.path.join(zip_root, f)
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
                         myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
 
+            # Add space for next message
+            sys.stdout.write('\n')
+
         # Remove the temp project dir we made
-        shutil.rmtree(targetDir)
-        self.tools.terminal('\nCompleted creating template: ' + self.tools.fName(target) + '\n')
+        self.tools.terminal('\nCompleted creating template: ' + target + '\n')
 
 
-    def templateToProject (self, uc, projHome, pid, tid, pname, source = None) :
-        '''Create a new project based on the provided template ID. This
-        function is called from newProject() so all preliminary checks
-        have been done. It should be good to go.'''
+    def templateToProject (self, targetDir = None, source = None) :
+        '''Create a new project based on the provided template ID. If a path to
+        the template is not provided it will look in the users template lib. A PID
+        must be provided. That is checked with the system. If the same PID is
+        found in the system, it must be removed before reruning this function. If
+        a non-default location is needed, a target path must be provided.'''
 
-        # Test to see if the project is already there
-        if os.path.isdir(projHome) :
-            self.tools.terminal('\nError: Project [' + pid + '] already exsits.')
+#        import pdb; pdb.set_trace()
+
+        # Set a default target path
+        projHome = os.path.join(self.local.projParentDefaultFolder, self.pid)
+        # See if we can build a better target path
+        if targetDir != '' :
+            projHome = os.path.join(targetDir, self.pid)
+        elif self.local.projHome :
+            projHome = os.path.join(self.local.projHome, self.pid)
+
+#        self.tools.dieNow()
+
+        # Test to see if the project already exists
+        if self.userConfig['Projects'].has_key(self.pid) or os.path.exists(projHome) :
+            self.tools.terminal('\nError: Project ID [' + self.pid + '] is already exists on this system. Use the remove command to remove it.')
             self.tools.dieNow()
-
+        # Test for source template file
         if not source :
-            source = os.path.join(uc.userConfig['Resources']['templates'], tid + '.zip')
-
-        # Validate template
-        if not os.path.isfile(source) :
-            self.tools.terminal('\nError: Template not found: ' + source)
-            self.tools.dieNow()
+            source = os.path.join(self.local.userLibTemplate, self.pid + '.zip')
+            if not os.path.exists(source) :
+                self.tools.terminal('\nError: No template can be found for [' + self.pid + ']\n')
+                self.tools.dieNow()
 
         # Unzip the template in place to start the new project
         with zipfile.ZipFile(source, 'r') as myzip :
             myzip.extractall(projHome)
 
         # Peek into the project
+        pname = 'The ' + self.pid + ' publishing project'
         pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
-
         pc['ProjectInfo']['projectName']               = pname
         pc['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
-        pc['ProjectInfo']['projectIDCode']             = pid
+        pc['ProjectInfo']['projectIDCode']             = self.pid
         pc.filename                                    = os.path.join(projHome, 'Config', 'project.conf')
         pc.write()
 
@@ -911,10 +939,10 @@ class Template (object) :
         projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
 
         # Register the new project
-        uc.registerProject(pid, pname, projectMediaIDCode, projHome)
+        self.user.registerProject(self.pid, pname, projectMediaIDCode, projHome)
         
         # Report what happened
-        self.tools.terminal('A new project [' + pid + '] has been created based on the [' + tid + '] template.')
+        self.tools.terminal('A new project [' + self.pid + '] has been created based on the [' + self.tools.fName(source) + '] template.')
 
 
 
