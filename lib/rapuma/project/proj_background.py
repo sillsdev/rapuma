@@ -44,7 +44,7 @@ class ProjBackground (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
-        self.local                      = ProjLocal(pid)
+        self.local                      = ProjLocal(pid, gid)
         self.proj_config                = Config(pid, gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()

@@ -800,7 +800,6 @@ class ProjData (object) :
 
 
 
-
 ###############################################################################
 ############################### Template Class ################################
 ###############################################################################
@@ -940,7 +939,16 @@ class Template (object) :
 
         # Register the new project
         self.user.registerProject(self.pid, pname, projectMediaIDCode, projHome)
-        
+
+        # Reset the local settings
+        self.local = ProjLocal(self.pid)
+
+        # Create any folders that might be needed
+        for fld in self.local.projFolders :
+            folder = os.path.join(self.local.projHome, fld)
+            if not os.path.exists(folder) :
+                os.makedirs(folder)
+
         # Report what happened
         self.tools.terminal('A new project [' + self.pid + '] has been created based on the [' + self.tools.fName(source) + '] template.')
 
