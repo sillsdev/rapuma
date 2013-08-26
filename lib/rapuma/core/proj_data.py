@@ -46,6 +46,7 @@ class ProjData (object) :
             '1220' : ['LOG', 'Project [<<1>>] already registered in the system.'],
             '1240' : ['ERR', 'Could not find/open the Project configuration file for [<<1>>]. Project could not be registered!'],
 
+            '3410' : ['LOG', 'Backup file cull skipping: [<<1>>] Not a recognized Rapuma backup file name format.'],
             '3510' : ['ERR', 'The path (or name) given is not valid: [<<1>>].'],
             '3530' : ['MSG', 'Project backup: [<<1>>] has been restored to: [<<2>>]. A backup of the orginal project remains and must be manually removed.'],
             '3550' : ['ERR', 'Project backup version request: [<<1>>] exceeds the maxium number which could be in storage which is: [<<2>>]. Request an earlier (lesser) version.'],
@@ -312,7 +313,10 @@ class ProjData (object) :
         cullList = []
         files = os.listdir(bakDir)
         for f in files :
-            cullList.append(int(f.split('.')[0]))
+            try :
+                cullList.append(int(f.split('.')[0]))
+            except :
+                self.log.writeToLog(self.errorCodes['3410'], [f])
         # Remove oldest file(s)
         while len(cullList) > maxStoreBackups :
             fn = min(cullList)
