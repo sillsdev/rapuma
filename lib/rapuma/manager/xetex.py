@@ -194,6 +194,46 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['1005'], [str(e)])
 
 
+    def makeCmpExtStyFileOn (self, fileName) :
+        '''Create a component style extentions "on" file for a specified component. A matching "off"
+        file will be created as well.'''
+
+        description = 'This is a component (on) style extension file which overrides any settings \
+        which were loaded for this rendering process. This file is read just before the component \
+        working file. After the component is rendered, the accompanying off style file will be \
+        loaded which will turn off any modified style commands that this style file has set. The \
+        user must edit this file in order for it to work right.'
+
+        # Create a blank file (only if there is none)
+        if not os.path.exists(fileName) :
+            with codecs.open(fileName, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(fileName, description, False))
+            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(fileName)])
+
+        # Need to return true here even if nothing was done
+        return True
+
+
+    def makeCmpExtStyFileOff (self, fileName) :
+        '''Create a component style extentions "off" file for a specified component. This is to
+        match the "on" file that was created.'''
+
+        description = 'This is a component (off) style extension file which overrides the settings \
+        that were loaded for this rendering process just prior to loading the component working \
+        file. The commands in this style file will off-set the "on" settings causing the macro to \
+        render as it did before the "on" styles were loaded. The user must edit this file for it \
+        to work properly.'
+
+        # Create a blank file (only if there is none)
+        if not os.path.exists(fileName) :
+            with codecs.open(fileName, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(fileName, description, False))
+            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(fileName)])
+
+        # Need to return true here even if nothing was done
+        return True
+
+
     def makeGrpExtStyFile (self) :
         '''Create a group Style extentions file to a specified group.'''
 
@@ -459,16 +499,33 @@ class Xetex (Manager) :
                     gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
             # Now add in each of the components
             for cid in cidList :
+                # Output files and commands for usfm cType
                 if self.cType == 'usfm' :
-                    cidSource = os.path.join(self.local.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
+                    cidSource       = os.path.join(self.local.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
+                    cidStyFileOn    = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-On-ext.sty')
+                    cidStyFileOff   = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-Off-ext.sty')
+                    # Check to see if a style override is needed
+                    if cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
+                        if not os.path.exists(cidStyFileOn) :
+                            self.makeCmpExtStyFileOn(cidStyFileOn)
+                        gidTexObject.write('\\stylesheet{' + cidStyFileOn + '}\n')
+                    # Check for short books add omit statement
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
-                        gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    # Add the working file here
+                    gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    # Check again for short books turn off omit statement
+                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumberfalse\n') 
-                    else :
-                        gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
+                    # Check for for style override and add the "Off" style file here
+                    if cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
+                        if not os.path.exists(cidStyFileOff) :
+                            self.makeCmpExtStyFileOn(cidStyFileOff)
+                        gidTexObject.write('\\stylesheet{' + cidStyFileOff + '}\n')
+                # Output files and commands for map cType
                 elif self.cType == 'map' :
                     gidTexObject.write('\\ptxfile{' + ProjMaps(self.pid, self.gid).getGidContainerFile() + '}\n')
+                # Output files and commands for toc cType
                 elif self.cType == 'toc' :
                     gidTexObject.write('\\ptxfile{' + ProjToc(self.pid, self.gid).getGidContainerFile() + '}\n')
                 else :

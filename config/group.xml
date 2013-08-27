@@ -118,5 +118,12 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
+    <setting>
+        <name>Component Style Override List</name>
+        <key>compStyOverrideList</key>
+        <description>A list of components that will have style override files created for them. A corresponding reset file will be made as well. The user must edit both files correctly for this to work properly.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
 </root>
 
