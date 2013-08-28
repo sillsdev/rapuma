@@ -505,7 +505,7 @@ class Xetex (Manager) :
                     cidStyFileOn    = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-On-ext.sty')
                     cidStyFileOff   = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-Off-ext.sty')
                     # Check to see if a style override is needed
-                    if cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
+                    if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
                         if not os.path.exists(cidStyFileOn) :
                             self.makeCmpExtStyFileOn(cidStyFileOn)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOn + '}\n')
@@ -518,7 +518,7 @@ class Xetex (Manager) :
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
                         gidTexObject.write('\\OmitChapterNumberfalse\n') 
                     # Check for for style override and add the "Off" style file here
-                    if cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
+                    if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
                         if not os.path.exists(cidStyFileOff) :
                             self.makeCmpExtStyFileOn(cidStyFileOff)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOff + '}\n')
