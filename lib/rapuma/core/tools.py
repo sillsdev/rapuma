@@ -408,6 +408,10 @@ class Tools (object) :
             configObj           = ConfigObj(encoding='utf-8')
             orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
             orgFileName         = orgConfigObj.filename
+            # FIXME: There is a deficiency here in that confs like project
+            # are compond objects. This will not deal with any of the conf's
+            # child object so additionl fields in the child sections are not
+            # dealt with, example would be Groups in project.conf
             defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
             defaultObj.merge(orgConfigObj)
             # A key comparison should be enough to tell if it is the same or not

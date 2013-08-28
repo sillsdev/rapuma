@@ -726,11 +726,11 @@ class ProjData (object) :
                 if cr > 0 :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # Get the project home reference and reset the log
-        self.local.projHome = self.getProjHome(tPath)
-        if self.local.projHome :
-            self.local      = ProjLocal(self.pid)
-            self.log        = ProjLog(self.pid)
+#        import pdb; pdb.set_trace()
+
+        # Set the project home reference
+        if tPath :
+            self.local.projHome = self.getProjHome(tPath)
 
         # First branch, does this project exist in the registry
         if self.userConfig['Projects'].has_key(self.pid) :
@@ -765,12 +765,20 @@ class ProjData (object) :
             if self.sameOwner(cloud) :
                 shutil.copytree(cloud, self.local.projHome)
                 self.registerProject(self.local.projHome)
+                # Reset the local and log now
+                self.local      = ProjLocal(self.pid)
+                self.log        = ProjLog(self.pid)
+                # Claim the local copy of the project
                 self.buyLocal(self.getConfig(self.local.projHome))
                 self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
             else :
                 if force :
                     shutil.copytree(cloud, self.local.projHome)
                     self.registerProject(self.local.projHome)
+                    # Reset the local and log now
+                    self.local      = ProjLocal(self.pid)
+                    self.log        = ProjLog(self.pid)
+                    # Claim the local copy of the project
                     self.buyLocal(self.getConfig(self.local.projHome))
                     self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
                 else :

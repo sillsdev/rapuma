@@ -12,7 +12,7 @@ for subdir in ('doc', 'resource', 'config') :
         datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
 
 setup(name = 'rapuma',
-        version = '0.6.r780',
+        version = '0.6.r790',
         description = "Rapid Publication Manager",
         long_description = "Rapuma is a publication management application.",
         maintainer = "Dennis Drescher",

@@ -26,12 +26,12 @@ echo rapuma project ENG-LATN-JAS project remove
 rapuma project ENG-LATN-JAS project remove
 
 # Create a new project based on the selected template
-echo rpm project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
-rpm project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS/eng-latn-tmpl.zip --target_path ~/Publishing/testArea
+echo rapuma project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS --target_path ~/Publishing/testArea
+rapuma project ENG-LATN-JAS template restore --source_path ~/Publishing/testArea/MBJAS/eng-latn-tmpl.zip --target_path ~/Publishing/testArea
 
 # Add a group with a component to the project.
-echo rpm group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
-rpm group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
+echo rapuma group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
+rapuma group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
 
 # With the new project created, you can now run the "proof" command and render the group.
 echo rapuma group ENG-LATN-JAS james group proof

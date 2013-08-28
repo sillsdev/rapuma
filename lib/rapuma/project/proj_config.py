@@ -379,6 +379,9 @@ class Config (object) :
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)
+                # Look for default and set to read-only
+                if target == self.local.defaultStyFile :
+                    self.tools.makeReadOnly(self.local.defaultStyFile)
             # Remove the source to avoid confusion
             if os.path.exists(target) :
                 os.remove(source)

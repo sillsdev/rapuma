@@ -118,6 +118,7 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
+
     <setting>
         <name>Component Style Override List</name>
         <key>compStyOverrideList</key>
@@ -125,5 +126,32 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
+
+    <setting>
+        <name>Component TeX Macro Override List</name>
+        <key>compTexOverrideList</key>
+        <description>A list of components that will have TeX override macro files created for them. A corresponding reset file will be made as well. The user must edit both files correctly for this to work properly.</description>
+        <type>list</type>
+        <value></value>
+    </setting>
+
+    <setting>
+        <name>Use Group Style Override</name>
+        <key>useGrpStyOverride</key>
+        <description>Set to true if a group style override file will be needed/used for rendering components in this group.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+
+    <setting>
+        <name>Use Group TeX Override</name>
+        <key>useGrpTexOverride</key>
+        <description>Set to true if a group TeX override macro file will be needed/used for rendering components in this group.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+
+
+
 </root>
 

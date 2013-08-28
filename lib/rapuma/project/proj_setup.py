@@ -746,11 +746,10 @@ class ProjSetup (object) :
         cType           = self.projectConfig['Groups'][gid]['cType']
         Ctype           = cType.capitalize()
         macPack         = self.projectConfig['CompTypes'][Ctype]['macroPackage']
-        defaultStyFile  = os.path.join(self.local.projStyleFolder, macPack + '.sty')
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()
-            stylesheet_extra = style.parse(open(os.path.expanduser(defaultStyFile),'r'))
+            stylesheet_extra = style.parse(open(os.path.expanduser(self.local.defaultStyFile),'r'))
             stylesheet.update(stylesheet_extra)
             # FIXME: Keep an eye on this: error_level=sfm.level.Structure
             # gave less than helpful feedback when a mal-formed verse was

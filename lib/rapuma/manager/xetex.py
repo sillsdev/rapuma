@@ -194,6 +194,42 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['1005'], [str(e)])
 
 
+    def makeExtFile (self, fileName, description) :
+        '''Generic function to create an extension file if one does not already exist.'''
+
+        if not os.path.exists(fileName) :
+            with codecs.open(fileName, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(fileName, description, False))
+            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(fileName)])
+            return True
+
+
+    def makeCmpExtTexFileOn (self, fileName) :
+        '''Create a component TeX extention macro "on" file for a specified component. A matching "off"
+        file will be created as well.'''
+
+        description = 'This is a component (on) TeX macro extension file which may override any macros \
+        which were loaded for this rendering process. This file is read just before the component \
+        working file. After the component is rendered, the accompanying off TeX file will be \
+        loaded which will turn off any modified macro commands that this TeX file has set. The \
+        user must edit this file in order for it to work right.'
+
+        return self.makeExtFile(fileName, description)
+
+
+    def makeCmpExtTexFileOff (self, fileName) :
+        '''Create a component TeX extention macro "off" file for a specified component. This is to
+        match the "on" file that was created.'''
+
+        description = 'This is a component (off) style extension file which overrides the settings \
+        that were loaded for this rendering process just prior to loading the component working \
+        file. The commands in this style file will off-set the "on" settings causing the macro to \
+        render as it did before the "on" styles were loaded. The user must edit this file for it \
+        to work properly.'
+
+        return self.makeExtFile(fileName, description)
+
+
     def makeCmpExtStyFileOn (self, fileName) :
         '''Create a component style extentions "on" file for a specified component. A matching "off"
         file will be created as well.'''
@@ -204,14 +240,7 @@ class Xetex (Manager) :
         loaded which will turn off any modified style commands that this style file has set. The \
         user must edit this file in order for it to work right.'
 
-        # Create a blank file (only if there is none)
-        if not os.path.exists(fileName) :
-            with codecs.open(fileName, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(fileName, description, False))
-            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(fileName)])
-
-        # Need to return true here even if nothing was done
-        return True
+        return self.makeExtFile(fileName, description)
 
 
     def makeCmpExtStyFileOff (self, fileName) :
@@ -224,14 +253,16 @@ class Xetex (Manager) :
         render as it did before the "on" styles were loaded. The user must edit this file for it \
         to work properly.'
 
-        # Create a blank file (only if there is none)
-        if not os.path.exists(fileName) :
-            with codecs.open(fileName, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(fileName, description, False))
-            self.log.writeToLog(self.errorCodes['1040'], [self.tools.fName(fileName)])
+        return self.makeExtFile(fileName, description)
 
-        # Need to return true here even if nothing was done
-        return True
+
+    def makeGrpExtTexFile (self) :
+        '''Create a group TeX extentions file for a specified group.'''
+
+        description = 'This is the group TeX extention macro file which overrides settings in \
+        the global TeX extension macro file.'
+
+        return self.makeExtFile(self.local.grpExtTexFile, description)
 
 
     def makeGrpExtStyFile (self) :
@@ -240,14 +271,7 @@ class Xetex (Manager) :
         description = 'This is the group style extention file which overrides settings in \
         the main default component extentions settings style file.'
 
-        # Create a blank file (only if there is none)
-        if not os.path.exists(self.local.grpExtStyFile) :
-            with codecs.open(self.local.grpExtStyFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(self.local.grpExtStyFileName, description, False))
-            self.log.writeToLog(self.errorCodes['1040'], [self.local.grpExtStyFileName])
-
-        # Need to return true here even if nothing was done
-        return True
+        return self.makeExtFile(self.local.grpExtStyFile, description)
 
 
     def makeGrpHyphExcTexFile (self) :
@@ -424,20 +448,20 @@ class Xetex (Manager) :
             return eval(''.join(dct))
 
 
-    def makeGrpExtTexFile (self) :
-        '''Create/copy a group TeX extentions file to the project for specified group.'''
+#    def makeGrpExtTexFile (self) :
+#        '''Create/copy a group TeX extentions file to the project for specified group.'''
 
-        description = 'This is the group extention file which overrides settings in \
-        the main TeX settings files and the component TeX settings.'
+#        description = 'This is the group extention file which overrides settings in \
+#        the main TeX settings files and the component TeX settings.'
 
-        # First look for a user file, if not, then make a blank one
-        if not os.path.isfile(self.local.grpExtTexFile) :
-            with codecs.open(self.local.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-                writeObject.write(self.tools.makeFileHeader(self.local.grpExtTexFileName, description, False))
-            self.log.writeToLog(self.errorCodes['0440'], [self.local.grpExtTexFile])
+#        # First look for a user file, if not, then make a blank one
+#        if not os.path.isfile(self.local.grpExtTexFile) :
+#            with codecs.open(self.local.grpExtTexFile, "w", encoding='utf_8') as writeObject :
+#                writeObject.write(self.tools.makeFileHeader(self.local.grpExtTexFileName, description, False))
+#            self.log.writeToLog(self.errorCodes['0440'], [self.local.grpExtTexFile])
 
-            # Need to return true here even if nothing was done
-            return True
+#            # Need to return true here even if nothing was done
+#            return True
 
 
     def makeGidTexFile (self, cidList) :
@@ -456,10 +480,8 @@ class Xetex (Manager) :
         if os.path.exists(self.local.gidTexFile) :
             os.remove(self.local.gidTexFile)
 
-        # Create (if needed) dependent files
+        # Create the main TeX settings file (made on every run)
         self.makeSettingsTexFile()
-        self.makeGrpExtTexFile()
-        self.makeGrpExtStyFile()
 
         # Start writing out the gid.tex file. Check/make dependencies as we go.
         # If we fail to make a dependency it will die and report during that process.
@@ -477,21 +499,22 @@ class Xetex (Manager) :
             gidTexObject.write('\\stylesheet{' + self.local.defaultStyFile + '}\n')
             # Load the global style extensions
             gidTexObject.write('\\stylesheet{' + self.local.glbExtStyFile + '}\n')
-            # Load the group style extensions
-            gidTexObject.write('\\stylesheet{' + self.local.grpExtStyFile + '}\n')
+            # Load the group style extensions (if needed)
+            if self.projectConfig['Groups'][self.gid].has_key('useGrpStyOverride') and self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useGrpStyOverride']) :
+                self.makeGrpExtStyFile(self.local.grpExtStyFile)
+                gidTexObject.write('\\stylesheet{' + self.local.grpExtStyFile + '}\n')
             # Load the settings (usfmTex: if marginalverses, load code in this)
             gidTexObject.write('\\input \"' + self.local.macSettingsFile + '\"\n')
-            # Load the settings extensions
+            # Load the TeX macro extensions for this macro package
             gidTexObject.write('\\input \"' + self.local.extTexFile + '\"\n')
-            # Load the group settings extensions
-            gidTexObject.write('\\input \"' + self.local.grpExtTexFile + '\"\n')
+            # Load the group TeX macro extensions (if needed)
+            if self.projectConfig['Groups'][self.gid].has_key('useGrpTexOverride') and self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useGrpTexOverride']) :
+                self.makeGrpExtTexFile(self.local.grpExtTexFile)
+                gidTexObject.write('\\input \"' + self.local.grpExtTexFile + '\"\n')
             # Load hyphenation data if needed
             if self.useHyphenation :
                 gidTexObject.write('\\input \"' + self.local.lccodeTexFile + '\"\n')
                 gidTexObject.write('\\input \"' + self.local.grpHyphExcTexFile + '\"\n')
-            ########
-            # FIXME: Previously style files were loaded here
-            ########
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projectConfig['Groups'][self.gid]['cidList'] :
                 startPageNumber = int(self.projectConfig['Groups'][self.gid]['startPageNumber'])
@@ -502,12 +525,17 @@ class Xetex (Manager) :
                 # Output files and commands for usfm cType
                 if self.cType == 'usfm' :
                     cidSource       = os.path.join(self.local.projComponentFolder, cid, self.project.groups[self.gid].makeFileNameWithExt(cid))
+                    cidTexFileOn    = os.path.join(self.local.projTexFolder, self.gid + '-' + cid + '-On-ext.tex')
+                    cidTexFileOff   = os.path.join(self.local.projTexFolder, self.gid + '-' + cid + '-Off-ext.tex')
                     cidStyFileOn    = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-On-ext.sty')
                     cidStyFileOff   = os.path.join(self.local.projStyleFolder, self.gid + '-' + cid + '-Off-ext.sty')
-                    # Check to see if a style override is needed
+                    # Check to see if a TeX macro override is needed
+                    if self.projectConfig['Groups'][self.gid].has_key('compTexOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compTexOverrideList'] :
+                        self.makeCmpExtTexFileOn(cidTexFileOn)
+                        gidTexObject.write('\\input \"' + cidTexFileOn + '\"\n')
+                    # Check to see if a style override is needed (if so create "on" file)
                     if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
-                        if not os.path.exists(cidStyFileOn) :
-                            self.makeCmpExtStyFileOn(cidStyFileOn)
+                        self.makeCmpExtStyFileOn(cidStyFileOn)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOn + '}\n')
                     # Check for short books add omit statement
                     if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
@@ -519,9 +547,12 @@ class Xetex (Manager) :
                         gidTexObject.write('\\OmitChapterNumberfalse\n') 
                     # Check for for style override and add the "Off" style file here
                     if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
-                        if not os.path.exists(cidStyFileOff) :
-                            self.makeCmpExtStyFileOn(cidStyFileOff)
+                        self.makeCmpExtStyFileOn(cidStyFileOff)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOff + '}\n')
+                    # Check for for TeX macro override and add the "Off" TeX file here
+                    if self.projectConfig['Groups'][self.gid].has_key('compTexOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compTexOverrideList'] :
+                        self.makeCmpExtTexFileOff(cidTexFileOff)
+                        gidTexObject.write('\\input \"' + cidTexFileOff + '\"\n')
                 # Output files and commands for map cType
                 elif self.cType == 'map' :
                     gidTexObject.write('\\ptxfile{' + ProjMaps(self.pid, self.gid).getGidContainerFile() + '}\n')
