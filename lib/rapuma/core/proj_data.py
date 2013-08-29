@@ -681,6 +681,8 @@ class ProjData (object) :
         '''Pull data from cloud storage and merge/replace local data.
         Do a full backup first before starting the actual pull operation.'''
 
+#        import pdb; pdb.set_trace()
+
         # Set the project home reference 
         if tPath :
             self.local.projHome = self.getProjHome(tPath)
@@ -698,6 +700,22 @@ class ProjData (object) :
         else :
             self.tools.terminal('Error: No path to the cloud has been configured.')
             self.tools.dieNow()
+
+        def emptyOutProject() :
+            # Empty out all the project contents except the HelperScript folder
+            # This is so we don't loose our place in the terminal.
+
+            for folder, subs, files in os.walk(self.local.projHome):
+                # Remove the rapuma log file (might need for this to be better)
+                if os.path.exists(os.path.join(self.local.projHome, 'rapuma.log')) :
+                    os.remove(os.path.join(self.local.projHome, 'rapuma.log'))
+                if folder == self.local.projHome :
+                    continue
+                elif os.path.split(folder)[1] == 'HelperScript' :
+                    continue
+                else :
+                    # Remove everything else
+                    shutil.rmtree(folder)
 
         def doPull () :
             # Get a total list of files from the project
@@ -734,8 +752,6 @@ class ProjData (object) :
                 if cr > 0 :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-#        import pdb; pdb.set_trace()
-
         # First branch, does this project exist in the registry
         if self.userConfig['Projects'].has_key(self.pid) :
             # Does the local user own it?
@@ -746,9 +762,8 @@ class ProjData (object) :
                 self.log.writeToLog(self.errorCodes['4260'], [self.pid])
             # Is the project physically present? To be safe, backup the old one
             self.tools.makeFolderBackup(self.local.projHome)
-            # Now remove the orginal
-            if os.path.exists(self.local.projHome) :
-                shutil.rmtree(self.local.projHome)
+            # Now remove the orginal project data
+            emptyOutProject()
             # If force is used then owner and age makes no difference
             doPull()
             self.buyLocal(self.getConfig(self.local.projHome))

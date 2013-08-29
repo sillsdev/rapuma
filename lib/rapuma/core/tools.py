@@ -53,13 +53,26 @@ class Tools (object) :
 
 
     def makeFolderBackup (self, source) :
-        '''Make a backup of a folder (and its subfolders).'''
+        '''Make a zipped backup of a folder (and its subfolders).'''
 
         if os.path.exists(source) :
             if os.path.isdir(source) :
-                target = self.incrementFileName(source + '.bak')
-                shutil.copytree(source, target)
-                self.terminal('Backup complete from: [' + source + '] to [' + target + '].')
+                target = source + '_' + self.fullFileTimeStamp() + '.zip'
+                root_len = len(source)
+                with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as myzip :
+                    sys.stdout.write('Backing up folder')
+                    sys.stdout.flush()
+                    for root, dirs, files in os.walk(source):
+                        # Chop off the part of the path we do not need to store
+                        zip_root = os.path.abspath(root)[root_len:]
+                        for f in files:
+                            fullpath = os.path.join(root, f)
+                            zip_name = os.path.join(zip_root, f)
+                            sys.stdout.write('.')
+                            sys.stdout.flush()
+                            myzip.write(fullpath, zip_name, zipfile.ZIP_DEFLATED)
+                    # Add space for next message
+                    sys.stdout.write('\n')
                 return True
             else :
                 self.terminal('Warning: Source ' + source + ' is not a folder. Cannot backup folder.')
