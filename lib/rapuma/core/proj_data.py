@@ -681,6 +681,14 @@ class ProjData (object) :
         '''Pull data from cloud storage and merge/replace local data.
         Do a full backup first before starting the actual pull operation.'''
 
+        # Set the project home reference 
+        if tPath :
+            self.local.projHome = self.getProjHome(tPath)
+        else :
+            if not self.userConfig['Projects'].has_key(self.pid) :
+                self.tools.terminal('Error: No target path given. Cannot install. Use --target (-t) to indicate path to project.')
+                self.tools.dieNow()
+
         # Make the cloud path (output errors to terminal as log may not be working at this point)
         if self.userConfig['Resources']['cloud'] != '' :
             cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
@@ -727,10 +735,6 @@ class ProjData (object) :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
 #        import pdb; pdb.set_trace()
-
-        # Set the project home reference
-        if tPath :
-            self.local.projHome = self.getProjHome(tPath)
 
         # First branch, does this project exist in the registry
         if self.userConfig['Projects'].has_key(self.pid) :
