@@ -148,6 +148,7 @@ class Xetex (Manager) :
             '1040' : ['LOG', 'Created: [<<1>>]'],
 
 
+            '0420' : ['WRN', 'TeX settings file has been frozen for debugging purposes.'],
             '0430' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
             '0440' : ['LOG', 'Created: [<<1>>]'],
             '0460' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
@@ -329,7 +330,7 @@ class Xetex (Manager) :
 ###############################################################################
 ############################# DEPENDENCY FUNCTIONS ############################
 ###############################################################################
-######################## Error Code Block Series = 400 ########################
+######################## Error Code Block Series = 0400 #######################
 ###############################################################################
 
 
@@ -337,10 +338,19 @@ class Xetex (Manager) :
         '''Create the primary TeX settings file.'''
 
         description = 'This is the primary TeX settings file for the ' + self.gid + ' group. \
-        It is auto-generated so editing can be a rather futile exercise.'
+        It is auto-generated so editing can be a rather futile exercise. This is unless you \
+        set freezeTexSettings to True in the XeTeX manager configuration of the project.conf \
+        file. Doing that will prevent the file from being remade. However, no configuration \
+        changes will be reflected in the static settings file. Use this with care.'
 
         # Setting for internal testing
         outputTest = False
+
+        # Check for freezeTexSettings in project.conf
+        if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
+                self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
+            self.log.writeToLog(self.errorCodes['0420'])
+            return False
 
         def appendLine(line, realVal) :
             '''Use this to shorten the code and look for listy things.'''

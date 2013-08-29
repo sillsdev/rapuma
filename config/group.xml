@@ -118,7 +118,6 @@ Todo:
         <type>string</type>
         <value></value>
     </setting>
-
     <setting>
         <name>Component Style Override List</name>
         <key>compStyOverrideList</key>
@@ -126,7 +125,6 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
-
     <setting>
         <name>Component TeX Macro Override List</name>
         <key>compTexOverrideList</key>
@@ -134,7 +132,6 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
-
     <setting>
         <name>Use Group Style Override</name>
         <key>useGrpStyOverride</key>
@@ -142,7 +139,6 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
-
     <setting>
         <name>Use Group TeX Override</name>
         <key>useGrpTexOverride</key>
@@ -150,8 +146,5 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
-
-
-
 </root>
 

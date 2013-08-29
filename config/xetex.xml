@@ -68,5 +68,12 @@ Todo:
         <type>list</type>
         <value></value>
     </setting>
+    <setting>
+        <name>Freeze TeX Settings File</name>
+        <key>freezeTexSettings</key>
+        <description>For debugging purposes, prevent the XeTeX manager from recreating the main TeX settings file. Default = False</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
 </root>
 
