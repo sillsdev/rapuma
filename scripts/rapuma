@@ -21,32 +21,52 @@
 
 import os, sys, timeit, datetime
 from functools                  import partial
+from itertools import ifilter
 
 startTime = timeit.default_timer()
 
-# Set the Rapuma base program paths
-rapumaHome = os.environ.get('RAPUMA_BASE')
-sysHome = os.environ.get('HOME')
-if not rapumaHome :
-    for t in ('/usr/local', '/usr') :
-        rapumaHome = os.path.join(t, 'share', 'rapuma')
-        if os.path.exists(os.path.join(rapumaHome, 'resource')) :
-            os.environ['RAPUMA_BASE'] = rapumaHome
-            break
+###########################################################################
+########################## Location Discovery #############################
+###########################################################################
 
-# Set the user environment path
-userHome = os.environ.get('RAPUMA_USER')
-if not userHome :
-    userHome = os.path.join(sysHome, '.config', 'rapuma')
-    os.environ['RAPUMA_USER'] = userHome
+# Set the Rapuma base program paths. It looks in /user/share first for an
+# installed copy. If you give it a actual path to the development version
+# it will run from there. (~/Projects/rapuma/scripts/rapuma)
+# FIXME: Environment variables are set that may not be needed if this block
+# of code was turned into a module and called from the dependent modules.
+rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
+rapumaHome = ifilter(os.path.exists,    [os.path.join(rapumaBase, 'share', 'rapuma'), 
+                                         os.path.join(rapumaBase)])
+rapumaHome = next(rapumaHome, None)
+os.environ['RAPUMA_BASE'] = rapumaHome
 
-# Set the (potential) project home
-projHome = os.getcwd()
+# Set the user environment path. This is always in the same place.
+userHome = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+os.environ['RAPUMA_USER'] = userHome
+
+# Set the (potential) project home by looking for the project config file.
+def find_project_root(tag, path=os.path.curdir):
+    path=os.path.splitdrive(os.path.realpath(os.path.expanduser(os.path.expandvars(path))))[1]
+    while (not os.path.exists(os.path.join(path, tag))):
+        path = os.path.dirname(path)
+        if path == os.path.sep: return None
+    return path
+
+# Find the project home
+# FIXME: Though we find the home here, it really doesn't mean anything.
+# It is not used here in this main script. As noted above, this code
+# block should be moved into a seperate module and called by others.
+projHome = find_project_root(os.path.join('Config', 'project.conf'))
+# If not found, assume that this is a new project situation
+if not projHome :
+    projHome = os.getcwd()
+
+###########################################################################
+########################## Location Discovery #############################
+###########################################################################
 
 # Load standard Python modules
 import codecs, argparse
-#from datetime import *
-#from configobj import ConfigObj
 
 # Load the local classes
 from rapuma.core.proj_local             import ProjLocal
@@ -83,7 +103,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r794'
+systemVersion   = '0.6.r795'
 local           = None
 
 # Give a welcome message

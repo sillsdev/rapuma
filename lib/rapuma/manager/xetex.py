@@ -416,9 +416,14 @@ class Xetex (Manager) :
             primaryFont = self.macPackConfig['FontSettings']['primaryFont']
             for font in installedFonts :
                 if font == primaryFont :
+                    # Output the primary font
                     for key in self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'].keys() :
                         writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'][key]) + '\n')
+                    # Output the seconday settings as well for this font
+                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
                 if not font == primaryFont :
+                    # There can only be one primary font, this is not it
                     for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
                         writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
 

@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
 <!--
 
- This file is part of GtkSourceView
+This file is part of GtkSourceView
 
- Author: Dennis Drescher <dennis_drescher@sil.org>
+Author: Dennis Drescher <dennis_drescher@sil.org>
 
- This will provide color syntax for editing USFM files.
+This will provide color syntax for editing USFM files.
 
- History:
+History:
 
 	20130329	Intial creation of description set. Much more
 			work needed. (djd)
- 
- In Ubuntu this file gets copied to:
- 
+
+To in stall, in Ubuntu this file gets copied to:
+
 	sudo cp usfmtex.lang /usr/share/gtksourceview-3.0/language-specs
+
+After that is done, the next time you open Gedit you should be able to
+select UsfmTeX from the dropdown (popup) list on the bottom tool bar
+and it should give you color syntax on most (but not all) USFM markers
+in your document.
 
 -->
 

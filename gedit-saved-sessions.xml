@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <saved-sessions>
 <session name="Basic">
-  <file path="file:///home/dennis/Projects/rapuma/dev_setup.sh"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/manager/project.py"/>
@@ -14,6 +13,7 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_local.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/core/proj_data.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_font.py"/>

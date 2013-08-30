@@ -10,7 +10,7 @@
 # This class will handle user configuration operations.
 
 ###############################################################################
-################################ Component Class ##############################
+############################# Component Class #################################
 ###############################################################################
 # Firstly, import all the standard Python modules we need for
 # this process
