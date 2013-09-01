@@ -352,6 +352,15 @@ Todo:
         </file>
 
         <file>
+            <name>Pre-Style Extension File</name>
+            <description>This file contains TeX macro extentions. The extensions in this file need to be loaded before styles and style extensions are loaded.</description>
+            <fileID>preStyTexExtFile</fileID>
+            <fileName>[self:macPack]-preSty-ext.tex</fileName>
+            <filePath>[self:projTexFolder]</filePath>
+            <depends></depends>
+            <relies>macPack</relies>
+        </file>
+        <file>
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
             <fileID>macSettingsFile</fileID>

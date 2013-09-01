@@ -38,6 +38,13 @@ Todo:
             <fileName>[self:projMacPackFolder][pathSep]ptxplus-marginalverses.tex</fileName>
             <depends></depends>
         </file>
+        <file>
+            <name>Marginal Verses File</name>
+            <description>The file that contains adjustments for components covered by this macro package.</description>
+            <moduleID>marginalVersesFile</moduleID>
+            <fileName>[self:projMacPackFolder][pathSep]ptxplus-marginalverses.tex</fileName>
+            <depends></depends>
+        </file>
     </section>
 
     <section>

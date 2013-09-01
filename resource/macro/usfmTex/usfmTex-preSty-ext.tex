@@ -1,0 +1,29 @@
+% usfmTex-preSty-ext.tex
+%
+% Custom TeX setup file for the usfmTex macro package. These will
+% be loaded in before the main stylesheet and its overrides are
+% loaded.
+
+%%%%%%%%%%%%%%%%%%%%%%%  Extra Tweaks %%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%% Additional Marginal Verse Settings
+% For marginal verse output we need to insert this right here.
+% This should be temporary. It allows one stylesheet to undo 
+% superscript in a previous one It needs to go right here to
+% keep everything else working
+%
+% This is needed to turn off superscript in the override stylesheet
+\catcode`\@=11
+\def\NoSuperscript  {\defp@ram{superscript}{false}}
+\catcode`\@=12
+%
+% In the override stylesheet (to follow) we need this to be
+% inserted for \v:
+% \Marker v
+% \sethook{start}{v}{\kern-3sp}
+% \FontSize 8
+% \Bold
+% \NoSuperscript
+
+

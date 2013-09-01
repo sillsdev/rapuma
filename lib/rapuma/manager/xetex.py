@@ -506,6 +506,9 @@ class Xetex (Manager) :
             gidTexObject.write(self.tools.makeFileHeader(self.local.gidTexFileName, description))
             # First bring in the main macro file
             gidTexObject.write('\\input \"' + self.local.primaryMacroFile + '\"\n')
+            # Check for a preStyle extension file and load if it is there
+            if os.path.exists(self.local.preStyTexExtFile) :
+                gidTexObject.write('\\input \"' + self.local.preStyTexExtFile + '\"\n')
             ########
             # FIXME? To avoid problems with the usfmTex marginalverses macro code, we bring
             # in the stylesheets now. Will this cause any problems with other macPacks?
