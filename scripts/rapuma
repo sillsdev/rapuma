@@ -20,8 +20,7 @@
 # set the base path
 
 import os, sys, timeit, datetime
-from functools                  import partial
-from itertools import ifilter
+from functools import partial
 
 startTime = timeit.default_timer()
 
@@ -35,11 +34,13 @@ startTime = timeit.default_timer()
 # FIXME: Environment variables are set that may not be needed if this block
 # of code was turned into a module and called from the dependent modules.
 rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
-rapumaHome = ifilter(os.path.exists,    [os.path.join(rapumaBase, 'share', 'rapuma'), 
-                                         os.path.join(rapumaBase)])
-rapumaHome = next(rapumaHome, None)
+rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
+                        os.path.join(rapumaBase)] if os.path.exists(d)]
+rapumaHome = rapumaHome[0] if len(rapumaHome) else None
 os.environ['RAPUMA_BASE'] = rapumaHome
-
+# According to the base if found, insert the lib folder into the Python sys path
+if rapumaHome :
+    sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
 # Set the user environment path. This is always in the same place.
 userHome = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 os.environ['RAPUMA_USER'] = userHome
@@ -103,7 +104,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r796'
+systemVersion   = '0.6.r797'
 local           = None
 
 # Give a welcome message

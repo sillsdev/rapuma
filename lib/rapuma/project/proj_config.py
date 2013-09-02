@@ -355,9 +355,10 @@ class Config (object) :
         self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
         self.tools.writeConfFile(self.projectConfig)
 
+# FIXME: I think this can be deprecated
         # Update existing macPack (but not conf file)
-        if os.path.exists(self.local.projMacPackFolder) :
-            self.updateMacPack(macPack, force)
+#        if os.path.exists(self.local.projMacPackFolder) :
+#            self.updateMacPack(macPack, force)
 
         # If we got this far, install the a fresh copy of the macPack
         self.installMacPackOnly(macPack)

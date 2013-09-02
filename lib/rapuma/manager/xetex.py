@@ -693,12 +693,19 @@ class Xetex (Manager) :
                             + self.local.projGidFolder + ':.'
 
             # Create the environment dictionary that will be fed into subprocess.call()
-            envDict = dict(os.environ)
+            #envDict = dict(os.environ)
+            envDict={}
             envDict['TEXINPUTS'] = texInputsLine
+            #envDict['TEXFORMATS'] = self.local.rapumaXetexFolder
+#            envDict['TEXMFCNF'] = os.path.join('/', 'etc', 'texmf')
+            envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf')
+            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
 
             # Create the XeTeX command argument list that subprocess.call()
             # will run with
             cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
+
+            print 'zzzzzzzzzzzzzzzz', cmds, envDict
 
             # Run the XeTeX and collect the return code for analysis
 #                self.tools.dieNow()
