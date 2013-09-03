@@ -697,9 +697,9 @@ class Xetex (Manager) :
             #envDict = dict(os.environ)
             envDict={}
             envDict['TEXINPUTS'] = texInputsLine
-            #envDict['TEXFORMATS'] = self.local.rapumaXetexFolder
+            envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
 #            envDict['TEXMFCNF'] = os.path.join('/', 'etc', 'texmf')
-            envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf')
+            envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
 
             # Create the XeTeX command argument list that subprocess.call()

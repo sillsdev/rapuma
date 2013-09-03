@@ -76,7 +76,7 @@
 
 % The tree containing the runtime files closely related to the specific
 % program version used:
-TEXMFMAIN = ${SELFAUTODIR}/texmf
+TEXMFMAIN = ${SELFAUTODIR}/texmf-local
 
 % The main distribution tree:
 TEXMFDIST = ${SEFLAUTODIR}/texmf-texlive
@@ -84,7 +84,7 @@ TEXMFDIST = ${SEFLAUTODIR}/texmf-texlive
 % A place for local additions to a "standard" texmf tree.
 % This tree is not used for local configuration maintained by
 % texconfig, it uses TEXMFCONFIG below.
-TEXMFLOCAL = ${SELFAUTODIR}/texmf
+TEXMFLOCAL = ${SELFAUTODIR}/texmf-local
 
 % TEXMFSYSVAR, where texconfig-sys stores variable runtime data.
 % With teTeX-3.0 or later, this must be set.
@@ -634,8 +634,8 @@ TEX = etex
 % For the vast majority of documents, 60000 or less will do.
 % 
 main_memory = 3000000 % words of inimemory available; also applies to inimf&mp
-extra_mem_top = 0     % extra high memory for chars, tokens, etc.
-extra_mem_bot = 0     % extra low memory for boxes, glue, breakpoints, etc.
+extra_mem_top = 2000000     % extra high memory for chars, tokens, etc.
+extra_mem_bot = 4000000     % extra low memory for boxes, glue, breakpoints, etc.
 
 % ConTeXt needs lots of memory.
 extra_mem_top.context = 2000000
