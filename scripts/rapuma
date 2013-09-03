@@ -104,7 +104,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r797'
+systemVersion   = '0.6.r802'
 local           = None
 
 # Give a welcome message
@@ -312,7 +312,7 @@ def userArguments (args) :
             if cmdType == 'group' :
                 ProjSetup(pid).updateAllGroups(args.force)
             elif cmdType == 'helper' :
-                ProjCommander(pid).updateScripts(args.template)
+                ProjCommander(pid).updateScripts()
             else :
                  cmdError(cmd, cmdType)
 

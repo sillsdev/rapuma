@@ -123,15 +123,15 @@ class ProjCommander (object) :
         mid     = self.projectMediaIDCode
 
         return {
-                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible group add --component_type usfm --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    group add --component_type usfm --source_id base --source_path $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    group add --component_type usfm --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible group add --component_type usfm --source_id base --source_path $1 --cid_list \"gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev\"'], 
+                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    group add --component_type usfm --source_id base --source_path $1 --cid_list \"mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev\"'], 
+                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    group add --component_type usfm --source_id base --source_path $1 --cid_list \"gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal\"'], 
                 'archive'       : ['Archive this project',                          'rapuma project '       + pid + ' archive   save '], 
                 'backup'        : ['Backup this project',                           'rapuma project '       + pid + ' backup    save '], 
                 'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + ' cloud     restore $1 '], 
                 'cloudPush'     : ['Push data from this project to the cloud',      'rapuma project '       + pid + ' cloud     save $1 '], 
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
-                'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  restore --target_path $1 '], 
+                'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' helper    update '], 
                 'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind '], 
