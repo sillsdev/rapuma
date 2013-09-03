@@ -158,6 +158,7 @@ class Xetex (Manager) :
 
             '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             '0610' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] group.'],
+            '0620' : ['DBG', 'xetex command in <<1>>: <<2>> <<3>>'],
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
             '0635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
@@ -705,6 +706,9 @@ class Xetex (Manager) :
             # will run with
             cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
 
+            if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
+                    self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
+                self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
             # Run the XeTeX and collect the return code for analysis
 #                self.tools.dieNow()
             rCode = subprocess.call(cmds, env = envDict)
