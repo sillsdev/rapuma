@@ -705,8 +705,6 @@ class Xetex (Manager) :
             # will run with
             cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
 
-            print 'zzzzzzzzzzzzzzzz', cmds, envDict
-
             # Run the XeTeX and collect the return code for analysis
 #                self.tools.dieNow()
             rCode = subprocess.call(cmds, env = envDict)
