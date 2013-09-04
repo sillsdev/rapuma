@@ -158,6 +158,8 @@ class Xetex (Manager) :
 
             '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             '0610' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] group.'],
+            '0615' : ['ERR', 'XeTeX failed to execute. System may not support the Rapuma internal 64 bit version.'],
+            '0617' : ['ERR', 'XeTeX failed to execute with this error: [<<1>>]'],
             '0620' : ['DBG', 'xetex command in <<1>>: <<2>> <<3>>'],
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
@@ -719,15 +721,24 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
 
             # Run the XeTeX and collect the return code for analysis
-            rCode = subprocess.call(cmds, env = envDict)
-
-            # Analyse the return code
-            if rCode == int(0) :
-                self.log.writeToLog(self.errorCodes['0625'], [self.local.gidTexFileName])
-            elif rCode in self.xetexErrorCodes :
-                self.log.writeToLog(self.errorCodes['0630'], [self.local.gidTexFileName, self.xetexErrorCodes[rCode], str(rCode)])
-            else :
-                self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
+            try :
+                rCode = subprocess.call(cmds, env = envDict)
+                # Analyse the return code
+                if rCode == int(0) :
+                    self.log.writeToLog(self.errorCodes['0625'], [self.local.gidTexFileName])
+                elif rCode in self.xetexErrorCodes :
+                    self.log.writeToLog(self.errorCodes['0630'], [self.local.gidTexFileName, self.xetexErrorCodes[rCode], str(rCode)])
+                else :
+                    self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
+            except Exception as e :
+                # If subprocess fails it might be because XeTeX did not execute
+                # we will try to analyze and report back something useful
+                if e.find('[Errno 8]') > 0 :
+                    # No 64 bit support
+                    self.log.writeToLog(self.errorCodes['0615'])
+                else :
+                    # Some other problem
+                    self.log.writeToLog(self.errorCodes['0615'], [self.local.gidPdfFile, str(e)])
 
             # Background management (Phase 2)
             bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
