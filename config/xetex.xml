@@ -69,9 +69,16 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Freeze TeX Settings File</name>
+        <name>Freeze TeX Settings</name>
         <key>freezeTexSettings</key>
         <description>For debugging purposes, prevent the XeTeX manager from recreating the main TeX settings file. Default = False</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Run External XeTeX</name>
+        <key>runExternalXetex</key>
+        <description>Run a system installed version of XeTeX rather than Rapuma's internal version.</description>
         <type>boolean</type>
         <value>False</value>
     </setting>

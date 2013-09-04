@@ -696,21 +696,29 @@ class Xetex (Manager) :
             # Create the environment dictionary that will be fed into subprocess.call()
             #envDict = dict(os.environ)
             envDict={}
+            # These are project environment vars
             envDict['TEXINPUTS'] = texInputsLine
-            envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
-#            envDict['TEXMFCNF'] = os.path.join('/', 'etc', 'texmf')
-            envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
-            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
+            # These are XeTeX environment vars that are run if the internal (fast) version
+            # of XeTeX is being run, which is the default. If runExternalXetex is set to
+            # False, the following special environment vars will be run. If set to true,
+            # an external version of XeTeX, provided it is installed, will run with its own
+            # environment vars set elsewhere
+            if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
+                    not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
+                envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
+                envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
+                envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
 
-            # Create the XeTeX command argument list that subprocess.call()
-            # will run with
+            # Create the XeTeX command argument list that subprocess.call() will run with
+            # the environment vars we set above
             cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
 
+            # For debugging purposes, output the following DBG message
             if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
                     self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
                 self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
+
             # Run the XeTeX and collect the return code for analysis
-#                self.tools.dieNow()
             rCode = subprocess.call(cmds, env = envDict)
 
             # Analyse the return code
