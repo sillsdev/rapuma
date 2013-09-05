@@ -734,7 +734,7 @@ class Xetex (Manager) :
                 # If subprocess fails it might be because XeTeX did not execute
                 # we will try to analyze and report back something useful
                 if str(e).find('[Errno 8]') > 0 :
-                    # No 64 bit support
+                    # Sorry, no 64 bit support
                     self.log.writeToLog(self.errorCodes['0615'])
                 else :
                     # Some other problem
