@@ -757,7 +757,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDependTrue>layoutConfig:PageLayout:useCropmarks</boolDependTrue>
+            <boolDependTrue>macPackConfig:PageLayout:useCropmarks</boolDependTrue>
         </setting>
         <setting>
             <name>Page Border</name>

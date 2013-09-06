@@ -443,9 +443,25 @@ class Xetex (Manager) :
         '''Affirm by returning True if the actual bool matches its
         state setting. Returning 'None' will cause a setting to be skipped.'''
 
+
         realBool = self.returnConfRefValue(boolDependInfo['#text']).lower()
-        if boolDependInfo['@state'].lower() == realBool :
+        if boolDependInfo['@state'].lower() == realBool.lower() :
             return True
+
+
+#        try :
+#            realBool = str(self.returnConfRefValue(boolDependInfo['#text']))
+#            print realBool, type(realBool)
+#            if boolDependInfo['@state'].lower() == realBool.lower() :
+#                return True
+#        except Exception as e :
+#            print str(e)
+#            print boolDependInfo
+#            print type(self.returnConfRefValue(boolDependInfo['#text']))
+#            print type(boolDependInfo['@state'])
+#            print type(boolDependInfo)
+#            self.tools.dieNow()
+
 
 
     def returnConfRefValue (self, ref) :
@@ -641,9 +657,13 @@ class Xetex (Manager) :
         # document is rendered. We turn that on here before and turn
         # it off below when backgounds are being added.
         if 'cropmarks' in self.projectConfig['Managers'][self.manager][mode + 'Background'] :
-            if not self.tools.str2bool(self.layoutConfig['PageLayout']['useCropmarks']) :
-                self.layoutConfig['PageLayout']['useCropmarks'] = True
-                self.tools.writeConfFile(self.layoutConfig)
+            if not self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
+                # Note that the value is set as a string because internally 
+                # incoming bool values are assumed to be strings a real boolean
+                # value will really throw a wrench in the works
+                self.macPackConfig['PageLayout']['useCropmarks'] = 'True'
+                # This is more of an internal value change so it will
+                # not be written out 
 
         # This is the file we will make. If force is set, delete the old one.
         if force :
@@ -744,11 +764,13 @@ class Xetex (Manager) :
             bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
             for bg in bgList :
                 # Special handling for cropmarks happened before rendering
-                # Turn off cropmarks here because it is done already
+                # To clean up, turn off cropmarks here because it is done already
                 if bg == 'cropmarks' :
-                    if self.tools.str2bool(self.layoutConfig['PageLayout']['useCropmarks']) :
-                        self.layoutConfig['PageLayout']['useCropmarks'] = False
-                        self.tools.writeConfFile(self.layoutConfig)
+                    if self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
+                        # Note that the value is set as a string because internally 
+                        # incoming bool values are assumed to be strings a real boolean
+                        # value will really throw a wrench in the works
+                        self.macPackConfig['PageLayout']['useCropmarks'] = 'False'
                     continue
                 bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
                 cmd = self.pdfUtilityCommand + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
