@@ -178,17 +178,11 @@ class Usfm (Group) :
 
     def getCidAdjPath (self, cid) :
         '''Return the full path of the cName working text adjustments file. 
-        This assumes the cName is valid.'''
+        This assumes the cName is valid. Note that all macro packages that have
+        a manual adjustment feature must use this naming scheme. The name syntax
+        comes from the "mother" macro package which is ptx2pdf.'''
 
-#        return os.path.join(self.local.projComponentFolder, cid, self.makeFileNameWithExt(cid) + '.adj')
-        return os.path.join(self.local.projComponentFolder, cid, self.makeFileName(cid) + '.adj')
-
-
-#    def getCidPiclistFile (self, cid) :
-#        '''Return the full path of the cName working text illustrations file. 
-#        This assumes the cName is valid.'''
-
-#        return os.path.join(self.local.projComponentFolder, cid, self.makeFileName(cid) + '.piclist')
+        return os.path.join(self.local.projComponentFolder, cid, self.makeFileNameWithExt(cid) + '.adj')
 
 
     def render(self, gid, mode, cidList, force) :
