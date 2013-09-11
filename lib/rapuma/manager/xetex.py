@@ -809,7 +809,7 @@ class Xetex (Manager) :
             # Build the name
             outputFolder = os.path.join(self.local.projHome, mode.capitalize())
             if pdfSubFileName :
-                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, pdfSubFileName), mode)
+                outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode)
             else :
                 outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode)
             # Make sure there is a folder there to put it in
