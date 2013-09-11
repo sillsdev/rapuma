@@ -275,7 +275,8 @@
 \obeylines%
 \gdef\@ddspecialhooks{% there are a few special USFM markers that we give "magic" properties
  \let\@H=\h%
- \def\h{\bgroup\obeylines\@h}% \h gets stored as the book name (for references)
+ \def\h{\bgroup\deactiv@tecustomch@rs
+        \obeylines\@h}% \h gets stored as the book name (for references)
  \def\@h ##1^^M{\gdef\b@ok{##1}\egroup}% store book id in \b@ok
  %
  \let\@CL=\cl%
@@ -388,6 +389,11 @@
 \def\@ctivate{\x@\edef\csname save-cat-\the\count255\endcsname{\the\catcode\count255}%
   \catcode\the\count255=\active\relax}
 \def\de@ctivate{\catcode\the\count255=\csname save-cat-\the\count255\endcsname\relax}
+
+\def\activ@tecustomch@rs{% activate all the chars configured with \DefineActiveChar
+ \def\d@something{\afterassignment\@ctivate \count255=}\the\do@ctive}  
+\def\deactiv@tecustomch@rs{% deactivate all the chars configured with \DefineActiveChar
+ \def\d@something{\afterassignment\de@ctivate \count255=}\the\do@ctive}  
 
 \def\openbracket{\char`\[\ignorespaces}
 \def\openparen{\char`\(\ignorespaces}
