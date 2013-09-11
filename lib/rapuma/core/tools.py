@@ -103,15 +103,15 @@ class Tools (object) :
             return fileName
 
 
-    def modeFileName (self, fileName, mode = 'draft') :
+    def modeFileName (self, targetDir, sourceFile, mode = 'draft') :
         '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
         
         # FIXME: It would be nice to have an alpha character incrementer
         
-        (path, fn) = os.path.split(fileName)
-        fParts = fn.split('.')
+        fileName = self.fName(sourceFile)
+        fParts = fileName.split('.')
         newName = mode + '_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
-        return os.path.join(path, newName)
+        return os.path.join(targetDir, newName)
 
 
     def makeFileHeader (self, fileName, desc = None, noEditWarn = True) :

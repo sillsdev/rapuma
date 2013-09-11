@@ -642,6 +642,8 @@ class Xetex (Manager) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
+#        import pdb; pdb.set_trace()
+
         # Get our list of cids
         # Check for cidList, use std group if it isn't there
         # If there is a cidList, create an alternate ouput name
@@ -672,7 +674,6 @@ class Xetex (Manager) :
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
-#        self.makeMacLinkFile()
         self.makeSettingsTexFile()
         self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
@@ -810,7 +811,7 @@ class Xetex (Manager) :
             if pdfSubFileName :
                 outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, pdfSubFileName), mode)
             else :
-                outputPdfFile = self.tools.modeFileName(os.path.join(outputFolder, self.local.gidPdfFile), mode)
+                outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode)
             # Make sure there is a folder there to put it in
             if not os.path.exists(outputFolder) :
                 os.makedirs(outputFolder)
