@@ -324,7 +324,7 @@
   \unvbox#1 % open up the vbox of notes to get at the list of individual note boxes
   \makehboxofhboxes % make a single hbox for all notes of this class
   \setbox0=\hbox{\unhbox0 \removehboxes} % add internote space
-  \getp@ram{baseline}{#2}\baselineskip=\p@ram
+  \getp@ram{baseline}{#2}\ifx\p@ram\relax\else\baselineskip=\p@ram\fi
 % Enable justification according to marker.
   \lineskiplimit=0pt\leftskip=\columnshift\rightskip=0pt\parskip=0pt%\lineskip=10pt
   \getp@ram{justification}{#2}%
@@ -511,7 +511,7 @@
     \advance\availht by -\ht0
     \advance\availht by -\dp0
     \advance\availht by -0.5\AboveNoteSpace
-    \getp@ram{baseline}{#1}\advance\availht-\p@ram
+    \getp@ram{baseline}{#1}\ifx\p@ram\relax\else\advance\availht-\p@ram\fi
   \fi}
 \def\reduceavailht@sep#1{
   \x@\let\x@\th@cl@ss\csname note-#1\endcsname

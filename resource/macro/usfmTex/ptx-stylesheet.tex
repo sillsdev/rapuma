@@ -146,6 +146,7 @@
 % called after \c and \v have been processed in stylesheet at beginning of typesetting file
 % Patch in special handling for \c and \v.
 % ~ is set to lowercase to a space in \ch@rstyle
+\newif\ifhangingverse
 \lowercase{
  \def\@ddcvhooks{
   \let\@V=\v% remember \v defn for (A) below
@@ -176,8 +177,8 @@
    % -1sp indicates that a hanging verse number has been requested here.
    % When this happens we make ll@p use llap to right justify the verse number at the current position.
    % Otherwise make ll@p do nothing.
-   \ifdim\lastkern=-1sp \let\ll@p=\llap %
-   \else \let\ll@p=\relax \fi % hanging verse number?
+   \ifdim\lastkern=-1sp \let\ll@p=\llap\hangingversetrue %
+   \else \let\ll@p=\relax\hangingversefalse \fi % hanging verse number?
    \ll@p\bgroup\m@kedigitsother\@v@} %
   % remember chapter macro for later
   \let\@C=\c
