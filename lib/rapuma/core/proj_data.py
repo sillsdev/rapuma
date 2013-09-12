@@ -105,8 +105,9 @@ class ProjData (object) :
             if oldPath != projHome :
                 self.userConfig['Projects'][pid]['projectPath'] = projHome
                 self.tools.writeConfFile(self.userConfig)
-                # Backup the oldPath if it is there
-                self.tools.makeFolderBackup(oldPath)
+                # FIXME: We used to backup the oldPath if it was there
+                # However, if necessary, this should be done by the caller
+#                self.tools.makeFolderBackup(oldPath)
                 # Now remove the orginal
                 if os.path.exists(oldPath) :
                     shutil.rmtree(oldPath)
@@ -679,7 +680,8 @@ class ProjData (object) :
 
     def pullFromCloud (self, force = False, tPath = None) :
         '''Pull data from cloud storage and merge/replace local data.
-        Do a full backup first before starting the actual pull operation.'''
+        If force is used, do a full backup first before starting the
+        actual pull operation.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -760,8 +762,9 @@ class ProjData (object) :
             # It (the cloud) needs to be newer
             if self.isNewerThanLocal(cloud, self.getConfig(self.local.projHome)) and not force :
                 self.log.writeToLog(self.errorCodes['4260'], [self.pid])
-            # Is the project physically present? To be safe, backup the old one
-            self.tools.makeFolderBackup(self.local.projHome)
+            # Is the project physically present? If force is used, backup the old one
+            if not force :
+                self.tools.makeFolderBackup(self.local.projHome)
             # Now remove the orginal project data
             emptyOutProject()
             # If force is used then owner and age makes no difference
@@ -775,8 +778,9 @@ class ProjData (object) :
 
         # This project is new to the system (registry)
         else :
-            # Is the project physically present? Backup the old one if so
-            self.tools.makeFolderBackup(self.local.projHome)
+            # Is the project physically present? If force is used, backup the old one
+            if not force :
+                self.tools.makeFolderBackup(self.local.projHome)
             # Now remove the orginal
             if os.path.exists(self.local.projHome) :
                 shutil.rmtree(self.local.projHome)
