@@ -19,25 +19,25 @@ rm -rf ~/Publishing/testArea/ENG-LATN-JAS
 
 # This first Rapuma command is for deleting any previous copies of this example project
 # on your system. It will first backup project data, then remove the current working copy.
-echo rapuma project ENG-LATN-JAS project remove
-rapuma project ENG-LATN-JAS project remove
+echo    rapuma project ENG-LATN-JAS project remove
+        rapuma project ENG-LATN-JAS project remove
 
 # This command creates a new project. It defines the type, name and location of the project.
 # Currently Rapuma only supports the "book" media type but the architecture, in theory, could
 # support a wide variety of outputs like phone, web, tablet, etc.
-echo rapuma project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
-rapuma project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
+echo    rapuma project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
+        rapuma project ENG-LATN-JAS project add --media_type book --name "The Book of James in English" --target_path ~/Publishing/testArea
 
 # This is where actual content is added to the project in the form of a group that contains components.
 # The "james" group is a "usfm" type and contains one component, "jas" (the book of James marked up
 # in USFM) The source ID helps Rapuma know what to call its unique source and the source path tells
 # Rapuma where to find it.
-echo rapuma group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
-rapuma group ENG-LATN-JAS james group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS
+echo    rapuma group ENG-LATN-JAS mb group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS/sources/mb
+        rapuma group ENG-LATN-JAS mb group add --component_type usfm --cid_list jas --source_id mb --source_path ~/Publishing/testArea/MBJAS/sources/mb
 
 # With simple projects such as this, we can now render the text. The "draft" command will set in
 # motion a process that will perform a number of tasks in this project such as import the default
 # font and macro package as well as create some default settings files.
-echo rapuma group ENG-LATN-JAS james group draft
-rapuma group ENG-LATN-JAS james group draft
+echo    rapuma group ENG-LATN-JAS mb group draft
+        rapuma group ENG-LATN-JAS mb group draft
 
