@@ -613,7 +613,15 @@
       \dimen5=\textwidth\advance\dimen5 by \ExtraRMargin\advance\dimen5 by -\columnshift %
       \vbox{\hbox to \dimen5{%\hbox to \columnshift{}
         \ifRTL \hbox to \ExtraRMargin{}\box\colB\makecolumngutter{\the\dimen3}{\the\dimen3}{\the\dimen0}\box\colA %
-        \else \box\colA\makecolumngutter{\the\dimen3}{\the\dimen3}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi\hfil}}}
+
+%%%%% Testing %%%%% (djd - 20130918)
+% Removing \hfil at the end to prevent right column from wanting to center
+% rather than moving all the way to the right.
+%        \else \box\colA\makecolumngutter{\the\dimen3}{\the\dimen3}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi\hfil}}}
+        \else \box\colA\makecolumngutter{\the\dimen3}{\the\dimen3}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi}}}
+%%%%% End Testing %%%%% (Remove comments when this has been determined to work)
+
+
     \advance\dimen3 by \dimen4 \ht\partial=\dimen3
     \global\holdinginserts=1
   \else
@@ -718,7 +726,12 @@
       \trace{p}{Text depth = \the\dimen3}%\showthe\dimen0
 	  % determine order of columns based on text direction
       \hbox to \dimen1{\hbox to \columnshift{}\ifRTL \hbox to \ExtraRMargin{}\box\colB\makecolumngutter{\the\dimen3}{\the\availht}{\the\dimen0}\box\colA
-        \else \box\colA\makecolumngutter{\the\dimen3}{\the\availht}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi\hfil}
+%%%%% Testing %%%%% (djd - 20130918)
+% Removing \hfil at the end to prevent right column from wanting to center
+% rather than moving all the way to the right.
+%        \else \box\colA\makecolumngutter{\the\dimen3}{\the\availht}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi\hfil}
+        \else \box\colA\makecolumngutter{\the\dimen3}{\the\availht}{\the\dimen0}\box\colB\hbox to \ExtraRMargin{}\fi}
+%%%%% End Testing %%%%% (Remove comments when this has been determined to work)
       \ifvoid\bottomins\else \kern-\dimen0 \dimen0=0pt \vskip\skip\bottomins \unvbox\bottomins \fi % ouput bottom spanning pictures
       \f@rstnotetrue
       \let\\=\ins@rtn@tecl@ss \the\n@tecl@sses % output all note classes
