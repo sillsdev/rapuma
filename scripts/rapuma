@@ -106,7 +106,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r824'
+systemVersion   = '0.6.r825'
 local           = None
 
 # Give a welcome message
@@ -661,6 +661,11 @@ groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to w
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
+
+# FIXME: add support for -p (page range output)
+
+# FIXME: add support for -o (output file name override), this will be used by Rapuma Web
+
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')

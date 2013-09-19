@@ -39,8 +39,17 @@ class Tools (object) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
-    def getPdfPages (self, pdfFile) :
-        '''Get the total number of pages in a PDF file.'''
+    def pdftkPullPages (self, source, target, pgRange) :
+        '''Using the concatenate function in the pdftk utility, extract
+        a range of pages, 1 to n. It returns it in the target file.'''
+
+        # FIXME: Very basic right now. User has to know exactly what they want.
+        # Make the command line and run it
+        rCode = subprocess.call(['pdftk', source, 'cat', pgRange, 'output', target])
+
+
+    def pdftkTotalPages (self, pdfFile) :
+        '''Using pdftk, get the total number of pages in a PDF file.'''
 
         # Create a temporary file that we will use to hold data.
         # It should be deleted after the function is done.
@@ -103,14 +112,17 @@ class Tools (object) :
             return fileName
 
 
-    def modeFileName (self, targetDir, sourceFile, mode = 'draft') :
-        '''Dissect a file name and turn it into a "proof" name with a timestamp.'''
-        
-        # FIXME: It would be nice to have an alpha character incrementer
-        
+    def modeFileName (self, targetDir, sourceFile, mode = 'draft', pgRange = None) :
+        '''Dissect a file name and turn it into a file name that includes a mode
+        and if necessary a page range with a timestamp on the end.'''
+
         fileName = self.fName(sourceFile)
         fParts = fileName.split('.')
-        newName = mode + '_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
+        if pgRange :
+            newName = mode + '_' + fParts[0] + '_' + str(pgRange) + self.ymd() + '.' + fParts[1]
+        else :
+            newName = mode + '_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
+
         return os.path.join(targetDir, newName)
 
 

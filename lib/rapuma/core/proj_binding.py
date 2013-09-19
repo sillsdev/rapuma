@@ -177,7 +177,7 @@ class ProjBinding (object) :
             self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(output)])
 
         # Collect the page count and record in group
-        newPages = self.tools.getPdfPages(output)
+        newPages = self.tools.pdftkTotalPages(output)
         # FIXME: For now, we need to hard-code the manager name
         manager = 'usfm_Xetex'
         if self.projectConfig['Managers'][manager].has_key('totalBoundPages') :

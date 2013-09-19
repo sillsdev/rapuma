@@ -638,7 +638,7 @@ class Xetex (Manager) :
 ###############################################################################
 
 
-    def run (self, gid, mode, cidList, force) :
+    def run (self, gid, mode, cidList, pgRange, force) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -785,7 +785,7 @@ class Xetex (Manager) :
                     self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
 
             # Collect the page count and record in group
-            newPages = self.tools.getPdfPages(self.local.gidPdfFile)
+            newPages = self.tools.pdftkTotalPages(self.local.gidPdfFile)
             if self.projectConfig['Groups'][gid].has_key('totalPages') :
                 oldPages = int(self.projectConfig['Groups'][gid]['totalPages'])
                 if oldPages != newPages or oldPages == 'None' :
@@ -809,14 +809,19 @@ class Xetex (Manager) :
             # Build the name
             outputFolder = os.path.join(self.local.projHome, mode.capitalize())
             if pdfSubFileName :
-                outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode)
+                outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode, pgRange)
             else :
-                outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode)
+                outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode, pgRange)
             # Make sure there is a folder there to put it in
             if not os.path.exists(outputFolder) :
                 os.makedirs(outputFolder)
             # Move, not copy to the outputFolder
-            shutil.move(self.local.gidPdfFile, outputPdfFile)
+            if pgRange :
+                self.tools.pdftkPullPages(self.local.gidPdfFile, outputPdfFile, pgRange)
+                # Clean up to simulate a move
+                os.remove(self.local.gidPdfFile)
+            else :
+                shutil.move(self.local.gidPdfFile, outputPdfFile)
 
         # Review the results if desired
         if os.path.isfile(outputPdfFile) :
