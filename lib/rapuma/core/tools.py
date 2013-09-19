@@ -119,7 +119,7 @@ class Tools (object) :
         fileName = self.fName(sourceFile)
         fParts = fileName.split('.')
         if pgRange :
-            newName = mode + '_' + fParts[0] + '_' + str(pgRange) + self.ymd() + '.' + fParts[1]
+            newName = mode + '_' + fParts[0] + '_pg' + str(pgRange) + '_' + self.ymd() + '.' + fParts[1]
         else :
             newName = mode + '_' + fParts[0] + '_' + self.ymd() + '.' + fParts[1]
 

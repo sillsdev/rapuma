@@ -328,6 +328,15 @@ def userArguments (args) :
         source_path = None
         cid_list    = None
         cType       = None
+        override    = None
+        pages       = None
+        # Set optional override
+        if args.override :
+            override = args.override
+        # Set optional page range
+        if args.pages :
+            pages = args.pages
+        # Set optional cType
         if args.component_type :
             cType = args.component_type
         else :
@@ -381,9 +390,9 @@ def userArguments (args) :
         elif cmd in ['draft', 'final', 'proof'] :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    Project(pid, gid).renderGroup(cmd, cid_list, args.force)
+                    Project(pid, gid).renderGroup(cmd, cid_list, pages, args.force)
                 elif cType == 'map' :
-                    ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, args.force)
+                    ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, pages, args.force)
                 elif cType == 'toc' :
                     ProjToc(pid, gid).renderToc(cmd, args.force)
                 else :
@@ -604,7 +613,7 @@ prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
 mediaTypes              = ['book']
 # Group
 grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'run', 'update', 'unlock']
+grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'update', 'unlock']
 componentTypes          = ['usfm', 'map', 'toc']
 # Component
 cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
@@ -661,11 +670,8 @@ groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to w
 groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
 groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
 groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
-
-# FIXME: add support for -p (page range output)
-
-# FIXME: add support for -o (output file name override), this will be used by Rapuma Web
-
+groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
+groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
 
 # Add Component subprocess arguments
 compCommand = subparsers.add_parser('component', help='General project component management commands help')
