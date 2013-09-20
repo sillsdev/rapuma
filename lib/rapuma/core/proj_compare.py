@@ -34,12 +34,14 @@ class ProjCompare (object) :
         self.tools                          = Tools()
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.diffViewCmd                    = self.userConfig['System']['textDifferentialViewerCommand']
-
-        # Make sure the diff view command is a list
-        if type(self.diffViewCmd) != list :
-            self.diffViewCmd = [self.userConfig['System']['textDifferentialViewerCommand']]
+        self.projectMediaIDCode             = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
+            self.diffViewCmd                = None
+        else :
+            self.diffViewCmd                = self.userConfig['System']['textDifferentialViewerCommand']
+            # Make sure the diff view command is a list
+            if type(self.diffViewCmd) != list :
+                self.diffViewCmd            = [self.userConfig['System']['textDifferentialViewerCommand']]
 
         # Log messages for this module
         self.errorCodes     = {
@@ -49,6 +51,7 @@ class ProjCompare (object) :
             '0290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
             '0295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
             '0220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
+            '0300' : ['WRN', 'Files are different but visual compare is not enabled.']
         }
 
 
@@ -90,17 +93,23 @@ class ProjCompare (object) :
 
         # If there are any differences, open the diff viewer
         if self.isDifferent(new, old) :
-            # To prevent file names being pushed back to the list ref
-            # we need to use extend() rather than append()
-            cmd = []
-            cmd.extend(self.diffViewCmd)
-            cmd.extend([new, old])
-            try :
-                self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(new),self.tools.fName(old)])
-                subprocess.call(cmd)
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                self.log.writeToLog(self.errorCodes['0280'], [str(e)])
+            # If no diffViewCmd is found this may be running headless
+            # in that case just report that the file is different and
+            # and leave the function
+            if not self.diffViewCmd :
+                self.log.writeToLog(self.errorCodes['0300'])
+            else :
+                # To prevent file names being pushed back to the list ref
+                # we need to use extend() rather than append()
+                cmd = []
+                cmd.extend(self.diffViewCmd)
+                cmd.extend([new, old])
+                try :
+                    self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(new),self.tools.fName(old)])
+                    subprocess.call(cmd)
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.log.writeToLog(self.errorCodes['0280'], [str(e)])
         else :
             self.log.writeToLog(self.errorCodes['0220'])
 
