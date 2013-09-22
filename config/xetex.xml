@@ -20,13 +20,6 @@ Todo:
         <value>--somethingimportant</value>
     </setting>
     <setting>
-        <name>Use PDF Viewer</name>
-        <key>usePdfViewer</key>
-        <description>Route the output to the PDF viewer.</description>
-        <type>boolean</type>
-        <value>True</value>
-    </setting>
-    <setting>
         <name>PDF Viewer Command</name>
         <key>pdfViewerCommand</key>
         <description>The command needed to view the PDF output created by this module. The default is taken from the rapuma system configuration file.</description>

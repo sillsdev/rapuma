@@ -99,22 +99,14 @@ class Xetex (Manager) :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
-        self.usePdfViewer           = self.tools.str2bool(self.projectConfig['Managers'][self.manager]['usePdfViewer'])
         self.useHyphenation         = self.proj_hyphenation.useHyphenation
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-
-        # Special folder paths
-#        self.projGidFolder              = os.path.join(self.local.projComponentFolder, self.gid)
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :
             os.makedirs(self.local.projGidFolder)
 
         # Check to see if the PDF support is ready to go
-        if not self.pdfViewer :
-            self.pdfViewer = self.project.userConfig['System']['pdfDefaultViewerCommand']
-            self.projectConfig['Managers'][self.manager]['pdfViewerCommand'] = self.pdfViewer
-            self.tools.writeConfFile(self.projectConfig)
         if not self.pdfUtilityCommand :
             self.pdfUtilityCommand = self.project.userConfig['System']['pdfDefaultUtilityCommand']
             self.projectConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
@@ -171,6 +163,8 @@ class Xetex (Manager) :
             '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
+            '0700' : ['ERR', 'Rendered file not found: <<1>>'],
+            '0710' : ['WRN', 'PDF viewing is disabled.'],
 
         }
 
@@ -186,16 +180,15 @@ class Xetex (Manager) :
 
 #        import pdb; pdb.set_trace()
 
-        if self.usePdfViewer :
-            # Add the file to the viewer command
-            self.pdfViewer.append(fileName)
-            # Run the XeTeX and collect the return code for analysis
-            try :
-                subprocess.Popen(self.pdfViewer)
-                return True
-            except Exception as e :
-                # If we don't succeed, we should probably quite here
-                self.log.writeToLog(self.errorCodes['1005'], [str(e)])
+        # Add the file to the viewer command
+        self.pdfViewer.append(fileName)
+        # Run the XeTeX and collect the return code for analysis
+        try :
+            subprocess.Popen(self.pdfViewer)
+            return True
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog(self.errorCodes['1005'], [str(e)])
 
 
     def makeExtFile (self, fileName, description) :
@@ -823,12 +816,19 @@ class Xetex (Manager) :
             else :
                 shutil.move(self.local.gidPdfFile, outputPdfFile)
 
+#        import pdb; pdb.set_trace()
+
         # Review the results if desired
         if os.path.isfile(outputPdfFile) :
-            if self.displayPdfOutput(outputPdfFile) :
-                self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(outputPdfFile)])
+            if not len(self.pdfViewer) == 0 :
+                if self.displayPdfOutput(outputPdfFile) :
+                    self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(outputPdfFile)])
+                else :
+                    self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(outputPdfFile)])
             else :
-                self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(outputPdfFile)])
+                self.log.writeToLog(self.errorCodes['0710'])
+        else :
+            self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(outputPdfFile)])
 
         return True
 

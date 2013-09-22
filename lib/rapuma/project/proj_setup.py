@@ -102,7 +102,7 @@ class ProjSetup (object) :
     def finishInit (self) :
         '''If this is a new project (or system) we need to handle these settings special.'''
 
-#            import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         # Catch if we have a Projects key sooner than later
         if not self.userConfig.has_key('Projects') :
@@ -847,11 +847,9 @@ class ProjDelete (object) :
 
 # Currently there is only this function in this class
 
-    def deleteProject (self) :
-        '''Delete a project from the Rapuma system registry and create a 
-        backup on the hard drive.'''
-
-#        import pdb; pdb.set_trace()
+    def deleteProject (self, force = False) :
+        '''Delete a project from the Rapuma system registry. If force is used,
+        create a backup in the project's parent folder.'''
 
         # If no pid was given this fails
         if not self.pid :
@@ -868,18 +866,22 @@ class ProjDelete (object) :
             else :
                 self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
 
-        # Do a simple (numbered) backup.
-        if self.projHome :
+        # Do a simple (numbered) backup if force is used.
+        if self.projHome and force :
             self.tools.makeFolderBackup(self.projHome)
-            if os.path.exists(self.projHome) :
-                shutil.rmtree(self.projHome)
-                self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
-            else :
-                self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
-                return
         else :
             self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
-            return False
+
+#        import pdb; pdb.set_trace()
+
+        # Remove any possible residual project data
+        if not self.projHome :
+            self.projHome = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        if os.path.exists(self.projHome) :
+            shutil.rmtree(self.projHome)
+            self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
+        else :
+            self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
 
         # Report the process is done
         self.tools.terminal('Removal process for [' + self.pid + '] is completed.')

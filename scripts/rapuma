@@ -106,7 +106,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r827'
+systemVersion   = '0.6.r830'
 local           = None
 
 # Give a welcome message
@@ -279,7 +279,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'project' :
-                ProjDelete(pid).deleteProject()
+                ProjDelete(pid).deleteProject(args.force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'restore' :
