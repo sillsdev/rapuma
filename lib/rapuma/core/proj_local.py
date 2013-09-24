@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, site
+import codecs, os, site, platform
 from configobj import ConfigObj
 
 # Load the local classes
@@ -40,6 +40,7 @@ class ProjLocal (object) :
         self.gid                = gid
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
+        self.osPlatform         = platform.architecture()[0][:2]
         self.projectConf        = projectConf
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig

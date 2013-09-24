@@ -48,7 +48,7 @@ Todo:
             <name>Rapuma XeTeX Folder</name>
             <description>XeTeX is run from within Rapuma and the executable and FMT file is located in this folder.</description>
             <folderID>rapumaXetexFolder</folderID>
-            <folderPath>[self:rapumaHome][pathSep]xetex</folderPath>
+            <folderPath>[self:rapumaHome][pathSep]xetex-[self:osPlatform]</folderPath>
             <relies>rapumaHome</relies>
         </folder>
         <folder>

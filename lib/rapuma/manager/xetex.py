@@ -716,6 +716,11 @@ class Xetex (Manager) :
                             + self.local.projMacroFolder + ':' \
                             + self.local.projGidFolder + ':.'
 
+
+            print os.path.join(self.local.rapumaXetexFolder, 'bin')
+
+
+
             # Create the environment dictionary that will be fed into subprocess.call()
             #envDict = dict(os.environ)
             envDict={}
