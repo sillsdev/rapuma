@@ -710,6 +710,11 @@ class Xetex (Manager) :
                             + self.local.projGidFolder + ':.'
 
 
+
+
+
+
+
             print 'Testing: ', os.path.join(self.local.rapumaXetexFolder, 'bin')
 
 
@@ -751,13 +756,20 @@ class Xetex (Manager) :
                     self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
             except Exception as e :
                 # If subprocess fails it might be because XeTeX did not execute
-                # we will try to analyze and report back something useful
-                if str(e).find('[Errno 8]') > 0 :
-                    # Error running XeTeX
-                    self.log.writeToLog(self.errorCodes['0615'], str(e))
-                else :
-                    # Some other problem
-                    self.log.writeToLog(self.errorCodes['0615'], [self.local.gidPdfFile, str(e)])
+                # we will try to report back something useful
+                self.log.writeToLog(self.errorCodes['0615'], str(e))
+
+
+
+
+
+
+
+
+
+
+
+
 
             # Background management (Phase 2)
             bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
