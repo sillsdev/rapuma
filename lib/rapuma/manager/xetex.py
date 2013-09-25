@@ -757,7 +757,7 @@ class Xetex (Manager) :
             except Exception as e :
                 # If subprocess fails it might be because XeTeX did not execute
                 # we will try to report back something useful
-                self.log.writeToLog(self.errorCodes['0615'], str(e))
+                self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
 
 
