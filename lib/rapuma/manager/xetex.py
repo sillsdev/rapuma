@@ -710,7 +710,7 @@ class Xetex (Manager) :
                             + self.local.projGidFolder + ':.'
 
 
-            print os.path.join(self.local.rapumaXetexFolder, 'bin')
+            print 'Testing: ', os.path.join(self.local.rapumaXetexFolder, 'bin')
 
 
 
