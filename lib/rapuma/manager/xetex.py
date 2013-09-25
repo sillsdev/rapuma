@@ -745,6 +745,13 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
 
             # Run the XeTeX and collect the return code for analysis
+
+
+
+            print 'Testing: ', cmds, envDict
+
+
+
             try :
                 rCode = subprocess.call(cmds, env = envDict)
                 # Analyse the return code
