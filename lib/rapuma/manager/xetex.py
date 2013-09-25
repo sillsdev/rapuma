@@ -709,16 +709,6 @@ class Xetex (Manager) :
                             + self.local.projMacroFolder + ':' \
                             + self.local.projGidFolder + ':.'
 
-
-
-
-
-
-
-            print 'Testing: ', os.path.join(self.local.rapumaXetexFolder, 'bin')
-
-
-
             # Create the environment dictionary that will be fed into subprocess.call()
             #envDict = dict(os.environ)
             envDict={}
@@ -745,13 +735,6 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
 
             # Run the XeTeX and collect the return code for analysis
-
-
-
-            print 'Testing: ', cmds, envDict
-
-
-
             try :
                 rCode = subprocess.call(cmds, env = envDict)
                 # Analyse the return code
