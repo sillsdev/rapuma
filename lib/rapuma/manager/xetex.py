@@ -150,7 +150,7 @@ class Xetex (Manager) :
 
             '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             '0610' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] group.'],
-            '0615' : ['ERR', 'XeTeX failed to execute. System may not support the Rapuma internal 64 bit version.'],
+            '0615' : ['ERR', 'XeTeX failed to execute with error: <<1>>'],
             '0617' : ['ERR', 'XeTeX failed to execute with this error: [<<1>>]'],
             '0620' : ['DBG', 'xetex command in <<1>>: <<2>> <<3>>'],
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
@@ -753,8 +753,8 @@ class Xetex (Manager) :
                 # If subprocess fails it might be because XeTeX did not execute
                 # we will try to analyze and report back something useful
                 if str(e).find('[Errno 8]') > 0 :
-                    # Sorry, no 64 bit support
-                    self.log.writeToLog(self.errorCodes['0615'])
+                    # Error running XeTeX
+                    self.log.writeToLog(self.errorCodes['0615'], str(e))
                 else :
                     # Some other problem
                     self.log.writeToLog(self.errorCodes['0615'], [self.local.gidPdfFile, str(e)])
