@@ -28,10 +28,20 @@ class UserConfig (object) :
         '''Intitate the whole class and create the object.'''
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.userHome           = os.environ.get('RAPUMA_USER')
+        self.defaultUserHome    = os.environ.get('RAPUMA_USER')
         self.userConfFileName   = 'rapuma.conf'
-        self.userConfFile       = os.path.join(self.userHome, self.userConfFileName)
         self.tools              = Tools()
+
+        # Point to the right user config
+        # Look for a web installation first, if not go to default
+        # Note that a slash is put before var as it is off of root
+        # That kind of stops this from being cross-platform
+        rapumaWebConfig         = os.path.join('/var', 'lib', 'rapuma', 'config', self.userConfFileName)
+        defaultConfig           = os.path.join(self.defaultUserHome, self.userConfFileName)
+        if os.path.exists(rapumaWebConfig) :
+            self.userConfFile   = rapumaWebConfig
+        else :
+            self.userConfFile   = defaultConfig
 
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
@@ -88,8 +98,8 @@ class UserConfig (object) :
         '''Initialize a user config file on a new install or system re-init.'''
 
         # Create home folders
-        if not os.path.isdir(self.userHome) :
-            os.mkdir(self.userHome)
+        if not os.path.isdir(self.defaultUserHome) :
+            os.mkdir(self.defaultUserHome)
 
         # Make the default global rapuma.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
@@ -113,6 +123,8 @@ class UserConfig (object) :
     def registerProject (self, pid, pname, pmid, projHome) :
         '''If it is not there, create an entry in the user's
         rapuma.conf located in the user's config folder.'''
+
+#        import pdb; pdb.set_trace()
 
         self.tools.buildConfSection(self.userConfig, 'Projects')
         self.tools.buildConfSection(self.userConfig['Projects'], pid)
