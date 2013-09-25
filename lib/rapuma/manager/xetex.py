@@ -732,7 +732,7 @@ class Xetex (Manager) :
             # For debugging purposes, output the following DBG message
             if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
                     self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
-                self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), "TEXINPUTS="+texInputsLine, " ".join(cmds)])
+                self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), str(envDict), " ".join(cmds)])
 
             # Run the XeTeX and collect the return code for analysis
             try :
@@ -748,18 +748,6 @@ class Xetex (Manager) :
                 # If subprocess fails it might be because XeTeX did not execute
                 # we will try to report back something useful
                 self.log.writeToLog(self.errorCodes['0615'], [str(e)])
-
-
-
-
-
-
-
-
-
-
-
-
 
             # Background management (Phase 2)
             bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']

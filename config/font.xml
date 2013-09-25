@@ -22,6 +22,13 @@ Todo:
         <value></value>
     </setting>
     <setting>
+        <name>Use Feature</name>
+        <key>usefeature</key>
+        <description>List any features needed for this font to render correctly. One or more can be listed, each must be separated by a colon.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
         <name>Use Language</name>
         <key>useLanguage</key>
         <description>The language this font will be working with. Specify the language by using its three letter Ethnologue code. The language must be supported by the font, otherwise the field should remain empty.</description>

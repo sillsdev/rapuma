@@ -258,6 +258,10 @@ class Config (object) :
             useLanguage = self.macPackConfig['FontSettings']['useLanguage']
             if useLanguage :
                 result = ':language=' + useLanguage
+        elif value == 'feature' :
+            useFeature = self.macPackConfig['FontSettings']['useFeature']
+            if useFeature :
+                result = ':' + useFeature
 
         return result
 
