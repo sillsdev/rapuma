@@ -85,8 +85,8 @@ class Xetex (Manager) :
             self.macPackConfig      = self.proj_config.macPackConfig
             self.macPackFunctions   = self.proj_config.macPackFunctions
         # Some config settings
-        self.pdfViewer              = self.projectConfig['Managers'][self.manager]['pdfViewerCommand']
-        self.pdfUtilityCommand      = self.projectConfig['Managers'][self.manager]['pdfUtilityCommand']
+        self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
+        self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
 
@@ -105,12 +105,6 @@ class Xetex (Manager) :
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :
             os.makedirs(self.local.projGidFolder)
-
-        # Check to see if the PDF support is ready to go
-        if not self.pdfUtilityCommand :
-            self.pdfUtilityCommand = self.project.userConfig['System']['pdfDefaultUtilityCommand']
-            self.projectConfig['Managers'][self.manager]['pdfUtilityCommand'] = self.pdfUtilityCommand
-            self.tools.writeConfFile(self.projectConfig)
 
         # Record some error codes
         # FIXME: much more needs to be done with this
@@ -181,10 +175,10 @@ class Xetex (Manager) :
 #        import pdb; pdb.set_trace()
 
         # Add the file to the viewer command
-        self.pdfViewer.append(fileName)
+        self.pdfViewerCmd.append(fileName)
         # Run the XeTeX and collect the return code for analysis
         try :
-            subprocess.Popen(self.pdfViewer)
+            subprocess.Popen(self.pdfViewerCmd)
             return True
         except Exception as e :
             # If we don't succeed, we should probably quite here
@@ -762,7 +756,7 @@ class Xetex (Manager) :
                         self.macPackConfig['PageLayout']['useCropmarks'] = 'False'
                     continue
                 bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
-                cmd = self.pdfUtilityCommand + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
+                cmd = self.pdfUtilityCmd + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
                 try :
                     subprocess.call(cmd)
                     shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
@@ -815,7 +809,7 @@ class Xetex (Manager) :
 
         # Review the results if desired
         if os.path.isfile(outputPdfFile) :
-            if not len(self.pdfViewer) == 0 :
+            if not len(self.pdfViewerCmd) == 0 :
                 if self.displayPdfOutput(outputPdfFile) :
                     self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(outputPdfFile)])
                 else :

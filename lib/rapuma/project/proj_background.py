@@ -44,6 +44,7 @@ class ProjBackground (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
         self.local                      = ProjLocal(pid, gid)
         self.proj_config                = Config(pid, gid)
         self.proj_config.getProjectConfig()
@@ -176,13 +177,12 @@ class ProjBackground (object) :
             self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
-    def createBorderFile (self, bgLinesFile) :
+    def createBorderFile (self, pdfOutFile) :
         '''Create a border backgound file used for proof reading.'''
 
         # Set our file names
-        source = os.path.join(self.local.rapumaIllustrationFolder, 'border.svg')
-        output = os.path.join(self.local.projIllustrationFolder,  'pageborder.svg')
-        final_output = bgLinesFile
+        borderSource        = os.path.join(self.local.rapumaIllustrationFolder, 'border.svg')
+        svgInFile           = tempfile.NamedTemporaryFile().name + '.svg'
 
         # input and calculation
         # get the values for page dimensions from Rapuma usfm_layout.conf 
@@ -196,8 +196,8 @@ class ProjBackground (object) :
         # paper width [px]
         paperWidth = round(pageWidth*90/25.4, 2)
 
-        # Read in the source file
-        contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
+        # Read in the borderSource file
+        contents = codecs.open(borderSource, "rt", encoding="utf_8_sig").read()
 
         # Make the changes
 
@@ -213,26 +213,20 @@ class ProjBackground (object) :
         contents = re.sub(ur'@pW', ur'%r' % paperWidth, contents)
 
         # Write out a temp file so we can do some checks
-        codecs.open(output, "wt", encoding="utf_8_sig").write(contents)
+        codecs.open(svgInFile, "wt", encoding="utf_8_sig").write(contents)
 
-        # commands = ['inkscape', output, final_output]
-        commands = ['inkscape', '-f', output, '-A', final_output]
-
-        try:
-            subprocess.call(commands) 
+        # Run the conversion utility
+        if self.convertSvgToPdf(svgInFile, pdfOutFile) :
             return True
-        except Exception as e :
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(final_output),str(e)])
 
 
-    def createLinesFile (self, bgLinesFile) :
+    def createLinesFile (self, pdfOutFile) :
         '''Create a lines background file used for composition work. The code
         in this file came from Flip Wester (flip_wester@sil.org)'''
 
         # Set our file names
-        source = os.path.join(self.local.rapumaIllustrationFolder, 'grid.svg')
-        output = tempfile.NamedTemporaryFile()
-        final_output = bgLinesFile
+        gridSource          = os.path.join(self.local.rapumaIllustrationFolder, 'grid.svg')
+        svgInFile           = tempfile.NamedTemporaryFile().name + '.svg'
 
         # For testing
         debug = False
@@ -304,13 +298,11 @@ class ProjBackground (object) :
         # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
         # based on pixel [px] measurements in Inkscape 
         topskip = round((1.25 * 12 * fontSizeUnit),3)
-        #topskip = round((0.8 * 12 * fontSizeUnit),3)
         if debug :
             self.tools.terminal('topskipcalc: ' + str(topskip))
 
         # The firstBaseLine is topMargin minus topskip in [px] 
         firstBaseLine = topMargin - topskip
-#        firstBaseLine = topPxMargin - topskip
         if debug :
             self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
 
@@ -320,26 +312,18 @@ class ProjBackground (object) :
         if debug :
             self.tools.terminal('lineGridHeight: ' + str(lineGridHeight))
 
-#        lineGridWidth = int((pageWidth-marginUnit*1.5)*90/25.4)
         lineGridWidth = textPxWidth
         if debug :
             self.tools.terminal('lineGridWidth: ' + str(lineGridWidth))
 
-#        lineGridMargin = int(marginUnit*45/25.4)
         lineGridMargin = outsidePxMargin
         if debug :
             self.tools.terminal('lineGridMargin: ' + str(lineGridMargin))
 
+        # Read in the gridSource file
+        contents = codecs.open(gridSource, "rt", encoding="utf_8_sig").read()
 
-
-#        self.tools.dieNow()
-
-
-
-        # Read in the source file
-        contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
-
-        # Make the changes
+        # Make the changes to the contents of the gridSource contents
 
         # 01 enter paper dimensions
         # paper height [px]
@@ -388,14 +372,40 @@ class ProjBackground (object) :
         contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
 
         # Write out a temp file so we are ready for the final process
-        codecs.open(output.name + '.svg', "wt", encoding="utf_8_sig").write(contents)
+        codecs.open(svgInFile, "wt", encoding="utf_8_sig").write(contents)
 
-        commands = ['inkscape', '-f', output.name + '.svg', '-A', final_output]
+        # Run the conversion utility
+        if self.convertSvgToPdf(svgInFile, pdfOutFile) :
+            return True
 
-#        import pdb; pdb.set_trace()
 
+    def buildCommandList (self, svgInFile, pdfOutFile) :
+        '''Convert a command line from the config that has keys in it for
+        input and output files. The commands in the config should look like
+        this coming in:
+            svgPdfConverter = convert,svgInFile,pdfOutFile
+            svgPdfConverter = rsvg-convert,-f,pdf,-o,pdfOutFile,svgInFile
+            svgPdfConverter = inkscape,-f,svgInFile,-A,pdfOutFile
+        This will insert the right value for svgInFile and pdfOutFile.'''
+
+        cmds = list()
+        for c in self.svgPdfConverter :
+            if c == 'svgInFile' :
+                cmds.append(svgInFile)
+            elif c == 'pdfOutFile' :
+                cmds.append(pdfOutFile)
+            else :
+                cmds.append(c)
+
+        return cmds
+
+
+    def convertSvgToPdf (self, svgInFile, pdfOutFile) :
+        '''Convert/render an SVG file to produce a PDF file.'''
+
+        # Simple try statement seems to work best for this
         try:
-            subprocess.call(commands) 
+            subprocess.call(self.buildCommandList(svgInFile, pdfOutFile)) 
             return True
         except Exception as e :
             self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(final_output),str(e)])

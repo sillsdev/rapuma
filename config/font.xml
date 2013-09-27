@@ -23,7 +23,7 @@ Todo:
     </setting>
     <setting>
         <name>Use Feature</name>
-        <key>usefeature</key>
+        <key>useFeature</key>
         <description>List any features needed for this font to render correctly. One or more can be listed, each must be separated by a colon.</description>
         <type>string</type>
         <value></value>

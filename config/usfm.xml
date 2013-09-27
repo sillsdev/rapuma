@@ -60,7 +60,7 @@ Todo:
         <key>macroPackage</key>
         <description>The macro package the XeTeX rendering engine will use to render components.</description>
         <type>string</type>
-        <value>ptx2pdf</value>
+        <value>usfmTex</value>
     </setting>
 </root>
 
