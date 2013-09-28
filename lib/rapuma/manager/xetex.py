@@ -713,6 +713,8 @@ class Xetex (Manager) :
                 envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
                 envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
                 envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
+            else :
+                envDict.update(os.environ)
 
             # Create the XeTeX command argument list that subprocess.call() will run with
             # the environment vars we set above
