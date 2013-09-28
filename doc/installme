@@ -1,12 +1,12 @@
 Installation instructions for Rapuma
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 14 May 2013
+	Last edited: 28 September 2013
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-STATUS: Currently Rapuma is under heavy development (by a single, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It is hoped it will be "feature-adequate" by early 2013, in time to do a Bible publication. (We'll see how that goes.)
+STATUS: Currently Rapuma is under heavy development (by a single, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
 
-These instructions are for manually installing the developer version of the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
+These instructions are for manually installing the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 REQUIRED PACKAGES
@@ -26,9 +26,7 @@ Next, in the terminal, you need to install all the necessary packages to run the
 
 Required:
 
-    sudo apt-get install texlive texlive-xetex python-configobj evince python-argparse pdftk mercurial meld
-
-(Note to me: Do we still need these?: python-vte python-mako python-htmlgen)
+    sudo apt-get install python-configobj evince python-argparse pdftk mercurial meld librsvg2-bin
 
 Another required package is the Palaso Python library. Rapuma depends on a couple parts of that.
 At this time, that package needs to be added to your system by cloning the project, then
@@ -44,20 +42,9 @@ This needs to be installed before you can use it. To install run:
 
 (Note: need to add simple test for install of palaso-python)
 
-Some suggested additional packages to make your Linux DTP system complete:
+Some suggested additional package(s) to make your Linux DTP system complete:
 
-    sudo apt-get install inkscape libgtk2-spell-perl tortoisehg
-
-Some suggested SIL Packages would be:
-
-    sudo apt-get install libteckit-perl teckit libfont-ttf-scripts-perl
-
-TECKit Work-around:
-There is a dependency conflict created in the way the texlive package is currently put together. It will block TECKit from being able to install correctly. It may be some time before this is fixed so a work-around can be applied by doing the following:
-
-    sudo dpkg-divert --package teckit --add /usr/bin/teckit_compile
-
-(Note: On newer versions of Ubuntu, the SIL repo may not be up to date so some of the above may not be available.)
+    sudo apt-get install tortoisehg libteckit-perl teckit libfont-ttf-scripts-perl
 
 Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
 

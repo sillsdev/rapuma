@@ -106,7 +106,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r840'
+systemVersion   = '0.6.r841'
 local           = None
 
 # Give a welcome message
@@ -329,10 +329,19 @@ def userArguments (args) :
         cid_list    = None
         cType       = None
         override    = None
+        ovrdPath    = ''
         pages       = None
         # Set optional override
         if args.override :
+            # This can only be used in the following context
+            if not cmd in ['draft', 'proof', 'final'] :
+                sys.exit('\nERROR: Cannot use override path in this context. Process halted!\n')
             override = args.override
+            ovrdPath = os.path.split(os.path.abspath(override))[0]
+            flName = os.path.split(override)[1]
+            override = os.path.join(ovrdPath, flName)
+            if not os.path.isdir(ovrdPath) :
+                sys.exit('\nERROR: The path given [' + ovrdPath + '] given is not valid. Process halted!\n')
         # Set optional page range
         if args.pages :
             pages = args.pages
@@ -390,11 +399,11 @@ def userArguments (args) :
         elif cmd in ['draft', 'final', 'proof'] :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    Project(pid, gid).renderGroup(cmd, cid_list, pages, args.force)
+                    Project(pid, gid).renderGroup(cmd, cid_list, pages, override)
                 elif cType == 'map' :
-                    ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, pages, args.force)
+                    ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, pages, override)
                 elif cType == 'toc' :
-                    ProjToc(pid, gid).renderToc(cmd, args.force)
+                    ProjToc(pid, gid).renderToc(cmd, override)
                 else :
                     cTypeError(cType)
             else :

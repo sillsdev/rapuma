@@ -33,7 +33,7 @@ This completes the basic setup routine for Rapuma. Now you can try the examples.
 
 RAPUMA EXAMPLES
 -----------------------------------------
-Rapuma comes with a couple example projects that help demonstrate what it can do and also test the system when revisions are made. Currently there are two demos that are found in the rapuma program directory that was downloaded from the Palaso projects repository. They are:
+Rapuma comes with a couple example projects. Use these commands to run them:
 
 File: example-jas.sh (A paraphase of the book of James in English.)
 

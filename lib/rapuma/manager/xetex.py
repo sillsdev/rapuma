@@ -625,7 +625,7 @@ class Xetex (Manager) :
 ###############################################################################
 
 
-    def run (self, gid, mode, cidList, pgRange, force) :
+    def run (self, gid, mode, cidList, pgRange, override) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render it.'''
 
@@ -653,11 +653,6 @@ class Xetex (Manager) :
                 self.macPackConfig['PageLayout']['useCropmarks'] = 'True'
                 # This is more of an internal value change so it will
                 # not be written out 
-
-        # This is the file we will make. If force is set, delete the old one.
-        if force :
-            if os.path.isfile(self.local.gidPdfFile) :
-                os.remove(self.local.gidPdfFile)
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
@@ -788,21 +783,26 @@ class Xetex (Manager) :
 
         # Move to the output folder according to mode for easier access
         if os.path.isfile(self.local.gidPdfFile) :
-            # Build the name
-            outputFolder = os.path.join(self.local.projHome, mode.capitalize())
-            if pdfSubFileName :
-                outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode, pgRange)
+            # For override requests just use that
+            if override :
+                outputPdfFile = override
+            # Otherwise, for normal output build the name and location
             else :
-                outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode, pgRange)
-            # Make sure there is a folder there to put it in
-            if not os.path.exists(outputFolder) :
-                os.makedirs(outputFolder)
-            # Move, not copy to the outputFolder
+                outputFolder = os.path.join(self.local.projHome, mode.capitalize())
+                if pdfSubFileName :
+                    outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode, pgRange)
+                else :
+                    outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode, pgRange)
+                # Make sure there is a folder there to put it in
+                if not os.path.exists(outputFolder) :
+                    os.makedirs(outputFolder)
+
+            # Pull out pages if requested (use the same file for output)
             if pgRange :
-                self.tools.pdftkPullPages(self.local.gidPdfFile, outputPdfFile, pgRange)
-                # Clean up to simulate a move
-                os.remove(self.local.gidPdfFile)
-            else :
+                self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
+
+            # Deliver to final target folder
+            if os.path.exists(self.local.gidPdfFile) :
                 shutil.move(self.local.gidPdfFile, outputPdfFile)
 
 #        import pdb; pdb.set_trace()
