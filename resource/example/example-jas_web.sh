@@ -37,6 +37,6 @@ echo    rapuma group ENG-LATN-JAS mb group add --component_type usfm --cid_list 
 # With simple projects such as this, we can now render the text. The "draft" command will set in
 # motion a process that will perform a number of tasks in this project such as import the default
 # font and macro package as well as create some default settings files.
-echo    rapuma group ENG-LATN-JAS mb group draft
-        rapuma group ENG-LATN-JAS mb group draft
+echo    rapuma group ENG-LATN-JAS mb group draft -o /var/lib/rapuma/work
+        rapuma group ENG-LATN-JAS mb group draft -o /var/lib/rapuma/work
 
