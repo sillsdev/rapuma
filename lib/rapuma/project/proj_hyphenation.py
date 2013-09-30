@@ -41,8 +41,6 @@ class ProjHyphenation (object) :
         self.pid                        = pid
         self.gid                        = gid
         self.tools                      = Tools()
-        self.local                      = ProjLocal(pid)
-        self.log                        = ProjLog(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(pid, gid)
@@ -50,6 +48,8 @@ class ProjHyphenation (object) :
         self.proj_config.getHyphenationConfig()
         self.projectConfig              = self.proj_config.projectConfig
         self.hyphenationConfig          = self.proj_config.hyphenationConfig
+        self.local                      = ProjLocal(pid, gid self.projectConfig)
+        self.log                        = ProjLog(pid)
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
         self.macPack                    = None
