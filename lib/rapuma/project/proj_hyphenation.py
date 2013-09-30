@@ -48,7 +48,7 @@ class ProjHyphenation (object) :
         self.proj_config.getHyphenationConfig()
         self.projectConfig              = self.proj_config.projectConfig
         self.hyphenationConfig          = self.proj_config.hyphenationConfig
-        self.local                      = ProjLocal(pid, gid self.projectConfig)
+        self.local                      = ProjLocal(pid, gid, self.projectConfig)
         self.log                        = ProjLog(pid)
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
