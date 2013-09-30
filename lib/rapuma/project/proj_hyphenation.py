@@ -168,8 +168,8 @@ class ProjHyphenation (object) :
 
         def update () :
             # Clean out the previous version of the component hyphenation file
-            if os.path.isfile(self.compHyphFile) :
-                os.remove(self.compHyphFile)
+            if os.path.isfile(self.local.compHyphFile) :
+                os.remove(self.local.compHyphFile)
             # Run a hyphenation source preprocess if specified
             if self.useSourcePreprocess :
                 self.processHyphens(force)
@@ -178,13 +178,13 @@ class ProjHyphenation (object) :
             self.harvestSource(force)
             self.makeHyphenatedWords()
             # Quick sanity test
-            if not os.path.isfile(self.compHyphFile) :
-                self.log.writeToLog(self.errorCodes['0275'], [self.tools.fName(self.compHyphFile)])
+            if not os.path.isfile(self.local.compHyphFile) :
+                self.log.writeToLog(self.errorCodes['0275'], [self.tools.fName(self.local.compHyphFile)])
             self.log.writeToLog(self.errorCodes['0270'], [self.cType])
 
         if force :
             update()
-        elif not os.path.exists(self.compHyphFile) :
+        elif not os.path.exists(self.local.compHyphFile) :
             update()
         elif os.path.exists(self.ptProjHyphBakFile) and self.tools.isOlder(self.ptProjHyphBakFile, self.ptHyphFile) :
             update()
@@ -241,8 +241,8 @@ class ProjHyphenation (object) :
         # Sort the list
         self.finalList.sort()
         # Output to the project storage file for other processes
-        with codecs.open(self.compHyphFile, "w", encoding='utf_8') as compHyphObject :
-            compHyphObject.write(self.tools.makeFileHeader(self.tools.fName(self.compHyphFile), description))
+        with codecs.open(self.local.compHyphFile, "w", encoding='utf_8') as compHyphObject :
+            compHyphObject.write(self.tools.makeFileHeader(self.tools.fName(self.local.compHyphFile), description))
             for word in self.finalList :
                 compHyphObject.write(word + '\n')
 

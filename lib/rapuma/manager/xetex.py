@@ -273,7 +273,7 @@ class Xetex (Manager) :
              Please refer to the documentation for details on how to make changes.'
 
         # Try to get dependent files in place
-        if not os.path.isfile(self.compHyphFile) :
+        if not os.path.isfile(self.local.compHyphFile) :
             # Call the Hyphenation manager to create a sorted file of hyphenated words
             # We will not use force (set to False) for this.
             self.proj_hyphenation.updateHyphenation(False)
@@ -282,7 +282,7 @@ class Xetex (Manager) :
         with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
             hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpHyphExcTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
-            with codecs.open(self.compHyphFile, "r", encoding='utf_8') as hyphenWords :
+            with codecs.open(self.local.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
                     # Strip out commented lines/words
                     if word[:1] != '#' and word != '' :
