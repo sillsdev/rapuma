@@ -491,8 +491,13 @@ class Config (object) :
             shutil.rmtree(macDirBak)
             self.log.writeToLog(self.errorCodes['3600'], [macPack])
             return True
+        # But if the install fails we need to put things back as they were
         else :
+            if os.path.exists(macDirBak) :
+                shutil.copytree(macDirBak, macDir)
+            # Report the failure
             self.log.writeToLog(self.errorCodes['3650'], [macPack])
+            return False
 
 
     def installMacPackOnly (self, package) :
