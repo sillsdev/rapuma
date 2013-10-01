@@ -45,7 +45,13 @@ class Tools (object) :
 
         # FIXME: Very basic right now. User has to know exactly what they want.
         # Make the command line and run it
-        rCode = subprocess.call(['pdftk', source, 'cat', pgRange, 'output', target])
+
+        # Create a temp file name
+        tmpOut = tempfile.NamedTemporaryFile().name
+        # Incase the source and target are the same output to a temp file
+        rCode = subprocess.call(['pdftk', source, 'cat', pgRange, 'output', tmpOut])
+        # Manually copy the temp file to the target
+        shutil.copy(tmpOut, target)
 
 
     def pdftkTotalPages (self, pdfFile) :
