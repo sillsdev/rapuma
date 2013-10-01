@@ -408,6 +408,6 @@ class ProjBackground (object) :
             subprocess.call(self.buildCommandList(svgInFile, pdfOutFile)) 
             return True
         except Exception as e :
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(final_output),str(e)])
+            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(pdfOutFile),str(e)])
 
 
