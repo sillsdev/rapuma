@@ -61,7 +61,8 @@ class Config (object) :
             '3310' : ['ERR', 'Failed to copy [<<1>>] to folder [<<2>>].'],
             '3400' : ['MSG', 'Force set to True. Removed macro package configuration file: [<<1>>]'],
             '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
-            '3600' : ['MSG', 'Updated macro package [<<1>>]']
+            '3600' : ['MSG', 'Updated macro package [<<1>>]'],
+            '3650' : ['ERR', 'Failed to updated macro package [<<1>>]']
 
         }
 
@@ -141,8 +142,10 @@ class Config (object) :
         if not os.path.exists(self.local.macPackConfXmlFile) :
             self.addMacPack(macPack)
 
+#        import pdb; pdb.set_trace()
+
         # Load macPackConfig
-        self.macPackConfig              = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -467,22 +470,29 @@ class Config (object) :
         # Be sure we have file names
         self.getMacPackConfig(macPack)
         # Delete the existing macro package (but not the settings)
-        macDir = os.path.join(self.local.projMacroFolder, macPack)
+        # but make a backup first
+        macDir          = os.path.join(self.local.projMacroFolder, macPack)
+        macDirBak       = macDir + '.bak'
         if os.path.exists(macDir) :
+            shutil.copytree(macDir, macDirBak)
             shutil.rmtree(macDir)
         # Reinstall the macPack
-        self.installMacPackOnly(macPack)
-        # Remove un-needed sty and tex files (to avoid confusion)
-        for f in self.getMacStyExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
-            if os.path.exists(source) :
-                os.remove(source)
-        for f in self.getMacTexExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
-            if os.path.exists(source) :
-                os.remove(source)
-
-        self.log.writeToLog(self.errorCodes['3600'], [macPack])
+        if self.installMacPackOnly(macPack) :
+            # Remove un-needed sty and tex files (to avoid confusion)
+            for f in self.getMacStyExtFiles() :
+                source = os.path.join(self.local.projMacPackFolder, f)
+                if os.path.exists(source) :
+                    os.remove(source)
+            for f in self.getMacTexExtFiles() :
+                source = os.path.join(self.local.projMacPackFolder, f)
+                if os.path.exists(source) :
+                    os.remove(source)
+            # Remove backup folder
+            shutil.rmtree(macDirBak)
+            self.log.writeToLog(self.errorCodes['3600'], [macPack])
+            return True
+        else :
+            self.log.writeToLog(self.errorCodes['3650'], [macPack])
 
 
     def installMacPackOnly (self, package) :

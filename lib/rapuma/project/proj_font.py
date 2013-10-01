@@ -287,14 +287,20 @@ class ProjFont (object) :
         '''Update a font package but do not change any of the existing settings.'''
 
         # Delete the existing font package (but not the settings)
-        fontDir = os.path.join(self.local.projFontFolder, font)
+        # but make a backup of it in case there is a problem
+        fontDir     = os.path.join(self.local.projFontFolder, font)
+        fontDirBak  = fontDir + '.bak'
         if os.path.exists(fontDir) :
+            shutil.copytree(fontDir, fontDirBak)
             shutil.rmtree(fontDir)
         # Bring in a fresh copy
         cRes = self.copyInFont(font)
         if cRes :
+            shutil.rmtree(fontDirBak)
             self.log.writeToLog(self.errorCodes['1237'], [font])
             return True
+        else :
+            shutil.copytree(fontDirBak, fontDir)
 
 
     def varifyFont (self) :

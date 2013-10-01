@@ -119,8 +119,8 @@ class ProjCommander (object) :
         '''Create a dictionary of all the static auxillary script information used in
         most projects.'''
 
-        pid     = self.pid
-        mid     = self.projectMediaIDCode
+        pid                 = self.pid
+        mid                 = self.projectMediaIDCode
 
         return {
                 'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible group add --component_type usfm --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
@@ -144,17 +144,23 @@ class ProjCommander (object) :
         '''Create a dictionary of the auxillary group script information used in
         most projects.'''
 
+#        import pdb; pdb.set_trace()
+
         # Load local versions of the macPack config
-        macPackConfig   = Config(self.pid, gid).macPackConfig
         # Set the vars for this function
-        pid         = self.pid
-        cType       = self.projectConfig['Groups'][gid]['cType']
-        renderer    = self.projectConfig['CompTypes'][cType.capitalize()]['renderer']
-        font        = ''
+        pid                 = self.pid
+        cType               = self.projectConfig['Groups'][gid]['cType']
+        Ctype               = cType.capitalize()
+        renderer            = self.projectConfig['CompTypes'][Ctype]['renderer']
+        macPack             = self.projectConfig['CompTypes'][Ctype]['macroPackage']
+        self.proj_config    = Config(self.pid, gid)
+        self.proj_config.getMacPackConfig(macPack)
+        macPackConfig       = self.proj_config.macPackConfig
+        font                = ''
         if macPackConfig and macPackConfig['FontSettings'].has_key('primaryFont') :
-            font    = macPackConfig['FontSettings']['primaryFont']
-        macro       = self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage']
-        mid         = self.projectMediaIDCode
+            font            = macPackConfig['FontSettings']['primaryFont']
+        macro               = self.projectConfig['CompTypes'][Ctype]['macroPackage']
+        mid                 = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {
                 'compareSource' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare source'], 
