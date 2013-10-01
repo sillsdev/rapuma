@@ -428,7 +428,9 @@ class Tools (object) :
         If one does not exist a new one will be created based on system default
         settings.'''
 
-#        import pdb; pdb.set_trace()
+
+#        if confFile.find('usfmTex') > 0 :
+#            import pdb; pdb.set_trace()
 
         if not os.path.isfile(confFile) :
             configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
@@ -436,9 +438,16 @@ class Tools (object) :
             self.writeConfFile(configObj)
         else :
             # But check against the default for possible new settings
-            configObj           = ConfigObj(encoding='utf-8')
-            orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
-            orgFileName         = orgConfigObj.filename
+            # If the original config file is corrupt, catch it here
+            try :
+                configObj           = ConfigObj(encoding='utf-8')
+                orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
+                orgFileName         = orgConfigObj.filename
+            except Exception as e :
+                self.terminal(u'\nERROR: Could not open config file: ' + confFile)
+                self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
+                self.dieNow()
+
             # FIXME: There is a deficiency here in that confs like project
             # are compond objects. This will not deal with any of the conf's
             # child object so additionl fields in the child sections are not
