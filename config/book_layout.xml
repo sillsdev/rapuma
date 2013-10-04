@@ -298,6 +298,14 @@ Todo:
             <value>False</value>
         </setting>
 
+        <setting>
+            <name>Use Hanging Punctuation</name>
+            <description>Turn on hanging punctuation. This is where various punctuation characters which come at the end of a line will be positioned just outside the margin of the text. Default = False</description>
+            <key>useHangingPunctuation</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
     </section>
 
 
