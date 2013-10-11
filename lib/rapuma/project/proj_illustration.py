@@ -194,7 +194,7 @@ class ProjIllustration (object) :
         '''Return the full path of the cName working text illustration file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentFolder, cid, cid + '_' + self.csid + '.piclist')
+        return os.path.join(self.local.projComponentFolder, cid, cid + '_' + self.csid + '.' + self.cType + '.piclist')
 
 
     def createPiclistFile (self, gid, cid) :
