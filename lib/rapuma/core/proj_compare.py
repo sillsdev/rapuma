@@ -86,13 +86,13 @@ class ProjCompare (object) :
         return False
 
 
-    def compare (self, new, old) :
+    def compare (self, old, new) :
         '''Run a compare on two files. Do not open in viewer unless it is different.'''
 
 #        import pdb; pdb.set_trace()
 
         # If there are any differences, open the diff viewer
-        if self.isDifferent(new, old) :
+        if self.isDifferent(old, new) :
             # If no diffViewCmd is found this may be running headless
             # in that case just report that the file is different and
             # and leave the function
@@ -103,7 +103,7 @@ class ProjCompare (object) :
                 # we need to use extend() rather than append()
                 cmd = []
                 cmd.extend(self.diffViewCmd)
-                cmd.extend([new, old])
+                cmd.extend([old, new])
                 try :
                     self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(new),self.tools.fName(old)])
                     subprocess.call(cmd)

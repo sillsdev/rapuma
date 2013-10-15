@@ -190,7 +190,7 @@ class ProjSetup (object) :
                 if force :
                     self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 # Compare the new working file with the previous
-                self.compare.compare(target, workingComp)
+                self.compare.compare(workingComp, target)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
