@@ -158,6 +158,22 @@ class UsfmTex (object) :
             return      results
 
 
+    def getFontSizeUnit (self) :
+        '''Calculate the font size unit. This counts on the style marker for "p" 
+        being set to 12pt. If for some reason it is not, then this will fail.
+        This will divide the body font size by 12 to get the size unit.'''
 
+        bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
+        return float("{0:.2f}".format(round(bodyFontSize / 12, 2)))
+
+
+    def getLineSpacingFactor (self) :
+        '''Calculate the line spacing factor. This is based on the body font size.
+        It will divide the body text leading by the body font size to get the factor
+        unit.'''
+
+        bodyTextLeading     = float(self.layoutConfig['TextElements']['bodyTextLeading'])
+        bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
+        return float("{0:.2f}".format(round(bodyTextLeading / bodyFontSize, 2)))
 
 

@@ -327,6 +327,20 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
+        <setting>
+            <name>Body Text Font Size</name>
+            <description>The size, in points, of the body text. Enter only an integer. Default = 10 points</description>
+            <key>bodyFontSize</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Body Text Leading</name>
+            <description>The size, in points, of the body text leading. Enter only an integer. Default = 12 points</description>
+            <key>bodyTextLeading</key>
+            <type>integer</type>
+            <value>12</value>
+        </setting>
     </section>
 </root>
 

@@ -381,20 +381,20 @@ Todo:
             <description>Using a value in points (pt), this scales the font size of all elements according to the amount of the value. 1pt is equal to 100%. Example, to decrease the size by 5%, enter the value .095pt. Default = 1pt</description>
             <key>fontSizeUnit</key>
             <type>integer</type>
-            <value>1pt</value>
-            <texCode>\FontSizeUnit=[val]</texCode>
+            <value>[function:getFontSizeUnit]</value>
+            <texCode>\FontSizeUnit=[val]pt</texCode>
         </setting>
         <setting>
             <name>Line Spacing Factor</name>
-            <description>Scaling factor used to adjust line spacing (leading), relative to font size  Default = 1.1</description>
+            <description>Scaling factor used to adjust line spacing (leading), relative to font size.</description>
             <key>lineSpacingFactor</key>
             <type>integer</type>
-            <value>1.1</value>
+            <value>[function:getLineSpacingFactor]</value>
             <texCode>\def\LineSpacingFactor{[val]}</texCode>
         </setting>
         <setting>
             <name>Vertical Space Factor</name>
-            <description>Scaling factor used to adjust amount of vertical spaces applied for USFM style sheet SpaceBefore and SpaceAfter values.   Default = 0.2</description>
+            <description>Scaling factor used to adjust amount of vertical spaces applied for USFM style sheet SpaceBefore and SpaceAfter values.</description>
             <key>verticalSpaceFactor</key>
             <type>integer</type>
             <value>1</value>
