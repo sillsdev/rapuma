@@ -231,7 +231,6 @@ class Usfm (Group) :
             # Test for source here and die if it isn't there
             if not os.path.isfile(cidUsfm) :
                 self.log.writeToLog(self.errorCodes['0220'], [cidUsfm], 'usfm.preProcessGroup():0220')
-
             # Add/manage the dependent files for this cid
             if self.macPack == 'usfmTex' or self.macPack == 'ptx2pdf' :
                 # Component adjustment file
@@ -355,7 +354,7 @@ class Usfm (Group) :
                 self.log.writeToLog(self.errorCodes['0240'], [self.gid])
                 return False
             # Sort through commented adjustment lines ()
-            elif self.adjustmentConfig[self.gid][cid].keys() :
+            elif self.adjustmentConfig[self.gid].has_key(cid) :
                 c = False
                 for k in self.adjustmentConfig[self.gid][cid].keys() :
                     # Note: Why does '#' work but it isn't specified?'
