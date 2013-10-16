@@ -165,7 +165,7 @@ class UsfmTex (object) :
 
         fontDefaultSize     = float(self.layoutConfig['TextElements']['fontDefaultSize'])
         bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
-        return float("{0:.2f}".format(round(bodyFontSize / fontDefaultSize, 2)))
+        return float("{0:.3f}".format(round(bodyFontSize / fontDefaultSize, 3)))
 
 
     def getLineSpacingFactor (self) :
@@ -175,6 +175,6 @@ class UsfmTex (object) :
 
         fontDefaultSize     = float(self.layoutConfig['TextElements']['fontDefaultSize'])
         bodyTextLeading     = float(self.layoutConfig['TextElements']['bodyTextLeading'])
-        return float("{0:.2f}".format(round(bodyTextLeading / fontDefaultSize, 2)))
+        return float("{0:.3f}".format(round(bodyTextLeading / fontDefaultSize, 3)))
 
 
