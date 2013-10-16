@@ -163,8 +163,9 @@ class UsfmTex (object) :
         being set to 12pt. If for some reason it is not, then this will fail.
         This will divide the body font size by 12 to get the size unit.'''
 
+        fontDefaultSize     = float(self.layoutConfig['TextElements']['fontDefaultSize'])
         bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
-        return float("{0:.2f}".format(round(bodyFontSize / 12, 2)))
+        return float("{0:.2f}".format(round(bodyFontSize / fontDefaultSize, 2)))
 
 
     def getLineSpacingFactor (self) :
@@ -172,8 +173,8 @@ class UsfmTex (object) :
         It will divide the body text leading by the body font size to get the factor
         unit.'''
 
+        fontDefaultSize     = float(self.layoutConfig['TextElements']['fontDefaultSize'])
         bodyTextLeading     = float(self.layoutConfig['TextElements']['bodyTextLeading'])
-        bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
-        return float("{0:.2f}".format(round(bodyTextLeading / bodyFontSize, 2)))
+        return float("{0:.2f}".format(round(bodyTextLeading / fontDefaultSize, 2)))
 
 

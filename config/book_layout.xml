@@ -341,6 +341,13 @@ Todo:
             <type>integer</type>
             <value>12</value>
         </setting>
+        <setting>
+            <name>Font Default Size</name>
+            <description>The default size value in points (pt) of the body text. Do NOT add "pt" to indicate value in points, that is assumed. This is the point size set in the usfm.sty for \p, \m, \q, etc. This is used by macro functions to calulate different settings for this macro package do not change this unless you know what you are doing. Defalt size is 12pt.</description>
+            <key>fontDefaultSize</key>
+            <type>integer</type>
+            <value>12</value>
+        </setting>
     </section>
 </root>
 
