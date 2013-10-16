@@ -237,9 +237,7 @@ class Usfm (Group) :
                 # Component adjustment file
                 cidAdjFile = self.getCidAdjPath(cid)
                 if useManualAdjustments :
-                    if not os.path.isfile(cidAdjFile) or self.tools.isOlder(cidAdjFile, self.local.adjustmentConfFile) :
-                        # Remake the adjustment file (if needed)
-                        self.createCompAdjustmentFile(cid)
+                    self.createCompAdjustmentFile(cid)
                 else :
                     # If no adjustments, remove any exsiting file
                     if os.path.isfile(cidAdjFile) :
@@ -345,6 +343,10 @@ class Usfm (Group) :
         # Check for a master adj conf file
         if os.path.exists(self.local.adjustmentConfFile) :
             adjFile = self.getCidAdjPath(cid)
+            # Clean up old file if there is one so we can start fresh
+            if os.path.exists(adjFile) :
+                os.remove(adjFile)
+            # Nothing to do if no gid section is found
             if not self.adjustmentConfig.has_key(self.gid) :
                 self.tools.buildConfSection(self.adjustmentConfig, self.gid)
                 self.tools.buildConfSection(self.adjustmentConfig[self.gid], cid)
@@ -352,6 +354,16 @@ class Usfm (Group) :
                 self.tools.writeConfFile(self.adjustmentConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [self.gid])
                 return False
+            # Sort through commented adjustment lines ()
+            elif self.adjustmentConfig[self.gid][cid].keys() :
+                c = False
+                for k in self.adjustmentConfig[self.gid][cid].keys() :
+                    # Note: Why does '#' work but it isn't specified?'
+                    if not k.find('%') >= 0 :
+                        c = True
+                    if not c :
+                        return False
+            # Loop through the adj conf file and look for this comp
             for c in self.adjustmentConfig[self.gid].keys() :
                 try :
                     if c == 'GeneralSettings' :

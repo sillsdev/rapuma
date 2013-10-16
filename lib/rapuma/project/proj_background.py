@@ -236,9 +236,11 @@ class ProjBackground (object) :
         # from Rapuma usfm_layout.conf 
         pageHeight          = float(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
-        lineSpacingFactor   = float(self.macPackConfig['FontSettings']['lineSpacingFactor'])
-        fontSizeUnit        = float(self.macPackConfig['FontSettings']['fontSizeUnit'].replace('pt', ''))
+#        lineSpacingFactor   = float(self.macPackConfig['FontSettings']['lineSpacingFactor'])
+#        fontSizeUnit        = float(self.macPackConfig['FontSettings']['fontSizeUnit'].replace('pt', ''))
 
+        fontSizeUnit        = self.macPackFunctions.getFontSizeUnit()
+        lineSpacingFactor   = self.macPackFunctions.getLineSpacingFactor()
         marginUnit          = self.macPackFunctions.getMarginUnit()
         topMarginFactor     = self.macPackFunctions.getTopMarginFactor()
         bottomMarginFactor  = self.macPackFunctions.getBottomMarginFactor()
