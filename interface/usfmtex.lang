@@ -5,12 +5,21 @@ This file is part of GtkSourceView
 
 Author: Dennis Drescher <dennis_drescher@sil.org>
 
-This will provide color syntax for editing USFM files.
+This will provide color syntax for editing USFM files. Normal USFM
+markers are colored in a light green. Chapter markers are blue and
+custom \z markers are purple. Custom markers must follow this
+convention: \z_[m]_[markername]
+
+Markers (anything that starts with "\") other than defined USFM
+markers will be colored in red. These are markers used for special
+formating that falls outside the USFM specification.
 
 History:
 
 	20130329	Intial creation of description set. Much more
-			work needed. (djd)
+		work needed. (djd)
+	20131018	Added additional support for USFM markers and
+		TeX markers (in red)
 
 To in stall, in Ubuntu this file gets copied to:
 
@@ -21,6 +30,11 @@ select UsfmTeX from the dropdown (popup) list on the bottom tool bar
 and it should give you color syntax on most (but not all) USFM markers
 in your document.
 
+Issues:
+	1) Has not been tested for all USFM markers, more can probably be
+		added. Need to consult the USFM manual.
+	2) Has been known to crash when a .usfm file is opened up in gEdit
+		by clicking on the file. No known reason why that would be.
 -->
 
 
@@ -43,37 +57,36 @@ in your document.
 
   <definitions>
 
-         <context id="custom-commands" style-ref="red" class="no-spell-check">
-            <prefix>\\</prefix>
-            <keyword>eject</keyword>
-            <keyword>break</keyword>
-            <keyword>hrule</keyword>
-            <keyword>skipline</keyword>
-            <keyword>skiphalfline</keyword>
-            <keyword>skipqline</keyword>
-            <keyword>suckupline</keyword>
-            <keyword>suckuphalfline</keyword>
-            <keyword>suckupqline</keyword>
-            <keyword>nbsp</keyword>
-            <keyword>zwsp</keyword>
-            <keyword>zwj</keyword>
-        </context>
-
         <context id="usfm-markers" style-ref="ltgreen" class="no-spell-check">
             <prefix>\\</prefix>
             <keyword>id</keyword>
             <keyword>h</keyword>
             <keyword>rem</keyword>
-            <keyword>[i]?m[tiqstp]?[0-4]?</keyword>
-            <keyword>[i]?s[0-4]?</keyword>
-            <keyword>r</keyword>
+            <keyword>ib</keyword>
+            <keyword>ili</keyword>
+            <keyword>imte</keyword>
+            <keyword>mt[1-4]?</keyword>
+            <keyword>s[1-3]?</keyword>
+            <keyword>io[1-4]?</keyword>
+            <keyword>io[r|t]?</keyword>
+            <keyword>imt[1-4]?</keyword>
+            <keyword>is[1-4]?</keyword>
+            <keyword>iq[1-4]?</keyword>
+            <keyword>iqt</keyword>
+            <keyword>toc[1-3]?</keyword>
+            <keyword>v\s[1-9]+[0-9]?</keyword>
+            <keyword>q[1-3]?</keyword>
+            <keyword>im[i|q|s|p]?</keyword>
+            <keyword>ie[x]?</keyword>
+            <keyword>ip[i|q|r]?</keyword>
+            <keyword>[b|p|m|r]</keyword>
+            <keyword>cl</keyword>
+            <keyword>ms</keyword>
+            <keyword>mr</keyword>
             <keyword>nb</keyword>
-            <keyword>[i]?p[imcrh]?</keyword>
-            <keyword>v\s[0-9]+</keyword>
-            <keyword>f[r|t|q]?</keyword>
+            <keyword>f[e|r|k|l|m|t|p|q|v]?</keyword>
+            <keyword>e[f|x]?</keyword>
             <keyword>x[o|t]?</keyword>
-            <keyword>q[0-4]?</keyword>
-            <keyword>[i]?b</keyword>
         </context>
 
         <context id="usfm-chapter" style-ref="blue" class="no-spell-check">
@@ -81,7 +94,12 @@ in your document.
         </context>
 
         <context id="usfm-custom" style-ref="purple" class="no-spell-check">
-            <match>\\z_[a-zA-Z0-9]+</match>
+            <match>\\z_[a-zA-Z0-9]+_[a-zA-Z0-9]+</match>
+        </context>
+
+         <context id="custom-commands" style-ref="red" class="no-spell-check">
+            <prefix>\\</prefix>
+            <keyword>[a-z]+</keyword>
         </context>
 
         <context id="usfmtex">
