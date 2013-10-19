@@ -633,10 +633,14 @@ class Xetex (Manager) :
 
         # Get our list of cids
         # Check for cidList, use std group if it isn't there
-        # If there is a cidList, create an alternate ouput name
+        # If there is a cidList, create an alternate ouput name.
+        # The file name needs to be ordered by ###-cid-gid.
         pdfSubFileName = ''
         if cidList :
-            pdfSubFileName = gid + '-' + '-'.join(cidList) + '.pdf'
+            cid = cidList[0]
+            cidInfo = self.pt_tools.usfmCidInfo()
+            cnid = "{:03}".format(int(cidInfo[cid][2]))
+            pdfSubFileName = cnid + '-' + '-'.join(cidList) + '-' + gid + '.pdf'
         else :
             cidList = self.projectConfig['Groups'][gid]['cidList']
 
