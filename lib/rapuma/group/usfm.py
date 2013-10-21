@@ -357,8 +357,7 @@ class Usfm (Group) :
             elif self.adjustmentConfig[self.gid].has_key(cid) :
                 c = False
                 for k in self.adjustmentConfig[self.gid][cid].keys() :
-                    # Note: Why does '#' work but it isn't specified?'
-                    if not k.find('%') >= 0 :
+                    if not k.find('%') >= 0 or not k.find('#') >= 0 :
                         c = True
                     if not c :
                         return False
