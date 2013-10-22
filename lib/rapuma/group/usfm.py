@@ -16,7 +16,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import os, codecs
+import os, codecs, re
 from configobj import ConfigObj, Section
 #from functools import partial
 
@@ -348,16 +348,17 @@ class Usfm (Group) :
             # Nothing to do if no gid section is found
             if not self.adjustmentConfig.has_key(self.gid) :
                 self.tools.buildConfSection(self.adjustmentConfig, self.gid)
+            if not self.adjustmentConfig[self.gid].has_key(cid) :
                 self.tools.buildConfSection(self.adjustmentConfig[self.gid], cid)
                 self.adjustmentConfig[self.gid][cid]['%1.1'] = '1'
                 self.tools.writeConfFile(self.adjustmentConfig)
                 self.log.writeToLog(self.errorCodes['0240'], [self.gid])
                 return False
             # Sort through commented adjustment lines ()
-            elif self.adjustmentConfig[self.gid].has_key(cid) :
+            if self.adjustmentConfig[self.gid].has_key(cid) :
                 c = False
                 for k in self.adjustmentConfig[self.gid][cid].keys() :
-                    if not k.find('%') >= 0 or not k.find('#') >= 0 :
+                    if not re.search(r'%|#', k) :
                         c = True
                     if not c :
                         return False

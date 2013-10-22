@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <!--
-
 This file is part of GtkSourceView
 
 Author: Dennis Drescher <dennis_drescher@sil.org>
@@ -36,7 +35,6 @@ Issues:
 	2) Has been known to crash when a .usfm file is opened up in gEdit
 		by clicking on the file. No known reason why that would be.
 -->
-
 
 <language id="usfmtex" _name="UsfmTeX" version="2.0" _section="Markup">
   <metadata>
@@ -90,16 +88,17 @@ Issues:
         </context>
 
         <context id="usfm-chapter" style-ref="blue" class="no-spell-check">
-            <match>\\c\s[0-9]+</match>
+            <prefix>\\c</prefix>
+            <keyword>\s[0-9]+</keyword>
         </context>
 
         <context id="usfm-custom" style-ref="purple" class="no-spell-check">
-            <match>\\z_[a-zA-Z0-9]+_[a-zA-Z0-9]+</match>
+            <prefix>\\z_</prefix>
+            <keyword>[a-zA-Z0-9_]+</keyword>
         </context>
 
-         <context id="custom-commands" style-ref="red" class="no-spell-check">
-            <prefix>\\</prefix>
-            <keyword>[a-z]+</keyword>
+        <context id="custom-commands" style-ref="red" class="no-spell-check">
+            <match>\\[a-zA-Z0-9]+\s</match>
         </context>
 
         <context id="usfmtex">
@@ -117,7 +116,6 @@ Issues:
                 <context ref="usfm-chapter"/>
                 <context ref="usfm-custom"/>
                 <context ref="custom-commands"/>
-
            </include>
         </context>
   </definitions>
