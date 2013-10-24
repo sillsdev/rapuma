@@ -55,7 +55,7 @@ Issues:
 
   <definitions>
 
-        <context id="usfm-markers" style-ref="ltgreen" class="no-spell-check">
+        <context id="usfm-markers" style-ref="ltgreen">
             <prefix>\\</prefix>
             <keyword>id</keyword>
             <keyword>h</keyword>
@@ -87,17 +87,17 @@ Issues:
             <keyword>x[o|t]?</keyword>
         </context>
 
-        <context id="usfm-chapter" style-ref="blue" class="no-spell-check">
+        <context id="usfm-chapter" style-ref="blue">
             <prefix>\\c</prefix>
             <keyword>\s[0-9]+</keyword>
         </context>
 
-        <context id="usfm-custom" style-ref="purple" class="no-spell-check">
+        <context id="usfm-custom" style-ref="purple">
             <prefix>\\z_</prefix>
             <keyword>[a-zA-Z0-9_]+</keyword>
         </context>
 
-        <context id="custom-commands" style-ref="red" class="no-spell-check">
+        <context id="custom-commands" style-ref="red">
             <match>\\[a-zA-Z0-9]+\s</match>
         </context>
 

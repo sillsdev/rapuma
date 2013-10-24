@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<!--
+Documentation for GtkSourceView is found at:
+    https://developer.gnome.org/gtksourceview/2.10/lang-reference.html
+
+To in stall, in Ubuntu this file gets copied to:
+
+    sudo cp RapumaConf.lang /usr/share/gtksourceview-3.0/language-specs
+-->
+
+<language id="rapumaconf" _name="RapumaConf" version="2.0">
+
+  <styles>
+    <style id="comment"          _name="Comment"/>
+    <style id="blue"             _name="Blue"         map-to="def:comment"/>
+    <style id="red"              _name="Red"/>
+    <style id="green"            _name="Green"/>
+  </styles>
+
+  <definitions>
+  
+    <context id="level-one" style-ref="green">
+        <match>\[\w+\]</match>
+    </context>
+
+    <context id="rapumaconf">
+        <include>
+            <context ref="level-one"/>
+        </include>
+    </context>
+
+
+  </definitions>
+
+</language>

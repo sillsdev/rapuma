@@ -1,0 +1,10 @@
+[Plugin]
+Loader=python
+Module=rapuma-ipe
+IAge=3
+Name=RapumaIPE
+Description=Rapuma Integrated Publishing Environment plugin for Gedit.
+Authors=Dennis Drescher <dennis@dreschers.info>
+Copyright=Copyright © Dennis Drescher 2013
+Website=http://www.sil.org
+Version=0.0.1
