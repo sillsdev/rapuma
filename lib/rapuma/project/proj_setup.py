@@ -132,6 +132,19 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
 
+    def makeCVOne (self, workingBak, workingCVOne) :
+        '''Create a .cv1 backup of the current working file (source), if
+        one exists. If not, do nothing.'''
+
+        # Check for the target (working file)
+        if os.path.exists(workingCVOne) :
+            self.tools.makeWriteable(workingCVOne)
+        shutil.copy(workingBak, workingCVOne)
+        self.tools.makeReadOnly(workingCVOne)
+
+        return True
+
+
     def updateAllGroups (self, force = False) :
         '''Run the update on all the groups in a project.'''
 
@@ -169,28 +182,28 @@ class ProjSetup (object) :
 
         # Process each cid
         for cid in cidList :
-            target          = self.getWorkingFile(gid, cid)
-            targetSource    = self.getWorkingSourceFile(gid, cid)
-            source          = self.getSourceFile(gid, cid)
-            workingComp     = self.getWorkCompareFile(gid, cid)
-            # Set aside a tmp backup of the target
-            targetBackup    = tempfile.NamedTemporaryFile(delete=True)
-            if os.path.exists(target) :
-                shutil.copy(target, targetBackup.name)
+            target              = self.getWorkingFile(gid, cid)
+            targetSource        = self.getWorkingSourceFile(gid, cid)
+            source              = self.getSourceFile(gid, cid)
+            workingBak          = tempfile.NamedTemporaryFile(delete=True).name
+            workingCVOne        = self.getWorkCompareFile(gid, cid)
 
-            # The use of force is for if the group is locked or source is
-            # matching and you want to rerun a preprocess on the text to update it.
+            # Create temp backup of working file
+            if os.path.exists(target) :
+                shutil.copy(target, workingBak)
+
+            # Don't do this unless it is different or forced
             if force or self.compare.isDifferent(source, targetSource) :
+                # Delete the existing working file
+                if os.path.exists(target) :
+                    os.remove(target)
+                self.makeCVOne(workingBak, workingCVOne)
                 self.installUsfmWorkingText(gid, cid, force)
-                # Update our compare for next time
-                if os.path.isfile(workingComp) :
-                    self.tools.makeWriteable(workingComp)
-                shutil.copy(targetBackup.name, workingComp)
-                self.tools.makeReadOnly(workingComp)
+                # Report if this was forced
                 if force :
                     self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 # Compare the new working file with the previous
-                self.compare.compare(workingComp, target)
+                self.compare.compare(workingCVOne, target)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
@@ -294,7 +307,7 @@ class ProjSetup (object) :
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         if self.projectConfig['Groups'].has_key(gid) :
             for cid in cidList :
-                self.uninstallGroupComponent(gid, cid, self.projectConfig, force)
+                self.uninstallGroupComponent(gid, cid, force)
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
                 self.log.writeToLog(self.errorCodes['0290'], [gid])
@@ -310,7 +323,7 @@ class ProjSetup (object) :
     def uninstallGroupComponent (self, gid, cid, force = False) :
         '''This will remove a component (files) from a group in the project.
         However, a backup will be made of the working text for comparison purposes. 
-       This does not return anything. We trust it worked.'''
+       This does not return anything. We trust it will work.'''
 
 #       import pdb; pdb.set_trace()
 
@@ -329,17 +342,15 @@ class ProjSetup (object) :
             working         = self.getWorkingFile(gid, cid)
 
             if os.path.isfile(working) :
-                # First a comparison backup needs to be made of the working text
-                if os.path.isfile(workingComp) :
-                    self.tools.makeWriteable(workingComp)
-                shutil.copy(working, workingComp)
-                self.tools.makeReadOnly(workingComp)
+                self.makeCVOne(working, workingComp)
                 self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(workingComp), cid])
                 for fn in os.listdir(targetFolder) :
                     f = os.path.join(targetFolder, fn)
                     if f != workingComp :
                         os.remove(f)
                         self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
+
+                return True
 
 
     def isSharedComponent (self, gid, cid) :
