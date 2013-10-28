@@ -144,7 +144,8 @@ class Usfm (Group) :
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
             '0230' : ['LOG', 'Created the [<<1>>] component adjustment file.'],
-            '0240' : ['LOG', 'Could not find adjustments for [<<1>>], created place holder setting.'],
+            '0240' : ['LOG', 'Could not find adjustments section for [<<1>>], created place holder setting.'],
+            '0245' : ['LOG', 'Could not find adjustments for [<<1>>]. No ajustment file has been output.'],
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
             '0260' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
             '0265' : ['ERR', 'Failed to create piclist file for [<<1>>]!'],
@@ -352,7 +353,7 @@ class Usfm (Group) :
                 self.tools.buildConfSection(self.adjustmentConfig[self.gid], cid)
                 self.adjustmentConfig[self.gid][cid]['%1.1'] = '1'
                 self.tools.writeConfFile(self.adjustmentConfig)
-                self.log.writeToLog(self.errorCodes['0240'], [self.gid])
+                self.log.writeToLog(self.errorCodes['0240'], [cid])
                 return False
             # Sort through commented adjustment lines ()
             if self.adjustmentConfig[self.gid].has_key(cid) :
@@ -360,31 +361,23 @@ class Usfm (Group) :
                 for k in self.adjustmentConfig[self.gid][cid].keys() :
                     if not re.search(r'%|#', k) :
                         c = True
-                    if not c :
-                        return False
-            # Loop through the adj conf file and look for this comp
-            for c in self.adjustmentConfig[self.gid].keys() :
-                try :
-                    if c == 'GeneralSettings' :
+                if not c :
+                    self.log.writeToLog(self.errorCodes['0245'], [cid])
+                    return False
+            # If we make it this far, create the new adjustment file
+            with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
+                writeObject.write(self.tools.makeFileHeader(adjFile, description, True))
+                # Output like this: JAS 1.13 +1
+                for k, v in self.adjustmentConfig[self.gid][cid].iteritems() :
+                    if re.search(r'%|#', k) :
                         continue
-                    else :
-                        comp = c.lower()
-                except Exception as e :
-                    # If this doesn't work, we should probably quite here
-                    self.tools.dieNow('Error: Malformed component ID [' + c + '] in adjustment file: ' + str(e) + '\n')
-                if  comp == cid and len(self.adjustmentConfig[self.gid][c].keys()) > 0 :
-                    with codecs.open(adjFile, "w", encoding='utf_8') as writeObject :
-                        writeObject.write(self.tools.makeFileHeader(adjFile, description, True))
-                        # Output like this: JAS 1.13 +1
-                        for k, v in self.adjustmentConfig[self.gid][c].iteritems() :
-                            if k[0] in ['%', '#'] :
-                                continue
-                            adj = v
-                            if int(v) > 0 : 
-                                adj = '+' + str(v)
-                            writeObject.write(comp.upper() + ' ' + k + ' ' + adj + '\n')
+                    adj = v
+                    if int(v) > 0 : 
+                        adj = '+' + str(v)
+                    writeObject.write(cid.upper() + ' ' + k + ' ' + adj + '\n')
 
-                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(adjFile)])
+                self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(adjFile)])
+
             return True
 
 

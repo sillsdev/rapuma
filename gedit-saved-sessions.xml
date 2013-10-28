@@ -27,6 +27,19 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>
+<session name="BRU-LATN-BIBA">
+  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Script/base_textPreprocess.py"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/hyphenation.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Style/OT-psa-On-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Style/OT-psa-Off-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-ext.tex"/>
+</session>
 <session name="Rapuma">
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
