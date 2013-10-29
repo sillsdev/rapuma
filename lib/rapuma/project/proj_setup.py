@@ -16,9 +16,9 @@
 # this process
 
 import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile
-from configobj                      import ConfigObj
-from importlib                      import import_module
-from functools                      import partial
+from configobj                              import ConfigObj
+from importlib                              import import_module
+from functools                              import partial
 
 import palaso.sfm as sfm
 from palaso.sfm                             import usfm, style, element, text

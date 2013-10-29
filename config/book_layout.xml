@@ -348,6 +348,13 @@ Todo:
             <type>integer</type>
             <value>12</value>
         </setting>
+        <setting>
+            <name>Body Text Default Leading</name>
+            <description>The default size value in points (pt) of the body text leading. Do NOT add "pt" to indicate value in points, that is assumed. This is the default leading used for line spacing with \p, \m, \q, etc. This is used by macro functions to calulate different settings for this macro package do not change this unless you know what you are doing. Defalt size is 14pt.</description>
+            <key>leadingDefaultSize</key>
+            <type>integer</type>
+            <value>14</value>
+        </setting>
     </section>
 </root>
 

@@ -27,6 +27,16 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>
+<session name="BLT-TAVT-NTTRA">
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Script/base_textPreprocess.py"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/TeX/usfmTex-ext.tex"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/TeX/usfmTex-settings.tex"/>
+</session>
 <session name="BRU-LATN-BIBA">
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Script/base_textPreprocess.py"/>
@@ -39,6 +49,7 @@
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/adjustment.conf"/>
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Style/usfmTex-ext.sty"/>
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-ext.tex"/>
+  <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-settings.tex"/>
 </session>
 <session name="Rapuma">
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
