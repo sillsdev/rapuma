@@ -17,11 +17,70 @@
 % specific project. You can also add more as needed. Have fun!
 
 
-%%%%% Depricated and special USFM Markers
+%%%%% Special Characters
+% Special characters that can be inserted into the working text. This is
+% preferred to direct injection of the characters which makes them less
+% noticable on review.
+\def\nbhy{‑}
+
+
+%%%%% Space Characters
+% Special space characters that can be inserted into the working text.
+\def\nbsp{ }
+\def\zwsp{​}
+\def\wj{⁠}
+
+
+%%%%% Horizontal Spacing
+% By default, text line spacing is on a grid that is based on the line
+% leading setting. If this is not required, to make the spacing more
+% flexible, the \baselineskip can be modified here. Just uncomment the
+% following line and adjust as necessary. The first number is the
+% optimum leading by adding the plus and minus you allow for some
+% stretching within those parameters.
+\baselineskip=12.5pt plus .5pt minus .1pt
+
+% These adjustments are used around footnote callers and punctuation to
+% add some space for punctuation that needs a little extra
+\def\qfkern{\kern1pt}
+\def\pfkern{\kern1pt}
+\def\sp{\kern3pt}
+\def\thnsp{\kern1pt}
+\def\thnnsp{\kern0.5pt}
+\def\nsp{\kern-3pt}
+\def\nthnsp{\kern-1pt}
+\def\nthnnsp{\kern-0.5pt}
+%Special quote handling
+\quotekernamount=0.1em
+
 % Process \b 
 % This is often frowned upon but if you want to add extra
-% spaces around poetry, uncomment this next line.
-%\def\b{\vskip 0.5\baselineskip}
+% spaces around poetry, uncomment this next line. The default
+% is one-half line.
+\def\b{\vskip 0.5\baselineskip}
+
+
+%%%%% Vertical Spacing
+% Adjustments for putting more or less space between lines.
+% WARNING: In some contexts these may cause the indent of
+% the paragraph to follow to be affected. One possible
+% work around is to use this command after the affected
+% marker. For example, instead of:
+%   \suckuphalfline
+%   \q1
+%   \v 1 Some verse text
+% use:
+%   \q1 \suckuphalfline
+%   \v 1 Some verse text
+% That has been known to work.
+\def\suckupline{\vskip -\baselineskip}
+\def\suckuphalfline{\vskip -0.5\baselineskip}
+\def\suckupqline{\vskip -0.25\baselineskip}
+\def\suckupqqline{\vskip -0.125\baselineskip}
+\def\skipline{\vskip\baselineskip}
+\def\skiphalfline{\vskip 0.5\baselineskip}
+\def\skipqline{\vskip 0.25\baselineskip}
+\def\skipqqline{\vskip 0.125\baselineskip}
 
 
 %%%%% Baselineskip Adjustment Hooks

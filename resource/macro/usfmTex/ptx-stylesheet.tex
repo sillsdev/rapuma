@@ -436,7 +436,10 @@
 \def\s@tupsizes{
  \le@dingunit=\LineSpacingFactor\FontSizeUnit
  \verticalsp@ceunit=\VerticalSpaceFactor\le@dingunit
- \baselineskip=14\le@dingunit
+ \ifdim\baselineskip < 1pt \baselineskip=14\le@dingunit\fi % If the baselineskip has been specifically
+                                                           % set it will remain. Otherwise, the default
+                                                           % of 14 will be applied here and set text will
+                                                           % hold to the grid.
  \lineskiplimit=-7\le@dingunit
  \lineskip=0pt
  \topskip=\baselineskip
