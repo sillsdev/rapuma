@@ -207,7 +207,7 @@
   \setbox\s@vedpage=\copy255
   % split the galley to the actual size available
   \setbox\colA=\vsplit255 to \availht
-  \setbox\colA=\vbox{\unvbox\colA}
+  %\setbox\colA=\vbox{\unvbox\colA}
   % and check if it all fit; if not, we'll have to back up and try again
   \ifvoid255 \fitonpagetrue \else \fitonpagefalse \fi
   \iffitonpage
@@ -218,7 +218,7 @@
     \def\pagecontents{%
 %      \msg{upwards mode = \the\XeTeXupwardsmode}
       \dimen1=\textwidth \advance\dimen1 \ExtraRMargin
-      \ifvoid\partial\else \vbox{\hbox to \dimen1{\hskip\columnshift\vbox{\unvbox\partial}}} \fi
+      \ifvoid\partial\else \vbox{\hbox to \dimen1{\hskip\columnshift\partial}} \fi
       \ifvoid\topins\else \unvbox\topins \vskip\skip\topins \fi
       \dimen0=\dp\colA
       \hbox to \dimen1{\hbox to \columnshift{}%

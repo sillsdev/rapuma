@@ -171,7 +171,7 @@ class UsfmTex (object) :
     def getLineSpacingFactor (self) :
         '''Calculate the line spacing factor. This is based on the body text leading.
         It will divide the body text leading by (leading default size * font size unit)
-        to get the factor unit.'''
+        to get the factor unit. [lsf = btl / (ld x fsu)]'''
 
         fontSizeUnit        = self.getFontSizeUnit()
         bodyTextLeading     = float(self.layoutConfig['TextElements']['bodyTextLeading'])
