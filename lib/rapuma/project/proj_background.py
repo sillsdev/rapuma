@@ -229,15 +229,13 @@ class ProjBackground (object) :
         svgInFile           = tempfile.NamedTemporaryFile().name + '.svg'
 
         # For testing
-        debug = False
+        debug = True
 
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
         # from Rapuma usfm_layout.conf 
         pageHeight          = float(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
-#        lineSpacingFactor   = float(self.macPackConfig['FontSettings']['lineSpacingFactor'])
-#        fontSizeUnit        = float(self.macPackConfig['FontSettings']['fontSizeUnit'].replace('pt', ''))
 
         fontSizeUnit        = self.macPackFunctions.getFontSizeUnit()
         lineSpacingFactor   = self.macPackFunctions.getLineSpacingFactor()
@@ -265,16 +263,12 @@ class ProjBackground (object) :
             return int(mm * 72 / 25.4)
 
         # paper height [px]
-        #paperHeight = round(pageHeight*90/25.4, 2)
         paperPxHeight = mmToPx(pageHeight)
         # paper height [pt]
-        #paperPtHeight = int(pageHeight*72/25.4)
         paperPtHeight = mmToPt(pageHeight)
         # paper width [px]
-        #paperPxWidth = round(pageWidth*90/25.4, 2)
         paperPxWidth = mmToPx(pageWidth)
         # paper width [pt]
-        #paperPtWidth = int(pageWidth*72/25.4)
         paperPtWidth = mmToPt(pageWidth)
         # text width [px]
         textPxWidth = mmToPx(textWidth)
@@ -307,6 +301,9 @@ class ProjBackground (object) :
         firstBaseLine = topMargin - topskip
         if debug :
             self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
+        firstBaseLineTtb = round((paperPxHeight - firstBaseLine),3) # from top of page
+        if debug :
+            self.tools.terminal('firstBaseLineTtb: ' + str(firstBaseLineTtb))
 
         # The dimensions of the grid rectangle are needed to prepare a placeholder for the
         # gridlines. 
@@ -322,59 +319,172 @@ class ProjBackground (object) :
         if debug :
             self.tools.terminal('lineGridMargin: ' + str(lineGridMargin))
 
-        # Read in the gridSource file
-        contents = codecs.open(gridSource, "rt", encoding="utf_8_sig").read()
+        # Set the position where the line numbers get printed, this is
+        # just to the left of the lineGridMargin
+        lineNumberPos = lineGridMargin - 10
 
-        # Make the changes to the contents of the gridSource contents
+        # Open the temp svg file
+        fo = open(svgInFile, "wb")
+        fo.write( '''<?xml version="1.0" standalone="no"?>
+        <!DOCTYPE svg SYSTEM "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             version="1.1" width="''')
+        fo.write(str (paperPxWidth))
+        fo.write( '''" height="''')
+        fo.write(str (paperPxHeight))
+        fo.write( '''">
+          <g>
+            <title>linegrid</title>
+            <desc>
+              This a sheet with lines.
+            </desc>
+        <!-- PARTIAL FRAME FOR LINE NUMBER 1 AT TOP OF LINEGRID -->
+            <path 
+               d="M ''')
+        fo.write(str (lineGridMargin))
+        fo.write(" " )
+        fo.write(str (firstBaseLineTtb))
+        fo.write(" v-" )
+        fo.write(str (topskip))
+        fo.write( ''' h 15"
+                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+        <!-- VERTICAL LINE ALONG LEFT OF LINEGRID --> 
+            <path
+               d="m ''')
+        fo.write(str (lineGridMargin))
+        fo.write("," )
+        fo.write(str (firstBaseLineTtb))
+        fo.write(" 0," )
+        fo.write(str (lineGridHeight))
+        fo.write( '''"
+                  style="stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+        <!-- THE ACTUAL LINEGRID --> 
+        
+            <path       
+               d= "m ''')
+        # top most line on the page below the top margin
+        fo.write(str (lineGridMargin))
+        fo.write("," )
+        fo.write(str (firstBaseLineTtb))
+        fo.write(" " )
+        fo.write(str (lineGridWidth))
+        fo.write( ''',0\n''')
+        # while loop to generate lines to the bottom margin        
+        num = 0
+        while (num < int(lineGridHeight/baselineskip)):
 
-        # 01 enter paper dimensions
-        # paper height [px]
-        # SearchText: @pH
-        # ReplaceText: variable paperPxHeight
-        contents = re.sub(ur'@pH', ur'%r' % paperPxHeight, contents)
+            if num%2 == 0: 
+                fo.write( '''           m 0, ''')
+                fo.write(str (baselineskip))
+                fo.write(" -" )
+                fo.write(str (lineGridWidth))
+                fo.write( ''',0\n''')
+            else:
+                fo.write( '''           m 0, ''')
+                fo.write(str (baselineskip))
+                fo.write(" " )
+                fo.write(str (lineGridWidth))
+                fo.write( ''',0\n''')
+            num = num +1
 
-        # 02 paper height [pt]
-        # SearchText: @pPH
-        # ReplaceText: variable paperPtHeight
-        contents = re.sub(ur'@pPH', ur'%r' % paperPtHeight, contents)
+        fo.write( '''"           style="stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+                   
+        <!-- LINE NUMBERS --> 
+                   
+            <text  y="''')
+        # vertical position of the line numbers
+        fo.write(str (firstBaseLineTtb))
+        fo.write( '''" style="font-family: Charis SIL;font-style:italic;font-size:5;fill:rgb(200,100,0)\n">''')
+        # line number 1 beside the top most line on the page
+        fo.write('''        <tspan x="''')
+        fo.write(str (lineNumberPos))
+        fo.write( '''" dy="0" baseline-shift="super">1</tspan>\n''')    
+        # while loop to place line numbers from the second line down
+        num = 0
+        linecount = 2
+        while (num < int(lineGridHeight/baselineskip)):
 
-        # 03 paper width [px]
-        # SearchText: @pW
-        # ReplaceText: variable paperPxWidth
-        contents = re.sub(ur'@pW', ur'%r' % paperPxWidth, contents)
+            fo.write( '''           <tspan x="''')
+            fo.write(str (lineNumberPos))
+            fo.write('''" dy="''' )
+            fo.write(str (baselineskip))
+            fo.write( '''" baseline-shift="super">''')
+            fo.write(str (linecount))
+            fo.write('''</tspan>\n''') 
+            
+            linecount = linecount +1  
 
-        # 04 paper height [pt]
-        # SearchText: @pPW
-        # ReplaceText: variable paperPtWidth
-        contents = re.sub(ur'@pPW', ur'%r' % paperPtWidth, contents)
+            num = num +1
+            
+        fo.write('''    </text>
+          </g>
+        </svg>''')
+        # Close opened file
+        fo.close()
 
-        # 05 Enter the position first base line
-        # SearchText: @fBL
-        # ReplaceText: variable firstBaseLine
-        contents = re.sub(ur'@fBL', ur'%r' % firstBaseLine, contents)
 
-        # 06 Enter the height of the line grid
-        # SearchText: @lGH
-        # ReplaceText: variable lineGridHeight
-        contents = re.sub(ur'@lGH', ur'%r' % lineGridHeight, contents)
 
-        # 07 Enter the width of the line grid
-        # SearchText: @lGW
-        # ReplaceText: variable lineGridWidth
-        contents = re.sub(ur'@lGW', ur'%r' % lineGridWidth, contents)
 
-        # 08 Enter the right margin of the line grid
-        # SearchText: @lGM
-        # ReplaceText: variable lineGridMargin
-        contents = re.sub(ur'@lGM', ur'%r' % lineGridMargin, contents)
+        ## Read in the gridSource file
+        #contents = codecs.open(gridSource, "rt", encoding="utf_8_sig").read()
 
-        # 09 enter the baselineskip value
-        # SearchText: @lS
-        # ReplaceText: variable baselineskip
-        contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
+        ## Make the changes to the contents of the gridSource contents
 
-        # Write out a temp file so we are ready for the final process
-        codecs.open(svgInFile, "wt", encoding="utf_8_sig").write(contents)
+        ## 01 enter paper dimensions
+        ## paper height [px]
+        ## SearchText: @pH
+        ## ReplaceText: variable paperPxHeight
+        #contents = re.sub(ur'@pH', ur'%r' % paperPxHeight, contents)
+
+        ## 02 paper height [pt]
+        ## SearchText: @pPH
+        ## ReplaceText: variable paperPtHeight
+        #contents = re.sub(ur'@pPH', ur'%r' % paperPtHeight, contents)
+
+        ## 03 paper width [px]
+        ## SearchText: @pW
+        ## ReplaceText: variable paperPxWidth
+        #contents = re.sub(ur'@pW', ur'%r' % paperPxWidth, contents)
+
+        ## 04 paper height [pt]
+        ## SearchText: @pPW
+        ## ReplaceText: variable paperPtWidth
+        #contents = re.sub(ur'@pPW', ur'%r' % paperPtWidth, contents)
+
+        ## 05 Enter the position first base line
+        ## SearchText: @fBL
+        ## ReplaceText: variable firstBaseLine
+        #contents = re.sub(ur'@fBL', ur'%r' % firstBaseLine, contents)
+
+        ## 06 Enter the height of the line grid
+        ## SearchText: @lGH
+        ## ReplaceText: variable lineGridHeight
+        #contents = re.sub(ur'@lGH', ur'%r' % lineGridHeight, contents)
+
+        ## 07 Enter the width of the line grid
+        ## SearchText: @lGW
+        ## ReplaceText: variable lineGridWidth
+        #contents = re.sub(ur'@lGW', ur'%r' % lineGridWidth, contents)
+
+        ## 08 Enter the right margin of the line grid
+        ## SearchText: @lGM
+        ## ReplaceText: variable lineGridMargin
+        #contents = re.sub(ur'@lGM', ur'%r' % lineGridMargin, contents)
+
+        ## 09 enter the baselineskip value
+        ## SearchText: @lS
+        ## ReplaceText: variable baselineskip
+        #contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
+
+        ## Write out a temp file so we are ready for the final process
+        #codecs.open(svgInFile, "wt", encoding="utf_8_sig").write(contents)
+
+
+
+
+
+
+#############################################################################
 
         # Run the conversion utility
         if self.convertSvgToPdf(svgInFile, pdfOutFile) :
@@ -400,6 +510,19 @@ class ProjBackground (object) :
                 cmds.append(c)
 
         return cmds
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def convertSvgToPdf (self, svgInFile, pdfOutFile) :
