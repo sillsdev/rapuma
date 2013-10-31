@@ -422,71 +422,7 @@ class ProjBackground (object) :
         # Close opened file
         fo.close()
 
-
-
-
-        ## Read in the gridSource file
-        #contents = codecs.open(gridSource, "rt", encoding="utf_8_sig").read()
-
-        ## Make the changes to the contents of the gridSource contents
-
-        ## 01 enter paper dimensions
-        ## paper height [px]
-        ## SearchText: @pH
-        ## ReplaceText: variable paperPxHeight
-        #contents = re.sub(ur'@pH', ur'%r' % paperPxHeight, contents)
-
-        ## 02 paper height [pt]
-        ## SearchText: @pPH
-        ## ReplaceText: variable paperPtHeight
-        #contents = re.sub(ur'@pPH', ur'%r' % paperPtHeight, contents)
-
-        ## 03 paper width [px]
-        ## SearchText: @pW
-        ## ReplaceText: variable paperPxWidth
-        #contents = re.sub(ur'@pW', ur'%r' % paperPxWidth, contents)
-
-        ## 04 paper height [pt]
-        ## SearchText: @pPW
-        ## ReplaceText: variable paperPtWidth
-        #contents = re.sub(ur'@pPW', ur'%r' % paperPtWidth, contents)
-
-        ## 05 Enter the position first base line
-        ## SearchText: @fBL
-        ## ReplaceText: variable firstBaseLine
-        #contents = re.sub(ur'@fBL', ur'%r' % firstBaseLine, contents)
-
-        ## 06 Enter the height of the line grid
-        ## SearchText: @lGH
-        ## ReplaceText: variable lineGridHeight
-        #contents = re.sub(ur'@lGH', ur'%r' % lineGridHeight, contents)
-
-        ## 07 Enter the width of the line grid
-        ## SearchText: @lGW
-        ## ReplaceText: variable lineGridWidth
-        #contents = re.sub(ur'@lGW', ur'%r' % lineGridWidth, contents)
-
-        ## 08 Enter the right margin of the line grid
-        ## SearchText: @lGM
-        ## ReplaceText: variable lineGridMargin
-        #contents = re.sub(ur'@lGM', ur'%r' % lineGridMargin, contents)
-
-        ## 09 enter the baselineskip value
-        ## SearchText: @lS
-        ## ReplaceText: variable baselineskip
-        #contents = re.sub(ur'@lS', ur'%r' % baselineskip, contents)
-
-        ## Write out a temp file so we are ready for the final process
-        #codecs.open(svgInFile, "wt", encoding="utf_8_sig").write(contents)
-
-
-
-
-
-
-#############################################################################
-
-        # Run the conversion utility
+        # Run the conversion utility to convert the temp svg to pdf
         if self.convertSvgToPdf(svgInFile, pdfOutFile) :
             return True
 
