@@ -525,7 +525,7 @@ class Xetex (Manager) :
             gidTexObject.write('\\stylesheet{' + self.local.glbExtStyFile + '}\n')
             # Load the group style extensions (if needed)
             if self.projectConfig['Groups'][self.gid].has_key('useGrpStyOverride') and self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useGrpStyOverride']) :
-                self.makeGrpExtStyFile(self.local.grpExtStyFile)
+                self.makeGrpExtStyFile()
                 gidTexObject.write('\\stylesheet{' + self.local.grpExtStyFile + '}\n')
             # Load the settings (usfmTex: if marginalverses, load code in this)
             gidTexObject.write('\\input \"' + self.local.macSettingsFile + '\"\n')

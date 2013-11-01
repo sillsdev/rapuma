@@ -51,6 +51,18 @@
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-ext.tex"/>
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-settings.tex"/>
 </session>
+<session name="KYU-LATN-NTCAT">
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/hyphenation.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/illustration.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Script/LATN_textPreprocess.py"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-ext.tex"/>
+  <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-settings.tex"/>
+</session>
 <session name="Rapuma">
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
