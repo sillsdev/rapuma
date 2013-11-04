@@ -469,21 +469,6 @@ class Xetex (Manager) :
             return eval(''.join(dct))
 
 
-#    def makeGrpExtTexFile (self) :
-#        '''Create/copy a group TeX extentions file to the project for specified group.'''
-
-#        description = 'This is the group extention file which overrides settings in \
-#        the main TeX settings files and the component TeX settings.'
-
-#        # First look for a user file, if not, then make a blank one
-#        if not os.path.isfile(self.local.grpExtTexFile) :
-#            with codecs.open(self.local.grpExtTexFile, "w", encoding='utf_8') as writeObject :
-#                writeObject.write(self.tools.makeFileHeader(self.local.grpExtTexFileName, description, False))
-#            self.log.writeToLog(self.errorCodes['0440'], [self.local.grpExtTexFile])
-
-#            # Need to return true here even if nothing was done
-#            return True
-
 
     def makeGidTexFile (self, cidList) :
         '''Create the main gid TeX control file.'''
@@ -533,7 +518,7 @@ class Xetex (Manager) :
             gidTexObject.write('\\input \"' + self.local.extTexFile + '\"\n')
             # Load the group TeX macro extensions (if needed)
             if self.projectConfig['Groups'][self.gid].has_key('useGrpTexOverride') and self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useGrpTexOverride']) :
-                self.makeGrpExtTexFile(self.local.grpExtTexFile)
+                self.makeGrpExtTexFile()
                 gidTexObject.write('\\input \"' + self.local.grpExtTexFile + '\"\n')
             # Load hyphenation data if needed
             if self.useHyphenation :

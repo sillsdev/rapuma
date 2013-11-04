@@ -17,7 +17,7 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=14
+current_page=12
 FILE_NAME_0=5421;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_1=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py;0;4
 FILE_NAME_2=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
@@ -30,7 +30,7 @@ FILE_NAME_8=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/pro
 FILE_NAME_9=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/tools.py;0;4
 FILE_NAME_10=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py;0;4
 FILE_NAME_11=944;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py;0;4
-FILE_NAME_12=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
+FILE_NAME_12=28257;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
 FILE_NAME_13=6664;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfmTex.py;0;4
 FILE_NAME_14=9817;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
 
