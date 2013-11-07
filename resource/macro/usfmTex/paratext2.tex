@@ -796,7 +796,7 @@
     \global\count\bottomins=\count255
     \let\\=\s@tn@tec@unt \the\n@tecl@sses % reset \count for each note class
     %\vbox{\hskip -\columnshift \box\partial}%
-    \vbox{\unvbox\partial}
+    \ifdim\ht\partial>\baselineskip \vbox{\unvbox\partial} \fi
     %\hskip\columnshift\box\partial
     \ifendbooknoeject\ifx\p@gefirstmark\t@tle \else\vskip\baselineskip\hskip-\columnshift\hrule\vskip2\baselineskip\fi\fi%
     %\msg{Starting 1col partial: \the\ht\partial, pagetotal: \the\pagetotal, textheight: \the\textheight}

@@ -53,14 +53,22 @@
 %Special quote handling
 \quotekernamount=0.1em
 
+
+%%%%% Vertical Spacing
+% Off-grid spacing. To enable variable vertical space uncomment
+% and setup the following \baselineskip command. The main
+% setting should be the actual line leading for the body text.
+% The plus and minus can be adjusted to get the desired results.
+% For individual books, this can be moved into the component 
+% *-ext.tex file.
+% \baselineskip=12pt plus 1pt minus 0.5pt
+
 % Process \b 
 % This is often frowned upon but if you want to add extra
 % spaces around poetry, uncomment this next line. The default
 % is one-half line.
 \def\b{\vskip 0.5\baselineskip}
 
-
-%%%%% Vertical Spacing
 % Adjustments for putting more or less space between lines.
 % WARNING: In some contexts these may cause the indent of
 % the paragraph to follow to be affected. One possible
