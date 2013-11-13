@@ -229,101 +229,96 @@ class ProjBackground (object) :
         svgInFile           = tempfile.NamedTemporaryFile().name + '.svg'
 
         # For testing
-        debug = True
+        debug = False
 
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
         # from Rapuma usfm_layout.conf 
         pageHeight          = float(self.layoutConfig['PageLayout']['pageHeight'])
         pageWidth           = float(self.layoutConfig['PageLayout']['pageWidth'])
-
-        fontSizeUnit        = self.macPackFunctions.getFontSizeUnit()
-        lineSpacingFactor   = self.macPackFunctions.getLineSpacingFactor()
-        marginUnit          = self.macPackFunctions.getMarginUnit()
-        topMarginFactor     = self.macPackFunctions.getTopMarginFactor()
-        bottomMarginFactor  = self.macPackFunctions.getBottomMarginFactor()
-
+        bodyFontSize        = float(self.layoutConfig['TextElements']['bodyFontSize'])
+        bodyTextLeading     = float(self.layoutConfig['TextElements']['bodyTextLeading'])
         topMargin           = float(self.layoutConfig['PageLayout']['topMargin'])
         bottomMargin        = float(self.layoutConfig['PageLayout']['bottomMargin'])
         outsideMargin       = float(self.layoutConfig['PageLayout']['outsideMargin'])
         insideMargin        = float(self.layoutConfig['PageLayout']['insideMargin'])
         textWidth           = pageWidth - (outsideMargin + insideMargin)
 
-        # The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
-        # are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
-        # causing the script to hang. Changing the values back to floats solves the problem.
-
-        # The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
-        # The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
-        
+        # The page dimensions are given in [mm] but are converted to pixels [px],
+        # the conversion factor for [mm] to [px] is 90/25.4 
         def mmToPx (mm) :
             return round(mm * 90 / 25.4, 2)
-
-        def mmToPt (mm) :
-            return int(mm * 72 / 25.4)
-
+            
         # paper height [px]
         paperPxHeight = mmToPx(pageHeight)
-        # paper height [pt]
-        paperPtHeight = mmToPt(pageHeight)
         # paper width [px]
         paperPxWidth = mmToPx(pageWidth)
-        # paper width [pt]
-        paperPtWidth = mmToPt(pageWidth)
         # text width [px]
         textPxWidth = mmToPx(textWidth)
-        # text width [pt]
-        textPtWidth = mmToPt(textWidth)
         # top margin [px]
         topPxMargin = mmToPx(topMargin)
         # outside margin [px]
         outsidePxMargin = mmToPx(outsideMargin)
+        # inside margin [px]
+        insidePxMargin = mmToPx(outsideMargin)
+        # bottom margin [px]
+        bottomPxMargin = mmToPx(bottomMargin)
 
-        # The baselineskip formula is a linear equation (y = m.x + b) generated based on 
-        # [px] measurements in Inkscape
-        baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
+        # The font and leading are given in TeX point [pt] and are converted 
+        # to pixels [px], the conversion factor for [pt] to [px] is 90/72.27 
+        # bodyFontSize [px]
+        bodyFontPxSize =  round(bodyFontSize * 90/72.27,2)
+        # bodyTextLeading [px]
+        bodyTextPxLeading =  round(bodyTextLeading * 90/72.27,2)    
+
+        # Grid positions are measured from the top left of the page.
+        # The grid starts at the top margin
         if debug :
-            self.tools.terminal('Space between lines: ' + str(baselineskip) + ' px')
-
-        # The topMargin position depends on the pagesize and defined in [mm]. It needs to be
-        # converted to pixels [px]
-        topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
+            self.tools.terminal('Grid dimensions are in [px] = 1/90 in')
+            self.tools.terminal('top margin: ' + str(topPxMargin))
+         
+        # The first line of text is topskip down from the top margin
+        topskip = bodyFontPxSize
         if debug :
-            self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
+            self.tools.terminal('topskip: ' + str(topskip))
 
-        # The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
-        # based on pixel [px] measurements in Inkscape 
-        topskip = round((1.25 * 12 * fontSizeUnit),3)
-        if debug :
-            self.tools.terminal('topskipcalc: ' + str(topskip))
-
-        # The firstBaseLine is topMargin minus topskip in [px] 
-        firstBaseLine = topMargin - topskip
+        # The y-position of the first baseline of text is topPtmargin + topskip
+        firstBaseLine = topPxMargin + topskip        
         if debug :
             self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
-        firstBaseLineTtb = round((paperPxHeight - firstBaseLine),3) # from top of page
+
+        # The y-position of the next gridlines is baselineskip down from the previous
+        baselineskip = bodyTextPxLeading
         if debug :
-            self.tools.terminal('firstBaseLineTtb: ' + str(firstBaseLineTtb))
-
-        # The dimensions of the grid rectangle are needed to prepare a placeholder for the
-        # gridlines. 
-        lineGridHeight = round(firstBaseLine - bottomMarginFactor * marginUnit*90/25.40, 3)
+            self.tools.terminal('baselineskip: ' + str(baselineskip))
+                
+        # The last gridline is just before or on the bottom margin 
+        bottomMarginTtb = paperPxHeight - bottomPxMargin
         if debug :
-            self.tools.terminal('lineGridHeight: ' + str(lineGridHeight))
+            self.tools.terminal('bottom margin from the top: ' + str(bottomMarginTtb))
 
-        lineGridWidth = textPxWidth
+        # Overall dimensions of the grid
+        # Grid Height
+        lineGridHeight = round(bottomMarginTtb - firstBaseLine)
+
+        # Grid Width
+        lineGridWidth = round(textPxWidth + outsidePxMargin * 0.25, 2) 
         if debug :
-            self.tools.terminal('lineGridWidth: ' + str(lineGridWidth))
+            self.tools.terminal('Grid H x W: ' + str(lineGridHeight) + ' x ' + str(lineGridWidth))
 
-        lineGridMargin = outsidePxMargin
-        if debug :
-            self.tools.terminal('lineGridMargin: ' + str(lineGridMargin))
+        # left Grid border
+        leftGridMargin = round(outsidePxMargin * 0.75,2)
 
-        # Set the position where the line numbers get printed, this is
-        # just to the left of the lineGridMargin
-        lineNumberPos = lineGridMargin - 10
+        # right Grid border
+        rightGridMargin=round(textPxWidth + outsidePxMargin,2)
 
-        # Open the temp svg file
+        # number position in relation to left grid border
+        lineNumberPos = leftGridMargin+1
+
+        # Grid bottom 
+        posGridBottom = bottomMarginTtb
+
+        # Create the temporary template file
         fo = open(svgInFile, "wb")
         fo.write( '''<?xml version="1.0" standalone="no"?>
         <!DOCTYPE svg SYSTEM "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -338,38 +333,94 @@ class ProjBackground (object) :
             <desc>
               This a sheet with lines.
             </desc>
-        <!-- PARTIAL FRAME FOR LINE NUMBER 1 AT TOP OF LINEGRID -->
+
+        <!-- LINeGRID MARGINS top, bottom, left and right--> 
+
             <path 
                d="M ''')
-        fo.write(str (lineGridMargin))
-        fo.write(" " )
-        fo.write(str (firstBaseLineTtb))
-        fo.write(" v-" )
-        fo.write(str (topskip))
-        fo.write( ''' h 15"
-                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
-        <!-- VERTICAL LINE ALONG LEFT OF LINEGRID --> 
-            <path
-               d="m ''')
-        fo.write(str (lineGridMargin))
+        fo.write(str (outsidePxMargin +15))
         fo.write("," )
-        fo.write(str (firstBaseLineTtb))
-        fo.write(" 0," )
-        fo.write(str (lineGridHeight))
+        fo.write(str (topPxMargin))
+        fo.write(" " )
+        fo.write(str (outsidePxMargin))
+        fo.write("," )
+        fo.write(str (topPxMargin))
+        fo.write('''"
+                       style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+            <path 
+               d="M ''')
+        fo.write(str (outsidePxMargin))
+        fo.write("," )
+        fo.write(str (topPxMargin))
+        fo.write(" " )
+        fo.write(str (outsidePxMargin))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
         fo.write( '''"
-                  style="stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+            <path 
+               d="M ''')
+        fo.write(str (outsidePxMargin))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
+        fo.write(" " )
+        fo.write(str (outsidePxMargin+15))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
+        fo.write( '''"
+                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+            <path 
+               d="M ''')
+        fo.write(str (rightGridMargin -15))
+        fo.write("," )
+        fo.write(str (topPxMargin))
+        fo.write(" " )
+        fo.write(str (rightGridMargin))
+        fo.write("," )
+        fo.write(str (topPxMargin))
+        fo.write('''"
+                       style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+            <path 
+               d="M ''')
+        fo.write(str (rightGridMargin))
+        fo.write("," )
+        fo.write(str (topPxMargin))
+        fo.write(" " )
+        fo.write(str (rightGridMargin))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
+
+        fo.write( '''"
+                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+            <path 
+               d="M ''')
+        fo.write(str (rightGridMargin))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
+        fo.write(" " )
+        fo.write(str (rightGridMargin-15))
+        fo.write("," )
+        fo.write(str (bottomMarginTtb))
+        fo.write( '''"
+                  style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+
+
         <!-- THE ACTUAL LINEGRID --> 
-        
+                                  
             <path       
                d= "m ''')
-        # top most line on the page below the top margin
-        fo.write(str (lineGridMargin))
+        fo.write(str (leftGridMargin-1))
         fo.write("," )
-        fo.write(str (firstBaseLineTtb))
+        fo.write(str (firstBaseLine))
         fo.write(" " )
         fo.write(str (lineGridWidth))
         fo.write( ''',0\n''')
-        # while loop to generate lines to the bottom margin        
+               
         num = 0
         while (num < int(lineGridHeight/baselineskip)):
 
@@ -392,14 +443,13 @@ class ProjBackground (object) :
         <!-- LINE NUMBERS --> 
                    
             <text  y="''')
-        # vertical position of the line numbers
-        fo.write(str (firstBaseLineTtb))
+        fo.write(str (firstBaseLine-3))
         fo.write( '''" style="font-family: Charis SIL;font-style:italic;font-size:5;fill:rgb(200,100,0)\n">''')
-        # line number 1 beside the top most line on the page
+
         fo.write('''        <tspan x="''')
         fo.write(str (lineNumberPos))
-        fo.write( '''" dy="0" baseline-shift="super">1</tspan>\n''')    
-        # while loop to place line numbers from the second line down
+        fo.write( '''" dy="0" >1</tspan>\n''')    
+
         num = 0
         linecount = 2
         while (num < int(lineGridHeight/baselineskip)):
@@ -408,7 +458,7 @@ class ProjBackground (object) :
             fo.write(str (lineNumberPos))
             fo.write('''" dy="''' )
             fo.write(str (baselineskip))
-            fo.write( '''" baseline-shift="super">''')
+            fo.write( '''">''')
             fo.write(str (linecount))
             fo.write('''</tspan>\n''') 
             
@@ -417,6 +467,21 @@ class ProjBackground (object) :
             num = num +1
             
         fo.write('''    </text>
+
+        <!-- LINE OF TEXT IN THE BOTTOM MARGIN --> 
+
+            <text  x="36" y="''')
+        fo.write(str (bottomMarginTtb+10))
+        fo.write('''" style="font-family: Charis SIL;font-style:italic;font-size:5;fill:rgb(200,100,0)"
+            >page size: ''')
+        fo.write(str (pageWidth))
+        fo.write('''x''')
+        fo.write(str (pageHeight))
+        fo.write(''' mm ; font size: ''')
+        fo.write(str (bodyFontSize))
+        fo.write(''' pt; leading: ''')
+        fo.write(str (bodyTextLeading))
+        fo.write(''' pt</text>
           </g>
         </svg>''')
         # Close opened file
@@ -425,6 +490,192 @@ class ProjBackground (object) :
         # Run the conversion utility to convert the temp svg to pdf
         if self.convertSvgToPdf(svgInFile, pdfOutFile) :
             return True
+
+
+        #fontSizeUnit        = self.macPackFunctions.getFontSizeUnit()
+        #lineSpacingFactor   = self.macPackFunctions.getLineSpacingFactor()
+        #marginUnit          = self.macPackFunctions.getMarginUnit()
+        #topMarginFactor     = self.macPackFunctions.getTopMarginFactor()
+        #bottomMarginFactor  = self.macPackFunctions.getBottomMarginFactor()
+
+        #topMargin           = float(self.layoutConfig['PageLayout']['topMargin'])
+        #bottomMargin        = float(self.layoutConfig['PageLayout']['bottomMargin'])
+        #outsideMargin       = float(self.layoutConfig['PageLayout']['outsideMargin'])
+        #insideMargin        = float(self.layoutConfig['PageLayout']['insideMargin'])
+        #textWidth           = pageWidth - (outsideMargin + insideMargin)
+
+        ## The values of lineSpacingFactor, fontSizeUnit, topMarginFactor and bottomMarginFactor
+        ## are configured as floats. Changing them to integer reduces fontSizeUnits <1 to 0,
+        ## causing the script to hang. Changing the values back to floats solves the problem.
+
+        ## The page size is defined in [mm] but is entered in pixels [px] and points [pt]. 
+        ## The conversion factor for [px] is 90/25.4 and for [pt] 72/25.4.
+        
+        #def mmToPx (mm) :
+            #return round(mm * 90 / 25.4, 2)
+
+        #def mmToPt (mm) :
+            #return int(mm * 72 / 25.4)
+
+        ## paper height [px]
+        #paperPxHeight = mmToPx(pageHeight)
+        ## paper height [pt]
+        #paperPtHeight = mmToPt(pageHeight)
+        ## paper width [px]
+        #paperPxWidth = mmToPx(pageWidth)
+        ## paper width [pt]
+        #paperPtWidth = mmToPt(pageWidth)
+        ## text width [px]
+        #textPxWidth = mmToPx(textWidth)
+        ## text width [pt]
+        #textPtWidth = mmToPt(textWidth)
+        ## top margin [px]
+        #topPxMargin = mmToPx(topMargin)
+        ## outside margin [px]
+        #outsidePxMargin = mmToPx(outsideMargin)
+
+        ## The baselineskip formula is a linear equation (y = m.x + b) generated based on 
+        ## [px] measurements in Inkscape
+        #baselineskip = round(((1.1650 * 12  * fontSizeUnit + -0.0300) * lineSpacingFactor*1.25),2)
+        #if debug :
+            #self.tools.terminal('Space between lines: ' + str(baselineskip) + ' px')
+
+        ## The topMargin position depends on the pagesize and defined in [mm]. It needs to be
+        ## converted to pixels [px]
+        #topMargin = round((pageHeight - topMarginFactor * marginUnit)*90/25.4, 3)
+        #if debug :
+            #self.tools.terminal('topMargin: ' + str(topMargin) + ' px')
+
+        ## The distance topMargin to firstBaseLine happens to be equal to the font size in pixels
+        ## based on pixel [px] measurements in Inkscape 
+        #topskip = round((1.25 * 12 * fontSizeUnit),3)
+        #if debug :
+            #self.tools.terminal('topskipcalc: ' + str(topskip))
+
+        ## The firstBaseLine is topMargin minus topskip in [px] 
+        #firstBaseLine = topMargin - topskip
+        #if debug :
+            #self.tools.terminal('firstBaseLine: ' + str(firstBaseLine))
+        #firstBaseLineTtb = round((paperPxHeight - firstBaseLine),3) # from top of page
+        #if debug :
+            #self.tools.terminal('firstBaseLineTtb: ' + str(firstBaseLineTtb))
+
+        ## The dimensions of the grid rectangle are needed to prepare a placeholder for the
+        ## gridlines. 
+        #lineGridHeight = round(firstBaseLine - bottomMarginFactor * marginUnit*90/25.40, 3)
+        #if debug :
+            #self.tools.terminal('lineGridHeight: ' + str(lineGridHeight))
+
+        #lineGridWidth = textPxWidth
+        #if debug :
+            #self.tools.terminal('lineGridWidth: ' + str(lineGridWidth))
+
+        #lineGridMargin = outsidePxMargin
+        #if debug :
+            #self.tools.terminal('lineGridMargin: ' + str(lineGridMargin))
+
+        ## Set the position where the line numbers get printed, this is
+        ## just to the left of the lineGridMargin
+        #lineNumberPos = lineGridMargin - 10
+
+        ## Open the temp svg file
+        #fo = open(svgInFile, "wb")
+        #fo.write( '''<?xml version="1.0" standalone="no"?>
+        #<!DOCTYPE svg SYSTEM "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        #<svg xmlns="http://www.w3.org/2000/svg"
+             #version="1.1" width="''')
+        #fo.write(str (paperPxWidth))
+        #fo.write( '''" height="''')
+        #fo.write(str (paperPxHeight))
+        #fo.write( '''">
+          #<g>
+            #<title>linegrid</title>
+            #<desc>
+              #This a sheet with lines.
+            #</desc>
+        #<!-- PARTIAL FRAME FOR LINE NUMBER 1 AT TOP OF LINEGRID -->
+            #<path 
+               #d="M ''')
+        #fo.write(str (lineGridMargin))
+        #fo.write(" " )
+        #fo.write(str (firstBaseLineTtb))
+        #fo.write(" v-" )
+        #fo.write(str (topskip))
+        #fo.write( ''' h 15"
+                  #style="fill:#ffffff;fill-opacity:1;stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+        #<!-- VERTICAL LINE ALONG LEFT OF LINEGRID --> 
+            #<path
+               #d="m ''')
+        #fo.write(str (lineGridMargin))
+        #fo.write("," )
+        #fo.write(str (firstBaseLineTtb))
+        #fo.write(" 0," )
+        #fo.write(str (lineGridHeight))
+        #fo.write( '''"
+                  #style="stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+        #<!-- THE ACTUAL LINEGRID --> 
+        
+            #<path       
+               #d= "m ''')
+        ## top most line on the page below the top margin
+        #fo.write(str (lineGridMargin))
+        #fo.write("," )
+        #fo.write(str (firstBaseLineTtb))
+        #fo.write(" " )
+        #fo.write(str (lineGridWidth))
+        #fo.write( ''',0\n''')
+        ## while loop to generate lines to the bottom margin        
+        #num = 0
+        #while (num < int(lineGridHeight/baselineskip)):
+
+            #if num%2 == 0: 
+                #fo.write( '''           m 0, ''')
+                #fo.write(str (baselineskip))
+                #fo.write(" -" )
+                #fo.write(str (lineGridWidth))
+                #fo.write( ''',0\n''')
+            #else:
+                #fo.write( '''           m 0, ''')
+                #fo.write(str (baselineskip))
+                #fo.write(" " )
+                #fo.write(str (lineGridWidth))
+                #fo.write( ''',0\n''')
+            #num = num +1
+
+        #fo.write( '''"           style="stroke-width:0.2px;stroke:rgb(255,200,0);stroke-opacity:1"/>
+                   
+        #<!-- LINE NUMBERS --> 
+                   
+            #<text  y="''')
+        ## vertical position of the line numbers
+        #fo.write(str (firstBaseLineTtb))
+        #fo.write( '''" style="font-family: Charis SIL;font-style:italic;font-size:5;fill:rgb(200,100,0)\n">''')
+        ## line number 1 beside the top most line on the page
+        #fo.write('''        <tspan x="''')
+        #fo.write(str (lineNumberPos))
+        #fo.write( '''" dy="0" baseline-shift="super">1</tspan>\n''')    
+        ## while loop to place line numbers from the second line down
+        #num = 0
+        #linecount = 2
+        #while (num < int(lineGridHeight/baselineskip)):
+
+            #fo.write( '''           <tspan x="''')
+            #fo.write(str (lineNumberPos))
+            #fo.write('''" dy="''' )
+            #fo.write(str (baselineskip))
+            #fo.write( '''" baseline-shift="super">''')
+            #fo.write(str (linecount))
+            #fo.write('''</tspan>\n''') 
+            
+            #linecount = linecount +1  
+
+            #num = num +1
+            
+        #fo.write('''    </text>
+          #</g>
+        #</svg>''')
+        ## Close opened file
+        #fo.close()
 
 
     def buildCommandList (self, svgInFile, pdfOutFile) :
@@ -448,19 +699,6 @@ class ProjBackground (object) :
         return cmds
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     def convertSvgToPdf (self, svgInFile, pdfOutFile) :
         '''Convert/render an SVG file to produce a PDF file.'''
 
@@ -472,3 +710,5 @@ class ProjBackground (object) :
             self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(pdfOutFile),str(e)])
 
 
+    
+    
