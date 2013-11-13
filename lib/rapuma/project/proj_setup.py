@@ -159,6 +159,8 @@ class ProjSetup (object) :
         copy and the proposed source. If there is, then it will perform
         the update. If not, it will require force to do the update.'''
 
+#        import pdb; pdb.set_trace()
+
         # Just in case there are any problems with the source path
         # Reset the local mod first
         self.local = ProjLocal(self.pid, gid, self.projectConfig)
@@ -172,10 +174,10 @@ class ProjSetup (object) :
         else :
             if type(cidList) != list :
                  cidList = cidList.split()
-                 # Do a quick validity test
-                 for cid in cidList :
-                    if not cid in self.projectConfig['Groups'][gid]['cidList'] :
-                        self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
+            # Do a quick validity test
+            for cid in cidList :
+                if not cid in self.projectConfig['Groups'][gid]['cidList'] :
+                    self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
 
         # Unlock the group so it can be worked on
         self.lockUnlock(gid, False)

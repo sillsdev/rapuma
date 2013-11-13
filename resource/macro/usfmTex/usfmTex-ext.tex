@@ -53,6 +53,23 @@
 %Special quote handling
 \quotekernamount=0.1em
 
+% Paragraph space shrinking
+% Note: This normally needs to be used within a paragraph
+% on a run of text. Use carefully!
+\def\shrink{\kern3pt\spaceskip=1.125pt plus 0.3pt minus 0.1pt}
+% An even tighter variant
+\def\shrinkk{\spaceskip=1pt plus 0.3pt minus 0.1pt}
+% Turn off paragraph spacing
+% Note: This should be used before the end of the paragraph.
+% The last line of a paragraph will tend to be "crunched"
+% so turning it off after the first word on the last line
+% normally keeps the spacing looking okay.
+\def\unshrink{\spaceskip=0pt\kern3pt}
+% Paragraph space stretch
+\def\stretch{\spaceskip=3.5pt plus 0.3pt minus 0.1pt}
+% Turn off paragraph space stretching (with word-space kern)
+\def\unstretch{\spaceskip=0pt\kern3pt}
+
 
 %%%%% Vertical Spacing
 % Off-grid spacing. To enable variable vertical space uncomment

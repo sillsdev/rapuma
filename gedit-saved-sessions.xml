@@ -64,6 +64,16 @@
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-ext.tex"/>
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-settings.tex"/>
 </session>
+<session name="MLF-THAI-NT">
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/hyphenation.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/illustration.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/TeX/usfmTex-ext.tex"/>
+</session>
 <session name="Rapuma">
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
