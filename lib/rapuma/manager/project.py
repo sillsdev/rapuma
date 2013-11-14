@@ -197,7 +197,6 @@ class Project (object) :
         # If the object already exists just return it
         if self.gid in self.groups: return self.groups[self.gid]
 
-#        import pdb; pdb.set_trace()
 
         cType = self.projectConfig['Groups'][self.gid]['cType']
         # Create a special component object if called

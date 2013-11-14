@@ -201,7 +201,7 @@ class Usfm (Group) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup(gid, mode, cids) :
+            if not self.preProcessGroup(gid, mode, [cid]) :
                 return False
 
         # With everything in place we can render the component.
@@ -214,6 +214,8 @@ class Usfm (Group) :
     def preProcessGroup (self, gid, mode, cidList) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
+
+#        import pdb; pdb.set_trace()
 
         # Get some relevant settings
         # FIXME: Note page border has not really been implemented yet.
