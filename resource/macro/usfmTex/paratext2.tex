@@ -108,13 +108,13 @@
 \def\m@kenote#1#2#3{\let\@sf\empty % #1=class(e.g. f, x); 
   % #2=caller + all the macros to setup the styling for the caller 
   % text is read later
-  \ifhmode\edef\@sf{\spacefactor\the\spacefactor}\/\fi
+  \ifhmode\edef\@sf{\spacefactor\the\spacefactor}\/\fi%
   % if footnote is on a chapter number ...
-  \ifhe@dings #2\edef\@wrap{\global\setbox\he@dingnotes=\vbox\bgroup\unvbox\he@dingnotes}\else\edef\@wrap{}
-    \ifch@pter \everypar={}\ch@pterfalse
+  \ifhe@dings #2\edef\@wrap{\global\setbox\he@dingnotes=\vbox\bgroup\unvbox\he@dingnotes}\else\edef\@wrap{}%
+    \ifch@pter \everypar={}\ch@pterfalse%
       \global\setbox\ch@pternote=\hbox{\box\ch@pternote #2}%
     \else #2\fi % output caller
-  \fi
+  \fi%
   % @sf preserves the space factor (e.g. extra space after a period), restore it now
   \@sf \@wrap\vm@kenote{#1}{\getp@ram{notecallerstyle}{#1}\ifx\p@ram\relax #2\else #3\fi}}
 
