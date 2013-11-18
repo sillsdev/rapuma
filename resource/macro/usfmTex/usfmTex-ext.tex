@@ -17,21 +17,14 @@
 % specific project. You can also add more as needed. Have fun!
 
 
-%%%%% Special Characters
+%%%%% SPECIAL CHARACTERS
 % Special characters that can be inserted into the working text. This is
 % preferred to direct injection of the characters which makes them less
 % noticable on review.
 \def\nbhy{‑}
 
 
-%%%%% Space Characters
-% Special space characters that can be inserted into the working text.
-\def\nbsp{ }
-\def\zwsp{​}
-\def\wj{⁠}
-
-
-%%%%% Horizontal Spacing
+%%%%% HORIZONTAL SPACING
 % By default, text line spacing is on a grid that is based on the line
 % leading setting. If this is not required, to make the spacing more
 % flexible, the \baselineskip can be modified here. Just uncomment the
@@ -39,6 +32,12 @@
 % optimum leading by adding the plus and minus you allow for some
 % stretching within those parameters.
 % \baselineskip=12.5pt plus .5pt minus .1pt
+
+% SPACE CHARACTERS
+% Special space characters that can be inserted into the working text.
+\def\nbsp{ }
+\def\zwsp{​}
+\def\wj{⁠}
 
 % These adjustments are used around footnote callers and punctuation to
 % add some space for punctuation that needs a little extra
@@ -71,7 +70,7 @@
 \def\unstretch{\spaceskip=0pt\kern3pt}
 
 
-%%%%% Vertical Spacing
+%%%%% VERTICAL SPACING
 % Off-grid spacing. To enable variable vertical space uncomment
 % and setup the following \baselineskip command. The main
 % setting should be the actual line leading for the body text.
@@ -120,7 +119,7 @@
 \def\skipqqqqline{\vskip 0.03125\baselineskip}
 
 
-%%%%% Baselineskip Adjustment Hooks
+%%%%% BASELINESKIP ADJUSTMENT HOOKS
 % This hook provides a means to adjust the baselineskip on a
 % specific style. It provides a place to put the initial 
 % setting so the hook can make the change and then go back
@@ -132,7 +131,7 @@
 %\sethook{after}{s1}{\baselineskip=\remblskip}
 
 
-%%%%% Header output
+%%%%% HEADER OUTPUT
 % To adjust the size of the page number in the header or footer
 % use the following code. Adjust font name and size as necessary.
 %\font\mysmallfont="[../Fonts/CharisSIL/CharisSILB.ttf]" at 10pt
@@ -145,7 +144,7 @@
 \catcode`\@=12
 
 
-%%%%% Footnote tweaks
+%%%%% FOOTNOTE TWEAKS
 % Footnote caller kerning - To adjust space around the
 % footnote caller use the following code Adjust the kern
 % amounts as necessary
@@ -166,7 +165,7 @@
 \def\internotepenalty{10000}
 
 
-%%%%% Substituting Characters
+%%%%% SUBSTITUTING CHARACTERS
 % Some times, when a character does not exist in a font
 % you can substitute from another if no special rendering
 % is needed. This code will do that. Modify as needed.
@@ -183,7 +182,7 @@
                                                 % the specified font
 
 
-%%%%% Non-standard Spaces
+%%%%% NON-STANDARD SPACES
 % Some publications may use non-standard (U+0020) between words.
 % But TeX (and XeTeX) will treat spaces other than U+0020 as
 % non-breaking which messes up your justification. This is a
@@ -193,32 +192,55 @@
 %\def^^^^2009{\hskip .2em plus.1em minus.1em\relax}
 
 
-%%%%% Heading space
-% There always seems to be problems with extra space between 
-% the section heading and the top of the column when the 
-% section head is at the top of the column. To take up the
-% slack this code will usually help. Any adjustments needed
-% should be done in the .sty and \VerticalSpaceFactor.
-% Trying to adjust this code doesn't seem to make any dif.
-% This is normally on by default.
+%%%%% HEADING SPACE AND TITLE SPACING
+% There can be problems with the way titles and section
+% heads fall in to place here are a couple of fixes that
+% may help with these problems.
+%
+% OFF-GRID LAYOUT TITLE SETTING
+% Un-comment the following if you are typesetting the
+% publication off-grid. This will ensure that the book
+% title will set consistently.
 \catcode`\@=11
 \def\gridb@x#1{%
- \setbox0=\ifgridp@c\vbox{\box#1}\else\killd@scenders#1\fi%
- \dimen2=\ht0 \advance\dimen2 by \dp0
- \dimen0=\baselineskip \vskip\baselineskip
- \ifgridp@c\line{}\nobreak\fi % otherwise first \line in loop won't get any baselineskip
-                              % when doing a picture box, because it's not part of the
-                              % current page
- \loop \ifdim\dimen0<\dimen2
-   \advance\dimen0 by \baselineskip
-    \line{}\nobreak \repeat
- \setbox0=\vbox to 0pt{\kern-\ht0\unvbox0}
- \unvbox0 \nobreak
-}
+    % Note the \vbox setting can be adjusted if necessary
+    % To fit title size which can vary from publication
+    % to publication.
+    \ift@tle\vbox to 48pt{\unvbox#1}\else\unvbox#1\fi
 \catcode`\@=12
 
+% ON-GRID LAYOUT SECTION HEAD
+% Depending on the leading section headings that end up at
+% the top of a column may have too much space above them.
+% If that happens the following fix might help.
+\catcode`\@=11
+    % \mystrut represents the highest character in the publication orthography
+    % Change the character in the first \hbox{Ŏ́} to represent the project's orthography
+    % Note: This will need to be more generalized and automated at some point
+    \def\mystrut{\setbox0=\hbox{Ŏ́}\dimen0=\ht0\dimen1\dp0\setbox0=\hbox{}\ht0=\dimen0\dp0=\dimen1\box0}
+    \def\gridb@x#1{%
+        \setbox0=\ifgridp@c\vbox{\box#1}\else%
+        % Change the \vbox size if default is not right
+        % This sets a fixed box around your main title (sorry if you don't want that)
+        \ift@tle\vbox to 72pt{\killd@scenders#1}\else\killd@scenders#1\fi\fi%
+        \dimen2=\ht0 \advance\dimen2 by \dp0
+        \dimen0=\baselineskip%
+        \ifgridp@c\line{}\nobreak\fi    % otherwise first \line in loop won't get any baselineskip
+                                        % when doing a picture box, because it's not part of the
+                                        % current page (Note: this has not been tested with pictures yet)
+        \loop \ifdim\dimen0<\dimen2
+            \advance\dimen0 by \baselineskip
+            \line{}\nobreak \repeat
+        % Depending on font metrics \dimen0 will need adjusting
+        % Note this should be automated too
+        \advance\dimen0 by -4pt
+        \setbox0=\vbox to 0pt{\kern-\dimen0\unvbox0}
+        \box0 \nobreak
+    }
+\catcode`\@=12 
 
-%%%%% Chapter/Verse Number Settings
+
+%%%%% CHAPTER/VERSE NUMBER SETTINGS
 % Some additional macros and commands to gain more control over verse numbers
 
 % Superscript tweaks (uncomment \def settings to override default values)
@@ -227,7 +249,7 @@
 %\def\SuperscriptFactor{0.75}    % Scale up or down the size of the verse number or caller
 
 
-%%%%% Special commands
+%%%%% SPECIAL COMMANDS
 % These are extra commands that can be inserted in the text
 
 % Enable commands with digits in them to be processed
