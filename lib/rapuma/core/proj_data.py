@@ -209,6 +209,8 @@ class ProjData (object) :
         out all all auto-created, user-specific files that could mess up a
         transfer to another system. This goes for archives and backups'''
 
+#        import pdb; pdb.set_trace()
+
         # In case an exclude list is not given
         if not excludeFiles :
             excludeFiles = []
@@ -325,7 +327,7 @@ class ProjData (object) :
             os.remove(os.path.join(bakDir, str(fn) + '.zip'))
 
 
-    def backupProject (self, targetPath) :
+    def backupProject (self, targetPath=None) :
         '''Backup a project. Send the compressed backup file with a date-stamp
         file name to the user-specified backup folder. If a target path is 
         specified, put the archive there but use the PID in the name. If other
@@ -355,6 +357,8 @@ class ProjData (object) :
         # Make sure the dir is there
         if not os.path.exists(projBackupFolder) :
             os.makedirs(projBackupFolder)
+
+#        import pdb; pdb.set_trace()
 
         # Zip up but use a list of files we don't want
         self.zipUpProject(backupTarget, self.makeExcludeFileList())
@@ -680,7 +684,7 @@ class ProjData (object) :
 
     def pullFromCloud (self, force = False, tPath = None) :
         '''Pull data from cloud storage and merge/replace local data.
-        If force is used, do a full backup first before starting the
+        If force is not used, do a full backup first before starting the
         actual pull operation.'''
 
 #        import pdb; pdb.set_trace()
@@ -754,58 +758,61 @@ class ProjData (object) :
                 if cr > 0 :
                     self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # First branch, does this project exist in the registry
-        if self.userConfig['Projects'].has_key(self.pid) :
-            # Does the local user own it?
-            if not self.sameOwner(cloud) and not force :
-                self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
-            # It (the cloud) needs to be newer
-            if self.isNewerThanLocal(cloud, self.getConfig(self.local.projHome)) and not force :
-                self.log.writeToLog(self.errorCodes['4260'], [self.pid])
-            # Is the project physically present? If force is used, backup the old one
-            if not force :
-                self.tools.makeFolderBackup(self.local.projHome)
-            # Now remove the orginal project data
-            emptyOutProject()
-            # If force is used then owner and age makes no difference
-            doPull()
-            self.buyLocal(self.getConfig(self.local.projHome))
-            # If a tPath was given register the project
-            if tPath :
-                self.registerProject(self.local.projHome)
-            # Report
-            self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
+         #First branch, does this project exist in the registry
+        #if self.userConfig['Projects'].has_key(self.pid) :
+             #Does the local user own it?
+            #if not self.sameOwner(cloud) and not force :
+                #self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
+             #It (the cloud) needs to be newer
+            #if self.isNewerThanLocal(cloud, self.getConfig(self.local.projHome)) and not force :
+                #self.log.writeToLog(self.errorCodes['4260'], [self.pid])
+             #Is the project physically present? If force is used, backup the old one
+            #if not force :
+                #self.tools.backupProject(self.local.projHome)
+             #Now remove the orginal project data
+            #emptyOutProject()
+             #If force is used then owner and age makes no difference
+            #doPull()
+            #self.buyLocal(self.getConfig(self.local.projHome))
+             #If a tPath was given register the project
+            #if tPath :
+                #self.registerProject(self.local.projHome)
+             #Report
+            #self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
 
         # This project is new to the system (registry)
-        else :
-            # Is the project physically present? If force is used, backup the old one
-            if not force :
-                self.tools.makeFolderBackup(self.local.projHome)
-            # Now remove the orginal
-            if os.path.exists(self.local.projHome) :
-                shutil.rmtree(self.local.projHome)
-            # Check owner
-            if self.sameOwner(cloud) :
-                shutil.copytree(cloud, self.local.projHome)
-                self.registerProject(self.local.projHome)
-                # Reset the local and log now
-                self.local      = ProjLocal(self.pid)
-                self.log        = ProjLog(self.pid)
-                # Claim the local copy of the project
-                self.buyLocal(self.getConfig(self.local.projHome))
-                self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
-            else :
-                if force :
-                    shutil.copytree(cloud, self.local.projHome)
-                    self.registerProject(self.local.projHome)
-                    # Reset the local and log now
-                    self.local      = ProjLocal(self.pid)
-                    self.log        = ProjLog(self.pid)
-                    # Claim the local copy of the project
-                    self.buyLocal(self.getConfig(self.local.projHome))
-                    self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
-                else :
-                    self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
+        #else :
+        # Is the project physically present? If force is used, backup the old one
+        if not force :
+#            self.backupProject(self.local.projHome)
+            self.backupProject()
+        # Now remove the orginal
+        emptyOutProject()
+        doPull()
+        #if os.path.exists(self.local.projHome) :
+            #shutil.rmtree(self.local.projHome)
+        # Check owner
+        #if self.sameOwner(cloud) :
+#        shutil.copytree(cloud, self.local.projHome)
+        self.registerProject(self.local.projHome)
+        # Reset the local and log now
+        self.local      = ProjLocal(self.pid)
+        self.log        = ProjLog(self.pid)
+        # Claim the local copy of the project
+        self.buyLocal(self.getConfig(self.local.projHome))
+        self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
+        #else :
+            #if force :
+                #shutil.copytree(cloud, self.local.projHome)
+                #self.registerProject(self.local.projHome)
+                ## Reset the local and log now
+                #self.local      = ProjLocal(self.pid)
+                #self.log        = ProjLog(self.pid)
+                ## Claim the local copy of the project
+                #self.buyLocal(self.getConfig(self.local.projHome))
+                #self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
+            #else :
+                #self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
