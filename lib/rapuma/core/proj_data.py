@@ -601,85 +601,69 @@ class ProjData (object) :
         self.tools.writeConfFile(projectConfig)
 
 
-    def pushToCloud (self, force = False) :
+    def pushToCloud (self) :
         '''Push local project data to the cloud. If a file in the cloud is
         older than the project file, it will be sent. Otherwise, it will
-        be skipped.'''
+        be skipped. Because the local is being pushed, the owner should
+        be changed to the local user.'''
 
         # Make a cloud reference
         cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
         if not os.path.isdir(cloud) :
             os.makedirs(cloud)
 
-        def doPush (cloud) :
-            '''When everything is sorted out do the push.'''
-
-            # Get a list of files we do not want
-            excludeFiles        = self.makeExcludeFileList()
-
-            # Get a total list of files from the project
-            cn = 0
-            cr = 0
-            sys.stdout.write('Pushing files to the cloud')
-            sys.stdout.flush()
-            for folder, subs, files in os.walk(self.local.projHome):
-                for fileName in files:
-                    # Do not include any backup files we find
-                    if fileName[-1] == '~' :
-                        continue
-                    if os.path.join(folder, fileName) not in excludeFiles :
-                        if not os.path.isdir(folder.replace(self.local.projHome, cloud)) :
-                            os.makedirs(folder.replace(self.local.projHome, cloud))
-                        cFile = os.path.join(folder, fileName).replace(self.local.projHome, cloud)
-                        pFile = os.path.join(folder, fileName)
-                        if not os.path.isfile(cFile) :
-                            sys.stdout.write('.')
-                            sys.stdout.flush()
-                            shutil.copy(pFile, cFile)
-                            cn +=1
-                        # Otherwise if the cloud file is older than
-                        # the project file, refresh it
-                        elif self.tools.isOlder(cFile, pFile) :
-                            if os.path.isfile(cFile) :
-                                os.remove(cFile)
-                            sys.stdout.write('.')
-                            sys.stdout.flush()
-                            shutil.copy(pFile, cFile)
-                            cr +=1
-            # Add space for next message
-            sys.stdout.write('\n')
-
-            # Report what happened
-            self.log.writeToLog(self.errorCodes['4110'])
-            if cn == 0 and cr == 0 :
-                self.log.writeToLog(self.errorCodes['4120'])
-            else :
-                if cn > 0 :
-                    self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
-                if cr > 0 :
-                    self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
-
         # Check for existence of this project in the cloud and who owns it
         pc = Config(self.pid)
         pc.getProjectConfig()
         projectConfig = pc.projectConfig
-        if not self.sameOwner(cloud) :
-            if force :
-                self.setCloudPushTime(projectConfig)
-                self.buyCloud(projectConfig)
-                doPush(cloud)
-            else :
-                self.log.writeToLog(self.errorCodes['4150'], [self.pid, self.getCloudOwner(cloud)])
+        self.setCloudPushTime(projectConfig)
+        self.buyCloud(projectConfig)
+
+        # When everything is sorted out do the push.
+        # Get a list of files we do not want
+        excludeFiles        = self.makeExcludeFileList()
+
+        # Get a total list of files from the project
+        cn = 0
+        cr = 0
+        sys.stdout.write('Pushing files to the cloud')
+        sys.stdout.flush()
+        for folder, subs, files in os.walk(self.local.projHome):
+            for fileName in files:
+                # Do not include any backup files we find
+                if fileName[-1] == '~' :
+                    continue
+                if os.path.join(folder, fileName) not in excludeFiles :
+                    if not os.path.isdir(folder.replace(self.local.projHome, cloud)) :
+                        os.makedirs(folder.replace(self.local.projHome, cloud))
+                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cloud)
+                    pFile = os.path.join(folder, fileName)
+                    if not os.path.isfile(cFile) :
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
+                        shutil.copy(pFile, cFile)
+                        cn +=1
+                    # Otherwise if the cloud file is older than
+                    # the project file, refresh it
+                    elif self.tools.isOlder(cFile, pFile) :
+                        if os.path.isfile(cFile) :
+                            os.remove(cFile)
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
+                        shutil.copy(pFile, cFile)
+                        cr +=1
+        # Add space for next message
+        sys.stdout.write('\n')
+
+        # Report what happened
+        self.log.writeToLog(self.errorCodes['4110'])
+        if cn == 0 and cr == 0 :
+            self.log.writeToLog(self.errorCodes['4120'])
         else :
-            if force :
-                self.setCloudPushTime(projectConfig)
-                doPush(cloud)
-            else :
-                if self.isNewerThanCloud(cloud, projectConfig) :
-                    self.setCloudPushTime(projectConfig)
-                    doPush(cloud)
-                else :
-                    self.log.writeToLog(self.errorCodes['4160'], [self.pid])
+            if cn > 0 :
+                self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
+            if cr > 0 :
+                self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
 
     def pullFromCloud (self, force = False, tPath = None) :
@@ -707,93 +691,59 @@ class ProjData (object) :
             self.tools.terminal('Error: No path to the cloud has been configured.')
             self.tools.dieNow()
 
-        def emptyOutProject() :
-            # Empty out all the project contents except the HelperScript folder
-            # This is so we don't loose our place in the terminal.
-
-            for folder, subs, files in os.walk(self.local.projHome):
-                # Remove the rapuma log file (might need for this to be better)
-                if os.path.exists(os.path.join(self.local.projHome, 'rapuma.log')) :
-                    os.remove(os.path.join(self.local.projHome, 'rapuma.log'))
-                if folder == self.local.projHome :
-                    continue
-                elif os.path.split(folder)[1] == 'HelperScript' :
-                    continue
-                else :
-                    # Remove everything else
-                    shutil.rmtree(folder)
-
-        def doPull () :
-            # Get a total list of files from the project
-            cn = 0
-            cr = 0
-            sys.stdout.write('\nPulling files from the cloud')
-            sys.stdout.flush()
-            for folder, subs, files in os.walk(cloud):
-                for fileName in files:
-                    if not os.path.isdir(folder.replace(cloud, self.local.projHome)) :
-                        os.makedirs(folder.replace(cloud, self.local.projHome))
-                    cFile = os.path.join(folder, fileName)
-                    pFile = os.path.join(folder, fileName).replace(cloud, self.local.projHome)
-                    if not os.path.isfile(pFile) :
-                        shutil.copy(cFile, pFile)
-                        cn +=1
-                    elif self.tools.isOlder(pFile, cFile) :
-                        if os.path.isfile(pFile) :
-                            os.remove(pFile)
-                        shutil.copy(cFile, pFile)
-                        cr +=1
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-            # Add space for next message
-            sys.stdout.write('\n')
-
-            # Report what happened
-            self.log.writeToLog(self.errorCodes['4210'])
-            if cn == 0 and cr == 0 :
-                self.log.writeToLog(self.errorCodes['4120'])
-            else :
-                if cn > 0 :
-                    self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
-                if cr > 0 :
-                    self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
-
-         #First branch, does this project exist in the registry
-        #if self.userConfig['Projects'].has_key(self.pid) :
-             #Does the local user own it?
-            #if not self.sameOwner(cloud) and not force :
-                #self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
-             #It (the cloud) needs to be newer
-            #if self.isNewerThanLocal(cloud, self.getConfig(self.local.projHome)) and not force :
-                #self.log.writeToLog(self.errorCodes['4260'], [self.pid])
-             #Is the project physically present? If force is used, backup the old one
-            #if not force :
-                #self.tools.backupProject(self.local.projHome)
-             #Now remove the orginal project data
-            #emptyOutProject()
-             #If force is used then owner and age makes no difference
-            #doPull()
-            #self.buyLocal(self.getConfig(self.local.projHome))
-             #If a tPath was given register the project
-            #if tPath :
-                #self.registerProject(self.local.projHome)
-             #Report
-            #self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
-
-        # This project is new to the system (registry)
-        #else :
         # Is the project physically present? If force is used, backup the old one
         if not force :
-#            self.backupProject(self.local.projHome)
             self.backupProject()
-        # Now remove the orginal
-        emptyOutProject()
-        doPull()
-        #if os.path.exists(self.local.projHome) :
-            #shutil.rmtree(self.local.projHome)
-        # Check owner
-        #if self.sameOwner(cloud) :
-#        shutil.copytree(cloud, self.local.projHome)
+
+        # Empty out all the project contents except the HelperScript folder
+        # This is so we don't loose our place in the terminal.
+        for folder, subs, files in os.walk(self.local.projHome):
+            # Remove the rapuma log file (might need for this to be better)
+            if os.path.exists(os.path.join(self.local.projHome, 'rapuma.log')) :
+                os.remove(os.path.join(self.local.projHome, 'rapuma.log'))
+            if folder == self.local.projHome :
+                continue
+            elif os.path.split(folder)[1] == 'HelperScript' :
+                continue
+            else :
+                # Remove everything else
+                shutil.rmtree(folder)
+
+        # Pull in the data from the project in the cloud
+        cn = 0
+        cr = 0
+        sys.stdout.write('\nPulling files from the cloud')
+        sys.stdout.flush()
+        for folder, subs, files in os.walk(cloud):
+            for fileName in files:
+                if not os.path.isdir(folder.replace(cloud, self.local.projHome)) :
+                    os.makedirs(folder.replace(cloud, self.local.projHome))
+                cFile = os.path.join(folder, fileName)
+                pFile = os.path.join(folder, fileName).replace(cloud, self.local.projHome)
+                if not os.path.isfile(pFile) :
+                    shutil.copy(cFile, pFile)
+                    cn +=1
+                elif self.tools.isOlder(pFile, cFile) :
+                    if os.path.isfile(pFile) :
+                        os.remove(pFile)
+                    shutil.copy(cFile, pFile)
+                    cr +=1
+                sys.stdout.write('.')
+                sys.stdout.flush()
+        # Add space for next message
+        sys.stdout.write('\n')
+
+        # Report what happened
+        self.log.writeToLog(self.errorCodes['4210'])
+        if cn == 0 and cr == 0 :
+            self.log.writeToLog(self.errorCodes['4120'])
+        else :
+            if cn > 0 :
+                self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
+            if cr > 0 :
+                self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
+
+        # Register the local copy to the local user
         self.registerProject(self.local.projHome)
         # Reset the local and log now
         self.local      = ProjLocal(self.pid)
@@ -801,18 +751,6 @@ class ProjData (object) :
         # Claim the local copy of the project
         self.buyLocal(self.getConfig(self.local.projHome))
         self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
-        #else :
-            #if force :
-                #shutil.copytree(cloud, self.local.projHome)
-                #self.registerProject(self.local.projHome)
-                ## Reset the local and log now
-                #self.local      = ProjLocal(self.pid)
-                #self.log        = ProjLog(self.pid)
-                ## Claim the local copy of the project
-                #self.buyLocal(self.getConfig(self.local.projHome))
-                #self.log.writeToLog(self.errorCodes['4270'], [self.pid, self.getLocalOwner()])
-            #else :
-                #self.log.writeToLog(self.errorCodes['4250'], [self.pid, self.getCloudOwner(cloud)])
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :

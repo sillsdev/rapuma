@@ -169,9 +169,9 @@ class ProjCommander (object) :
                 'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
                 'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
                 'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 
-                'draft'         : ['Create ' + gid + ' group PDF draft file.',      'rapuma group '     + pid + ' ' + gid + ' group         draft   --cid_list \"$1\" --force '], 
-                'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group '     + pid + ' ' + gid + ' group         proof   --cid_list \"$1\" --force '], 
-                'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group '     + pid + ' ' + gid + ' group         final   --cid_list \"$1\" --force '], 
+                'draft'         : ['Create ' + gid + ' group PDF draft file.',      'rapuma group '     + pid + ' ' + gid + ' group         draft   --cid_list \"$1\" '], 
+                'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group '     + pid + ' ' + gid + ' group         proof   --cid_list \"$1\" '], 
+                'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group '     + pid + ' ' + gid + ' group         final   --cid_list \"$1\" '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group '     + pid + ' ' + gid + ' group         update  --cid_list \"$1\" $2 '], 
                 'updateFont'    : ['Update the ' + gid + ' font.',                  'rapuma package '   + pid + ' ' + gid + ' \"' + font + '\" font update '], 
                 'updateMacro'   : ['Update the ' + gid + ' macro package.',         'rapuma package '   + pid + ' ' + gid + ' \"' + macro + '\" macro update '] 
