@@ -60,8 +60,7 @@ class ProjData (object) :
             '4120' : ['MSG', 'No files updated.'],
             '4130' : ['MSG', 'Added: <<1>> file(s).'],
             '4140' : ['MSG', 'Updated: <<1>> file(s)'],
-            '4150' : ['ERR', 'The cloud project [<<1>>] you want to push to is owned by [<<2>>]. Use force (-f) to change the owner to your user ID.'],
-            '4160' : ['ERR', 'The cloud project [<<1>>] is newer than the local copy. If you seriously want to overwrite it, use force (-f) to do so.'],
+            '4150' : ['WRN', 'Because force (-f) was used, the existing cloud project [<<1>>] has been flushed. The local project will replace it.'],
 
             '4210' : ['MSG', 'Completed pulling/restoring data from the cloud.'],
             '4220' : ['ERR', 'Cannot resolve path: [<<1>>]'],
@@ -601,14 +600,25 @@ class ProjData (object) :
         self.tools.writeConfFile(projectConfig)
 
 
-    def pushToCloud (self) :
+    def pushToCloud (self, force = False) :
         '''Push local project data to the cloud. If a file in the cloud is
         older than the project file, it will be sent. Otherwise, it will
         be skipped. Because the local is being pushed, the owner should
-        be changed to the local user.'''
+        be changed to the local user. If force is used we will "flush"
+        the project cloud storage area so all the local data will become
+        the new version in the cloud. This could be risky if the cloud
+        contained information that was stored no other place.'''
 
-        # Make a cloud reference
+        # Make a path to the cloud
         cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+
+        # If force is used, flush the cloud
+        if force :
+            if os.path.isdir(cloud) :
+                shutil.rmtree(cloud)
+                self.log.writeToLog(self.errorCodes['4150'], [self.pid])
+
+        # Create a cloud folder if needed
         if not os.path.isdir(cloud) :
             os.makedirs(cloud)
 
@@ -626,6 +636,8 @@ class ProjData (object) :
         # Get a total list of files from the project
         cn = 0
         cr = 0
+        # Add space for output message
+        sys.stdout.write('\n')
         sys.stdout.write('Pushing files to the cloud')
         sys.stdout.flush()
         for folder, subs, files in os.walk(self.local.projHome):

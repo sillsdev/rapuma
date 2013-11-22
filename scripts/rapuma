@@ -106,7 +106,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r897'
+systemVersion   = '0.6.r898'
 local           = None
 
 # Give a welcome message
@@ -305,7 +305,7 @@ def userArguments (args) :
             elif cmdType == 'backup' :
                 ProjData(pid).backupProject(targetPath)
             elif cmdType == 'cloud' :
-                ProjData(pid).pushToCloud()
+                ProjData(pid).pushToCloud(args.force)
             elif cmdType == 'template' :
                 Template(pid).projectToTemplate(args.id)
             else :

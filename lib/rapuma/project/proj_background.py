@@ -229,7 +229,7 @@ class ProjBackground (object) :
         svgInFile           = tempfile.NamedTemporaryFile().name + '.svg'
 
         # For testing
-        debug = True
+        debug = False
 
         # input and calculation
         # get the values  for lineSpaceFactor and fontSizeUnit
