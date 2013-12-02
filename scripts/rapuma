@@ -106,7 +106,7 @@ systemAbout     = 'Rapuma is a publishing management system written by the frien
                     with that in mind. We welcome input and participation in this project. It \
                     is our hope it will be able to serve more than just MSEAG. For questions \
                     or more information please write: dennis_drescher@sil.org.'
-systemVersion   = '0.6.r898'
+systemVersion   = '0.6.r900'
 local           = None
 
 # Give a welcome message
@@ -131,10 +131,12 @@ def checkCreatorVersion (pid, projectConfig, systemVersion) :
         ProjCommander(pid).updateScripts()
 
 
-def trimLog () :
+def trimLog (local=None) :
     '''Trim a log file.  This will take an existing log file and
     trim it to the amount specified in the system file.'''
 
+#    import pdb; pdb.set_trace()
+    
     # Of course this isn't needed if there isn't even a log file
     if local and os.path.isfile(local.projLogFile) :
 
@@ -587,7 +589,7 @@ def userArguments (args) :
             pass
 
     # Do some project log maintenance
-    trimLog()
+    trimLog(local)
 
 ###############################################################################
 ############################### Argparser Setup ###############################

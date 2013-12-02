@@ -153,7 +153,7 @@ class Xetex (Manager) :
             '0640' : ['ERR', 'Failed to add background to [<<1>>]. Ended with error: [<<2>>]'],
             '0645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
             '0650' : ['ERR', 'Component type [<<1>>] not supported!'],
-            '0665' : ['LOG', 'Successfully added lines background to [<<1>>].'],
+            '0665' : ['LOG', 'Successfully added [<<1>>] background to [<<2>>].'],
             '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
@@ -747,7 +747,7 @@ class Xetex (Manager) :
                     subprocess.call(cmd)
                     shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
                     os.remove(self.tools.tempName(self.local.gidPdfFile))
-                    self.log.writeToLog(self.errorCodes['0665'])
+                    self.log.writeToLog(self.errorCodes['0665'], [self.tools.fName(bgFile), self.tools.fName(self.local.gidPdfFile)])
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
                     self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])

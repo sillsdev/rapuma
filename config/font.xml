@@ -17,9 +17,9 @@ Todo:
     <setting>
         <name>Use Rendering System</name>
         <key>useRenderingSystem</key>
-        <description>The font rendering system (abbreviation) that will be used, e.g. use \"GR\" for Graphite. The supplied font rendering system must be supported by the font, otherwise the field should remain empty.</description>
+        <description>The font rendering system (abbreviation) that will be used, e.g. use \"GR\" for Graphite. The supplied font rendering system must be supported by the font, otherwise the field should remain empty. (Note: Because of a bug in XeTeX, the current rendering engine, the default is set to GR. This may not be appropreate for all fonts.) </description>
         <type>string</type>
-        <value></value>
+        <value>GR</value>
     </setting>
     <setting>
         <name>Use Feature</name>

@@ -17,12 +17,12 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=4
-FILE_NAME_0=14239;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
+current_page=12
+FILE_NAME_0=6594;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_1=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py;0;4
 FILE_NAME_2=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
 FILE_NAME_3=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_compare.py;0;4
-FILE_NAME_4=29452;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_data.py;0;4
+FILE_NAME_4=28022;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_data.py;0;4
 FILE_NAME_5=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_edit.py;0;4
 FILE_NAME_6=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_local.py;0;4
 FILE_NAME_7=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_log.py;0;4
@@ -30,13 +30,15 @@ FILE_NAME_8=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/pro
 FILE_NAME_9=3000;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/tools.py;0;4
 FILE_NAME_10=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py;0;4
 FILE_NAME_11=10113;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py;0;4
-FILE_NAME_12=34759;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
+FILE_NAME_12=8591;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
 FILE_NAME_13=6664;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfmTex.py;0;4
-FILE_NAME_14=16748;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
+FILE_NAME_14=11283;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
 FILE_NAME_15=2593;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex-ext.tex;0;4
 FILE_NAME_16=10456;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
 FILE_NAME_17=9921;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
 FILE_NAME_18=11508;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py;0;4
+FILE_NAME_19=22241;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex.xml;0;4
+FILE_NAME_20=505;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/font.xml;0;4
 
 [VTE]
 last_dir=/home/dennis/Projects/rapuma

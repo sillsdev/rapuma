@@ -64,6 +64,18 @@
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-ext.tex"/>
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/TeX/usfmTex-settings.tex"/>
 </session>
+<session name="LHI-LATN-NTMINI">
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/hyphenation.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/illustration.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Script/LHI_textPreprocess.py"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/TeX/usfmTex-ext.tex"/>
+  <file path="file:///home/dennis/Publishing/LHI/LHI-LATN-NTMINI/TeX/usfmTex-settings.tex"/>
+</session>
 <session name="MLF-THAI-NT">
   <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/adjustment.conf"/>
   <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Config/hyphenation.conf"/>
