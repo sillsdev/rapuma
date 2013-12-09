@@ -21,7 +21,11 @@
 % Special characters that can be inserted into the working text. This is
 % preferred to direct injection of the characters which makes them less
 % noticable on review.
-\def\nbhy{‑}
+\def\uhy{}      % Normal Unicode hyphen character (U+2010)
+\def\nbhy{‑}    % Non-breaking hyphen (U+2011)
+\def\endash{–}  % En Dash (U+2013)
+\def\emdash{—}  % Em Dash (U+2014)
+\def\bullet{•}  % Bullet (U+2022)
 
 
 %%%%% HORIZONTAL SPACING
@@ -35,9 +39,12 @@
 
 % SPACE CHARACTERS
 % Special space characters that can be inserted into the working text.
-\def\nbsp{ }
-\def\zwsp{​}
-\def\wj{⁠}
+\def\nbsp{ }   % Nonbreaking space (U+00A0)
+\def\zwsp{​}    % Zero width space (U+200B)
+\def\zwj{‍}     % Zero width joiner (U+200D)
+\def\wj{⁠}      % Word joiner (U+2060)
+\def\spnorm{ } % Normal space character (U+0020)
+
 
 % These adjustments are used around footnote callers and punctuation to
 % add some space for punctuation that needs a little extra
@@ -78,6 +85,15 @@
 % For individual books, this can be moved into the component 
 % *-ext.tex file.
 % \baselineskip=12pt plus 1pt minus 0.5pt
+
+% Temporary off-grid spacing
+% Uncomenting and inserting into the working text the following
+% commands will cause the text between \offgrid and \ongrid
+% to adjust to fit the space on the page. Ajust as necessary.
+% Remember the \baselineskip should always be the actual
+% line leading for the body text.
+%\def\offgrid{\baselineskip=12pt plus 1pt minus 0.5pt}
+%\def\ongrid{\baselineskip=12pt\topskip=\baselineskip}
 
 % AboveNoteSpace
 % The distance between the last line of text and footnote area
@@ -129,6 +145,26 @@
 % Baselineskip Adjustment Hook Example
 %\sethook{start}{s1}{\remblskip=\baselineskip \baselineskip=10pt}
 %\sethook{after}{s1}{\baselineskip=\remblskip}
+
+
+%%%%% TITLE PAGE INSERT
+% This will enable a title page such as used between testaments
+% to be inserted before the start of the first book in the section
+% like GEN and MAT.
+\def\titlepage#1{%
+    \vbox{\vskip 96pt% Adjust horizontal position
+    \hfil\hbox{\kern-15pt% Ajust center position
+    \genbkbasbolditalic #1}\hfill}\par% Deliver the text
+    \eject% End of first page
+    \par\nbsp\eject\relax% Add a blank back page
+    }%
+
+% Insert the following code at the top of first book in the 
+% section before the \id line. Unless adjusted, these 2 pages
+% will be included in the total page count.
+%\makedigitsother\catcode`{=1 \catcode`}=2
+%\titlepage{The Old Testament} % Insert title text here
+%\catcode`{=11\catcode`}=11\makedigitsletters
 
 
 %%%%% HEADER OUTPUT
@@ -201,13 +237,13 @@
 % Un-comment the following if you are typesetting the
 % publication off-grid. This will ensure that the book
 % title will set consistently.
-\catcode`\@=11
-\def\gridb@x#1{%
-    % Note the \vbox setting can be adjusted if necessary
-    % To fit title size which can vary from publication
-    % to publication.
-    \ift@tle\vbox to 48pt{\unvbox#1}\else\unvbox#1\fi
-\catcode`\@=12
+%\catcode`\@=11
+%\def\gridb@x#1{%
+    %% Note the \vbox setting can be adjusted if necessary
+    %% To fit title size which can vary from publication
+    %% to publication.
+    %\ift@tle\vbox to 48pt{\unvbox#1}\else\unvbox#1\fi
+%\catcode`\@=12
 
 % ON-GRID LAYOUT SECTION HEAD
 % Depending on the leading section headings that end up at
@@ -226,8 +262,8 @@
         \dimen2=\ht0 \advance\dimen2 by \dp0
         \dimen0=\baselineskip%
         \ifgridp@c\line{}\nobreak\fi    % otherwise first \line in loop won't get any baselineskip
-                                        % when doing a picture box, because it's not part of the
-                                        % current page (Note: this has not been tested with pictures yet)
+                                            % when doing a picture box, because it's not part of the
+                                            % current page (Note: this has not been tested with pictures yet)
         \loop \ifdim\dimen0<\dimen2
             \advance\dimen0 by \baselineskip
             \line{}\nobreak \repeat
@@ -258,16 +294,11 @@
 \def\makedigitsletters{\m@kedigitsletters}
 \catcode `@=12
 
-% Special spaces
-\def\nbsp{ }    % Nonbreaking space (U+00A0)
-\def\zwsp{​}     % Zero width space (U+200B)
-\def\zwj{‍}      % Zero width joiner (U+200D)
-
 % Special line space commands (Warning, these do not always work)
 \newdimen\remblskip \remblskip=\baselineskip
 % Remove space
 \def\suckupline{\vskip -\baselineskip}          % Full line
-\def\suckuphalfline{\vskip -0.5\baselineskip}   % Half a line
+\def\suckuphalfline{\vskip -0.5\baselineskip}  % Half a line
 \def\suckupqline{\vskip -0.25\baselineskip}     % 1/4 of a line
 % Add space
 \def\skipline{\vskip\baselineskip}              % Full line
