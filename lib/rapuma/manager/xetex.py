@@ -624,7 +624,8 @@ class Xetex (Manager) :
         if cidList :
             cid = cidList[0]
             cidInfo = self.pt_tools.usfmCidInfo()
-            cnid = "{:03}".format(int(cidInfo[cid][2]))
+            # Add a filler character to the ID
+            cnid = "{:0>3}".format(cidInfo[cid][2])
             pdfSubFileName = cnid + '-' + '-'.join(cidList) + '-' + gid + '.pdf'
         else :
             cidList = self.projectConfig['Groups'][gid]['cidList']

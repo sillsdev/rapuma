@@ -113,4 +113,12 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>
+<session name="ShrinkyPic">
+  <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/setup.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/shrinkypic.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/dialog/main.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/process/crush.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/process/im_process.py"/>
+</session>
 </saved-sessions>
