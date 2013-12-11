@@ -323,10 +323,10 @@
 \def\tblrowspace{4pt}       % The space between rows of the table
 
 % Define non-header lable
+\newdimen\tbltwowlsetlabel
 \def\tbltwowlsetlabel#1{\setbox0=\hbox{\bdit #1\bdit*}\tbltwowllabel=\wd0}
 % Macro code for leadered two colum layout:
 \newdimen\tbltwowllabel
-\newdimen\tbltwowlsetlabel
 \def\tbltwowlheader#1#2{\parfillskip=\tblmarginright\bdit #1\bdit*\hfil
   \setbox0=\hbox{\bdit #2\bdit*}\tbltwowllabel=\wd0\box0\par\vskip \tblheaderspace}
 
