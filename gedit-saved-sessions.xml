@@ -36,6 +36,9 @@
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Style/usfmTex-ext.sty"/>
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/TeX/usfmTex-ext.tex"/>
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/TeX/usfmTex-settings.tex"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/TeX/usfmTex-FRONT-ext.tex"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Style/usfmTex-FRONT-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Component/frt/frt_base.usfm"/>
 </session>
 <session name="BRU-LATN-BIBA">
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Admin/BRU-LATN-BIBA_Issues.txt"/>
@@ -116,9 +119,10 @@
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>
   <file path="file:///home/dennis/Projects/shrinkypic/setup.py"/>
-  <file path="file:///home/dennis/Projects/shrinkypic/shrinkypic.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/shrinkypic"/>
   <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/dialog/main.py"/>
   <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/process/crush.py"/>
   <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/process/im_process.py"/>
+  <file path="file:///home/dennis/Projects/shrinkypic/lib/shrinkypic/icon/pyresources.qrc"/>
 </session>
 </saved-sessions>

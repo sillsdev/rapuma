@@ -306,3 +306,41 @@
 \def\skipqline{\vskip 0.25\baselineskip}        % 1/4 of a line
 
 
+%%%%% Enable basic 2 (and maybe 3) row TOC markup in front matter
+% Markers to insert in the text are:
+%   \tbltwowlheader{<bookNameHeading>}{<pageNumberHeading>}
+%   \tbltwowllabel{<bookName>}{<pageNumber>}
+%   \tbltwowlsetlabel{<digits>}
+% Note the tbltwowlsetlabel{<digits>} is for use when no header
+% row is desired. This will be inserted before the first
+% \tbltwowllabel marker. The <digits> are the number of digits
+% in the longest page number. Normally that would be "000".
+% The following are additional settings:
+\def\myleader{.}            % The leader character
+\def\leaderspace{0.8em}     % The space between the leader characters
+\def\tblmarginright{0in}    % The width of the table's right margin
+\def\tblheaderspace{4pt}    % The space between the header and the first row
+\def\tblrowspace{4pt}       % The space between rows of the table
+
+% Define non-header lable
+\def\tbltwowlsetlabel#1{\setbox0=\hbox{\bdit #1\bdit*}\tbltwowllabel=\wd0}
+% Macro code for leadered two colum layout:
+\newdimen\tbltwowllabel
+\newdimen\tbltwowlsetlabel
+\def\tbltwowlheader#1#2{\parfillskip=\tblmarginright\bdit #1\bdit*\hfil
+  \setbox0=\hbox{\bdit #2\bdit*}\tbltwowllabel=\wd0\box0\par\vskip \tblheaderspace}
+
+\def\tbltwowlrow#1#2{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\bk #1\bk*%
+  \quad\leaders\hbox to \leaderspace{\hss\myleader\hss}\hfill\hbox to \tbltwowllabel{%
+  \hfil\no #2\no*}\par}%
+
+% Macro code for leadered three colum layout: (Caution, not really tested yet!)
+\newdimen\tblthreewllabel
+\def\tblthreewlheader#1#2#3{\parfillskip=\tblmarginright\setbox0\hbox{\bdit #1\bdit*\relax}\tblthreewllabel=\wd0
+  \noindent\box0\hskip\tblthreewcolmngap\bdit #2\bdit*\hfil\bdit #3\bdit*\par\vskip \tblheaderspace}
+
+\def\tblthreewlrow#1#2#3{\parskip=\tblrowspace\parfillskip=\tblmarginright\noindent\hbox to \tblthreewllabel{\bk #1\bk*\hss\relax}%
+  \hskip\tblthreewcolmngap\k #2\k*
+  \leaders\hbox to \leaderspace{\hss\no \myleader\no*\hss}\hfil
+  \enskip\no #3\no*\par}%
+
