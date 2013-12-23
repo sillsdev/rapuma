@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource>
+        <file>rpm_16.png</file>
+        <file>rpm_32.png</file>
+        <file>rpm_48.png</file>
+        <file>rpm_96.png</file>
+        <file>rpm_256.png</file>
+    </qresource>
+</RCC>

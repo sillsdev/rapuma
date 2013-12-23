@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Create a PySide compatable dialogs
+pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
+
+# Setup icon resources
+pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc

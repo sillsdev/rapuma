@@ -108,66 +108,17 @@ from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 
-# Load GUI modules
-from PySide                             import QtGui
-from PySide.QtGui                       import QDialog, QMessageBox, QApplication
-from rapuma.dialog                      import main
-from rapuma.icon.pyresources            import qInitResources, qCleanupResources
-
 # Grab some system info
-sysConfig                               = ConfigObj(os.path.join(rapumaBase, 'rapuma.ini'), encoding='utf-8')
+sysConfig       = ConfigObj(os.path.join(rapumaBase, 'rapuma.ini'), encoding='utf-8')
 # Instantiate User config class
-uc                                      = UserConfig()
-tools                                   = Tools()
+uc              = UserConfig()
+tools           = Tools()
 
 # Set some global vars
-systemName                              = sysConfig['Rapuma']['systemName']
-systemAbout                             = sysConfig['Rapuma']['systemAbout']
-systemVersion                           = sysConfig['Rapuma']['systemVersion']
-local                                   = None
-
-
-###########################################################################
-############################## Rapuma GUI #################################
-###########################################################################
-
-class RapumaMainForm (QDialog, main.Ui_MainWindow) :
-
-    def __init__ (self, parent=None) :
-        '''Initialize and start up the UI'''
-
-        super(RapumaMainForm, self).__init__(parent)
-        # Init app resources
-        qInitResources()
-        appicon = QtGui.QIcon(':/rpm_256.png')
-        appicon.addFile(':/rpm_96.png')
-        appicon.addFile(':/rpm_48.png')
-        appicon.addFile(':/rpm_32.png')
-        appicon.addFile(':/rpm_16.png')
-        appicon.addFile(':/rpm.svg')
-        
-        self.setWindowIcon(appicon)
-#        self.setCentralWidget(self)
-#        self.setMenuBar(self)
-#        self.setStatusBar(self)
-        self.setupUi(self)
-        self.connectionActions()
-
-
-    def main (self) :
-        '''This function shows the main dialog'''
-
-        self.show()
-
-
-    def connectionActions (self) :
-        '''Connect to form buttons.'''
-
-        print "Connection Actions"
-
-###########################################################################
-############################## Rapuma API #################################
-###########################################################################
+systemName      = sysConfig['Rapuma']['systemName']
+systemAbout     = sysConfig['Rapuma']['systemAbout']
+systemVersion   = sysConfig['Rapuma']['systemVersion']
+local           = None
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
@@ -656,171 +607,159 @@ def userArguments (args) :
     if local :
         trimLog(local)
 
+###############################################################################
+############################### Argparser Setup ###############################
+###############################################################################
+
+# The following is applied to certain inputs to garentee input to be Unicode
+# and not ascii or whatever the default file system encoding is.
+# (Note: See the settings section for an example.)
+fsunicode = partial(unicode, encoding=sys.getfilesystemencoding())
+
+# We will try to maintain a common syntax in all the subparsers Some common
+# argument options are:
+#   -a = add something
+#   -r = remove something
+#   -e = execute something
+#   -f = force the execution of something
+#   -p = path (and file name) of something
+
+# Setup the arg parser
+parser = argparse.ArgumentParser(description=systemName)
+subparsers = parser.add_subparsers(help='sub-command help')
+
+# Add help subprocess arguments
+helpCommand = subparsers.add_parser('help', help='General system help')
+
+# Available choices
+# System
+syCommandTypes          = ['setup']
+syCommands              = ['name', 'uid', 'projects', 'cloud', 'folders']
+# Project
+prCommandTypes          = ['archive', 'backup', 'cloud', 'group', 'helper', 'project', 'template']
+prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
+mediaTypes              = ['book']
+# Group
+grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
+grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'update', 'unlock']
+componentTypes          = ['usfm', 'map', 'toc']
+# Component
+cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
+compareTests            = ['source', 'source-working', 'working']
+# Packages
+pkCommandType           = ['font', 'macro']
+pkCommands              = ['add', 'primary', 'remove', 'update']
+# Processes
+pcCommandType           = ['export', 'preprocess', 'postprocess']
+pcCommands              = ['add', 'remove', 'update']
+# Background
+bgCommandType           = ['bind', 'draft', 'final', 'proof']
+bgCommands              = ['add', 'remove', 'update']
+backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
+# Example
+examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
+
+# Add main arguments (first postion options)
+parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
+parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
+
+# Add project subprocess arguments
+sysCommand = subparsers.add_parser('system', help='General system management commands help')
+sysCommand.add_argument('command_type', choices=syCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+sysCommand.add_argument('command', choices=syCommands, help='The setting command for managing user and system settings.')
+sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
+sysCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
+
+# FIXME: Restore from template will not work. The pid is the new project name but we
+# currently do not have any means to specify the template. The same will be true for
+# backups, we may need to add a "resource_id" arg to be able to ID them.
+
+# Add Project subprocess arguments
+projCommand = subparsers.add_parser('project', help='General project management commands help')
+projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
+projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
+projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
+projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
+projCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
+projCommand.add_argument('-b', '--bak_num', help='Specify the number (version) of backup you want to restore.')
+projCommand.add_argument('-i', '--id', help='Specify an ID for an opperation.')
+
+# Add Group subprocess arguments
+groupCommand = subparsers.add_parser('group', help='General project group management commands help')
+groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+groupCommand.add_argument('group_id', help='A unique ID for this group.')
+groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
+groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
+groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
+groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
+groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
+groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
+groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
+groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
+groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
+
+# Add Component subprocess arguments
+compCommand = subparsers.add_parser('component', help='General project component management commands help')
+compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+compCommand.add_argument('group_id', help='The group ID this component is a part of.')
+compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
+compCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
+compCommand.add_argument('-c', '--compare_type', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
+
+# Add Package management subprocess arguments
+packCommand = subparsers.add_parser('package', help='General package handling commands help')
+packCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+packCommand.add_argument('group_id', help='The group ID this package is a part of.')
+packCommand.add_argument('package_id', help='The package name ID. The ID given has to be a valid system package.')
+packCommand.add_argument('package_type', choices=pkCommandType, help='The package type. The type given has to be a valid system package type.')
+packCommand.add_argument('command', choices=pkCommands, help='The general commands that can be used for managing groups.')
+packCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
+
+# Add Processing subprocess arguments
+processCommand = subparsers.add_parser('process', help='General settings for managing processes. Actual execution of the processes is done through the group commands')
+processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+processCommand.add_argument('group_id', help='A unique ID for this group.')
+processCommand.add_argument('process_type', choices=pcCommandType, help='The type of process being managed. The type given has to be a valid system package type.')
+processCommand.add_argument('command', choices=pcCommands, help='The general commands that can be used for managing groups.')
+processCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
+processCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for postprocesses.')
+processCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
+
+# Add Settings subprocess arguments
+settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
+settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+#settingsCommand.add_argument('group_id', help='A unique ID for this group.')
+settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
+settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
+settingsCommand.add_argument('key', help='The key which has the value to be changed.')
+settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
+
+# Add page background subprocess arguments
+backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
+backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
+backgroundCommand.add_argument('output_type', choices=bgCommandType, help='The type of (rendered) output a background will be applied to or removed from.')
+backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
+backgroundCommand.add_argument('command', choices=bgCommands, help='The general commands that can be used for managing backgound.')
+
+# Add example subprocess arguments
+exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
+exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
+
+# Send the collected arguments to the handler
+userArguments(parser.parse_args())
 
 
 ###############################################################################
-############################## Rapuma Starts Here #############################
+########################### Close out the session #############################
 ###############################################################################
 
-if __name__ == '__main__' :
-
-    # The following is applied to certain inputs to garentee input to be Unicode
-    # and not ascii or whatever the default file system encoding is.
-    # (Note: See the settings section for an example.)
-    fsunicode = partial(unicode, encoding=sys.getfilesystemencoding())
-
-    # We will try to maintain a common syntax in all the subparsers Some common
-    # argument options are:
-    #   -a = add something
-    #   -r = remove something
-    #   -e = execute something
-    #   -f = force the execution of something
-    #   -p = path (and file name) of something
-
-    # Setup the arg parser
-    parser = argparse.ArgumentParser(description=systemName)
-    subparsers = parser.add_subparsers(help='sub-command help')
-
-    # Add help subprocess arguments
-    helpCommand = subparsers.add_parser('help', help='General system help')
-
-    # Available choices
-    # System
-    syCommandTypes          = ['setup']
-    syCommands              = ['name', 'uid', 'projects', 'cloud', 'folders']
-    # Project
-    prCommandTypes          = ['archive', 'backup', 'cloud', 'group', 'helper', 'project', 'template']
-    prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
-    mediaTypes              = ['book']
-    # Group
-    grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'update', 'unlock']
-    componentTypes          = ['usfm', 'map', 'toc']
-    # Component
-    cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
-    compareTests            = ['source', 'source-working', 'working']
-    # Packages
-    pkCommandType           = ['font', 'macro']
-    pkCommands              = ['add', 'primary', 'remove', 'update']
-    # Processes
-    pcCommandType           = ['export', 'preprocess', 'postprocess']
-    pcCommands              = ['add', 'remove', 'update']
-    # Background
-    bgCommandType           = ['bind', 'draft', 'final', 'proof']
-    bgCommands              = ['add', 'remove', 'update']
-    backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
-    # Example
-    examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
-
-    # Add main arguments (first postion options)
-    parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
-    parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
-
-    # Add project subprocess arguments
-    sysCommand = subparsers.add_parser('system', help='General system management commands help')
-    sysCommand.add_argument('command_type', choices=syCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    sysCommand.add_argument('command', choices=syCommands, help='The setting command for managing user and system settings.')
-    sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
-    sysCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
-
-    # FIXME: Restore from template will not work. The pid is the new project name but we
-    # currently do not have any means to specify the template. The same will be true for
-    # backups, we may need to add a "resource_id" arg to be able to ID them.
-
-    # Add Project subprocess arguments
-    projCommand = subparsers.add_parser('project', help='General project management commands help')
-    projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
-    projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
-    projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
-    projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
-    projCommand.add_argument('-n', '--name', help='If creating a new project, give a human readable name to describe this project.')
-    projCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
-    projCommand.add_argument('-b', '--bak_num', help='Specify the number (version) of backup you want to restore.')
-    projCommand.add_argument('-i', '--id', help='Specify an ID for an opperation.')
-
-    # Add Group subprocess arguments
-    groupCommand = subparsers.add_parser('group', help='General project group management commands help')
-    groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    groupCommand.add_argument('group_id', help='A unique ID for this group.')
-    groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
-    groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
-    groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-    groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
-    groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
-    groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
-    groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock.')
-    groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
-    groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
-
-    # Add Component subprocess arguments
-    compCommand = subparsers.add_parser('component', help='General project component management commands help')
-    compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    compCommand.add_argument('group_id', help='The group ID this component is a part of.')
-    compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
-    compCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
-    compCommand.add_argument('-c', '--compare_type', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
-
-    # Add Package management subprocess arguments
-    packCommand = subparsers.add_parser('package', help='General package handling commands help')
-    packCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    packCommand.add_argument('group_id', help='The group ID this package is a part of.')
-    packCommand.add_argument('package_id', help='The package name ID. The ID given has to be a valid system package.')
-    packCommand.add_argument('package_type', choices=pkCommandType, help='The package type. The type given has to be a valid system package type.')
-    packCommand.add_argument('command', choices=pkCommands, help='The general commands that can be used for managing groups.')
-    packCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
-
-    # Add Processing subprocess arguments
-    processCommand = subparsers.add_parser('process', help='General settings for managing processes. Actual execution of the processes is done through the group commands')
-    processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    processCommand.add_argument('group_id', help='A unique ID for this group.')
-    processCommand.add_argument('process_type', choices=pcCommandType, help='The type of process being managed. The type given has to be a valid system package type.')
-    processCommand.add_argument('command', choices=pcCommands, help='The general commands that can be used for managing groups.')
-    processCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
-    processCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for postprocesses.')
-    processCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
-
-    # Add Settings subprocess arguments
-    settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
-    settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    #settingsCommand.add_argument('group_id', help='A unique ID for this group.')
-    settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
-    settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
-    settingsCommand.add_argument('key', help='The key which has the value to be changed.')
-    settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
-
-    # Add page background subprocess arguments
-    backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
-    backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-    backgroundCommand.add_argument('output_type', choices=bgCommandType, help='The type of (rendered) output a background will be applied to or removed from.')
-    backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
-    backgroundCommand.add_argument('command', choices=bgCommands, help='The general commands that can be used for managing backgound.')
-
-    # Add example subprocess arguments
-    exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
-    exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
-
-#    # Send the collected arguments to the handler
-#    userArguments(parser.parse_args())
-
-    app = QApplication(sys.argv)
-    if len(sys.argv) == 1 :
-        window = RapumaMainForm()
-        window.main()
-        sys.exit(app.exec_())
-    else :
-        # Send the collected arguments to the handler
-        processUserArguments(parser.parse_args())
-
-        ###############################################################################
-        ########################### Close out the session #############################
-        ###############################################################################
-
-        # In case there are any Canadians using this, politely say good bye
-        timeTotal = round(timeit.default_timer() - startTime, 2)
-        tools.terminal('\n\t\tTotal process time: ' + str(datetime.timedelta(seconds = timeTotal)).split('.')[0] + '\n')
-        tools.terminal('\t\tThank you, please come again!\n')
+# In case there are any Canadians using this, politely say good bye
+timeTotal = round(timeit.default_timer() - startTime, 2)
+tools.terminal('\n\t\tTotal process time: ' + str(datetime.timedelta(seconds = timeTotal)).split('.')[0] + '\n')
+tools.terminal('\t\tThank you, please come again!\n')
 
 
 
