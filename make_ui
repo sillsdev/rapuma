@@ -1,7 +1,21 @@
 #!/bin/sh
 
+# Update version number with a little Python code
+python <<END
+import os
+from configobj import ConfigObj
+from mercurial import ui, hg
+repo = hg.repository(ui.ui(), os.getcwd())
+sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
+versionSeries = sysConfig['Rapuma']['versionSeries']
+sysConfig['Rapuma']['currentVersion'] = str(versionSeries) + '.r' + str(len(repo))
+sysConfig.write()
+
+END
+
+
 # Create a PySide compatable dialogs
-pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
+#pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
 
 # Setup icon resources
-pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc
+#pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc

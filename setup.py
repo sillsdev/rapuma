@@ -1,8 +1,39 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-from distutils.core import setup
-from glob import glob
+#    Copyright 2014, SIL International
+#    All rights reserved.
+#
+#    This library is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation; either version 2.1 of License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should also have received a copy of the GNU Lesser General Public
+#    License along with this library in the file named "LICENSE".
+#    If not, write to the Free Software Foundation, 51 Franklin Street,
+#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    internet at http://www.fsf.org/licenses/lgpl.html.
+
+# Import modules
 import os
+from distutils.core                     import setup
+from glob                               import glob
+from configobj                          import ConfigObj
+
+# Grab some app/system info
+projBase                                = os.getcwd()
+sysConfig                               = ConfigObj(os.path.join(projBase, 'config', 'system.ini'), encoding='utf-8')
+systemName                              = sysConfig['Rapuma']['systemName']
+systemAbout                             = sysConfig['Rapuma']['systemAbout']
+currentVersion                          = sysConfig['Rapuma']['currentVersion']
+daMan                                   = sysConfig['Rapuma']['maintainer']
+daMansEmail                             = sysConfig['Rapuma']['maintainerEmail']
 
 datafiles = []
 # This sets the path for usr/local/share/rapuma
@@ -13,11 +44,11 @@ for subdir in ('doc', 'resource', 'config', 'xetex-32', 'xetex-64') :
         datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
 
 setup(name = 'rapuma',
-        version = '0.6.r830',
-        description = "Rapid Publication Manager",
-        long_description = "Rapuma is a publication management application.",
-        maintainer = "Dennis Drescher",
-        maintainer_email = "dennis_drescher@sil.org",
+        version = currentVersion,
+        description = systemName,
+        long_description = systemAbout,
+        maintainer = daMan,
+        maintainer_email = daMansEmail,
         package_dir = {'':'lib'},
         packages = ["rapuma", 'rapuma.core', 'rapuma.dialog', 'rapuma.group', 'rapuma.icon', 'rapuma.manager', 'rapuma.project'],
         scripts = glob("scripts/rapuma*"),
