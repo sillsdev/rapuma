@@ -1,0 +1,187 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+#    Copyright 2014, SIL International
+#    All rights reserved.
+#
+#    This library is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation; either version 2.1 of License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should also have received a copy of the GNU Lesser General Public
+#    License along with this library in the file named "LICENSE".
+#    If not, write to the Free Software Foundation, 51 Franklin Street,
+#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    internet at http://www.fsf.org/licenses/lgpl.html.
+
+
+###############################################################################
+######################### Description/Documentation ###########################
+###############################################################################
+
+# One script to rule them all.  This is the main Rapuma engine script.
+# This script will drive all processes and keep track of what happens in the
+# project log in each respective project.
+
+
+###############################################################################
+################################ Initialize Rapuma ###############################
+###############################################################################
+# Firstly, import all the standard Python modules we need for this process and
+# set the base path
+
+import os, sys, timeit, datetime
+from functools import partial
+
+startTime = timeit.default_timer()
+
+###########################################################################
+########################## Location Discovery #############################
+###########################################################################
+
+# Set the Rapuma base program paths. It looks in /user/share first for an
+# installed copy. If you give it a actual path to the development version
+# it will run from there. (~/Projects/rapuma/scripts/rapuma)
+# FIXME: Environment variables are set that may not be needed if this block
+# of code was turned into a module and called from the dependent modules.
+rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
+rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
+                        os.path.join(rapumaBase)] if os.path.exists(d)]
+rapumaHome = rapumaHome[0] if len(rapumaHome) else None
+os.environ['RAPUMA_BASE'] = rapumaHome
+# According to the base if found, insert the lib folder into the Python sys path
+if rapumaHome :
+    sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
+# Set the user environment path. This is always in the same place.
+userHome = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+os.environ['RAPUMA_USER'] = userHome
+
+# Set the (potential) project home by looking for the project config file.
+def find_project_root(tag, path=os.path.curdir):
+    path=os.path.splitdrive(os.path.realpath(os.path.expanduser(os.path.expandvars(path))))[1]
+    while (not os.path.exists(os.path.join(path, tag))):
+        path = os.path.dirname(path)
+        if path == os.path.sep: return None
+    return path
+
+# Find the project home
+# FIXME: Though we find the home here, it really doesn't mean anything.
+# It is not used here in this main script. As noted above, this code
+# block should be moved into a seperate module and called by others.
+projHome = find_project_root(os.path.join('Config', 'project.conf'))
+# If not found, assume that this is a new project situation
+if not projHome :
+    projHome = os.getcwd()
+
+os.environ['RAPUMA_PROJ'] = projHome
+
+###########################################################################
+########################## Location Discovery #############################
+###########################################################################
+
+# Load standard Python modules
+import codecs
+from configobj                          import ConfigObj
+
+# Load the Rapuma lib classes
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_data              import ProjData, Template
+from rapuma.core.proj_binding           import ProjBinding
+from rapuma.core.proj_compare           import ProjCompare
+from rapuma.core.proj_process           import ProjProcess
+from rapuma.core.tools                  import Tools
+from rapuma.project.proj_config         import Config
+from rapuma.project.proj_setup          import ProjSetup, ProjDelete
+from rapuma.project.proj_commander      import ProjCommander
+from rapuma.project.proj_font           import ProjFont
+from rapuma.project.proj_hyphenation    import ProjHyphenation
+from rapuma.project.proj_maps           import ProjMaps
+from rapuma.project.proj_toc            import ProjToc
+from rapuma.project.proj_background     import ProjBackground
+from rapuma.manager.project             import Project
+
+# Load GUI modules
+from PySide                             import QtGui
+from PySide.QtGui                       import QMainWindow, QApplication
+from rapuma.dialog                      import main
+from rapuma.icon.pyresources            import qInitResources, qCleanupResources
+
+# Grab some system info
+sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
+# Instantiate User config class
+uc                                      = UserConfig()
+tools                                   = Tools()
+
+# Set some global vars
+systemName                              = sysConfig['Rapuma']['systemName']
+systemAbout                             = sysConfig['Rapuma']['systemAbout']
+currentVersion                          = sysConfig['Rapuma']['currentVersion']
+local                                   = None
+
+
+###############################################################################
+################################ Rapuma GUI ###################################
+###############################################################################
+
+class RapumaGUI (QMainWindow, main.Ui_MainWindow) :
+
+    def __init__ (self, parent=None) :
+        '''Initialize and start up the UI'''
+
+        super(RapumaGUI, self).__init__(parent)
+        # Init app resources
+        qInitResources()
+        appicon = QtGui.QIcon(':/rpm_256.png')
+        appicon.addFile(':/rpm_96.png')
+        appicon.addFile(':/rpm_48.png')
+        appicon.addFile(':/rpm_32.png')
+        appicon.addFile(':/rpm_16.png')
+        appicon.addFile(':/rpm.svg')
+        
+        self.setWindowIcon(appicon)
+        self.setupUi(self)
+        self.connectionActions()
+
+
+    def main (self) :
+        '''This function shows the main dialog'''
+
+        self.show()
+
+
+    def connectionActions (self) :
+        '''Connect to form buttons.'''
+
+        print "Connection Actions"
+
+
+###############################################################################
+############################## Rapuma Starts Here #############################
+###############################################################################
+
+if __name__ == '__main__' :
+
+    app = QApplication(sys.argv)
+    window = RapumaGUI()
+    window.main()
+    sys.exit(app.exec_())
+
+
+
+
+
+
+
+
+
+
+
+

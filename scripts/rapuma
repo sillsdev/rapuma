@@ -25,13 +25,12 @@
 ######################### Description/Documentation ###########################
 ###############################################################################
 
-# One script to rule them all.  This is the main Rapuma engine script.
-# This script will drive all processes and keep track of what happens in the
-# project log in each respective project.
+# This is the main Command Line Interface (CLI) script. All Rapuma functionality
+# should be accessable by this script.
 
 
 ###############################################################################
-################################ Initialize Rapuma ###############################
+############################### Initialize Rapuma #############################
 ###############################################################################
 # Firstly, import all the standard Python modules we need for this process and
 # set the base path
@@ -41,9 +40,9 @@ from functools import partial
 
 startTime = timeit.default_timer()
 
-###########################################################################
-########################## Location Discovery #############################
-###########################################################################
+###############################################################################
+############################ Location Discovery ###############################
+###############################################################################
 
 # Set the Rapuma base program paths. It looks in /user/share first for an
 # installed copy. If you give it a actual path to the development version
@@ -81,9 +80,9 @@ if not projHome :
 
 os.environ['RAPUMA_PROJ'] = projHome
 
-###########################################################################
-########################## Location Discovery #############################
-###########################################################################
+###############################################################################
+############################ Location Discovery ###############################
+###############################################################################
 
 # Load standard Python modules
 import codecs, argparse
@@ -108,12 +107,6 @@ from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 
-# Load GUI modules
-from PySide                             import QtGui
-from PySide.QtGui                       import QDialog, QMessageBox, QApplication
-from rapuma.dialog                      import main
-from rapuma.icon.pyresources            import qInitResources, qCleanupResources
-
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
 # Instantiate User config class
@@ -127,55 +120,17 @@ currentVersion                          = sysConfig['Rapuma']['currentVersion']
 local                                   = None
 
 
-###########################################################################
-############################## Rapuma GUI #################################
-###########################################################################
-
-class RapumaMainForm (QDialog, main.Ui_MainWindow) :
-
-    def __init__ (self, parent=None) :
-        '''Initialize and start up the UI'''
-
-        super(RapumaMainForm, self).__init__(parent)
-        # Init app resources
-        qInitResources()
-        appicon = QtGui.QIcon(':/rpm_256.png')
-        appicon.addFile(':/rpm_96.png')
-        appicon.addFile(':/rpm_48.png')
-        appicon.addFile(':/rpm_32.png')
-        appicon.addFile(':/rpm_16.png')
-        appicon.addFile(':/rpm.svg')
-        
-        self.setWindowIcon(appicon)
-#        self.setCentralWidget(self)
-#        self.setMenuBar(self)
-#        self.setStatusBar(self)
-        self.setupUi(self)
-        self.connectionActions()
-
-
-    def main (self) :
-        '''This function shows the main dialog'''
-
-        self.show()
-
-
-    def connectionActions (self) :
-        '''Connect to form buttons.'''
-
-        print "Connection Actions"
-
-###########################################################################
-############################## Rapuma API #################################
-###########################################################################
+###############################################################################
+################################ Rapuma CLI ###################################
+###############################################################################
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
 tools.terminal('\n\t\t\tVersion ' + currentVersion + '\n')
 
-###########################################################################
-########################### Rapuma Functions ##############################
-###########################################################################
+###############################################################################
+############################# Rapuma Functions ################################
+###############################################################################
 
 def checkCreatorVersion (pid, projectConfig, currentVersion) :
     '''Keep track of the version of Rapuma used in the current project.'''
@@ -801,27 +756,18 @@ if __name__ == '__main__' :
     exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
     exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
 
-#    # Send the collected arguments to the handler
-#    userArguments(parser.parse_args())
+    # Send the collected arguments to the handler
+    userArguments(parser.parse_args())
 
-    app = QApplication(sys.argv)
-    if len(sys.argv) == 1 :
-        window = RapumaMainForm()
-        window.main()
-        sys.exit(app.exec_())
-    else :
-        # Send the collected arguments to the handler
-#        processUserArguments(parser.parse_args())
-        userArguments(parser.parse_args())
 
-        ###############################################################################
-        ########################### Close out the session #############################
-        ###############################################################################
+    ###############################################################################
+    ########################### Close out the session #############################
+    ###############################################################################
 
-        # In case there are any Canadians using this, politely say good bye
-        timeTotal = round(timeit.default_timer() - startTime, 2)
-        tools.terminal('\n\t\tTotal process time: ' + str(datetime.timedelta(seconds = timeTotal)).split('.')[0] + '\n')
-        tools.terminal('\t\tThank you, please come again!\n')
+    # In case there are any Canadians using this, politely say good bye
+    timeTotal = round(timeit.default_timer() - startTime, 2)
+    tools.terminal('\n\t\tTotal process time: ' + str(datetime.timedelta(seconds = timeTotal)).split('.')[0] + '\n')
+    tools.terminal('\t\tThank you, please come again!\n')
 
 
 
