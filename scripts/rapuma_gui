@@ -110,7 +110,7 @@ from rapuma.manager.project             import Project
 
 # Load GUI modules
 from PySide                             import QtGui
-from PySide.QtGui                       import QMainWindow, QApplication
+from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
 from rapuma.dialog                      import main
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
@@ -148,7 +148,16 @@ class RapumaGUI (QMainWindow, main.Ui_MainWindow) :
         
         self.setWindowIcon(appicon)
         self.setupUi(self)
-        self.connectionActions()
+
+        # Connect the menu actions
+        amFileOpen = self.findChild(QtGui.QAction,"menuFileOpen")
+        amFileOpen.triggered.connect(self.mFileOpen)
+        amFileNew = self.findChild(QtGui.QAction,"menuFileNew")
+        amFileNew.triggered.connect(self.mFileNew)
+        amFileQuite = self.findChild(QtGui.QAction,"menuFileQuite")
+        amFileQuite.triggered.connect(self.mFileQuite)
+        amHelpAbout = self.findChild(QtGui.QAction,"menuHelpAbout")
+        amHelpAbout.triggered.connect(self.mHelpAbout)
 
 
     def main (self) :
@@ -157,10 +166,31 @@ class RapumaGUI (QMainWindow, main.Ui_MainWindow) :
         self.show()
 
 
-    def connectionActions (self) :
-        '''Connect to form buttons.'''
+###############################################################################
+################################ Menu Items ###################################
+###############################################################################
 
-        print "Connection Actions"
+    def mFileOpen (self) :
+        
+        print "Want to open a file open dialog?"
+
+
+    def mFileNew (self) :
+    
+        print "Want to create a new project?"
+
+
+    def mFileQuite (self) :
+    
+        sys.exit()
+
+
+    def mHelpAbout (self) :
+
+        QMessageBox.about(self, "About Rapuma",
+                """<p>Copyright &copy; 2014 SIL International.
+               All rights reserved in accordance with
+               GPL v2 or later - NO WARRANTIES!""")
 
 
 ###############################################################################

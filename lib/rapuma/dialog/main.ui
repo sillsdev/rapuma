@@ -27,15 +27,16 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_2"/>
-    <addaction name="actionNew"/>
-    <addaction name="actionQuite"/>
+    <addaction name="menuFileOpen"/>
+    <addaction name="menuFileNew"/>
+    <addaction name="separator"/>
+    <addaction name="menuFileQuite"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout"/>
+    <addaction name="menuHelpAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
@@ -46,22 +47,31 @@
     <string>open</string>
    </property>
   </action>
-  <action name="actionOpen_2">
+  <action name="menuFileOpen">
    <property name="text">
     <string>Open</string>
    </property>
+   <property name="toolTip">
+    <string>Open an exsiting project</string>
+   </property>
   </action>
-  <action name="actionNew">
+  <action name="menuFileNew">
    <property name="text">
     <string>New</string>
    </property>
+   <property name="toolTip">
+    <string>Create a new Rapuma project</string>
+   </property>
   </action>
-  <action name="actionQuite">
+  <action name="menuFileQuite">
    <property name="text">
     <string>Quite</string>
    </property>
+   <property name="toolTip">
+    <string>Quite Rapuma</string>
+   </property>
   </action>
-  <action name="actionAbout">
+  <action name="menuHelpAbout">
    <property name="text">
     <string>About</string>
    </property>
