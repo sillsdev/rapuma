@@ -109,8 +109,9 @@ from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 
 # Load GUI modules
-from PySide                             import QtGui
+from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
+from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import main
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
@@ -131,7 +132,7 @@ local                                   = None
 ################################ Rapuma GUI ###################################
 ###############################################################################
 
-class RapumaGUI (QMainWindow, main.Ui_MainWindow) :
+class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
@@ -150,14 +151,19 @@ class RapumaGUI (QMainWindow, main.Ui_MainWindow) :
         self.setupUi(self)
 
         # Connect the menu actions
-        amFileOpen = self.findChild(QtGui.QAction,"menuFileOpen")
+        amFileOpen          = self.findChild(QtGui.QAction,"menuFileOpen")
         amFileOpen.triggered.connect(self.mFileOpen)
-        amFileNew = self.findChild(QtGui.QAction,"menuFileNew")
+        amFileNew           = self.findChild(QtGui.QAction,"menuFileNew")
         amFileNew.triggered.connect(self.mFileNew)
-        amFileQuite = self.findChild(QtGui.QAction,"menuFileQuite")
+        amFileQuite         = self.findChild(QtGui.QAction,"menuFileQuite")
         amFileQuite.triggered.connect(self.mFileQuite)
-        amHelpAbout = self.findChild(QtGui.QAction,"menuHelpAbout")
+        amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
+#        amHelpAboutStatus   = self.QtCore.QPropertyAnimation.propertyName("toolTip")
         amHelpAbout.triggered.connect(self.mHelpAbout)
+        
+        
+        # This prints a simple message in the status bar
+        self.statusBar().showMessage("Hi There!")
 
 
     def main (self) :

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'lib/rapuma/dialog/main.ui'
 #
-# Created: Sat Jan  4 23:11:23 2014
+# Created: Tue Jan  7 15:16:37 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,4 +60,5 @@ class Ui_MainWindow(object):
         self.menuFileQuite.setText(QtGui.QApplication.translate("MainWindow", "Quite", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFileQuite.setToolTip(QtGui.QApplication.translate("MainWindow", "Quite Rapuma", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelpAbout.setToolTip(QtGui.QApplication.translate("MainWindow", "Learn about Rapuma", None, QtGui.QApplication.UnicodeUTF8))
 

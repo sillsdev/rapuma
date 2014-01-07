@@ -296,6 +296,7 @@
 
 \def\pdfb@@kmark{\ifx\b@ok\prevb@ok
  \else
+  \global\dr@ppednumberfalse
   \bgroup\liter@lspecials
    \special{pdf:dest (\id@@@.) [@thispage /Fit]}%
    \ifx\b@ok\relax \let\t@mp=\id@@@ \else \let\t@mp=\b@ok \fi

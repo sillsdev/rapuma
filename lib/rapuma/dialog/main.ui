@@ -75,6 +75,9 @@
    <property name="text">
     <string>About</string>
    </property>
+   <property name="toolTip">
+    <string>Learn about Rapuma</string>
+   </property>
   </action>
  </widget>
  <resources/>
