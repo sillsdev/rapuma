@@ -112,7 +112,9 @@ from rapuma.manager.project             import Project
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import main
+from rapuma.dialog                      import main, open, new
+from rapuma.dialog.open                 import OpenDlg
+from rapuma.dialog.new                  import NewDlg
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
 # Grab some system info
@@ -177,8 +179,12 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 ###############################################################################
 
     def mFileOpen (self) :
-        
-        print "Want to open a file open dialog?"
+        dlg = OpenDialog(self.projectList)
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
 
 
     def mFileNew (self) :

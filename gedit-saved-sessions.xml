@@ -121,6 +121,8 @@
   <file path="file:///home/dennis/Projects/rapuma/setup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/open.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/new.py"/>
 </session>
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>

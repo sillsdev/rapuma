@@ -41,7 +41,9 @@ class ProjBinding (object) :
         self.tools              = Tools()
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.projectConfig      = Config(pid).projectConfig
+        self.config             = Config(pid)
+        self.config.getProjectConfig()
+        self.projectConfig      = self.config.projectConfig
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -62,7 +64,6 @@ class ProjBinding (object) :
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding group.'],
             '0250' : ['MSG', 'Completed final render on Binding component [<<1>>].'],
             '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
-
         }
 
 
@@ -70,6 +71,7 @@ class ProjBinding (object) :
         '''Finishing collecting settings that would be needed for most
         functions in this module.'''
 
+#        import pdb; pdb.set_trace()
         try :
             self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
             self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
@@ -87,15 +89,6 @@ class ProjBinding (object) :
 
 #        import pdb; pdb.set_trace()
 
-#    def initProject (self, pid, gid) :
-#        '''Initialize an existing project according to the project ID given.
-#        This is slightly different from the one in the main rapuma script.'''
-
-#        local       = ProjLocal(pid)
-#        pc          = Config(local)
-#        log         = ProjLog(pid)
-#        return        Project(pid, gid)
-
 
     def bind (self) :
         '''Bind all groups in the order they are indicated by group bindOrder
@@ -105,23 +98,6 @@ class ProjBinding (object) :
         each time a group is rendered from here.'''
 
 #        import pdb; pdb.set_trace()
-
-
-
-
-
-
-# FIXME: Because we need many, if not all, of the services used in the render
-# process, it might be good to do some preprocessing to be sure everthing happens
-# that is supposed to. Example, first time bind is run hypenation doesn't seem to
-# to work but after subsequent runs with draft and proof, hypenation works with bind.
-# Might be able to prevent that with preprocessing here.
-
-
-
-
-
-
 
         # Get the order of the groups to be bound.
         bindOrder = {}
@@ -137,25 +113,12 @@ class ProjBinding (object) :
             self.log.writeToLog(self.errorCodes['0210'])
             return False
 
-
-
-
-# FIXME: main work starts in here some place
-# will also need to add back all the "self.gid" markers in all
-# the project managers.
-
-
-
-
         # Rerender the groups by bindingOrder value
         keyList = bindOrder.keys()
         keyList.sort()
         for key in keyList :
             # Do a force render in the bind mode
             Project(self.pid, bindOrder[key]).renderGroup('bind', '', True)
-
-
-
 
         # Build the final bind command
         confCommand = ['pdftk']

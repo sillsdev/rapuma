@@ -156,7 +156,6 @@
     \hfil\hbox{\kern-15pt% Ajust center position
     \genbkbasbolditalic #1}\hfill}\par% Deliver the text
     \eject% End of first page
-    \par\nbsp\eject\relax% Add a blank back page
     }%
 
 % Insert the following code at the top of first book in the 
@@ -165,7 +164,16 @@
 %\makedigitsother\catcode`{=1 \catcode`}=2
 %\titlepage{The Old Testament} % Insert title text here
 %\catcode`{=11\catcode`}=11\makedigitsletters
+% Note: You may need to use the \blankpage command before or after
+% the \titlepage command
 
+
+%%%%% BLANK PAGE INSERT
+% This will insert a blank page. This should be used at the beginning
+% or end of a book/component.
+\def\blankpage{%
+    \par\nbsp\eject\relax%
+}
 
 %%%%% HEADER OUTPUT
 % To adjust the size of the page number in the header or footer

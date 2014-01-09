@@ -16,6 +16,8 @@ END
 
 # Create a PySide compatable dialogs
 pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
+pyside-uic lib/rapuma/dialog/open.ui > lib/rapuma/dialog/open.py
+pyside-uic lib/rapuma/dialog/new.ui > lib/rapuma/dialog/new.py
 
 # Setup icon resources
 pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc
