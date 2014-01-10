@@ -99,6 +99,12 @@ class ProjBinding (object) :
 
 #        import pdb; pdb.set_trace()
 
+# FIXME: The problem with bind the way it is is that because the process creates 3
+# separate files and joins them together with pdftk, we loose the index. What is 
+# needed is to make one big control file that runs everything needed in the right order
+# This has been reported as a bug.
+
+
         # Get the order of the groups to be bound.
         bindOrder = {}
         for grp in self.projectConfig['Groups'].keys() :
@@ -129,7 +135,7 @@ class ProjBinding (object) :
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(self.local.projDeliverableFolder, self.pid + '_' + self.tools.ymd() + '.pdf')
+        output = os.path.join(self.local.projDeliverableFolder, self.pid + '_contents_final_' + self.tools.ymd() + '.pdf')
         confCommand.append(output)
         # Run the binding command
         rCode = subprocess.call(confCommand)
