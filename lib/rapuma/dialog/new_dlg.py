@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'lib/rapuma/dialog/new.ui'
+# Form implementation generated from reading ui file 'lib/rapuma/dialog/new_dlg.ui'
 #
-# Created: Fri Jan 10 20:17:53 2014
+# Created: Mon Jan 20 16:38:57 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
