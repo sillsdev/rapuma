@@ -36,14 +36,43 @@ class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
 
         super(NewCtrl, self).__init__(parent)
 
-        #self.setWindowIcon(appicon)
         self.setupUi(self)
+        self.connectionActions()
 
 
     def main (self) :
         '''This function shows the main dialog'''
 
         self.show()
+
+
+    def connectionActions (self) :
+        '''Connect to form buttons.'''
+
+        self.pushButtonOk.clicked.connect(self.okClicked)
+        self.pushButtonBrowse.clicked.connect(self.browseForFolder)
+
+
+    def okClicked (self) :
+        '''Execute the OK button.'''
+
+        projPath                = self.lineEditProjPath.text()
+
+        print "OK button was pushed", projPath
+
+
+    def browseForFolder (self) :
+        '''Call a basic find file widget to get the folder we want to put this project in.'''
+
+        # Set our browse options
+        options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
+        # Run the dialog and get the folder
+        directory = QtGui.QFileDialog.getExistingDirectory(self,
+                "QFileDialog.getExistingDirectory()",
+                self.lineEditProjPath.text(), options)
+        # Set the text in the edit box
+        if directory :
+            self.lineEditProjPath.setText(directory)
 
 
 ###############################################################################
