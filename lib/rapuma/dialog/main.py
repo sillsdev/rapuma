@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'lib/rapuma/dialog/main.ui'
 #
-# Created: Tue Jan 21 19:15:48 2014
+# Created: Wed Jan 22 21:44:49 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,14 +33,14 @@ class Ui_MainWindow(object):
         self.menuFileOpen.setObjectName("menuFileOpen")
         self.menuFileNew = QtGui.QAction(MainWindow)
         self.menuFileNew.setObjectName("menuFileNew")
-        self.menuFileQuite = QtGui.QAction(MainWindow)
-        self.menuFileQuite.setObjectName("menuFileQuite")
+        self.menuFileQuit = QtGui.QAction(MainWindow)
+        self.menuFileQuit.setObjectName("menuFileQuit")
         self.menuHelpAbout = QtGui.QAction(MainWindow)
         self.menuHelpAbout.setObjectName("menuHelpAbout")
         self.menuFile.addAction(self.menuFileOpen)
         self.menuFile.addAction(self.menuFileNew)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.menuFileQuite)
+        self.menuFile.addAction(self.menuFileQuit)
         self.menuHelp.addAction(self.menuHelpAbout)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -57,8 +57,8 @@ class Ui_MainWindow(object):
         self.menuFileOpen.setToolTip(QtGui.QApplication.translate("MainWindow", "Open an exsiting project", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFileNew.setText(QtGui.QApplication.translate("MainWindow", "New", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFileNew.setToolTip(QtGui.QApplication.translate("MainWindow", "Create a new Rapuma project", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFileQuite.setText(QtGui.QApplication.translate("MainWindow", "Quite", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFileQuite.setToolTip(QtGui.QApplication.translate("MainWindow", "Quite Rapuma", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFileQuit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFileQuit.setToolTip(QtGui.QApplication.translate("MainWindow", "Quit Rapuma", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpAbout.setToolTip(QtGui.QApplication.translate("MainWindow", "Learn about Rapuma", None, QtGui.QApplication.UnicodeUTF8))
 

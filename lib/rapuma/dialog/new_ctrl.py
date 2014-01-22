@@ -22,6 +22,8 @@
 
 
 import os, sys
+from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -31,13 +33,16 @@ from rapuma.dialog                      import new_dlg
 
 class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
 
-    def __init__ (self, parent=None) :
+    def __init__ (self, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(NewCtrl, self).__init__(parent)
 
         self.setupUi(self)
         self.connectionActions()
+        self.userConfig = userConfig
+        # Set the default path for new project
+        self.lineEditProjPath.setText(self.userConfig['Resources']['projects'])
 
 
     def main (self) :
@@ -56,9 +61,29 @@ class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        projPath                = self.lineEditProjPath.text()
+        langCode                = self.lineEditLangId.text().upper(),
+        scriptCode              = self.lineEditScriptId.text().upper(),
+        projCode                = self.lineEditProjId.text().upper(),
+        projPath                = self.lineEditProjPath.text(),
+        projName                = self.lineEditProjName.text(),
+        projDescription         = self.textEditProjDescription.toPlainText()
 
-        print "OK button was pushed", projPath
+        fields = {
+            'langCode'                : langCode,
+            'scriptCode'              : scriptCode,
+            'projCode'                : projCode,
+            'Id'                      : str(langCode) + '-' + str(scriptCode) + '-' + str(projCode),
+            'projPath'                : projPath,
+            'projName'                : projName,
+            'projDescription'         : projDescription
+            }
+
+# Work on ID tuple/str problem
+
+        print "OK button was pushed", fields
+
+        
+
 
 
     def browseForFolder (self) :

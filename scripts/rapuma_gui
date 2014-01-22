@@ -90,23 +90,23 @@ import codecs
 from configobj                          import ConfigObj
 
 # Load the Rapuma lib classes
-from rapuma.core.proj_local             import ProjLocal
-from rapuma.core.proj_log               import ProjLog
-from rapuma.core.user_config            import UserConfig
-from rapuma.core.proj_data              import ProjData, Template
-from rapuma.core.proj_binding           import ProjBinding
-from rapuma.core.proj_compare           import ProjCompare
-from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
-from rapuma.project.proj_config         import Config
-from rapuma.project.proj_setup          import ProjSetup, ProjDelete
-from rapuma.project.proj_commander      import ProjCommander
-from rapuma.project.proj_font           import ProjFont
-from rapuma.project.proj_hyphenation    import ProjHyphenation
-from rapuma.project.proj_maps           import ProjMaps
-from rapuma.project.proj_toc            import ProjToc
-from rapuma.project.proj_background     import ProjBackground
-from rapuma.manager.project             import Project
+from rapuma.core.user_config            import UserConfig
+#from rapuma.core.proj_local             import ProjLocal
+#from rapuma.core.proj_log               import ProjLog
+#from rapuma.core.proj_data              import ProjData, Template
+#from rapuma.core.proj_binding           import ProjBinding
+#from rapuma.core.proj_compare           import ProjCompare
+#from rapuma.core.proj_process           import ProjProcess
+#from rapuma.project.proj_config         import Config
+#from rapuma.project.proj_setup          import ProjSetup, ProjDelete
+#from rapuma.project.proj_commander      import ProjCommander
+#from rapuma.project.proj_font           import ProjFont
+#from rapuma.project.proj_hyphenation    import ProjHyphenation
+#from rapuma.project.proj_maps           import ProjMaps
+#from rapuma.project.proj_toc            import ProjToc
+#from rapuma.project.proj_background     import ProjBackground
+#from rapuma.manager.project             import Project
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -117,6 +117,7 @@ from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
+
 # Instantiate User config class
 uc                                      = UserConfig()
 tools                                   = Tools()
@@ -147,6 +148,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
         
+        self.sysConfig      = sysConfig
+        self.userConfig     = uc.userConfig
         self.setWindowIcon(appicon)
         self.setupUi(self)
 
@@ -155,8 +158,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         amFileOpen.triggered.connect(self.mFileOpen)
         amFileNew           = self.findChild(QtGui.QAction,"menuFileNew")
         amFileNew.triggered.connect(self.mFileNew)
-        amFileQuite         = self.findChild(QtGui.QAction,"menuFileQuite")
-        amFileQuite.triggered.connect(self.mFileQuite)
+        amFileQuit          = self.findChild(QtGui.QAction,"menuFileQuit")
+        amFileQuit.triggered.connect(self.mFileQuit)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
 #        amHelpAboutStatus   = self.QtCore.QPropertyAnimation.propertyName("toolTip")
         amHelpAbout.triggered.connect(self.mHelpAbout)
@@ -186,7 +189,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 
 
     def mFileNew (self) :
-        dlg = new_ctrl.NewCtrl()
+        dlg = new_ctrl.NewCtrl(self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
@@ -194,7 +197,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
             return False
 
 
-    def mFileQuite (self) :
+    def mFileQuit (self) :
     
         sys.exit()
 
@@ -202,9 +205,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
     def mHelpAbout (self) :
 
         QMessageBox.about(self, "About Rapuma",
+                """<p>Version: """ + currentVersion + 
                 """<p>Copyright &copy; 2014 SIL International.
-               All rights reserved in accordance with
-               GPL v2 or later - NO WARRANTIES!""")
+                    All rights reserved in accordance with
+                    GPL v2 or later - NO WARRANTIES!""")
 
 
 ###############################################################################

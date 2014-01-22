@@ -30,7 +30,7 @@
     <addaction name="menuFileOpen"/>
     <addaction name="menuFileNew"/>
     <addaction name="separator"/>
-    <addaction name="menuFileQuite"/>
+    <addaction name="menuFileQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -63,12 +63,12 @@
     <string>Create a new Rapuma project</string>
    </property>
   </action>
-  <action name="menuFileQuite">
+  <action name="menuFileQuit">
    <property name="text">
-    <string>Quite</string>
+    <string>Quit</string>
    </property>
    <property name="toolTip">
-    <string>Quite Rapuma</string>
+    <string>Quit Rapuma</string>
    </property>
   </action>
   <action name="menuHelpAbout">
