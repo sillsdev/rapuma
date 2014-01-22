@@ -24,6 +24,7 @@
 import os, sys
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
+from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -31,16 +32,21 @@ from PySide.QtGui                       import QDialog, QApplication, QMessageBo
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import new_dlg
 
+
 class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
 
-    def __init__ (self, userConfig, parent=None) :
+    def __init__ (self, sysConfig, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(NewCtrl, self).__init__(parent)
 
+        # Grab some system info
+        self.sysConfig                  = sysConfig
+        self.currentVersion             = sysConfig['Rapuma']['currentVersion']
+        # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
-        self.userConfig = userConfig
+        self.userConfig                 = userConfig
         # Set the default path for new project
         self.lineEditProjPath.setText(self.userConfig['Resources']['projects'])
 
@@ -61,26 +67,22 @@ class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        langCode                = self.lineEditLangId.text().upper(),
-        scriptCode              = self.lineEditScriptId.text().upper(),
-        projCode                = self.lineEditProjId.text().upper(),
-        projPath                = self.lineEditProjPath.text(),
-        projName                = self.lineEditProjName.text(),
+        mediaType               = 'book'
+        langCode                = self.lineEditLangId.text().upper()
+        scriptCode              = self.lineEditScriptId.text().upper()
+        projCode                = self.lineEditProjId.text().upper()
+        pid                     = langCode + '-' + scriptCode + '-' + projCode
+        projPath                = self.lineEditProjPath.text()
+        projName                = self.lineEditProjName.text()
         projDescription         = self.textEditProjDescription.toPlainText()
+        nProjPath               = os.path.join(projPath, pid)
 
-        fields = {
-            'langCode'                : langCode,
-            'scriptCode'              : scriptCode,
-            'projCode'                : projCode,
-            'Id'                      : str(langCode) + '-' + str(scriptCode) + '-' + str(projCode),
-            'projPath'                : projPath,
-            'projName'                : projName,
-            'projDescription'         : projDescription
-            }
+# FIXME: A bunch of integrety checks need to go here to make sure
+# the above data is good to go
 
-# Work on ID tuple/str problem
+        print "OK button was pushed", pid
 
-        print "OK button was pushed", fields
+        ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.currentVersion, '')
 
         
 

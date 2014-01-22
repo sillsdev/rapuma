@@ -189,7 +189,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 
 
     def mFileNew (self) :
-        dlg = new_ctrl.NewCtrl(self.userConfig)
+        dlg = new_ctrl.NewCtrl(self.sysConfig, self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
