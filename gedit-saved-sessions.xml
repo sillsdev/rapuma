@@ -123,6 +123,11 @@
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_new_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_open_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_archive_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_backup_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_reap_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_remove_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_system_preferences_ctrl.py"/>
 </session>
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>

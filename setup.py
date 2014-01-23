@@ -31,7 +31,7 @@ projBase                                = os.getcwd()
 sysConfig                               = ConfigObj(os.path.join(projBase, 'config', 'system.ini'), encoding='utf-8')
 systemName                              = sysConfig['Rapuma']['systemName']
 systemAbout                             = sysConfig['Rapuma']['systemAbout']
-currentVersion                          = sysConfig['Rapuma']['currentVersion']
+systemVersion                           = sysConfig['Rapuma']['systemVersion']
 daMan                                   = sysConfig['Rapuma']['maintainer']
 daMansEmail                             = sysConfig['Rapuma']['maintainerEmail']
 
@@ -44,7 +44,7 @@ for subdir in ('doc', 'resource', 'config', 'xetex-32', 'xetex-64') :
         datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
 
 setup(name = 'rapuma',
-        version = currentVersion,
+        version = systemVersion,
         description = systemName,
         long_description = systemAbout,
         maintainer = daMan,

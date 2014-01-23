@@ -42,7 +42,7 @@ class MenuManageNewCtrl (QDialog, QPropertyAnimation, menu_manage_new_dlg.Ui_Men
 
         # Grab some system info
         self.sysConfig                  = sysConfig
-        self.currentVersion             = sysConfig['Rapuma']['currentVersion']
+        self.systemVersion              = sysConfig['Rapuma']['systemVersion']
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
@@ -82,7 +82,7 @@ class MenuManageNewCtrl (QDialog, QPropertyAnimation, menu_manage_new_dlg.Ui_Men
 
         print "OK button was pushed", pid
 
-        ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.currentVersion, '')
+        ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '')
 
         
 

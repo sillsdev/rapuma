@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'lib/rapuma/dialog/menu_manage_open_dlg.ui'
 #
-# Created: Thu Jan 23 16:34:37 2014
+# Created: Fri Jan 24 04:35:57 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,6 +23,7 @@ class Ui_MenuManageOpen(object):
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
 
         self.retranslateUi(MenuManageOpen)
+        QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("clicked()"), MenuManageOpen.close)
         QtCore.QMetaObject.connectSlotsByName(MenuManageOpen)
 
     def retranslateUi(self, MenuManageOpen):

@@ -10,14 +10,19 @@ sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encodin
 versionSeries = sysConfig['Rapuma']['versionSeries']
 sysConfig['Rapuma']['systemVersion'] = str(versionSeries) + '.r' + str(len(repo))
 sysConfig.write()
-
 END
-
 
 # Create a PySide compatable dialogs
 pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
 pyside-uic lib/rapuma/dialog/menu_manage_open_dlg.ui > lib/rapuma/dialog/menu_manage_open_dlg.py
 pyside-uic lib/rapuma/dialog/menu_manage_new_dlg.ui > lib/rapuma/dialog/menu_manage_new_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_archive_dlg.ui > lib/rapuma/dialog/menu_manage_archive_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_backup_dlg.ui > lib/rapuma/dialog/menu_manage_backup_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_reap_dlg.ui > lib/rapuma/dialog/menu_manage_reap_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_remove_dlg.ui > lib/rapuma/dialog/menu_manage_remove_dlg.py
+pyside-uic lib/rapuma/dialog/menu_system_preferences_dlg.ui > lib/rapuma/dialog/menu_system_preferences_dlg.py
 
 # Setup icon resources
 pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc
+
+
