@@ -8,7 +8,7 @@ from mercurial import ui, hg
 repo = hg.repository(ui.ui(), os.getcwd())
 sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
 versionSeries = sysConfig['Rapuma']['versionSeries']
-sysConfig['Rapuma']['currentVersion'] = str(versionSeries) + '.r' + str(len(repo))
+sysConfig['Rapuma']['systemVersion'] = str(versionSeries) + '.r' + str(len(repo))
 sysConfig.write()
 
 END
@@ -16,8 +16,8 @@ END
 
 # Create a PySide compatable dialogs
 pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
-pyside-uic lib/rapuma/dialog/open_dlg.ui > lib/rapuma/dialog/open_dlg.py
-pyside-uic lib/rapuma/dialog/new_dlg.ui > lib/rapuma/dialog/new_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_open_dlg.ui > lib/rapuma/dialog/menu_manage_open_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_new_dlg.ui > lib/rapuma/dialog/menu_manage_new_dlg.py
 
 # Setup icon resources
 pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc

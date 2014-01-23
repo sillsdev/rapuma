@@ -112,7 +112,14 @@ from rapuma.core.user_config            import UserConfig
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import main, open_ctrl, new_ctrl
+from rapuma.dialog                      import main
+from rapuma.dialog                      import menu_manage_new_ctrl
+from rapuma.dialog                      import menu_manage_open_ctrl
+from rapuma.dialog                      import menu_manage_archive_ctrl
+from rapuma.dialog                      import menu_manage_backup_ctrl
+from rapuma.dialog                      import menu_manage_reap_ctrl
+from rapuma.dialog                      import menu_manage_remove_ctrl
+from rapuma.dialog                      import menu_system_preferences_ctrl
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
 # Grab some system info
@@ -124,8 +131,9 @@ tools                                   = Tools()
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
+systemCopyright                         = sysConfig['Rapuma']['systemCopyright']
+systemVersion                           = sysConfig['Rapuma']['systemVersion']
 systemAbout                             = sysConfig['Rapuma']['systemAbout']
-currentVersion                          = sysConfig['Rapuma']['currentVersion']
 local                                   = None
 
 
@@ -196,42 +204,67 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 # Manage ######################################################################
 
     def mManageNew (self) :
-        dlg = new_ctrl.NewCtrl(self.sysConfig, self.userConfig)
+        dlg = menu_manage_new_ctrl.MenuManageNewCtrl(self.sysConfig, self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
-
 
     def mManageOpen (self) :
-        dlg = open_ctrl.OpenCtrl()
+        dlg = menu_manage_open_ctrl.MenuManageOpenCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-
     def mManageBackup (self) :
-        print 'Not implemented'
-    def mManageArchive (self) :
-        print 'Not implemented'
-    def mManageRemove (self) :
-        print 'Not implemented'
-    def mManageReap (self) :
-        print 'Not implemented'
+        dlg = menu_manage_backup_ctrl.MenuManageBackupCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
 
+    def mManageArchive (self) :
+        dlg = menu_manage_archive_ctrl.MenuManageArchiveCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
+
+    def mManageRemove (self) :
+        dlg = menu_manage_remove_ctrl.MenuManageRemoveCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
+
+    def mManageReap (self) :
+        dlg = menu_manage_reap_ctrl.MenuManageReapCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
 
     def mManageQuit (self) :
-    
+        '''Quit the whole program.'''
+
         sys.exit()
 
 # System ######################################################################
 
     def mSystemPreferences (self) :
-        print 'Not implemented'
-
+        dlg = menu_system_preferences_ctrl.MenuSystemPreferencesCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
 
 # Help ########################################################################
 
@@ -244,10 +277,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
     def mHelpAbout (self) :
 
         QMessageBox.about(self, "About Rapuma",
-                """<p>Version: """ + currentVersion + 
-                """<p>Copyright &copy; 2014 SIL International.
-                    All rights reserved in accordance with
-                    GPL v2 or later - NO WARRANTIES!""")
+                """<p>""" + systemName + 
+                """<p>Version: """ + systemVersion + 
+                """<p>Copyright &copy; """ + systemCopyright +
+                """<p>""" + systemAbout )
 
 
 ###############################################################################

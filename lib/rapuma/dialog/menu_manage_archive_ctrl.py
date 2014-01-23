@@ -27,14 +27,14 @@ import os, sys
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import open_dlg
+from rapuma.dialog                      import menu_manage_open_dlg
 
-class OpenCtrl (QDialog, QPropertyAnimation, open_dlg.Ui_OpenProject) :
+class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_MenuManageOpen) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(OpenCtrl, self).__init__(parent)
+        super(MenuManageOpenCtrl, self).__init__(parent)
 
         #self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -59,7 +59,7 @@ class OpenCtrl (QDialog, QPropertyAnimation, open_dlg.Ui_OpenProject) :
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = OpenCtrl()
+    window = MenuManageOpenCtrl()
     window.main()
     sys.exit(app.exec_())
 

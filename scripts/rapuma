@@ -116,7 +116,7 @@ tools                                   = Tools()
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
 systemAbout                             = sysConfig['Rapuma']['systemAbout']
-currentVersion                          = sysConfig['Rapuma']['currentVersion']
+systemVersion                           = sysConfig['Rapuma']['systemVersion']
 local                                   = None
 
 
@@ -126,21 +126,21 @@ local                                   = None
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
-tools.terminal('\n\t\t\tVersion ' + currentVersion + '\n')
+tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 
 ###############################################################################
 ############################# Rapuma Functions ################################
 ###############################################################################
 
-def checkCreatorVersion (pid, projectConfig, currentVersion) :
+def checkCreatorVersion (pid, projectConfig, systemVersion) :
     '''Keep track of the version of Rapuma used in the current project.'''
 
     if not projectConfig['ProjectInfo'].has_key('projectCreatorVersion') :
-        projectConfig['ProjectInfo']['projectCreatorVersion'] = currentVersion
+        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
         tools.writeConfFile(projectConfig)
 
-    if projectConfig['ProjectInfo']['projectCreatorVersion'] != currentVersion :
-        projectConfig['ProjectInfo']['projectCreatorVersion'] = currentVersion
+    if projectConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
+        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
         tools.writeConfFile(projectConfig)
         # Now update the scripts if that is needed
         ProjCommander(pid).updateScripts()
@@ -203,7 +203,7 @@ def userArguments (args) :
     # Pre-command process: Extra help access
     if sys.argv[1].lower() == 'help' :
         if args.about :
-            tools.terminal('\n' + systemName + ' version ' + currentVersion + '\n')
+            tools.terminal('\n' + systemName + ' version ' + systemVersion + '\n')
             tools.terminal('About: ' + systemAbout + '\n')
             return
 
@@ -257,7 +257,7 @@ def userArguments (args) :
         local       = ProjLocal(pid)
         pc          = Config(pid)
         pc.getProjectConfig()
-        checkCreatorVersion(pid, pc.projectConfig, currentVersion)
+        checkCreatorVersion(pid, pc.projectConfig, systemVersion)
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -290,7 +290,7 @@ def userArguments (args) :
                 if not args.name :
                     sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
                 nProjPath = os.path.join(targetPath, pid)
-                ProjSetup(pid).newProject(nProjPath, args.media_type, args.name, currentVersion, '')
+                ProjSetup(pid).newProject(nProjPath, args.media_type, args.name, systemVersion, '')
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'bind' :

@@ -30,15 +30,15 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import new_dlg
+from rapuma.dialog                      import menu_manage_new_dlg
 
 
-class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
+class MenuManageNewCtrl (QDialog, QPropertyAnimation, menu_manage_new_dlg.Ui_MenuManageNew) :
 
     def __init__ (self, sysConfig, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(NewCtrl, self).__init__(parent)
+        super(MenuManageNewCtrl, self).__init__(parent)
 
         # Grab some system info
         self.sysConfig                  = sysConfig
@@ -115,7 +115,7 @@ class NewCtrl (QDialog, QPropertyAnimation, new_dlg.Ui_NewProject) :
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = NewCtrl()
+    window = MenuManageNewCtrl()
     window.main()
     sys.exit(app.exec_())
 
