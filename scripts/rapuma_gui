@@ -154,18 +154,32 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         self.setupUi(self)
 
         # Connect the menu actions
-        amFileOpen          = self.findChild(QtGui.QAction,"menuFileOpen")
-        amFileOpen.triggered.connect(self.mFileOpen)
-        amFileNew           = self.findChild(QtGui.QAction,"menuFileNew")
-        amFileNew.triggered.connect(self.mFileNew)
-        amFileQuit          = self.findChild(QtGui.QAction,"menuFileQuit")
-        amFileQuit.triggered.connect(self.mFileQuit)
+        # Manage
+        amManageNew         = self.findChild(QtGui.QAction,"menuManageNew")
+        amManageNew.triggered.connect(self.mManageNew)
+        amManageOpen        = self.findChild(QtGui.QAction,"menuManageOpen")
+        amManageOpen.triggered.connect(self.mManageOpen)
+        amManageBackup      = self.findChild(QtGui.QAction,"menuManageBackup")
+        amManageBackup.triggered.connect(self.mManageBackup)
+        amManageArchive     = self.findChild(QtGui.QAction,"menuManageArchive")
+        amManageArchive.triggered.connect(self.mManageArchive)
+        amManageReap        = self.findChild(QtGui.QAction,"menuManageReap")
+        amManageReap.triggered.connect(self.mManageReap)
+        amManageRemove      = self.findChild(QtGui.QAction,"menuManageRemove")
+        amManageRemove.triggered.connect(self.mManageRemove)
+        amManageQuit        = self.findChild(QtGui.QAction,"menuManageQuit")
+        amManageQuit.triggered.connect(self.mManageQuit)
+        # System
+        amSystemPreferences = self.findChild(QtGui.QAction,"menuSystemPreferences")
+        amSystemPreferences.triggered.connect(self.mSystemPreferences)
+        # Help
+        amHelpHelp          = self.findChild(QtGui.QAction,"menuHelpHelp")
+        amHelpHelp.triggered.connect(self.mHelpHelp)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
-#        amHelpAboutStatus   = self.QtCore.QPropertyAnimation.propertyName("toolTip")
         amHelpAbout.triggered.connect(self.mHelpAbout)
         
         
-        # This prints a simple message in the status bar
+        # FIXME: This prints a simple message in the status bar, can we do more with it?
         self.statusBar().showMessage("Hi There!")
 
 
@@ -179,16 +193,9 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 ################################ Menu Items ###################################
 ###############################################################################
 
-    def mFileOpen (self) :
-        dlg = open_ctrl.OpenCtrl()
-        if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+# Manage ######################################################################
 
-
-    def mFileNew (self) :
+    def mManageNew (self) :
         dlg = new_ctrl.NewCtrl(self.sysConfig, self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
@@ -197,9 +204,41 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
             return False
 
 
-    def mFileQuit (self) :
+    def mManageOpen (self) :
+        dlg = open_ctrl.OpenCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
+
+
+    def mManageBackup (self) :
+        print 'Not implemented'
+    def mManageArchive (self) :
+        print 'Not implemented'
+    def mManageRemove (self) :
+        print 'Not implemented'
+    def mManageReap (self) :
+        print 'Not implemented'
+
+
+    def mManageQuit (self) :
     
         sys.exit()
+
+# System ######################################################################
+
+    def mSystemPreferences (self) :
+        print 'Not implemented'
+
+
+# Help ########################################################################
+
+    def mHelpHelp (self) :
+
+        QMessageBox.information(self, "Rapuma Help",
+                """<p>The Rapuma Help viewer has not been implemented yet. Sorry about that.""")
 
 
     def mHelpAbout (self) :

@@ -25,20 +25,33 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Manage</string>
     </property>
-    <addaction name="menuFileOpen"/>
-    <addaction name="menuFileNew"/>
+    <addaction name="menuManageNew"/>
+    <addaction name="menuManageOpen"/>
+    <addaction name="menuManageBackup"/>
+    <addaction name="menuManageArchive"/>
+    <addaction name="menuManageReap"/>
+    <addaction name="menuManageRemove"/>
     <addaction name="separator"/>
-    <addaction name="menuFileQuit"/>
+    <addaction name="menuManageQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="menuHelpHelp"/>
+    <addaction name="separator"/>
     <addaction name="menuHelpAbout"/>
    </widget>
+   <widget class="QMenu" name="menuSystem">
+    <property name="title">
+     <string>System</string>
+    </property>
+    <addaction name="menuSystemPreferences"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSystem"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -47,7 +60,7 @@
     <string>open</string>
    </property>
   </action>
-  <action name="menuFileOpen">
+  <action name="menuManageOpen">
    <property name="text">
     <string>Open</string>
    </property>
@@ -55,7 +68,7 @@
     <string>Open an exsiting project</string>
    </property>
   </action>
-  <action name="menuFileNew">
+  <action name="menuManageNew">
    <property name="text">
     <string>New</string>
    </property>
@@ -63,7 +76,7 @@
     <string>Create a new Rapuma project</string>
    </property>
   </action>
-  <action name="menuFileQuit">
+  <action name="menuManageQuit">
    <property name="text">
     <string>Quit</string>
    </property>
@@ -76,7 +89,55 @@
     <string>About</string>
    </property>
    <property name="toolTip">
-    <string>Learn about Rapuma</string>
+    <string>Learn about what Rapuma is</string>
+   </property>
+  </action>
+  <action name="menuSystemPreferences">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+   <property name="toolTip">
+    <string>Change Rapuma system preferences</string>
+   </property>
+  </action>
+  <action name="menuHelpHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Find information about how to use Rapuma</string>
+   </property>
+  </action>
+  <action name="menuManageBackup">
+   <property name="text">
+    <string>Backup</string>
+   </property>
+   <property name="toolTip">
+    <string>Backup an existing project</string>
+   </property>
+  </action>
+  <action name="menuManageArchive">
+   <property name="text">
+    <string>Archive</string>
+   </property>
+   <property name="toolTip">
+    <string>Archive an existing project</string>
+   </property>
+  </action>
+  <action name="menuManageRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove an existing project</string>
+   </property>
+  </action>
+  <action name="menuManageReap">
+   <property name="text">
+    <string>REAP</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a project to SIL REAP (Archive)</string>
    </property>
   </action>
  </widget>
