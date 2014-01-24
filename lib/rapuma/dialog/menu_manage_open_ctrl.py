@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys
+import os, sys, StringIO
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -38,6 +38,7 @@ class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_M
 
         #self.setWindowIcon(appicon)
         self.setupUi(self)
+        self.connectionActions()
 
 
     def main (self) :
@@ -46,10 +47,31 @@ class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_M
         self.show()
 
 
-###############################################################################
-################################ Menu Items ###################################
-###############################################################################
+    def connectionActions (self) :
+        '''Connect to form buttons.'''
 
+        self.pushButtonOk.clicked.connect(self.okClicked)
+
+
+    def okClicked (self) :
+        '''Execute the OK button.'''
+
+        pid                     = self.lineEditPid.text().upper()
+
+        saved_output = sys.stdout
+        output_object = StringIO.StringIO()
+        sys.stdout = output_object
+
+#        if ProjDelete(pid).deleteProject(force) :
+#            result = output_object.getvalue()
+#            QMessageBox.information(self, "Project Open", result)
+#        else :
+#            result = output_object.getvalue()
+#            QMessageBox.warning(self, "Project Open", result)
+
+        # Output to terminal the stdout and close the dialog
+        sys.stdout = saved_output
+        self.close()
 
 
 ###############################################################################

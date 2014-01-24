@@ -20,6 +20,7 @@ pyside-uic lib/rapuma/dialog/menu_manage_archive_dlg.ui > lib/rapuma/dialog/menu
 pyside-uic lib/rapuma/dialog/menu_manage_backup_dlg.ui > lib/rapuma/dialog/menu_manage_backup_dlg.py
 pyside-uic lib/rapuma/dialog/menu_manage_reap_dlg.ui > lib/rapuma/dialog/menu_manage_reap_dlg.py
 pyside-uic lib/rapuma/dialog/menu_manage_remove_dlg.ui > lib/rapuma/dialog/menu_manage_remove_dlg.py
+pyside-uic lib/rapuma/dialog/menu_manage_template_dlg.ui > lib/rapuma/dialog/menu_manage_template_dlg.py
 pyside-uic lib/rapuma/dialog/menu_system_preferences_dlg.ui > lib/rapuma/dialog/menu_system_preferences_dlg.py
 
 # Setup icon resources

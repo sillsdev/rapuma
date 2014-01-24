@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuManageOpen</class>
- <widget class="QWidget" name="MenuManageOpen">
+ <class>MenuManageTemplate</class>
+ <widget class="QWidget" name="MenuManageTemplate">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Rapuma - Open Project</string>
+   <string>Rapuma - Template Project</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="2">
@@ -24,7 +24,7 @@
    <item row="1" column="1">
     <widget class="QPushButton" name="pushButtonOk">
      <property name="toolTip">
-      <string>Remove a selected project</string>
+      <string>Create a template from the selected project</string>
      </property>
      <property name="text">
       <string>OK</string>
@@ -65,12 +65,12 @@
   <connection>
    <sender>pushButtonCancel</sender>
    <signal>clicked(bool)</signal>
-   <receiver>MenuManageOpen</receiver>
+   <receiver>MenuManageTemplate</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>327</x>
-     <y>183</y>
+     <x>269</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -81,12 +81,12 @@
   <connection>
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
-   <receiver>MenuManageOpen</receiver>
+   <receiver>MenuManageTemplate</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>165</y>
+     <x>178</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
      <x>37</x>

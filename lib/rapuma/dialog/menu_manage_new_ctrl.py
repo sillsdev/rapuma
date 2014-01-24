@@ -21,10 +21,13 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys
+import os, sys, StringIO
+
+
+# Load Rapuma modules
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
-from rapuma.project.proj_setup          import ProjSetup, ProjDelete
+from rapuma.project.proj_setup          import ProjSetup
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -80,12 +83,20 @@ class MenuManageNewCtrl (QDialog, QPropertyAnimation, menu_manage_new_dlg.Ui_Men
 # FIXME: A bunch of integrety checks need to go here to make sure
 # the above data is good to go
 
-        print "OK button was pushed", pid
+        saved_output = sys.stdout
+        output_object = StringIO.StringIO()
+        sys.stdout = output_object
 
-        ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '')
+        if ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '') :
+            result = output_object.getvalue()
+            QMessageBox.information(self, "Project Create", result)
+        else :
+            result = output_object.getvalue()
+            QMessageBox.warning(self, "Project Create", result)
 
-        
-
+        # Output to terminal the stdout and close the dialog
+        sys.stdout = saved_output
+        self.close()
 
 
     def browseForFolder (self) :
@@ -100,12 +111,6 @@ class MenuManageNewCtrl (QDialog, QPropertyAnimation, menu_manage_new_dlg.Ui_Men
         # Set the text in the edit box
         if directory :
             self.lineEditProjPath.setText(directory)
-
-
-###############################################################################
-################################ Menu Items ###################################
-###############################################################################
-
 
 
 ###############################################################################

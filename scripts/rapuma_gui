@@ -119,6 +119,7 @@ from rapuma.dialog                      import menu_manage_archive_ctrl
 from rapuma.dialog                      import menu_manage_backup_ctrl
 from rapuma.dialog                      import menu_manage_reap_ctrl
 from rapuma.dialog                      import menu_manage_remove_ctrl
+from rapuma.dialog                      import menu_manage_template_ctrl
 from rapuma.dialog                      import menu_system_preferences_ctrl
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
@@ -175,6 +176,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         amManageReap.triggered.connect(self.mManageReap)
         amManageRemove      = self.findChild(QtGui.QAction,"menuManageRemove")
         amManageRemove.triggered.connect(self.mManageRemove)
+        amManageTemplate      = self.findChild(QtGui.QAction,"menuManageTemplate")
+        amManageTemplate.triggered.connect(self.mManageTemplate)
         amManageQuit        = self.findChild(QtGui.QAction,"menuManageQuit")
         amManageQuit.triggered.connect(self.mManageQuit)
         # System
@@ -186,7 +189,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
         
-        
+        # Set the project ID (PID)
+        self.pid            = self.userConfig['System']['current']
+        self.labelPid.setText(self.pid)
+
         # FIXME: This prints a simple message in the status bar, can we do more with it?
         self.statusBar().showMessage("Hi There!")
 
@@ -235,6 +241,14 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         else :
             return False
 
+    def mManageReap (self) :
+        dlg = menu_manage_reap_ctrl.MenuManageReapCtrl()
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
+
     def mManageRemove (self) :
         dlg = menu_manage_remove_ctrl.MenuManageRemoveCtrl()
         if dlg.exec_() :
@@ -243,8 +257,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         else :
             return False
 
-    def mManageReap (self) :
-        dlg = menu_manage_reap_ctrl.MenuManageReapCtrl()
+    def mManageTemplate (self) :
+        dlg = menu_manage_template_ctrl.MenuManageTemplateCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result

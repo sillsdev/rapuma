@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'lib/rapuma/dialog/main.ui'
 #
-# Created: Fri Jan 24 04:35:57 2014
+# Created: Fri Jan 24 21:44:55 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,9 +12,32 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(800, 714)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.tabWidgetProjInfo = QtGui.QTabWidget(self.centralwidget)
+        self.tabWidgetProjInfo.setGeometry(QtCore.QRect(10, 40, 781, 431))
+        self.tabWidgetProjInfo.setObjectName("tabWidgetProjInfo")
+        self.tab_info = QtGui.QWidget()
+        self.tab_info.setObjectName("tab_info")
+        self.gridLayout = QtGui.QGridLayout(self.tab_info)
+        self.gridLayout.setObjectName("gridLayout")
+        self.lineEditProjName = QtGui.QLineEdit(self.tab_info)
+        self.lineEditProjName.setObjectName("lineEditProjName")
+        self.gridLayout.addWidget(self.lineEditProjName, 0, 0, 1, 1)
+        self.tabWidgetProjInfo.addTab(self.tab_info, "")
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName("tab")
+        self.tabWidgetProjInfo.addTab(self.tab, "")
+        self.tab_2 = QtGui.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.tabWidgetProjInfo.addTab(self.tab_2, "")
+        self.labelProjId = QtGui.QLabel(self.centralwidget)
+        self.labelProjId.setGeometry(QtCore.QRect(10, 10, 71, 17))
+        self.labelProjId.setObjectName("labelProjId")
+        self.labelPid = QtGui.QLabel(self.centralwidget)
+        self.labelPid.setGeometry(QtCore.QRect(90, 10, 91, 17))
+        self.labelPid.setObjectName("labelPid")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
@@ -51,11 +74,16 @@ class Ui_MainWindow(object):
         self.menuManageRemove.setObjectName("menuManageRemove")
         self.menuManageReap = QtGui.QAction(MainWindow)
         self.menuManageReap.setObjectName("menuManageReap")
+        self.menuManageTemplate = QtGui.QAction(MainWindow)
+        self.menuManageTemplate.setObjectName("menuManageTemplate")
         self.menuFile.addAction(self.menuManageNew)
         self.menuFile.addAction(self.menuManageOpen)
-        self.menuFile.addAction(self.menuManageBackup)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuManageArchive)
+        self.menuFile.addAction(self.menuManageBackup)
         self.menuFile.addAction(self.menuManageReap)
+        self.menuFile.addAction(self.menuManageTemplate)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuManageRemove)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.menuManageQuit)
@@ -72,6 +100,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Rapuma", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEditProjName.setToolTip(QtGui.QApplication.translate("MainWindow", "Project name, could be book title", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEditProjName.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "Project Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidgetProjInfo.setTabText(self.tabWidgetProjInfo.indexOf(self.tab_info), QtGui.QApplication.translate("MainWindow", "Information", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidgetProjInfo.setTabText(self.tabWidgetProjInfo.indexOf(self.tab), QtGui.QApplication.translate("MainWindow", "Tab 1", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidgetProjInfo.setTabText(self.tabWidgetProjInfo.indexOf(self.tab_2), QtGui.QApplication.translate("MainWindow", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelProjId.setText(QtGui.QApplication.translate("MainWindow", "Project ID:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelPid.setText(QtGui.QApplication.translate("MainWindow", "Project ID", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "Manage", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuSystem.setTitle(QtGui.QApplication.translate("MainWindow", "System", None, QtGui.QApplication.UnicodeUTF8))
@@ -96,4 +131,5 @@ class Ui_MainWindow(object):
         self.menuManageRemove.setToolTip(QtGui.QApplication.translate("MainWindow", "Remove an existing project", None, QtGui.QApplication.UnicodeUTF8))
         self.menuManageReap.setText(QtGui.QApplication.translate("MainWindow", "REAP", None, QtGui.QApplication.UnicodeUTF8))
         self.menuManageReap.setToolTip(QtGui.QApplication.translate("MainWindow", "Add a project to SIL REAP (Archive)", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuManageTemplate.setText(QtGui.QApplication.translate("MainWindow", "Template", None, QtGui.QApplication.UnicodeUTF8))
 

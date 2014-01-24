@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys
+import os, sys, StringIO
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -44,12 +44,6 @@ class MenuManageArchiveCtrl (QDialog, QPropertyAnimation, menu_manage_archive_dl
         '''This function shows the main dialog'''
 
         self.show()
-
-
-###############################################################################
-################################ Menu Items ###################################
-###############################################################################
-
 
 
 ###############################################################################
