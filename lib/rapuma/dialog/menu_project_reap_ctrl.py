@@ -27,14 +27,14 @@ import os, sys, StringIO
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_manage_backup_dlg
+from rapuma.dialog                      import menu_project_reap_dlg
 
-class MenuManageBackupCtrl (QDialog, QPropertyAnimation, menu_manage_backup_dlg.Ui_MenuManageBackup) :
+class MenuProjectReapCtrl (QDialog, QPropertyAnimation, menu_project_reap_dlg.Ui_MenuProjectReap) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuManageBackupCtrl, self).__init__(parent)
+        super(MenuProjectReapCtrl, self).__init__(parent)
 
         #self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -53,7 +53,7 @@ class MenuManageBackupCtrl (QDialog, QPropertyAnimation, menu_manage_backup_dlg.
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuManageBackupCtrl()
+    window = MenuProjectReapCtrl()
     window.main()
     sys.exit(app.exec_())
 

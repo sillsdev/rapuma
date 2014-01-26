@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>714</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Rapuma</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="mainTabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>781</width>
+      <height>611</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="mainProject">
+     <attribute name="title">
+      <string>Project</string>
+     </attribute>
+     <attribute name="toolTip">
+      <string>Project-wide information and settings</string>
+     </attribute>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLineEdit" name="lineEditProjName">
+        <property name="toolTip">
+         <string>Project name, could be book title</string>
+        </property>
+        <property name="placeholderText">
+         <string>Project Name</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="mainGroup">
+     <attribute name="title">
+      <string>Group</string>
+     </attribute>
+     <attribute name="toolTip">
+      <string>Group-wide settings and information</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="mainComponent">
+     <attribute name="title">
+      <string>Component</string>
+     </attribute>
+     <attribute name="toolTip">
+      <string>Component settings, information and source and working text</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="mainLog">
+     <attribute name="title">
+      <string>Logs</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="labelProject">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>60</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Project:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelPid">
+    <property name="geometry">
+     <rect>
+      <x>68</x>
+      <y>10</y>
+      <width>80</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Project ID</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelGroup">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>10</y>
+      <width>50</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Group:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelGid">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>10</y>
+      <width>80</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Group ID</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelComponent">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>10</y>
+      <width>85</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Component:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCid">
+    <property name="geometry">
+     <rect>
+      <x>368</x>
+      <y>10</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Comp ID</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonDraft">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>5</y>
+      <width>80</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Create a draft of the selected component(s)</string>
+    </property>
+    <property name="text">
+     <string>Draft</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonProof">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>5</y>
+      <width>80</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Create a proof of the selected component(s)</string>
+    </property>
+    <property name="text">
+     <string>Proof</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonFinal">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>5</y>
+      <width>80</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Create view of the final output of the selected component(s)</string>
+    </property>
+    <property name="text">
+     <string>Final</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuProject">
+    <property name="title">
+     <string>Project</string>
+    </property>
+    <addaction name="menuProjectAdd"/>
+    <addaction name="menuProjectRemove"/>
+    <addaction name="menuProjectRestore"/>
+    <addaction name="menuProjectSelect"/>
+    <addaction name="separator"/>
+    <addaction name="menuProjectArchive"/>
+    <addaction name="menuProjectCloud"/>
+    <addaction name="menuProjectBackup"/>
+    <addaction name="menuProjectBind"/>
+    <addaction name="menuProjectReap"/>
+    <addaction name="menuProjectTemplate"/>
+    <addaction name="menuProjectUpdate"/>
+    <addaction name="separator"/>
+    <addaction name="menuProjectSystemPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="menuProjectQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="menuHelpHelp"/>
+    <addaction name="menuHelpExamples"/>
+    <addaction name="separator"/>
+    <addaction name="menuHelpAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuGroup">
+    <property name="title">
+     <string>Group</string>
+    </property>
+    <addaction name="menuGroupAdd"/>
+    <addaction name="menuGroupRemove"/>
+    <addaction name="menuGroupSelect"/>
+    <addaction name="menuGroupUpdate"/>
+   </widget>
+   <widget class="QMenu" name="menuComponent">
+    <property name="title">
+     <string>Component</string>
+    </property>
+    <addaction name="menuComponentAdd"/>
+    <addaction name="menuComponentRemove"/>
+    <addaction name="menuComponentSelect"/>
+    <addaction name="menuComponentUpdate"/>
+   </widget>
+   <addaction name="menuProject"/>
+   <addaction name="menuGroup"/>
+   <addaction name="menuComponent"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>open</string>
+   </property>
+  </action>
+  <action name="menuProjectSelect">
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Open an exsiting project</string>
+   </property>
+  </action>
+  <action name="menuProjectAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new Rapuma project</string>
+   </property>
+  </action>
+  <action name="menuProjectQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit Rapuma</string>
+   </property>
+  </action>
+  <action name="menuHelpAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>Learn about what Rapuma is</string>
+   </property>
+  </action>
+  <action name="menuProjectSystemPreferences">
+   <property name="text">
+    <string>System Preferences</string>
+   </property>
+   <property name="toolTip">
+    <string>Change Rapuma system preferences</string>
+   </property>
+  </action>
+  <action name="menuHelpHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Find information about how to use Rapuma</string>
+   </property>
+  </action>
+  <action name="menuProjectBackup">
+   <property name="text">
+    <string>Backup</string>
+   </property>
+   <property name="toolTip">
+    <string>Backup an existing project</string>
+   </property>
+  </action>
+  <action name="menuProjectArchive">
+   <property name="text">
+    <string>Archive</string>
+   </property>
+   <property name="toolTip">
+    <string>Archive an existing project</string>
+   </property>
+  </action>
+  <action name="menuProjectRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove an existing project</string>
+   </property>
+  </action>
+  <action name="menuProjectReap">
+   <property name="text">
+    <string>REAP</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a project to SIL REAP (Archive)</string>
+   </property>
+  </action>
+  <action name="menuProjectTemplate">
+   <property name="text">
+    <string>Template</string>
+   </property>
+  </action>
+  <action name="menuComponentAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a component to the selected group</string>
+   </property>
+  </action>
+  <action name="menuComponentRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove a component from the selected group</string>
+   </property>
+  </action>
+  <action name="menuComponentSelect">
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Select a component(s) to render </string>
+   </property>
+  </action>
+  <action name="menuGroupAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a group to this project</string>
+   </property>
+  </action>
+  <action name="menuGroupRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove a group from this project</string>
+   </property>
+  </action>
+  <action name="menuGroupSelect">
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Select a group to process in this project</string>
+   </property>
+  </action>
+  <action name="menuProjectRestore">
+   <property name="text">
+    <string>Restore</string>
+   </property>
+   <property name="toolTip">
+    <string>Restore a Rapuma project from backup or archive</string>
+   </property>
+  </action>
+  <action name="menuProjectBind">
+   <property name="text">
+    <string>Bind</string>
+   </property>
+   <property name="toolTip">
+    <string>Bind groups in the main content section</string>
+   </property>
+  </action>
+  <action name="menuProjectCloud">
+   <property name="text">
+    <string>Cloud</string>
+   </property>
+   <property name="toolTip">
+    <string>Save the current project to the cloud</string>
+   </property>
+  </action>
+  <action name="menuHelpExamples">
+   <property name="text">
+    <string>Examples</string>
+   </property>
+   <property name="toolTip">
+    <string>Try a couple Rapuma project examples</string>
+   </property>
+  </action>
+  <action name="menuGroupUpdate">
+   <property name="text">
+    <string>Update</string>
+   </property>
+   <property name="toolTip">
+    <string>Update a group(s)</string>
+   </property>
+  </action>
+  <action name="menuComponentUpdate">
+   <property name="text">
+    <string>Update</string>
+   </property>
+   <property name="toolTip">
+    <string>Update a component(s)</string>
+   </property>
+  </action>
+  <action name="menuProjectUpdate">
+   <property name="text">
+    <string>Update</string>
+   </property>
+   <property name="toolTip">
+    <string>Update project elements</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButtonDraft</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>504</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>503</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonProof</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>596</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>596</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonFinal</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>686</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>689</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setupUi()</slot>
+ </slots>
+</ui>

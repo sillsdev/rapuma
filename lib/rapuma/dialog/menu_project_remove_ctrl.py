@@ -23,20 +23,25 @@
 
 import os, sys, StringIO
 
+# Load Rapuma modules
+from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
+from rapuma.project.proj_setup          import ProjDelete
+
 # Load GUI modules
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_manage_open_dlg
+from rapuma.dialog                      import menu_project_remove_dlg
 
-class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_MenuManageOpen) :
+class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dlg.Ui_MenuProjectRemove) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuManageOpenCtrl, self).__init__(parent)
+        super(MenuProjectRemoveCtrl, self).__init__(parent)
 
-        #self.setWindowIcon(appicon)
+        # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
 
@@ -57,21 +62,24 @@ class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_M
         '''Execute the OK button.'''
 
         pid                     = self.lineEditPid.text().upper()
+        force                   = self.checkBoxBackup.isChecked()
 
         saved_output = sys.stdout
         output_object = StringIO.StringIO()
         sys.stdout = output_object
 
-#        if ProjDelete(pid).deleteProject(force) :
-#            result = output_object.getvalue()
-#            QMessageBox.information(self, "Project Open", result)
-#        else :
-#            result = output_object.getvalue()
-#            QMessageBox.warning(self, "Project Open", result)
+        if ProjDelete(pid).deleteProject(force) :
+            result = output_object.getvalue()
+            QMessageBox.information(self, "Project Create", result)
+        else :
+            result = output_object.getvalue()
+            QMessageBox.warning(self, "Project Create", result)
 
         # Output to terminal the stdout and close the dialog
         sys.stdout = saved_output
         self.close()
+
+
 
 
 ###############################################################################
@@ -81,7 +89,7 @@ class MenuManageOpenCtrl (QDialog, QPropertyAnimation, menu_manage_open_dlg.Ui_M
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuManageOpenCtrl()
+    window = MenuProjectRemoveCtrl()
     window.main()
     sys.exit(app.exec_())
 

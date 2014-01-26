@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuManageTemplate</class>
- <widget class="QWidget" name="MenuManageTemplate">
+ <class>MenuProjectArchive</class>
+ <widget class="QWidget" name="MenuProjectArchive">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Rapuma - Template Project</string>
+   <string>Rapuma - Archive Project</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="2">
@@ -65,7 +65,7 @@
   <connection>
    <sender>pushButtonCancel</sender>
    <signal>clicked(bool)</signal>
-   <receiver>MenuManageTemplate</receiver>
+   <receiver>MenuProjectArchive</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -81,7 +81,7 @@
   <connection>
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
-   <receiver>MenuManageTemplate</receiver>
+   <receiver>MenuProjectArchive</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">

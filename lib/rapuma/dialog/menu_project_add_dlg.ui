@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuManageNew</class>
- <widget class="QWidget" name="MenuManageNew">
+ <class>MenuProjectAdd</class>
+ <widget class="QWidget" name="MenuProjectAdd">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -261,7 +261,7 @@
   <connection>
    <sender>pushButtonCancel</sender>
    <signal>clicked(bool)</signal>
-   <receiver>MenuManageNew</receiver>
+   <receiver>MenuProjectAdd</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -277,7 +277,7 @@
   <connection>
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
-   <receiver>MenuManageNew</receiver>
+   <receiver>MenuProjectAdd</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -293,7 +293,7 @@
   <connection>
    <sender>pushButtonBrowse</sender>
    <signal>clicked()</signal>
-   <receiver>MenuManageNew</receiver>
+   <receiver>MenuProjectAdd</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">

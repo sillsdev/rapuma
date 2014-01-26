@@ -1,29 +1,63 @@
-#!/bin/sh
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-# Update version number with a little Python code
-python <<END
-import os
+#    Copyright 2014, SIL International
+#    All rights reserved.
+#
+#    This library is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation; either version 2.1 of License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should also have received a copy of the GNU Lesser General Public
+#    License along with this library in the file named "LICENSE".
+#    If not, write to the Free Software Foundation, 51 Franklin Street,
+#    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
+#    internet at http://www.fsf.org/licenses/lgpl.html.
+
+# Import modules
+import os, subprocess
 from configobj import ConfigObj
 from mercurial import ui, hg
+
+# Update version number
 repo = hg.repository(ui.ui(), os.getcwd())
 sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
 versionSeries = sysConfig['Rapuma']['versionSeries']
 sysConfig['Rapuma']['systemVersion'] = str(versionSeries) + '.r' + str(len(repo))
 sysConfig.write()
-END
 
-# Create a PySide compatable dialogs
-pyside-uic lib/rapuma/dialog/main.ui > lib/rapuma/dialog/main.py
-pyside-uic lib/rapuma/dialog/menu_manage_open_dlg.ui > lib/rapuma/dialog/menu_manage_open_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_new_dlg.ui > lib/rapuma/dialog/menu_manage_new_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_archive_dlg.ui > lib/rapuma/dialog/menu_manage_archive_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_backup_dlg.ui > lib/rapuma/dialog/menu_manage_backup_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_reap_dlg.ui > lib/rapuma/dialog/menu_manage_reap_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_remove_dlg.ui > lib/rapuma/dialog/menu_manage_remove_dlg.py
-pyside-uic lib/rapuma/dialog/menu_manage_template_dlg.ui > lib/rapuma/dialog/menu_manage_template_dlg.py
-pyside-uic lib/rapuma/dialog/menu_system_preferences_dlg.ui > lib/rapuma/dialog/menu_system_preferences_dlg.py
+# Create a PySide compatable menu dialogs
+dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
+            'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
+            'menu_project_reap', 'menu_project_template', 'menu_project_update',
+            'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add',
+            'menu_group_remove', 'menu_group_select', 'menu_group_update', 'menu_component_add',
+            'menu_component_remove', 'menu_component_select', 'menu_component_update',
+            'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
+
+for i in dialogs :
+    uiDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.ui')
+    pyDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.py')
+    cmd     = ['pyside-uic', uiDlg, '-o', pyDlg]
+    if os.path.exists(uiDlg) :
+        try :
+            subprocess.call(cmd)
+        except Exception as e :
+            print str(e)
 
 # Setup icon resources
-pyside-rcc -o lib/rapuma/icon/pyresources.py lib/rapuma/icon/pyresources.qrc
+py      = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources.py')
+qrc     = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources.qrc')
+cmd = ['pyside-rcc', '-o', py, qrc]
+try :
+    subprocess.call(cmd)
+except Exception as e :
+    print str(e)
 
 

@@ -27,14 +27,14 @@ import os, sys, StringIO
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_manage_archive_dlg
+from rapuma.dialog                      import menu_project_archive_dlg
 
-class MenuManageArchiveCtrl (QDialog, QPropertyAnimation, menu_manage_archive_dlg.Ui_MenuManageArchive) :
+class MenuProjectArchiveCtrl (QDialog, QPropertyAnimation, menu_project_archive_dlg.Ui_MenuProjectArchive) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuManageArchiveCtrl, self).__init__(parent)
+        super(MenuProjectArchiveCtrl, self).__init__(parent)
 
         #self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -53,7 +53,7 @@ class MenuManageArchiveCtrl (QDialog, QPropertyAnimation, menu_manage_archive_dl
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuManageArchiveCtrl()
+    window = MenuProjectArchiveCtrl()
     window.main()
     sys.exit(app.exec_())
 

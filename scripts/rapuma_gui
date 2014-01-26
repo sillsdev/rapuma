@@ -106,21 +106,13 @@ from rapuma.core.user_config            import UserConfig
 #from rapuma.project.proj_maps           import ProjMaps
 #from rapuma.project.proj_toc            import ProjToc
 #from rapuma.project.proj_background     import ProjBackground
-#from rapuma.manager.project             import Project
+#from rapuma.projectr.project             import Project
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import main
-from rapuma.dialog                      import menu_manage_new_ctrl
-from rapuma.dialog                      import menu_manage_open_ctrl
-from rapuma.dialog                      import menu_manage_archive_ctrl
-from rapuma.dialog                      import menu_manage_backup_ctrl
-from rapuma.dialog                      import menu_manage_reap_ctrl
-from rapuma.dialog                      import menu_manage_remove_ctrl
-from rapuma.dialog                      import menu_manage_template_ctrl
-from rapuma.dialog                      import menu_system_preferences_ctrl
+from rapuma.dialog                      import main_dlg
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
 # Grab some system info
@@ -142,7 +134,7 @@ local                                   = None
 ################################ Rapuma GUI ###################################
 ###############################################################################
 
-class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
+class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
@@ -159,30 +151,71 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
         
         self.sysConfig      = sysConfig
         self.userConfig     = uc.userConfig
+        self.tools          = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
 
         # Connect the menu actions
-        # Manage
-        amManageNew         = self.findChild(QtGui.QAction,"menuManageNew")
-        amManageNew.triggered.connect(self.mManageNew)
-        amManageOpen        = self.findChild(QtGui.QAction,"menuManageOpen")
-        amManageOpen.triggered.connect(self.mManageOpen)
-        amManageBackup      = self.findChild(QtGui.QAction,"menuManageBackup")
-        amManageBackup.triggered.connect(self.mManageBackup)
-        amManageArchive     = self.findChild(QtGui.QAction,"menuManageArchive")
-        amManageArchive.triggered.connect(self.mManageArchive)
-        amManageReap        = self.findChild(QtGui.QAction,"menuManageReap")
-        amManageReap.triggered.connect(self.mManageReap)
-        amManageRemove      = self.findChild(QtGui.QAction,"menuManageRemove")
-        amManageRemove.triggered.connect(self.mManageRemove)
-        amManageTemplate      = self.findChild(QtGui.QAction,"menuManageTemplate")
-        amManageTemplate.triggered.connect(self.mManageTemplate)
-        amManageQuit        = self.findChild(QtGui.QAction,"menuManageQuit")
-        amManageQuit.triggered.connect(self.mManageQuit)
-        # System
-        amSystemPreferences = self.findChild(QtGui.QAction,"menuSystemPreferences")
-        amSystemPreferences.triggered.connect(self.mSystemPreferences)
+        dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
+                    'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
+                    'menu_project_reap', 'menu_project_template', 'menu_project_update',
+                    'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add',
+                    'menu_group_remove', 'menu_group_select', 'menu_group_update', 'menu_component_add',
+                    'menu_component_remove', 'menu_component_select', 'menu_component_update',
+                    'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
+
+        for i in dialogs :
+            ctrl   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
+            if os.path.exists(ctrl) :
+               print i
+
+# When we process the menu items we want to:
+
+#   Import all the menu item modules (one for each item)
+#   Run findChild to create an action object
+#   Connect to the triggered item
+#   Auto-generate the menu item processes (Should we pass the same objects to them all even if they do not need them?)
+
+
+        from rapuma.dialog                      import menu_project_add_ctrl
+        from rapuma.dialog                      import menu_project_select_ctrl
+        from rapuma.dialog                      import menu_project_archive_ctrl
+        from rapuma.dialog                      import menu_project_backup_ctrl
+        from rapuma.dialog                      import menu_project_reap_ctrl
+        from rapuma.dialog                      import menu_project_remove_ctrl
+        from rapuma.dialog                      import menu_project_template_ctrl
+        from rapuma.dialog                      import menu_project_systempreferences_ctrl
+
+        self.menu_project_add_ctrl                  = menu_project_add_ctrl
+        self.menu_project_select_ctrl               = menu_project_select_ctrl
+        self.menu_project_archive_ctrl              = menu_project_archive_ctrl
+        self.menu_project_backup_ctrl               = menu_project_backup_ctrl
+        self.menu_project_reap_ctrl                 = menu_project_reap_ctrl
+        self.menu_project_remove_ctrl               = menu_project_remove_ctrl
+        self.menu_project_template_ctrl             = menu_project_template_ctrl
+        self.menu_project_systempreferences_ctrl    = menu_project_systempreferences_ctrl
+
+        # Project
+        amProjectAdd         = self.findChild(QtGui.QAction,"menuProjectAdd")
+        amProjectAdd.triggered.connect(self.mProjectAdd)
+        amProjectSelect        = self.findChild(QtGui.QAction,"menuProjectSelect")
+        amProjectSelect.triggered.connect(self.mProjectSelect)
+        amProjectBackup      = self.findChild(QtGui.QAction,"menuProjectBackup")
+        amProjectBackup.triggered.connect(self.mProjectBackup)
+        amProjectArchive     = self.findChild(QtGui.QAction,"menuProjectArchive")
+        amProjectArchive.triggered.connect(self.mProjectArchive)
+        amProjectReap        = self.findChild(QtGui.QAction,"menuProjectReap")
+        amProjectReap.triggered.connect(self.mProjectReap)
+        amProjectRemove      = self.findChild(QtGui.QAction,"menuProjectRemove")
+        amProjectRemove.triggered.connect(self.mProjectRemove)
+        amProjectTemplate      = self.findChild(QtGui.QAction,"menuProjectTemplate")
+        amProjectTemplate.triggered.connect(self.mProjectTemplate)
+        amProjectPreferences = self.findChild(QtGui.QAction,"menuProjectSystemPreferences")
+        amProjectPreferences.triggered.connect(self.mProjectSystemPreferences)
+        amProjectQuit        = self.findChild(QtGui.QAction,"menuProjectQuit")
+        amProjectQuit.triggered.connect(self.mProjectQuit)
+        # Group
+        # Component
         # Help
         amHelpHelp          = self.findChild(QtGui.QAction,"menuHelpHelp")
         amHelpHelp.triggered.connect(self.mHelpHelp)
@@ -207,78 +240,77 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main.Ui_MainWindow) :
 ################################ Menu Items ###################################
 ###############################################################################
 
-# Manage ######################################################################
+# Project ######################################################################
 
-    def mManageNew (self) :
-        dlg = menu_manage_new_ctrl.MenuManageNewCtrl(self.sysConfig, self.userConfig)
+    def mProjectAdd (self) :
+        dlg = self.menu_project_add_ctrl.MenuProjectAddCtrl(self.sysConfig, self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageOpen (self) :
-        dlg = menu_manage_open_ctrl.MenuManageOpenCtrl()
+    def mProjectSelect (self) :
+        dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl()
+        dlg.exec_()
+        if dlg.returnResults :
+            self.labelPid.setText(dlg.returnResults)
+            self.userConfig['System']['current'] = dlg.returnResults
+            self.tools.writeConfFile(self.userConfig)
+            return True
+
+    def mProjectBackup (self) :
+        dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageBackup (self) :
-        dlg = menu_manage_backup_ctrl.MenuManageBackupCtrl()
+    def mProjectArchive (self) :
+        dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageArchive (self) :
-        dlg = menu_manage_archive_ctrl.MenuManageArchiveCtrl()
+    def mProjectReap (self) :
+        dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageReap (self) :
-        dlg = menu_manage_reap_ctrl.MenuManageReapCtrl()
+    def mProjectRemove (self) :
+        dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageRemove (self) :
-        dlg = menu_manage_remove_ctrl.MenuManageRemoveCtrl()
+    def mProjectTemplate (self) :
+        dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageTemplate (self) :
-        dlg = menu_manage_template_ctrl.MenuManageTemplateCtrl()
+    def mProjectSystemPreferences (self) :
+        dlg = self.menu_project_systempreferences_ctrl.MenuProjectSystemPreferencesCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mManageQuit (self) :
+    def mProjectQuit (self) :
         '''Quit the whole program.'''
 
         sys.exit()
-
-# System ######################################################################
-
-    def mSystemPreferences (self) :
-        dlg = menu_system_preferences_ctrl.MenuSystemPreferencesCtrl()
-        if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
 
 # Help ########################################################################
 

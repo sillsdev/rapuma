@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuManageRemove</class>
- <widget class="QWidget" name="MenuManageRemove">
+ <class>MenuProjectRemove</class>
+ <widget class="QWidget" name="MenuProjectRemove">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -75,7 +75,7 @@
   <connection>
    <sender>pushButtonCancel</sender>
    <signal>clicked(bool)</signal>
-   <receiver>MenuManageRemove</receiver>
+   <receiver>MenuProjectRemove</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -91,7 +91,7 @@
   <connection>
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
-   <receiver>MenuManageRemove</receiver>
+   <receiver>MenuProjectRemove</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -107,7 +107,7 @@
   <connection>
    <sender>checkBoxBackup</sender>
    <signal>toggled(bool)</signal>
-   <receiver>MenuManageRemove</receiver>
+   <receiver>MenuProjectRemove</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">

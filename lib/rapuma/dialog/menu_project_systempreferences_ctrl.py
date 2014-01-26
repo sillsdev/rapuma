@@ -27,14 +27,14 @@ import os, sys, StringIO
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_system_preferences_dlg
+from rapuma.dialog                      import menu_project_systempreferences_dlg
 
-class MenuSystemPreferencesCtrl (QDialog, QPropertyAnimation, menu_system_preferences_dlg.Ui_MenuSystemPreferences) :
+class MenuProjectSystemPreferencesCtrl (QDialog, QPropertyAnimation, menu_project_systempreferences_dlg.Ui_MenuProjectSystemPreferences) :
 
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuSystemPreferencesCtrl, self).__init__(parent)
+        super(MenuProjectSystemPreferencesCtrl, self).__init__(parent)
 
         #self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -53,7 +53,7 @@ class MenuSystemPreferencesCtrl (QDialog, QPropertyAnimation, menu_system_prefer
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuSystemPreferencesCtrl()
+    window = MenuProjectSystemPreferencesCtrl()
     window.main()
     sys.exit(app.exec_())
 

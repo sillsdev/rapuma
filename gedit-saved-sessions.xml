@@ -119,15 +119,17 @@
 <session name="Rapuma-GUI">
   <file path="file:///home/dennis/Projects/rapuma/make_ui"/>
   <file path="file:///home/dennis/Projects/rapuma/setup.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_new_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_open_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_archive_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_backup_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_reap_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_manage_remove_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_system_preferences_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_archive_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_reap_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_systempreferences_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_template_ctrl.py"/>
+  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
 </session>
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>
