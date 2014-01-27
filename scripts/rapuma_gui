@@ -86,7 +86,7 @@ os.environ['RAPUMA_PROJ'] = projHome
 ###########################################################################
 
 # Load standard Python modules
-import codecs
+import codecs, importlib
 from configobj                          import ConfigObj
 
 # Load the Rapuma lib classes
@@ -164,36 +164,17 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                     'menu_component_remove', 'menu_component_select', 'menu_component_update',
                     'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
 
+        # Import all the menu item modules (one for each item)
         for i in dialogs :
             ctrl   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
             if os.path.exists(ctrl) :
-               print i
+                mod = importlib.import_module('rapuma.dialog.' + i + '_ctrl')
+                setattr(self, i + '_ctrl', mod)
 
-# When we process the menu items we want to:
+# FIXME: we need to add the following to the above for loop
 
-#   Import all the menu item modules (one for each item)
 #   Run findChild to create an action object
 #   Connect to the triggered item
-#   Auto-generate the menu item processes (Should we pass the same objects to them all even if they do not need them?)
-
-
-        from rapuma.dialog                      import menu_project_add_ctrl
-        from rapuma.dialog                      import menu_project_select_ctrl
-        from rapuma.dialog                      import menu_project_archive_ctrl
-        from rapuma.dialog                      import menu_project_backup_ctrl
-        from rapuma.dialog                      import menu_project_reap_ctrl
-        from rapuma.dialog                      import menu_project_remove_ctrl
-        from rapuma.dialog                      import menu_project_template_ctrl
-        from rapuma.dialog                      import menu_project_systempreferences_ctrl
-
-        self.menu_project_add_ctrl                  = menu_project_add_ctrl
-        self.menu_project_select_ctrl               = menu_project_select_ctrl
-        self.menu_project_archive_ctrl              = menu_project_archive_ctrl
-        self.menu_project_backup_ctrl               = menu_project_backup_ctrl
-        self.menu_project_reap_ctrl                 = menu_project_reap_ctrl
-        self.menu_project_remove_ctrl               = menu_project_remove_ctrl
-        self.menu_project_template_ctrl             = menu_project_template_ctrl
-        self.menu_project_systempreferences_ctrl    = menu_project_systempreferences_ctrl
 
         # Project
         amProjectAdd         = self.findChild(QtGui.QAction,"menuProjectAdd")
@@ -221,6 +202,11 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         amHelpHelp.triggered.connect(self.mHelpHelp)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
+
+
+# FIXME: Can we auto-generate the menu item processes (Should we pass the same objects to them all even if they do not need them?)
+
+
         
         # Set the project ID (PID)
         self.pid            = self.userConfig['System']['current']
