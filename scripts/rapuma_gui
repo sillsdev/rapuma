@@ -167,47 +167,35 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         # Import all the menu item modules (one for each item)
         for i in dialogs :
             ctrl   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
+            # Build some names we may need in our process
+            mName = ''; fName = ''; oName = ''
+            for c in i.split('_') :
+                if c == 'menu' :
+                    mName = c
+                    fName = c[:1]
+                    oName = 'a' + c[:1]
+                else :
+                    mName += c.capitalize() 
+                    fName += c.capitalize()
+                    oName += c.capitalize()
+            # Filter by processing only items that have control files
             if os.path.exists(ctrl) :
-                mod = importlib.import_module('rapuma.dialog.' + i + '_ctrl')
+                ctrl = 'rapuma.dialog.' + i + '_ctrl'
+                # Import dialog control modules
+                mod = importlib.import_module(ctrl)
                 setattr(self, i + '_ctrl', mod)
+                # Connect modules to functions
+                setattr(self, oName, self.findChild(QtGui.QAction, mName))
+                getattr(self, mName).triggered.connect(getattr(self, fName))
+# FIXME: This doesn't work right now
+#            else :
+#                setattr(self, oName, self.findChild(QtGui.QAction, mName))
+#                getattr(self, mName).triggered.connect(self.notImplemented(mName))
 
-# FIXME: we need to add the following to the above for loop
-
-#   Run findChild to create an action object
-#   Connect to the triggered item
-
-        # Project
-        amProjectAdd         = self.findChild(QtGui.QAction,"menuProjectAdd")
-        amProjectAdd.triggered.connect(self.mProjectAdd)
-        amProjectSelect        = self.findChild(QtGui.QAction,"menuProjectSelect")
-        amProjectSelect.triggered.connect(self.mProjectSelect)
-        amProjectBackup      = self.findChild(QtGui.QAction,"menuProjectBackup")
-        amProjectBackup.triggered.connect(self.mProjectBackup)
-        amProjectArchive     = self.findChild(QtGui.QAction,"menuProjectArchive")
-        amProjectArchive.triggered.connect(self.mProjectArchive)
-        amProjectReap        = self.findChild(QtGui.QAction,"menuProjectReap")
-        amProjectReap.triggered.connect(self.mProjectReap)
-        amProjectRemove      = self.findChild(QtGui.QAction,"menuProjectRemove")
-        amProjectRemove.triggered.connect(self.mProjectRemove)
-        amProjectTemplate      = self.findChild(QtGui.QAction,"menuProjectTemplate")
-        amProjectTemplate.triggered.connect(self.mProjectTemplate)
-        amProjectPreferences = self.findChild(QtGui.QAction,"menuProjectSystemPreferences")
-        amProjectPreferences.triggered.connect(self.mProjectSystemPreferences)
-        amProjectQuit        = self.findChild(QtGui.QAction,"menuProjectQuit")
-        amProjectQuit.triggered.connect(self.mProjectQuit)
-        # Group
-        # Component
-        # Help
-        amHelpHelp          = self.findChild(QtGui.QAction,"menuHelpHelp")
-        amHelpHelp.triggered.connect(self.mHelpHelp)
+        # Override control actions in the list with other types of actions
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
 
-
-# FIXME: Can we auto-generate the menu item processes (Should we pass the same objects to them all even if they do not need them?)
-
-
-        
         # Set the project ID (PID)
         self.pid            = self.userConfig['System']['current']
         self.labelPid.setText(self.pid)
@@ -223,10 +211,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
 
 ###############################################################################
-################################ Menu Items ###################################
+############################ Menu Item Functions ##############################
 ###############################################################################
 
-# Project ######################################################################
+# Project #####################################################################
 
     def mProjectAdd (self) :
         dlg = self.menu_project_add_ctrl.MenuProjectAddCtrl(self.sysConfig, self.userConfig)
@@ -285,8 +273,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         else :
             return False
 
-    def mProjectSystemPreferences (self) :
-        dlg = self.menu_project_systempreferences_ctrl.MenuProjectSystemPreferencesCtrl()
+    def mProjectSystempreferences (self) :
+        dlg = self.menu_project_systempreferences_ctrl.MenuProjectSystempreferencesCtrl()
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
@@ -300,12 +288,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
 # Help ########################################################################
 
-    def mHelpHelp (self) :
-
-        QMessageBox.information(self, "Rapuma Help",
-                """<p>The Rapuma Help viewer has not been implemented yet. Sorry about that.""")
-
-
     def mHelpAbout (self) :
 
         QMessageBox.about(self, "About Rapuma",
@@ -313,6 +295,17 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 """<p>Version: """ + systemVersion + 
                 """<p>Copyright &copy; """ + systemCopyright +
                 """<p>""" + systemAbout )
+
+
+# Not implemented message
+
+    def notImplemented (self, item) :
+
+        QMessageBox.information(self, "Rapuma Help",
+                """<p>The """ + item + """ action has not been implemented yet. Sorry about that.""")
+
+
+
 
 
 ###############################################################################

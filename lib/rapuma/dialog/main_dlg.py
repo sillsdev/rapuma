@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Sun Jan 26 20:24:19 2014
+# Created: Tue Jan 28 11:04:39 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -88,8 +88,8 @@ class Ui_MainWindow(object):
         self.menuProjectQuit.setObjectName("menuProjectQuit")
         self.menuHelpAbout = QtGui.QAction(MainWindow)
         self.menuHelpAbout.setObjectName("menuHelpAbout")
-        self.menuProjectSystemPreferences = QtGui.QAction(MainWindow)
-        self.menuProjectSystemPreferences.setObjectName("menuProjectSystemPreferences")
+        self.menuProjectSystempreferences = QtGui.QAction(MainWindow)
+        self.menuProjectSystempreferences.setObjectName("menuProjectSystempreferences")
         self.menuHelpHelp = QtGui.QAction(MainWindow)
         self.menuHelpHelp.setObjectName("menuHelpHelp")
         self.menuProjectBackup = QtGui.QAction(MainWindow)
@@ -141,7 +141,7 @@ class Ui_MainWindow(object):
         self.menuProject.addAction(self.menuProjectTemplate)
         self.menuProject.addAction(self.menuProjectUpdate)
         self.menuProject.addSeparator()
-        self.menuProject.addAction(self.menuProjectSystemPreferences)
+        self.menuProject.addAction(self.menuProjectSystempreferences)
         self.menuProject.addSeparator()
         self.menuProject.addAction(self.menuProjectQuit)
         self.menuHelp.addAction(self.menuHelpHelp)
@@ -204,8 +204,8 @@ class Ui_MainWindow(object):
         self.menuProjectQuit.setToolTip(QtGui.QApplication.translate("MainWindow", "Quit Rapuma", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpAbout.setToolTip(QtGui.QApplication.translate("MainWindow", "Learn about what Rapuma is", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuProjectSystemPreferences.setText(QtGui.QApplication.translate("MainWindow", "System Preferences", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuProjectSystemPreferences.setToolTip(QtGui.QApplication.translate("MainWindow", "Change Rapuma system preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuProjectSystempreferences.setText(QtGui.QApplication.translate("MainWindow", "System Preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuProjectSystempreferences.setToolTip(QtGui.QApplication.translate("MainWindow", "Change Rapuma system preferences", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpHelp.setText(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelpHelp.setToolTip(QtGui.QApplication.translate("MainWindow", "Find information about how to use Rapuma", None, QtGui.QApplication.UnicodeUTF8))
         self.menuProjectBackup.setText(QtGui.QApplication.translate("MainWindow", "Backup", None, QtGui.QApplication.UnicodeUTF8))

@@ -221,7 +221,7 @@
     <addaction name="menuProjectTemplate"/>
     <addaction name="menuProjectUpdate"/>
     <addaction name="separator"/>
-    <addaction name="menuProjectSystemPreferences"/>
+    <addaction name="menuProjectSystempreferences"/>
     <addaction name="separator"/>
     <addaction name="menuProjectQuit"/>
    </widget>
@@ -295,7 +295,7 @@
     <string>Learn about what Rapuma is</string>
    </property>
   </action>
-  <action name="menuProjectSystemPreferences">
+  <action name="menuProjectSystempreferences">
    <property name="text">
     <string>System Preferences</string>
    </property>

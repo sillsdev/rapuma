@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MenuProjectSystemPreferences</class>
- <widget class="QWidget" name="MenuProjectSystemPreferences">
+ <class>MenuProjectSystempreferences</class>
+ <widget class="QWidget" name="MenuProjectSystempreferences">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -65,7 +65,7 @@
   <connection>
    <sender>pushButtonCancel</sender>
    <signal>clicked(bool)</signal>
-   <receiver>MenuProjectSystemPreferences</receiver>
+   <receiver>MenuProjectSystempreferences</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -81,7 +81,7 @@
   <connection>
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
-   <receiver>MenuProjectSystemPreferences</receiver>
+   <receiver>MenuProjectSystempreferences</receiver>
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
