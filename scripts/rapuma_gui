@@ -187,12 +187,20 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 # Connect modules to functions
                 setattr(self, oName, self.findChild(QtGui.QAction, mName))
                 getattr(self, mName).triggered.connect(getattr(self, fName))
+
+
 # FIXME: This doesn't work right now
 #            else :
+#                import pdb; pdb.set_trace()
+
+#                print mName, fName, oName
+
 #                setattr(self, oName, self.findChild(QtGui.QAction, mName))
-#                getattr(self, mName).triggered.connect(self.notImplemented(mName))
+#                getattr(self, mName).triggered.connect(self.notImplemented(i))
 
         # Override control actions in the list with other types of actions
+        amProjectQuit       = self.findChild(QtGui.QAction,"menuProjectQuit")
+        amProjectQuit.triggered.connect(self.mProjectQuit)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
 
@@ -302,7 +310,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def notImplemented (self, item) :
 
         QMessageBox.information(self, "Rapuma Help",
-                """<p>The """ + item + """ action has not been implemented yet. Sorry about that.""")
+                """<p>The [""" + item + """] action has not been implemented yet. Sorry about that.""")
 
 
 
