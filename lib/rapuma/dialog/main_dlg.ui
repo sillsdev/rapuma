@@ -14,185 +14,237 @@
    <string>Rapuma</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTabWidget" name="mainTabWidget">
+   <widget class="QStackedWidget" name="stackedWidgetWorkArea">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
+      <y>10</y>
       <width>781</width>
-      <height>611</height>
+      <height>651</height>
      </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
-    <widget class="QWidget" name="mainProject">
-     <attribute name="title">
-      <string>Project</string>
-     </attribute>
-     <attribute name="toolTip">
-      <string>Project-wide information and settings</string>
-     </attribute>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLineEdit" name="lineEditProjName">
-        <property name="toolTip">
-         <string>Project name, could be book title</string>
-        </property>
-        <property name="placeholderText">
-         <string>Project Name</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <widget class="QWidget" name="pageBlank"/>
+    <widget class="QWidget" name="pageProject">
+     <widget class="QLineEdit" name="lineEditProjectName">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>110</y>
+        <width>281</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Project name, could be book title</string>
+      </property>
+      <property name="placeholderText">
+       <string>Project Name</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelProjectPid">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>10</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Project ID</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelProjectProject">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>55</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Project:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonProjectBind">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Bind</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="mainGroup">
-     <attribute name="title">
-      <string>Group</string>
-     </attribute>
-     <attribute name="toolTip">
-      <string>Group-wide settings and information</string>
-     </attribute>
+    <widget class="QWidget" name="pageGroup">
+     <widget class="QLabel" name="labelGroup">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>50</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Group:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelGroupGid">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>10</y>
+        <width>80</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Group ID</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonGroupFinal">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create view of the final output of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Final</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonGroupDraft">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create a draft of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Draft</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonGroupProof">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create a proof of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Proof</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="mainComponent">
-     <attribute name="title">
-      <string>Component</string>
-     </attribute>
-     <attribute name="toolTip">
-      <string>Component settings, information and source and working text</string>
-     </attribute>
+    <widget class="QWidget" name="pageComponent">
+     <widget class="QLabel" name="labelComponentCid">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>10</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Comp ID</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelComponentComponent">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>85</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Component:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonComponentFinal">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create view of the final output of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Final</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonComponentDraft">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create a draft of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Draft</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonComponentProof">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create a proof of the selected component(s)</string>
+      </property>
+      <property name="text">
+       <string>Proof</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="mainLog">
-     <attribute name="title">
-      <string>Logs</string>
-     </attribute>
-    </widget>
-   </widget>
-   <widget class="QLabel" name="labelProject">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>60</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Project:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelPid">
-    <property name="geometry">
-     <rect>
-      <x>68</x>
-      <y>10</y>
-      <width>80</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Project ID</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelGroup">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>10</y>
-      <width>50</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Group:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelGid">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>10</y>
-      <width>80</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Group ID</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelComponent">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>10</y>
-      <width>85</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Component:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelCid">
-    <property name="geometry">
-     <rect>
-      <x>368</x>
-      <y>10</y>
-      <width>70</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Comp ID</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonDraft">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>5</y>
-      <width>80</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Create a draft of the selected component(s)</string>
-    </property>
-    <property name="text">
-     <string>Draft</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonProof">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>5</y>
-      <width>80</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Create a proof of the selected component(s)</string>
-    </property>
-    <property name="text">
-     <string>Proof</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonFinal">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>5</y>
-      <width>80</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Create view of the final output of the selected component(s)</string>
-    </property>
-    <property name="text">
-     <string>Final</string>
-    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -209,6 +261,7 @@
      <string>Project</string>
     </property>
     <addaction name="menuProjectAdd"/>
+    <addaction name="menuProjectEdit"/>
     <addaction name="menuProjectRemove"/>
     <addaction name="menuProjectRestore"/>
     <addaction name="menuProjectSelect"/>
@@ -239,18 +292,28 @@
      <string>Group</string>
     </property>
     <addaction name="menuGroupAdd"/>
+    <addaction name="menuGroupEdit"/>
     <addaction name="menuGroupRemove"/>
     <addaction name="menuGroupSelect"/>
     <addaction name="menuGroupUpdate"/>
+    <addaction name="separator"/>
+    <addaction name="actionDraft"/>
+    <addaction name="actionFinal"/>
+    <addaction name="actionProof"/>
    </widget>
    <widget class="QMenu" name="menuComponent">
     <property name="title">
      <string>Component</string>
     </property>
     <addaction name="menuComponentAdd"/>
+    <addaction name="menuComponentEdit"/>
     <addaction name="menuComponentRemove"/>
     <addaction name="menuComponentSelect"/>
     <addaction name="menuComponentUpdate"/>
+    <addaction name="separator"/>
+    <addaction name="actionDraft_2"/>
+    <addaction name="actionFinal_2"/>
+    <addaction name="actionProof_2"/>
    </widget>
    <addaction name="menuProject"/>
    <addaction name="menuGroup"/>
@@ -452,58 +515,63 @@
     <string>Update project elements</string>
    </property>
   </action>
+  <action name="actionDraft">
+   <property name="text">
+    <string>Draft</string>
+   </property>
+  </action>
+  <action name="actionFinal">
+   <property name="text">
+    <string>Final</string>
+   </property>
+  </action>
+  <action name="actionProof">
+   <property name="text">
+    <string>Proof</string>
+   </property>
+  </action>
+  <action name="actionDraft_2">
+   <property name="text">
+    <string>Draft</string>
+   </property>
+  </action>
+  <action name="actionFinal_2">
+   <property name="text">
+    <string>Final</string>
+   </property>
+  </action>
+  <action name="actionProof_2">
+   <property name="text">
+    <string>Proof</string>
+   </property>
+  </action>
+  <action name="menuProjectEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit settings or render the current project</string>
+   </property>
+  </action>
+  <action name="menuGroupEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit settings or render the current group</string>
+   </property>
+  </action>
+  <action name="menuComponentEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit settings or render the current component</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>pushButtonDraft</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>setupUi()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>504</x>
-     <y>48</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>503</x>
-     <y>57</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButtonProof</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>setupUi()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>596</x>
-     <y>45</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>596</x>
-     <y>57</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButtonFinal</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>setupUi()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>686</x>
-     <y>44</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>689</x>
-     <y>57</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>setupUi()</slot>
  </slots>

@@ -110,7 +110,7 @@ from rapuma.core.user_config            import UserConfig
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
-from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox
+from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox, QStackedWidget
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import main_dlg
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
@@ -156,12 +156,12 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.setupUi(self)
 
         # Connect the menu actions
-        dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
-                    'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
-                    'menu_project_reap', 'menu_project_template', 'menu_project_update',
-                    'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add',
+        dialogs = ['menu_project_add', 'menu_project_edit', 'menu_project_remove', 'menu_project_restore',
+                    'menu_project_select', 'menu_project_archive', 'menu_project_cloud', 'menu_project_backup',
+                    'menu_project_bind', 'menu_project_reap', 'menu_project_template', 'menu_project_update',
+                    'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add', 'menu_group_edit',
                     'menu_group_remove', 'menu_group_select', 'menu_group_update', 'menu_component_add',
-                    'menu_component_remove', 'menu_component_select', 'menu_component_update',
+                    'menu_component_edit', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
                     'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
 
         # Import all the menu item modules (one for each item)
@@ -196,17 +196,41 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 #                print mName, fName, oName
 
 #                setattr(self, oName, self.findChild(QtGui.QAction, mName))
+                
+#                print dir(getattr(self, oName))
+                
 #                getattr(self, mName).triggered.connect(self.notImplemented(i))
 
+
+
+
         # Override control actions in the list with other types of actions
+        amProjectEdit       = self.findChild(QtGui.QAction,"menuProjectEdit")
+        amProjectEdit.triggered.connect(self.mProjectEdit)
+        amGroupEdit         = self.findChild(QtGui.QAction,"menuGroupEdit")
+        amGroupEdit.triggered.connect(self.mGroupEdit)
+        amComponentEdit     = self.findChild(QtGui.QAction,"menuComponentEdit")
+        amComponentEdit.triggered.connect(self.mComponentEdit)
         amProjectQuit       = self.findChild(QtGui.QAction,"menuProjectQuit")
         amProjectQuit.triggered.connect(self.mProjectQuit)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
 
-        # Set the project ID (PID)
-        self.pid            = self.userConfig['System']['current']
-        self.labelPid.setText(self.pid)
+        # Set the current IDs for PID, GID, and CID
+        self.pid            = self.userConfig['System']['currentPid']
+        self.gid            = self.userConfig['System']['currentGid']
+        self.cid            = self.userConfig['System']['currentCid']
+        if self.cid :
+            self.labelComponentCid.setText(self.cid)
+            self.setCurrentIndexWorkArea(3)
+        elif self.gid :
+            self.labelGroupGid.setText(self.gid)
+            self.setCurrentIndexWorkArea(2)
+        elif self.pid :
+            self.labelProjectPid.setText(self.pid)
+            self.setCurrentIndexWorkArea(1)
+        else :
+            self.setCurrentIndexWorkArea(0)
 
         # FIXME: This prints a simple message in the status bar, can we do more with it?
         self.statusBar().showMessage("Hi There!")
@@ -232,12 +256,25 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         else :
             return False
 
+    def mProjectEdit (self) :
+        if self.pid :
+            self.labelProjectPid.setText(self.pid)
+            self.setCurrentIndexWorkArea(1)
+        else :
+            if self.mProjectSelect() :
+                self.setCurrentIndexWorkArea(1)
+
     def mProjectSelect (self) :
         dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl()
         dlg.exec_()
         if dlg.returnResults :
-            self.labelPid.setText(dlg.returnResults)
-            self.userConfig['System']['current'] = dlg.returnResults
+            self.labelProjectPid.setText(dlg.returnResults)
+            self.userConfig['System']['currentPid'] = dlg.returnResults
+            self.pid = dlg.returnResults
+            self.userConfig['System']['currentGid'] = ''
+            self.gid = ''
+            self.userConfig['System']['currentCid'] = ''
+            self.cid = ''
             self.tools.writeConfFile(self.userConfig)
             return True
 
@@ -294,6 +331,44 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
         sys.exit()
 
+# Group #######################################################################
+
+    def mGroupEdit (self) :
+        if self.gid :
+            self.labelGroupGid.setText(self.gid)
+            self.setCurrentIndexWorkArea(2)
+        else :
+            if self.mGroupSelect() :
+                self.setCurrentIndexWorkArea(2)
+
+    def mGroupSelect (self) :
+        dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl()
+        dlg.exec_()
+        if dlg.returnResults :
+            self.labelGroupGid.setText(dlg.returnResults)
+            self.userConfig['System']['currentGid'] = dlg.returnResults
+            self.tools.writeConfFile(self.userConfig)
+            return True
+
+# Component ###################################################################
+
+    def mComponentEdit (self) :
+        if self.cid :
+            self.labelComponentCid.setText(self.cid)
+            self.setCurrentIndexWorkArea(3)
+        else :
+            if self.mComponentSelect() :
+                self.setCurrentIndexWorkArea(3)
+
+    def mComponentSelect (self) :
+        dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl()
+        dlg.exec_()
+        if dlg.returnResults :
+            self.labelComponentCid.setText(dlg.returnResults)
+            self.userConfig['System']['currentCid'] = dlg.returnResults
+            self.tools.writeConfFile(self.userConfig)
+            return True
+
 # Help ########################################################################
 
     def mHelpAbout (self) :
@@ -304,13 +379,19 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 """<p>Copyright &copy; """ + systemCopyright +
                 """<p>""" + systemAbout )
 
-
-# Not implemented message
+# Support functions ###########################################################
 
     def notImplemented (self, item) :
 
         QMessageBox.information(self, "Rapuma Help",
                 """<p>The [""" + item + """] action has not been implemented yet. Sorry about that.""")
+
+    def getCurrentIndexWorkArea (self) :
+        return self.stackedWidgetWorkArea.currentIndex()
+
+    def setCurrentIndexWorkArea (self, index) :
+        if index != self.getCurrentIndexWorkArea() :
+            self.stackedWidgetWorkArea.setCurrentIndex(index)
 
 
 

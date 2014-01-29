@@ -122,13 +122,8 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_archive_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_reap_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_systempreferences_ctrl.py"/>
-  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_template_ctrl.py"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
 </session>
 <session name="ShrinkyPic">

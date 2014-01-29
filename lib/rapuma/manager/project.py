@@ -80,8 +80,9 @@ class Project (object) :
             self.projectConfig = newConf
             self.projectConfig.filename = self.local.projectConfFile
 
-        # Go ahead and set this as the current project
+        # Go ahead and set this as the current project and group
         self.setProjCurrent(self.projectIDCode)
+        self.setGroupCurrent(self.gid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -241,14 +242,26 @@ class Project (object) :
 ###############################################################################
 
     def setProjCurrent (self, pid) :
-        '''Compare pid with the current recored pid e rapuma.conf. If it is
+        '''Compare pid with the current recored pid in rapuma.conf. If it is
         different change to the new pid. If not, leave it alone.'''
 
         currentPid = ''
-        if self.userConfig['System'].has_key('current') :
-            currentPid = self.userConfig['System']['current']
+        if self.userConfig['System'].has_key('currentPid') :
+            currentPid = self.userConfig['System']['currentPid']
         if pid != currentPid :
-            self.userConfig['System']['current'] = pid
+            self.userConfig['System']['currentPid'] = pid
+            self.tools.writeConfFile(self.userConfig)
+
+
+    def setGroupCurrent (self, gid) :
+        '''Compare gid with the current recored gid in rapuma.conf. If it is
+        different change to the new gid. If not, leave it alone.'''
+
+        currentGid = ''
+        if self.userConfig['System'].has_key('currentGid') :
+            currentGid = self.userConfig['System']['currentGid']
+        if gid != currentGid :
+            self.userConfig['System']['currentGid'] = gid
             self.tools.writeConfFile(self.userConfig)
 
 
