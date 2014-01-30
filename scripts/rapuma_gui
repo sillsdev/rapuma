@@ -149,23 +149,24 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
         
-        self.sysConfig      = sysConfig
-        self.userConfig     = uc.userConfig
-        self.tools          = Tools()
+        self.sysConfig          = sysConfig
+        self.userConfig         = uc.userConfig
+        self.tools              = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
 
         # Connect the menu actions
-        dialogs = ['menu_project_add', 'menu_project_edit', 'menu_project_remove', 'menu_project_restore',
-                    'menu_project_select', 'menu_project_archive', 'menu_project_cloud', 'menu_project_backup',
-                    'menu_project_bind', 'menu_project_reap', 'menu_project_template', 'menu_project_update',
-                    'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add', 'menu_group_edit',
-                    'menu_group_remove', 'menu_group_select', 'menu_group_update', 'menu_component_add',
-                    'menu_component_edit', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
-                    'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
+        ctrlDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
+                    'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
+                    'menu_project_reap', 'menu_project_template', 'menu_project_update', 'menu_project_systempreferences',
+                    'menu_group_add', 'menu_group_remove', 'menu_group_select', 'menu_group_update',
+                    'menu_component_add', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
+                    'menu_help_help', 'menu_help_examples']
+
+        mainDlgs = ['menu_project_edit', 'menu_group_edit', 'menu_component_edit', 'menu_project_quit', 'menu_help_about']
 
         # Import all the menu item modules (one for each item)
-        for i in dialogs :
+        for i in ctrlDlgs :
             ctrl   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
             # Build some names we may need in our process
             mName = ''; fName = ''; oName = ''
@@ -187,19 +188,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 # Connect modules to functions
                 setattr(self, oName, self.findChild(QtGui.QAction, mName))
                 getattr(self, mName).triggered.connect(getattr(self, fName))
-
-
-# FIXME: This doesn't work right now
-#            else :
-#                import pdb; pdb.set_trace()
-
-#                print mName, fName, oName
-
-#                setattr(self, oName, self.findChild(QtGui.QAction, mName))
-                
-#                print dir(getattr(self, oName))
-                
-#                getattr(self, mName).triggered.connect(self.notImplemented(i))
+            else :
+                # Redirect to a not implemented message
+                setattr(self, oName, self.findChild(QtGui.QAction, mName))
+                getattr(self, mName).triggered.connect(self.notImplemented)
 
 
 
@@ -381,10 +373,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
 # Support functions ###########################################################
 
-    def notImplemented (self, item) :
+    def notImplemented (self) :
 
         QMessageBox.information(self, "Rapuma Help",
-                """<p>The [""" + item + """] action has not been implemented yet. Sorry about that.""")
+                """<p>This action has not been implemented yet. Sorry about that.""")
 
     def getCurrentIndexWorkArea (self) :
         return self.stackedWidgetWorkArea.currentIndex()

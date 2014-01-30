@@ -124,6 +124,8 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_group_select_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_component_select_ctrl.py"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
 </session>
 <session name="ShrinkyPic">

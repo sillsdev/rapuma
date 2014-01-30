@@ -32,14 +32,14 @@ versionSeries = sysConfig['Rapuma']['versionSeries']
 sysConfig['Rapuma']['systemVersion'] = str(versionSeries) + '.r' + str(len(repo))
 sysConfig.write()
 
-# Create a PySide compatable menu dialogs
+# Create a PySide compatable menu dialogs (should not include items that do not have external dialog)
 dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
             'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
             'menu_project_reap', 'menu_project_template', 'menu_project_update',
             'menu_project_systempreferences', 'menu_project_quit', 'menu_group_add',
             'menu_group_remove', 'menu_group_select', 'menu_group_update', 'menu_component_add',
             'menu_component_remove', 'menu_component_select', 'menu_component_update',
-            'menu_help_help', 'menu_help_examples', 'menu_help_about', 'main']
+            'menu_help_help', 'menu_help_examples', 'main']
 
 for i in dialogs :
     uiDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.ui')
