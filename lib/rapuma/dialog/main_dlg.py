@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Thu Jan 30 15:31:03 2014
+# Created: Fri Jan 31 22:00:36 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -160,7 +160,6 @@ class Ui_MainWindow(object):
         self.menuComponentEdit = QtGui.QAction(MainWindow)
         self.menuComponentEdit.setObjectName("menuComponentEdit")
         self.menuProject.addAction(self.menuProjectAdd)
-        self.menuProject.addAction(self.menuProjectEdit)
         self.menuProject.addAction(self.menuProjectRemove)
         self.menuProject.addAction(self.menuProjectRestore)
         self.menuProject.addAction(self.menuProjectSelect)
@@ -181,7 +180,6 @@ class Ui_MainWindow(object):
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.menuHelpAbout)
         self.menuGroup.addAction(self.menuGroupAdd)
-        self.menuGroup.addAction(self.menuGroupEdit)
         self.menuGroup.addAction(self.menuGroupRemove)
         self.menuGroup.addAction(self.menuGroupSelect)
         self.menuGroup.addAction(self.menuGroupUpdate)
@@ -190,7 +188,6 @@ class Ui_MainWindow(object):
         self.menuGroup.addAction(self.actionFinal)
         self.menuGroup.addAction(self.actionProof)
         self.menuComponent.addAction(self.menuComponentAdd)
-        self.menuComponent.addAction(self.menuComponentEdit)
         self.menuComponent.addAction(self.menuComponentRemove)
         self.menuComponent.addAction(self.menuComponentSelect)
         self.menuComponent.addAction(self.menuComponentUpdate)

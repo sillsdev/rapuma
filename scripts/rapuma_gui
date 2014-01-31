@@ -163,7 +163,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                     'menu_component_add', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
                     'menu_help_help', 'menu_help_examples']
 
-        mainDlgs = ['menu_project_edit', 'menu_group_edit', 'menu_component_edit', 'menu_project_quit', 'menu_help_about']
+        mainDlgs = ['menu_project_quit', 'menu_help_about']
 
         # Import all the menu item modules (one for each item)
         for i in ctrlDlgs :
@@ -193,16 +193,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 setattr(self, oName, self.findChild(QtGui.QAction, mName))
                 getattr(self, mName).triggered.connect(self.notImplemented)
 
-
-
-
         # Override control actions in the list with other types of actions
-        amProjectEdit       = self.findChild(QtGui.QAction,"menuProjectEdit")
-        amProjectEdit.triggered.connect(self.mProjectEdit)
-        amGroupEdit         = self.findChild(QtGui.QAction,"menuGroupEdit")
-        amGroupEdit.triggered.connect(self.mGroupEdit)
-        amComponentEdit     = self.findChild(QtGui.QAction,"menuComponentEdit")
-        amComponentEdit.triggered.connect(self.mComponentEdit)
         amProjectQuit       = self.findChild(QtGui.QAction,"menuProjectQuit")
         amProjectQuit.triggered.connect(self.mProjectQuit)
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
@@ -212,16 +203,22 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.pid            = self.userConfig['System']['currentPid']
         self.gid            = self.userConfig['System']['currentGid']
         self.cid            = self.userConfig['System']['currentCid']
-        if self.cid :
-            self.labelComponentCid.setText(self.cid)
-            self.setCurrentIndexWorkArea(3)
-        elif self.gid :
-            self.labelGroupGid.setText(self.gid)
-            self.setCurrentIndexWorkArea(2)
-        elif self.pid :
-            self.labelProjectPid.setText(self.pid)
-            self.setCurrentIndexWorkArea(1)
+        # Go to the last item that was selected or go to work area 0 if there is nothing selected
+        if self.pid :
+            if self.cid :
+                self.labelComponentCid.setText(self.cid)
+                self.setCurrentIndexWorkArea(3)
+            elif self.gid :
+                self.labelGroupGid.setText(self.gid)
+                self.setCurrentIndexWorkArea(2)
+            else :
+                self.labelProjectPid.setText(self.pid)
+                self.setCurrentIndexWorkArea(1)
         else :
+            # If not project is selected we get rid of any group and component selections
+            self.userConfig['System']['currentGid'] = ''
+            self.userConfig['System']['currentCid'] = ''
+            self.tools.writeConfFile(self.userConfig)
             self.setCurrentIndexWorkArea(0)
 
         # FIXME: This prints a simple message in the status bar, can we do more with it?
@@ -248,18 +245,11 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         else :
             return False
 
-    def mProjectEdit (self) :
-        if self.pid :
-            self.labelProjectPid.setText(self.pid)
-            self.setCurrentIndexWorkArea(1)
-        else :
-            if self.mProjectSelect() :
-                self.setCurrentIndexWorkArea(1)
-
     def mProjectSelect (self) :
         dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl()
         dlg.exec_()
         if dlg.returnResults :
+            self.setCurrentIndexWorkArea(1)
             self.labelProjectPid.setText(dlg.returnResults)
             self.userConfig['System']['currentPid'] = dlg.returnResults
             self.pid = dlg.returnResults
@@ -325,41 +315,41 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
 # Group #######################################################################
 
-    def mGroupEdit (self) :
-        if self.gid :
-            self.labelGroupGid.setText(self.gid)
-            self.setCurrentIndexWorkArea(2)
-        else :
-            if self.mGroupSelect() :
-                self.setCurrentIndexWorkArea(2)
-
     def mGroupSelect (self) :
-        dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl()
-        dlg.exec_()
-        if dlg.returnResults :
-            self.labelGroupGid.setText(dlg.returnResults)
-            self.userConfig['System']['currentGid'] = dlg.returnResults
-            self.tools.writeConfFile(self.userConfig)
-            return True
+        '''Select a group in the current project.'''
+        
+        if self.pid :
+            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl()
+            dlg.exec_()
+            if dlg.returnResults :
+                self.setCurrentIndexWorkArea(2)
+                self.labelGroupGid.setText(dlg.returnResults)
+                self.userConfig['System']['currentGid'] = dlg.returnResults
+                self.gid = dlg.returnResults
+                self.tools.writeConfFile(self.userConfig)
+                return True
+        else :
+            QMessageBox.warning(self, "Rapuma Warning",
+                    """<p>Cannot select a group without a project selected.""")
 
 # Component ###################################################################
 
-    def mComponentEdit (self) :
-        if self.cid :
-            self.labelComponentCid.setText(self.cid)
-            self.setCurrentIndexWorkArea(3)
-        else :
-            if self.mComponentSelect() :
-                self.setCurrentIndexWorkArea(3)
-
     def mComponentSelect (self) :
-        dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl()
-        dlg.exec_()
-        if dlg.returnResults :
-            self.labelComponentCid.setText(dlg.returnResults)
-            self.userConfig['System']['currentCid'] = dlg.returnResults
-            self.tools.writeConfFile(self.userConfig)
-            return True
+        '''Select a component from the current selected group.'''
+        
+        if self.gid :
+            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl()
+            dlg.exec_()
+            if dlg.returnResults :
+                self.setCurrentIndexWorkArea(3)
+                self.labelComponentCid.setText(dlg.returnResults)
+                self.userConfig['System']['currentCid'] = dlg.returnResults
+                self.cid = dlg.returnResults
+                self.tools.writeConfFile(self.userConfig)
+                return True
+        else :
+            QMessageBox.warning(self, "Rapuma Warning",
+                    """<p>Cannot select a component without a group selected.""")
 
 # Help ########################################################################
 

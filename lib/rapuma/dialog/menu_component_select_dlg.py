@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_component_select_dlg.ui'
 #
-# Created: Thu Jan 30 15:31:03 2014
+# Created: Fri Jan 31 22:00:36 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,8 @@ class Ui_MenuComponentSelect(object):
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuComponentSelect.close)
         QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuComponentSelect.setupUi)
         QtCore.QMetaObject.connectSlotsByName(MenuComponentSelect)
+        MenuComponentSelect.setTabOrder(self.lineEditCid, self.pushButtonOk)
+        MenuComponentSelect.setTabOrder(self.pushButtonOk, self.pushButtonCancel)
 
     def retranslateUi(self, MenuComponentSelect):
         MenuComponentSelect.setWindowTitle(QtGui.QApplication.translate("MenuComponentSelect", "Rapuma - Select Component", None, QtGui.QApplication.UnicodeUTF8))

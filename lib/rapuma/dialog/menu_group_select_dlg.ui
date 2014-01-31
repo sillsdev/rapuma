@@ -63,6 +63,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEditGid</tabstop>
+  <tabstop>pushButtonOk</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

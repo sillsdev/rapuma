@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="pageBlank"/>
     <widget class="QWidget" name="pageProject">
@@ -261,7 +261,6 @@
      <string>Project</string>
     </property>
     <addaction name="menuProjectAdd"/>
-    <addaction name="menuProjectEdit"/>
     <addaction name="menuProjectRemove"/>
     <addaction name="menuProjectRestore"/>
     <addaction name="menuProjectSelect"/>
@@ -292,7 +291,6 @@
      <string>Group</string>
     </property>
     <addaction name="menuGroupAdd"/>
-    <addaction name="menuGroupEdit"/>
     <addaction name="menuGroupRemove"/>
     <addaction name="menuGroupSelect"/>
     <addaction name="menuGroupUpdate"/>
@@ -306,7 +304,6 @@
      <string>Component</string>
     </property>
     <addaction name="menuComponentAdd"/>
-    <addaction name="menuComponentEdit"/>
     <addaction name="menuComponentRemove"/>
     <addaction name="menuComponentSelect"/>
     <addaction name="menuComponentUpdate"/>

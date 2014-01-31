@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_group_select_dlg.ui'
 #
-# Created: Thu Jan 30 15:31:03 2014
+# Created: Fri Jan 31 22:00:36 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,8 @@ class Ui_MenuGroupSelect(object):
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuGroupSelect.close)
         QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuGroupSelect.setupUi)
         QtCore.QMetaObject.connectSlotsByName(MenuGroupSelect)
+        MenuGroupSelect.setTabOrder(self.lineEditGid, self.pushButtonOk)
+        MenuGroupSelect.setTabOrder(self.pushButtonOk, self.pushButtonCancel)
 
     def retranslateUi(self, MenuGroupSelect):
         MenuGroupSelect.setWindowTitle(QtGui.QApplication.translate("MenuGroupSelect", "Rapuma - Select Group", None, QtGui.QApplication.UnicodeUTF8))

@@ -60,6 +60,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEditCid</tabstop>
+  <tabstop>pushButtonOk</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
