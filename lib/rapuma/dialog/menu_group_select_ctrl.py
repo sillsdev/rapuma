@@ -31,15 +31,19 @@ from rapuma.dialog                      import menu_group_select_dlg
 
 class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui_MenuGroupSelect) :
 
-    def __init__ (self, parent=None) :
+    def __init__ (self, projectConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuGroupSelectCtrl, self).__init__(parent)
 
-        #self.setWindowIcon(appicon)
         self.setupUi(self)
         self.connectionActions()
-        self.returnResults = None
+        self.projectConfig = projectConfig
+        self.selectedGroup = None
+
+        # Populate the list with projects
+        for g in self.projectConfig['Groups'].iteritems() :
+            self.listWidgetGroups.addItem(g[0])
 
 
     def main (self) :
@@ -57,10 +61,7 @@ class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.returnResults = self.lineEditGid.text().upper()
-
-        print self.returnResults
-#        return pid
+        self.selectedGroup = self.listWidgetGroups.currentItem().text()
         self.close()
 
 

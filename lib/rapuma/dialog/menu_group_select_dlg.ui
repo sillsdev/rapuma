@@ -7,41 +7,28 @@
     <x>0</x>
     <y>0</y>
     <width>279</width>
-    <height>106</height>
+    <height>188</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Rapuma - Select Group</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="2">
-    <widget class="QPushButton" name="pushButtonCancel">
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelGroupId">
      <property name="text">
-      <string>Cancel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="pushButtonOk">
-     <property name="toolTip">
-      <string>Remove a selected project</string>
-     </property>
-     <property name="text">
-      <string>OK</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QLineEdit" name="lineEditGid">
-     <property name="toolTip">
-      <string>ID of the group to be selected</string>
-     </property>
-     <property name="statusTip">
       <string>Group ID</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="3">
+    <widget class="QListWidget" name="listWidgetGroups">
+     <property name="toolTip">
+      <string>Select a group</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -54,17 +41,26 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="labelGroupId">
+   <item row="2" column="1">
+    <widget class="QPushButton" name="pushButtonOk">
+     <property name="toolTip">
+      <string>Remove a selected project</string>
+     </property>
      <property name="text">
-      <string>Group ID</string>
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pushButtonCancel">
+     <property name="text">
+      <string>Cancel</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>lineEditGid</tabstop>
   <tabstop>pushButtonOk</tabstop>
   <tabstop>pushButtonCancel</tabstop>
  </tabstops>

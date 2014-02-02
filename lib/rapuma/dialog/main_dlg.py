@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Fri Jan 31 22:00:36 2014
+# Created: Sun Feb  2 15:02:23 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.lineEditProjectName.setGeometry(QtCore.QRect(30, 110, 281, 27))
         self.lineEditProjectName.setObjectName("lineEditProjectName")
         self.labelProjectPid = QtGui.QLabel(self.pageProject)
-        self.labelProjectPid.setGeometry(QtCore.QRect(70, 10, 111, 17))
+        self.labelProjectPid.setGeometry(QtCore.QRect(70, 10, 181, 17))
         self.labelProjectPid.setObjectName("labelProjectPid")
         self.labelProjectProject = QtGui.QLabel(self.pageProject)
         self.labelProjectProject.setGeometry(QtCore.QRect(10, 10, 55, 17))

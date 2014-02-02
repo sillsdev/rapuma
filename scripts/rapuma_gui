@@ -98,7 +98,7 @@ from rapuma.core.user_config            import UserConfig
 #from rapuma.core.proj_binding           import ProjBinding
 #from rapuma.core.proj_compare           import ProjCompare
 #from rapuma.core.proj_process           import ProjProcess
-#from rapuma.project.proj_config         import Config
+from rapuma.project.proj_config         import Config
 #from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 #from rapuma.project.proj_commander      import ProjCommander
 #from rapuma.project.proj_font           import ProjFont
@@ -151,6 +151,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         
         self.sysConfig          = sysConfig
         self.userConfig         = uc.userConfig
+        self.projectConfig      = None
         self.tools              = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -246,13 +247,13 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             return False
 
     def mProjectSelect (self) :
-        dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl()
+        dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl(self.userConfig)
         dlg.exec_()
-        if dlg.returnResults :
+        if dlg.selectedProject :
             self.setCurrentIndexWorkArea(1)
-            self.labelProjectPid.setText(dlg.returnResults)
-            self.userConfig['System']['currentPid'] = dlg.returnResults
-            self.pid = dlg.returnResults
+            self.labelProjectPid.setText(dlg.selectedProject)
+            self.userConfig['System']['currentPid'] = dlg.selectedProject
+            self.pid = dlg.selectedProject
             self.userConfig['System']['currentGid'] = ''
             self.gid = ''
             self.userConfig['System']['currentCid'] = ''
@@ -317,15 +318,18 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
     def mGroupSelect (self) :
         '''Select a group in the current project.'''
-        
+
         if self.pid :
-            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl()
+            self.proj_config = Config(self.pid)
+            self.proj_config.getProjectConfig()
+            self.projectConfig = self.proj_config.projectConfig
+            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.projectConfig)
             dlg.exec_()
-            if dlg.returnResults :
+            if dlg.selectedGroup :
                 self.setCurrentIndexWorkArea(2)
-                self.labelGroupGid.setText(dlg.returnResults)
-                self.userConfig['System']['currentGid'] = dlg.returnResults
-                self.gid = dlg.returnResults
+                self.labelGroupGid.setText(dlg.selectedGroup)
+                self.userConfig['System']['currentGid'] = dlg.selectedGroup
+                self.gid = dlg.selectedGroup
                 self.tools.writeConfFile(self.userConfig)
                 return True
         else :

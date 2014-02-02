@@ -31,15 +31,19 @@ from rapuma.dialog                      import menu_project_select_dlg
 
 class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dlg.Ui_MenuProjectSelect) :
 
-    def __init__ (self, parent=None) :
+    def __init__ (self, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectSelectCtrl, self).__init__(parent)
 
-        #self.setWindowIcon(appicon)
         self.setupUi(self)
         self.connectionActions()
-        self.returnResults = None
+        self.userConfig = userConfig
+        self.selectedProject = None
+
+        # Populate the list with projects
+        for p in self.userConfig['Projects'].iteritems() :
+            self.listWidgetProjects.addItem(p[0])
 
 
     def main (self) :
@@ -57,10 +61,7 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.returnResults = self.lineEditPid.text().upper()
-
-        print self.returnResults
-#        return pid
+        self.selectedProject = self.listWidgetProjects.currentItem().text()
         self.close()
 
 
