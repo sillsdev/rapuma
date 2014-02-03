@@ -14,13 +14,6 @@ Todo:
 
 <root>
     <setting>
-        <name>Validate Source Text</name>
-        <key>validateUsfm</key>
-        <description>Run a basic USFM validation check on the incoming source text.</description>
-        <type>boolean</type>
-        <value>True</value>
-    </setting>
-    <setting>
         <name>Extract FIG Markers From Working Text</name>
         <key>extractFigMarkers</key>
         <description>Extract any \fig markers that are in the text which is being imported as working text.</description>

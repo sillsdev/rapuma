@@ -193,19 +193,23 @@ class ProjSetup (object) :
             # Create temp backup of working file
             if os.path.exists(target) :
                 shutil.copy(target, workingBak)
-
+                
             # Don't do this unless it is different or forced
             if force or self.compare.isDifferent(source, targetSource) :
                 # Delete the existing working file
                 if os.path.exists(target) :
                     os.remove(target)
-                self.makeCVOne(workingBak, workingCVOne)
+                # Create the backup for comparison
+                if os.path.exists(workingBak) :
+                    self.makeCVOne(workingBak, workingCVOne)
+                # Install the new text
                 self.installUsfmWorkingText(gid, cid, force)
                 # Report if this was forced
                 if force :
                     self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
                 # Compare the new working file with the previous
-                self.compare.compare(workingCVOne, target)
+                if os.path.exists(workingCVOne) :
+                    self.compare.compare(workingCVOne, target)
             else :
                 self.log.writeToLog(self.errorCodes['0272'], [cid])
 
@@ -663,7 +667,7 @@ class ProjSetup (object) :
         if self.usfmCopy(targetSource, target, gid) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
-                proj_process.checkForPreprocessScript(gid)
+                proj_process.checkForPreprocessScript(gid)                
                 if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
@@ -705,12 +709,23 @@ class ProjSetup (object) :
         '''Copy USFM text from source to target. Decode if necessary, then
         normalize. With the text in place, validate unless that is False.'''
 
-        sourceEncode        = self.projectConfig['Managers']['usfm_Text']['sourceEncode']
-        workEncode          = self.projectConfig['Managers']['usfm_Text']['workEncode']
-        unicodeNormalForm   = self.projectConfig['Managers']['usfm_Text']['unicodeNormalForm']
-        validateUsfm        = self.tools.str2bool(self.projectConfig['CompTypes']['Usfm']['validateUsfm'])
+        sourceEncode                = self.projectConfig['Managers']['usfm_Text']['sourceEncode']
+        workEncode                  = self.projectConfig['Managers']['usfm_Text']['workEncode']
+        unicodeNormalForm           = self.projectConfig['Managers']['usfm_Text']['unicodeNormalForm']
+        validateSourceMarkup        = self.tools.str2bool(self.projectConfig['Groups'][gid]['validateSourceMarkup'])
 
-        # Bring in our source text
+#        import pdb; pdb.set_trace()
+
+        # Validate the source markup text (Defalt is True)
+        if validateSourceMarkup :
+            if not self.usfmTextFileIsValid(source, gid) :
+                self.log.writeToLog(self.errorCodes['1090'], [source,self.tools.fName(target)])
+                return False
+        else :
+            # Warn that validation was turned off
+            self.log.writeToLog(self.errorCodes['1095'], [self.tools.fName(target)])
+
+        # Bring in our source text and work with the encoding if needed
         if sourceEncode == workEncode :
             contents = codecs.open(source, 'rt', 'utf_8_sig')
             lines = contents.read()
@@ -722,19 +737,10 @@ class ProjSetup (object) :
         normal = unicodedata.normalize(unicodeNormalForm, lines)
         self.log.writeToLog(self.errorCodes['1080'], [unicodeNormalForm])
 
-        # Write out the text to the target
+        # All should be okay to write out the text to the target
         writeout = codecs.open(target, "wt", "utf_8_sig")
         writeout.write(normal)
         writeout.close
-
-        # Validate the target USFM text (Defalt is True)
-        if validateUsfm :
-            if not self.usfmTextFileIsValid(target, gid) :
-                self.log.writeToLog(self.errorCodes['1090'], [source,self.tools.fName(target)])
-                return False
-        else :
-            self.log.writeToLog(self.errorCodes['1095'], [self.tools.fName(target)])
-
         return True
 
 

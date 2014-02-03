@@ -507,10 +507,10 @@ Todo:
             <name>Group Preprocess Script File</name>
             <description>The script used to preprocess the group (component) text.</description>
             <fileID>groupPreprocessFile</fileID>
-            <fileName>[self:csid]_textPreprocess.py</fileName>
+            <fileName>[self:gid]_textPreprocess.py</fileName>
             <filePath>[self:projScriptFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies>gid</relies>
         </file>
         <file>
             <name>Rapuma Preprocess Script File</name>

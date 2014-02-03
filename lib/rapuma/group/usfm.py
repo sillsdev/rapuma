@@ -130,7 +130,6 @@ class Usfm (Group) :
             'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
             'USFM-025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
             'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
-            'USFM-070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
             'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
             'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
             'USFM-095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],

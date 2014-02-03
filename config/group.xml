@@ -14,6 +14,13 @@ Todo:
 
 <root>
     <setting>
+        <name>Validate Source Text Markup</name>
+        <key>validateSourceMarkup</key>
+        <description>Run a basic markup validation check on the incoming source text.</description>
+        <type>boolean</type>
+        <value>True</value>
+    </setting>
+    <setting>
         <name>Group Component Type</name>
         <key>cType</key>
         <description>The type of components that are to be used for this group. (Only one is allowed.)</description>
