@@ -561,8 +561,8 @@
         \dimen0=\ht\colB \incr{\dimen0}{\topleftins} \incr{\dimen0}{\bottomleftins}
         \advance\dimen0 by -\ht\colA \decr{\dimen0}{\toprightins} \decr{\dimen0}{\bottomrightins}
         \ifdim\dimen0>.3\baselineskip \rebalancefalse\fi
-		% give up if target size less than 3 lines (should not happen)
-        \ifdim\shortavail<3\baselineskip \rebalancefalse\fi
+		% give up if target size less than 2 lines (should not happen)
+        \ifdim\shortavail<2\baselineskip \rebalancefalse\fi
         \ifrebalance\repeat
 	  % last try failed, so back up to previous length
       \advance\shortavail by \baselineskip
