@@ -666,6 +666,9 @@ class ProjSetup (object) :
         # backup file. (Is self.style.defaultStyFile the best thing?)
         if self.usfmCopy(targetSource, target, gid) :
             # Run any working text preprocesses on the new component text
+            # Note that the groupPreprocessFile value is based on the csid,
+            # not the gid. This allows for different preprocess scripts
+            # to be used for the same type but use can then span groups
             if usePreprocessScript :
                 proj_process.checkForPreprocessScript(gid)                
                 if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :

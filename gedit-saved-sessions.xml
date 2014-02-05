@@ -27,6 +27,12 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_hyphenation.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>
+<session name="BLT-LAOO-NTLS">
+  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/usfmTex.conf"/>
+</session>
 <session name="BLT-TAVT-NTTRA">
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/adjustment.conf"/>
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/layout.conf"/>
