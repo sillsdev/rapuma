@@ -656,6 +656,7 @@
   \ifx\t@st\empty\edef\p@gefirstmark{\firstmark}\fi % remember first, if not already set
   \availht=\trialheight % amount of space we think is available
   \let\\=\reduceavailht \the\n@tecl@sses % reduce it by the space needed for each note class
+  \divide\availht by\baselineskip \multiply\availht by\baselineskip
 %%%
   \decr{\availht}{\topins}% and by the space needed for spanning pictures
   \decr{\availht}{\bottomins}
