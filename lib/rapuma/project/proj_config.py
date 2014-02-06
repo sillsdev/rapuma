@@ -54,7 +54,6 @@ class Config (object) :
 
         # Log messages for this module
         self.errorCodes     = {
-
             '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. Use force (-f) to reinstall.'],
             '3200' : ['ERR', 'Failed to install macro package: [<<1>>]'],
             '3300' : ['MSG', 'Install macro package: [<<1>>], Reinitialized [<<2>>]'],
@@ -63,7 +62,6 @@ class Config (object) :
             '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
             '3600' : ['MSG', 'Updated macro package [<<1>>]'],
             '3650' : ['ERR', 'Failed to updated macro package [<<1>>]']
-
         }
 
         # Test for gid before trying to finish the init
