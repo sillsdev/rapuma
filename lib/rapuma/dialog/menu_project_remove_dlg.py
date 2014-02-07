@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_dlg.ui'
 #
-# Created: Wed Feb  5 16:30:08 2014
+# Created: Fri Feb  7 08:37:49 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!

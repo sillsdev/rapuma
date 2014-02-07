@@ -173,6 +173,9 @@ class ProjCommander (object) :
                 'proof'         : ['Create ' + gid + ' group PDF proof file.',      'rapuma group '     + pid + ' ' + gid + ' group         proof   --cid_list \"$1\" '], 
                 'final'         : ['Create ' + gid + ' group PDF final file.',      'rapuma group '     + pid + ' ' + gid + ' group         final   --cid_list \"$1\" '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group '     + pid + ' ' + gid + ' group         update  --cid_list \"$1\" $2 '], 
+                'addFont'       : ['Add a font to the ' + gid + ' group.',          'rapuma package '   + pid + ' ' + gid + ' $1 font add -f '],
+                'removeFont'    : ['Remove a font from the ' + gid + ' group.',     'rapuma package '   + pid + ' ' + gid + ' $1 font remove -f '],
+                'primaryFont'   : ['Make font primary for the ' + gid + ' group.',  'rapuma package '   + pid + ' ' + gid + ' $1 font primary -f '],
                 'updateFont'    : ['Update the ' + gid + ' font.',                  'rapuma package '   + pid + ' ' + gid + ' \"' + font + '\" font update '], 
                 'updateMacro'   : ['Update the ' + gid + ' macro package.',         'rapuma package '   + pid + ' ' + gid + ' \"' + macro + '\" macro update '] 
             }

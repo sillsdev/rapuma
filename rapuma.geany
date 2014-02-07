@@ -17,7 +17,7 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=25
+current_page=28
 FILE_NAME_0=13333;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_1=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py;0;4
 FILE_NAME_2=6435;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
@@ -34,7 +34,7 @@ FILE_NAME_12=29662;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/man
 FILE_NAME_13=6664;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfmTex.py;0;4
 FILE_NAME_14=11283;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
 FILE_NAME_15=6950;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex-ext.tex;0;4
-FILE_NAME_16=10456;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
+FILE_NAME_16=11133;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
 FILE_NAME_17=11980;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
 FILE_NAME_18=6724;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py;0;4
 FILE_NAME_19=318;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex.xml;0;4
@@ -46,6 +46,7 @@ FILE_NAME_24=585;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/usfm.xml;0;4
 FILE_NAME_25=364;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/group.xml;0;4
 FILE_NAME_26=27547;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/paratext2.tex;0;4
 FILE_NAME_27=11079;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_config.py;0;4
+FILE_NAME_28=14847;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_font.py;0;4
 
 [VTE]
 last_dir=/home/dennis/Projects/rapuma
