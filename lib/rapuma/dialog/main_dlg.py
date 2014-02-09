@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Fri Feb  7 08:37:50 2014
+# Created: Sun Feb  9 20:59:38 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,11 +12,11 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 714)
+        MainWindow.resize(801, 628)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.stackedWidgetWorkArea = QtGui.QStackedWidget(self.centralwidget)
-        self.stackedWidgetWorkArea.setGeometry(QtCore.QRect(10, 10, 781, 651))
+        self.stackedWidgetWorkArea.setGeometry(QtCore.QRect(10, 10, 781, 561))
         self.stackedWidgetWorkArea.setFrameShape(QtGui.QFrame.NoFrame)
         self.stackedWidgetWorkArea.setObjectName("stackedWidgetWorkArea")
         self.pageBlank = QtGui.QWidget()
@@ -38,6 +38,12 @@ class Ui_MainWindow(object):
         self.pushButtonProjectBind.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButtonProjectBind.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.pushButtonProjectBind.setObjectName("pushButtonProjectBind")
+        self.pushButtonProjectCloud = QtGui.QPushButton(self.pageProject)
+        self.pushButtonProjectCloud.setGeometry(QtCore.QRect(570, 10, 80, 27))
+        self.pushButtonProjectCloud.setObjectName("pushButtonProjectCloud")
+        self.pushButtonProjectBackup = QtGui.QPushButton(self.pageProject)
+        self.pushButtonProjectBackup.setGeometry(QtCore.QRect(480, 10, 80, 27))
+        self.pushButtonProjectBackup.setObjectName("pushButtonProjectBackup")
         self.stackedWidgetWorkArea.addWidget(self.pageProject)
         self.pageGroup = QtGui.QWidget()
         self.pageGroup.setObjectName("pageGroup")
@@ -77,7 +83,7 @@ class Ui_MainWindow(object):
         self.stackedWidgetWorkArea.addWidget(self.pageComponent)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 25))
         self.menubar.setObjectName("menubar")
         self.menuProject = QtGui.QMenu(self.menubar)
         self.menuProject.setObjectName("menuProject")
@@ -87,6 +93,8 @@ class Ui_MainWindow(object):
         self.menuGroup.setObjectName("menuGroup")
         self.menuComponent = QtGui.QMenu(self.menubar)
         self.menuComponent.setObjectName("menuComponent")
+        self.menuFont = QtGui.QMenu(self.menubar)
+        self.menuFont.setObjectName("menuFont")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -159,9 +167,14 @@ class Ui_MainWindow(object):
         self.menuGroupEdit.setObjectName("menuGroupEdit")
         self.menuComponentEdit = QtGui.QAction(MainWindow)
         self.menuComponentEdit.setObjectName("menuComponentEdit")
+        self.menuFontAdd = QtGui.QAction(MainWindow)
+        self.menuFontAdd.setObjectName("menuFontAdd")
+        self.menuFontRemove = QtGui.QAction(MainWindow)
+        self.menuFontRemove.setObjectName("menuFontRemove")
+        self.menuFontUpdate = QtGui.QAction(MainWindow)
+        self.menuFontUpdate.setObjectName("menuFontUpdate")
         self.menuProject.addAction(self.menuProjectAdd)
         self.menuProject.addAction(self.menuProjectRemove)
-        self.menuProject.addAction(self.menuProjectRestore)
         self.menuProject.addAction(self.menuProjectSelect)
         self.menuProject.addSeparator()
         self.menuProject.addAction(self.menuProjectArchive)
@@ -195,9 +208,13 @@ class Ui_MainWindow(object):
         self.menuComponent.addAction(self.actionDraft_2)
         self.menuComponent.addAction(self.actionFinal_2)
         self.menuComponent.addAction(self.actionProof_2)
+        self.menuFont.addAction(self.menuFontAdd)
+        self.menuFont.addAction(self.menuFontRemove)
+        self.menuFont.addAction(self.menuFontUpdate)
         self.menubar.addAction(self.menuProject.menuAction())
         self.menubar.addAction(self.menuGroup.menuAction())
         self.menubar.addAction(self.menuComponent.menuAction())
+        self.menubar.addAction(self.menuFont.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -211,6 +228,8 @@ class Ui_MainWindow(object):
         self.labelProjectPid.setText(QtGui.QApplication.translate("MainWindow", "Project ID", None, QtGui.QApplication.UnicodeUTF8))
         self.labelProjectProject.setText(QtGui.QApplication.translate("MainWindow", "Project:", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonProjectBind.setText(QtGui.QApplication.translate("MainWindow", "Bind", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonProjectCloud.setText(QtGui.QApplication.translate("MainWindow", "Cloud", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonProjectBackup.setText(QtGui.QApplication.translate("MainWindow", "Backup", None, QtGui.QApplication.UnicodeUTF8))
         self.labelGroup.setText(QtGui.QApplication.translate("MainWindow", "Group:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelGroupGid.setText(QtGui.QApplication.translate("MainWindow", "Group ID", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonGroupFinal.setToolTip(QtGui.QApplication.translate("MainWindow", "Create view of the final output of the selected component(s)", None, QtGui.QApplication.UnicodeUTF8))
@@ -231,6 +250,7 @@ class Ui_MainWindow(object):
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuGroup.setTitle(QtGui.QApplication.translate("MainWindow", "Group", None, QtGui.QApplication.UnicodeUTF8))
         self.menuComponent.setTitle(QtGui.QApplication.translate("MainWindow", "Component", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFont.setTitle(QtGui.QApplication.translate("MainWindow", "Font", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setText(QtGui.QApplication.translate("MainWindow", "open", None, QtGui.QApplication.UnicodeUTF8))
         self.menuProjectSelect.setText(QtGui.QApplication.translate("MainWindow", "Select", None, QtGui.QApplication.UnicodeUTF8))
         self.menuProjectSelect.setToolTip(QtGui.QApplication.translate("MainWindow", "Open an exsiting project", None, QtGui.QApplication.UnicodeUTF8))
@@ -291,4 +311,10 @@ class Ui_MainWindow(object):
         self.menuGroupEdit.setToolTip(QtGui.QApplication.translate("MainWindow", "Edit settings or render the current group", None, QtGui.QApplication.UnicodeUTF8))
         self.menuComponentEdit.setText(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuComponentEdit.setToolTip(QtGui.QApplication.translate("MainWindow", "Edit settings or render the current component", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontAdd.setText(QtGui.QApplication.translate("MainWindow", "Add", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontAdd.setToolTip(QtGui.QApplication.translate("MainWindow", "Add a font to this project", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontRemove.setText(QtGui.QApplication.translate("MainWindow", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontRemove.setToolTip(QtGui.QApplication.translate("MainWindow", "Remove a font from this project", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontUpdate.setText(QtGui.QApplication.translate("MainWindow", "Update", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFontUpdate.setToolTip(QtGui.QApplication.translate("MainWindow", "Update a font for this project", None, QtGui.QApplication.UnicodeUTF8))
 

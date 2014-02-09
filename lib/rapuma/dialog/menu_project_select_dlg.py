@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_dlg.ui'
 #
-# Created: Fri Feb  7 08:37:49 2014
+# Created: Sun Feb  9 20:59:38 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_MenuProjectSelect(object):
     def setupUi(self, MenuProjectSelect):
         MenuProjectSelect.setObjectName("MenuProjectSelect")
-        MenuProjectSelect.resize(279, 285)
+        MenuProjectSelect.resize(550, 285)
         self.gridLayout = QtGui.QGridLayout(MenuProjectSelect)
         self.gridLayout.setObjectName("gridLayout")
         self.labelSelectProject = QtGui.QLabel(MenuProjectSelect)

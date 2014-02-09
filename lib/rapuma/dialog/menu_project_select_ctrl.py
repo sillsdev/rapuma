@@ -25,7 +25,7 @@ import os, sys, StringIO
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
-from PySide.QtGui                       import QDialog, QApplication, QMessageBox
+from PySide.QtGui                       import QDialog, QApplication, QMessageBox, QListWidgetItem
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_select_dlg
 
@@ -43,7 +43,10 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
 
         # Populate the list with projects
         for p in self.userConfig['Projects'].iteritems() :
-            self.listWidgetProjects.addItem(p[0])
+            name = self.userConfig['Projects'][p[0]]['projectName']
+            # The ID has the name tacked on
+            self.listWidgetProjects.addItem(p[0] + ' (' + name + ')')
+            self.listWidgetProjects.sortItems()
 
 
     def main (self) :
@@ -61,7 +64,8 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.selectedProject = self.listWidgetProjects.currentItem().text()
+        # Here we will just take the ID, not the name
+        self.selectedProject = self.listWidgetProjects.currentItem().text().split()[0]
         self.close()
 
 

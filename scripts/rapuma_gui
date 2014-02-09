@@ -139,6 +139,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def __init__ (self, parent=None) :
         '''Initialize and start up the UI'''
 
+#        import pdb; pdb.set_trace()
+
         super(RapumaGUI, self).__init__(parent)
         # Init app resources
         qInitResources()
@@ -157,18 +159,19 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.setupUi(self)
 
         # Connect the menu actions
-        ctrlDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_restore', 'menu_project_select',
-                    'menu_project_archive', 'menu_project_cloud', 'menu_project_backup', 'menu_project_bind',
-                    'menu_project_reap', 'menu_project_template', 'menu_project_update', 'menu_project_systempreferences',
+        ctrlDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'menu_project_archive', 
+                    'menu_project_cloud', 'menu_project_backup', 'menu_project_bind', 'menu_project_reap', 
+                    'menu_project_template', 'menu_project_update', 'menu_project_systempreferences',
                     'menu_group_add', 'menu_group_remove', 'menu_group_select', 'menu_group_update',
                     'menu_component_add', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
+                    'menu_font_add', 'menu_font_remove', 'menu_font_update',
                     'menu_help_help', 'menu_help_examples']
 
         mainDlgs = ['menu_project_quit', 'menu_help_about']
 
         # Import all the menu item modules (one for each item)
         for i in ctrlDlgs :
-            ctrl   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
+            ctrl   = os.path.join(rapumaHome, 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
             # Build some names we may need in our process
             mName = ''; fName = ''; oName = ''
             for c in i.split('_') :
@@ -206,6 +209,14 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.cid            = self.userConfig['System']['currentCid']
         # Go to the last item that was selected or go to work area 0 if there is nothing selected
         if self.pid :
+            # Quick grab the projectConfig, we may need it later
+            try :
+                self.proj_config = Config(self.pid)
+                self.proj_config.getProjectConfig()
+                self.projectConfig = self.proj_config.projectConfig
+            except :
+                pass
+            # Now find the window to land in
             if self.cid :
                 self.labelComponentCid.setText(self.cid)
                 self.setCurrentIndexWorkArea(3)
@@ -261,16 +272,24 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             self.tools.writeConfFile(self.userConfig)
             return True
 
-    def mProjectBackup (self) :
-        dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl()
+    def mProjectArchive (self) :
+        dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl(self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
         else :
             return False
 
-    def mProjectArchive (self) :
-        dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl()
+    def mProjectBackup (self) :
+        dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl(self.userConfig)
+        if dlg.exec_() :
+            result = dlg.returnResults()
+            return result
+        else :
+            return False
+
+    def mProjectCloud (self) :
+        dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
@@ -278,7 +297,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             return False
 
     def mProjectReap (self) :
-        dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl()
+        dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl(self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
@@ -286,15 +305,33 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             return False
 
     def mProjectRemove (self) :
-        dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl()
-        if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
+    
+        print 'Removing a project'
+
+#        import pdb; pdb.set_trace()
+    
+        dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl(self.userConfig)
+        dlg.exec_()
+        
+        if dlg.removed :
+            print dlg.removed
+        
+
+            print 'Looks successful'
+        
+        
+# FIXME: add dialog adjustments if the removed project is the current one
+        
+            print dlg.removed
+        
         else :
+
+            print 'Looks not so successful'
+
             return False
 
     def mProjectTemplate (self) :
-        dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl()
+        dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl(self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
@@ -320,9 +357,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         '''Select a group in the current project.'''
 
         if self.pid :
-            self.proj_config = Config(self.pid)
-            self.proj_config.getProjectConfig()
-            self.projectConfig = self.proj_config.projectConfig
             dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.projectConfig)
             dlg.exec_()
             if dlg.selectedGroup :
@@ -342,13 +376,13 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         '''Select a component from the current selected group.'''
         
         if self.gid :
-            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl()
+            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl(self.gid, self.projectConfig)
             dlg.exec_()
-            if dlg.returnResults :
+            if dlg.selectedComponent :
                 self.setCurrentIndexWorkArea(3)
-                self.labelComponentCid.setText(dlg.returnResults)
-                self.userConfig['System']['currentCid'] = dlg.returnResults
-                self.cid = dlg.returnResults
+                self.labelComponentCid.setText(dlg.selectedComponent)
+                self.userConfig['System']['currentCid'] = dlg.selectedComponent
+                self.cid = dlg.selectedComponent
                 self.tools.writeConfFile(self.userConfig)
                 return True
         else :

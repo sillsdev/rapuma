@@ -128,16 +128,19 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/project/proj_illustration.py"/>
 </session>
 <session name="Rapuma-GUI">
+  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
+  <file path="file:///home/dennis/Projects/rapuma/config/rapuma.xml"/>
+  <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/Projects/rapuma/make_ui"/>
   <file path="file:///home/dennis/Projects/rapuma/setup.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_cloud_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_group_select_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_component_select_ctrl.py"/>
-  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
 </session>
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>

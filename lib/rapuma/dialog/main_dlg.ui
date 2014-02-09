@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>714</height>
+    <width>801</width>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>781</width>
-      <height>651</height>
+      <height>561</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -90,6 +90,32 @@
       </property>
       <property name="text">
        <string>Bind</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonProjectCloud">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Cloud</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonProjectBackup">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>10</y>
+        <width>80</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Backup</string>
       </property>
      </widget>
     </widget>
@@ -252,7 +278,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>801</width>
      <height>25</height>
     </rect>
    </property>
@@ -262,7 +288,6 @@
     </property>
     <addaction name="menuProjectAdd"/>
     <addaction name="menuProjectRemove"/>
-    <addaction name="menuProjectRestore"/>
     <addaction name="menuProjectSelect"/>
     <addaction name="separator"/>
     <addaction name="menuProjectArchive"/>
@@ -312,9 +337,18 @@
     <addaction name="actionFinal_2"/>
     <addaction name="actionProof_2"/>
    </widget>
+   <widget class="QMenu" name="menuFont">
+    <property name="title">
+     <string>Font</string>
+    </property>
+    <addaction name="menuFontAdd"/>
+    <addaction name="menuFontRemove"/>
+    <addaction name="menuFontUpdate"/>
+   </widget>
    <addaction name="menuProject"/>
    <addaction name="menuGroup"/>
    <addaction name="menuComponent"/>
+   <addaction name="menuFont"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -564,6 +598,30 @@
    </property>
    <property name="toolTip">
     <string>Edit settings or render the current component</string>
+   </property>
+  </action>
+  <action name="menuFontAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a font to this project</string>
+   </property>
+  </action>
+  <action name="menuFontRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove a font from this project</string>
+   </property>
+  </action>
+  <action name="menuFontUpdate">
+   <property name="text">
+    <string>Update</string>
+   </property>
+   <property name="toolTip">
+    <string>Update a font for this project</string>
    </property>
   </action>
  </widget>

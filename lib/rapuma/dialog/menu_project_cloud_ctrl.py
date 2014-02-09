@@ -32,27 +32,20 @@ from rapuma.project.proj_setup          import ProjDelete
 from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox, QListWidgetItem
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_project_remove_dlg
+from rapuma.dialog                      import menu_project_cloud_dlg
 
-class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dlg.Ui_MenuProjectRemove) :
+class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.Ui_MenuProjectCloud) :
 
     def __init__ (self, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuProjectRemoveCtrl, self).__init__(parent)
+        super(MenuProjectCloudCtrl, self).__init__(parent)
 
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
         self.userConfig         = userConfig
-        self.removed            = None
-
-        # Populate the list with projects
-        for p in self.userConfig['Projects'].iteritems() :
-            name = self.userConfig['Projects'][p[0]]['projectName']
-            # The ID has the name tacked on
-            self.listWidgetProjects.addItem(p[0] + ' (' + name + ')')
-            self.listWidgetProjects.sortItems()
+        self.restored           = None
 
 
     def main (self) :
@@ -70,36 +63,8 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        pid                     = self.listWidgetProjects.currentItem().text().split()[0]
         force                   = self.checkBoxBackup.isChecked()
 
-        msgBox = QMessageBox()
-#        msgBox.setTitle('Select Project')
-        msgBox.setText("You have selected the " + pid + " project for removal.")
-        if force :
-            msgBox.setIcon(QMessageBox.Question)
-            msgBox.setInformativeText("A backup will be made.")
-        else :
-            msgBox.setIcon(QMessageBox.Warning)
-            msgBox.setInformativeText("All data from this project will be deleted!")
-        msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        msgBox.setDefaultButton(QMessageBox.Cancel)
-        ret = msgBox.exec_()
-
-        if ret == QtGui.QMessageBox.Ok :
-            saved_output = sys.stdout
-            output_object = StringIO.StringIO()
-            sys.stdout = output_object
-
-            if ProjDelete(pid).deleteProject(force) :
-                result = output_object.getvalue()
-                QMessageBox.information(self, "Project Remove", result)
-                self.removed = True
-            else :
-                result = output_object.getvalue()
-                QMessageBox.warning(self, "Project Remove", result)
-
-        # Close now regardless of whatever was clicked
         self.close()
 
 
@@ -110,7 +75,7 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuProjectRemoveCtrl()
+    window = MenuProjectCloudCtrl()
     window.main()
     sys.exit(app.exec_())
 

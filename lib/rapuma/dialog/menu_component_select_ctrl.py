@@ -28,10 +28,11 @@ from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_component_select_dlg
+from rapuma.core.paratext               import Paratext
 
 class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_select_dlg.Ui_MenuComponentSelect) :
 
-    def __init__ (self, parent=None) :
+    def __init__ (self, gid, projectConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuComponentSelectCtrl, self).__init__(parent)
@@ -39,7 +40,18 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
         #self.setWindowIcon(appicon)
         self.setupUi(self)
         self.connectionActions()
-        self.returnResults = None
+        self.projectConfig      = projectConfig
+        self.pid                = self.projectConfig['ProjectInfo']['projectIDCode']
+        self.gid                = gid
+        self.selectedComponent  = None
+        self.pt_tools           = Paratext(self.pid, self.gid)
+
+        # Populate the list with groups from the current project
+        for c in self.projectConfig['Groups'][self.gid]['cidList'] :
+            print 
+            name = self.pt_tools.usfmCidInfo()[c.lower()][0]
+            # The ID has the name tacked on
+            self.listWidgetComponents.addItem(c + ' (' + name + ')')
 
 
     def main (self) :
@@ -57,10 +69,7 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.returnResults = self.lineEditCid.text().upper()
-
-        print self.returnResults
-#        return pid
+        self.selectedComponent = self.listWidgetComponents.currentItem().text().split()[0]
         self.close()
 
 

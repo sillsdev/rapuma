@@ -41,9 +41,16 @@ class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui
         self.projectConfig = projectConfig
         self.selectedGroup = None
 
-        # Populate the list with projects
+        # Populate the list with groups from the current project
         for g in self.projectConfig['Groups'].iteritems() :
-            self.listWidgetGroups.addItem(g[0])
+            name = ''
+            try :
+                name = self.projectConfig['Groups'][g[0]]['groupName']
+            except :
+                pass
+            # The ID has the name tacked on
+            self.listWidgetGroups.addItem(g[0] + ' (' + name + ')')
+            self.listWidgetGroups.sortItems()
 
 
     def main (self) :
@@ -61,7 +68,7 @@ class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.selectedGroup = self.listWidgetGroups.currentItem().text()
+        self.selectedGroup = self.listWidgetGroups.currentItem().text().split()[0]
         self.close()
 
 

@@ -89,10 +89,10 @@ class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_M
 
         if ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '') :
             result = output_object.getvalue()
-            QMessageBox.information(self, "Project Create", result)
+            QMessageBox.information(self, "Project Add", result)
         else :
             result = output_object.getvalue()
-            QMessageBox.warning(self, "Project Create", result)
+            QMessageBox.warning(self, "Project Add", result)
 
         # Output to terminal the stdout and close the dialog
         sys.stdout = saved_output
