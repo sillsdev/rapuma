@@ -36,7 +36,7 @@ from rapuma.dialog                      import menu_project_cloud_dlg
 
 class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.Ui_MenuProjectCloud) :
 
-    def __init__ (self, userConfig, parent=None) :
+    def __init__ (self, pid, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectCloudCtrl, self).__init__(parent)
@@ -44,8 +44,10 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
-        self.userConfig         = userConfig
-        self.restored           = None
+        self.pid                    = pid
+        self.userConfig             = userConfig
+        self.lineEditProjectLocal.setText(self.userConfig['Projects'][self.pid]['projectPath'])
+        self.lineEditProjectCloud.setText(self.userConfig['Resources']['cloud'])
 
 
     def main (self) :
@@ -63,7 +65,31 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        force                   = self.checkBoxBackup.isChecked()
+        flush                   = self.checkBoxFlush.isChecked()
+        backup                  = self.checkBoxBackup.isChecked()
+
+        # Look at the radio buttons in the Action group
+        # (This was taken from: 
+        #   http://stackoverflow.com/questions/2089897/finding-checked-qradiobutton-among-many-into-a-qvboxlayout )
+        actionContents = self.groupBoxAction.layout()
+        for i in range(0, actionContents.count()) :
+            widget = actionContents.itemAt(i).widget()
+            # Find the radio buttons
+            if (widget!=0) and (type(widget) is QtGui.QRadioButton) :
+                # Do an action according to wich one was selected
+                if i == 0 and widget.isChecked() :
+                    print 'Pushing to cloud'
+                elif i == 1 and widget.isChecked() :
+                    print 'Pulling from cloud'
+                elif i == 2 and widget.isChecked() :
+                    print 'Restoring from cloud'
+
+# These are the basic things we want to do
+#ProjData(pid).pullFromCloud(args.force, targetPath)
+#ProjData(pid).backupProject(targetPath)
+#ProjData(pid).pushToCloud(args.force)
+
+
 
         self.close()
 

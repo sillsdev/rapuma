@@ -289,7 +289,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             return False
 
     def mProjectCloud (self) :
-        dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.userConfig)
+        dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.pid, self.userConfig)
         if dlg.exec_() :
             result = dlg.returnResults()
             return result
