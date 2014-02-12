@@ -113,7 +113,7 @@
       <item row="0" column="1">
        <widget class="QCheckBox" name="checkBoxFlush">
         <property name="toolTip">
-         <string>Replace the cloud version with the local version</string>
+         <string>Completly replace the cloud version with the local version</string>
         </property>
         <property name="text">
          <string>Flush</string>

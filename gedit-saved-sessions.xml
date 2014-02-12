@@ -142,6 +142,11 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_group_select_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_component_select_ctrl.py"/>
 </session>
+<session name="SHN-MYMR-BIBA">
+  <file path="file:///home/dennis/Publishing/SHN/SHN-MYMR-BIBA/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/SHN/SHN-MYMR-BIBA/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/SHN/SHN-MYMR-BIBA/Config/usfmTex.conf"/>
+</session>
 <session name="ShrinkyPic">
   <file path="file:///home/dennis/Projects/shrinkypic/make_ui"/>
   <file path="file:///home/dennis/Projects/shrinkypic/setup.py"/>

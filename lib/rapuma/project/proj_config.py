@@ -245,12 +245,15 @@ class Config (object) :
         '''Get a special font setting if there is one. Otherwise
         return null.'''
 
-        # FIXME: This may need to be moved to Fonts
+        # FIXME: This may need to be moved to Fonts, plus it might be a
+        # little brittle. Using primaryFont for a default might be asking
+        # for trouble
         result = ''
         if value == 'mapping' :
-            useMapping = self.macPackConfig['FontSettings']['useMapping']
+            useMapping      = self.macPackConfig['FontSettings']['useMapping']
+            primaryFont     = self.macPackConfig['FontSettings']['primaryFont']
             if useMapping :
-                result = ':mapping=' + os.path.join(self.local.projFontFolder, useMapping)
+                result = ':mapping=' + os.path.join(self.local.projFontFolder, primaryFont, useMapping)
         elif value == 'renderer' :
             useRenderingSystem = self.macPackConfig['FontSettings']['useRenderingSystem']
             if useRenderingSystem :
