@@ -678,9 +678,9 @@ class ProjData (object) :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
 
-    def pullFromCloud (self, force = False, tPath = None) :
+    def pullFromCloud (self, force = True, tPath = None) :
         '''Pull data from cloud storage and merge/replace local data.
-        If force is not used, do a full backup first before starting the
+        If force is used, do a full backup first before starting the
         actual pull operation.'''
 
 #        import pdb; pdb.set_trace()
@@ -704,7 +704,7 @@ class ProjData (object) :
             self.tools.dieNow()
 
         # Is the project physically present? If force is used, backup the old one
-        if not force :
+        if force :
             self.backupProject()
 
         # Empty out all the project contents except the HelperScript folder

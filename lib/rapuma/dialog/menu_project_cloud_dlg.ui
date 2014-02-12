@@ -112,6 +112,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QCheckBox" name="checkBoxFlush">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="toolTip">
          <string>Completly replace the cloud version with the local version</string>
         </property>
@@ -122,6 +125,9 @@
       </item>
       <item row="1" column="1">
        <widget class="QCheckBox" name="checkBoxBackup">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Create a backup of the project before replacing it with cloud version</string>
         </property>
@@ -190,8 +196,8 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>327</x>
-     <y>183</y>
+     <x>438</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -206,12 +212,76 @@
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>165</y>
+     <x>341</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>37</x>
      <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonPull</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBoxBackup</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>107</x>
+     <y>184</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonPush</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBoxFlush</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>107</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonLocalBrowse</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MenuProjectCloud</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>395</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>438</x>
+     <y>62</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonCloudBrowse</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MenuProjectCloud</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>437</x>
+     <y>123</y>
     </hint>
    </hints>
   </connection>

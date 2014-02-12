@@ -27,10 +27,13 @@ import os, sys, StringIO
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.project.proj_setup          import ProjDelete
+from rapuma.core.proj_data              import ProjData
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
-from PySide.QtGui                       import QDialog, QApplication, QMessageBox, QListWidgetItem
+from PySide.QtGui                       import QDialog, QApplication, QMessageBox, \
+                                                QListWidgetItem, QFileDialog, \
+                                                 QRadioButton
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_cloud_dlg
 
@@ -46,8 +49,11 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         self.connectionActions()
         self.pid                    = pid
         self.userConfig             = userConfig
-        self.lineEditProjectLocal.setText(self.userConfig['Projects'][self.pid]['projectPath'])
         self.lineEditProjectCloud.setText(self.userConfig['Resources']['cloud'])
+        try :
+            self.lineEditProjectLocal.setText(self.userConfig['Projects'][self.pid]['projectPath'])
+        except :
+            pass
 
 
     def main (self) :
@@ -60,13 +66,30 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         '''Connect to form buttons.'''
 
         self.pushButtonOk.clicked.connect(self.okClicked)
+        self.pushButtonLocalBrowse.clicked.connect(self.findPath)
+        self.pushButtonCloudBrowse.clicked.connect(self.findPath)
+
+
+    def findPath (self) :
+        '''Call a basic find file widget to get the path we want.'''
+
+# FIXME: Look at the docs to make this dialog only for grabing the folder path
+# and have the return go back to the right lineEdit box
+
+        fileName = None
+        dialog = QFileDialog(self, "Find a Picture")
+        dialog.setViewMode(QFileDialog.Detail)
+        dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        if dialog.exec_():
+            fileName = dialog.selectedFiles()[0]
+
+        # When the folder is found, change the right line edit box
+#        self.FileNameEdit.setText(fileName)
 
 
     def okClicked (self) :
         '''Execute the OK button.'''
-
-        flush                   = self.checkBoxFlush.isChecked()
-        backup                  = self.checkBoxBackup.isChecked()
 
         # Look at the radio buttons in the Action group
         # (This was taken from: 
@@ -75,21 +98,14 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         for i in range(0, actionContents.count()) :
             widget = actionContents.itemAt(i).widget()
             # Find the radio buttons
-            if (widget!=0) and (type(widget) is QtGui.QRadioButton) :
+            if (widget!=0) and (type(widget) is QRadioButton) :
                 # Do an action according to wich one was selected
                 if i == 0 and widget.isChecked() :
-                    print 'Pushing to cloud'
+                    ProjData(self.pid).pushToCloud(self.checkBoxFlush.isChecked())
                 elif i == 1 and widget.isChecked() :
-                    print 'Pulling from cloud'
+                    ProjData(self.pid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
                 elif i == 2 and widget.isChecked() :
-                    print 'Restoring from cloud'
-
-# These are the basic things we want to do
-#ProjData(pid).pullFromCloud(args.force, targetPath)
-#ProjData(pid).backupProject(targetPath)
-#ProjData(pid).pushToCloud(args.force)
-
-
+                    ProjData(self.pid).pullFromCloud(False, self.lineEditProjectLocal.text())
 
         self.close()
 

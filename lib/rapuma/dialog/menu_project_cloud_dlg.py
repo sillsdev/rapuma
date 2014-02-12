@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_cloud_dlg.ui'
 #
-# Created: Wed Feb 12 04:44:30 2014
+# Created: Wed Feb 12 21:02:20 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,9 +48,11 @@ class Ui_MenuProjectCloud(object):
         self.radioButtonRestore.setObjectName("radioButtonRestore")
         self.gridLayout.addWidget(self.radioButtonRestore, 2, 0, 1, 1)
         self.checkBoxFlush = QtGui.QCheckBox(self.groupBoxAction)
+        self.checkBoxFlush.setEnabled(True)
         self.checkBoxFlush.setObjectName("checkBoxFlush")
         self.gridLayout.addWidget(self.checkBoxFlush, 0, 1, 1, 1)
         self.checkBoxBackup = QtGui.QCheckBox(self.groupBoxAction)
+        self.checkBoxBackup.setEnabled(False)
         self.checkBoxBackup.setChecked(True)
         self.checkBoxBackup.setObjectName("checkBoxBackup")
         self.gridLayout.addWidget(self.checkBoxBackup, 1, 1, 1, 1)
@@ -67,6 +69,10 @@ class Ui_MenuProjectCloud(object):
         self.retranslateUi(MenuProjectCloud)
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.close)
         QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectCloud.setupUi)
+        QtCore.QObject.connect(self.radioButtonPull, QtCore.SIGNAL("toggled(bool)"), self.checkBoxBackup.setEnabled)
+        QtCore.QObject.connect(self.radioButtonPush, QtCore.SIGNAL("toggled(bool)"), self.checkBoxFlush.setEnabled)
+        QtCore.QObject.connect(self.pushButtonLocalBrowse, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.setupUi)
+        QtCore.QObject.connect(self.pushButtonCloudBrowse, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.setupUi)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectCloud)
         MenuProjectCloud.setTabOrder(self.pushButtonCancel, self.pushButtonOk)
         MenuProjectCloud.setTabOrder(self.pushButtonOk, self.lineEditProjectLocal)
@@ -99,7 +105,7 @@ class Ui_MenuProjectCloud(object):
         self.radioButtonPull.setText(QtGui.QApplication.translate("MenuProjectCloud", "Cloud to Local", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonRestore.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Add a new local project with data from the cloud", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonRestore.setText(QtGui.QApplication.translate("MenuProjectCloud", "Restore From Cloud", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxFlush.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Replace the cloud version with the local version", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxFlush.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Completly replace the cloud version with the local version", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxFlush.setText(QtGui.QApplication.translate("MenuProjectCloud", "Flush", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxBackup.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Create a backup of the project before replacing it with cloud version", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxBackup.setText(QtGui.QApplication.translate("MenuProjectCloud", "Backup", None, QtGui.QApplication.UnicodeUTF8))
