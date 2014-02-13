@@ -9,5 +9,8 @@ sudo find . -name "rapuma*" -exec rm -rfv {} \;
 # Go on to remove the supporting files
 sudo rm -r /usr/local/share/rapuma
 
-# Next we should remove the Python libs, how do we do that?
+# Next we should remove the Python libs
+sudo rm -r /usr/local/lib/python2.7/dist-packages/rapuma
+cd /usr/local/lib/python2.7/dist-packages
+sudo find . -name "rapuma*" -exec rm -rfv {} \;
 
