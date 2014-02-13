@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Wed Feb 12 21:02:20 2014
+# Created: Thu Feb 13 09:49:17 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
