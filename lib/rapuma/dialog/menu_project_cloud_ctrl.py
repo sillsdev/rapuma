@@ -49,9 +49,11 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         self.connectionActions()
         self.pid                    = pid
         self.userConfig             = userConfig
-        self.lineEditProjectCloud.setText(self.userConfig['Resources']['cloud'])
+        self.cloudPath              = self.userConfig['Resources']['cloud']
+        self.projPath               = self.userConfig['Resources']['projects']
         try :
-            self.lineEditProjectLocal.setText(self.userConfig['Projects'][self.pid]['projectPath'])
+            self.projPath           = self.userConfig['Projects'][self.pid]['projectPath']
+            self.lineEditProjectLocal.setText(self.projPath)
         except :
             pass
 
@@ -66,26 +68,19 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         '''Connect to form buttons.'''
 
         self.pushButtonOk.clicked.connect(self.okClicked)
-        self.pushButtonLocalBrowse.clicked.connect(self.findPath)
-        self.pushButtonCloudBrowse.clicked.connect(self.findPath)
+        self.pushButtonLocalBrowse.clicked.connect(self.findProjPath)
 
 
-    def findPath (self) :
-        '''Call a basic find file widget to get the path we want.'''
+    def findProjPath (self) :
+        '''Call a basic find folder widget to get the path we want.'''
 
-# FIXME: Look at the docs to make this dialog only for grabing the folder path
-# and have the return go back to the right lineEdit box
-
-        fileName = None
-        dialog = QFileDialog(self, "Find a Picture")
-        dialog.setViewMode(QFileDialog.Detail)
-        dialog.setAcceptMode(QFileDialog.AcceptOpen)
-        dialog.setFileMode(QFileDialog.ExistingFile)
-        if dialog.exec_():
-            fileName = dialog.selectedFiles()[0]
-
-        # When the folder is found, change the right line edit box
-#        self.FileNameEdit.setText(fileName)
+        dialog = QFileDialog(self, "Find a Folder")
+        dialog.setDirectory(self.projPath)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly)
+        if dialog.exec_() :
+            # When the folder is found, change the right line edit box
+            self.lineEditProjectLocal.setText(dialog.selectedFiles()[0])
 
 
     def okClicked (self) :
@@ -102,10 +97,14 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
                 # Do an action according to wich one was selected
                 if i == 0 and widget.isChecked() :
                     ProjData(self.pid).pushToCloud(self.checkBoxFlush.isChecked())
-                elif i == 1 and widget.isChecked() :
-                    ProjData(self.pid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
                 elif i == 2 and widget.isChecked() :
-                    ProjData(self.pid).pullFromCloud(False, self.lineEditProjectLocal.text())
+                    ProjData(self.pid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
+                elif i == 4 and widget.isChecked() :
+                    if os.path.exists(os.path.join(self.cloudPath, self.lineEditProjectCloudId.text())) :
+                        ProjData(self.pid).pullFromCloud(False, self.lineEditProjectLocal.text())
+                    else :
+                        QMessageBox.warning(self, "Error!", """<p>Cloud ID not valid.""")
+
 
         self.close()
 

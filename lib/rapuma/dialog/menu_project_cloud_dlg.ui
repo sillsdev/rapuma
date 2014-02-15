@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>277</height>
+    <width>445</width>
+    <height>226</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Rapuma - Manage Cloud</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="labelPathLocal">
      <property name="text">
@@ -21,17 +21,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QLineEdit" name="lineEditProjectLocal">
-     <property name="toolTip">
-      <string>Enter the path to the local project</string>
-     </property>
-     <property name="placeholderText">
-      <string>Enter Path</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
+   <item row="1" column="2">
     <widget class="QPushButton" name="pushButtonLocalBrowse">
      <property name="toolTip">
       <string>Browse to an existing local project</string>
@@ -41,34 +31,37 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="labelPathCloud">
-     <property name="text">
-      <string>Path to Cloud Project</string>
+   <item row="3" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-    </widget>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
-   <item row="3" column="0" colspan="3">
-    <widget class="QLineEdit" name="lineEditProjectCloud">
+   <item row="3" column="1">
+    <widget class="QPushButton" name="pushButtonOk">
      <property name="toolTip">
-      <string>Enter the path to the cloud project</string>
-     </property>
-     <property name="placeholderText">
-      <string>Enter Path</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="3">
-    <widget class="QPushButton" name="pushButtonCloudBrowse">
-     <property name="toolTip">
-      <string>Browse to a project in the cloud</string>
+      <string>Remove a selected project</string>
      </property>
      <property name="text">
-      <string>Browse</string>
+      <string>OK</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="3" column="2">
+    <widget class="QPushButton" name="pushButtonCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBoxAction">
      <property name="toolTip">
       <string>Define the action to be taken</string>
@@ -76,7 +69,7 @@
      <property name="title">
       <string>Action</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
        <widget class="QRadioButton" name="radioButtonPush">
         <property name="toolTip">
@@ -90,26 +83,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonPull">
-        <property name="toolTip">
-         <string>Update the local project with data pulled from the cloud</string>
-        </property>
-        <property name="text">
-         <string>Cloud to Local</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QRadioButton" name="radioButtonRestore">
-        <property name="toolTip">
-         <string>Add a new local project with data from the cloud</string>
-        </property>
-        <property name="text">
-         <string>Restore From Cloud</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QCheckBox" name="checkBoxFlush">
         <property name="enabled">
@@ -120,6 +93,16 @@
         </property>
         <property name="text">
          <string>Flush</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="radioButtonPull">
+        <property name="toolTip">
+         <string>Update the local project with data pulled from the cloud</string>
+        </property>
+        <property name="text">
+         <string>Cloud to Local</string>
         </property>
        </widget>
       </item>
@@ -139,36 +122,39 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="radioButtonRestore">
+        <property name="toolTip">
+         <string>Add a new local project with data from the cloud</string>
+        </property>
+        <property name="text">
+         <string>Restore From Cloud</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEditProjectCloudId">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Enter a cloud project ID to restore</string>
+        </property>
+        <property name="placeholderText">
+         <string>Enter Cloud ID</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
-   <item row="5" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="5" column="1">
-    <widget class="QPushButton" name="pushButtonOk">
+   <item row="1" column="0" colspan="2">
+    <widget class="QLineEdit" name="lineEditProjectLocal">
      <property name="toolTip">
-      <string>Remove a selected project</string>
+      <string>Enter the path to the local project</string>
      </property>
-     <property name="text">
-      <string>OK</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2" colspan="2">
-    <widget class="QPushButton" name="pushButtonCancel">
-     <property name="text">
-      <string>Cancel</string>
+     <property name="placeholderText">
+      <string>Enter Path</string>
      </property>
     </widget>
    </item>
@@ -179,13 +165,12 @@
   <tabstop>pushButtonOk</tabstop>
   <tabstop>lineEditProjectLocal</tabstop>
   <tabstop>pushButtonLocalBrowse</tabstop>
-  <tabstop>lineEditProjectCloud</tabstop>
-  <tabstop>pushButtonCloudBrowse</tabstop>
   <tabstop>radioButtonPush</tabstop>
   <tabstop>radioButtonPull</tabstop>
   <tabstop>radioButtonRestore</tabstop>
   <tabstop>checkBoxFlush</tabstop>
   <tabstop>checkBoxBackup</tabstop>
+  <tabstop>lineEditProjectCloudId</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -196,8 +181,8 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>267</y>
+     <x>453</x>
+     <y>216</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -212,8 +197,8 @@
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
-     <y>267</y>
+     <x>362</x>
+     <y>216</y>
     </hint>
     <hint type="destinationlabel">
      <x>37</x>
@@ -228,12 +213,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>184</y>
+     <x>133</x>
+     <y>139</y>
     </hint>
     <hint type="destinationlabel">
-     <x>263</x>
-     <y>184</y>
+     <x>353</x>
+     <y>139</y>
     </hint>
    </hints>
   </connection>
@@ -244,12 +229,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>156</y>
+     <x>133</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
-     <x>263</x>
-     <y>156</y>
+     <x>353</x>
+     <y>111</y>
     </hint>
    </hints>
   </connection>
@@ -270,18 +255,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButtonCloudBrowse</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>MenuProjectCloud</receiver>
-   <slot>setupUi()</slot>
+   <sender>radioButtonRestore</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditProjectCloudId</receiver>
+   <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>404</x>
-     <y>109</y>
+     <x>169</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
-     <x>437</x>
-     <y>123</y>
+     <x>207</x>
+     <y>163</y>
     </hint>
    </hints>
   </connection>

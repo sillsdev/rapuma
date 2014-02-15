@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/nancy/Projects/rapuma/lib/rapuma/dialog/menu_group_select_dlg.ui'
+# Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_group_select_dlg.ui'
 #
-# Created: Thu Feb 13 20:59:55 2014
+# Created: Sat Feb 15 11:53:55 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
