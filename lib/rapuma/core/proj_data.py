@@ -34,7 +34,6 @@ class ProjData (object) :
 
         self.pid            = pid
         self.tools          = Tools()
-        self.local          = pid
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
