@@ -119,7 +119,6 @@ from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
 
 # Instantiate User config class
-uc                                      = UserConfig()
 tools                                   = Tools()
 
 # Set some global vars
@@ -150,10 +149,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         appicon.addFile(':/rpm_32.png')
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
-        
         self.sysConfig          = sysConfig
-        self.userConfig         = uc.userConfig
-        self.projectConfig      = None
         self.tools              = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
@@ -206,6 +202,19 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         amHelpAbout         = self.findChild(QtGui.QAction,"menuHelpAbout")
         amHelpAbout.triggered.connect(self.mHelpAbout)
 
+        # Set or reset/update main window dialog settings
+        self.updateSettings()
+
+        # FIXME: This prints a simple message in the status bar, can we do more with it?
+        self.statusBar().showMessage("Hi There!")
+
+
+    def updateSettings (self) :
+        '''Update or refresh all the settings in this dialog window.'''
+
+        self.userConfig         = UserConfig().userConfig
+        self.projectConfig      = None
+
         # Set the current IDs for PID, GID, and CID
         self.pid            = self.userConfig['System']['currentPid']
         self.gid            = self.userConfig['System']['currentGid']
@@ -236,9 +245,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             self.tools.writeConfFile(self.userConfig)
             self.setCurrentIndexWorkArea(0)
 
-        # FIXME: This prints a simple message in the status bar, can we do more with it?
-        self.statusBar().showMessage("Hi There!")
-
 
     def main (self) :
         '''This function shows the main dialog'''
@@ -255,99 +261,49 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def mProjectAdd (self) :
         dlg = self.menu_project_add_ctrl.MenuProjectAddCtrl(self.sysConfig, self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectSelect (self) :
         dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl(self.userConfig)
         dlg.exec_()
         if dlg.selectedProject :
-            self.setCurrentIndexWorkArea(1)
-            self.labelProjectPid.setText(dlg.selectedProject)
-            self.userConfig['System']['currentPid'] = dlg.selectedProject
-            self.pid = dlg.selectedProject
-            self.userConfig['System']['currentGid'] = ''
-            self.gid = ''
-            self.userConfig['System']['currentCid'] = ''
-            self.cid = ''
-            self.tools.writeConfFile(self.userConfig)
-            return True
+            self.updateSettings()
 
     def mProjectArchive (self) :
         dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl(self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectBackup (self) :
         dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl(self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectCloud (self) :
         dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.pid, self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectReap (self) :
         dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl(self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectRemove (self) :
-    
-        print 'Removing a project'
-
-#        import pdb; pdb.set_trace()
-    
         dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl(self.userConfig)
         dlg.exec_()
-        
         if dlg.removed :
-            print dlg.removed
-        
-
-            print 'Looks successful'
-        
-        
-# FIXME: add dialog adjustments if the removed project is the current one
-        
-            print dlg.removed
-        
-        else :
-
-            print 'Looks not so successful'
-
-            return False
+            self.updateSettings()
 
     def mProjectTemplate (self) :
         dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl(self.userConfig)
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectSystempreferences (self) :
         dlg = self.menu_project_systempreferences_ctrl.MenuProjectSystempreferencesCtrl()
         if dlg.exec_() :
-            result = dlg.returnResults()
-            return result
-        else :
-            return False
+            self.updateSettings()
 
     def mProjectQuit (self) :
         '''Quit the whole program.'''
@@ -360,15 +316,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         '''Select a group in the current project.'''
 
         if self.pid :
-            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.projectConfig)
+            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.userConfig, self.projectConfig)
             dlg.exec_()
             if dlg.selectedGroup :
-                self.setCurrentIndexWorkArea(2)
-                self.labelGroupGid.setText(dlg.selectedGroup)
-                self.userConfig['System']['currentGid'] = dlg.selectedGroup
-                self.gid = dlg.selectedGroup
-                self.tools.writeConfFile(self.userConfig)
-                return True
+                self.updateSettings()
         else :
             QMessageBox.warning(self, "Rapuma Warning",
                     """<p>Cannot select a group without a project selected.""")
@@ -379,15 +330,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         '''Select a component from the current selected group.'''
         
         if self.gid :
-            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl(self.gid, self.projectConfig)
+            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl(self.userConfig, self.projectConfig, self.gid)
             dlg.exec_()
             if dlg.selectedComponent :
-                self.setCurrentIndexWorkArea(3)
-                self.labelComponentCid.setText(dlg.selectedComponent)
-                self.userConfig['System']['currentCid'] = dlg.selectedComponent
-                self.cid = dlg.selectedComponent
-                self.tools.writeConfFile(self.userConfig)
-                return True
+                self.updateSettings()
         else :
             QMessageBox.warning(self, "Rapuma Warning",
                     """<p>Cannot select a component without a group selected.""")

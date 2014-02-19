@@ -30,16 +30,20 @@ from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_component_select_dlg
 from rapuma.core.paratext               import Paratext
 
+# Load the Rapuma lib classes
+from rapuma.core.tools                  import Tools
+
 class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_select_dlg.Ui_MenuComponentSelect) :
 
-    def __init__ (self, gid, projectConfig, parent=None) :
+    def __init__ (self, userConfig, projectConfig, gid, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuComponentSelectCtrl, self).__init__(parent)
 
-        #self.setWindowIcon(appicon)
+        self.tools = Tools()
         self.setupUi(self)
         self.connectionActions()
+        self.userConfig         = userConfig
         self.projectConfig      = projectConfig
         self.pid                = self.projectConfig['ProjectInfo']['projectIDCode']
         self.gid                = gid
@@ -48,7 +52,6 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
 
         # Populate the list with groups from the current project
         for c in self.projectConfig['Groups'][self.gid]['cidList'] :
-            print 
             name = self.pt_tools.usfmCidInfo()[c.lower()][0]
             # The ID has the name tacked on
             self.listWidgetComponents.addItem(c + ' (' + name + ')')
@@ -70,6 +73,9 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
         '''Execute the OK button.'''
 
         self.selectedComponent = self.listWidgetComponents.currentItem().text().split()[0]
+        self.userConfig['System']['currentCid'] = self.selectedComponent
+        self.cid = self.selectedComponent
+        self.tools.writeConfFile(self.userConfig)
         self.close()
 
 
@@ -83,15 +89,5 @@ if __name__ == '__main__' :
     window = MenuComponentSelectCtrl()
     window.main()
     sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
 
 

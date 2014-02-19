@@ -47,6 +47,7 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
+        self.tools                  = Tools()
         self.pid                    = pid
         self.userConfig             = userConfig
         self.cloudPath              = self.userConfig['Resources']['cloud']
@@ -101,6 +102,11 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
                     ProjData(self.pid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
                 elif i == 4 and widget.isChecked() :
                     if os.path.exists(os.path.join(self.cloudPath, self.lineEditProjectCloudId.text())) :
+                        self.pid = self.lineEditProjectCloudId.text()
+                        self.userConfig['System']['currentPid'] = self.pid
+                        self.userConfig['System']['currentGid'] = ''
+                        self.userConfig['System']['currentCid'] = ''
+                        self.tools.writeConfFile(self.userConfig)
                         ProjData(self.pid).pullFromCloud(False, self.lineEditProjectLocal.text())
                     else :
                         QMessageBox.warning(self, "Error!", """<p>Cloud ID not valid.""")

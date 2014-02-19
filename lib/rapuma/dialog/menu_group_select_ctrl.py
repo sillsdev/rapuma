@@ -29,15 +29,20 @@ from PySide.QtGui                       import QDialog, QApplication, QMessageBo
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_group_select_dlg
 
+# Load the Rapuma lib classes
+from rapuma.core.tools                  import Tools
+
 class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui_MenuGroupSelect) :
 
-    def __init__ (self, projectConfig, parent=None) :
+    def __init__ (self, userConfig, projectConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuGroupSelectCtrl, self).__init__(parent)
 
+        self.tools = Tools()
         self.setupUi(self)
         self.connectionActions()
+        self.userConfig = userConfig
         self.projectConfig = projectConfig
         self.selectedGroup = None
 
@@ -69,6 +74,11 @@ class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui
         '''Execute the OK button.'''
 
         self.selectedGroup = self.listWidgetGroups.currentItem().text().split()[0]
+        self.userConfig['System']['currentGid'] = self.selectedGroup
+        self.gid = self.selectedGroup
+        self.userConfig['System']['currentCid'] = ''
+        self.cid = ''
+        self.tools.writeConfFile(self.userConfig)
         self.close()
 
 
@@ -82,15 +92,5 @@ if __name__ == '__main__' :
     window = MenuGroupSelectCtrl()
     window.main()
     sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
 
 

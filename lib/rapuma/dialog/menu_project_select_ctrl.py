@@ -29,6 +29,9 @@ from PySide.QtGui                       import QDialog, QApplication, QMessageBo
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_select_dlg
 
+# Load the Rapuma lib classes
+from rapuma.core.tools                  import Tools
+
 class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dlg.Ui_MenuProjectSelect) :
 
     def __init__ (self, userConfig, parent=None) :
@@ -36,6 +39,7 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
 
         super(MenuProjectSelectCtrl, self).__init__(parent)
 
+        self.tools = Tools()
         self.setupUi(self)
         self.connectionActions()
         self.userConfig = userConfig
@@ -66,6 +70,13 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
 
         # Here we will just take the ID, not the name
         self.selectedProject = self.listWidgetProjects.currentItem().text().split()[0]
+        self.pid = self.selectedProject
+        self.userConfig['System']['currentPid'] = self.pid
+        self.userConfig['System']['currentGid'] = ''
+        self.gid = ''
+        self.userConfig['System']['currentCid'] = ''
+        self.cid = ''
+        self.tools.writeConfFile(self.userConfig)
         self.close()
 
 
@@ -79,15 +90,5 @@ if __name__ == '__main__' :
     window = MenuProjectSelectCtrl()
     window.main()
     sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
 
 

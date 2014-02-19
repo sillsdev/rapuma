@@ -45,6 +45,7 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
         self.setupUi(self)
         self.connectionActions()
         self.userConfig         = userConfig
+        self.tools              = Tools()
         self.removed            = None
 
         # Populate the list with projects
@@ -92,9 +93,15 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
             sys.stdout = output_object
 
             if ProjDelete(pid).deleteProject(force) :
+                # Clean up the userConfig settings here
+                if pid == self.userConfig['System']['currentPid'] :
+                    self.userConfig['System']['currentPid'] = ''
+                    self.userConfig['System']['currentGid'] = ''
+                    self.userConfig['System']['currentCid'] = ''
+                    self.tools.writeConfFile(self.userConfig)
+                self.removed = True
                 result = output_object.getvalue()
                 QMessageBox.information(self, "Project Remove", result)
-                self.removed = True
             else :
                 result = output_object.getvalue()
                 QMessageBox.warning(self, "Project Remove", result)
