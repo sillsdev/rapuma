@@ -104,6 +104,14 @@ class ProjBinding (object) :
 # needed is to make one big control file that runs everything needed in the right order
 # This has been reported as a bug.
 
+        # Set the mode for bind
+        mode = 'bind'
+        # Set the cidList (to none)
+        cidList = ''
+        # Set the pages (to none)
+        pages = ''
+        # Override file name/path (not used with bind)
+        override = ''
 
         # Get the order of the groups to be bound.
         bindOrder = {}
@@ -124,14 +132,16 @@ class ProjBinding (object) :
         keyList.sort()
         for key in keyList :
             # Do a force render in the bind mode
-            Project(self.pid, bindOrder[key]).renderGroup('bind', '', True)
+            Project(self.pid, bindOrder[key]).renderGroup(mode, cidList, pages, override)
 
         # Build the final bind command
+        disposable = []
         confCommand = ['pdftk']
         # Append each of the input files
         for key in keyList :
             gidPdf = os.path.join(self.local.projComponentFolder, bindOrder[key], bindOrder[key] + '.pdf')
             confCommand.append(gidPdf)
+            disposable.append(gidPdf)
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
@@ -144,6 +154,11 @@ class ProjBinding (object) :
             self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(output)])
         else :
             self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(output)])
+
+        # If the old files are still there we have a problem on the next run, delete them now
+        for f in disposable :
+            if os.path.isfile(f) :
+                os.remove(f)
 
         # Collect the page count and record in group
         newPages = self.tools.pdftkTotalPages(output)

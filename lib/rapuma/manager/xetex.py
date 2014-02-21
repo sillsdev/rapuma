@@ -733,25 +733,27 @@ class Xetex (Manager) :
             # Background management (Phase 2)
             bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
             for bg in bgList :
-                # Special handling for cropmarks happened before rendering
-                # To clean up, turn off cropmarks here because it is done already
-                if bg == 'cropmarks' :
-                    if self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
-                        # Note that the value is set as a string because internally 
-                        # incoming bool values are assumed to be strings a real boolean
-                        # value will really throw a wrench in the works
-                        self.macPackConfig['PageLayout']['useCropmarks'] = 'False'
-                    continue
-                bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
-                cmd = self.pdfUtilityCmd + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
-                try :
-                    subprocess.call(cmd)
-                    shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
-                    os.remove(self.tools.tempName(self.local.gidPdfFile))
-                    self.log.writeToLog(self.errorCodes['0665'], [self.tools.fName(bgFile), self.tools.fName(self.local.gidPdfFile)])
-                except Exception as e :
-                    # If we don't succeed, we should probably quite here
-                    self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
+                # Only if we are not in the bind mode
+                if bg != 'bind' :
+                    # Special handling for cropmarks happened before rendering
+                    # To clean up, turn off cropmarks here because it is done already
+                    if bg == 'cropmarks' :
+                        if self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
+                            # Note that the value is set as a string because internally 
+                            # incoming bool values are assumed to be strings a real boolean
+                            # value will really throw a wrench in the works
+                            self.macPackConfig['PageLayout']['useCropmarks'] = 'False'
+                        continue
+                    bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
+                    cmd = self.pdfUtilityCmd + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
+                    try :
+                        subprocess.call(cmd)
+                        shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
+                        os.remove(self.tools.tempName(self.local.gidPdfFile))
+                        self.log.writeToLog(self.errorCodes['0665'], [self.tools.fName(bgFile), self.tools.fName(self.local.gidPdfFile)])
+                    except Exception as e :
+                        # If we don't succeed, we should probably quite here
+                        self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
 
             # Collect the page count and record in group
             newPages = self.tools.pdftkTotalPages(self.local.gidPdfFile)

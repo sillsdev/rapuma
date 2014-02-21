@@ -171,7 +171,7 @@ class Project (object) :
 ###############################################################################
 
 
-    def renderGroup (self, mode, cidList = None, pages = None, override = None) :
+    def renderGroup (self, mode, cidList = '', pages = '', override = '') :
         '''Render a group of subcomponents or any number of components
         in the group specified in the cidList.'''
 

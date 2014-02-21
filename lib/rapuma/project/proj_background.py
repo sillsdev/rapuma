@@ -166,15 +166,16 @@ class ProjBackground (object) :
     def createWatermarkFile (self, target, mode) :
         '''Install a default Rapuma watermark file into the project.'''
 
-        # FIXME: A custom watermark creation function is needed here, load default for now
-        rpmDefWatermarkFile = os.path.join(self.local.rapumaIllustrationFolder, mode + 'Watermark.pdf')
+        if mode != 'bind' :
+            # FIXME: A custom watermark creation function is needed here, load default for now
+            rpmDefWatermarkFile = os.path.join(self.local.rapumaIllustrationFolder, mode + 'Watermark.pdf')
 
-        try :
-            shutil.copy(rpmDefWatermarkFile, target)
-            self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
-        except Exception as e :
-            # If this doesn't work, we should probably quit here
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
+            try :
+                shutil.copy(rpmDefWatermarkFile, target)
+                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
+            except Exception as e :
+                # If this doesn't work, we should probably quit here
+                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
 
 
     def createBorderFile (self, pdfOutFile) :
