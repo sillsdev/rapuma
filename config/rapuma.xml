@@ -20,27 +20,6 @@ Todo:
         <sectionID>System</sectionID>
         <description>These are configurable system settings. Change them only if you know what you are doing!</description>
         <setting>
-            <name>Current Project</name>
-            <key>currentPid</key>
-            <description>The current (perhaps more accurately the previously processed) project ID.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Current Group</name>
-            <key>currentGid</key>
-            <description>The current (perhaps more accurately the previously processed) group ID.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Current Component</name>
-            <key>currentCid</key>
-            <description>The current (perhaps more accurately the previously processed) component ID.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
             <name>Debugging</name>
             <key>debugging</key>
             <description>If set to true, reporting will be verbose and all events will be recorded to the log file for the purpose of debugging errors.</description>

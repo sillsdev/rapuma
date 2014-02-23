@@ -31,27 +31,30 @@ from rapuma.project.proj_setup          import ProjSetup
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
-from PySide.QtGui                       import QDialog, QApplication, QMessageBox
+from PySide.QtGui                       import QDialog, QApplication, QMessageBox, QFileDialog
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_add_dlg
 
 
 class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_MenuProjectAdd) :
 
-    def __init__ (self, sysConfig, userConfig, parent=None) :
+    def __init__ (self, guiSettings, sysConfig, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectAddCtrl, self).__init__(parent)
 
         # Grab some system info
         self.sysConfig                  = sysConfig
+        self.guiSettings                = guiSettings
         self.systemVersion              = sysConfig['Rapuma']['systemVersion']
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
         self.userConfig                 = userConfig
         # Set the default path for new project
-        self.lineEditProjPath.setText(self.userConfig['Resources']['projects'])
+        self.projDir                    = self.userConfig['Resources']['projects']
+        self.lineEditProjPath.setText(self.projDir)
+        self.completed                  = False
 
 
     def main (self) :
@@ -90,6 +93,11 @@ class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_M
         if ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '') :
             result = output_object.getvalue()
             QMessageBox.information(self, "Project Add", result)
+            self.guiSettings.currentPid = pid
+            self.guiSettings.currentGid = ''
+            self.guiSettings.currentCid = ''
+            self.guiSettings.setBookmarks()
+            self.completed = True
         else :
             result = output_object.getvalue()
             QMessageBox.warning(self, "Project Add", result)
@@ -102,15 +110,13 @@ class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_M
     def browseForFolder (self) :
         '''Call a basic find file widget to get the folder we want to put this project in.'''
 
-        # Set our browse options
-        options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
-        # Run the dialog and get the folder
-        directory = QtGui.QFileDialog.getExistingDirectory(self,
-                "QFileDialog.getExistingDirectory()",
-                self.lineEditProjPath.text(), options)
-        # Set the text in the edit box
-        if directory :
-            self.lineEditProjPath.setText(directory)
+        dialog = QFileDialog(self, "Find a Folder")
+        dialog.setDirectory(self.projDir)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly)
+        if dialog.exec_() :
+            # When the folder is found, change the right line edit box
+            self.lineEditProjPath.setText(dialog.selectedFiles()[0])
 
 
 ###############################################################################

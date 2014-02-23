@@ -35,7 +35,7 @@ from rapuma.core.tools                  import Tools
 
 class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_select_dlg.Ui_MenuComponentSelect) :
 
-    def __init__ (self, userConfig, projectConfig, gid, parent=None) :
+    def __init__ (self, guiSettings, userConfig, projectConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuComponentSelectCtrl, self).__init__(parent)
@@ -45,13 +45,12 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
         self.connectionActions()
         self.userConfig         = userConfig
         self.projectConfig      = projectConfig
-        self.pid                = self.projectConfig['ProjectInfo']['projectIDCode']
-        self.gid                = gid
+        self.guiSettings        = guiSettings
         self.selectedComponent  = None
-        self.pt_tools           = Paratext(self.pid, self.gid)
+        self.pt_tools           = Paratext(self.guiSettings.currentPid, self.guiSettings.currentGid)
 
         # Populate the list with groups from the current project
-        for c in self.projectConfig['Groups'][self.gid]['cidList'] :
+        for c in self.projectConfig['Groups'][self.guiSettings.currentGid]['cidList'] :
             name = self.pt_tools.usfmCidInfo()[c.lower()][0]
             # The ID has the name tacked on
             self.listWidgetComponents.addItem(c + ' (' + name + ')')
@@ -72,10 +71,9 @@ class MenuComponentSelectCtrl (QDialog, QPropertyAnimation, menu_component_selec
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.selectedComponent = self.listWidgetComponents.currentItem().text().split()[0]
-        self.userConfig['System']['currentCid'] = self.selectedComponent
-        self.cid = self.selectedComponent
-        self.tools.writeConfFile(self.userConfig)
+        self.guiSettings.currentCid = self.listWidgetComponents.currentItem().text().split()[0]
+        self.selectedComponent = self.guiSettings.currentCid
+        self.guiSettings.setBookmarks()
         self.close()
 
 

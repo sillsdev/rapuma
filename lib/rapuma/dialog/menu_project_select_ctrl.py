@@ -34,7 +34,7 @@ from rapuma.core.tools                  import Tools
 
 class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dlg.Ui_MenuProjectSelect) :
 
-    def __init__ (self, userConfig, parent=None) :
+    def __init__ (self, guiSettings, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectSelectCtrl, self).__init__(parent)
@@ -42,8 +42,9 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
         self.tools = Tools()
         self.setupUi(self)
         self.connectionActions()
-        self.userConfig = userConfig
-        self.selectedProject = None
+        self.guiSettings            = guiSettings
+        self.userConfig             = userConfig
+        self.selectedProject        = None
 
         # Populate the list with projects
         for p in self.userConfig['Projects'].iteritems() :
@@ -69,14 +70,11 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
         '''Execute the OK button.'''
 
         # Here we will just take the ID, not the name
-        self.selectedProject = self.listWidgetProjects.currentItem().text().split()[0]
-        self.pid = self.selectedProject
-        self.userConfig['System']['currentPid'] = self.pid
-        self.userConfig['System']['currentGid'] = ''
-        self.gid = ''
-        self.userConfig['System']['currentCid'] = ''
-        self.cid = ''
-        self.tools.writeConfFile(self.userConfig)
+        self.guiSettings.currentPid = self.listWidgetProjects.currentItem().text().split()[0]
+        self.selectedProject = self.guiSettings.currentPid
+        self.guiSettings.currentGid = ''
+        self.guiSettings.currentCid = ''
+        self.guiSettings.setBookmarks()
         self.close()
 
 

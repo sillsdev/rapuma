@@ -133,15 +133,12 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEditProjectCloudId">
+       <widget class="QComboBox" name="comboBoxCloudProjects">
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="toolTip">
-         <string>Enter a cloud project ID to restore</string>
-        </property>
-        <property name="placeholderText">
-         <string>Enter Cloud ID</string>
+        <property name="frame">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -170,7 +167,6 @@
   <tabstop>radioButtonRestore</tabstop>
   <tabstop>checkBoxFlush</tabstop>
   <tabstop>checkBoxBackup</tabstop>
-  <tabstop>lineEditProjectCloudId</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -181,7 +177,7 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>453</x>
+     <x>435</x>
      <y>216</y>
     </hint>
     <hint type="destinationlabel">
@@ -197,7 +193,7 @@
    <slot>setupUi()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>362</x>
+     <x>344</x>
      <y>216</y>
     </hint>
     <hint type="destinationlabel">
@@ -217,7 +213,7 @@
      <y>139</y>
     </hint>
     <hint type="destinationlabel">
-     <x>353</x>
+     <x>335</x>
      <y>139</y>
     </hint>
    </hints>
@@ -233,7 +229,7 @@
      <y>111</y>
     </hint>
     <hint type="destinationlabel">
-     <x>353</x>
+     <x>335</x>
      <y>111</y>
     </hint>
    </hints>
@@ -257,16 +253,16 @@
   <connection>
    <sender>radioButtonRestore</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEditProjectCloudId</receiver>
+   <receiver>comboBoxCloudProjects</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>169</x>
-     <y>165</y>
+     <x>139</x>
+     <y>158</y>
     </hint>
     <hint type="destinationlabel">
-     <x>207</x>
-     <y>163</y>
+     <x>206</x>
+     <y>162</y>
     </hint>
    </hints>
   </connection>

@@ -36,7 +36,7 @@ from rapuma.dialog                      import menu_project_remove_dlg
 
 class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dlg.Ui_MenuProjectRemove) :
 
-    def __init__ (self, userConfig, parent=None) :
+    def __init__ (self, guiSettings, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectRemoveCtrl, self).__init__(parent)
@@ -44,9 +44,10 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
-        self.userConfig         = userConfig
-        self.tools              = Tools()
-        self.removed            = None
+        self.guiSettings            = guiSettings
+        self.userConfig             = userConfig
+        self.tools                  = Tools()
+        self.removed                = None
 
         # Populate the list with projects
         for p in self.userConfig['Projects'].iteritems() :
@@ -94,11 +95,8 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
 
             if ProjDelete(pid).deleteProject(force) :
                 # Clean up the userConfig settings here
-                if pid == self.userConfig['System']['currentPid'] :
-                    self.userConfig['System']['currentPid'] = ''
-                    self.userConfig['System']['currentGid'] = ''
-                    self.userConfig['System']['currentCid'] = ''
-                    self.tools.writeConfFile(self.userConfig)
+                if pid == self.guiSettings.currentPid :
+                    self.guiSettings.resetBookmarks()
                 self.removed = True
                 result = output_object.getvalue()
                 QMessageBox.information(self, "Project Remove", result)

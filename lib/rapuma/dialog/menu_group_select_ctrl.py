@@ -34,17 +34,18 @@ from rapuma.core.tools                  import Tools
 
 class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui_MenuGroupSelect) :
 
-    def __init__ (self, userConfig, projectConfig, parent=None) :
+    def __init__ (self, guiSettings, userConfig, projectConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuGroupSelectCtrl, self).__init__(parent)
 
-        self.tools = Tools()
+        self.tools                      = Tools()
+        self.guiSettings                = guiSettings
         self.setupUi(self)
         self.connectionActions()
-        self.userConfig = userConfig
-        self.projectConfig = projectConfig
-        self.selectedGroup = None
+        self.userConfig                 = userConfig
+        self.projectConfig              = projectConfig
+        self.selectedGroup              = None
 
         # Populate the list with groups from the current project
         for g in self.projectConfig['Groups'].iteritems() :
@@ -73,12 +74,10 @@ class MenuGroupSelectCtrl (QDialog, QPropertyAnimation, menu_group_select_dlg.Ui
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        self.selectedGroup = self.listWidgetGroups.currentItem().text().split()[0]
-        self.userConfig['System']['currentGid'] = self.selectedGroup
-        self.gid = self.selectedGroup
-        self.userConfig['System']['currentCid'] = ''
-        self.cid = ''
-        self.tools.writeConfFile(self.userConfig)
+        self.guiSettings.currentGid = self.listWidgetGroups.currentItem().text().split()[0]
+        self.selectedGroup = self.guiSettings.currentGid
+        self.guiSettings.currentCid = ''
+        self.guiSettings.setBookmarks()
         self.close()
 
 

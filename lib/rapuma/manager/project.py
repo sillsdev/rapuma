@@ -241,30 +241,6 @@ class Project (object) :
 ############################ System Level Functions ###########################
 ###############################################################################
 
-    def setProjCurrent (self, pid) :
-        '''Compare pid with the current recored pid in rapuma.conf. If it is
-        different change to the new pid. If not, leave it alone.'''
-
-        currentPid = ''
-        if self.userConfig['System'].has_key('currentPid') :
-            currentPid = self.userConfig['System']['currentPid']
-        if pid != currentPid :
-            self.userConfig['System']['currentPid'] = pid
-            self.tools.writeConfFile(self.userConfig)
-
-
-    def setGroupCurrent (self, gid) :
-        '''Compare gid with the current recored gid in rapuma.conf. If it is
-        different change to the new gid. If not, leave it alone.'''
-
-        currentGid = ''
-        if self.userConfig['System'].has_key('currentGid') :
-            currentGid = self.userConfig['System']['currentGid']
-        if gid != currentGid :
-            self.userConfig['System']['currentGid'] = gid
-            self.tools.writeConfFile(self.userConfig)
-
-
     def run (self, command, opts, userConfig) :
         '''Run a command'''
 

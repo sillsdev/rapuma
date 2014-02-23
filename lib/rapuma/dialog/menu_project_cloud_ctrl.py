@@ -39,7 +39,7 @@ from rapuma.dialog                      import menu_project_cloud_dlg
 
 class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.Ui_MenuProjectCloud) :
 
-    def __init__ (self, pid, userConfig, parent=None) :
+    def __init__ (self, guiSettings, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
         super(MenuProjectCloudCtrl, self).__init__(parent)
@@ -47,16 +47,22 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         # Setup the GUI
         self.setupUi(self)
         self.connectionActions()
+        self.completed              = False
         self.tools                  = Tools()
-        self.pid                    = pid
+        self.guiSettings            = guiSettings
         self.userConfig             = userConfig
         self.cloudPath              = self.userConfig['Resources']['cloud']
         self.projPath               = self.userConfig['Resources']['projects']
         try :
-            self.projPath           = self.userConfig['Projects'][self.pid]['projectPath']
+            self.projPath           = self.userConfig['Projects'][self.guiSettings.currentPid]['projectPath']
             self.lineEditProjectLocal.setText(self.projPath)
         except :
             pass
+            
+        dirs = os.listdir(self.cloudPath)
+        dirs.sort()
+        for d in dirs :
+            self.comboBoxCloudProjects.addItem(d)
 
 
     def main (self) :
@@ -97,17 +103,17 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
             if (widget!=0) and (type(widget) is QRadioButton) :
                 # Do an action according to wich one was selected
                 if i == 0 and widget.isChecked() :
-                    ProjData(self.pid).pushToCloud(self.checkBoxFlush.isChecked())
+                    ProjData(self.guiSettings.currentPid).pushToCloud(self.checkBoxFlush.isChecked())
                 elif i == 2 and widget.isChecked() :
-                    ProjData(self.pid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
+                    ProjData(self.guiSettings.currentPid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
                 elif i == 4 and widget.isChecked() :
-                    if os.path.exists(os.path.join(self.cloudPath, self.lineEditProjectCloudId.text())) :
-                        self.pid = self.lineEditProjectCloudId.text()
-                        self.userConfig['System']['currentPid'] = self.pid
-                        self.userConfig['System']['currentGid'] = ''
-                        self.userConfig['System']['currentCid'] = ''
-                        self.tools.writeConfFile(self.userConfig)
-                        ProjData(self.pid).pullFromCloud(False, self.lineEditProjectLocal.text())
+                    if os.path.exists(os.path.join(self.cloudPath, self.comboBoxCloudProjects.currentText())) :
+                        self.guiSettings.currentPid = self.comboBoxCloudProjects.currentText()
+                        self.guiSettings.currentGid = ''
+                        self.guiSettings.currentCid = ''
+                        self.guiSettings.setBookmarks()
+                        ProjData(self.guiSettings.currentPid).pullFromCloud(False, self.lineEditProjectLocal.text())
+                        self.completed = True
                     else :
                         QMessageBox.warning(self, "Error!", """<p>Cloud ID not valid.""")
 

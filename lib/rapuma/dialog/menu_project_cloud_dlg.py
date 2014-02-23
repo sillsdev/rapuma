@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_cloud_dlg.ui'
 #
-# Created: Fri Feb 21 14:22:56 2014
+# Created: Sun Feb 23 08:22:56 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,10 +52,11 @@ class Ui_MenuProjectCloud(object):
         self.radioButtonRestore = QtGui.QRadioButton(self.groupBoxAction)
         self.radioButtonRestore.setObjectName("radioButtonRestore")
         self.gridLayout_2.addWidget(self.radioButtonRestore, 2, 0, 1, 1)
-        self.lineEditProjectCloudId = QtGui.QLineEdit(self.groupBoxAction)
-        self.lineEditProjectCloudId.setEnabled(False)
-        self.lineEditProjectCloudId.setObjectName("lineEditProjectCloudId")
-        self.gridLayout_2.addWidget(self.lineEditProjectCloudId, 2, 1, 1, 1)
+        self.comboBoxCloudProjects = QtGui.QComboBox(self.groupBoxAction)
+        self.comboBoxCloudProjects.setEnabled(False)
+        self.comboBoxCloudProjects.setFrame(True)
+        self.comboBoxCloudProjects.setObjectName("comboBoxCloudProjects")
+        self.gridLayout_2.addWidget(self.comboBoxCloudProjects, 2, 1, 1, 1)
         self.gridLayout.addWidget(self.groupBoxAction, 2, 0, 1, 2)
         self.lineEditProjectLocal = QtGui.QLineEdit(MenuProjectCloud)
         self.lineEditProjectLocal.setObjectName("lineEditProjectLocal")
@@ -67,7 +68,7 @@ class Ui_MenuProjectCloud(object):
         QtCore.QObject.connect(self.radioButtonPull, QtCore.SIGNAL("toggled(bool)"), self.checkBoxBackup.setEnabled)
         QtCore.QObject.connect(self.radioButtonPush, QtCore.SIGNAL("toggled(bool)"), self.checkBoxFlush.setEnabled)
         QtCore.QObject.connect(self.pushButtonLocalBrowse, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.setupUi)
-        QtCore.QObject.connect(self.radioButtonRestore, QtCore.SIGNAL("toggled(bool)"), self.lineEditProjectCloudId.setEnabled)
+        QtCore.QObject.connect(self.radioButtonRestore, QtCore.SIGNAL("toggled(bool)"), self.comboBoxCloudProjects.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectCloud)
         MenuProjectCloud.setTabOrder(self.pushButtonCancel, self.pushButtonOk)
         MenuProjectCloud.setTabOrder(self.pushButtonOk, self.lineEditProjectLocal)
@@ -77,7 +78,6 @@ class Ui_MenuProjectCloud(object):
         MenuProjectCloud.setTabOrder(self.radioButtonPull, self.radioButtonRestore)
         MenuProjectCloud.setTabOrder(self.radioButtonRestore, self.checkBoxFlush)
         MenuProjectCloud.setTabOrder(self.checkBoxFlush, self.checkBoxBackup)
-        MenuProjectCloud.setTabOrder(self.checkBoxBackup, self.lineEditProjectCloudId)
 
     def retranslateUi(self, MenuProjectCloud):
         MenuProjectCloud.setWindowTitle(QtGui.QApplication.translate("MenuProjectCloud", "Rapuma - Manage Cloud", None, QtGui.QApplication.UnicodeUTF8))
@@ -99,8 +99,6 @@ class Ui_MenuProjectCloud(object):
         self.checkBoxBackup.setText(QtGui.QApplication.translate("MenuProjectCloud", "Backup", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonRestore.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Add a new local project with data from the cloud", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonRestore.setText(QtGui.QApplication.translate("MenuProjectCloud", "Restore From Cloud", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditProjectCloudId.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Enter a cloud project ID to restore", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditProjectCloudId.setPlaceholderText(QtGui.QApplication.translate("MenuProjectCloud", "Enter Cloud ID", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditProjectLocal.setToolTip(QtGui.QApplication.translate("MenuProjectCloud", "Enter the path to the local project", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditProjectLocal.setPlaceholderText(QtGui.QApplication.translate("MenuProjectCloud", "Enter Path", None, QtGui.QApplication.UnicodeUTF8))
 

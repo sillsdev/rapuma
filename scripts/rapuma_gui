@@ -113,6 +113,7 @@ from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QMainWindow, QApplication, QMessageBox, QStackedWidget
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import main_dlg
+from rapuma.dialog                      import gui_config
 from rapuma.icon.pyresources            import qInitResources, qCleanupResources
 
 # Grab some system info
@@ -149,6 +150,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         appicon.addFile(':/rpm_32.png')
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
+        self.guiSettings        = gui_config.GuiConfig()
         self.sysConfig          = sysConfig
         self.tools              = Tools()
         self.setWindowIcon(appicon)
@@ -215,34 +217,30 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.userConfig         = UserConfig().userConfig
         self.projectConfig      = None
 
-        # Set the current IDs for PID, GID, and CID
-        self.pid            = self.userConfig['System']['currentPid']
-        self.gid            = self.userConfig['System']['currentGid']
-        self.cid            = self.userConfig['System']['currentCid']
         # Go to the last item that was selected or go to work area 0 if there is nothing selected
-        if self.pid :
+        if self.guiSettings.currentPid :
             # Quick grab the projectConfig, we may need it later
             try :
-                self.proj_config = Config(self.pid)
+                self.proj_config = Config(self.guiSettings.currentPid)
                 self.proj_config.getProjectConfig()
                 self.projectConfig = self.proj_config.projectConfig
             except :
                 pass
             # Now find the window to land in
-            if self.cid :
-                self.labelComponentCid.setText(self.cid)
+            if self.guiSettings.currentCid :
+                self.labelComponentCid.setText(self.guiSettings.currentCid)
                 self.setCurrentIndexWorkArea(3)
-            elif self.gid :
-                self.labelGroupGid.setText(self.gid)
+            elif self.guiSettings.currentGid :
+                self.labelGroupGid.setText(self.guiSettings.currentGid)
                 self.setCurrentIndexWorkArea(2)
             else :
-                self.labelProjectPid.setText(self.pid)
+                self.labelProjectPid.setText(self.guiSettings.currentPid)
                 self.setCurrentIndexWorkArea(1)
+                self.lineEditProjectName.setText(self.userConfig['Projects'][self.guiSettings.currentPid]['projectName'])
         else :
-            # If not project is selected we get rid of any group and component selections
-            self.userConfig['System']['currentGid'] = ''
-            self.userConfig['System']['currentCid'] = ''
-            self.tools.writeConfFile(self.userConfig)
+#            # If no project is selected we get rid of any group and component selections
+#            self.guiSettings.setCurrentGid()
+#            self.guiSettings.setCurrentCid()
             self.setCurrentIndexWorkArea(0)
 
 
@@ -259,50 +257,60 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 # Project #####################################################################
 
     def mProjectAdd (self) :
-        dlg = self.menu_project_add_ctrl.MenuProjectAddCtrl(self.sysConfig, self.userConfig)
-        if dlg.exec_() :
+        dlg = self.menu_project_add_ctrl.MenuProjectAddCtrl(self.guiSettings, self.sysConfig, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectSelect (self) :
-        dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl(self.userConfig)
+        dlg = self.menu_project_select_ctrl.MenuProjectSelectCtrl(self.guiSettings, self.userConfig)
         dlg.exec_()
         if dlg.selectedProject :
             self.updateSettings()
 
     def mProjectArchive (self) :
-        dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl(self.userConfig)
-        if dlg.exec_() :
+        dlg = self.menu_project_archive_ctrl.MenuProjectArchiveCtrl(self.guiSettings, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectBackup (self) :
-        dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl(self.userConfig)
-        if dlg.exec_() :
+        dlg = self.menu_project_backup_ctrl.MenuProjectBackupCtrl(self.guiSettings, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectCloud (self) :
-        dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.pid, self.userConfig)
-        if dlg.exec_() :
+        
+        dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.guiSettings, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectReap (self) :
-        dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl(self.userConfig)
-        if dlg.exec_() :
+        dlg = self.menu_project_reap_ctrl.MenuProjectReapCtrl(self.guiSettings, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectRemove (self) :
-        dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl(self.userConfig)
+
+        self.userConfig         = UserConfig().userConfig
+        dlg = self.menu_project_remove_ctrl.MenuProjectRemoveCtrl(self.guiSettings, self.userConfig)
         dlg.exec_()
         if dlg.removed :
             self.updateSettings()
 
     def mProjectTemplate (self) :
-        dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl(self.userConfig)
-        if dlg.exec_() :
+        dlg = self.menu_project_template_ctrl.MenuProjectTemplateCtrl(self.guiSettings, self.userConfig)
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectSystempreferences (self) :
         dlg = self.menu_project_systempreferences_ctrl.MenuProjectSystempreferencesCtrl()
-        if dlg.exec_() :
+        dlg.exec_()
+        if dlg.completed :
             self.updateSettings()
 
     def mProjectQuit (self) :
@@ -315,8 +323,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def mGroupSelect (self) :
         '''Select a group in the current project.'''
 
-        if self.pid :
-            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.userConfig, self.projectConfig)
+        if self.guiSettings.currentPid :
+            dlg = self.menu_group_select_ctrl.MenuGroupSelectCtrl(self.guiSettings, self.userConfig, self.projectConfig)
             dlg.exec_()
             if dlg.selectedGroup :
                 self.updateSettings()
@@ -329,8 +337,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def mComponentSelect (self) :
         '''Select a component from the current selected group.'''
         
-        if self.gid :
-            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl(self.userConfig, self.projectConfig, self.gid)
+        if self.guiSettings.currentGid :
+            dlg = self.menu_component_select_ctrl.MenuComponentSelectCtrl(self.guiSettings, self.userConfig, self.projectConfig)
             dlg.exec_()
             if dlg.selectedComponent :
                 self.updateSettings()
