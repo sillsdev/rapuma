@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MenuProjectBackupRestore</class>
+ <widget class="QWidget" name="MenuProjectBackupRestore">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>370</width>
+    <height>412</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Rapuma - Manage Backups</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupBoxBackupAction">
+     <property name="toolTip">
+      <string>Define the action to be taken</string>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="11" column="0">
+       <widget class="QLabel" name="labelNeLocation">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>New Location (Folder)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QRadioButton" name="radioButtonRemove">
+        <property name="toolTip">
+         <string>Update the local project with data pulled from the cloud</string>
+        </property>
+        <property name="text">
+         <string>Remove Backup</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QRadioButton" name="radioButtonRestoreNew">
+        <property name="toolTip">
+         <string>Add a new local project with data from the cloud</string>
+        </property>
+        <property name="text">
+         <string>Restore As New</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEditProjectLocation">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Path to a location to restore a backup to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="2">
+       <widget class="QPushButton" name="pushButtonBrowseProjectLocation">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Browse to a location to restore a backup</string>
+        </property>
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="2">
+       <widget class="QPushButton" name="pushButtonBrowseBackupFile">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Browse to backup file you wish to restore</string>
+        </property>
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelSelectBackup">
+        <property name="text">
+         <string>Select Backup</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="labelBackupFile">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Backup File</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEditBackupFile">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Path to a backup file</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QCheckBox" name="checkBoxCustomBackupLocation">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Restore a backup from outside the system</string>
+        </property>
+        <property name="text">
+         <string>Custom</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="labelSelectAction">
+        <property name="text">
+         <string>Select Action</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelSelectProject">
+        <property name="text">
+         <string>Select Project</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="QComboBox" name="comboBoxSelectBackup">
+        <property name="toolTip">
+         <string>Select a backup to restore</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QComboBox" name="comboBoxSelectProject">
+        <property name="toolTip">
+         <string>Select project to restore a backup to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QRadioButton" name="radioButtonRestore">
+        <property name="toolTip">
+         <string>Update (push to) the cloud with local project data</string>
+        </property>
+        <property name="text">
+         <string>Restore Backup</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="pushButtonOk">
+     <property name="toolTip">
+      <string>Manage a backup operation</string>
+     </property>
+     <property name="text">
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pushButtonCancel">
+     <property name="toolTip">
+      <string>Cancel this operation</string>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonOk</tabstop>
+  <tabstop>radioButtonRemove</tabstop>
+  <tabstop>radioButtonRestoreNew</tabstop>
+  <tabstop>checkBoxCustomBackupLocation</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>radioButtonRestoreNew</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelNeLocation</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>105</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>85</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonRestoreNew</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditProjectLocation</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>133</x>
+     <y>238</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>121</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonRestoreNew</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pushButtonBrowseProjectLocation</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>238</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>310</x>
+     <y>286</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonRestoreNew</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBoxCustomBackupLocation</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>185</x>
+     <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxCustomBackupLocation</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelBackupFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>129</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxCustomBackupLocation</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditBackupFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>245</x>
+     <y>244</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxCustomBackupLocation</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pushButtonBrowseBackupFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>334</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setupUi()</slot>
+ </slots>
+</ui>
