@@ -100,6 +100,13 @@
   <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/Style/usfmTex-ext.sty"/>
   <file path="file:///home/dennis/Publishing/MLF/MLF-THAI-NT/TeX/usfmTex-ext.tex"/>
 </session>
+<session name="PA2014">
+  <file path="file:///home/dennis/Projects/photo-album-maker/mseag_album_A5.py"/>
+  <file path="file:///home/dennis/Projects/photo-album-maker/mseag_album_pics.py"/>
+  <file path="file:///home/dennis/Projects/photo-album-maker/testing.py"/>
+  <file path="file:///home/dennis/Publishing/MSEAG/CPA2014/data/Conference%20Photo%20Book%202014%20-%20Sheet1.csv"/>
+  <file path="file:///home/dennis/Publishing/MSEAG/CPA2014/data/test.csv"/>
+</session>
 <session name="Rapuma">
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
@@ -131,6 +138,7 @@
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/config/rapuma.xml"/>
   <file path="file:///home/dennis/Projects/rapuma/config/rapuma_gui.xml"/>
+  <file path="file:///home/dennis/.config/rapuma/rapuma_gui.conf"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/gui_config.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma"/>
   <file path="file:///home/dennis/Projects/rapuma/make_ui"/>
@@ -138,6 +146,7 @@
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.py"/>
   <file path="file:///home/dennis/Projects/rapuma/scripts/rapuma_gui"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_ctrl.py"/>
+  <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_cloud_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_ctrl.py"/>
   <file path="file:///home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_select_ctrl.py"/>

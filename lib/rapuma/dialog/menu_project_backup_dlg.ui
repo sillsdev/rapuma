@@ -212,11 +212,18 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>pushButtonCancel</tabstop>
   <tabstop>pushButtonOk</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>comboBoxSelectProject</tabstop>
+  <tabstop>comboBoxSelectBackup</tabstop>
+  <tabstop>radioButtonRestore</tabstop>
   <tabstop>radioButtonRemove</tabstop>
   <tabstop>radioButtonRestoreNew</tabstop>
   <tabstop>checkBoxCustomBackupLocation</tabstop>
+  <tabstop>lineEditProjectLocation</tabstop>
+  <tabstop>pushButtonBrowseProjectLocation</tabstop>
+  <tabstop>lineEditBackupFile</tabstop>
+  <tabstop>pushButtonBrowseBackupFile</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -329,6 +336,70 @@
     <hint type="destinationlabel">
      <x>293</x>
      <y>334</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>MenuProjectBackupRestore</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonOk</sender>
+   <signal>clicked()</signal>
+   <receiver>MenuProjectBackupRestore</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>190</x>
+     <y>388</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>153</x>
+     <y>372</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonBrowseProjectLocation</sender>
+   <signal>clicked()</signal>
+   <receiver>MenuProjectBackupRestore</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>332</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>293</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonBrowseBackupFile</sender>
+   <signal>clicked()</signal>
+   <receiver>MenuProjectBackupRestore</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>340</x>
+     <y>342</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>337</y>
     </hint>
    </hints>
   </connection>

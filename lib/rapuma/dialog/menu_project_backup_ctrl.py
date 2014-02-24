@@ -35,14 +35,14 @@ from PySide.QtGui                       import QDialog, QApplication, QMessageBo
                                                 QListWidgetItem, QFileDialog, \
                                                  QRadioButton
 from PySide.QtCore                      import QPropertyAnimation
-from rapuma.dialog                      import menu_project_cloud_dlg
+from rapuma.dialog                      import menu_project_backup_dlg
 
-class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.Ui_MenuProjectCloud) :
+class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dlg.Ui_MenuProjectBackupRestore) :
 
     def __init__ (self, guiSettings, userConfig, parent=None) :
         '''Initialize and start up the UI'''
 
-        super(MenuProjectCloudCtrl, self).__init__(parent)
+        super(MenuProjectBackupCtrl, self).__init__(parent)
 
         # Setup the GUI
         self.setupUi(self)
@@ -51,18 +51,30 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         self.tools                  = Tools()
         self.guiSettings            = guiSettings
         self.userConfig             = userConfig
-        self.cloudPath              = self.userConfig['Resources']['cloud']
         self.projPath               = self.userConfig['Resources']['projects']
-        try :
-            self.projPath           = self.userConfig['Projects'][self.guiSettings.currentPid]['projectPath']
-            self.lineEditProjectLocal.setText(self.projPath)
-        except :
-            pass
-            
-        dirs = os.listdir(self.cloudPath)
-        dirs.sort()
-        for d in dirs :
-            self.comboBoxCloudProjects.addItem(d)
+        self.backupPath             = self.userConfig['Resources']['backup']
+        self.currentBackupFolder    = os.path.join(self.backupPath, self.guiSettings.currentPid)
+        self.lineEditProjectLocation.setText(self.projPath)
+
+        # Populate the project combo box
+        projs = self.userConfig['Projects'].keys()
+        projs.sort()
+        c = 0
+        for p in projs :
+            self.comboBoxSelectProject.addItem(p)
+            if p == self.guiSettings.currentPid :
+                pSet = c
+        self.comboBoxSelectProject.setItemText(pSet, self.guiSettings.currentPid)
+
+        # Populate the backup combo box
+        bkups = os.listdir(self.currentBackupFolder)
+        bkups.sort()
+        for b in bkups :
+        
+# FIXME: Need to convert the datestamp to human readable form
+        
+            self.comboBoxSelectBackup.addItem(b)
+
 
 
     def main (self) :
@@ -75,19 +87,6 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         '''Connect to form buttons.'''
 
         self.pushButtonOk.clicked.connect(self.okClicked)
-        self.pushButtonLocalBrowse.clicked.connect(self.findProjPath)
-
-
-    def findProjPath (self) :
-        '''Call a basic find folder widget to get the path we want.'''
-
-        dialog = QFileDialog(self, "Find a Folder")
-        dialog.setDirectory(self.projPath)
-        dialog.setFileMode(QFileDialog.Directory)
-        dialog.setOption(QFileDialog.ShowDirsOnly)
-        if dialog.exec_() :
-            # When the folder is found, change the right line edit box
-            self.lineEditProjectLocal.setText(dialog.selectedFiles()[0])
 
 
     def okClicked (self) :
@@ -96,26 +95,18 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         # Look at the radio buttons in the Action group
         # (This was taken from: 
         #   http://stackoverflow.com/questions/2089897/finding-checked-qradiobutton-among-many-into-a-qvboxlayout )
-        actionContents = self.groupBoxAction.layout()
-        for i in range(0, actionContents.count()) :
-            widget = actionContents.itemAt(i).widget()
+        actionContents = self.groupBoxBackupAction.layout()
+        for i in range(0, groupBoxBackupAction.count()) :
+            widget = groupBoxBackupAction.itemAt(i).widget()
             # Find the radio buttons
             if (widget!=0) and (type(widget) is QRadioButton) :
                 # Do an action according to wich one was selected
                 if i == 0 and widget.isChecked() :
-                    ProjData(self.guiSettings.currentPid).pushToCloud(self.checkBoxFlush.isChecked())
+                    print 'Restore Backup'
                 elif i == 2 and widget.isChecked() :
-                    ProjData(self.guiSettings.currentPid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
+                    print 'Remove Backup'
                 elif i == 4 and widget.isChecked() :
-                    if os.path.exists(os.path.join(self.cloudPath, self.comboBoxCloudProjects.currentText())) :
-                        self.guiSettings.currentPid = self.comboBoxCloudProjects.currentText()
-                        self.guiSettings.currentGid = ''
-                        self.guiSettings.currentCid = ''
-                        self.guiSettings.setBookmarks()
-                        ProjData(self.guiSettings.currentPid).pullFromCloud(False, self.lineEditProjectLocal.text())
-                        self.completed = True
-                    else :
-                        QMessageBox.warning(self, "Error!", """<p>Cloud ID not valid.""")
+                    print 'Restore as new'
 
 
         self.close()
