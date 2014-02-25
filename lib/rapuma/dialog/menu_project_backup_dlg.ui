@@ -406,6 +406,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>comboBoxSelectProject</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>MenuProjectBackupRestore</receiver>
+   <slot>setupUi()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>346</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setupUi()</slot>

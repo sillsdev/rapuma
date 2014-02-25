@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_dlg.ui'
 #
-# Created: Tue Feb 25 20:05:58 2014
+# Created: Tue Feb 25 21:01:18 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -97,6 +97,7 @@ class Ui_MenuProjectBackupRestore(object):
         QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.setupUi)
         QtCore.QObject.connect(self.pushButtonBrowseProjectLocation, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.setupUi)
         QtCore.QObject.connect(self.pushButtonBrowseBackupFile, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.setupUi)
+        QtCore.QObject.connect(self.comboBoxSelectProject, QtCore.SIGNAL("currentIndexChanged(QString)"), MenuProjectBackupRestore.setupUi)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectBackupRestore)
         MenuProjectBackupRestore.setTabOrder(self.pushButtonOk, self.pushButtonCancel)
         MenuProjectBackupRestore.setTabOrder(self.pushButtonCancel, self.comboBoxSelectProject)

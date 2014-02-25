@@ -28,6 +28,7 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.project.proj_setup          import ProjDelete
 from rapuma.core.proj_data              import ProjData
+from rapuma.core.proj_local             import ProjLocal
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -51,38 +52,40 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         self.tools                  = Tools()
         self.guiSettings            = guiSettings
         self.userConfig             = userConfig
-        self.projPath               = self.userConfig['Resources']['projects']
-        self.backupPath             = self.userConfig['Resources']['backup']
-        self.currentBackupFolder    = os.path.join(self.backupPath, self.guiSettings.currentPid)
-        self.lineEditProjectLocation.setText(self.projPath)
-        self.pSet                   = 0
+        self.local                  = ProjLocal(self.guiSettings.currentPid)
+        self.localPid               = self.guiSettings.currentPid
+        self.lineEditProjectLocation.setText(self.local.projHome)
+        self.populateProjects()
 
 
-# FIXME: Break these out to seperate functions
+    def populateProjects (self) :
+        '''Populate the project combo box.'''
 
-
-        # Populate the project combo box
+        if self.comboBoxSelectProject.currentText() :
+            self.localPid = self.comboBoxSelectProject.currentText()
         projs = self.userConfig['Projects'].keys()
         projs.sort()
         c = 0
         for p in projs :
             self.comboBoxSelectProject.addItem(p)
-            if p == self.guiSettings.currentPid :
-                self.pSet = c
+            if p == self.localPid :
+                pSet = c
             c +=1
+        self.comboBoxSelectProject.setCurrentIndex(pSet)
+        self.populateBackups()
 
-        # Populate the backup combo box
-        bkups = os.listdir(self.currentBackupFolder)
+
+    def populateBackups (self) :
+        '''Populate the backup combo box.'''
+
+        self.comboBoxSelectBackup.clear()
+        bkups = os.listdir(os.path.join(self.local.userLibBackup, self.comboBoxSelectProject.currentText()))
         bkups.sort()
         for b in bkups :
             dt = b[:14]
             dt = datetime.datetime(int(dt[:4]), int(dt[4:6]), int(dt[6:8]), int(dt[8:10]), int(dt[10:12]), int(dt[12:14]))
             dt = dt.strftime('%A, %d-%b-%Y, %I:%M %p')
             self.comboBoxSelectBackup.addItem(dt)
-
-        print self.pSet, self.guiSettings.currentPid
-        self.comboBoxSelectProject.setCurrentIndex(self.pSet)
-
 
 
     def main (self) :
@@ -95,6 +98,7 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         '''Connect to form buttons.'''
 
         self.pushButtonOk.clicked.connect(self.okClicked)
+        self.comboBoxSelectProject.currentIndexChanged.connect(self.populateBackups)
 
 
     def okClicked (self) :
