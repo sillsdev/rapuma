@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys, StringIO
+import os, sys, StringIO, datetime
 
 # Load Rapuma modules
 from rapuma.core.tools                  import Tools
@@ -55,6 +55,11 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         self.backupPath             = self.userConfig['Resources']['backup']
         self.currentBackupFolder    = os.path.join(self.backupPath, self.guiSettings.currentPid)
         self.lineEditProjectLocation.setText(self.projPath)
+        self.pSet                   = 0
+
+
+# FIXME: Break these out to seperate functions
+
 
         # Populate the project combo box
         projs = self.userConfig['Projects'].keys()
@@ -63,17 +68,20 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         for p in projs :
             self.comboBoxSelectProject.addItem(p)
             if p == self.guiSettings.currentPid :
-                pSet = c
-        self.comboBoxSelectProject.setItemText(pSet, self.guiSettings.currentPid)
+                self.pSet = c
+            c +=1
 
         # Populate the backup combo box
         bkups = os.listdir(self.currentBackupFolder)
         bkups.sort()
         for b in bkups :
-        
-# FIXME: Need to convert the datestamp to human readable form
-        
-            self.comboBoxSelectBackup.addItem(b)
+            dt = b[:14]
+            dt = datetime.datetime(int(dt[:4]), int(dt[4:6]), int(dt[6:8]), int(dt[8:10]), int(dt[10:12]), int(dt[12:14]))
+            dt = dt.strftime('%A, %d-%b-%Y, %I:%M %p')
+            self.comboBoxSelectBackup.addItem(dt)
+
+#        print pSet, self.guiSettings.currentPid
+#        self.comboBoxSelectProject.setItemText(self.pSet, self.guiSettings.currentPid)
 
 
 

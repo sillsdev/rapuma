@@ -80,10 +80,6 @@ class Project (object) :
             self.projectConfig = newConf
             self.projectConfig.filename = self.local.projectConfFile
 
-        # Go ahead and set this as the current project and group
-        self.setProjCurrent(self.projectIDCode)
-        self.setGroupCurrent(self.gid)
-
         # Log messages for this module
         self.errorCodes     = {
             'PROJ-000' : ['MSG', 'Project module messages'],

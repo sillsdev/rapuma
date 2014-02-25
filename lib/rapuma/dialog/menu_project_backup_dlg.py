@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_dlg.ui'
 #
-# Created: Mon Feb 24 15:29:32 2014
+# Created: Tue Feb 25 10:57:21 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -85,6 +85,7 @@ class Ui_MenuProjectBackupRestore(object):
         self.gridLayout_2.addWidget(self.pushButtonCancel, 1, 2, 1, 1)
 
         self.retranslateUi(MenuProjectBackupRestore)
+        self.comboBoxSelectProject.setCurrentIndex(-1)
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.labelNeLocation.setEnabled)
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.lineEditProjectLocation.setEnabled)
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.pushButtonBrowseProjectLocation.setEnabled)
