@@ -80,8 +80,8 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
             dt = dt.strftime('%A, %d-%b-%Y, %I:%M %p')
             self.comboBoxSelectBackup.addItem(dt)
 
-#        print pSet, self.guiSettings.currentPid
-#        self.comboBoxSelectProject.setItemText(self.pSet, self.guiSettings.currentPid)
+        print self.pSet, self.guiSettings.currentPid
+        self.comboBoxSelectProject.setCurrentIndex(self.pSet)
 
 
 

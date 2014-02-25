@@ -28,6 +28,7 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.project.proj_setup          import ProjDelete
 from rapuma.core.proj_data              import ProjData
+from rapuma.core.proj_local             import ProjLocal
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -51,15 +52,15 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         self.tools                  = Tools()
         self.guiSettings            = guiSettings
         self.userConfig             = userConfig
-        self.cloudPath              = self.userConfig['Resources']['cloud']
-        self.projPath               = self.userConfig['Resources']['projects']
-        try :
-            self.projPath           = self.userConfig['Projects'][self.guiSettings.currentPid]['projectPath']
-            self.lineEditProjectLocal.setText(self.projPath)
-        except :
-            pass
-            
-        dirs = os.listdir(self.cloudPath)
+        self.local                  = ProjLocal(self.guiSettings.currentPid)
+        self.lineEditProjectLocal.setText(self.local.projHome)
+        self.populateProjects()
+
+
+    def populateProjects (self) :
+        '''Populate the combo box list.'''
+
+        dirs = os.listdir(self.local.userCloudStorage)
         dirs.sort()
         for d in dirs :
             self.comboBoxCloudProjects.addItem(d)
@@ -82,7 +83,7 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
         '''Call a basic find folder widget to get the path we want.'''
 
         dialog = QFileDialog(self, "Find a Folder")
-        dialog.setDirectory(self.projPath)
+        dialog.setDirectory(self.local.projHome)
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly)
         if dialog.exec_() :
@@ -107,7 +108,7 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
                 elif i == 2 and widget.isChecked() :
                     ProjData(self.guiSettings.currentPid).pullFromCloud(self.checkBoxBackup.isChecked(), self.lineEditProjectLocal.text())
                 elif i == 4 and widget.isChecked() :
-                    if os.path.exists(os.path.join(self.cloudPath, self.comboBoxCloudProjects.currentText())) :
+                    if os.path.exists(os.path.join(self.local.userCloudStorage, self.comboBoxCloudProjects.currentText())) :
                         self.guiSettings.currentPid = self.comboBoxCloudProjects.currentText()
                         self.guiSettings.currentGid = ''
                         self.guiSettings.currentCid = ''

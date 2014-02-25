@@ -17,11 +17,11 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=14
+current_page=3
 FILE_NAME_0=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/paratext.py;0;4
 FILE_NAME_1=13418;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_2=7202;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
-FILE_NAME_3=11476;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
+FILE_NAME_3=4076;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
 FILE_NAME_4=10798;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py;0;4
 FILE_NAME_5=41222;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
 FILE_NAME_6=8582;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
