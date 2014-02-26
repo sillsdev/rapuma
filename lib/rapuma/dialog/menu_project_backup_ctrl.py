@@ -108,8 +108,8 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         # (This was taken from: 
         #   http://stackoverflow.com/questions/2089897/finding-checked-qradiobutton-among-many-into-a-qvboxlayout )
         actionContents = self.groupBoxBackupAction.layout()
-        for i in range(0, groupBoxBackupAction.count()) :
-            widget = groupBoxBackupAction.itemAt(i).widget()
+        for i in range(0, actionContents.count()) :
+            widget = actionContents.itemAt(i).widget()
             # Find the radio buttons
             if (widget!=0) and (type(widget) is QRadioButton) :
                 # Do an action according to wich one was selected
@@ -131,7 +131,7 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
 if __name__ == '__main__' :
 
     app = QApplication(sys.argv)
-    window = MenuProjectCloudCtrl()
+    window = MenuProjectBackupCtrl()
     window.main()
     sys.exit(app.exec_())
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_dlg.ui'
 #
-# Created: Tue Feb 25 21:01:18 2014
+# Created: Wed Feb 26 14:48:37 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -11,6 +11,7 @@ from PySide import QtCore, QtGui
 
 class Ui_MenuProjectBackupRestore(object):
     def setupUi(self, MenuProjectBackupRestore):
+#        import pdb; pdb.set_trace()
         MenuProjectBackupRestore.setObjectName("MenuProjectBackupRestore")
         MenuProjectBackupRestore.resize(370, 412)
         self.gridLayout_2 = QtGui.QGridLayout(MenuProjectBackupRestore)
@@ -90,7 +91,6 @@ class Ui_MenuProjectBackupRestore(object):
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.lineEditProjectLocation.setEnabled)
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.pushButtonBrowseProjectLocation.setEnabled)
         QtCore.QObject.connect(self.radioButtonRestoreNew, QtCore.SIGNAL("toggled(bool)"), self.checkBoxCustomBackupLocation.setEnabled)
-        QtCore.QObject.connect(self.checkBoxCustomBackupLocation, QtCore.SIGNAL("toggled(bool)"), self.labelBackupFile.setEnabled)
         QtCore.QObject.connect(self.checkBoxCustomBackupLocation, QtCore.SIGNAL("toggled(bool)"), self.lineEditBackupFile.setEnabled)
         QtCore.QObject.connect(self.checkBoxCustomBackupLocation, QtCore.SIGNAL("toggled(bool)"), self.pushButtonBrowseBackupFile.setEnabled)
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.close)
@@ -98,6 +98,7 @@ class Ui_MenuProjectBackupRestore(object):
         QtCore.QObject.connect(self.pushButtonBrowseProjectLocation, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.setupUi)
         QtCore.QObject.connect(self.pushButtonBrowseBackupFile, QtCore.SIGNAL("clicked()"), MenuProjectBackupRestore.setupUi)
         QtCore.QObject.connect(self.comboBoxSelectProject, QtCore.SIGNAL("currentIndexChanged(QString)"), MenuProjectBackupRestore.setupUi)
+        QtCore.QObject.connect(self.checkBoxCustomBackupLocation, QtCore.SIGNAL("toggled(bool)"), self.labelBackupFile.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectBackupRestore)
         MenuProjectBackupRestore.setTabOrder(self.pushButtonOk, self.pushButtonCancel)
         MenuProjectBackupRestore.setTabOrder(self.pushButtonCancel, self.comboBoxSelectProject)

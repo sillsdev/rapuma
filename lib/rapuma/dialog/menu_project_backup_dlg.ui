@@ -297,22 +297,6 @@
   <connection>
    <sender>checkBoxCustomBackupLocation</sender>
    <signal>toggled(bool)</signal>
-   <receiver>labelBackupFile</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>216</x>
-     <y>239</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>129</x>
-     <y>318</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBoxCustomBackupLocation</sender>
-   <signal>toggled(bool)</signal>
    <receiver>lineEditBackupFile</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
@@ -419,6 +403,22 @@
     <hint type="destinationlabel">
      <x>346</x>
      <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxCustomBackupLocation</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelBackupFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>234</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>65</x>
+     <y>317</y>
     </hint>
    </hints>
   </connection>
