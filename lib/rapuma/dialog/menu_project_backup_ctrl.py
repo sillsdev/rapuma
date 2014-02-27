@@ -38,7 +38,7 @@ from PySide.QtGui                       import QDialog, QApplication, QMessageBo
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_backup_dlg
 
-class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dlg.Ui_MenuProjectBackupRestore) :
+class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dlg.Ui_MenuProjectBackup) :
 
     def __init__ (self, guiSettings, userConfig, parent=None) :
         '''Initialize and start up the UI'''
@@ -53,24 +53,28 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         self.guiSettings            = guiSettings
         self.userConfig             = userConfig
         self.local                  = ProjLocal(self.guiSettings.currentPid)
-        self.localPid               = self.guiSettings.currentPid
         self.lineEditProjectLocation.setText(self.local.projHome)
+        self.localPid               = self.guiSettings.currentPid
         self.populateProjects()
 
 
     def populateProjects (self) :
         '''Populate the project combo box.'''
 
+#        import pdb; pdb.set_trace()
+
         if self.comboBoxSelectProject.currentText() :
             self.localPid = self.comboBoxSelectProject.currentText()
-        projs = self.userConfig['Projects'].keys()
-        projs.sort()
-        c = 0
-        for p in projs :
-            self.comboBoxSelectProject.addItem(p)
-            if p == self.localPid :
-                pSet = c
-            c +=1
+        projects = self.userConfig['Projects'].keys()
+        projects.sort()
+        count = 0
+        pSet = ''
+        for proj in projects :
+            if proj == self.localPid :
+                pSet = count
+            count +=1
+        self.comboBoxSelectProject.clear()
+        self.comboBoxSelectProject.addItems(projects)
         self.comboBoxSelectProject.setCurrentIndex(pSet)
         self.populateBackups()
 
@@ -83,9 +87,10 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         bkups.sort()
         for b in bkups :
             dt = b[:14]
+            bn = dt
             dt = datetime.datetime(int(dt[:4]), int(dt[4:6]), int(dt[6:8]), int(dt[8:10]), int(dt[10:12]), int(dt[12:14]))
             dt = dt.strftime('%A, %d-%b-%Y, %I:%M %p')
-            self.comboBoxSelectBackup.addItem(dt)
+            self.comboBoxSelectBackup.addItem(dt, bn)
 
 
     def main (self) :
@@ -114,11 +119,33 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
             if (widget!=0) and (type(widget) is QRadioButton) :
                 # Do an action according to wich one was selected
                 if i == 0 and widget.isChecked() :
-                    print 'Restore Backup'
+                    print 'Backup Selected', i, self.comboBoxSelectBackup.itemData(1)
+
+
+
+                    
+# FIXME: Something is not quite right here with this command
+                    
+                    ProjData(self.localPid).restoreLocalBackup(self.comboBoxSelectBackup.itemData(1))
+
+
+
+
+                elif i == 1 and widget.isChecked() :
+                    print 'Remove Backup', i
                 elif i == 2 and widget.isChecked() :
-                    print 'Remove Backup'
-                elif i == 4 and widget.isChecked() :
-                    print 'Restore as new'
+                    print 'Restore as new', i
+                elif i == 3 and widget.isChecked() :
+                    print 'Restore as new', i
+
+#            elif cmdType == 'backup' :
+#                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
+#                    ProjData(pid).restoreLocalBackup(args.bak_num)
+#                else :
+#                    if sourcePath :
+#                        ProjData(pid).restoreExternalBackup(sourcePath, targetPath)
+#                    else :
+#                        sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
 
 
         self.close()

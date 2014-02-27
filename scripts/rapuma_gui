@@ -281,7 +281,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             self.updateSettings()
 
     def mProjectCloud (self) :
-        
         dlg = self.menu_project_cloud_ctrl.MenuProjectCloudCtrl(self.guiSettings, self.userConfig)
         dlg.exec_()
         if dlg.completed :

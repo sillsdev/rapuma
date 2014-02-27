@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_cloud_dlg.ui'
 #
-# Created: Wed Feb 26 14:48:37 2014
+# Created: Thu Feb 27 16:46:26 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,10 +64,10 @@ class Ui_MenuProjectCloud(object):
 
         self.retranslateUi(MenuProjectCloud)
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.close)
-        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectCloud.setupUi)
+        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectCloud.update)
         QtCore.QObject.connect(self.radioButtonPull, QtCore.SIGNAL("toggled(bool)"), self.checkBoxBackup.setEnabled)
         QtCore.QObject.connect(self.radioButtonPush, QtCore.SIGNAL("toggled(bool)"), self.checkBoxFlush.setEnabled)
-        QtCore.QObject.connect(self.pushButtonLocalBrowse, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.setupUi)
+        QtCore.QObject.connect(self.pushButtonLocalBrowse, QtCore.SIGNAL("clicked(bool)"), MenuProjectCloud.update)
         QtCore.QObject.connect(self.radioButtonRestore, QtCore.SIGNAL("toggled(bool)"), self.comboBoxCloudProjects.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectCloud)
         MenuProjectCloud.setTabOrder(self.pushButtonCancel, self.pushButtonOk)

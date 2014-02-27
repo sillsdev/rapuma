@@ -278,7 +278,7 @@
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
    <receiver>MenuProjectAdd</receiver>
-   <slot>setupUi()</slot>
+   <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
@@ -294,7 +294,7 @@
    <sender>pushButtonBrowse</sender>
    <signal>clicked()</signal>
    <receiver>MenuProjectAdd</receiver>
-   <slot>setupUi()</slot>
+   <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>408</x>

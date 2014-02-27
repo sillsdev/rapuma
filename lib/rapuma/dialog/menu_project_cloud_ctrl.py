@@ -60,6 +60,7 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
     def populateProjects (self) :
         '''Populate the combo box list.'''
 
+        comboBox = QtGui.QComboBox()
         dirs = os.listdir(self.local.userCloudStorage)
         dirs.sort()
         for d in dirs :

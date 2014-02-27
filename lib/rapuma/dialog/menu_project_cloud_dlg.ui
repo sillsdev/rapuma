@@ -190,7 +190,7 @@
    <sender>pushButtonOk</sender>
    <signal>clicked()</signal>
    <receiver>MenuProjectCloud</receiver>
-   <slot>setupUi()</slot>
+   <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>344</x>
@@ -238,7 +238,7 @@
    <sender>pushButtonLocalBrowse</sender>
    <signal>clicked(bool)</signal>
    <receiver>MenuProjectCloud</receiver>
-   <slot>setupUi()</slot>
+   <slot>update()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>395</x>

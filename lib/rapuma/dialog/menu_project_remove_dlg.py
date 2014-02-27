@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_dlg.ui'
 #
-# Created: Wed Feb 26 14:48:37 2014
+# Created: Thu Feb 27 16:46:26 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_MenuProjectRemove(object):
 
         self.retranslateUi(MenuProjectRemove)
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuProjectRemove.close)
-        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectRemove.setupUi)
+        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectRemove.update)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectRemove)
         MenuProjectRemove.setTabOrder(self.pushButtonOk, self.pushButtonCancel)
 

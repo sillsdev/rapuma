@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_dlg.ui'
 #
-# Created: Wed Feb 26 14:48:37 2014
+# Created: Thu Feb 27 16:46:26 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -96,8 +96,8 @@ class Ui_MenuProjectAdd(object):
 
         self.retranslateUi(MenuProjectAdd)
         QtCore.QObject.connect(self.pushButtonCancel, QtCore.SIGNAL("clicked(bool)"), MenuProjectAdd.close)
-        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectAdd.setupUi)
-        QtCore.QObject.connect(self.pushButtonBrowse, QtCore.SIGNAL("clicked()"), MenuProjectAdd.setupUi)
+        QtCore.QObject.connect(self.pushButtonOk, QtCore.SIGNAL("clicked()"), MenuProjectAdd.update)
+        QtCore.QObject.connect(self.pushButtonBrowse, QtCore.SIGNAL("clicked()"), MenuProjectAdd.update)
         QtCore.QMetaObject.connectSlotsByName(MenuProjectAdd)
         MenuProjectAdd.setTabOrder(self.pushButtonCancel, self.lineEditLangId)
         MenuProjectAdd.setTabOrder(self.lineEditLangId, self.lineEditScriptId)
