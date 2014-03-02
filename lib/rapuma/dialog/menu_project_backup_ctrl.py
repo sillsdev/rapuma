@@ -53,8 +53,9 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         self.guiSettings            = guiSettings
         self.userConfig             = userConfig
         self.local                  = ProjLocal(self.guiSettings.currentPid)
-        self.lineEditProjectLocation.setText(self.local.projHome)
+        self.lineEditNewProjectLocation.setText(self.local.projHome)
         self.localPid               = self.guiSettings.currentPid
+        self.curBakDict             = {}
         self.populateProjects()
 
 
@@ -82,15 +83,21 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
     def populateBackups (self) :
         '''Populate the backup combo box.'''
 
+        if self.comboBoxSelectProject.currentText() :
+            self.localPid = self.comboBoxSelectProject.currentText()
         self.comboBoxSelectBackup.clear()
+        self.curBakDict = {}
         bkups = os.listdir(os.path.join(self.local.userLibBackup, self.comboBoxSelectProject.currentText()))
         bkups.sort()
         for b in bkups :
             dt = b[:14]
-            bn = dt
             dt = datetime.datetime(int(dt[:4]), int(dt[4:6]), int(dt[6:8]), int(dt[8:10]), int(dt[10:12]), int(dt[12:14]))
             dt = dt.strftime('%A, %d-%b-%Y, %I:%M %p')
-            self.comboBoxSelectBackup.addItem(dt, bn)
+            # Because I don't know how to access multiple items in a comboBox index
+            # I had to work around with the curBakDict thingy. This works but it
+            # could be better if we could access multiple items in a single comboBox field
+            self.comboBoxSelectBackup.addItem(dt)
+            self.curBakDict[dt] = os.path.join(self.local.userLibBackup, self.comboBoxSelectProject.currentText(), b)
 
 
     def main (self) :
@@ -109,34 +116,51 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
     def okClicked (self) :
         '''Execute the OK button.'''
 
-        # Look at the radio buttons in the Action group
-        # (This was taken from: 
-        #   http://stackoverflow.com/questions/2089897/finding-checked-qradiobutton-among-many-into-a-qvboxlayout )
         actionContents = self.groupBoxBackupAction.layout()
         for i in range(0, actionContents.count()) :
             widget = actionContents.itemAt(i).widget()
             # Find the radio buttons
             if (widget!=0) and (type(widget) is QRadioButton) :
-                # Do an action according to wich one was selected
+
+                # Backup current project
                 if i == 0 and widget.isChecked() :
-                    print 'Backup Selected', i, self.comboBoxSelectBackup.itemData(1)
+                    if ProjData(self.localPid).backupProject() :
+                        QMessageBox.information(self, "Info", "<p>Project has been backed up.</p>")
+                    else :
+                        QMessageBox.warning(self, "Error!", "<p>Project was not backed up. Please check the logs for the reason.</p>")
 
-
-
-                    
-# FIXME: Something is not quite right here with this command
-                    
-                    ProjData(self.localPid).restoreLocalBackup(self.comboBoxSelectBackup.itemData(1))
-
-
-
-
+                # Restore selected backup, for selected project
                 elif i == 1 and widget.isChecked() :
-                    print 'Remove Backup', i
+                    # If there is an exsiting project make a temp backup in 
+                    # case something goes dreadfully wrong
+                    if os.path.exists(self.local.projHome) :
+                        self.tools.makeFolderBackup(self.local.projHome)
+                    if ProjData(self.localPid).backupRestore(self.curBakDict[self.comboBoxSelectBackup.currentText()]) :
+                        QMessageBox.information(self, "Info", """<p>Project has been restored.""")
+                    else :
+                        QMessageBox.warning(self, "Error!", """<p>Project was not restored. Please check the logs for the reason.""")
+
+                # Remove Selected Backup
                 elif i == 2 and widget.isChecked() :
-                    print 'Restore as new', i
+                    msg = QtCore.QT_TR_NOOP("<p>Are you sure you want to delete the backup made on:</p>" \
+                            "<p>" + self.comboBoxSelectBackup.currentText() + "</p>" \
+                            "<p>This data will be permanently removed from your system.</p>")
+                    reply = QMessageBox.critical(self, "Warning", msg, QMessageBox.StandardButton.Ok | QMessageBox.Cancel)
+                    if reply == QMessageBox.StandardButton.Ok :
+                        if os.path.exists(self.curBakDict[self.comboBoxSelectBackup.currentText()]) :
+                            if not os.remove(self.curBakDict[self.comboBoxSelectBackup.currentText()]) :
+                                QMessageBox.information(self, "Info", "<p>The backup created on:</p>" \
+                                    "<p>" + self.comboBoxSelectBackup.currentText() + "</p>" \
+                                    "<p>has been removed.</p>")
+
+                # Restore Alternate Backup
                 elif i == 3 and widget.isChecked() :
-                    print 'Restore as new', i
+
+                # New Project from Alternate
+                elif i == 4 and widget.isChecked() :
+
+                # Flush Project Backups
+                elif i == 5 and widget.isChecked() :
 
 #            elif cmdType == 'backup' :
 #                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
@@ -148,7 +172,7 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
 #                        sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
 
 
-        self.close()
+#        self.close()
 
 
 ###############################################################################

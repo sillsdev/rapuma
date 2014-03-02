@@ -337,13 +337,12 @@ class ProjData (object) :
 
         # Set some paths and file names
         if not targetPath :
-            sysBackupFolder = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup']))
             # Now check for a valid location to backup to
-            if self.userConfig['Resources']['backup'] == '' :
+            if self.local.userLibBackup == '' :
                 self.log.writeToLog(self.errorCodes['3622'])
-            elif not os.path.exists(sysBackupFolder) :
-                self.log.writeToLog(self.errorCodes['3620'], [sysBackupFolder])
-            projBackupFolder    = os.path.join(sysBackupFolder, self.pid)
+            elif not os.path.exists(self.local.userLibBackup) :
+                self.log.writeToLog(self.errorCodes['3620'], [self.local.userLibBackup])
+            projBackupFolder    = os.path.join(self.local.userLibBackup, self.pid)
             backupTarget        = os.path.join(projBackupFolder, self.tools.fullFileTimeStamp() + '.zip')
         else :
             projBackupFolder    = self.tools.resolvePath(targetPath)
@@ -374,75 +373,73 @@ class ProjData (object) :
         return True
 
 
-    def backupRestore (self, backup, projHome) :
-        '''Restore a backup to a specified projHome folder.'''
+    def backupRestore (self, backup) :
+        '''Restore a backup to a specified project.'''
 
 #        import pdb; pdb.set_trace()
 
-        # If there is an exsiting project make a temp backup in 
-        # case something goes dreadfully wrong
-        self.tools.makeFolderBackup(projHome)
         # Now remove the orginal
-        if os.path.exists(projHome) :
-            shutil.rmtree(projHome)
+        if os.path.exists(self.local.projHome) :
+            shutil.rmtree(self.local.projHome)
         # Create an empty folder to restore to
-        os.makedirs(projHome)
+        os.makedirs(self.local.projHome)
 
         # If we made it this far, extract the archive
         with zipfile.ZipFile(backup, 'r') as myzip :
-            myzip.extractall(projHome)
+            myzip.extractall(self.local.projHome)
+        return True
 
 
-    def restoreLocalBackup (self, bNum) :
-        '''Restore from a project backup. As a project may have multiple backups in
-        its backup folder, the user will need to provide a number from 1 to n (n being
-        the number of backups in the folder, 1 being the most recent and n being the
-        oldest). If no number is provided, 1, (the most recent) will be restored.'''
+#    def restoreLocalBackup (self, bakFile) :
+#        '''Restore from a project backup. As a project may have multiple backups in
+#        its backup folder, the user will need to provide a number from 1 to n (n being
+#        the number of backups in the folder, 1 being the most recent and n being the
+#        oldest). If no number is provided, 1, (the most recent) will be restored.'''
 
-        # Adjust bNum if needed
-        maxBak = int(self.userConfig['System']['maxStoreBackups'])
-        if not bNum :
-            bNum = 0
-        else :
-            bNum = int(bNum)
-            if bNum <= 0 :
-                bNum = 0
-            elif bNum > maxBak :
-                self.log.writeToLog(self.errorCodes['3550'], [str(bNum), str(maxBak)])
-            else :
-                bNum = bNum-1
+#        # Adjust bNum if needed
+#        maxBak = int(self.userConfig['System']['maxStoreBackups'])
+#        if not bNum :
+#            bNum = 0
+#        else :
+#            bNum = int(bNum)
+#            if bNum <= 0 :
+#                bNum = 0
+#            elif bNum > maxBak :
+#                self.log.writeToLog(self.errorCodes['3550'], [str(bNum), str(maxBak)])
+#            else :
+#                bNum = bNum-1
 
-        # Get vals we need
-        projHome            = self.getProjHome()
-        projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'], self.pid))
+#        # Get vals we need
+#        projHome            = self.getProjHome()
+#        projBackupFolder    = self.tools.resolvePath(os.path.join(self.userConfig['Resources']['backup'], self.pid))
 
-        # Get the archive file name
-        files = os.listdir(projBackupFolder)
-        fns = []
-        for f in files :
-            fns.append(int(f.split('.')[0]))
-        # Sort the list, last (latest) first
-        fns.sort(reverse=True)
-        # Make file path/name
-        backup = os.path.join(projBackupFolder, str(fns[bNum]) + '.zip')
-        if not os.path.exists(backup) :
-            self.log.writeToLog(self.errorCodes['3510'], [backup])
+#        # Get the archive file name
+#        files = os.listdir(projBackupFolder)
+#        fns = []
+#        for f in files :
+#            fns.append(int(f.split('.')[0]))
+#        # Sort the list, last (latest) first
+#        fns.sort(reverse=True)
+#        # Make file path/name
+#        backup = os.path.join(projBackupFolder, str(fns[bNum]) + '.zip')
+#        if not os.path.exists(backup) :
+#            self.log.writeToLog(self.errorCodes['3510'], [backup])
 
-        # Restore the backup
-        self.backupRestore(backup, projHome)
+#        # Restore the backup
+#        self.backupRestore(backup, projHome)
 
-        # Permission for executables is lost in the zip, fix them here
-        self.tools.fixExecutables(projHome)
+#        # Permission for executables is lost in the zip, fix them here
+#        self.tools.fixExecutables(projHome)
 
-        # If this is a new project we will need to register it now
-        self.registerProject(projHome)
+#        # If this is a new project we will need to register it now
+#        self.registerProject(projHome)
 
-        # Add helper scripts if needed
-        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
+#        # Add helper scripts if needed
+#        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+#            ProjCommander(self.pid).updateScripts()
 
-        # Finish here (We will leave the project backup in place)
-        self.log.writeToLog(self.errorCodes['3530'], [self.tools.fName(backup),projHome])
+#        # Finish here (We will leave the project backup in place)
+#        self.log.writeToLog(self.errorCodes['3530'], [self.tools.fName(backup),projHome])
 
 
     def restoreExternalBackup (self, source, target = None, force = False) :

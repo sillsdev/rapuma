@@ -92,7 +92,7 @@ from configobj                          import ConfigObj
 # Load the Rapuma lib classes
 from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
-#from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_local             import ProjLocal
 #from rapuma.core.proj_log               import ProjLog
 #from rapuma.core.proj_data              import ProjData, Template
 #from rapuma.core.proj_binding           import ProjBinding
@@ -214,33 +214,37 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def updateSettings (self) :
         '''Update or refresh all the settings in this dialog window.'''
 
+#        import pdb; pdb.set_trace()
+
         self.userConfig         = UserConfig().userConfig
         self.projectConfig      = None
 
         # Go to the last item that was selected or go to work area 0 if there is nothing selected
         if self.guiSettings.currentPid :
-            # Quick grab the projectConfig, we may need it later
-            try :
-                self.proj_config = Config(self.guiSettings.currentPid)
-                self.proj_config.getProjectConfig()
-                self.projectConfig = self.proj_config.projectConfig
-            except :
-                pass
-            # Now find the window to land in
-            if self.guiSettings.currentCid :
-                self.labelComponentCid.setText(self.guiSettings.currentCid)
-                self.setCurrentIndexWorkArea(3)
-            elif self.guiSettings.currentGid :
-                self.labelGroupGid.setText(self.guiSettings.currentGid)
-                self.setCurrentIndexWorkArea(2)
+            if os.path.exists(ProjLocal(self.guiSettings.currentPid).projectConfFile) :
+                # Quick grab the projectConfig, we may need it later
+                try :
+                    self.proj_config = Config(self.guiSettings.currentPid)
+                    self.proj_config.getProjectConfig()
+                    self.projectConfig = self.proj_config.projectConfig
+                except :
+                    pass
+                # Now find the window to land in
+                if self.guiSettings.currentCid :
+                    self.labelComponentCid.setText(self.guiSettings.currentCid)
+                    self.setCurrentIndexWorkArea(3)
+                elif self.guiSettings.currentGid :
+                    self.labelGroupGid.setText(self.guiSettings.currentGid)
+                    self.setCurrentIndexWorkArea(2)
+                else :
+                    self.labelProjectPid.setText(self.guiSettings.currentPid)
+                    self.setCurrentIndexWorkArea(1)
+                    self.lineEditProjectName.setText(self.userConfig['Projects'][self.guiSettings.currentPid]['projectName'])
             else :
-                self.labelProjectPid.setText(self.guiSettings.currentPid)
-                self.setCurrentIndexWorkArea(1)
-                self.lineEditProjectName.setText(self.userConfig['Projects'][self.guiSettings.currentPid]['projectName'])
+                QMessageBox.warning(self, "Rapuma Warning",
+                    """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
+                self.setCurrentIndexWorkArea(0)
         else :
-#            # If no project is selected we get rid of any group and component selections
-#            self.guiSettings.setCurrentGid()
-#            self.guiSettings.setCurrentCid()
             self.setCurrentIndexWorkArea(0)
 
 
