@@ -76,7 +76,6 @@ class ProjData (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-
     def registerProject (self, projHome) :
         '''Do a basic project registration with information available in a
         project config file found in projHome.'''
@@ -373,20 +372,23 @@ class ProjData (object) :
         return True
 
 
-    def backupRestore (self, backup) :
-        '''Restore a backup to a specified project.'''
+    def backupRestore (self, backup, target = None) :
+        '''Restore a backup to the current or specified project.'''
 
 #        import pdb; pdb.set_trace()
 
+        if not target :
+            target = self.local.projHome
+
         # Now remove the orginal
-        if os.path.exists(self.local.projHome) :
-            shutil.rmtree(self.local.projHome)
+        if os.path.exists(target) :
+            shutil.rmtree(target)
         # Create an empty folder to restore to
-        os.makedirs(self.local.projHome)
+        os.makedirs(target)
 
         # If we made it this far, extract the archive
         with zipfile.ZipFile(backup, 'r') as myzip :
-            myzip.extractall(self.local.projHome)
+            myzip.extractall(target)
         return True
 
 
@@ -453,23 +455,27 @@ class ProjData (object) :
 #        import pdb; pdb.set_trace()
 
         # Create the source backup file name
-        source = os.path.join(source, self.pid + '.zip')
+#        source = os.path.join(source, self.pid + '.zip')
+
+# FIXME: This needs some review and rework
 
         # Restore the backup
-        self.backupRestore(source, projHome)
+        if self.backupRestore(source, projHome) :
 
-        # Permission for executables is lost in the zip, fix them here
-        self.tools.fixExecutables(projHome)
+            # Permission for executables is lost in the zip, fix them here
+            self.tools.fixExecutables(projHome)
 
-        # If this is a new project we will need to register it now
-        self.registerProject(projHome)
+            # If this is a new project we will need to register it now
+            self.registerProject(projHome)
 
-        # Add helper scripts if needed
-        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
+            # Add helper scripts if needed
+            if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+                ProjCommander(self.pid).updateScripts()
 
-        # Finish here (We will leave the backup-backup in place)
-        self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + projHome + '\n')
+            # Finish here (We will leave the backup-backup in place)
+            self.tools.terminal('\nRapuma backup [' + self.pid + '] has been restored to: ' + projHome + '\n')
+            
+            return True
 
 
 ###############################################################################

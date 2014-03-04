@@ -69,7 +69,7 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
         projects = self.userConfig['Projects'].keys()
         projects.sort()
         count = 0
-        pSet = ''
+        pSet = 0
         for proj in projects :
             if proj == self.localPid :
                 pSet = count
@@ -111,6 +111,31 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
 
         self.pushButtonOk.clicked.connect(self.okClicked)
         self.comboBoxSelectProject.currentIndexChanged.connect(self.populateBackups)
+        self.pushButtonBrowseAlternateBackupFile.clicked.connect(self.findAlternateBackup)
+        self.pushButtonBrowseProjectLocation.clicked.connect(self.findProjPath)
+
+
+    def findAlternateBackup (self) :
+        '''Call a basic find file widget to get the file we want.'''
+
+        dialog = QFileDialog(self, "Find a File")
+        dialog.setDirectory(self.local.projHome)
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        if dialog.exec_() :
+            # When the file is found, change the right line edit box
+            self.lineEditAlternateBackup.setText(dialog.selectedFiles()[0])
+
+
+    def findProjPath (self) :
+        '''Call a basic find folder widget to get the path we want.'''
+
+        dialog = QFileDialog(self, "Find a Folder")
+        dialog.setDirectory(self.local.projHome)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly)
+        if dialog.exec_() :
+            # When the folder is found, change the right line edit box
+            self.lineEditNewProjectLocation.setText(dialog.selectedFiles()[0])
 
 
     def okClicked (self) :
@@ -129,19 +154,20 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
                     else :
                         QMessageBox.warning(self, "Error!", "<p>Project was not backed up. Please check the logs for the reason.</p>")
 
-                # Restore selected backup, for selected project
+                # Restore selected backup, to selected project
                 elif i == 1 and widget.isChecked() :
                     # If there is an exsiting project make a temp backup in 
                     # case something goes dreadfully wrong
                     if os.path.exists(self.local.projHome) :
                         self.tools.makeFolderBackup(self.local.projHome)
                     if ProjData(self.localPid).backupRestore(self.curBakDict[self.comboBoxSelectBackup.currentText()]) :
-                        QMessageBox.information(self, "Info", """<p>Project has been restored.""")
+                        QMessageBox.information(self, "Info", "<p>Project has been restored.")
                     else :
-                        QMessageBox.warning(self, "Error!", """<p>Project was not restored. Please check the logs for the reason.""")
+                        QMessageBox.warning(self, "Error!", "<p>Project was not restored. Please check the logs for the reason.")
 
                 # Remove Selected Backup
                 elif i == 2 and widget.isChecked() :
+                    # Give a warning
                     msg = QtCore.QT_TR_NOOP("<p>Are you sure you want to delete the backup made on:</p>" \
                             "<p>" + self.comboBoxSelectBackup.currentText() + "</p>" \
                             "<p>This data will be permanently removed from your system.</p>")
@@ -155,12 +181,46 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
 
                 # Restore Alternate Backup
                 elif i == 3 and widget.isChecked() :
+                    # Check for data
+                    if not os.path.isfile(self.lineEditAlternateBackup.text()) :
+                        QMessageBox.warning(self, "Error!", "<p>A valid path has not been entered in the Alternate Backup File field.")
+                    else :
+                        # Give a final warning
+                        msg = QtCore.QT_TR_NOOP("<p>You are about to overwrite this project with new data:</p>" \
+                                "<p>" + self.localPid + "</p>" \
+                                "<p>Any data in the current copy of the project will be lost.</p>")
+                        reply = QMessageBox.critical(self, "Warning", msg, QMessageBox.StandardButton.Ok | QMessageBox.Cancel)
+                        if reply == QMessageBox.StandardButton.Ok :
+                            if ProjData(self.localPid).backupRestore(self.lineEditAlternateBackup.text()) :
+                                QMessageBox.information(self, "Info", "<p>Project has been restored from the alternate backup file.")
+                            else :
+                                QMessageBox.warning(self, "Error!", "<p>Project was not restored. Please check the logs for the reason.")
 
                 # New Project from Alternate
                 elif i == 4 and widget.isChecked() :
+                    # Check for project and field data
+                    if not os.path.isfile(self.lineEditAlternateBackup.text()) :
+                        QMessageBox.warning(self, "Error!", "<p>A valid path/file has not been entered in the Alternate Backup File field.")
+                    elif not os.path.isdir(self.lineEditNewProjectLocation.text()) :
+                        QMessageBox.warning(self, "Error!", "<p>A valid path/folder has not been entered in the New Project folder field.")
+                    else :
+                        # First we need to find out what the real PID of the backup is
+# FIXME: Finish the discoverPidFromZip function
+                        self.localPid = self.tools.discoverPidFromZip(self.lineEditAlternateBackup.text())
+# FIXME: Working here
+                        # Check to see if the PID we found is already registered in the system
+                        
+                        if ProjData(self.localPid).restoreExternalBackup(self.lineEditAlternateBackup.text(), self.lineEditNewProjectLocation.text()) :
+                            QMessageBox.information(self, "Info", "<p>The new/restored project has been added to your local system.")
+                        else :
+                            QMessageBox.warning(self, "Error!", "<p>Failed to create new/restored project. Please check the logs for the reason.")
+
+
 
                 # Flush Project Backups
                 elif i == 5 and widget.isChecked() :
+                    # Check for data
+                    print 'checking for data'
 
 #            elif cmdType == 'backup' :
 #                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :

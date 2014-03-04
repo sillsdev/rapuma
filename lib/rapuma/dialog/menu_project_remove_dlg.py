@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_remove_dlg.ui'
 #
-# Created: Sat Mar  1 12:58:41 2014
+# Created: Tue Mar  4 16:24:35 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,6 +22,7 @@ class Ui_MenuProjectRemove(object):
         self.listWidgetProjects.setObjectName("listWidgetProjects")
         self.gridLayout.addWidget(self.listWidgetProjects, 1, 0, 1, 3)
         self.checkBoxBackup = QtGui.QCheckBox(MenuProjectRemove)
+        self.checkBoxBackup.setChecked(True)
         self.checkBoxBackup.setObjectName("checkBoxBackup")
         self.gridLayout.addWidget(self.checkBoxBackup, 2, 0, 1, 1)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

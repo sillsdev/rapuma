@@ -341,6 +341,24 @@ class Tools (object) :
 
         return '\"' + path + '\"'
 
+
+#####################################################################################
+
+# FIXME: Finish this!
+
+    def discoverPidFromZip (self, bakFile) :
+        '''Look at a project.conf file in a backed up project Zip file to
+        find out what the PID is.'''
+        
+        # For now just return a test project name
+        return 'ENG-LATN-WEB'
+
+
+
+#####################################################################################
+
+
+
     def isInZip (self, fileName, fileZip) :
         '''Look for a specific file in a zip file.'''
 
