@@ -219,38 +219,30 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
 
                 # Flush Project Backups
                 elif i == 5 and widget.isChecked() :
-                    # Check for data
-# FIXME: Working here
-
+                    # Varify this operation
                     msg = QtCore.QT_TR_NOOP("<p>You are about to delete all the backup data for this project:</p>" \
                             "<p>" + self.localPid + "</p>" \
                             "<p>This might be a really bad idea so choose wisely.</p>")
                     reply = QMessageBox.critical(self, "Warning", msg, QMessageBox.StandardButton.Ok | QMessageBox.Cancel)
                     if reply == QMessageBox.StandardButton.Ok :
-                        killDir = os.path.join(self.local.userLibBackup, self.localPid)
-                        
+                        target = os.path.join(self.local.userLibBackup, self.localPid)
                         # Need to get rid of all the files but not the folder
-                        
-                        if os.path.isdir(killDir) :
-                            if shutil.rmtree(killDir) :
-                                print 'killed it'
-                            else :
-                                print 'saved it'
+                        if os.path.isdir(target) :
+                            bks = os.listdir(target)
+                            for f in bks :
+                                try :
+                                    os.remove(os.path.join(target, f))
+                                except OSError as e :
+                                    # errno.ENOENT = no such file or directory (skip those)
+                                    # re-raise exception if a different error occured
+                                    if e.errno != errno.ENOENT :
+                                        raise 
+                            QMessageBox.information(self, "Info", "<p>Backup files have been deleted.")
                         else :
-                            print 'not there'
+                            QMessageBox.warning(self, "Warning!", "<p>This project backup folder: [" + target + "] was not found. Could not delete anything.")
 
-
-#            elif cmdType == 'backup' :
-#                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
-#                    ProjData(pid).restoreLocalBackup(args.bak_num)
-#                else :
-#                    if sourcePath :
-#                        ProjData(pid).restoreExternalBackup(sourcePath, targetPath)
-#                    else :
-#                        sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
-
-
-#        self.close()
+        # Close to avoid conflict with changed settings
+        self.close()
 
 
 ###############################################################################
