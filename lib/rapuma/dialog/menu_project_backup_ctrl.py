@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys, StringIO, datetime
+import os, sys, StringIO, datetime, shutil
 
 # Load Rapuma modules
 from rapuma.core.tools                  import Tools
@@ -205,22 +205,40 @@ class MenuProjectBackupCtrl (QDialog, QPropertyAnimation, menu_project_backup_dl
                         QMessageBox.warning(self, "Error!", "<p>A valid path/folder has not been entered in the New Project folder field.")
                     else :
                         # First we need to find out what the real PID of the backup is
-# FIXME: Finish the discoverPidFromZip function
-                        self.localPid = self.tools.discoverPidFromZip(self.lineEditAlternateBackup.text())
-# FIXME: Working here
+                        thisPid = self.tools.discoverPidFromZip(self.lineEditAlternateBackup.text())
                         # Check to see if the PID we found is already registered in the system
-                        
-                        if ProjData(self.localPid).restoreExternalBackup(self.lineEditAlternateBackup.text(), self.lineEditNewProjectLocation.text()) :
-                            QMessageBox.information(self, "Info", "<p>The new/restored project has been added to your local system.")
+                        if thisPid != '' and not self.userConfig['Projects'].has_key(thisPid) :
+                            # If not, do the restore
+                            if ProjData(thisPid).restoreExternalBackup(self.lineEditAlternateBackup.text(), self.lineEditNewProjectLocation.text()) :
+                                QMessageBox.information(self, "Info", "<p>The new/restored project has been added to your local system.")
+                                self.localPid = thisPid
+                            else :
+                                QMessageBox.warning(self, "Error!", "<p>Failed to create new/restored project. Please check the logs for the reason.")
                         else :
-                            QMessageBox.warning(self, "Error!", "<p>Failed to create new/restored project. Please check the logs for the reason.")
-
-
+                            QMessageBox.warning(self, "Error!", "<p>The project [" + thisPid + "] already exists. It must be removed before this operation can be done.")
 
                 # Flush Project Backups
                 elif i == 5 and widget.isChecked() :
                     # Check for data
-                    print 'checking for data'
+# FIXME: Working here
+
+                    msg = QtCore.QT_TR_NOOP("<p>You are about to delete all the backup data for this project:</p>" \
+                            "<p>" + self.localPid + "</p>" \
+                            "<p>This might be a really bad idea so choose wisely.</p>")
+                    reply = QMessageBox.critical(self, "Warning", msg, QMessageBox.StandardButton.Ok | QMessageBox.Cancel)
+                    if reply == QMessageBox.StandardButton.Ok :
+                        killDir = os.path.join(self.local.userLibBackup, self.localPid)
+                        
+                        # Need to get rid of all the files but not the folder
+                        
+                        if os.path.isdir(killDir) :
+                            if shutil.rmtree(killDir) :
+                                print 'killed it'
+                            else :
+                                print 'saved it'
+                        else :
+                            print 'not there'
+
 
 #            elif cmdType == 'backup' :
 #                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
