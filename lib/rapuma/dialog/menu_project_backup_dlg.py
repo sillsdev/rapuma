@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_dlg.ui'
+# Form implementation generated from reading ui file '/home/nancy/Projects/rapuma/lib/rapuma/dialog/menu_project_backup_dlg.ui'
 #
-# Created: Thu Mar  6 16:50:56 2014
+# Created: Thu Mar  6 20:17:22 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!

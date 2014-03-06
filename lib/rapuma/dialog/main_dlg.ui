@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="pageProject">
      <widget class="QLabel" name="labelProjectPid">
@@ -124,7 +124,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabGeneralSettings">
        <attribute name="title">
@@ -174,9 +174,9 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>420</x>
+        <x>410</x>
         <y>480</y>
-        <width>131</width>
+        <width>150</width>
         <height>31</height>
        </rect>
       </property>
@@ -348,9 +348,9 @@
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>420</x>
+        <x>410</x>
         <y>480</y>
-        <width>131</width>
+        <width>150</width>
         <height>31</height>
        </rect>
       </property>
@@ -450,22 +450,6 @@
        <attribute name="title">
         <string>Working</string>
        </attribute>
-       <widget class="Q3TextEdit" name="textEditWorking">
-        <property name="geometry">
-         <rect>
-          <x>3</x>
-          <y>9</y>
-          <width>751</width>
-          <height>381</height>
-         </rect>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::PlainText</enum>
-        </property>
-        <property name="wordWrap">
-         <enum>Q3TextEdit::NoWrap</enum>
-        </property>
-       </widget>
       </widget>
       <widget class="QWidget" name="tabSource">
        <attribute name="title">
@@ -533,9 +517,9 @@
      <widget class="QLabel" name="label_19">
       <property name="geometry">
        <rect>
-        <x>420</x>
+        <x>410</x>
         <y>480</y>
-        <width>131</width>
+        <width>150</width>
         <height>31</height>
        </rect>
       </property>
@@ -623,9 +607,9 @@
      <widget class="QLabel" name="label_23">
       <property name="geometry">
        <rect>
-        <x>420</x>
+        <x>410</x>
         <y>480</y>
-        <width>131</width>
+        <width>150</width>
         <height>31</height>
        </rect>
       </property>
@@ -700,7 +684,8 @@
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>../icon/Gnome-Document-Open-48.png</normaloff>../icon/Gnome-Document-Open-48.png</iconset>
+      <normaloff>../icon/Gnome-Document-Open-48.png</normaloff>
+      <normalon>../icon/Gnome-Document-Open-48.png</normalon>../icon/Gnome-Document-Open-48.png</iconset>
     </property>
    </widget>
   </widget>
@@ -1056,19 +1041,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>Q3Frame</class>
-   <extends>QFrame</extends>
-   <header>Qt3Support/Q3Frame</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Q3TextEdit</class>
-   <extends>Q3Frame</extends>
-   <header>q3textedit.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>
