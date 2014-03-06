@@ -219,7 +219,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.userConfig         = UserConfig().userConfig
         self.projectConfig      = None
 
-        # Go to the last item that was selected or go to work area 0 if there is nothing selected
+        # Go to the last item that was selected
         if self.guiSettings.currentPid :
             if os.path.exists(ProjLocal(self.guiSettings.currentPid).projectConfFile) :
                 # Quick grab the projectConfig, we may need it later
@@ -229,23 +229,24 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                     self.projectConfig = self.proj_config.projectConfig
                 except :
                     pass
-                # Now find the window to land in
+                # Now inject the page settings
                 if self.guiSettings.currentCid :
                     self.labelComponentCid.setText(self.guiSettings.currentCid)
-                    self.setCurrentIndexWorkArea(3)
+#                    self.setCurrentIndexWorkArea(3)
                 elif self.guiSettings.currentGid :
                     self.labelGroupGid.setText(self.guiSettings.currentGid)
-                    self.setCurrentIndexWorkArea(2)
+#                    self.setCurrentIndexWorkArea(2)
                 else :
                     self.labelProjectPid.setText(self.guiSettings.currentPid)
-                    self.setCurrentIndexWorkArea(1)
+#                    self.setCurrentIndexWorkArea(1)
                     self.lineEditProjectName.setText(self.userConfig['Projects'][self.guiSettings.currentPid]['projectName'])
             else :
                 QMessageBox.warning(self, "Rapuma Warning",
                     """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
-                self.setCurrentIndexWorkArea(0)
-        else :
-            self.setCurrentIndexWorkArea(0)
+
+        # Always start in the project work area
+        self.setCurrentIndexWorkArea(0)
+        self.tabWidgetProject.setCurrentIndex(0)
 
 
     def main (self) :

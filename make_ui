@@ -39,7 +39,7 @@ dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'me
             'menu_group_add', 'menu_group_remove', 'menu_group_select', 'menu_group_update',
             'menu_component_add', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
             'menu_font_add', 'menu_font_remove', 'menu_font_update',
-            'menu_help_help', 'menu_help_examples']
+            'menu_help_help', 'menu_help_examples', 'main']
 
 for i in dialogs :
     uiDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.ui')
