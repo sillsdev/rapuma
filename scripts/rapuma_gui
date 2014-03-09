@@ -150,11 +150,15 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         appicon.addFile(':/rpm_32.png')
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
+        appicon.addFile(':icon/Gnome-Document-Open-48.png')
         self.guiSettings        = gui_config.GuiConfig()
         self.sysConfig          = sysConfig
         self.tools              = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
+
+# Review: http://www.youtube.com/watch?v=umU9VP_uX34&list=PLA955A8F9A95378CE&index=14
+# This is a video on how to work with icon resource files
 
         # Connect the menu actions
         ctrlDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'menu_project_archive', 
