@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/nancy/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Sun Mar  9 20:53:40 2014
+# Created: Mon Mar 10 21:21:06 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -200,9 +200,9 @@ class Ui_MainWindow(object):
         self.toolButton = QtGui.QToolButton(self.centralwidget)
         self.toolButton.setGeometry(QtCore.QRect(20, 10, 35, 30))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../icon/Gnome-Document-Open-48.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon.addPixmap(QtGui.QPixmap("../icon/Gnome-Document-Open-48.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon.addPixmap(QtGui.QPixmap(":/Gnome-Document-Open-48.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButton.setIcon(icon)
+        self.toolButton.setIconSize(QtCore.QSize(32, 32))
         self.toolButton.setObjectName("toolButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -479,3 +479,4 @@ class Ui_MainWindow(object):
         self.menuFontUpdate.setText(QtGui.QApplication.translate("MainWindow", "Update", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFontUpdate.setToolTip(QtGui.QApplication.translate("MainWindow", "Update a font for this project", None, QtGui.QApplication.UnicodeUTF8))
 
+import pyresources_rc

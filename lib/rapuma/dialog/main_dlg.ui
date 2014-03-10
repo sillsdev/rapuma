@@ -683,9 +683,14 @@
      <string>...</string>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>../icon/Gnome-Document-Open-48.png</normaloff>
-      <normalon>../icon/Gnome-Document-Open-48.png</normalon>../icon/Gnome-Document-Open-48.png</iconset>
+     <iconset resource="../icon/pyresources.qrc">
+      <normaloff>:/Gnome-Document-Open-48.png</normaloff>:/Gnome-Document-Open-48.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>32</width>
+      <height>32</height>
+     </size>
     </property>
    </widget>
   </widget>
@@ -1041,7 +1046,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icon/pyresources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>horizontalScrollBar</sender>

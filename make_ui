@@ -52,10 +52,9 @@ for i in dialogs :
             print str(e) + ': ' + str(cmd)
 
 # Setup icon resources
-py      = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources.py')
-qrc     = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources.qrc')
-#cmd = ['pyside-rcc', '-o', py, qrc]
-cmd = ['pyrcc4', '-o', py, qrc]
+py      = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources_rc.py')
+qrc     = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources_rc.qrc')
+cmd = ['pyside-rcc', '-o', py, qrc]
 try :
     subprocess.call(cmd)
 except Exception as e :
