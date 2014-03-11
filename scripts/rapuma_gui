@@ -114,7 +114,7 @@ from PySide.QtGui                       import QMainWindow, QApplication, QMessa
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import main_dlg
 from rapuma.dialog                      import gui_config
-from rapuma.icon.pyresources            import qInitResources, qCleanupResources
+from rapuma.dialog.pyresources_rc       import qInitResources, qCleanupResources
 
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
@@ -157,11 +157,12 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.setWindowIcon(appicon)
         self.setupUi(self)
 
-# Review: http://www.youtube.com/watch?v=umU9VP_uX34&list=PLA955A8F9A95378CE&index=14
-# This is a video on how to work with icon resource files
+        # Connect toolbar buttons
+        self.toolButtonSelectProject.clicked.connect(self.mProjectSelect)
+
 
         # Connect the menu actions
-        ctrlDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'menu_project_archive', 
+        menuDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'menu_project_archive', 
                     'menu_project_cloud', 'menu_project_backup', 'menu_project_bind', 'menu_project_reap', 
                     'menu_project_template', 'menu_project_update', 'menu_project_systempreferences',
                     'menu_group_add', 'menu_group_remove', 'menu_group_select', 'menu_group_update',
@@ -172,7 +173,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         mainDlgs = ['menu_project_quit', 'menu_help_about']
 
         # Import all the menu item modules (one for each item)
-        for i in ctrlDlgs :
+        for i in menuDlgs :
             # For testing purposes this is the path to the dev project files
             ctrlP   = os.path.join(rapumaHome, 'lib', 'rapuma', 'dialog', i + '_ctrl.py')
             # For operation purposes this is the path to the installed project files
