@@ -103,7 +103,6 @@
 <session name="PA2014">
   <file path="file:///home/dennis/Projects/photo-album-maker/pa_maker.py"/>
   <file path="file:///home/dennis/Projects/photo-album-maker/lib/pa_maker/process/img_process.py"/>
-  <file path="file:///home/dennis/Projects/photo-album-maker/mseag_album_pics.py"/>
   <file path="file:///home/dennis/Projects/photo-album-maker/testing.py"/>
   <file path="file:///home/dennis/Publishing/MSEAG/CPA2014/data/Conference%20Photo%20Book%202014%20-%20Sheet1.csv"/>
   <file path="file:///home/dennis/Publishing/MSEAG/CPA2014/data/test.csv"/>

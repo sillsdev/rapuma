@@ -44,7 +44,7 @@ dialogs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'me
 for i in dialogs :
     uiDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.ui')
     pyDlg   = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', i + '_dlg.py')
-    cmd     = ['pyside-uic', uiDlg, '-o', pyDlg]
+    cmd     = ['pyside-uic', '-o', pyDlg, '--from-imports', uiDlg]
     if os.path.exists(uiDlg) :
         try :
             subprocess.call(cmd)
@@ -52,8 +52,11 @@ for i in dialogs :
             print str(e) + ': ' + str(cmd)
 
 # Setup icon resources
-py      = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources_rc.py')
-qrc     = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources_rc.qrc')
+# The py file is deposited in the dialog folder so dialogs
+# have access to the resources. We'll keep the qrc file in
+# with the icons as that seems to be the best place for it.
+py      = os.path.join(os.getcwd(), 'lib', 'rapuma', 'dialog', 'pyresources_rc.py')
+qrc     = os.path.join(os.getcwd(), 'lib', 'rapuma', 'icon', 'pyresources.qrc')
 cmd = ['pyside-rcc', '-o', py, qrc]
 try :
     subprocess.call(cmd)
