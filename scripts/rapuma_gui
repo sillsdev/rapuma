@@ -168,6 +168,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                     'menu_group_add', 'menu_group_remove', 'menu_group_select', 'menu_group_update',
                     'menu_component_add', 'menu_component_remove', 'menu_component_select', 'menu_component_update',
                     'menu_font_add', 'menu_font_remove', 'menu_font_update',
+                    'menu_tools_mockup', 'menu_tools_indextabs',
                     'menu_help_help', 'menu_help_examples']
 
         mainDlgs = ['menu_project_quit', 'menu_help_about']
