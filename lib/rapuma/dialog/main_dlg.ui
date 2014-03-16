@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>40</y>
-      <width>781</width>
+      <width>782</width>
       <height>511</height>
      </rect>
     </property>
@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="pageProject">
      <widget class="QLabel" name="labelProjectPid">
@@ -170,10 +170,10 @@
      <widget class="QToolButton" name="toolButton">
       <property name="geometry">
        <rect>
-        <x>600</x>
+        <x>632</x>
         <y>10</y>
-        <width>35</width>
-        <height>30</height>
+        <width>40</width>
+        <height>35</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -196,10 +196,10 @@
      <widget class="QToolButton" name="toolButton_2">
       <property name="geometry">
        <rect>
-        <x>660</x>
+        <x>682</x>
         <y>10</y>
-        <width>35</width>
-        <height>30</height>
+        <width>40</width>
+        <height>35</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -222,10 +222,10 @@
      <widget class="QToolButton" name="toolButton_3">
       <property name="geometry">
        <rect>
-        <x>720</x>
+        <x>732</x>
         <y>10</y>
-        <width>35</width>
-        <height>30</height>
+        <width>40</width>
+        <height>35</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -285,60 +285,12 @@
        <string>Group ID</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButtonGroupFinal">
-      <property name="geometry">
-       <rect>
-        <x>660</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create view of the final output of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Final</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonGroupDraft">
-      <property name="geometry">
-       <rect>
-        <x>480</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create a draft of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Draft</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonGroupProof">
-      <property name="geometry">
-       <rect>
-        <x>570</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create a proof of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Proof</string>
-      </property>
-     </widget>
      <widget class="QTabWidget" name="tabWidgetGroup">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>50</y>
-        <width>762</width>
+        <width>761</width>
         <height>430</height>
        </rect>
       </property>
@@ -421,11 +373,14 @@
      <widget class="QToolButton" name="toolButtonGroupDraft">
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>632</x>
         <y>10</y>
         <width>40</width>
         <height>35</height>
        </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a draft PDF of this group</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -441,6 +396,102 @@
        </size>
       </property>
      </widget>
+     <widget class="QToolButton" name="toolButtonGroupProof">
+      <property name="geometry">
+       <rect>
+        <x>682</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a proof PDF of this group</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/document_proof-48.png</normaloff>:/document_proof-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButtonGroupFinal">
+      <property name="geometry">
+       <rect>
+        <x>732</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a final PDF of this group</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/document_final-48.png</normaloff>:/document_final-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButtonGroupSelect">
+      <property name="geometry">
+       <rect>
+        <x>582</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>6</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Select a group to work on</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/Gnome-Document-Open-48.png</normaloff>:/Gnome-Document-Open-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <zorder>labelGroup</zorder>
+     <zorder>labelGroupGid</zorder>
+     <zorder>tabWidgetGroup</zorder>
+     <zorder>label_8</zorder>
+     <zorder>label_9</zorder>
+     <zorder>label_10</zorder>
+     <zorder>label_11</zorder>
+     <zorder>toolButtonGroupDraft</zorder>
+     <zorder>toolButtonGroupProof</zorder>
+     <zorder>toolButtonGroupFinal</zorder>
+     <zorder>line_3</zorder>
+     <zorder>toolButtonGroupSelect</zorder>
     </widget>
     <widget class="QWidget" name="pageComponent">
      <widget class="QLabel" name="labelComponentCid">
@@ -479,54 +530,6 @@
       </property>
       <property name="text">
        <string>Component:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonComponentFinal">
-      <property name="geometry">
-       <rect>
-        <x>660</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create view of the final output of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Final</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonComponentDraft">
-      <property name="geometry">
-       <rect>
-        <x>480</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create a draft of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Draft</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonComponentProof">
-      <property name="geometry">
-       <rect>
-        <x>570</x>
-        <y>10</y>
-        <width>80</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Create a proof of the selected component(s)</string>
-      </property>
-      <property name="text">
-       <string>Proof</string>
       </property>
      </widget>
      <widget class="QTabWidget" name="tabWidgetComponent">
@@ -659,6 +662,110 @@
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; font-style:italic; text-decoration: underline; color:#cfcfcf;&quot;&gt;Group&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButton_4">
+      <property name="geometry">
+       <rect>
+        <x>632</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a draft PDF of this component</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/document_draft-48.png</normaloff>:/document_draft-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButton_5">
+      <property name="geometry">
+       <rect>
+        <x>732</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a final PDF version of this component</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/document_final-48.png</normaloff>:/document_final-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButton_6">
+      <property name="geometry">
+       <rect>
+        <x>682</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Produce a proof PDF of this component</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/document_proof-48.png</normaloff>:/document_proof-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButtonComponentSelect">
+      <property name="geometry">
+       <rect>
+        <x>582</x>
+        <y>10</y>
+        <width>40</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Select a component to work on</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../icon/pyresources.qrc">
+        <normaloff>:/Gnome-Document-Open-48.png</normaloff>:/Gnome-Document-Open-48.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
       </property>
      </widget>
     </widget>
@@ -820,7 +927,7 @@
    <widget class="QToolButton" name="toolButtonQuit">
     <property name="geometry">
      <rect>
-      <x>750</x>
+      <x>747</x>
       <y>5</y>
       <width>35</width>
       <height>30</height>
@@ -848,7 +955,7 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>765</width>
+      <width>762</width>
       <height>20</height>
      </rect>
     </property>

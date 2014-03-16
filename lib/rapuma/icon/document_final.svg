@@ -32,37 +32,39 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1920"
-   inkscape:window-height="1024"
+   inkscape:window-width="941"
+   inkscape:window-height="852"
    id="namedview5"
    showgrid="false"
-   inkscape:zoom="8.0571875"
-   inkscape:cx="52.452842"
-   inkscape:cy="56.011525"
+   inkscape:zoom="5.5235797"
+   inkscape:cx="51.634874"
+   inkscape:cy="52.817947"
    inkscape:window-x="0"
    inkscape:window-y="27"
-   inkscape:window-maximized="1"
+   inkscape:window-maximized="0"
    inkscape:current-layer="Layer_1" />
 <path
    d="M66.118,13.377H26.987c-2.627,0-4.767,2.141-4.767,4.768v68.213c0,2.63,2.14,4.768,4.767,4.768h47.932  c2.63,0,4.768-2.138,4.768-4.768V28.12L66.118,13.377z M67.243,20.512l5.948,6.463h-5.948V20.512z M75.684,86.357  c0,0.421-0.344,0.765-0.765,0.765H26.987c-0.421,0-0.763-0.344-0.763-0.765V18.145c0-0.421,0.342-0.762,0.763-0.762h36.251v11.595  c0,1.104,0.899,1.999,2.003,1.999h10.442V86.357z"
    id="path3"
    style="fill:#0000ff"
-   inkscape:export-filename="/home/dennis/Projects/rapuma/lib/rapuma/icon/text3049.png"
+   inkscape:export-filename="/home/dennis/Projects/rapuma/lib/rapuma/icon/document_final-256.png"
    inkscape:export-xdpi="296.33823"
    inkscape:export-ydpi="296.33823" />
 <text
    xml:space="preserve"
-   style="font-size:20.87868309px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#cccccc;fill-opacity:1;stroke:none;font-family:Sans"
+   style="font-size:20.87868308999999911px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000080;fill-opacity:1;stroke:none;font-family:Sans"
    x="44.846317"
    y="6.6424985"
    id="text3049"
    sodipodi:linespacing="125%"
    transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
    inkscape:export-xdpi="296.33823"
-   inkscape:export-ydpi="296.33823"><tspan
+   inkscape:export-ydpi="296.33823"
+   inkscape:export-filename="/home/dennis/Projects/rapuma/lib/rapuma/icon/document_final-256.png"><tspan
      sodipodi:role="line"
      id="tspan3051"
      x="44.846317"
      y="6.6424985"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Charis SIL;-inkscape-font-specification:Charis SIL">FINAL</tspan></text>
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Charis SIL;-inkscape-font-specification:Charis SIL;fill:#000080">FINAL</tspan></text>
+
 </svg>
