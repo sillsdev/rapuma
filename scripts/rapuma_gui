@@ -241,8 +241,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 # Might be able to use .loadResource()
 
 
-            workingText = codecs.open('/home/dennis/Publishing/BRU/BRU-LATN-BIBA/Component/1ch/1ch_base.usfm', 'r', 'utf_8_sig').read()
-            self.plainTextEditComponentWorking.setPlainText(workingText)
+#            workingText = codecs.open('/home/dennis/Publishing/BRU/BRU-LATN-BIBA/Component/1ch/1ch_base.usfm', 'r', 'utf_8_sig').read()
+#            self.plainTextEditComponentWorking.setPlainText(workingText)
 
 
 

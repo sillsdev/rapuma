@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/menu_project_add_dlg.ui'
 #
-# Created: Mon Mar 17 13:28:16 2014
+# Created: Mon Mar 17 16:12:03 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -124,7 +124,7 @@ class Ui_MenuProjectAdd(object):
         self.lineEditProjPath.setPlaceholderText(QtGui.QApplication.translate("MenuProjectAdd", "Project Path", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonBrowse.setToolTip(QtGui.QApplication.translate("MenuProjectAdd", "Browse to the project folder", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonBrowse.setText(QtGui.QApplication.translate("MenuProjectAdd", "Browse", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelName.setText(QtGui.QApplication.translate("MenuProjectAdd", "Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelName.setText(QtGui.QApplication.translate("MenuProjectAdd", "Title", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditProjName.setToolTip(QtGui.QApplication.translate("MenuProjectAdd", "Project name, could be book title", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditProjName.setPlaceholderText(QtGui.QApplication.translate("MenuProjectAdd", "Project Name", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDescription.setToolTip(QtGui.QApplication.translate("MenuProjectAdd", "Create a new Rapuma project", None, QtGui.QApplication.UnicodeUTF8))
