@@ -227,6 +227,28 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
         # Go to the last item that was selected
         if self.guiSettings.currentPid :
+
+
+
+
+
+
+# FIXME: To make this work we will need to pull the document in here.
+# Then, when a change is made, we will need to save on lost focus
+# On lost focus another function will be called that will save the 
+# current text in the text editing window
+
+# Might be able to use .loadResource()
+
+
+            workingText = codecs.open('/home/dennis/Publishing/BRU/BRU-LATN-BIBA/Component/1ch/1ch_base.usfm', 'r', 'utf_8_sig').read()
+            self.plainTextEditComponentWorking.setPlainText(workingText)
+
+
+
+
+
+
             if os.path.exists(ProjLocal(self.guiSettings.currentPid).projectConfFile) :
                 # Quick grab the projectConfig, we may need it later
                 try :

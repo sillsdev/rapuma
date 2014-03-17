@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="pageProject">
      <widget class="QLabel" name="labelProjectPid">
@@ -480,18 +480,6 @@
        </size>
       </property>
      </widget>
-     <zorder>labelGroup</zorder>
-     <zorder>labelGroupGid</zorder>
-     <zorder>tabWidgetGroup</zorder>
-     <zorder>label_8</zorder>
-     <zorder>label_9</zorder>
-     <zorder>label_10</zorder>
-     <zorder>label_11</zorder>
-     <zorder>toolButtonGroupDraft</zorder>
-     <zorder>toolButtonGroupProof</zorder>
-     <zorder>toolButtonGroupFinal</zorder>
-     <zorder>line_3</zorder>
-     <zorder>toolButtonGroupSelect</zorder>
     </widget>
     <widget class="QWidget" name="pageComponent">
      <widget class="QLabel" name="labelComponentCid">
@@ -542,12 +530,25 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabWorking">
        <attribute name="title">
         <string>Working</string>
        </attribute>
+       <widget class="QPlainTextEdit" name="plainTextEditComponentWorking">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>10</y>
+          <width>721</width>
+          <height>371</height>
+         </rect>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QPlainTextEdit::NoWrap</enum>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabSource">
        <attribute name="title">

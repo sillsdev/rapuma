@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/dennis/Projects/rapuma/lib/rapuma/dialog/main_dlg.ui'
 #
-# Created: Sat Mar 15 22:37:41 2014
+# Created: Mon Mar 17 13:28:17 2014
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -178,6 +178,10 @@ class Ui_MainWindow(object):
         self.tabWidgetComponent.setObjectName("tabWidgetComponent")
         self.tabWorking = QtGui.QWidget()
         self.tabWorking.setObjectName("tabWorking")
+        self.plainTextEditComponentWorking = QtGui.QPlainTextEdit(self.tabWorking)
+        self.plainTextEditComponentWorking.setGeometry(QtCore.QRect(20, 10, 721, 371))
+        self.plainTextEditComponentWorking.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.plainTextEditComponentWorking.setObjectName("plainTextEditComponentWorking")
         self.tabWidgetComponent.addTab(self.tabWorking, "")
         self.tabSource = QtGui.QWidget()
         self.tabSource.setObjectName("tabSource")
@@ -432,10 +436,10 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.stackedWidgetWorkArea.setCurrentIndex(0)
+        self.stackedWidgetWorkArea.setCurrentIndex(2)
         self.tabWidgetProject.setCurrentIndex(0)
         self.tabWidgetGroup.setCurrentIndex(3)
-        self.tabWidgetComponent.setCurrentIndex(2)
+        self.tabWidgetComponent.setCurrentIndex(0)
         self.tabWidgetFont.setCurrentIndex(1)
         QtCore.QObject.connect(self.horizontalScrollBar, QtCore.SIGNAL("sliderMoved(int)"), self.stackedWidgetWorkArea.setCurrentIndex)
         QtCore.QObject.connect(self.toolButtonSelectProject, QtCore.SIGNAL("clicked()"), MainWindow.update)
