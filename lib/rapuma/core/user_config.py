@@ -120,7 +120,7 @@ class UserConfig (object) :
             pass
 
 
-    def registerProject (self, pid, pname, pmid, projHome) :
+    def registerProject (self, pid, pmid, projHome) :
         '''If it is not there, create an entry in the user's
         rapuma.conf located in the user's config folder.'''
 
@@ -130,7 +130,6 @@ class UserConfig (object) :
         self.tools.buildConfSection(self.userConfig['Projects'], pid)
 
         # Now add the project data
-        self.userConfig['Projects'][pid]['projectName']         = pname
         self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
         self.userConfig['Projects'][pid]['projectPath']         = projHome
         self.userConfig['Projects'][pid]['projectCreateDate']   = self.tools.tStamp()

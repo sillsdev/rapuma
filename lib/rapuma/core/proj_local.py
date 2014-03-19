@@ -18,7 +18,6 @@
 # this process
 
 import codecs, os, site, platform
-from configobj import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools

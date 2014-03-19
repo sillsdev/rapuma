@@ -79,8 +79,6 @@ class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_M
         projCode                = self.lineEditProjId.text().upper()
         pid                     = langCode + '-' + scriptCode + '-' + projCode
         projPath                = self.lineEditProjPath.text()
-        projName                = self.lineEditProjName.text()
-        projDescription         = self.textEditProjDescription.toPlainText()
         nProjPath               = os.path.join(projPath, pid)
 
 # FIXME: A bunch of integrety checks need to go here to make sure
@@ -90,7 +88,7 @@ class MenuProjectAddCtrl (QDialog, QPropertyAnimation, menu_project_add_dlg.Ui_M
         output_object = StringIO.StringIO()
         sys.stdout = output_object
 
-        if ProjSetup(pid).newProject(nProjPath, mediaType, projName, self.systemVersion, '') :
+        if ProjSetup(pid).newProject(nProjPath, mediaType, self.systemVersion) :
             result = output_object.getvalue()
             QMessageBox.information(self, "Project Add", result)
             self.guiSettings.currentPid = pid

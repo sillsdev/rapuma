@@ -163,13 +163,12 @@ class Config (object) :
 ###############################################################################
 
 
-    def makeNewprojectConf (self, local, pid, pmid, pname, cVersion) :
+    def makeNewprojectConf (self, local, pid, pmid, cVersion) :
         '''Create a new project configuration file for a new project.'''
 
         self.projectConfig = ConfigObj(self.tools.getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
         # Insert intitial project settings
         self.projectConfig['ProjectInfo']['projectMediaIDCode']        = pmid
-        self.projectConfig['ProjectInfo']['projectName']               = pname
         self.projectConfig['ProjectInfo']['creatorID']                 = self.userConfig['System']['userID']
         self.projectConfig['ProjectInfo']['projectCreatorVersion']     = cVersion
         self.projectConfig['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()

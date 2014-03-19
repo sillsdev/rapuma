@@ -541,7 +541,7 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0600 ########################
 ###############################################################################
 
-    def newProject (self, projHome, pmid, pname, systemVersion, tid = None) :
+    def newProject (self, projHome, pmid, systemVersion, tid = None) :
         '''Create a new publishing project.'''
 
 #        import pdb; pdb.set_trace()
@@ -556,7 +556,8 @@ class ProjSetup (object) :
             return
 
         # Add project to local Rapuma project registry
-        self.user.registerProject(self.pid, pname, self.projectMediaIDCode, self.projHome)
+#        self.user.registerProject(self.pid, pname, self.projectMediaIDCode, self.projHome)
+        self.user.registerProject(self.pid, self.projectMediaIDCode, self.projHome)
 
         # Load a couple necessary modules
         self.local              = ProjLocal(self.pid)
@@ -595,10 +596,10 @@ class ProjSetup (object) :
 
         # Create the project depeding on if it is from a template or not
         if tid :
-            self.data.templateToProject(self.user, self.local.projHome, self.pid, tid, pname)
+            self.data.templateToProject(self.user, self.local.projHome, self.pid, tid)
         else :
             # If not from a template, just create a new version of the project config file
-            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, pname, systemVersion)
+            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, systemVersion)
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :

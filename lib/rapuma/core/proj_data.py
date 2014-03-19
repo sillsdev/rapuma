@@ -288,7 +288,7 @@ class ProjData (object) :
         log         = ProjLog(pid)
         aProject    = Project(uc.userConfig, pc.projectConfig, local, log, systemVersion)
     #    import pdb; pdb.set_trace()
-        uc.registerProject(aProject.projectIDCode, aProject.projectName, aProject.projectMediaIDCode, aProject.local.projHome)
+        uc.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
         self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
@@ -920,9 +920,7 @@ class Template (object) :
             myzip.extractall(projHome)
 
         # Peek into the project
-        pname = 'The ' + self.pid + ' publishing project'
         pc = ConfigObj(os.path.join(projHome, 'Config', 'project.conf'), encoding='utf-8')
-        pc['ProjectInfo']['projectName']               = pname
         pc['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         pc['ProjectInfo']['projectIDCode']             = self.pid
         pc.filename                                    = os.path.join(projHome, 'Config', 'project.conf')
@@ -932,7 +930,7 @@ class Template (object) :
         projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
 
         # Register the new project
-        self.user.registerProject(self.pid, pname, projectMediaIDCode, projHome)
+        self.user.registerProject(self.pid, projectMediaIDCode, projHome)
 
         # Reset the local settings
         self.local = ProjLocal(self.pid)
