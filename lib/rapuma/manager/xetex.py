@@ -169,6 +169,48 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
+    def checkStartPageNumber (self) :
+        '''Adjust page number for the current group. The current logic is
+        if there is no number in the startPageNumber setting, we can put
+        one in there as a suggestion. If there is already one there, the
+        user will be responsible for seeing that it is correct.'''
+
+#        import pdb; pdb.set_trace()
+
+        try :
+            # Simply try to return anything that is in the field
+            cStrPgNo = self.projectConfig['Groups'][self.gid]['startPageNumber']
+            if cStrPgNo != '' :
+                return cStrPgNo
+        except :
+            # If nothing is there, we'll make a suggestion
+            pGrp = str(self.projectConfig['Groups'][self.gid]['precedingGroup'])
+            if pGrp == 'None' :
+                self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
+                self.tools.writeConfFile(self.projectConfig)
+                return '1'
+            else :
+                # Calculate the suggested number based on the preceeding group
+                try :
+                    cStrPgNo    = str(self.projectConfig['Groups'][self.gid]['startPageNumber'])
+                except :
+                    cStrPgNo    = 1
+                    self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
+                try :
+                    pGrpPgs     = int(self.projectConfig['Groups'][pGrp]['totalPages'])
+                    pGrpStrPgNo = int(self.projectConfig['Groups'][pGrp]['startPageNumber'])
+                except :
+                    # FIXME: Maybe this could go out and find out exactly how many pages were in the preceeding group
+                    pGrpPgs     = 1
+                    pGrpStrPgNo = 1
+                    self.projectConfig['Groups'][pGrp]['totalPages'] = 1
+                    self.projectConfig['Groups'][pGrp]['startPageNumber'] = 1
+                # Whether this is right or wrong set it the way it is
+                self.projectConfig['Groups'][self.gid]['startPageNumber'] = (pGrpStrPgNo + pGrpPgs)
+                self.tools.writeConfFile(self.projectConfig)
+                return self.projectConfig['Groups'][pGrp]['startPageNumber']
+
+
     def displayPdfOutput (self, fileName) :
         '''Display a PDF XeTeX output file if that is turned on.'''
 
@@ -526,7 +568,8 @@ class Xetex (Manager) :
                 gidTexObject.write('\\input \"' + self.local.grpHyphExcTexFile + '\"\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projectConfig['Groups'][self.gid]['cidList'] :
-                startPageNumber = int(self.projectConfig['Groups'][self.gid]['startPageNumber'])
+                # Check if this setting is there
+                startPageNumber = self.checkStartPageNumber()
                 if startPageNumber > 1 :
                     gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
             # Now add in each of the components
@@ -756,17 +799,8 @@ class Xetex (Manager) :
                         self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
 
             # Collect the page count and record in group
-            newPages = self.tools.pdftkTotalPages(self.local.gidPdfFile)
-            if self.projectConfig['Groups'][gid].has_key('totalPages') :
-                oldPages = int(self.projectConfig['Groups'][gid]['totalPages'])
-                if oldPages != newPages or oldPages == 'None' :
-                    self.projectConfig['Groups'][gid]['totalPages'] = newPages
-                    self.tools.writeConfFile(self.projectConfig)
-                    self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
-            else :
-                self.projectConfig['Groups'][gid]['totalPages'] = newPages
-                self.tools.writeConfFile(self.projectConfig)
-                self.log.writeToLog(self.errorCodes['0610'], [str(newPages),gid])
+            self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+            self.tools.writeConfFile(self.projectConfig)
 
             # If we are in bind mode we will finish up here
             if mode == 'bind' :

@@ -223,7 +223,8 @@ class Usfm (Group) :
         useManualAdjustments    = self.tools.str2bool(self.projectConfig['Groups'][gid]['useManualAdjustments'])
 
         # Adjust the page number if necessary
-        self.checkStartPageNumber()
+# FIXME: I moved this to xetex module, was this a good idea?
+#        self.checkStartPageNumber()
 
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
@@ -296,42 +297,47 @@ class Usfm (Group) :
 
         return True
 
+# FIXME: Moved this to xetex.py as that was the only place it was called from
+    #def checkStartPageNumber (self) :
+        #'''Adjust page number for the current group. The current logic is
+        #if there is no number in the startPageNumber setting, we can put
+        #one in there as a suggestion. If there is already one there, the
+        #user will be responsible for seeing that it is correct.'''
 
-    def checkStartPageNumber (self) :
-        '''Adjust page number for the current group.'''
+##        import pdb; pdb.set_trace()
 
-        # Be sure settings are in place
-        self.checkStartPageNumberSettings()
-
-#        import pdb; pdb.set_trace()
-
-        # If none, that means it hasn't been set or it is first
-        pGrp = str(self.projectConfig['Groups'][self.gid]['precedingGroup'])
-        if pGrp == 'None' :
-            return False
-
-        cStrPgNo = str(self.projectConfig['Groups'][self.gid]['startPageNumber'])
-        pGrpStrPgNo = int(self.projectConfig['Groups'][pGrp]['startPageNumber'])
-        pGrpPgs     = int(self.projectConfig['Groups'][pGrp]['totalPages'])
-        nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
-        # If the start page number is set to 1 (or less) it should not update
-        if cStrPgNo != nStrPgNo and int(cStrPgNo) > 1 :
-            self.projectConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
-            self.tools.writeConfFile(self.projectConfig)
-
-
-    def checkStartPageNumberSettings (self) :
-        '''Make sure the page number settings are in place. This may be deprecated later.'''
-
-        change = False
-        if not self.projectConfig['Groups'][self.gid].has_key('precedingGroup') :
-            self.projectConfig['Groups'][self.gid]['precedingGroup'] = None
-            change = True
-        if not self.projectConfig['Groups'][self.gid].has_key('startPageNumber') :
-            self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
-            change = True
-        if change :
-            self.tools.writeConfFile(self.projectConfig)
+        #try :
+            ## Simply try to return anything that is in the field
+            #cStrPgNo = self.projectConfig['Groups'][self.gid]['startPageNumber']
+            #if cStrPgNo != '' :
+                #return cStrPgNo
+        #except :
+            ## If nothing is there, we'll make a suggestion
+            #pGrp = str(self.projectConfig['Groups'][self.gid]['precedingGroup'])
+            #if pGrp == 'None' :
+                #self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
+                #self.tools.writeConfFile(self.projectConfig)
+                #return '1'
+            #else :
+                ## Calculate the suggested number based on the preceeding group
+                #try :
+                    #cStrPgNo    = str(self.projectConfig['Groups'][self.gid]['startPageNumber'])
+                #except :
+                    #cStrPgNo    = 1
+                    #self.projectConfig['Groups'][self.gid]['startPageNumber'] = 1
+                #try :
+                    #pGrpPgs     = int(self.projectConfig['Groups'][pGrp]['totalPages'])
+                    #pGrpStrPgNo = int(self.projectConfig['Groups'][pGrp]['startPageNumber'])
+                #except :
+                    ## FIXME: Maybe this could go out and find out exactly how many pages were in the preceeding group
+                    #pGrpPgs     = 1
+                    #pGrpStrPgNo = 1
+                    #self.projectConfig['Groups'][pGrp]['totalPages'] = 1
+                    #self.projectConfig['Groups'][pGrp]['startPageNumber'] = 1
+                ## Whether this is right or wrong set it the way it is
+                #self.projectConfig['Groups'][self.gid]['startPageNumber'] = (pGrpStrPgNo + pGrpPgs)
+                #self.tools.writeConfFile(self.projectConfig)
+                #return self.projectConfig['Groups'][pGrp]['startPageNumber']
 
 
     def createCompAdjustmentFile (self, cid) :
