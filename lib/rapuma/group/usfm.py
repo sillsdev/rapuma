@@ -314,7 +314,8 @@ class Usfm (Group) :
         pGrpStrPgNo = int(self.projectConfig['Groups'][pGrp]['startPageNumber'])
         pGrpPgs     = int(self.projectConfig['Groups'][pGrp]['totalPages'])
         nStrPgNo    = (pGrpStrPgNo + pGrpPgs)
-        if cStrPgNo != nStrPgNo and int(cStrPgNo) > 0 :
+        # If the start page number is set to 1 (or less) it should not update
+        if cStrPgNo != nStrPgNo and int(cStrPgNo) > 1 :
             self.projectConfig['Groups'][self.gid]['startPageNumber'] = nStrPgNo
             self.tools.writeConfFile(self.projectConfig)
 
