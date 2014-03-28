@@ -115,6 +115,10 @@ class ProjBinding (object) :
 
         # Get the order of the groups to be bound.
         bindOrder = {}
+        # Put a safty in here in case there are no groups yet
+        if not self.projectConfig.has_key('Groups') :
+            return False
+
         for grp in self.projectConfig['Groups'].keys() :
             if not self.projectConfig['Groups'][grp].has_key('bindingOrder') :
                 self.projectConfig['Groups'][grp]['bindingOrder'] = 0
@@ -181,6 +185,7 @@ class ProjBinding (object) :
         # Run the viewer and collect the return code for analysis
         try :
             subprocess.Popen(pdfViewer)
+            return True
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog(self.errorCodes['0260'], [str(e)])

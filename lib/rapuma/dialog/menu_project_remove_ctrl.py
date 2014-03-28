@@ -52,7 +52,7 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
         # Populate the list with projects
         for p in self.userConfig['Projects'].iteritems() :
             try :
-                name = self.userConfig['Projects'][p[0]]['projectName']
+                name = self.userConfig['Projects'][p[0]]['projectTitle']
             except :
                 name = 'None'
             # The ID has the name tacked on

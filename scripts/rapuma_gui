@@ -94,8 +94,8 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 #from rapuma.core.proj_log               import ProjLog
-#from rapuma.core.proj_data              import ProjData, Template
-#from rapuma.core.proj_binding           import ProjBinding
+from rapuma.core.proj_data              import ProjData, Template
+from rapuma.core.proj_binding           import ProjBinding
 #from rapuma.core.proj_compare           import ProjCompare
 #from rapuma.core.proj_process           import ProjProcess
 from rapuma.project.proj_config         import Config
@@ -115,12 +115,13 @@ from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import main_dlg
 from rapuma.dialog                      import gui_config
 from rapuma.dialog.pyresources_rc       import qInitResources, qCleanupResources
+from rapuma.dialog.common_ctrl          import CommonCtrl
 
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
 
 # Instantiate User config class
-tools                                   = Tools()
+#tools                                   = Tools()
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
@@ -151,14 +152,13 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         appicon.addFile(':/rpm_16.png')
         appicon.addFile(':/rpm.svg')
         appicon.addFile(':icon/Gnome-Document-Open-48.png')
+        self.common             = CommonCtrl()
         self.guiSettings        = gui_config.GuiConfig()
         self.sysConfig          = sysConfig
         self.tools              = Tools()
         self.setWindowIcon(appicon)
         self.setupUi(self)
-
-        # Connect toolbar buttons
-        self.toolButtonSelectProject.clicked.connect(self.mProjectSelect)
+        self.connectionActions()
 
 
         # Connect the menu actions
@@ -217,6 +217,15 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.statusBar().showMessage("Hi There!")
 
 
+    def connectionActions (self) :
+        '''Connect to form buttons.'''
+
+        self.toolButtonSelectProject.clicked.connect(self.mProjectSelect)
+        self.toolButtonProjectPgBackup.clicked.connect(self.backup)
+        self.toolButtonProjectPgCloudPush.clicked.connect(self.cloudPush)
+        self.toolButtonProjectPgBind.clicked.connect(self.bind)
+
+
     def updateSettings (self) :
         '''Update or refresh all the settings in this dialog window.'''
 
@@ -267,7 +276,7 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 else :
                     self.labelProjectPid.setText(self.guiSettings.currentPid)
 #                    self.setCurrentIndexWorkArea(1)
-                    self.lineEditProjectName.setText(self.userConfig['Projects'][self.guiSettings.currentPid]['projectName'])
+                    self.lineEditProjectName.setText(self.common.tempFixProjectName(self.userConfig, self.guiSettings.currentPid))
             else :
                 QMessageBox.warning(self, "Rapuma Warning",
                     """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
@@ -281,6 +290,39 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         '''This function shows the main dialog'''
 
         self.show()
+
+
+###############################################################################
+########################## Work Page Item Functions ###########################
+###############################################################################
+
+# Project #####################################################################
+
+    def cloudPush (self) :
+        '''Push the current project to the cloud'''
+        
+        if ProjData(self.guiSettings.currentPid).pushToCloud(False) :
+            QMessageBox.information(self, "Info", "<p>Project has been pushed to the cloud.</p>")
+        else :
+            QMessageBox.warning(self, "Error!", "<p>Project could not be pushed to the cloud. Please check the logs for the reason.</p>")
+
+
+    def backup (self) :
+        '''Backup the current project.'''
+        
+        if ProjData(self.guiSettings.currentPid).backupProject() :
+            QMessageBox.information(self, "Info", "<p>Project has been backed up.</p>")
+        else :
+            QMessageBox.warning(self, "Error!", "<p>Project was not backed up. Please check the logs for the reason.</p>")
+
+
+    def bind (self) :
+        '''Run the bind command on the project.'''
+
+        if ProjBinding(self.guiSettings.currentPid).bind() :
+            QMessageBox.information(self, "Info", "<p>The bind command has been run on this project.</p>")
+        else :
+            QMessageBox.warning(self, "Error!", "<p>The bind command could not be run on this project. Please check the logs for the reason.</p>")
 
 
 ###############################################################################

@@ -28,6 +28,7 @@ from PySide                             import QtGui, QtCore
 from PySide.QtGui                       import QDialog, QApplication, QMessageBox, QListWidgetItem
 from PySide.QtCore                      import QPropertyAnimation
 from rapuma.dialog                      import menu_project_select_dlg
+from rapuma.dialog.common_ctrl          import CommonCtrl
 
 # Load the Rapuma lib classes
 from rapuma.core.tools                  import Tools
@@ -39,7 +40,8 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
 
         super(MenuProjectSelectCtrl, self).__init__(parent)
 
-        self.tools = Tools()
+        self.tools                  = Tools()
+        self.common                 = CommonCtrl()
         self.setupUi(self)
         self.connectionActions()
         self.guiSettings            = guiSettings
@@ -48,7 +50,8 @@ class MenuProjectSelectCtrl (QDialog, QPropertyAnimation, menu_project_select_dl
 
         # Populate the list with projects
         for p in self.userConfig['Projects'].iteritems() :
-            name = self.userConfig['Projects'][p[0]]['projectName']
+#            name = self.userConfig['Projects'][p[0]]['projectTitle']
+            name = self.common.tempFixProjectName(self.userConfig, p[0])
             # The ID has the name tacked on
             self.listWidgetProjects.addItem(p[0] + ' (' + name + ')')
             self.listWidgetProjects.sortItems()

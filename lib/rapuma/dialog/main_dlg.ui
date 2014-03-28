@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="pageProject">
      <widget class="QLabel" name="labelProjectPid">
@@ -167,7 +167,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; font-style:italic; text-decoration: underline; color:#cfcfcf;&quot;&gt;Font&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButton">
+     <widget class="QToolButton" name="toolButtonProjectPgBackup">
       <property name="geometry">
        <rect>
         <x>632</x>
@@ -193,7 +193,7 @@
        </size>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButton_2">
+     <widget class="QToolButton" name="toolButtonProjectPgCloudPush">
       <property name="geometry">
        <rect>
         <x>682</x>
@@ -219,7 +219,7 @@
        </size>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButton_3">
+     <widget class="QToolButton" name="toolButtonProjectPgBind">
       <property name="geometry">
        <rect>
         <x>732</x>

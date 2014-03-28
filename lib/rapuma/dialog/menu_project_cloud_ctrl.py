@@ -119,7 +119,6 @@ class MenuProjectCloudCtrl (QDialog, QPropertyAnimation, menu_project_cloud_dlg.
                     else :
                         QMessageBox.warning(self, "Error!", """<p>Cloud ID not valid.""")
 
-
         self.close()
 
 

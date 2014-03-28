@@ -56,7 +56,7 @@ class Project (object) :
         self.managers               = {}
         self.projectMediaIDCode     = self.projectConfig['ProjectInfo']['projectMediaIDCode']
         self.projectIDCode          = self.projectConfig['ProjectInfo']['projectIDCode']
-        self.projectName            = self.projectConfig['ProjectInfo']['projectName']
+        self.projectName            = self.projectConfig['ProjectInfo']['projectTitle']
         # The gid cannot generally be set yet but we will make a placeholder
         # for it here and the functions below will set it. (I'm just say'n)
 

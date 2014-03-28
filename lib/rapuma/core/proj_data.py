@@ -84,13 +84,13 @@ class ProjData (object) :
         projectConfig          = self.getConfig(projHome)
 
         if len(projectConfig) :
-            pName           = projectConfig['ProjectInfo']['projectName']
+            pTitle          = projectConfig['ProjectInfo']['projectTitle']
             pid             = projectConfig['ProjectInfo']['projectIDCode']
             pmid            = projectConfig['ProjectInfo']['projectMediaIDCode']
             pCreate         = projectConfig['ProjectInfo']['projectCreateDate']
             if not self.userConfig['Projects'].has_key(pid) :
                 self.tools.buildConfSection(self.userConfig['Projects'], pid)
-                self.userConfig['Projects'][pid]['projectName']         = pName
+                self.userConfig['Projects'][pid]['projectTitle']        = pTitle
                 self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
                 self.userConfig['Projects'][pid]['projectPath']         = projHome
                 self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
@@ -679,6 +679,8 @@ class ProjData (object) :
             if cr > 0 :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
+        return True
+
 
     def pullFromCloud (self, force = True, tPath = None) :
         '''Pull data from cloud storage and merge/replace local data.
@@ -827,7 +829,7 @@ class Template (object) :
 
         # Now make the config files generic for use with any project
         tc = ConfigObj(os.path.join(tempDir, 'Config', 'project.conf'), encoding='utf-8')
-        tc['ProjectInfo']['projectName']                = ''
+        tc['ProjectInfo']['projectTitle']               = ''
         tc['ProjectInfo']['projectIDCode']              = ''
         tc['ProjectInfo']['projectCreateDate']          = ''
         tc['ProjectInfo']['projectCreateDate']          = ''
