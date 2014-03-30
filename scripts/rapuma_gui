@@ -106,7 +106,7 @@ from rapuma.project.proj_config         import Config
 #from rapuma.project.proj_maps           import ProjMaps
 #from rapuma.project.proj_toc            import ProjToc
 #from rapuma.project.proj_background     import ProjBackground
-#from rapuma.projectr.project             import Project
+from rapuma.manager.project              import Project
 
 # Load GUI modules
 from PySide                             import QtGui, QtCore
@@ -220,11 +220,22 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def connectionActions (self) :
         '''Connect to form buttons.'''
 
+        # Tool bar
         self.toolButtonSelectProject.clicked.connect(self.mProjectSelect)
+        # Project page
         self.toolButtonProjectPgBackup.clicked.connect(self.backup)
         self.toolButtonProjectPgCloudPush.clicked.connect(self.cloudPush)
         self.toolButtonProjectPgBind.clicked.connect(self.bind)
-
+        # Group page
+        self.toolButtonGroupPgSelect.clicked.connect(self.mGroupSelect)
+        self.toolButtonGroupPgDraft.clicked.connect(self.draftGroup)
+        self.toolButtonGroupPgProof.clicked.connect(self.proofGroup)
+        self.toolButtonGroupPgFinal.clicked.connect(self.finalGroup)
+        # Component page
+        self.toolButtonComponentPgSelect.clicked.connect(self.mComponentSelect)
+        self.toolButtonComponentPgDraft.clicked.connect(self.draftComponent)
+        self.toolButtonComponentPgProof.clicked.connect(self.proofComponent)
+        self.toolButtonComponentPgFinal.clicked.connect(self.finalComponent)
 
     def updateSettings (self) :
         '''Update or refresh all the settings in this dialog window.'''
@@ -269,21 +280,21 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
                 # Now inject the page settings
                 if self.guiSettings.currentCid :
                     self.labelComponentCid.setText(self.guiSettings.currentCid)
-#                    self.setCurrentIndexWorkArea(3)
+                    self.setCurrentIndexWorkArea(2)
                 elif self.guiSettings.currentGid :
                     self.labelGroupGid.setText(self.guiSettings.currentGid)
-#                    self.setCurrentIndexWorkArea(2)
+                    self.setCurrentIndexWorkArea(1)
                 else :
                     self.labelProjectPid.setText(self.guiSettings.currentPid)
-#                    self.setCurrentIndexWorkArea(1)
+                    self.setCurrentIndexWorkArea(0)
                     self.lineEditProjectName.setText(self.common.tempFixProjectName(self.userConfig, self.guiSettings.currentPid))
             else :
                 QMessageBox.warning(self, "Rapuma Warning",
                     """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
 
         # Always start in the project work area
-        self.setCurrentIndexWorkArea(0)
-        self.tabWidgetProject.setCurrentIndex(0)
+#        self.setCurrentIndexWorkArea(0)
+#        self.tabWidgetProject.setCurrentIndex(0)
 
 
     def main (self) :
@@ -323,6 +334,54 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             QMessageBox.information(self, "Info", "<p>The bind command has been run on this project.</p>")
         else :
             QMessageBox.warning(self, "Error!", "<p>The bind command could not be run on this project. Please check the logs for the reason.</p>")
+
+
+# Group #######################################################################
+
+    def draftGroup (self) :
+        '''Run the draft command on the current group.'''
+
+        print 'Running Group Draft'
+
+    def proofGroup (self) :
+        '''Run the proof command on the current group.'''
+
+        print 'Running Group Proof'
+
+    def finalGroup (self) :
+        '''Run the final command on the current group.'''
+
+        print 'Running Group Final'
+
+
+# Component ###################################################################
+
+    def draftComponent (self) :
+        '''Run the draft command on the current component.'''
+
+        # These next two settings need to be connected to the dialog
+        pages = ''
+        override = ''
+        # Render
+        cid_list = self.checkCidList(self.guiSettings.currentCid)
+        Project(self.guiSettings.currentPid, self.guiSettings.currentGid).renderGroup('draft', cid_list, pages, override)
+
+
+    def proofComponent (self) :
+        '''Run the proof command on the current component.'''
+
+        print 'Running Component Proof'
+
+
+    def finalComponent (self) :
+        '''Run the final command on the current component.'''
+
+        print 'Running Component Final'
+
+#        elif cmd in ['draft', 'final', 'proof'] :
+#            if cmdType == 'group' :
+#                if cType == 'usfm' :
+#                    Project(pid, gid).renderGroup(cmd, cid_list, pages, override)
 
 
 ###############################################################################
@@ -443,9 +502,13 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
     def setCurrentIndexWorkArea (self, index) :
         if index != self.getCurrentIndexWorkArea() :
             self.stackedWidgetWorkArea.setCurrentIndex(index)
+            self.horizontalScrollBar.setValue(index)
 
-
-
+    def checkCidList (self, cid) :
+        if not type(self.guiSettings.currentCid) == list :
+            return self.guiSettings.currentCid.split()
+        else :
+            return self.guiSettings.currentCid
 
 
 ###############################################################################
