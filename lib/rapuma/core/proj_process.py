@@ -164,6 +164,10 @@ class ProjProcess (object) :
         '''Check to see if a preprocess script is installed. If not, install the
         default script and give a warning that the script is not complete.'''
 
+        # First make sure the Scripts folder is there
+        if not os.path.isdir(self.local.projScriptFolder) :
+            os.makedirs(self.local.projScriptFolder)
+
         # Check and copy if needed
         if not os.path.isfile(self.local.groupPreprocessFile) :
             shutil.copy(self.local.rpmPreprocessFile, self.local.groupPreprocessFile)
