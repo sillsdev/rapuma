@@ -46,7 +46,6 @@ class ProjBinding (object) :
         self.pg_back            = ProjBackground(self.pid)
         self.config.getProjectConfig()
         self.projectConfig      = self.config.projectConfig
-        self.watermark          = self.projectConfig['GeneralSettings']['watermark']
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -54,18 +53,12 @@ class ProjBinding (object) :
 
         # Log messages for this module
         self.errorCodes     = {
-            '0000' : ['MSG', 'Placeholder message'],
-            
             '0205' : ['MSG', 'Unassigned message.'],
-            '0210' : ['MSG', 'No groups are specified for binding.'],
-            '0212' : ['WRN', 'The [<<1>>] binding group already exists. Use force to replace.'],
-            '0215' : ['ERR', 'Failed to create the [<<1>>] binding group. Got error: [<<2>>]'],
-            '0220' : ['MSG', 'Removed the [<<1>>] binding group.'],
-            '0225' : ['ERR', 'The [<<1>>] binding group was not found.'],
-            '0230' : ['MSG', 'Completed proccessing on the [<<1>>] binding group.'],
-            '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding group.'],
-            '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding group.'],
-            '0250' : ['MSG', 'Completed final render on Binding component [<<1>>].'],
+            '0210' : ['MSG', 'No contents are specified for binding.'],
+            '0215' : ['ERR', 'Failed to bind contents into the [<<1>>] fille. Got error: [<<2>>]'],
+            '0230' : ['MSG', 'Completed proccessing on the [<<1>>] binding file.'],
+            '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding file.'],
+            '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding file.'],
             '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
         }
 
@@ -93,7 +86,7 @@ class ProjBinding (object) :
 #        import pdb; pdb.set_trace()
 
 
-    def bind (self) :
+    def bind (self, save = False) :
         '''Bind all groups in the order they are indicated by group bindOrder
         settings. Note, because binding spans groups and the main body
         (project.py) mainly just works on one group at a time, this has to
@@ -106,6 +99,14 @@ class ProjBinding (object) :
 # separate files and joins them together with pdftk, we loose the index. What is 
 # needed is to make one big control file that runs everything needed in the right order
 # This has been reported in the Rapuma bugtracker.
+
+        # Make a name if the file is to be saved
+        if save :
+            bindFileName = self.pid + '_contents_' + self.tools.ymd()
+            # Save this to the Deliverable folder
+            bindFile = os.path.join(self.local.projDeliverableFolder, bindFileName + '.pdf')
+        else :
+            bindFile = tempfile.NamedTemporaryFile().name
 
         # Get the order of the groups to be bound.
         bindOrder = {}
@@ -140,18 +141,18 @@ class ProjBinding (object) :
         # Now the rest of the commands and output file
         confCommand.append('cat')
         confCommand.append('output')
-        output = os.path.join(self.local.projDeliverableFolder, self.pid + '_contents_final_' + self.tools.ymd() + '.pdf')
-        confCommand.append(output)
+        confCommand.append(bindFile)
+
         # Run the binding command
         rCode = subprocess.call(confCommand)
         # Analyse the return code
         if rCode == int(0) :
-            self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(output)])
+            self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(bindFile)])
         else :
-            self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(output)])
+            self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(bindFile)])
 
         # Collect the page count and record in group
-        newPages = self.tools.pdftkTotalPages(output)
+        newPages = self.tools.pdftkTotalPages(bindFile)
         # FIXME: For now, we need to hard-code the manager name
         manager = 'usfm_Xetex'
         if self.projectConfig['Managers'][manager].has_key('totalBoundPages') :
@@ -159,19 +160,15 @@ class ProjBinding (object) :
             if oldPages != newPages or oldPages == 'None' :
                 self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
                 self.tools.writeConfFile(self.projectConfig)
-                self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(output)])
+                self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(bindFileName)])
         else :
             self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
             self.tools.writeConfFile(self.projectConfig)
-            self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(output)])
-
-        # Now, add a watermark if that setting is activated
-        if self.watermark :
-            self.pg_back.addBackground(output, self.watermark)
+            self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(bindFileName)])
 
         # Build the viewer command
         pdfViewerCmd = self.projectConfig['Managers'][manager]['pdfViewerCommand']
-        pdfViewerCmd.append(output)
+        pdfViewerCmd.append(bindFile)
         # Run the XeTeX and collect the return code for analysis
         try :
             subprocess.Popen(pdfViewerCmd)

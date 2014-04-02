@@ -89,7 +89,10 @@ class Xetex (Manager) :
         self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-        self.watermark              = self.projectConfig['GeneralSettings']['watermark']
+# FIXME: This is for a future feature to add cropmarks outside XeTeX
+#        self.cropmarks              = self.tools.str2bool(self.projectConfig['GeneralSettings']['cropmarks'])
+        self.lines                  = self.tools.str2bool(self.projectConfig['GeneralSettings']['lines'])
+        self.box                    = self.tools.str2bool(self.projectConfig['GeneralSettings']['box'])
 
         # Get settings for this component
         self.managerSettings = self.projectConfig['Managers'][self.manager]
@@ -142,6 +145,8 @@ class Xetex (Manager) :
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
+            '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
+            '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
 
         }
 
@@ -603,7 +608,7 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 0600 #######################
 ###############################################################################
 
-    def run (self, gid, cidList, pgRange, override) :
+    def run (self, gid, cidList, pgRange, override, save) :
         '''This will check all the dependencies for a group and then
         use XeTeX to render the whole group or a subset of components
         and even a page range in a single component.'''
@@ -698,9 +703,29 @@ class Xetex (Manager) :
         if pgRange :
             self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
 
-        # Now, add a watermark if that setting is activated
-        if self.watermark :
-            self.pg_back.addBackground(self.local.gidPdfFile, self.watermark)
+# FIXME: This is for a future feature to add cropmarks outside of XeTeX
+#        # Now, add cropmarks background if that setting is activated
+#        if self.cropmarks :
+#            self.pg_back.addCropmarksBackground(self.local.gidPdfFile)
+
+        # Now, add a lines background if that setting is activated
+        if self.lines :
+            self.pg_back.addLinesBackground(self.local.gidPdfFile)
+
+        # Now, add a box background if that setting is activated
+        if self.box :
+            self.pg_back.addBoxBackground(self.local.gidPdfFile)
+
+        # If the user wants to save this file, do that now
+        if save :
+            renderFileName = self.pid + '_contents_' + self.tools.ymd() + '.pdf'
+            # Save this to the Deliverable folder
+            renderFile = os.path.join(self.local.projDeliverableFolder, renderFileName)
+            # If shutil.copy() spits anything back its bad news
+            if shutil.copy(self.local.gidPdfFile, renderFile) :
+                self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
+            else :
+                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
 
         # Review the results if desired
         if os.path.isfile(self.local.gidPdfFile) :
@@ -718,7 +743,8 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0710'])
         else :
             self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(self.local.gidPdfFileName)])
-
+            
+        # If we made it this far, return True
         return True
 
 

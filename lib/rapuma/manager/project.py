@@ -167,7 +167,7 @@ class Project (object) :
 ###############################################################################
 
 
-    def renderGroup (self, cidList = '', pages = '', override = '') :
+    def renderGroup (self, cidList = '', pages = '', override = '', save = False) :
         '''Render a group of subcomponents or any number of components
         in the group specified in the cidList.'''
 
@@ -179,9 +179,8 @@ class Project (object) :
 
         # Otherwise, do a basic test for exsistance and move on
         if self.projectConfig['Groups'].has_key(self.gid) :
-
             # Now create the group and pass the params on
-            self.createGroup().render(self.gid, cidList, pages, override)
+            self.createGroup().render(self.gid, cidList, pages, override, save)
             return True
 
 

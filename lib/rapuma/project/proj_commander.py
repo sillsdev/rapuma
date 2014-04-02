@@ -134,7 +134,7 @@ class ProjCommander (object) :
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' helper    update '], 
                 'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
-                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind '], 
+                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind --force '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
             }
@@ -171,6 +171,7 @@ class ProjCommander (object) :
                 'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 
                 'render'        : ['Render ' + gid + ' group PDF file.',            'rapuma group '     + pid + ' ' + gid + ' group         render  --cid_list \"$1\" '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group '     + pid + ' ' + gid + ' group         update  --cid_list \"$1\" $2 '], 
+                'watermark'     : ['Create a watermark for ' + gid + ' group.',     'rapuma group '     + pid + ' ' + gid + ' group         watermark  --cid_list \"$1\" $2 '], 
                 'addFont'       : ['Add a font to the ' + gid + ' group.',          'rapuma package '   + pid + ' ' + gid + ' $1 font add -f '],
                 'removeFont'    : ['Remove a font from the ' + gid + ' group.',     'rapuma package '   + pid + ' ' + gid + ' $1 font remove -f '],
                 'primaryFont'   : ['Make font primary for the ' + gid + ' group.',  'rapuma package '   + pid + ' ' + gid + ' $1 font primary -f '],

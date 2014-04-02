@@ -48,21 +48,40 @@ class ProjBackground (object) :
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
+    def addCropmarksBackground (self, target) :
+        '''Add a background that puts cropmarks around the page area.'''
 
-    def addBackground (self, target, watermark) :
-        '''Add a backgound (watermark) to a specific PDF file.'''
+        print 'Calling: addCropmarksBackground()'
+
+
+    def addBoxBackground (self, target) :
+        '''Add a background that puts a box around the page area.'''
+
+        print 'Calling: addBoxBackground()'
+
+
+    def addLinesBackground (self, target) :
+        '''Add a background that has lines that represent the type
+        leading.'''
+
+        print 'Calling: addLinesBackground()'
+
+
+    def addWatermarkBackground (self, gid, cid_list, pages, override) :
+        '''Add a background (watermark) to a specific PDF file.'''
 
 # Start rewrite here
-        pass
+        print 'Calling: addWatermarkBackground()'
+        print gid, cid_list, pages, override
 
 
     def createWatermarkFile (self, watermark) :
         '''Create a watermark file and return the file name.'''
 
-        pass
+        print 'Calling: createWatermarkFile()'
         
 
-    def createBorderFile (self, pdfOutFile) :
+    def createBoxFile (self, pdfOutFile) :
         '''Create a border backgound file used for proof reading.'''
 
         # Set our file names
