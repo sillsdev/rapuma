@@ -780,9 +780,9 @@ Todo:
             <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
             <key>useCropmarks</key>
             <type>boolean</type>
-            <value>False</value>
+            <value>[config:projectConfig|GeneralSettings|cropmarks]</value>
             <texCode>\CropMarkstrue</texCode>
-            <boolDepend state='true'>[config:macPackConfig|PageLayout|useCropmarks]</boolDepend>
+            <boolDepend state='true'>[config:projectConfig|GeneralSettings|cropmarks]</boolDepend>
         </setting>
         <setting>
             <name>End Book No Eject</name>

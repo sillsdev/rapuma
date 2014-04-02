@@ -127,5 +127,31 @@ Todo:
             <value></value>
         </setting>
     </section>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This section contains miscellaneous global settings and operational information for the project.</description>
+        <setting>
+            <name>Page Background Watermark</name>
+            <key>watermark</key>
+            <description>Enter text (one word like proof or draft) to be used as a watermark on the page background. If nothing is present, no watermark will be used.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Cropmarks</name>
+            <description>Set to true if you want cropmarks to show page trim size.</description>
+            <key>cropmarks</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Last Edit on the Config File</name>
+            <key>lastEdit</key>
+            <description>A time stamp of when the project config was last edited.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
 </root>
 

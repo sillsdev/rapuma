@@ -65,7 +65,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
-        self.pg_back                = ProjBackground(self.pid, self.gid)
+        self.pg_back                = ProjBackground(self.pid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -89,6 +89,7 @@ class Xetex (Manager) :
         self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.watermark              = self.projectConfig['GeneralSettings']['watermark']
 
         # Get settings for this component
         self.managerSettings = self.projectConfig['Managers'][self.manager]
@@ -116,23 +117,9 @@ class Xetex (Manager) :
         # Log messages for this module
         self.errorCodes     = {
 
-            'XTEX-000' : ['MSG', 'XeTeX module messages'],
-            'XTEX-005' : ['TOD', 'The ParaTExt SSF file could not be found. Check the project folder to see if it exsits.'],
-            'XTEX-010' : ['LOG', 'Version number: [<<1>>], was found. Assumed persistent values have been merged.'],
-            'XTEX-015' : ['LOG', 'Version number present, not running persistant values.'],
-            'XTEX-020' : ['LOG', 'Wrote out new layout configuration file.'],
-            'XTEX-045' : ['TOD', 'File <<1>> is missing. Check the error log for an import error for this required file. The system cannot render without it.'],
-            'XTEX-050' : ['ERR', 'USFM working text not found: <<1>>. This is required in order to render.'],
-            'XTEX-055' : ['ERR', 'make<<1>>() failed to properly create: <<2>>. This is a required file in order to render.'],
-            'XTEX-080' : ['LOG', 'There has been a change in [<<1>>], [<<2>>] needs to be rerendered.'],
-            'XTEX-085' : ['MSG', 'The file: <<1>> was not found, XeTeX will now try to render it.'],
-            'XTEX-110' : ['MSG', 'The file <<1>> was removed so it could be rerendered.'],
-            'XTEX-120' : ['ERR', 'Global style file [<<1>>] is missing! This is a required file that should have been installed with the component. We have to stop here, sorry about that.'],
-
             '1005' : ['ERR', 'PDF viewer failed with error: [<<1>>]'],
             '1010' : ['ERR', 'Style file [<<1>>] could not be created.'],
             '1040' : ['LOG', 'Created: [<<1>>]'],
-
 
             '0420' : ['WRN', 'TeX settings file has been frozen for debugging purposes.'],
             '0430' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
@@ -150,11 +137,7 @@ class Xetex (Manager) :
             '0625' : ['MSG', 'Rendering of [<<1>>] successful.'],
             '0630' : ['ERR', 'Rendering [<<1>>] was unsuccessful. <<2>> (<<3>>)'],
             '0635' : ['ERR', 'XeTeX error code [<<1>>] not understood by Rapuma.'],
-            '0640' : ['ERR', 'Failed to add background to [<<1>>]. Ended with error: [<<2>>]'],
-            '0645' : ['LOG', 'Successfully added watermark to [<<1>>].'],
             '0650' : ['ERR', 'Component type [<<1>>] not supported!'],
-            '0665' : ['LOG', 'Successfully added [<<1>>] background to [<<2>>].'],
-            '0670' : ['LOG', 'Successfully rendered [<<1>>] group for binding.'],
             '0690' : ['MSG', 'Dependent files unchanged, rerendering of [<<1>>] un-necessary.'],
             '0695' : ['MSG', 'Routing <<1>> to PDF viewer.'],
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
@@ -209,22 +192,6 @@ class Xetex (Manager) :
                 self.projectConfig['Groups'][self.gid]['startPageNumber'] = (pGrpStrPgNo + pGrpPgs)
                 self.tools.writeConfFile(self.projectConfig)
                 return self.projectConfig['Groups'][pGrp]['startPageNumber']
-
-
-    def displayPdfOutput (self, fileName) :
-        '''Display a PDF XeTeX output file if that is turned on.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Add the file to the viewer command
-        self.pdfViewerCmd.append(fileName)
-        # Run the XeTeX and collect the return code for analysis
-        try :
-            subprocess.Popen(self.pdfViewerCmd)
-            return True
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['1005'], [str(e)])
 
 
     def makeExtFile (self, fileName, description) :
@@ -478,21 +445,6 @@ class Xetex (Manager) :
             return True
 
 
-#        try :
-#            realBool = str(self.returnConfRefValue(boolDependInfo['#text']))
-#            print realBool, type(realBool)
-#            if boolDependInfo['@state'].lower() == realBool.lower() :
-#                return True
-#        except Exception as e :
-#            print str(e)
-#            print boolDependInfo
-#            print type(self.returnConfRefValue(boolDependInfo['#text']))
-#            print type(boolDependInfo['@state'])
-#            print type(boolDependInfo)
-#            self.tools.dieNow()
-
-
-
     def returnConfRefValue (self, ref) :
         '''Return the value of a given config reference. The ref syntax is
         as follows: [config:configObj|section|key]. This should be able to
@@ -509,7 +461,6 @@ class Xetex (Manager) :
                 dct.append('["' + i + '"]')
 
             return eval(''.join(dct))
-
 
 
     def makeGidTexFile (self, cidList) :
@@ -652,40 +603,17 @@ class Xetex (Manager) :
 ######################## Error Code Block Series = 0600 #######################
 ###############################################################################
 
-
-    def run (self, gid, mode, cidList, pgRange, override) :
+    def run (self, gid, cidList, pgRange, override) :
         '''This will check all the dependencies for a group and then
-        use XeTeX to render it.'''
+        use XeTeX to render the whole group or a subset of components
+        and even a page range in a single component.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Get our list of cids
-        # Check for cidList, use std group if it isn't there
-        # If there is a cidList, create an alternate ouput name.
-        # The file name needs to be ordered by ###-cid-gid.
-        pdfSubFileName = ''
-        if cidList :
-            cid = cidList[0]
-            cidInfo = self.pt_tools.usfmCidInfo()
-            # Add a filler character to the ID
-            cnid = "{:0>3}".format(cidInfo[cid][2])
-            pdfSubFileName = cnid + '-' + '-'.join(cidList) + '-' + gid + '.pdf'
-        else :
+        # There must be a cidList. If one was not passed, default to
+        # the group list
+        if not cidList :
             cidList = self.projectConfig['Groups'][gid]['cidList']
-
-        # Background management (Phase one)
-        # Much of the backgound handeling happens after rendering but
-        # if cropmarks are desired, they must be turned on before the
-        # document is rendered. We turn that on here before and turn
-        # it off below when backgounds are being added.
-        if 'cropmarks' in self.projectConfig['Managers'][self.manager][mode + 'Background'] :
-            if not self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
-                # Note that the value is set as a string because internally 
-                # incoming bool values are assumed to be strings a real boolean
-                # value will really throw a wrench in the works
-                self.macPackConfig['PageLayout']['useCropmarks'] = 'True'
-                # This is more of an internal value change so it will
-                # not be written out 
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
@@ -710,142 +638,86 @@ class Xetex (Manager) :
                 if os.path.exists(cidAdj) :
                     dep.append(cidAdj)
 
-        # Render if gidPdf is older or is missing
-        render = False
-        if not os.path.isfile(self.local.gidPdfFile) :
-            render = True
-        else :
-            for d in dep :
-                if self.tools.isOlder(self.local.gidPdfFile, d) :
-                    render = True
-                    break
-
         # Call the renderer
-        if render :
-            # Create the environment that XeTeX will use. This will be temporarily set
-            # by subprocess.call() just before XeTeX is run.
-            texInputsLine = self.project.local.projHome + ':' \
-                            + self.local.projStyleFolder + ':' \
-                            + self.local.projTexFolder + ':' \
-                            + self.local.projMacPackFolder + ':' \
-                            + self.local.projMacroFolder + ':' \
-                            + self.local.projGidFolder + ':.'
+        # Create the environment that XeTeX will use. This will be temporarily set
+        # by subprocess.call() just before XeTeX is run.
+        texInputsLine = self.project.local.projHome + ':' \
+                        + self.local.projStyleFolder + ':' \
+                        + self.local.projTexFolder + ':' \
+                        + self.local.projMacPackFolder + ':' \
+                        + self.local.projMacroFolder + ':' \
+                        + self.local.projGidFolder + ':.'
 
-            # Create the environment dictionary that will be fed into subprocess.call()
-            #envDict = dict(os.environ)
-            envDict={}
-            # These are project environment vars
-            envDict['TEXINPUTS'] = texInputsLine
-            # These are XeTeX environment vars that are run if the internal (fast) version
-            # of XeTeX is being run, which is the default. If runExternalXetex is set to
-            # False, the following special environment vars will be run. If set to true,
-            # an external version of XeTeX, provided it is installed, will run with its own
-            # environment vars set elsewhere
-            if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
-                    not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
-                envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
-                envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
-                envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
-            else :
-                envDict.update(os.environ)
-
-            # Create the XeTeX command argument list that subprocess.call() will run with
-            # the environment vars we set above
-            cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
-
-            # For debugging purposes, output the following DBG message
-            if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
-                    self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
-                self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), str(envDict), " ".join(cmds)])
-
-            # Run the XeTeX and collect the return code for analysis
-            try :
-                rCode = subprocess.call(cmds, env = envDict)
-                # Analyse the return code
-                if rCode == int(0) :
-                    self.log.writeToLog(self.errorCodes['0625'], [self.local.gidTexFileName])
-                elif rCode in self.xetexErrorCodes :
-                    self.log.writeToLog(self.errorCodes['0630'], [self.local.gidTexFileName, self.xetexErrorCodes[rCode], str(rCode)])
-                else :
-                    self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
-            except Exception as e :
-                # If subprocess fails it might be because XeTeX did not execute
-                # we will try to report back something useful
-                self.log.writeToLog(self.errorCodes['0615'], [str(e)])
-
-            # Background management (Phase 2)
-            bgList = self.projectConfig['Managers'][self.manager][mode + 'Background']
-            for bg in bgList :
-                # Only if we are not in the bind mode
-                if bg != 'bind' :
-                    # Special handling for cropmarks happened before rendering
-                    # To clean up, turn off cropmarks here because it is done already
-                    if bg == 'cropmarks' :
-                        if self.tools.str2bool(self.macPackConfig['PageLayout']['useCropmarks']) :
-                            # Note that the value is set as a string because internally 
-                            # incoming bool values are assumed to be strings a real boolean
-                            # value will really throw a wrench in the works
-                            self.macPackConfig['PageLayout']['useCropmarks'] = 'False'
-                        continue
-                    bgFile = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
-                    cmd = self.pdfUtilityCmd + [self.local.gidPdfFile, 'background', bgFile, 'output', self.tools.tempName(self.local.gidPdfFile)]
-                    try :
-                        subprocess.call(cmd)
-                        shutil.copy(self.tools.tempName(self.local.gidPdfFile), self.local.gidPdfFile)
-                        os.remove(self.tools.tempName(self.local.gidPdfFile))
-                        self.log.writeToLog(self.errorCodes['0665'], [self.tools.fName(bgFile), self.tools.fName(self.local.gidPdfFile)])
-                    except Exception as e :
-                        # If we don't succeed, we should probably quite here
-                        self.log.writeToLog(self.errorCodes['0640'], [self.local.gidPdfFile, str(e)])
-
-            # Collect the page count and record in group
-            self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
-            self.tools.writeConfFile(self.projectConfig)
-
-            # If we are in bind mode we will finish up here
-            if mode == 'bind' :
-                self.log.writeToLog(self.errorCodes['0670'], [gid])
-                return True
+        # Create the environment dictionary that will be fed into subprocess.call()
+        #envDict = dict(os.environ)
+        envDict={}
+        # These are project environment vars
+        envDict['TEXINPUTS'] = texInputsLine
+        # These are XeTeX environment vars that are run if the internal (fast) version
+        # of XeTeX is being run, which is the default. If runExternalXetex is set to
+        # False, the following special environment vars will be run. If set to true,
+        # an external version of XeTeX, provided it is installed, will run with its own
+        # environment vars set elsewhere
+        if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
+                not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
+            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
+            envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
+            envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
         else :
-            self.log.writeToLog(self.errorCodes['0690'], [self.local.gidPdfFileName])
+            envDict.update(os.environ)
 
-        # Move to the output folder according to mode for easier access
-        if os.path.isfile(self.local.gidPdfFile) :
-            # For override requests just use that
-            if override :
-                outputPdfFile = override
-            # Otherwise, for normal output build the name and location
+        # Create the XeTeX command argument list that subprocess.call() will run with
+        # the environment vars we set above
+        cmds = ['xetex', '-output-directory=' + self.local.projGidFolder, self.local.gidTexFile]
+
+        # For debugging purposes, output the following DBG message
+        if self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('freezeTexSettings') and \
+                self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['freezeTexSettings']) :
+            self.log.writeToLog(self.errorCodes['0620'], [os.getcwd(), str(envDict), " ".join(cmds)])
+
+        # Run the XeTeX and collect the return code for analysis
+        try :
+            rCode = subprocess.call(cmds, env = envDict)
+            # Analyse the return code
+            if rCode == int(0) :
+                self.log.writeToLog(self.errorCodes['0625'], [self.local.gidTexFileName])
+            elif rCode in self.xetexErrorCodes :
+                self.log.writeToLog(self.errorCodes['0630'], [self.local.gidTexFileName, self.xetexErrorCodes[rCode], str(rCode)])
             else :
-                outputFolder = os.path.join(self.local.projHome, mode.capitalize())
-                if pdfSubFileName :
-                    outputPdfFile = self.tools.modeFileName(outputFolder, pdfSubFileName, mode, pgRange)
-                else :
-                    outputPdfFile = self.tools.modeFileName(outputFolder, self.local.gidPdfFile, mode, pgRange)
-                # Make sure there is a folder there to put it in
-                if not os.path.exists(outputFolder) :
-                    os.makedirs(outputFolder)
+                self.log.writeToLog(self.errorCodes['0635'], [str(rCode)])
+        except Exception as e :
+            # If subprocess fails it might be because XeTeX did not execute
+            # we will try to report back something useful
+            self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
-            # Pull out pages if requested (use the same file for output)
-            if pgRange :
-                self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
+        # Collect the page count and record in group
+        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+        self.tools.writeConfFile(self.projectConfig)
 
-            # Deliver to final target folder
-            if os.path.exists(self.local.gidPdfFile) :
-                shutil.move(self.local.gidPdfFile, outputPdfFile)
+        # Pull out pages if requested (use the same file for output)
+        if pgRange :
+            self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
 
-#        import pdb; pdb.set_trace()
+        # Now, add a watermark if that setting is activated
+        if self.watermark :
+            self.pg_back.addBackground(self.local.gidPdfFile, self.watermark)
 
         # Review the results if desired
-        if os.path.isfile(outputPdfFile) :
+        if os.path.isfile(self.local.gidPdfFile) :
             if not len(self.pdfViewerCmd) == 0 :
-                if self.displayPdfOutput(outputPdfFile) :
-                    self.log.writeToLog(self.errorCodes['0695'], [self.tools.fName(outputPdfFile)])
-                else :
-                    self.log.writeToLog(self.errorCodes['0600'], [self.tools.fName(outputPdfFile)])
+                # Add the file to the viewer command
+                self.pdfViewerCmd.append(self.local.gidPdfFile)
+                # Run the XeTeX and collect the return code for analysis
+                try :
+                    subprocess.Popen(self.pdfViewerCmd)
+                    return True
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.log.writeToLog(self.errorCodes['1005'], [str(e)])
             else :
                 self.log.writeToLog(self.errorCodes['0710'])
         else :
-            self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(outputPdfFile)])
+            self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(self.local.gidPdfFileName)])
 
         return True
 

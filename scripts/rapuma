@@ -104,7 +104,6 @@ from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_maps           import ProjMaps
 from rapuma.project.proj_toc            import ProjToc
-from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 
 # Grab some system info
@@ -355,9 +354,6 @@ def userArguments (args) :
         pages       = None
         # Set optional override
         if args.override :
-            # This can only be used in the following context
-            if not cmd in ['draft', 'proof', 'final'] :
-                sys.exit('\nERROR: Cannot use override path in this context. Process halted!\n')
             override = args.override
             ovrdPath = os.path.split(os.path.abspath(override))[0]
             flName = os.path.split(override)[1]
@@ -418,14 +414,14 @@ def userArguments (args) :
                 prc.checkForPreprocessScript (gid)
             else :
                 cmdError(cmd, cmdType)
-        elif cmd in ['draft', 'final', 'proof'] :
+        elif cmd == 'render' :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    Project(pid, gid).renderGroup(cmd, cid_list, pages, override)
+                    Project(pid, gid).renderGroup(cid_list, pages, override)
                 elif cType == 'map' :
-                    ProjMaps(pid, gid).renderMapGroup(cmd, cid_list, pages, override)
+                    ProjMaps(pid, gid).renderMapGroup(cid_list, pages, override)
                 elif cType == 'toc' :
-                    ProjToc(pid, gid).renderToc(cmd, override)
+                    ProjToc(pid, gid).renderToc(override)
                 else :
                     cTypeError(cType)
             else :
@@ -579,20 +575,6 @@ def userArguments (args) :
         else :
             sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
 
-    ##### BACKGROUND
-    # Commands for setting the page background
-    elif sys.argv[1].lower() == 'background' :
-        cmdType     = args.output_type
-        cmd         = args.command
-        pid         = args.project_id
-        bgrd        = args.background
-        if cmd == 'add' :
-            ProjBackground(pid).addBackground(cmdType, bgrd)
-        elif cmd == 'remove' :
-            ProjBackground(pid).removeBackground(cmdType, bgrd)
-        elif cmd == 'update' :
-            ProjBackground(pid).updateBackground(cmdType, bgrd)
-
     # Totally lost
     else:
         sys.exit('\nERROR: Command not recognized: [' + sys.argv[1] + ']\n')
@@ -649,7 +631,7 @@ if __name__ == '__main__' :
     mediaTypes              = ['book']
     # Group
     grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'draft', 'final', 'lock', 'proof', 'remove', 'update', 'unlock']
+    grCommands              = ['add', 'lock', 'remove', 'render', 'update', 'unlock']
     componentTypes          = ['usfm', 'map', 'toc']
     # Component
     cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
@@ -660,10 +642,6 @@ if __name__ == '__main__' :
     # Processes
     pcCommandType           = ['export', 'preprocess', 'postprocess']
     pcCommands              = ['add', 'remove', 'update']
-    # Background
-    bgCommandType           = ['bind', 'draft', 'final', 'proof']
-    bgCommands              = ['add', 'remove', 'update']
-    backgrounds             = ['box', 'cropmarks', 'draft', 'final', 'lines', 'proof']
     # Example
     examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
 
@@ -743,13 +721,6 @@ if __name__ == '__main__' :
     settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
     settingsCommand.add_argument('key', help='The key which has the value to be changed.')
     settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
-
-    # Add page background subprocess arguments
-    backgroundCommand = subparsers.add_parser('background', help='Commands for managing page backgrounds such as watermarks, lines, etc.')
-    backgroundCommand.add_argument('project_id', help='A project ID for the project you wish to archive, backup or make template from. If a project is being made from a template, the project ID must not conflict with any others on the system.')
-    backgroundCommand.add_argument('output_type', choices=bgCommandType, help='The type of (rendered) output a background will be applied to or removed from.')
-    backgroundCommand.add_argument('background', choices=backgrounds, default='none', help='The type of background to be applied or removed from the output.')
-    backgroundCommand.add_argument('command', choices=bgCommands, help='The general commands that can be used for managing backgound.')
 
     # Add example subprocess arguments
     exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')

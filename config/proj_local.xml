@@ -358,7 +358,7 @@ Todo:
         </file>
         <file>
             <name>Group PDF Output File</name>
-            <description>The PDF output file that TeX produce. (This is a temporary file that will be moved and renamed.)</description>
+            <description>The PDF output file that TeX produces from a group.</description>
             <fileID>gidPdfFile</fileID>
             <fileName>[self:gid].pdf</fileName>
             <filePath>[self:projGidFolder]</filePath>

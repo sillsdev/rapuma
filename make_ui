@@ -63,4 +63,6 @@ try :
 except Exception as e :
     print str(e)
 
+# Report the version
+print 'Version set to: ' + sysConfig['Rapuma']['systemVersion']
 

@@ -118,17 +118,21 @@ class Tools (object) :
             return fileName
 
 
-    def modeFileName (self, targetDir, sourceFile, mode = 'draft', pgRange = None) :
+    def renderFileName (self, targetDir, sourceFile, watermark = '', pgRange = None) :
         '''Dissect a file name and turn it into a file name that includes a mode
         and if necessary a page range with a timestamp on the end.'''
 
         fileName = self.fName(sourceFile)
         fParts = fileName.split('.')
 
-        if pgRange :
-            newName = fParts[0] + '-pg' + str(pgRange) + '_' + mode + '_' + self.ymd() + '.' + fParts[1]
+        if pgRange and watermark :
+            newName = fParts[0] + '-pg' + str(pgRange) + '_' + watermark + '_' + self.ymd() + '.' + fParts[1]
+        elif pgRange :
+            newName = fParts[0] + '-pg' + str(pgRange) + '_' + self.ymd() + '.' + fParts[1]
+        elif watermark :
+            newName = fParts[0] + '_' + watermark + '_' + self.ymd() + '.' + fParts[1]
         else :
-            newName = fParts[0] + '_' + mode + '_' + self.ymd() + '.' + fParts[1]
+            newName = fParts[0] + '_' + self.ymd() + '.' + fParts[1]
             
         return os.path.join(targetDir, newName)
 

@@ -20,12 +20,13 @@ import os, shutil, codecs, re, subprocess, tempfile
 from configobj                      import ConfigObj, Section
 
 # Load the local classes
-from rapuma.core.tools              import Tools
-from rapuma.core.user_config        import UserConfig
-from rapuma.core.proj_local         import ProjLocal
-from rapuma.core.proj_log           import ProjLog
-from rapuma.manager.project         import Project
-from rapuma.project.proj_config     import Config
+from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
+from rapuma.manager.project             import Project
+from rapuma.project.proj_config         import Config
+from rapuma.project.proj_background     import ProjBackground
 
 
 ###############################################################################
@@ -42,8 +43,10 @@ class ProjBinding (object) :
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.config             = Config(pid)
+        self.pg_back            = ProjBackground(self.pid)
         self.config.getProjectConfig()
         self.projectConfig      = self.config.projectConfig
+        self.watermark          = self.projectConfig['GeneralSettings']['watermark']
         self.projHome           = None
         self.projectMediaIDCode = None
         self.local              = None
@@ -102,16 +105,7 @@ class ProjBinding (object) :
 # FIXME: The problem with bind the way it is is that because the process creates 3
 # separate files and joins them together with pdftk, we loose the index. What is 
 # needed is to make one big control file that runs everything needed in the right order
-# This has been reported as a bug.
-
-        # Set the mode for bind
-        mode = 'bind'
-        # Set the cidList (to none)
-        cidList = ''
-        # Set the pages (to none)
-        pages = ''
-        # Override file name/path (not used with bind)
-        override = ''
+# This has been reported in the Rapuma bugtracker.
 
         # Get the order of the groups to be bound.
         bindOrder = {}
@@ -134,9 +128,6 @@ class ProjBinding (object) :
         # Rerender the groups by bindingOrder value
         keyList = bindOrder.keys()
         keyList.sort()
-        for key in keyList :
-            # Do a force render in the bind mode
-            Project(self.pid, bindOrder[key]).renderGroup(mode, cidList, pages, override)
 
         # Build the final bind command
         disposable = []
@@ -159,11 +150,6 @@ class ProjBinding (object) :
         else :
             self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(output)])
 
-        # If the old files are still there we have a problem on the next run, delete them now
-        for f in disposable :
-            if os.path.isfile(f) :
-                os.remove(f)
-
         # Collect the page count and record in group
         newPages = self.tools.pdftkTotalPages(output)
         # FIXME: For now, we need to hard-code the manager name
@@ -179,15 +165,17 @@ class ProjBinding (object) :
             self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(output)])
 
+        # Now, add a watermark if that setting is activated
+        if self.watermark :
+            self.pg_back.addBackground(output, self.watermark)
+
         # Build the viewer command
-        pdfViewer = self.projectConfig['Managers'][manager]['pdfViewerCommand']
-        pdfViewer.append(output)
-        # Run the viewer and collect the return code for analysis
+        pdfViewerCmd = self.projectConfig['Managers'][manager]['pdfViewerCommand']
+        pdfViewerCmd.append(output)
+        # Run the XeTeX and collect the return code for analysis
         try :
-            subprocess.Popen(pdfViewer)
+            subprocess.Popen(pdfViewerCmd)
             return True
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog(self.errorCodes['0260'], [str(e)])
-
-

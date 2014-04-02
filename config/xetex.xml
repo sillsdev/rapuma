@@ -34,34 +34,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Draft Background</name>
-        <key>draftBackground</key>
-        <description>A list of backgounds to use for a draft version of a group.</description>
-        <type>list</type>
-        <value>linesWatermark,draftWatermark</value>
-    </setting>
-    <setting>
-        <name>Proof Background</name>
-        <key>proofBackground</key>
-        <description>A list of backgounds to use for a proof version of a group.</description>
-        <type>list</type>
-        <value>boxWatermark,proofWatermark</value>
-    </setting>
-    <setting>
-        <name>Final Background</name>
-        <key>finalBackground</key>
-        <description>A list of backgounds to use for a final version of a group. Normally there are none.</description>
-        <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Bind Background</name>
-        <key>bindBackground</key>
-        <description>A list of backgounds to use for a bound final version of the publication. Normally there are none.</description>
-        <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
         <name>Freeze TeX Settings</name>
         <key>freezeTexSettings</key>
         <description>For debugging purposes, prevent the XeTeX manager from recreating the main TeX settings file. Default = False</description>

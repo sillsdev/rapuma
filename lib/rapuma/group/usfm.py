@@ -63,7 +63,6 @@ class Usfm (Group) :
         self.proj_config.getAdjustmentConfig()
         self.projectConfig          = self.proj_config.projectConfig
         self.adjustmentConfig       = self.proj_config.adjustmentConfig
-        self.pg_background          = ProjBackground(self.pid, self.gid)
         self.log                    = project.log
         self.cfg                    = cfg
         self.mType                  = project.projectMediaIDCode
@@ -185,7 +184,7 @@ class Usfm (Group) :
         return os.path.join(self.local.projComponentFolder, cid, self.makeFileNameWithExt(cid) + '.adj')
 
 
-    def render(self, gid, mode, cidList, pages, override) :
+    def render(self, gid, cidList, pages, override) :
         '''Does USFM specific rendering of a USFM component'''
 
 #        import pdb; pdb.set_trace()
@@ -200,17 +199,17 @@ class Usfm (Group) :
         # Preprocess all subcomponents (one or more)
         # Stop if it breaks at any point
         for cid in cids :
-            if not self.preProcessGroup(gid, mode, [cid]) :
+            if not self.preProcessGroup(gid, [cid]) :
                 return False
 
         # With everything in place we can render the component.
         # Note: We pass the cidList straight through
-        self.project.managers['usfm_' + self.renderer.capitalize()].run(gid, mode, cidList, pages, override)
+        self.project.managers['usfm_' + self.renderer.capitalize()].run(gid, cidList, pages, override)
 
         return True
 
 
-    def preProcessGroup (self, gid, mode, cidList) :
+    def preProcessGroup (self, gid, cidList) :
         '''This will prepare a component group for rendering by checking for
         and/or creating any dependents it needs to render properly.'''
 
@@ -287,11 +286,6 @@ class Usfm (Group) :
 
             else :
                 self.log.writeToLog(self.errorCodes['0220'], [self.macPack], 'usfm.preProcessGroup():0220')
-
-        # Background management
-        bgList = self.projectConfig['Managers'][self.cType + '_' + self.renderer.capitalize()][mode + 'Background']
-        for bg in bgList :
-            self.pg_background.checkForBackground(bg, mode)
 
         # Any more stuff to run?
 

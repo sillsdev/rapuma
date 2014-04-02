@@ -20,163 +20,47 @@ from configobj                          import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools                  import Tools
-from rapuma.core.user_config            import UserConfig
-from rapuma.core.proj_local             import ProjLocal
-from rapuma.core.proj_log               import ProjLog
-from rapuma.project.proj_config         import Config
-from rapuma.group.usfmTex               import UsfmTex
 
 
 class ProjBackground (object) :
 
-    def __init__(self, pid, gid) :
+    def __init__(self, pid) :
         '''Intitate the whole class and create the object.'''
         
-        # FIXME: because the usfm cType is most common at this time, to make
-        # things easier we set that as the cType. If the project is not using
-        # that cType, this will all break.
+# FIXME: Doing a complete rewrite to allow this process to occure at any time in the process
 
 #        import pdb; pdb.set_trace()
 
         self.pid                        = pid
-        self.gid                        = gid
         self.tools                      = Tools()
-        self.user                       = UserConfig()
-        self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
-        self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
-        self.local                      = ProjLocal(pid, gid)
-        self.proj_config                = Config(pid, gid)
-        self.proj_config.getProjectConfig()
-        self.proj_config.getLayoutConfig()
-        self.projectConfig              = self.proj_config.projectConfig
-        self.layoutConfig               = self.proj_config.layoutConfig
-        self.log                        = ProjLog(pid)
-        self.cType                      = self.projectConfig['Groups'][gid]['cType']
-        self.Ctype                      = self.cType.capitalize()
-        self.macPack                    = None
-        self.macPackConfig              = None
-        self.macPackFunctions           = None
-        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_config.getMacPackConfig(self.macPack)
-            self.proj_config.loadMacPackFunctions(self.macPack)
-            self.macPackConfig          = self.proj_config.macPackConfig
-            self.macPackFunctions       = self.proj_config.macPackFunctions
 
         # Log messages for this module
         self.errorCodes     = {
+
             '0000' : ['MSG', 'Placeholder message'],
-            '0220' : ['MSG', 'Background [<<1>>] is already being used for the [<<2>>] background type.'],
-            '0230' : ['MSG', 'Background [<<1>>] has been added for use in the [<<2>>] background.'],
-            '0240' : ['MSG', 'Background [<<1>>] has been removed from the [<<2>>] background type.'],
-            '0250' : ['MSG', 'Background [<<1>>] is not used in [<<2>>] background type. Cannot remove.'],
-            '0260' : ['MSG', 'Background [<<1>>] has been updated for the [<<2>>] background type.'],
-            '0270' : ['MSG', 'Background [<<1>>] is not found in the [<<2>>] background type. Cannot update.'],
-            '0280' : ['MSG', 'Installed background file [<<1>>] into the project.'],
-            '0290' : ['ERR', 'Failed to install background file [<<1>>]. Error: [<<2>>]'],
+
         }
 
 
 ###############################################################################
-############################## Compare Functions ##############################
+############################### Basic Functions ###############################
 ###############################################################################
 ######################## Error Code Block Series = 0200 #######################
 ###############################################################################
 
-# FIXME: We have a bit of a time-bomb here in that backgounds are managed at
-# the project level but the settings info we need comes from the manager level
-# which is tied to the cType. In the code below we will be making the assumption
-# that the cType is "usfm". That will point us to the usfm_Xetex manager which
-# all of this is currently tied to. If this ever changes, we are hosed as far
-# as backgound management goes.
+
+    def addBackground (self, target, watermark) :
+        '''Add a backgound (watermark) to a specific PDF file.'''
+
+# Start rewrite here
+        pass
 
 
-    def addBackground (self, outType, bgrd) :
-        '''Add a backgound to a specific output type.'''
+    def createWatermarkFile (self, watermark) :
+        '''Create a watermark file and return the file name.'''
 
-        bgName = bgrd
-        # Handle cropmarks
-        if bgrd != 'cropmarks' :
-            bgName = bgrd + 'Watermark'
-
-        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
-        if not bgName in bgList :
-            bgList.append(bgName)
-            self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
-            self.tools.writeConfFile(self.projectConfig)
-            if bgrd != 'cropmarks' :
-                self.checkForBackground(bgName, outType)
-            self.log.writeToLog(self.errorCodes['0230'], [bgName, outType])
-        else :
-            self.log.writeToLog(self.errorCodes['0220'], [bgName, outType])
-
-
-    def removeBackground (self, outType, bgrd) :
-        '''Remove a backgound from a specified output type.'''
-
-        bgName = bgrd
-        # Handle cropmarks
-        if bgrd != 'cropmarks' :
-            bgName = bgrd + 'Watermark'
-
-        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
-        if bgName in bgList :
-            bgList.remove(bgName)
-            self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background'] = bgList
-            self.tools.writeConfFile(self.projectConfig)
-            self.log.writeToLog(self.errorCodes['0240'], [bgName, outType])
-        else :
-            self.log.writeToLog(self.errorCodes['0250'], [bgName, outType])
-
-
-    def updateBackground (self, outType, bgrd) :
-        '''Update a background for a specific output type.'''
-
-        bgName = bgrd
-        # Handle cropmarks
-        if bgrd != 'cropmarks' :
-            bgName = bgrd + 'Watermark'
-
-        bgList = self.projectConfig['Managers']['usfm_Xetex'][outType + 'Background']
-        if bgName in bgList :
-            if bgrd != 'cropmarks' :
-                self.checkForBackground(bgName, outType, True)
-            self.log.writeToLog(self.errorCodes['0260'], [bgName, outType])
-        else :
-            self.log.writeToLog(self.errorCodes['0270'], [bgName, outType])
-
-
-    def checkForBackground (self, bg, mode, force = False) :
-        '''Check to see if a required backgound file is present. If not,
-        make it so.'''
-
-        projBgFile      = os.path.join(self.local.projIllustrationFolder, bg + '.pdf')
-        if not os.path.exists(projBgFile) or force :
-            if bg.find('lines') >= 0 :
-                if self.createLinesFile(projBgFile) :
-                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(projBgFile)])
-            elif bg.find('box') >= 0 :
-                if self.createBorderFile(projBgFile) :
-                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(projBgFile)])
-            else :
-                self.createWatermarkFile(projBgFile, mode)
-
-
-    def createWatermarkFile (self, target, mode) :
-        '''Install a default Rapuma watermark file into the project.'''
-
-        if mode != 'bind' :
-            # FIXME: A custom watermark creation function is needed here, load default for now
-            rpmDefWatermarkFile = os.path.join(self.local.rapumaIllustrationFolder, mode + 'Watermark.pdf')
-
-            try :
-                shutil.copy(rpmDefWatermarkFile, target)
-                self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(target)])
-            except Exception as e :
-                # If this doesn't work, we should probably quit here
-                self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(target),str(e)])
-
+        pass
+        
 
     def createBorderFile (self, pdfOutFile) :
         '''Create a border backgound file used for proof reading.'''
