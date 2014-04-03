@@ -103,7 +103,9 @@ class ProjBinding (object) :
         # Make a name if the file is to be saved
         if save :
             bindFileName = self.pid + '_contents_' + self.tools.ymd()
-            # Save this to the Deliverable folder
+            # Save this to the Deliverable folder (Make sure there is one)
+            if not os.path.isdir(self.local.projDeliverableFolder) :
+                os.makedirs(self.local.projDeliverableFolder)
             bindFile = os.path.join(self.local.projDeliverableFolder, bindFileName + '.pdf')
         else :
             bindFile = tempfile.NamedTemporaryFile().name

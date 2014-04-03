@@ -617,8 +617,24 @@ class Xetex (Manager) :
 
         # There must be a cidList. If one was not passed, default to
         # the group list
+        cidListSubFileName      = ''
+        renderFile              = ''
+        renderFileName          = ''
         if not cidList :
             cidList = self.projectConfig['Groups'][gid]['cidList']
+        else :
+            # If there is a cidList, create an alternate ouput name.
+            # This is so if the file is saved it will have a unique
+            # name. the name needs to be ordered by ###-cid-gid.
+            # We need to do this sooner than later.
+            if len(cidList) > 1 :
+                cidListSubFileName = '-'.join(cidList)
+            else :
+                cid = cidList[0]
+                cidInfo = self.pt_tools.usfmCidInfo()
+                # Add a filler character to the ID
+                cnid = "{:0>3}".format(cidInfo[cid][2])
+                cidListSubFileName = cnid + '-' + cid
 
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
@@ -718,8 +734,21 @@ class Xetex (Manager) :
 
         # If the user wants to save this file, do that now
         if save :
-            renderFileName = self.pid + '_contents_' + self.tools.ymd() + '.pdf'
-            # Save this to the Deliverable folder
+            # If given, the override file name becomes the file name 
+            if override :
+                renderFile = override
+            else :
+                renderFileName = self.pid + '_' + gid
+                if cidListSubFileName :
+                    renderFileName = renderFileName + '_' + cidListSubFileName
+                if pgRange :
+                    renderFileName = renderFileName + '_pg(' + pgRange + ')'
+                # Finish off the file name here
+                renderFileName = renderFileName + '_' + self.tools.ymd() + '.pdf'
+
+            # Save this to the Deliverable folder (Make sure there is one)
+            if not os.path.isdir(self.local.projDeliverableFolder) :
+                os.makedirs(self.local.projDeliverableFolder)
             renderFile = os.path.join(self.local.projDeliverableFolder, renderFileName)
             # If shutil.copy() spits anything back its bad news
             if shutil.copy(self.local.gidPdfFile, renderFile) :
@@ -728,10 +757,14 @@ class Xetex (Manager) :
                 self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
 
         # Review the results if desired
-        if os.path.isfile(self.local.gidPdfFile) :
+        if renderFile :
+            viewFile = renderFile
+        else :
+            viewFile = self.local.gidPdfFile
+        if os.path.isfile(viewFile) :
             if not len(self.pdfViewerCmd) == 0 :
                 # Add the file to the viewer command
-                self.pdfViewerCmd.append(self.local.gidPdfFile)
+                self.pdfViewerCmd.append(viewFile)
                 # Run the XeTeX and collect the return code for analysis
                 try :
                     subprocess.Popen(self.pdfViewerCmd)
@@ -742,7 +775,7 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0710'])
         else :
-            self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(self.local.gidPdfFileName)])
+            self.log.writeToLog(self.errorCodes['0700'], [self.tools.fName(viewFile)])
             
         # If we made it this far, return True
         return True
