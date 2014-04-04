@@ -65,7 +65,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pt_tools               = Paratext(self.pid, self.gid)
-        self.pg_back                = ProjBackground(self.pid)
+        self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -93,6 +93,7 @@ class Xetex (Manager) :
 #        self.cropmarks              = self.tools.str2bool(self.projectConfig['GeneralSettings']['cropmarks'])
         self.lines                  = self.tools.str2bool(self.projectConfig['GeneralSettings']['lines'])
         self.box                    = self.tools.str2bool(self.projectConfig['GeneralSettings']['box'])
+        self.watermark              = self.projectConfig['GeneralSettings']['watermark']
 
         # Get settings for this component
         self.managerSettings = self.projectConfig['Managers'][self.manager]
@@ -146,6 +147,7 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
+            '0725' : ['MSG', 'Added watermark: [<<1>>] to file: [<<2>>]'],
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
 
         }
@@ -719,6 +721,8 @@ class Xetex (Manager) :
         if pgRange :
             self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
 
+        ##### Background management #####
+
 # FIXME: This is for a future feature to add cropmarks outside of XeTeX
 #        # Now, add cropmarks background if that setting is activated
 #        if self.cropmarks :
@@ -743,8 +747,10 @@ class Xetex (Manager) :
                     renderFileName = renderFileName + '_' + cidListSubFileName
                 if pgRange :
                     renderFileName = renderFileName + '_pg(' + pgRange + ')'
-                # Finish off the file name here
-                renderFileName = renderFileName + '_' + self.tools.ymd() + '.pdf'
+                # Add date stamp
+                renderFileName = renderFileName + '_' + self.tools.ymd()
+                # Add render file extention
+                renderFileName = renderFileName + '.pdf'
 
             # Save this to the Deliverable folder (Make sure there is one)
             if not os.path.isdir(self.local.projDeliverableFolder) :
@@ -754,10 +760,17 @@ class Xetex (Manager) :
             if shutil.copy(self.local.gidPdfFile, renderFile) :
                 self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
             else :
+                # Once we know the file is successfully generated, add a water mark if requested
                 self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
+                if self.watermark :
+                    wmFile = self.pg_back.addWatermarkBackground(renderFile)
+                    if os.path.exists(wmFile) :
+                        self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
 
-        # Review the results if desired
-        if renderFile :
+        ##### Veiwing #####
+        if wmFile :
+            viewFile = wmFile
+        elif renderFile :
             viewFile = renderFile
         else :
             viewFile = self.local.gidPdfFile

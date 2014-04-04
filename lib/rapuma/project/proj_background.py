@@ -20,11 +20,15 @@ from configobj                          import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools                  import Tools
+from rapuma.core.user_config            import UserConfig
+from rapuma.project.proj_config         import Config
+from rapuma.core.proj_local             import ProjLocal
+from rapuma.core.proj_log               import ProjLog
 
 
 class ProjBackground (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
         
 # FIXME: Doing a complete rewrite to allow this process to occure at any time in the process
@@ -32,12 +36,27 @@ class ProjBackground (object) :
 #        import pdb; pdb.set_trace()
 
         self.pid                        = pid
+        self.gid                        = gid
+        self.local                      = ProjLocal(pid, gid)
         self.tools                      = Tools()
+        self.proj_config                = Config(pid, gid)
+        self.proj_config.getProjectConfig()
+        self.proj_config.getLayoutConfig()
+        self.projectConfig              = self.proj_config.projectConfig
+        self.layoutConfig               = self.proj_config.layoutConfig
+        self.log                        = ProjLog(pid)
+        self.user                       = UserConfig()
+        self.userConfig                 = self.user.userConfig
+        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
+
 
         # Log messages for this module
         self.errorCodes     = {
 
             '0000' : ['MSG', 'Placeholder message'],
+            '0280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
+            '0290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
 
         }
 
@@ -57,23 +76,62 @@ class ProjBackground (object) :
     def addBoxBackground (self, target) :
         '''Add a background that puts a box around the page area.'''
 
-        print 'Calling: addBoxBackground()'
+        # Create box background file name 
+        if self.gid :
+            boxFile = os.path.join(self.local.projIllustrationFolder, self.gid + '-boxBackground.pdf')
+        else :
+            boxFile = os.path.join(self.local.projIllustrationFolder, 'boxBackground.pdf')
+            
+        # Create the lines file
+        if not os.path.isfile(boxFile) :
+            self.createBoxFile(boxFile)
+                
+        # Merge the lines file with the target
+        if os.path.isfile(boxFile) :
+            if self.mergePdfFilesPdftk(target, boxFile) :
+                return True
 
 
     def addLinesBackground (self, target) :
         '''Add a background that has lines that represent the type
         leading.'''
 
-        print 'Calling: addLinesBackground()'
+        # Create lines background file name 
+        if self.gid :
+            linesFile = os.path.join(self.local.projIllustrationFolder, self.gid + '-linesBackground.pdf')
+        else :
+            linesFile = os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf')
+            
+        # Create the lines file
+        if not os.path.isfile(linesFile) :
+            self.createLinesFile(linesFile)
+                
+        # Merge the lines file with the target
+        if os.path.isfile(linesFile) :
+            if self.mergePdfFilesPdftk(target, linesFile) :
+                return True
 
 
-    def addWatermarkBackground (self, gid, cid_list, pages, override) :
+    def addWatermarkBackground (self, source) :
         '''Add a background (watermark) to a specific PDF file.'''
 
-# Start rewrite here
-        print 'Calling: addWatermarkBackground()'
-        print gid, cid_list, pages, override
+        watermark = self.projectConfig['GeneralSettings']['watermark']
+        # Create watermark background file name 
+        watermarkFile = os.path.join(self.local.projIllustrationFolder, 'watermark-' + watermark + '.pdf')
+        # Create the target file name
+        target = source.split('.')[0] + '-' + watermark + '.pdf'
+        # Create the watermark file
+        if not os.path.isfile(watermarkFile) :
+            self.createWatermarkFile(watermarkFile)
+        # For this operation we need to copy our source to target
+        shutil.copy(source, target)
+        # Merge the watermark file with the target
+        if os.path.isfile(watermarkFile) :
+            if self.mergePdfFilesPdftk(target, watermarkFile) :
+                return target
 
+
+    ##### Background Creation Functions #####
 
     def createWatermarkFile (self, watermark) :
         '''Create a watermark file and return the file name.'''
@@ -390,6 +448,19 @@ class ProjBackground (object) :
                 cmds.append(c)
 
         return cmds
+
+
+    def mergePdfFilesPdftk (self, front, back) :
+        '''Merge two PDF files together using pdftk.'''
+    
+        cmd = ['pdftk', front, 'background', back, 'output', self.tools.tempName(front)]
+        try:
+            subprocess.call(cmd) 
+            shutil.copy(self.tools.tempName(front), front)
+            os.remove(self.tools.tempName(front))
+            return True
+        except Exception as e :
+            self.log.writeToLog(self.errorCodes['0280'], [str(cmd), str(e)])
 
 
     def convertSvgToPdf (self, svgInFile, pdfOutFile) :
