@@ -622,6 +622,7 @@ class Xetex (Manager) :
         cidListSubFileName      = ''
         renderFile              = ''
         renderFileName          = ''
+        wmFile                  = ''
         if not cidList :
             cidList = self.projectConfig['Groups'][gid]['cidList']
         else :
@@ -737,35 +738,41 @@ class Xetex (Manager) :
             self.pg_back.addBoxBackground(self.local.gidPdfFile)
 
         # If the user wants to save this file, do that now
-        if save :
-            # If given, the override file name becomes the file name 
-            if override :
-                renderFile = override
-            else :
-                renderFileName = self.pid + '_' + gid
-                if cidListSubFileName :
-                    renderFileName = renderFileName + '_' + cidListSubFileName
-                if pgRange :
-                    renderFileName = renderFileName + '_pg(' + pgRange + ')'
-                # Add date stamp
-                renderFileName = renderFileName + '_' + self.tools.ymd()
-                # Add render file extention
-                renderFileName = renderFileName + '.pdf'
-
+        if save and not override :
+            renderFileName = self.pid + '_' + gid
+            if cidListSubFileName :
+                renderFileName = renderFileName + '_' + cidListSubFileName
+            if pgRange :
+                renderFileName = renderFileName + '_pg(' + pgRange + ')'
+            # Add date stamp
+            renderFileName = renderFileName + '_' + self.tools.ymd()
+            # Add render file extention
+            renderFileName = renderFileName + '.pdf'
             # Save this to the Deliverable folder (Make sure there is one)
             if not os.path.isdir(self.local.projDeliverableFolder) :
                 os.makedirs(self.local.projDeliverableFolder)
+            # Final file name and path
             renderFile = os.path.join(self.local.projDeliverableFolder, renderFileName)
-            # If shutil.copy() spits anything back its bad news
+            # Copy, no news is good news
             if shutil.copy(self.local.gidPdfFile, renderFile) :
                 self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
             else :
-                # Once we know the file is successfully generated, add a water mark if requested
                 self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
-                if self.watermark :
-                    wmFile = self.pg_back.addWatermarkBackground(renderFile)
-                    if os.path.exists(wmFile) :
-                        self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
+
+        # If given, the override file name becomes the file name 
+        if override :
+            renderFile = override
+            # Copy, no news is good news
+            if shutil.copy(self.local.gidPdfFile, renderFile) :
+                self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
+            else :
+                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
+
+        # Once we know the file is successfully generated, add a water mark if requested
+        if self.watermark :
+            wmFile = self.pg_back.addWatermarkBackground(renderFile)
+            if os.path.exists(wmFile) :
+                self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
 
         ##### Veiwing #####
         if wmFile :

@@ -27,7 +27,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="pageProject">
      <widget class="QLabel" name="labelProjectPid">
@@ -95,32 +95,232 @@
       </property>
       <widget class="QWidget" name="tabGeneralSettings">
        <attribute name="title">
-        <string>General</string>
+        <string>Information</string>
        </attribute>
        <attribute name="toolTip">
         <string>Backup project</string>
        </attribute>
-       <widget class="QLineEdit" name="lineEditProjectName">
+       <widget class="QLineEdit" name="lineEditProjectPgProjectTitle">
         <property name="geometry">
          <rect>
           <x>20</x>
           <y>30</y>
-          <width>281</width>
+          <width>361</width>
           <height>27</height>
          </rect>
         </property>
         <property name="toolTip">
-         <string>Project name, could be book title</string>
+         <string>Enter a brief project title or name, could be the book title</string>
         </property>
         <property name="placeholderText">
-         <string>Project Name</string>
+         <string>Project NameTitle</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEditProjectPgInformationDescription">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>90</y>
+          <width>361</width>
+          <height>91</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lableProjectPgInformationDescription">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>70</y>
+          <width>141</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Project Description</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labelProjectPgInformationProjectTitle">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>10</y>
+          <width>101</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Project Title</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEditProjectPgInformationEthnologueId">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>30</y>
+          <width>113</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Enter the three letter Ethnologue code for this language</string>
+        </property>
+        <property name="placeholderText">
+         <string>Ethnologue ID</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labelProjectPgInformationEthnologueId">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>10</y>
+          <width>121</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Ethnologue Code</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labelProjectPgInformationIsbn">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>70</y>
+          <width>66</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>ISBN</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labelProjectPgInformationStartDate">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>130</y>
+          <width>81</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Start Date</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEditProjectPgInformationIsbn">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>90</y>
+          <width>211</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Enter the ISBN (if used)</string>
+        </property>
+        <property name="placeholderText">
+         <string>ISBN</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_2">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>150</y>
+          <width>113</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Enter the date this project was started</string>
+        </property>
+        <property name="placeholderText">
+         <string>Start Date</string>
         </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tabStyle">
        <attribute name="title">
-        <string>Style</string>
+        <string>General</string>
        </attribute>
+       <widget class="QCheckBox" name="checkBoxProjectPgGeneralCropmarks">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>30</y>
+          <width>141</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Add cropmarks to the page</string>
+        </property>
+        <property name="text">
+         <string>Cropmarks</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBoxProjectPgGenerallines">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>60</y>
+          <width>151</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Add a text line tracking background</string>
+        </property>
+        <property name="text">
+         <string>Text Lines</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEditProjectPgWatermark">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>140</y>
+          <width>121</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Enter text for adding a watermark to the page (no text, no watermark)</string>
+        </property>
+        <property name="placeholderText">
+         <string>Watermark</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBoxProjectPgGeneralPageBox">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>90</y>
+          <width>97</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Add a border (box) background around the page</string>
+        </property>
+        <property name="text">
+         <string>Page Box</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labelProjectPgGeneralWatermark">
+        <property name="geometry">
+         <rect>
+          <x>23</x>
+          <y>120</y>
+          <width>91</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Watermark</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabTex">
        <attribute name="title">
@@ -370,7 +570,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; font-style:italic; text-decoration: underline; color:#cfcfcf;&quot;&gt;Component&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButtonGroupPgDraft">
+     <widget class="QToolButton" name="toolButtonGroupPgRender">
       <property name="geometry">
        <rect>
         <x>632</x>
@@ -380,66 +580,14 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>Produce a draft PDF of this group</string>
+       <string>Render the text of the current group to PDF</string>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_draft-48.png</normaloff>:/document_draft-48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>32</width>
-        <height>32</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QToolButton" name="toolButtonGroupPgProof">
-      <property name="geometry">
-       <rect>
-        <x>682</x>
-        <y>10</y>
-        <width>40</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Produce a proof PDF of this group</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_proof-48.png</normaloff>:/document_proof-48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>32</width>
-        <height>32</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QToolButton" name="toolButtonGroupPgFinal">
-      <property name="geometry">
-       <rect>
-        <x>732</x>
-        <y>10</y>
-        <width>40</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Produce a final PDF of this group</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_final-48.png</normaloff>:/document_final-48.png</iconset>
+        <normaloff>:/Gnome-System-Run-48.png</normaloff>:/Gnome-System-Run-48.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -665,7 +813,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; font-style:italic; text-decoration: underline; color:#cfcfcf;&quot;&gt;Group&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QToolButton" name="toolButtonComponentPgDraft">
+     <widget class="QToolButton" name="toolButtonComponentPgRender">
       <property name="geometry">
        <rect>
         <x>632</x>
@@ -675,66 +823,14 @@
        </rect>
       </property>
       <property name="toolTip">
-       <string>Produce a draft PDF of this component</string>
+       <string>Render the text of the current component to PDF</string>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_draft-48.png</normaloff>:/document_draft-48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>32</width>
-        <height>32</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QToolButton" name="toolButtonComponentPgFinal">
-      <property name="geometry">
-       <rect>
-        <x>732</x>
-        <y>10</y>
-        <width>40</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Produce a final PDF version of this component</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_final-48.png</normaloff>:/document_final-48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>32</width>
-        <height>32</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QToolButton" name="toolButtonComponentPgProof">
-      <property name="geometry">
-       <rect>
-        <x>682</x>
-        <y>10</y>
-        <width>40</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Produce a proof PDF of this component</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../icon/pyresources.qrc">
-        <normaloff>:/document_proof-48.png</normaloff>:/document_proof-48.png</iconset>
+        <normaloff>:/Gnome-System-Run-48.png</normaloff>:/Gnome-System-Run-48.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -1406,6 +1502,22 @@
     <hint type="destinationlabel">
      <x>202</x>
      <y>32</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditProjectPgProjectTitle</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>190</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>313</y>
     </hint>
    </hints>
   </connection>

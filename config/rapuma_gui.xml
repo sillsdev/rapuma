@@ -40,6 +40,13 @@ Todo:
             <type>string</type>
             <value></value>
         </setting>
+        <setting>
+            <name>Last Page</name>
+            <key>lastPage</key>
+            <description>The last page in the GUI which was displayed.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
     </section>
 </root>
 

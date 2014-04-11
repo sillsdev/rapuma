@@ -1,16 +1,17 @@
 Installation instructions for Rapuma
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 28 September 2013
+	Last edited: 09 April 2014
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-STATUS: Currently Rapuma is under heavy development (by a single, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
+STATUS: Currently Rapuma is under heavy development (by one, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
 
 These instructions are for manually installing the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
-REQUIRED PACKAGES
------------------------------------------
+-------------------------------------------------------------------------------
+UBUNTU SYSTEM SETUP
+-------------------------------------------------------------------------------
 Go to the SIL Linux packages site and hook your system up with that if it isn't already. Follow the instructions on this page:
 
     http://packages.sil.org
@@ -22,19 +23,28 @@ Now run the following commands in your terminal:
 
 Note the upgrade could take some time. Also, if it asks, answer yes to the "install without verification" question.
 
-Next, in the terminal, you need to install all the necessary packages to run the Rapuma publishing system. There are two categories, required and suggested. When you use this command, be sure to review the list of programs that it is proposing to install. Look for any that it might want to remove. Be sure no critical programs are being removed. If you are not sure, do not go any further. Here are packages to install:
+Next, in the terminal, you need to install all the necessary packages to run the Rapuma publishing system in various ways. There are several categories/levels of packages you will need to be aware of. They are as follows:
 
-Required:
+-------------------------------------------------------------------------------
+1) REQUIRED PACKAGES FOR BASIC CLI AND HEADLESS OPERATION:
+-------------------------------------------------------------------------------
 
-    sudo apt-get install python-configobj evince python-argparse pdftk mercurial meld librsvg2-bin
+This is the basic set of packages needed to run Rapuma from the CLI (Command Line Interface) and headless access by a web server-based interface:
+
+    sudo apt-get install python-configobj python-argparse pdftk librsvg2-bin
 
 Another required package is the Palaso Python library. Rapuma depends on a couple parts of that.
-At this time, that package needs to be added to your system by cloning the project, then
-following the install proceedure. It can be cloned from here:
+At this time, this is not a formal Ubuntu package and needs to be added to your system by cloning the project, to do this use the following install proceedure.
+
+a) To obtain the Palaso software, you will need to first need to be sure that you have mercurial installed on your system. If you do not, install with this command:
+
+    sudo apt-get install mercurial
+
+b) If you have mercurial you can install the palaso software. It can be cloned from here with this command:
 
     hg clone http://hg.palaso.org/palaso-python ~/Projects/palaso-python
 
-This needs to be installed before you can use it. To install run:
+c) This python package needs to be installed before you can use it. To install run these commands:
 
     cd ~/Projects/palaso-python
     ./setup.py --nokmn build
@@ -42,23 +52,35 @@ This needs to be installed before you can use it. To install run:
 
 (Note: need to add simple test for install of palaso-python)
 
+
+-------------------------------------------------------------------------------
+2) REQUIRED FOR ADVANCED CLI AND GUI OPERATION:
+-------------------------------------------------------------------------------
+
+Some Rapuma features that require user interaction (via  can be accessed with these packages involved.
+
+    sudo apt-get install evince meld
+
 Some suggested additional package(s) to make your Linux DTP system complete:
 
-    sudo apt-get install tortoisehg libteckit-perl teckit libfont-ttf-scripts-perl
+    sudo apt-get install mercurial tortoisehg libteckit-perl teckit libfont-ttf-scripts-perl
 
 Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
 
 With all the above packages installed, we are ready to move on to installing Rapuma publishing package.
 
-GETTING Rapuma
------------------------------------------
+
+-------------------------------------------------------------------------------
+3) GETTING RAPUMA
+-------------------------------------------------------------------------------
+
 To obtain Rapuma, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in a folder called "~/Projects" but you are welcomed to put it wherever you want.
 
 Create the above path if it does not exist with this command in your terminal:
 
     mkdir ~/Projects
 
-Now you can to go to the Palaso website and clone the project code with:
+Now you can go to the Palaso website and clone the Rapuma project code with:
 
     hg clone http://hg.palaso.org/pub-rpm ~/Projects/rapuma
 
@@ -67,8 +89,10 @@ That should put Rapuma where you need it. From time to time you may want to upda
     hg pull --update
 
 
-PACKAGE INSTALLATION AND SETUP
------------------------------------------
+-------------------------------------------------------------------------------
+4) PACKAGE INSTALLATION AND SETUP
+-------------------------------------------------------------------------------
+
 Like the palaso.python setup you will use the setup.py script. With a terminal in the root of the rapuma repository on your local machine, run:
 
     cd ~/Projects/rapuma

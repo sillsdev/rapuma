@@ -66,6 +66,13 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Project Description</name>
+            <key>projectDescription</key>
+            <description>A concise project description.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Project Translators</name>
             <key>translators</key>
             <description>The name of the author or translators for this publication.</description>

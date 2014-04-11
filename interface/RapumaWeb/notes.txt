@@ -1,0 +1,10 @@
+In PHP:
+
+- XML to JSON mapper for the config file
+    - read XML and produce JSON
+
+- a Model in PHP
+  - persist JSON from the client
+  - write out JSON to config file format
+
+

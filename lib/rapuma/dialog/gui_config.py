@@ -57,9 +57,10 @@ class GuiConfig (object) :
             self.guiConfig.write()
 
         # Grab the module settings
-        self.currentPid = self.guiConfig['ProjectBookmark']['currentPid']
-        self.currentGid = self.guiConfig['ProjectBookmark']['currentGid']
-        self.currentCid = self.guiConfig['ProjectBookmark']['currentCid']
+        self.currentPid     = self.guiConfig['ProjectBookmark']['currentPid']
+        self.currentGid     = self.guiConfig['ProjectBookmark']['currentGid']
+        self.currentCid     = self.guiConfig['ProjectBookmark']['currentCid']
+        self.lastPage       = self.guiConfig['ProjectBookmark']['lastPage']
 
         # Log messages for this module
         self.errorCodes     = {
@@ -91,13 +92,21 @@ class GuiConfig (object) :
         self.tools.writeConfFile(self.guiConfig)
 
 
+    def setLastPage (self, page) :
+        '''Set the current page number for a last page bookmarking reference.'''
+
+        self.lastPage = page
+        self.guiConfig['ProjectBookmark']['lastPage'] = page
+        self.tools.writeConfFile(self.guiConfig)
+
+
     def setPidCurrent (self, pid = None) :
         '''Compare pid with the current recored pid in rapuma_gui.conf.
         If it is different change to the new pid. If not, leave it alone.'''
 
         if pid != self.currentPid :
-            self.guiConfig['ProjectBookmark']['currentPid'] = pid
             self.currentPid = pid
+            self.guiConfig['ProjectBookmark']['currentPid'] = pid
             self.tools.writeConfFile(self.guiConfig)
 
 
@@ -106,8 +115,8 @@ class GuiConfig (object) :
         If it is different change to the new gid. If not, leave it alone.'''
 
         if gid != self.currentGid :
-            self.guiConfig['ProjectBookmark']['currentGid'] = gid
             self.currentGid = gid
+            self.guiConfig['ProjectBookmark']['currentGid'] = gid
             self.tools.writeConfFile(self.guiConfig)
 
 
@@ -116,8 +125,8 @@ class GuiConfig (object) :
         If it is different change to the new cid. If not, leave it alone.'''
 
         if gid != self.currentCid :
-            self.guiConfig['ProjectBookmark']['currentCid'] = cid
             self.currentCid = cid
+            self.guiConfig['ProjectBookmark']['currentCid'] = cid
             self.tools.writeConfFile(self.guiConfig)
 
 

@@ -86,7 +86,7 @@ os.environ['RAPUMA_PROJ'] = projHome
 ###########################################################################
 
 # Load standard Python modules
-import codecs, importlib
+import codecs, importlib, time
 from configobj                          import ConfigObj
 
 # Load the Rapuma lib classes
@@ -160,7 +160,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.setupUi(self)
         self.connectionActions()
 
-
         # Connect the menu actions
         menuDlgs = ['menu_project_add', 'menu_project_remove', 'menu_project_select', 'menu_project_archive', 
                     'menu_project_cloud', 'menu_project_backup', 'menu_project_bind', 'menu_project_reap', 
@@ -213,8 +212,8 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         # Set or reset/update main window dialog settings
         self.updateSettings()
 
-        # FIXME: This prints a simple message in the status bar, can we do more with it?
-        self.statusBar().showMessage("Hi There!")
+        # This prints a simple message in the status bar to start
+        self.statusBar().showMessage('So, what do you want to do?', 3000)
 
 
     def connectionActions (self) :
@@ -226,16 +225,13 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.toolButtonProjectPgBackup.clicked.connect(self.backup)
         self.toolButtonProjectPgCloudPush.clicked.connect(self.cloudPush)
         self.toolButtonProjectPgBind.clicked.connect(self.bind)
+        self.checkBoxProjectPgGeneralCropmarks.clicked.connect(self.setCropmarks)
         # Group page
         self.toolButtonGroupPgSelect.clicked.connect(self.mGroupSelect)
-        self.toolButtonGroupPgDraft.clicked.connect(self.draftGroup)
-        self.toolButtonGroupPgProof.clicked.connect(self.proofGroup)
-        self.toolButtonGroupPgFinal.clicked.connect(self.finalGroup)
+        self.toolButtonGroupPgRender.clicked.connect(self.renderGroup)
         # Component page
         self.toolButtonComponentPgSelect.clicked.connect(self.mComponentSelect)
-        self.toolButtonComponentPgDraft.clicked.connect(self.draftComponent)
-        self.toolButtonComponentPgProof.clicked.connect(self.proofComponent)
-        self.toolButtonComponentPgFinal.clicked.connect(self.finalComponent)
+        self.toolButtonComponentPgRender.clicked.connect(self.renderComponent)
 
     def updateSettings (self) :
         '''Update or refresh all the settings in this dialog window.'''
@@ -245,8 +241,53 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         self.userConfig         = UserConfig().userConfig
         self.projectConfig      = None
 
-        # Go to the last item that was selected
-        if self.guiSettings.currentPid :
+        self.guiSettings.setLastPage(self.horizontalScrollBar.value())
+
+
+        print '::', self.lineEditProjectPgProjectTitle.text()
+
+
+        if os.path.exists(ProjLocal(self.guiSettings.currentPid).projectConfFile) :
+            # Quick grab the projectConfig, we may need it later
+            try :
+                self.proj_config = Config(self.guiSettings.currentPid)
+                self.proj_config.getProjectConfig()
+                self.projectConfig = self.proj_config.projectConfig
+            except :
+                pass
+            # Now inject the settings for all the pages
+            # Component Page
+            
+            # Group Page
+            
+            # Project Page
+            self.lineEditProjectPgProjectTitle.setText(self.common.tempFixProjectName(self.userConfig, self.guiSettings.currentPid))
+            check = self.projectConfig['GeneralSettings']['cropmarks']
+            if check == 'True' :
+                self.checkBoxProjectPgGeneralCropmarks.setCheckState(QtCore.Qt.Checked)
+
+            # Jump to the last page
+            if self.guiSettings.lastPage :
+                self.setCurrentIndexWorkArea(int(self.guiSettings.lastPage))
+                self.horizontalScrollBar.setSingleStep(int(self.guiSettings.lastPage))
+            else :
+                if self.guiSettings.currentCid :
+                    self.labelComponentCid.setText(self.guiSettings.currentCid)
+                    self.setCurrentIndexWorkArea(2)
+                    self.horizontalScrollBar.setSingleStep(2)
+                elif self.guiSettings.currentGid :
+                    self.labelGroupGid.setText(self.guiSettings.currentGid)
+                    self.setCurrentIndexWorkArea(1)
+                    self.horizontalScrollBar.setSingleStep(1)
+                else :
+                    self.labelProjectPid.setText(self.guiSettings.currentPid)
+                    self.setCurrentIndexWorkArea(0)
+                    self.lineEditProjectPgProjectTitle.setText(self.common.tempFixProjectName(self.userConfig, self.guiSettings.currentPid))
+                    self.horizontalScrollBar.setSingleStep(0)
+
+        else :
+            QMessageBox.warning(self, "Rapuma Warning",
+                """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
 
 
 
@@ -269,33 +310,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
 
 
-            if os.path.exists(ProjLocal(self.guiSettings.currentPid).projectConfFile) :
-                # Quick grab the projectConfig, we may need it later
-                try :
-                    self.proj_config = Config(self.guiSettings.currentPid)
-                    self.proj_config.getProjectConfig()
-                    self.projectConfig = self.proj_config.projectConfig
-                except :
-                    pass
-                # Now inject the page settings
-                if self.guiSettings.currentCid :
-                    self.labelComponentCid.setText(self.guiSettings.currentCid)
-                    self.setCurrentIndexWorkArea(2)
-                elif self.guiSettings.currentGid :
-                    self.labelGroupGid.setText(self.guiSettings.currentGid)
-                    self.setCurrentIndexWorkArea(1)
-                else :
-                    self.labelProjectPid.setText(self.guiSettings.currentPid)
-                    self.setCurrentIndexWorkArea(0)
-                    self.lineEditProjectName.setText(self.common.tempFixProjectName(self.userConfig, self.guiSettings.currentPid))
-            else :
-                QMessageBox.warning(self, "Rapuma Warning",
-                    """<p>There seems to be a problem with the project you selected. The project home folder cannot be found.""")
-
-        # Always start in the project work area
-#        self.setCurrentIndexWorkArea(0)
-#        self.tabWidgetProject.setCurrentIndex(0)
-
 
     def main (self) :
         '''This function shows the main dialog'''
@@ -317,7 +331,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         else :
             QMessageBox.warning(self, "Error!", "<p>Project could not be pushed to the cloud. Please check the logs for the reason.</p>")
 
-
     def backup (self) :
         '''Backup the current project.'''
         
@@ -325,7 +338,6 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
             QMessageBox.information(self, "Info", "<p>Project has been backed up.</p>")
         else :
             QMessageBox.warning(self, "Error!", "<p>Project was not backed up. Please check the logs for the reason.</p>")
-
 
     def bind (self) :
         '''Run the bind command on the project.'''
@@ -335,53 +347,44 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
         else :
             QMessageBox.warning(self, "Error!", "<p>The bind command could not be run on this project. Please check the logs for the reason.</p>")
 
+    def setCropmarks (self) :
+        '''Change the cropmarks setting according to if the box is checked or not.'''
+
+        self.proj_config = Config(self.guiSettings.currentPid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig = self.proj_config.projectConfig
+        if self.checkBoxProjectPgGeneralCropmarks.isChecked() :
+            self.projectConfig['GeneralSettings']['cropmarks'] = True
+        else :
+            self.projectConfig['GeneralSettings']['cropmarks'] = False
+
+        self.tools.writeConfFile(self.projectConfig)
+
 
 # Group #######################################################################
 
-    def draftGroup (self) :
-        '''Run the draft command on the current group.'''
+    def renderGroup (self) :
+        '''Run the render command on the current group.'''
 
-        print 'Running Group Draft'
-
-    def proofGroup (self) :
-        '''Run the proof command on the current group.'''
-
-        print 'Running Group Proof'
-
-    def finalGroup (self) :
-        '''Run the final command on the current group.'''
-
-        print 'Running Group Final'
-
+        print 'Running Group Render'
 
 # Component ###################################################################
 
-    def draftComponent (self) :
+    def renderComponent (self) :
         '''Run the draft command on the current component.'''
 
-        # These next two settings need to be connected to the dialog
-        pages = ''
-        override = ''
         # Render
-        cid_list = self.checkCidList(self.guiSettings.currentCid)
-        Project(self.guiSettings.currentPid, self.guiSettings.currentGid).renderGroup('draft', cid_list, pages, override)
-
-
-    def proofComponent (self) :
-        '''Run the proof command on the current component.'''
-
-        print 'Running Component Proof'
-
-
-    def finalComponent (self) :
-        '''Run the final command on the current component.'''
-
-        print 'Running Component Final'
-
-#        elif cmd in ['draft', 'final', 'proof'] :
-#            if cmdType == 'group' :
-#                if cType == 'usfm' :
-#                    Project(pid, gid).renderGroup(cmd, cid_list, pages, override)
+        if not self.guiSettings.currentCid :
+            QMessageBox.information(self, "Rapuma Help",
+                    """<p>No component has been selected!""")
+        else :
+            # These next two settings need to be connected to the dialog
+            pages = ''
+            override = ''
+            cid_list = self.checkCidList(self.guiSettings.currentCid)
+            Project(self.guiSettings.currentPid, self.guiSettings.currentGid).renderGroup(cid_list, pages, override)
+            self.updateSettings()
+            self.statusBar().showMessage('Rendering complete on: ' + "{0}".format(", ".join(str(i) for i in cid_list)), 3000)
 
 
 ###############################################################################
@@ -498,6 +501,10 @@ class RapumaGUI (QMainWindow, QPropertyAnimation, main_dlg.Ui_MainWindow) :
 
     def getCurrentIndexWorkArea (self) :
         return self.stackedWidgetWorkArea.currentIndex()
+
+
+# FIXME: Here!
+
 
     def setCurrentIndexWorkArea (self, index) :
         if index != self.getCurrentIndexWorkArea() :

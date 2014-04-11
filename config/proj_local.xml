@@ -201,33 +201,12 @@ Todo:
         </folder>
         <folder>
             <name>Project Deliverable Folder</name>
-            <description>The folder were final rendered versions of project material goes. This folder will be backed up, unlike the draft and proof folders.</description>
+            <description>The folder were final rendered versions of project material goes. This folder will be backed up so data should always be safe in this location.</description>
             <folderID>projDeliverableFolder</folderID>
             <folderPath>[self:projHome][pathSep]Deliverable</folderPath>
             <relies>projHome</relies>
         </folder>
-        <folder>
-            <name>Project Final Folder</name>
-            <description>The folder were final rendered versions of project material goes. This folder will be backed up, unlike the draft and proof folders.</description>
-            <folderID>projFinalFolder</folderID>
-            <folderPath>[self:projHome][pathSep]Final</folderPath>
-            <relies>projHome</relies>
-        </folder>
-        <folder>
-            <name>Project Proof Folder</name>
-            <description>The folder were project proof files (rendered) items are kept. This folder is not backed up.</description>
-            <folderID>projProofFolder</folderID>
-            <folderPath>[self:projHome][pathSep]Proof</folderPath>
-            <relies>projHome</relies>
-        </folder>
-        <folder>
-            <name>Project Draft Folder</name>
-            <description>The folder were project draft files (rendered) items are kept. This folder is not backed up.</description>
-            <folderID>projDraftFolder</folderID>
-            <folderPath>[self:projHome][pathSep]Draft</folderPath>
-            <relies>projHome</relies>
-        </folder>
-        <folder>
+       <folder>
             <name>Project Style Folder</name>
             <description>The folder were project style files are kept.</description>
             <folderID>projStyleFolder</folderID>
