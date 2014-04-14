@@ -97,8 +97,9 @@ class ProjLocal (object) :
                             # Next, if the 'relies' exists, set the value
                             val = self.processNestedPlaceholders(item['folderPath'])
                             # Check for relative path and fix it if needed
-                            if val[0] == '~' :
-                                val = os.path.expanduser(val)
+                            if len(val) > 0 :
+                                if val[0] == '~' :
+                                    val = os.path.expanduser(val)
                             if item['relies'] :
                                 if getattr(self, item['relies']) :
                                     setattr(self, item['folderID'], val)
