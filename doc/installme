@@ -31,7 +31,7 @@ Next, in the terminal, you need to install all the necessary packages to run the
 
 This is the basic set of packages needed to run Rapuma from the CLI (Command Line Interface) and headless access by a web server-based interface:
 
-    sudo apt-get install python-configobj python-argparse pdftk librsvg2-bin
+    sudo apt-get install python-configobj python-argparse python-pypdf pdftk librsvg2-bin
 
 Another required package is the Palaso Python library. Rapuma depends on a couple parts of that.
 At this time, this is not a formal Ubuntu package and needs to be added to your system by cloning the project, to do this use the following install proceedure.

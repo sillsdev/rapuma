@@ -1,0 +1,35 @@
+{
+    "GeneralSettings":
+    {
+        "box": "False",
+        "lastEdit": "2014-04-08 15:38:37",
+        "lines": "False",
+        "cropmarks": "True",
+        "watermark": "PROOF"
+    },
+    "Backup":
+    {
+        "ownerID": "dennis_drescher",
+        "lastCloudPush": "20140311145509",
+        "lastBackup": "20140106110902"
+    },
+    "ProjectInfo": 
+    {
+        "languageCode": "",
+        "projectDescription": "",
+        "projectCreatorVersion": "0.1.r985",
+        "isbnNumber": "",
+        "projectName": "The New Testament in the Kayah Language in Latin Script",
+        "projectIDCode": "KYU-LATN-NTCAT",
+        "typesetters": "",
+        "translators": "",
+        "projectTitle": "",
+        "projectMediaIDCode": "book",
+        "finishDate": "",
+        "creatorID": "",
+        "startDate": "",
+        "projectCreateDate": "2013-05-02 09:48:18"
+    }
+}
+
+
