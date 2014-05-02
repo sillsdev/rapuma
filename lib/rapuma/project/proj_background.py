@@ -26,6 +26,71 @@ from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 
 
+class ManageBackground (object) :
+    '''Functions to manage background features such as page merging and
+    custom background '''
+
+    def __init__(self, pid, gid = None) :
+        '''Intitate the whole class and create the object.'''
+        
+        self.pid                        = pid
+        self.gid                        = gid
+        # Conversion factor mm to points 
+        self.mmFactor = 72/25.4
+
+        # Log messages for this module
+        self.errorCodes     = {
+
+            '0000' : ['MSG', 'Placeholder message'],
+            '1000' : ['ERR', 'GhostScript failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
+
+        }
+
+
+    def gsMergePdf (self, fgFile, bgFile, outputFile) :
+        '''Main function of the module that runs a Ghostscript formula
+        that places the media (forground) in center of sheet (background).'''
+
+# Write functions to do the calculations for page offsets needed for the merge
+
+
+        (fgX, fgY) = self.getFgFileXY(fgFile)
+        (bgX, fgY) = self.getBgFileXY(bgFile)
+
+
+
+        cmd = ['gs', '-o', outputFile, '-sDEVICE=pdfwrite', '-dQUIET', [[[change this:'-sPAPERSIZE=a4']]], '-dFIXEDMEDIA', '-c', '<</PageOffset [' + xOffset + ' ' + yOffset + ']>>', 'setpagedevice', '-f', inputFile]
+
+        try:
+            subprocess.call(cmd) 
+            return True
+        except Exception as e :
+            self.log.writeToLog(self.errorCodes['1000'], [str(cmd), str(e)])
+
+
+    def getFgFileXY () :
+    def getBgFileXY () :
+
+
+    def xCenterOffset (self, fgX, bgX) :
+        '''Calculate the offset for the horizontal center of two pages to be merged.'''
+
+        # Determining pageoffset
+        return ((bgX - fgX)/2) * self.mmFactor
+
+
+    def yCenterOffset (self, fgY, bgY) :
+        '''Calculate the offset for the vertial center of two pages to be merged.'''
+        # Determining pageoffset
+        return ((bgY - fgY)/2) * self.mmFactor
+
+
+
+
+
+
+
+
 class ProjBackground (object) :
 
     def __init__(self, pid, gid = None) :
