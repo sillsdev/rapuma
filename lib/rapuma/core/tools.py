@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat, json
 import difflib, tempfile, subprocess
 from datetime                               import *
 from xml.etree                              import cElementTree as ET
@@ -550,8 +550,34 @@ class Tools (object) :
         return settings
 
 
+
+
+
+
+################################################################################33
+
+    def writeJson (self, config) :
+        '''Write out a JSON file.'''
+
+        # For legacy purposes we need to figure out the name
+        # from the ConfigObj that was passed in
+        (path, fName) = os.path.split(config.filename)
+        (name, ext) = fName.split('.')
+        jsonFile = os.path.join(path, name + '.json')
+        # Try to write out the JSON file now
+        try :
+            with open(jsonFile, 'w') as outfile :
+                json.dump(config, outfile, indent=4, sort_keys=True)
+        except Exception as e :
+            self.terminal(u'\nERROR: Could not write to: ' + jsonFile)
+            self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
+
+
     def writeConfFile (self, config) :
         '''Generic routin to write out to, or create a config file.'''
+
+# This needs to be rewriten to provide support for JSON output
+
 
 #        import pdb; pdb.set_trace()
 
@@ -587,11 +613,13 @@ class Tools (object) :
                     config['GeneralSettings']['lastEdit'] = self.tStamp()
                     # Try to write out the data now
                     config.write()
+                    # Write the JSON file out now
+                    self.writeJson(config)
                 except Exception as e :
-                    terminal(u'\nERROR: Could not write to: ' + config.filename)
-                    terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
+                    self.terminal(u'\nERROR: Could not write to: ' + config.filename)
+                    self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
                     # Recover now
-                    if os.path.isfile(confData) :
+                    if os.path.isfile(orgConfData.name) :
                         shutil.copy(orgConfData.name, config.filename)
                     # Use raise to send out a stack trace. An error at this point
                     # is like a kernel panic. Not good at all.
@@ -600,6 +628,20 @@ class Tools (object) :
                 break
         # Should be done if we made it this far
         return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def xml_to_section (self, xmlFile) :

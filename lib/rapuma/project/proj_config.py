@@ -177,7 +177,7 @@ class Config (object) :
         # Even though there was no push, we need a time stamp to avoid confusion
         self.projectConfig['Backup']['lastCloudPush']                  = self.tools.fullFileTimeStamp()
         self.projectConfig.filename                                    = local.projectConfFile
-        self.projectConfig.write()
+        self.tools.writeConfFile(self.projectConfig)
 
 
 ###############################################################################

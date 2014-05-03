@@ -30,7 +30,7 @@ class ManageBackground (object) :
     '''Functions to manage background features such as page merging and
     custom background '''
 
-    def __init__(self, pid, gid = None) :
+    def __init__ (self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
         
         self.pid                        = pid
@@ -54,13 +54,14 @@ class ManageBackground (object) :
 # Write functions to do the calculations for page offsets needed for the merge
 
 
-        (fgX, fgY) = self.getFgFileXY(fgFile)
-        (bgX, fgY) = self.getBgFileXY(bgFile)
+        (fgX, fgY) = self.gsFgFileXY(fgFile, xOffset, yOffset)
+#        (bgX, fgY) = self.gsBgFileXY(bgFile, xOffset, yOffset)
 
 
 
-        cmd = ['gs', '-o', outputFile, '-sDEVICE=pdfwrite', '-dQUIET', [[[change this:'-sPAPERSIZE=a4']]], '-dFIXEDMEDIA', '-c', '<</PageOffset [' + xOffset + ' ' + yOffset + ']>>', 'setpagedevice', '-f', inputFile]
-
+#        cmd = ['gs', '-o', outputFile, '-sDEVICE=pdfwrite', '-dQUIET', [[[change this:'-sPAPERSIZE=a4']]], '-dFIXEDMEDIA', '-c', '<</PageOffset [' + xOffset + ' ' + yOffset + ']>>', 'setpagedevice', '-f', inputFile]
+        cmd = ''
+        
         try:
             subprocess.call(cmd) 
             return True
@@ -69,7 +70,9 @@ class ManageBackground (object) :
 
 
     def getFgFileXY () :
+        pass
     def getBgFileXY () :
+        pass
 
 
     def xCenterOffset (self, fgX, bgX) :
