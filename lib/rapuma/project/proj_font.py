@@ -170,6 +170,8 @@ class ProjFont (object) :
         xmlFile = os.path.join(self.local.rapumaConfigFolder, 'font.xml')
         keyVals = self.tools.getXMLSettings(xmlFile)
         self.macPackConfig['FontSettings'] = keyVals.dict()
+        # File name may not be in the object yet, inject it now
+        self.macPackConfig.filename = self.local.macPackConfFile 
         self.tools.writeConfFile(self.macPackConfig)
 
 

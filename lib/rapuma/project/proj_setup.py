@@ -268,11 +268,14 @@ class ProjSetup (object) :
         self.projectConfig['Groups'][gid]['cidList']               = cidList
         self.projectConfig['Groups'][gid]['bindingOrder']          = 0
 
+        # Not sure why but the file name in the confobj gets lost
+        # so we add it back in here. Something not right about this. 
+        # It happens in proj_config as well. 
+        self.projectConfig.filename = self.local.projectConfFile
+
         # Here we need to "inject" cType information into the config
         # If we don't createGroup() will fail badly.
         self.cType = cType
-
-#        import pdb; pdb.set_trace()
         self.tools.addComponentType(self.projectConfig, self.local, cType)
 
         # Lock and save our config settings
@@ -818,7 +821,8 @@ class ProjSetup (object) :
             return
 
         # Load the file and make the change
-        confObj = ConfigObj(confFile, encoding='utf-8')
+#        confObj = ConfigObj(confFile, encoding='utf-8')
+        confObj = self.tools.readJsonToConfig(confFile)
         outConfObj = confObj
         try :
             # Walk our confObj to get to the section we want

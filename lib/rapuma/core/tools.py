@@ -438,50 +438,6 @@ class Tools (object) :
                 return cfg
 
 
-    def initConfig (self, confFile, defaultFile) :
-        '''Initialize or load a config file. This will load a config file if an
-        existing one is there and update it with any new system default settings
-        If one does not exist a new one will be created based on system default
-        settings.'''
-
-
-#        if confFile.find('usfmTex') > 0 :
-#            import pdb; pdb.set_trace()
-
-        if not os.path.isfile(confFile) :
-            configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            configObj.filename  = confFile
-            self.writeConfFile(configObj)
-        else :
-            # But check against the default for possible new settings
-            # If the original config file is corrupt, catch it here
-            try :
-                configObj           = ConfigObj(encoding='utf-8')
-                orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
-                orgFileName         = orgConfigObj.filename
-            except Exception as e :
-                self.terminal(u'\nERROR: Could not open config file: ' + confFile)
-                self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
-                self.dieNow()
-
-            # FIXME: There is a deficiency here in that confs like project
-            # are compond objects. This will not deal with any of the conf's
-            # child object so additionl fields in the child sections are not
-            # dealt with, example would be Groups in project.conf
-            defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            defaultObj.merge(orgConfigObj)
-            # A key comparison should be enough to tell if it is the same or not
-            if self.confObjCompare(defaultObj, orgConfigObj) :
-                configObj = orgConfigObj
-                configObj.filename = orgFileName
-            else :
-                configObj = defaultObj
-                configObj.filename = orgFileName
-                self.writeConfFile(configObj)
-
-        return configObj
-
-
     def confObjCompare (self, objA, objB) :
         '''Do a simple compare on two ConfigObj objects.'''
 
@@ -550,38 +506,141 @@ class Tools (object) :
         return settings
 
 
+    def initConfig (self, jsonFile, defaultFile) :
+        '''Initialize or load a config file. This will load a config file if an
+        existing one is there and update it with any new system default settings.
+        Internally, Rapuma uses ConfigObj-style dictionaries but externally stores
+        in JSON for better interface with GUIs. This assumes the config file is 
+        JSON. If that is not found and an older style configObj INI file is found,
+        it will use that. (It will be removed on the next write to that config 
+        file.) If no config file exist a new one will be created based on system 
+        default settings.'''
+
+        # If there is no config, we simply make one
+        if not os.path.isfile(jsonFile) :
+            configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+            configObj.filename  = jsonFile
+            self.writeConfigToJson(configObj)
+        else :
+            # Check against the default for possible new settings
+            # If the original config file is corrupt, catch it here
+            try :
+                configObj           = ConfigObj(encoding='utf-8')
+                orgConfigObj        = ConfigObj(self.readJsonToConfig(jsonFile))
+                orgFileName         = jsonFile
+            except Exception as e :
+                self.terminal(u'\nERROR: Could not open JSON config file: ' + jsonFile)
+                self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
+                self.dieNow()
+
+            # FIXME: There is a deficiency here in that confs like project
+            # are compond objects. This will not deal with any of the conf's
+            # child object so additionl fields in the child sections are not
+            # dealt with, example would be Groups in project.conf
+            defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+            defaultObj.merge(orgConfigObj)
+            # A key comparison should be enough to tell if it is the same or not
+            if self.confObjCompare(defaultObj, orgConfigObj) :
+                configObj = orgConfigObj
+                configObj.filename = orgFileName
+            else :
+                configObj = defaultObj
+                configObj.filename = orgFileName
+                self.writeConfigToJson(configObj)
+
+        return configObj
+
+
+    def getJsonFileName(self, config) :
+        '''Pull the file name from a ConfigObj object and return the
+        equivalent name with a JSON extention.'''
+
+        # Just in case an actual path/file was sent
+        try :
+            os.path.isfile(config)
+            (path, fName) = os.path.split(config)
+        except :
+            (path, fName) = os.path.split(config.filename)
+
+        (name, ext) = fName.split('.')
+
+        return os.path.join(path, name + '.json')
+
+
+    def getConfFileName(self, config) :
+        '''Counterpart to getJsonFileName(). This will pull the file name 
+        from a ConfigObj object and return the equivalent name with a 
+        conf extention.'''
+
+        # Just in case an actual path/file was sent
+        try :
+            os.path.isfile(config)
+            (path, fName) = os.path.split(config)
+        except :
+            (path, fName) = os.path.split(config.filename)
+
+        (name, ext) = fName.split('.')
+
+        return os.path.join(path, name + '.conf')
 
 
 
 
-################################################################################33
 
-    def writeJson (self, config) :
+
+
+
+#####################################################################################
+
+
+# FIXME: The big problem here is that both the read and write command
+# are being called way to much and each config file is being read and
+# writen many times during any given process. This must be fixed.
+
+
+    def readJsonToConfig (self, config) :
+        '''Read in an external JSON file and return a ConfigObj object.'''
+        
+        # Get file name
+        jsonFile = self.getJsonFileName(config)
+        
+        with open(jsonFile) as json_data:
+            conf = ConfigObj(json.load(json_data))
+            conf.filename = jsonFile
+            return conf
+
+
+    def writeConfigToJson (self, config) :
         '''Write out a JSON file.'''
 
-        # For legacy purposes we need to figure out the name
-        # from the ConfigObj that was passed in
-        (path, fName) = os.path.split(config.filename)
-        (name, ext) = fName.split('.')
-        jsonFile = os.path.join(path, name + '.json')
+        # Get file name
+        jsonFile = self.getJsonFileName(config)
+
         # Try to write out the JSON file now
         try :
             with open(jsonFile, 'w') as outfile :
-                json.dump(config, outfile, indent=4, sort_keys=True)
+                json.dump(config, outfile, indent=4, sort_keys=True, encoding='utf-8')
         except Exception as e :
             self.terminal(u'\nERROR: Could not write to: ' + jsonFile)
             self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
 
 
+
+####################################################################################
+
+
+
+
+
+
+
+
+
     def writeConfFile (self, config) :
-        '''Generic routin to write out to, or create a config file.'''
+        '''Generic routin to write out to, or create a config file. Note that
+        currently, internally, we use ConfigObj to transport data but use
+        JSON to store the config data externally.'''
 
-# This needs to be rewriten to provide support for JSON output
-
-
-#        import pdb; pdb.set_trace()
-
-        # Build the folder path if needed
         if not os.path.exists(os.path.split(config.filename)[0]) :
             os.makedirs(os.path.split(config.filename)[0])
 
@@ -612,9 +671,18 @@ class Tools (object) :
                     # If we got past that, write a time stamp
                     config['GeneralSettings']['lastEdit'] = self.tStamp()
                     # Try to write out the data now
-                    config.write()
+# We would write to the config here but since we are phasing that out
+# and we will be able to right JSON, this should be okay to do now.
+#                    config.write()
                     # Write the JSON file out now
-                    self.writeJson(config)
+                    self.writeConfigToJson(config)
+                    
+                    # Look for old config and remove it now (for older projects)
+                    # This will be depricated in the future.
+                    confFile = self.getConfFileName(config)
+                    if os.path.isfile(confFile) :
+                        os.remove(confFile)
+                    
                 except Exception as e :
                     self.terminal(u'\nERROR: Could not write to: ' + config.filename)
                     self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
@@ -628,20 +696,6 @@ class Tools (object) :
                 break
         # Should be done if we made it this far
         return True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def xml_to_section (self, xmlFile) :

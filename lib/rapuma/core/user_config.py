@@ -22,14 +22,14 @@ from configobj import ConfigObj
 from rapuma.core.tools          import Tools
 
 
-class UserConfig (object) :
+class UserConfig (object) : 
 
     def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.defaultUserHome    = os.environ.get('RAPUMA_USER')
-        self.userConfFileName   = 'rapuma.conf'
+        self.userConfFileName   = 'rapuma.json'
         self.tools              = Tools()
 
         # Point to the right user config
@@ -53,12 +53,13 @@ class UserConfig (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # Now make the users local rapuma.conf file if it isn't there
+        # Now make the users local rapuma.json file if it isn't there
         if not os.path.exists(self.userConfFile) :
             self.initUserHome()
 
         # Load the Rapuma conf file into an object
-        self.userConfig = ConfigObj(self.userConfFile, encoding='utf-8')
+#        self.userConfig = ConfigObj(self.userConfFile, encoding='utf-8')
+        self.userConfig = self.tools.readJsonToConfig(self.userConfFile)
 
         # Initialize the user's home folders, like resouces, etc
         self.makeHomeFolders()
@@ -82,7 +83,8 @@ class UserConfig (object) :
         if not self.userConfig.__eq__(newConfig) :
             self.userConfig = newConfig
             self.userConfig.filename = self.userConfFile
-            self.userConfig.write()
+#            self.userConfig.write()
+            self.tools.writeConfFile(self.userConfig)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -101,14 +103,15 @@ class UserConfig (object) :
         if not os.path.isdir(self.defaultUserHome) :
             os.mkdir(self.defaultUserHome)
 
-        # Make the default global rapuma.conf for custom environment settings
+        # Make the default global rapuma.json for custom environment settings
         if not os.path.isfile(self.userConfFile) :
             self.userConfig = ConfigObj(encoding='utf-8')
             self.userConfig.filename = self.userConfFile
             self.userConfig['System'] = {}
             self.userConfig['System']['userName'] = 'Default User'
             self.userConfig['System']['initDate'] = self.tools.tStamp()
-            self.userConfig.write()
+#            self.userConfig.write()
+            self.tools.writeConfFile(self.userConfig)
 
 
     def isRegisteredProject (self, pid) :
@@ -122,7 +125,7 @@ class UserConfig (object) :
 
     def registerProject (self, pid, pmid, projHome) :
         '''If it is not there, create an entry in the user's
-        rapuma.conf located in the user's config folder.'''
+        rapuma.json located in the user's config folder.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -134,7 +137,8 @@ class UserConfig (object) :
         self.userConfig['Projects'][pid]['projectPath']         = projHome
         self.userConfig['Projects'][pid]['projectCreateDate']   = self.tools.tStamp()
 
-        self.userConfig.write()
+#        self.userConfig.write()
+        self.tools.writeConfFile(self.userConfig)
         return True
 
 
@@ -144,7 +148,8 @@ class UserConfig (object) :
 #        import pdb; pdb.set_trace()
         
         del self.userConfig['Projects'][pid]
-        self.userConfig.write()
+#        self.userConfig.write()
+        self.tools.writeConfFile(self.userConfig)
         
         # Check to see if we were succeful
         if not self.userConfig['Projects'].has_key(pid) :
@@ -158,7 +163,8 @@ class UserConfig (object) :
         if oldValue != value :
             self.userConfig[section][key] = value
             # Write out the results
-            self.userConfig.write()
+#            self.userConfig.write()
+            self.tools.writeConfFile(self.userConfig)
             self.tools.terminal('\nRapuma user name setting changed from [' + oldValue + '] to [' + value + '].\n\n')
         else :
             self.tools.terminal('\nSame value given, nothing to changed.\n\n')
@@ -215,7 +221,8 @@ class UserConfig (object) :
 
         # Write out if needed
         if confWriteFlag :
-            self.userConfig.write()
+#            self.userConfig.write()
+            self.tools.writeConfFile(self.userConfig)
         return True
 
 

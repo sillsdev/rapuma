@@ -145,12 +145,12 @@ class ProjLocal (object) :
         if self.projHome :
             for cf in configFiles :
                 # Set the config path/file value
-                setattr(self, cf + 'ConfFileName', cf + '.conf')
+                setattr(self, cf + 'ConfFileName', cf + '.json')
                 if debug :
-                    debugObj.write(cf + 'ConfFileName' + ' = ' + getattr(self, cf + 'ConfFileName', cf + '.conf') + '\n')
-                setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.conf'))
+                    debugObj.write(cf + 'ConfFileName' + ' = ' + getattr(self, cf + 'ConfFileName', cf + '.json') + '\n')
+                setattr(self, cf + 'ConfFile', os.path.join(self.projConfFolder, cf + '.json'))
                 if debug :
-                    debugObj.write(cf + 'ConfFile' + ' = ' + getattr(self, cf + 'ConfFile', cf + '.conf') + '\n')
+                    debugObj.write(cf + 'ConfFile' + ' = ' + getattr(self, cf + 'ConfFile', cf + '.json') + '\n')
                 # Set the xml config file name (project is according to media type)
                 if cf == 'project' :
                     setattr(self, cf + 'ConfXmlFileName', self.mType + '.xml')

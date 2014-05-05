@@ -299,7 +299,7 @@ Todo:
             <name>Project Macro Package Configuration File</name>
             <description>The project macro package configuation file.</description>
             <fileID>macPackConfFile</fileID>
-            <fileName>[self:macPack].conf</fileName>
+            <fileName>[self:macPack].json</fileName>
             <filePath>[self:projConfFolder][pathSep]</filePath>
             <depends></depends>
             <relies>macPack</relies>

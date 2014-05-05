@@ -197,6 +197,9 @@ class Project (object) :
         cType = self.projectConfig['Groups'][self.gid]['cType']
         # Create a special component object if called
         cfg = self.projectConfig['Groups'][self.gid]
+        cfg.filename = self.local.projectConfFile
+        
+        
         module = import_module('rapuma.group.' + cType)
         ManagerClass = getattr(module, cType.capitalize())
         groupObj = ManagerClass(self, cfg)

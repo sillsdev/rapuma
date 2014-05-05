@@ -97,6 +97,10 @@ class Config (object) :
 #        import pdb; pdb.set_trace()
 
         self.projectConfig = self.tools.initConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
+        
+        # The file name is injected during the init but somehow doesn't take.
+        # Because of this we reset it here.
+        self.projectConfig.filename = self.local.projectConfFile
 
 
     def getAdjustmentConfig (self) :
@@ -357,6 +361,12 @@ class Config (object) :
         user style and TeX files will be overwritten.'''
 
 #        import pdb; pdb.set_trace()
+
+        # Not sure why but the file name in the confobj gets lost
+        # so we add it back in here. Something not right about this.
+        # It happens in proj_setup as well. 
+        self.projectConfig.filename = self.local.projectConfFile
+
 
         # Set the projectConf to the new/same package
         self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
