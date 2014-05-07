@@ -506,6 +506,10 @@ class Tools (object) :
         return settings
 
 
+################################################################################################
+
+# FIXME: Doing a lot of work around here to make this work
+
     def initConfig (self, jsonFile, defaultFile) :
         '''Initialize or load a config file. This will load a config file if an
         existing one is there and update it with any new system default settings.
@@ -516,7 +520,11 @@ class Tools (object) :
         file.) If no config file exist a new one will be created based on system 
         default settings.'''
 
-        # If there is no config, we simply make one
+        # In case there is an old config file present, we will assume it
+        # is what we really want, at least for now. Get the name now.
+        configObjFile = self.getConfFileName(jsonFile)
+
+        # If there is no config, we simply make one and call it good
         if not os.path.isfile(jsonFile) :
             configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
             configObj.filename  = jsonFile
@@ -526,8 +534,12 @@ class Tools (object) :
             # If the original config file is corrupt, catch it here
             try :
                 configObj           = ConfigObj(encoding='utf-8')
-                orgConfigObj        = ConfigObj(self.readJsonToConfig(jsonFile))
-                orgFileName         = jsonFile
+                if os.path.isfile(configObjFile) :
+                    orgConfigObj        = ConfigObj(configObjFile)
+                    orgFileName         = configObjFile
+                else :
+                    orgConfigObj        = ConfigObj(self.readJsonToConfig(jsonFile))
+                    orgFileName         = jsonFile
             except Exception as e :
                 self.terminal(u'\nERROR: Could not open JSON config file: ' + jsonFile)
                 self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
