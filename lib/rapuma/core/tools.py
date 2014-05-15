@@ -291,7 +291,7 @@ class Tools (object) :
                 # Clean the line, may be a BOM to remove
                 line = line.replace(u'\ufeff', '').strip()
                 if line[:1] != '#' and line[:1] != '' and line[:1] != '\n' :
-                    terminal('Macro line: ' + line)
+                    self.terminal('Macro line: ' + line)
                     # FIXME: Could this be done better with subprocess()?
                     os.system(line)
             return True
@@ -322,7 +322,7 @@ class Tools (object) :
         '''Generic function to remove an item to any list if it is there.
         If not, just return the list contents or an empty list.'''
 
-        terminal('\nError: This function is not implemented yet!\n')
+        self.terminal('\nError: This function is not implemented yet!\n')
 
 
     def str2bool (self, string) :
@@ -404,14 +404,14 @@ class Tools (object) :
         try:
             fileObj = open(fileName, 'r').read()
         except Exception as e :
-            terminal('decodeText() failed with the following error: ' + str(e))
+            self.terminal('decodeText() failed with the following error: ' + str(e))
             self.dieNow()
         # Now try to run the decode() function
         try:
             return fileObj.decode(sourceEncode)
 
         except Exception:
-            terminal('decodeText() could not decode: [' + fileName + ']\n')
+            self.terminal('decodeText() could not decode: [' + fileName + ']\n')
             self.dieNow()
 
 
@@ -603,8 +603,8 @@ class Tools (object) :
                     # Try to write out the data now
                     config.write()
                 except Exception as e :
-                    terminal(u'\nERROR: Could not write to: ' + config.filename)
-                    terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
+                    self.terminal(u'\nERROR: Could not write to: ' + config.filename)
+                    self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
                     # Recover now
                     if os.path.isfile(confData) :
                         shutil.copy(orgConfData.name, config.filename)
