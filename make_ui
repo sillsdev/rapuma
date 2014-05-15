@@ -20,16 +20,20 @@
 #    suite 500, Boston, MA 02110-1335, USA or visit their web page on the 
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
-# Import modules
-import os, subprocess
+# Import standard modules
+import os, subprocess, sys
 from configobj import ConfigObj
-from mercurial import ui, hg
+# Temporay mod the Python path to import auxillary modules
+sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), 'lib'))
+import sh
+del sys.path[0]
 
 # Update version number
-repo = hg.repository(ui.ui(), os.getcwd())
+gv = str(sh.git.describe('master')).strip().split('-')
+version = gv[0] + '.' + gv[1].zfill(3) + ' build(' + gv[2] + ')'
+
 sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
-versionSeries = sysConfig['Rapuma']['versionSeries']
-sysConfig['Rapuma']['systemVersion'] = str(versionSeries) + '.r' + str(len(repo))
+sysConfig['Rapuma']['gitVersion'] = version
 sysConfig.write()
 
 # Create a PySide compatable menu dialogs (should not include items that do not have external dialog)
@@ -64,5 +68,5 @@ except Exception as e :
     print str(e)
 
 # Report the version
-print 'Version set to: ' + sysConfig['Rapuma']['systemVersion']
+print 'Version set to: ' + sysConfig['Rapuma']['gitVersion']
 
