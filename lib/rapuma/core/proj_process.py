@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, shutil, subprocess
+import codecs, os, shutil, subprocess, zipfile, StringIO
 from configobj                      import ConfigObj
 
 # Load the local classes
@@ -23,6 +23,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
+from rapuma.core.paratext           import Paratext
 from rapuma.project.proj_config     import Config
 
 
@@ -40,6 +41,7 @@ class ProjProcess (object) :
         self.projectConfig          = self.proj_config.projectConfig
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
+        self.paratext               = Paratext(pid, gid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -102,7 +104,7 @@ class ProjProcess (object) :
         self.log.writeToLog('XPRT-040')
         for cid in self.components[cName].getSubcomponentList(cName) :
             cidCName = self.components[cName].getRapumaCName(cid)
-            ptName = PT_Tools(self).formPTName(cName, cid)
+            ptName = self.paratext.formPTName(cName, cid)
             # Test, no name = no success
             if not ptName :
                 self.log.writeToLog('XPRT-010')
@@ -118,12 +120,12 @@ class ProjProcess (object) :
 
         # Start the main process here
         if bundle :
-            archFile = os.path.join(path, cName + '_' + ymd() + '.zip')
+            archFile = os.path.join(path, cName + '_' + self.tools.ymd() + '.zip')
             # Hopefully, this is a one time operation but if force is not True,
             # we will expand the file name so nothing is lost.
             if not force :
                 if os.path.isfile(archFile) :
-                    archFile = os.path.join(path, cName + '_' + fullFileTimeStamp() + '.zip')
+                    archFile = os.path.join(path, cName + '_' + self.tools.fullFileTimeStamp() + '.zip')
 
             myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
             for f in fList :

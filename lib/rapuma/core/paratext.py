@@ -126,7 +126,7 @@ class Paratext (object) :
         # a nameFormID setting. If not, try updating the manager. If there
         # still is not a nameFormID, die in a very spectacular way.
         if not self.projectConfig['Managers']['usfm_Text']['nameFormID'] :
-            self.project.managers['usfm_Text'].updateManagerSettings(gid)
+            self.project.managers['usfm_Text'].updateManagerSettings(self.gid)
 
         # Hopefully all is well now
         nameFormID  = self.projectConfig['Managers']['usfm_Text']['nameFormID']

@@ -19,7 +19,7 @@ import os, codecs
 
 
 # Load the local classes
-from rapuma.core.tools import *
+from rapuma.core.tools import Tools
 
 
 ###############################################################################
@@ -38,11 +38,12 @@ class Group (object) :
         self.cfg = cfg
         self.parent = parent or project
         self.managers = {}
+        self.tools = Tools()
 
 
     def render(self) :
         '''Render a group.'''
 
-        terminal("Warning: Calling dummy rendering in the group class.")
+        self.tools.terminal("Warning: Calling dummy rendering in the group class.")
 
 

@@ -23,6 +23,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
+from rapuma.manager.project         import Project
 from rapuma.project.proj_config     import Config
 from rapuma.project.proj_commander  import ProjCommander
 
@@ -33,6 +34,7 @@ class ProjData (object) :
         '''Intitate the whole class and create the object.'''
 
         self.pid            = pid
+        self.gid            = gid
         self.tools          = Tools()
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
@@ -145,7 +147,7 @@ class ProjData (object) :
 
         return excludeFiles
 
-
+# FIXME: Should archiveProject() use self.pid instead of explicitly passing in a pid?
     def archiveProject (self, pid, path = None) :
         '''Archive a project. Send the compressed archive file to the user-specified
         archive folder. If none is specified, put the archive in cwd. If a valid
@@ -155,10 +157,10 @@ class ProjData (object) :
         project is archived, all work should cease on the project.'''
 
         # Make a private project object just for archiving
-        aProject = initProject(pid)
+        aProject = Project(pid, self.gid)
         # Set some paths and file names
         archName = aProject.projectIDCode + '.rapuma'
-        userArchives = uc.userConfig['Resources']['archive']
+        userArchives = self.userConfig['Resources']['archive']
         archTarget = ''
         if path :
             path = self.tools.resolvePath(path)
@@ -192,7 +194,7 @@ class ProjData (object) :
             os.rename(aProject.local.projHome, bakArchProjDir)
 
         # Remove references from user rapuma.conf
-        if uc.unregisterProject(pid) :
+        if self.user.unregisterProject(pid) :
             self.tools.terminal('Removed [' + pid + '] from user configuration.\n')
         else :
             self.tools.terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
@@ -233,7 +235,7 @@ class ProjData (object) :
             # Add a space before the next message
             print '\n'
 
-
+# FIXME: Should restoreArchive() use self.pid instead of explicitly passing in a pid?
     def restoreArchive (self, pid, targetPath, sourcePath = None) :
         '''Restore a project from the user specified storage area or sourcePath if 
         specified. Use targetPath to specify where the project will be restored.
@@ -255,8 +257,8 @@ class ProjData (object) :
         if sourcePath :
             if os.path.isdir(sourcePath) :
                 archSource = os.path.join(sourcePath, archName)
-        elif os.path.isdir(uc.userConfig['Resources']['archive']) :
-            userArchives = uc.userConfig['Resources']['archive']
+        elif os.path.isdir(self.userConfig['Resources']['archive']) :
+            userArchives = self.userConfig['Resources']['archive']
             archSource = os.path.join(userArchives, archName)
         else :
             self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
@@ -286,9 +288,9 @@ class ProjData (object) :
         local       = ProjLocal(pid)
         pc          = Config(pid)
         log         = ProjLog(pid)
-        aProject    = Project(uc.userConfig, pc.projectConfig, local, log, systemVersion)
+        aProject    = Project(pid, self.gid)
     #    import pdb; pdb.set_trace()
-        uc.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
+        self.user.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
         self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')

@@ -386,7 +386,7 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['2437'], [self.macPackConfig['FontSettings']['primaryFont'],self.Ctype])
             return True
         else :
-            self.log.writeToLog(self.errorCodes['2430'], [font,Ctype])
+            self.log.writeToLog(self.errorCodes['2430'], [font,self.Ctype])
             return True
 
         return False
