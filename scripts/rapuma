@@ -58,8 +58,7 @@ os.environ['RAPUMA_BASE'] = rapumaHome
 if rapumaHome :
     sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
 # Set the user environment path. This is always in the same place.
-userHome = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
-os.environ['RAPUMA_USER'] = userHome
+os.environ['RAPUMA_USER'] = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 
 # Set the (potential) project home by looking for the project config file.
 def find_project_root(tag, path=os.path.curdir):
