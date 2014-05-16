@@ -24,8 +24,6 @@ from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.core.paratext               import Paratext
 from rapuma.project.proj_config         import Config
-from rapuma.project.proj_maps           import ProjMaps
-from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
@@ -563,12 +561,6 @@ class Xetex (Manager) :
                     if self.projectConfig['Groups'][self.gid].has_key('compTexOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compTexOverrideList'] :
                         self.makeCmpExtTexFileOff(cidTexFileOff)
                         gidTexObject.write('\\input \"' + cidTexFileOff + '\"\n')
-                # Output files and commands for map cType
-                elif self.cType == 'map' :
-                    gidTexObject.write('\\ptxfile{' + ProjMaps(self.pid, self.gid).getGidContainerFile() + '}\n')
-                # Output files and commands for toc cType
-                elif self.cType == 'toc' :
-                    gidTexObject.write('\\ptxfile{' + ProjToc(self.pid, self.gid).getGidContainerFile() + '}\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
             # This can only hapen once in the whole process, this marks the end

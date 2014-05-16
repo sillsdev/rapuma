@@ -103,8 +103,6 @@ from rapuma.project.proj_config         import Config
 #from rapuma.project.proj_commander      import ProjCommander
 #from rapuma.project.proj_font           import ProjFont
 #from rapuma.project.proj_hyphenation    import ProjHyphenation
-#from rapuma.project.proj_maps           import ProjMaps
-#from rapuma.project.proj_toc            import ProjToc
 #from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project              import Project
 

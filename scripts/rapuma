@@ -101,8 +101,6 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
-from rapuma.project.proj_maps           import ProjMaps
-from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 
@@ -111,6 +109,14 @@ sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'co
 # Instantiate User config class
 uc                                      = UserConfig()
 tools                                   = Tools()
+
+# Get a list of projects
+projDir = uc.userConfig['Resources']['projects']
+if os.path.exists(projDir) :
+    projList = tools.getProjList(projDir)
+else :
+    sys.exit('\nERROR: The projects folder path is not valid: ' + projDir + '. Process halting.\n')
+
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
@@ -247,9 +253,19 @@ def userArguments (args) :
         if args.script :
             os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
 
+
+
+# FIXME: Process a project ID list here
+
+
+
+
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
-        if not uc.userConfig.has_key('Projects') or not uc.userConfig['Projects'].has_key(args.project_id) :
+        if args.project_id not in projList :
+
+#        if not uc.userConfig.has_key('Projects') or not uc.userConfig['Projects'].has_key(args.project_id) :
+
             sys.exit('\nERROR: Project ID [' + args.project_id + '] not found in system configuration. Process halting.\n')
         # Update the creator version if necessary
         pid         = args.project_id
@@ -257,6 +273,14 @@ def userArguments (args) :
         pc          = Config(pid)
         pc.getProjectConfig()
         checkCreatorVersion(pid, pc.projectConfig, systemVersion)
+
+
+
+
+
+
+
+
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -309,7 +333,11 @@ def userArguments (args) :
             if cmdType == 'archive' :
                 ProjData(pid).restoreArchive(targetPath, sourcePath)
             elif cmdType == 'backup' :
-                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
+
+                if pid not in projList :
+
+#                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
+
                     ProjData(pid).restoreLocalBackup(args.bak_num)
                 else :
                     if sourcePath :
@@ -405,10 +433,6 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     # Force in this context is used to save the file in the Deliverables folder
                     ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, source_path, force)
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).addGroup(cid_list, args.source_id, source_path, force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).addGroup(force)
             elif cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -423,11 +447,6 @@ def userArguments (args) :
             if cmdType == 'group' :
                 if cType == 'usfm' :
                     Project(pid, gid).renderGroup(cid_list, pages, override, force)
-# FIXME: These next 2 are not done yet!
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).renderMapGroup(cid_list, pages, override)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).renderToc(override)
                 else :
                     cTypeError(cType)
             else :
@@ -443,10 +462,6 @@ def userArguments (args) :
                     ProjSetup(pid).removeGroup(gid, force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         ProjCommander(pid).removeScripts()
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).removeGroup(force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).removeGroup(force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -466,10 +481,6 @@ def userArguments (args) :
                         ProjSetup(pid).addCompGroupSourcePath(gid, source_path)
                     else :
                         ProjSetup(pid).updateGroup(gid, cid_list, force)
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).updateGroup(cid_list, force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).updateToc(force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
