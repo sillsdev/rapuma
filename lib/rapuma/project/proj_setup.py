@@ -173,7 +173,7 @@ class ProjSetup (object) :
             cidList = self.projectConfig['Groups'][gid]['cidList']
         else :
             if type(cidList) != list :
-                 cidList = cidList.split()
+                cidList = cidList.split()
             # Do a quick validity test
             for cid in cidList :
                 if not cid in self.projectConfig['Groups'][gid]['cidList'] :

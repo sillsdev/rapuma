@@ -70,7 +70,7 @@ class UserConfig (object) :
             userProjs = ''
 
         # Create a new conf object based on all the XML default settings
-        # Then override them with any exsiting user settings.
+        # Then override them with any existing user settings.
         newConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8').override(self.userConfig)
 
         # Put back the copied data of any project information that we might have

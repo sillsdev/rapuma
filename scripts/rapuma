@@ -44,11 +44,13 @@ startTime = timeit.default_timer()
 ############################ Location Discovery ###############################
 ###############################################################################
 
-# Set the Rapuma base program paths. It looks in /user/share first for an
+# Set the Rapuma base program paths. It looks in /usr/share first for an
 # installed copy. If you give it a actual path to the development version
 # it will run from there. (~/Projects/rapuma/scripts/rapuma)
 # FIXME: Environment variables are set that may not be needed if this block
 # of code was turned into a module and called from the dependent modules.
+# E.g., if rapuma is called from /usr/bin/rapuma then rapumaBase = /usr
+# If from ~/Projects/rapuma/scripts/rapuma then rapumaBase = ~/Projects/rapuma
 rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
 rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
                         os.path.join(rapumaBase)] if os.path.exists(d)]
@@ -181,7 +183,7 @@ def trimLog (local) :
 # All command options must contain a project ID (-i). That is required. If one
 # is not listed then the incoming command is either considered malformed or
 # incomplete. If there is a way to figure out what the user might be needing
-# the help system will be called. Otherwise, Rapuma will quite.
+# the help system will be called. Otherwise, Rapuma will quit.
 
 # The argument handler
 def userArguments (args) :

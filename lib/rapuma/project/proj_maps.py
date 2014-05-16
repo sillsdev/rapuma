@@ -209,9 +209,9 @@ class ProjMaps (object) :
             os.makedirs(self.projIllustrationFolder)
         shutil.copy(os.path.join(filePath, fileName), os.path.join(self.projIllustrationFolder, fileName))
 
-         # Create a component folder and its contents
-#        self.createComponentFolder(cid)
-#        self.createComponentContainerFile(cid, force)
+        # Create a component folder and its contents
+        # self.createComponentFolder(cid)
+        # self.createComponentContainerFile(cid, force)
 
         self.log.writeToLog(self.errorCodes['0225'], [cid,self.gid])
 
@@ -380,9 +380,9 @@ class ProjMaps (object) :
             cidList = self.projectConfig['Groups'][gid]['cidList']
         else :
             if type(cidList) != list :
-                 cidList = cidList.split()
-                 # Do a quick validity test
-                 for cid in cidList :
+                cidList = cidList.split()
+                # Do a quick validity test
+                for cid in cidList :
                     if not cid in self.projectConfig['Groups'][gid]['cidList'] :
                         self.log.writeToLog(self.errorCodes['0630'], [cid,gid])
 

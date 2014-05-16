@@ -222,12 +222,12 @@ class Config (object) :
         # A value that is a font setting
         elif holderKey and holderType == 'font' :
             result = self.getFontSetting(holderKey)
-        # A value that is a path separater character
+        # A value that is a path separator character
         elif holderType == 'pathSep' :
             result = os.sep
-        # A value that contains a system delclaired value
+        # A value that contains a system declared value
         # Note this only works if the value we are looking for has
-        # been declaired above in the module init
+        # been declared above in the module init
         elif holderType == 'self' :
 #            if holderKey.find('.') >= 0 :
 #                splitKey = holderKey.split('.')

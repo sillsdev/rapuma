@@ -241,7 +241,7 @@ class ProjData (object) :
         specified. Use targetPath to specify where the project will be restored.
         Rapuma will register the project there.'''
 
-        # Check to see if the user included the extention
+        # Check to see if the user included the extension
         try :
             pid.split('.')[1] == 'rapuma'
             archName = pid

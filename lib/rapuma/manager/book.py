@@ -10,7 +10,7 @@
 # This class will handle upper level project tasks for the book media type.
 
 # History:
-# 20111207 - djd - Started with intial file
+# 20111207 - djd - Started with initial file
 
 
 ###############################################################################
