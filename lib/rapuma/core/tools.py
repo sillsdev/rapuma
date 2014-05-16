@@ -419,6 +419,21 @@ class Tools (object) :
 ########################## Config/Dictionary routines #########################
 ###############################################################################
 
+    def getProjIdList (self, projDir) :
+        '''Return a list of projects from a specified valid Rapuma project
+        folder. It is assumed the folder exists but still not have any
+        projects. A valid project is assumed if a project.conf file
+        exists in the Config folder. If none are found, return an empty list.'''
+
+        projList = []
+        for d in os.listdir(projDir) :
+            dp = os.path.join(projDir, d, 'Config', 'project.conf')
+            if os.path.exists(dp) :
+                projList.append(d)
+                
+        return projList
+
+
     def addComponentType (self, cfg, local, cType) :
         '''Add (register) a component type to the config if it 
         is not there already.'''

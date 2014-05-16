@@ -111,12 +111,11 @@ uc                                      = UserConfig()
 tools                                   = Tools()
 
 # Get a list of projects
-projDir = uc.userConfig['Resources']['projects']
+projDir = os.path.expanduser(uc.userConfig['Resources']['projects'])
 if os.path.exists(projDir) :
-    projList = tools.getProjList(projDir)
+    projList = tools.getProjIdList(projDir)
 else :
     sys.exit('\nERROR: The projects folder path is not valid: ' + projDir + '. Process halting.\n')
-
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
@@ -252,20 +251,9 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'example' :
         if args.script :
             os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
-
-
-
-# FIXME: Process a project ID list here
-
-
-
-
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
         if args.project_id not in projList :
-
-#        if not uc.userConfig.has_key('Projects') or not uc.userConfig['Projects'].has_key(args.project_id) :
-
             sys.exit('\nERROR: Project ID [' + args.project_id + '] not found in system configuration. Process halting.\n')
         # Update the creator version if necessary
         pid         = args.project_id
@@ -273,14 +261,6 @@ def userArguments (args) :
         pc          = Config(pid)
         pc.getProjectConfig()
         checkCreatorVersion(pid, pc.projectConfig, systemVersion)
-
-
-
-
-
-
-
-
 
     # Command processing
     # Dummy place holder for 'system' which as actually processed above
@@ -335,9 +315,6 @@ def userArguments (args) :
             elif cmdType == 'backup' :
 
                 if pid not in projList :
-
-#                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
-
                     ProjData(pid).restoreLocalBackup(args.bak_num)
                 else :
                     if sourcePath :
