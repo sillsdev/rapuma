@@ -83,10 +83,8 @@ class ProjLog (object) :
         # Look for a <<#>> pattern replace it with
         # the corresponding position in the args list.
         if args :
-            c = 0
-            for a in args :
-                c +=1
-                msg = msg.replace('<<' + str(c) + '>>', args[c-1])
+            for count, arg in enumerate(args) :
+                msg = msg.replace('<<' + str(count-1) + '>>', arg)
 
         # Write out everything but LOG messages to the terminal
         if code != 'LOG' and code != 'TOD' :
