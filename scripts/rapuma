@@ -51,7 +51,7 @@ startTime = timeit.default_timer()
 # of code was turned into a module and called from the dependent modules.
 # E.g., if rapuma is called from /usr/bin/rapuma then rapumaBase = /usr
 # If from ~/Projects/rapuma/scripts/rapuma then rapumaBase = ~/Projects/rapuma
-rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
+rapumaBase = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
                         os.path.join(rapumaBase)] if os.path.exists(d)]
 rapumaHome = rapumaHome[0] if len(rapumaHome) else None
