@@ -29,11 +29,11 @@ import sh
 del sys.path[0]
 
 # Update version number
-gv = str(sh.git.describe('master')).strip().split('-')
-version = gv[0] + '.' + gv[1].zfill(3) + ' build(' + gv[2] + ')'
+gv              = str(sh.git.describe('master')).strip().split('-')
+systemVersion   = gv[0] + '.' + gv[1].zfill(3) + ' build(' + gv[2] + ')'
 
 sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
-sysConfig['Rapuma']['gitVersion'] = version
+sysConfig['Rapuma']['systemVersion'] = systemVersion
 sysConfig.write()
 
 # Create a PySide compatable menu dialogs (should not include items that do not have external dialog)
@@ -68,5 +68,5 @@ except Exception as e :
     print str(e)
 
 # Report the version
-print 'Version set to: ' + sysConfig['Rapuma']['gitVersion']
+print 'Version set to: ' + sysConfig['Rapuma']['systemVersion']
 
