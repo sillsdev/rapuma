@@ -107,6 +107,8 @@ class MenuProjectRemoveCtrl (QDialog, QPropertyAnimation, menu_project_remove_dl
                 result = output_object.getvalue()
                 QMessageBox.warning(self, "Project Remove", result)
 
+            sys.stdout = saved_output
+
         # Close now regardless of whatever was clicked
         self.close()
 

@@ -14,12 +14,12 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, subprocess
 from configobj                  import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools          import Tools
-from rapuma.core.proj_config    import Config
+from rapuma.project.proj_config import Config
 from rapuma.core.user_config    import UserConfig
 from rapuma.core.proj_local     import ProjLocal
 from rapuma.core.proj_log       import ProjLog
@@ -84,7 +84,7 @@ class ProjEdit (object) :
 
 # FIXME: Still lots to do on this next function
 
-    def edit (self, cName = None, glob = False, sys = False) :
+    def edit (self, gid, cName = None, glob = False, sys = False) :
         '''Call editing application to edit various project and system files.'''
 
         editDocs = ['gedit']

@@ -47,7 +47,7 @@ class Project (object) :
         self.projectConfig          = self.config.projectConfig
         self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
-        macPack                     = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()

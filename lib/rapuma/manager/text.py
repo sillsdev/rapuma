@@ -146,8 +146,8 @@ class Text (Manager) :
         return True
 
 
-    def testCompTextFile (self, source, projSty = None) :
-        '''This will direct a request to the proper validater for
+    def testCompTextFile (self, cName, source, projSty = None) :
+        '''This will direct a request to the proper validator for
         testing the source of a component text file.'''
 
         if self.cType == 'usfm' :

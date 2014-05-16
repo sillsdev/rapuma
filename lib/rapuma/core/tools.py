@@ -396,7 +396,7 @@ class Tools (object) :
 ############################ Text encoding routines ###########################
 ###############################################################################
 
-    def decodeText (self, fileName, sourceEncoded) :
+    def decodeText (self, fileName, sourceEncode) :
         '''In case an encoding conversion is needed. This function will try
         to do that and if it fails, it should return a meaningful error msg.'''
 
@@ -606,7 +606,7 @@ class Tools (object) :
                     self.terminal(u'\nERROR: Could not write to: ' + config.filename)
                     self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']' + unicode(config) + '\n')
                     # Recover now
-                    if os.path.isfile(confData) :
+                    if os.path.isfile(orgConfData.name) :
                         shutil.copy(orgConfData.name, config.filename)
                     # Use raise to send out a stack trace. An error at this point
                     # is like a kernel panic. Not good at all.
