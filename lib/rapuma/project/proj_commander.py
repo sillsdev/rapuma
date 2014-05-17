@@ -34,12 +34,12 @@ class ProjCommander (object) :
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local                  = ProjLocal(self.pid)
         self.proj_config            = Config(pid)
         self.proj_config.getProjectConfig()
         self.projectConfig          = self.proj_config.projectConfig
+        self.projectMediaIDCode     = self.projectConfig['ProjectInfo']['projectMediaIDCode']
 
         # Log messages for this module
         self.errorCodes     = {

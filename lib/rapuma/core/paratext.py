@@ -38,7 +38,7 @@ class Paratext (object) :
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
         self.proj_config            = Config(pid, gid)
-        self.projHome               = self.userConfig['Projects'][pid]['projectPath']
+        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.proj_config            = Config(pid, gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -67,7 +67,6 @@ class Paratext (object) :
         # A source path is often important, try to get that now
         try :
             self.csid                   = self.projectConfig['Groups'][self.gid]['csid']
-            self.sourcePath             = self.userConfig['Projects'][self.pid][self.csid + '_sourcePath']
         except :
             self.log.writeToLog(self.errorCodes['0020'])
 

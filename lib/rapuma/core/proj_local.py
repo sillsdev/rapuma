@@ -44,29 +44,23 @@ class ProjLocal (object) :
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
+        self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projFolders        = []
-        self.projHome           = None
         self.localDict          = None
         self.cType              = None
-        self.mType              = None
+        self.mType              = 'book'
         self.macPack            = None
         self.csid               = None
-        self.sourcePath         = None
         debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
             os.makedirs(os.path.join(self.userResouce, 'debug'))
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-        if self.userConfig['Projects'].has_key(pid) :
-            self.projHome       = self.userConfig['Projects'][pid]['projectPath']
-            self.mType          = self.userConfig['Projects'][pid]['projectMediaIDCode']
+
+        # Pickup some vars that are dependent on the project.conf
         if projectConf :
-            self.cType          = projectConf['Groups'][gid]['cType']
+            self.mType          = projectConf['ProjectInfo']['projectMediaIDCode']
             self.csid           = projectConf['Groups'][gid]['csid']
             self.macPack        = projectConf['CompTypes'][self.cType.capitalize()]['macroPackage']
-            if self.userConfig['Projects'][pid].has_key(self.csid + '_sourcePath') :
-                self.sourcePath = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')

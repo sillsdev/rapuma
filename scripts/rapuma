@@ -274,8 +274,13 @@ def userArguments (args) :
         cmdType     = args.command_type
         cmd         = args.command
         force       = args.force
+        template    = args.id
         sourcePath  = ''
         targetPath  = ''
+        mediaType   = None
+        if args.media_type :
+            mediaType = args.media_type
+
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
@@ -289,13 +294,7 @@ def userArguments (args) :
         # Figure out what manage command this is and do it
         if cmd == 'add' :
             if cmdType == 'project' :
-                if not args.media_type in ['book'] :
-                    sys.exit('\nERROR: Media type given: [' + args.media_type + '] is not valid. Process halting.\n')
-# Depricated
-#                if not args.name :
-#                    sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
-                nProjPath = os.path.join(targetPath, pid)
-                ProjSetup(pid).newProject(nProjPath, args.media_type, systemVersion)
+                ProjSetup(sysConfig, pid).newProject(mediaType, template, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'bind' :

@@ -61,7 +61,7 @@ class ProjEdit (object) :
 
         # Look for an existing project home path
         if self.tools.isProject(self.pid) :
-            localProjHome   = self.userConfig['Projects'][self.pid]['projectPath']
+            localProjHome   = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         else :
             localProjHome   = ''
         # Testing: The local project home wins over a user provided one

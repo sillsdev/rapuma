@@ -40,7 +40,7 @@ class ProjData (object) :
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
-        self.projList       = self.tools.getProjIdList(self.userConfig['Resources']['projects'])
+        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['Resources']['projects']))
 
         # Log messages for this module
         self.errorCodes     = {
@@ -79,50 +79,6 @@ class ProjData (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-
-# This really needs work!
-
-
-    def setBasicProjectInfo (self, projHome) :
-#    def registerProject (self, projHome) :
-        '''Inserrt the basic project info in a new project.conf file.'''
-
-        pid                 = os.path.basename(projHome)
-        projectConfig          = self.getConfig(projHome)
-
-        if len(projectConfig) :
-            pTitle          = projectConfig['ProjectInfo']['projectTitle']
-            pid             = projectConfig['ProjectInfo']['projectIDCode']
-            pmid            = projectConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate         = projectConfig['ProjectInfo']['projectCreateDate']
-
-# FIXME: This next part may not be needed
-
-            #if not self.userConfig['Projects'].has_key(pid) :
-                #self.tools.buildConfSection(self.userConfig['Projects'], pid)
-                #self.userConfig['Projects'][pid]['projectTitle']        = pTitle
-                #self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
-                #self.userConfig['Projects'][pid]['projectPath']         = projHome
-                #self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
-                #self.tools.writeConfFile(self.userConfig)
-            #else :
-                #self.log.writeToLog(self.errorCodes['1220'], [pid])
-            ## Change the project path is something different has been given
-            #oldPath = self.userConfig['Projects'][pid]['projectPath']
-            #if oldPath != projHome :
-                #self.userConfig['Projects'][pid]['projectPath'] = projHome
-                #self.tools.writeConfFile(self.userConfig)
-                ## FIXME: We used to backup the oldPath if it was there
-                ## However, if necessary, this should be done by the caller
-##                self.tools.makeFolderBackup(oldPath)
-                ## Now remove the orginal
-                #if os.path.exists(oldPath) :
-                    #shutil.rmtree(oldPath)
-
-#######################
-
-        else :
-            self.log.writeToLog(self.errorCodes['1240'], [pid])
 
 
 ###############################################################################
@@ -344,7 +300,7 @@ class ProjData (object) :
         backups with the same name exist there, increment with a number.'''
 
         # First see if this is even a valid project
-        if not in self.projList :
+        if self.pid not in self.projList :
             self.log.writeToLog(self.errorCodes['3610'], [self.pid])
 
         # Set some paths and file names
@@ -706,7 +662,7 @@ class ProjData (object) :
         if tPath :
             self.local.projHome = self.getProjHome(tPath)
         else :
-            if not in self.projList :
+            if self.pid not in self.projList :
                 self.tools.terminal('Error: No target path given. Cannot install. Use --target (-t) to indicate path to project.')
                 self.tools.dieNow()
 
@@ -920,7 +876,7 @@ class Template (object) :
 #        self.tools.dieNow()
 
         # Test to see if the project already exists
-        if in self.projList :
+        if self.pid in self.projList :
             self.tools.terminal('\nError: Project ID [' + self.pid + '] is already exists on this system. Use the remove command to remove it.')
             self.tools.dieNow()
         # Test for source template file

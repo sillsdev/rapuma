@@ -63,36 +63,6 @@ class UserConfig (object) :
         # Initialize the user's home folders, like resouces, etc
         self.makeHomeFolders()
 
-
-
-# FIXME: Probably taking this out
-
-
-        ## Look for any projects that might be registered and copy the data out
-        #try :
-            #userProjs = self.userConfig['Projects']
-        #except :
-            #userProjs = ''
-
-        ## Create a new conf object based on all the XML default settings
-        ## Then override them with any exsiting user settings.
-        #newConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8').override(self.userConfig)
-
-        ## Put back the copied data of any project information that we might have
-        ## lost from the XML/conf file merging.
-        #if userProjs :
-            #newConfig['Projects'] = userProjs
-
-        ## Do not bother writing if nothing has changed
-        #if not self.userConfig.__eq__(newConfig) :
-            #self.userConfig = newConfig
-            #self.userConfig.filename = self.userConfFile
-            #self.userConfig.write()
-
-
-########################################
-
-
         # Log messages for this module
         self.errorCodes     = {
             '0000' : ['MSG', 'Placeholder message'],

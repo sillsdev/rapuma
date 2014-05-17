@@ -409,15 +409,6 @@ Todo:
             <relies>macPack</relies>
         </file>
         <file>
-            <name>ParaTExt Project Source Hyphenation File</name>
-            <description>The source hypenation word list that is produced by ParaTExt.</description>
-            <fileID>ptHyphFile</fileID>
-            <fileName>hyphenatedWords.txt</fileName>
-            <filePath>[self:sourcePath]</filePath>
-            <depends></depends>
-            <relies>sourcePath</relies>
-        </file>
-        <file>
             <name>TeX lccode Definition File</name>
             <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
             <fileID>lccodeTexFile</fileID>

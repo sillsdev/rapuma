@@ -39,15 +39,16 @@ from rapuma.project.proj_config             import Config
 
 class ProjSetup (object) :
 
-    def __init__(self, pid) :
+    def __init__(self, sysConfig, pid) :
         '''Intitate the whole class and create the object.'''
 
+        self.pid                            = pid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
+        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.tools                          = Tools()
-        self.pid                            = pid
-        self.projHome                       = None
         self.projectMediaIDCode             = None
+        self.systemVersion                  = sysConfig['Rapuma']['systemVersion']
         self.local                          = None
         self.log                            = None
         self.groups                         = {}
@@ -104,26 +105,16 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # Catch if we have a Projects key sooner than later
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-            self.tools.writeConfFile(self.userConfig)
-
-        if self.userConfig['Projects'].has_key(self.pid) :
-            self.data               = ProjData(self.pid)
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            # These could be initialized above but because it might be necessary
-            # to reinitialize, we put them here
-            self.log                = ProjLog(self.pid)
-            self.proj_config        = Config(self.pid)
-            self.proj_config.getProjectConfig()
-            self.projectConfig      = self.proj_config.projectConfig
-            self.local              = ProjLocal(self.pid)
-            self.compare            = ProjCompare(self.pid)
-            return True
-        else :
-            return False
+        self.data               = ProjData(self.pid)
+        # These could be initialized above but because it might be necessary 
+        # to reinitialize, we put them here
+        self.log                = ProjLog(self.pid)
+        self.proj_config        = Config(self.pid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig      = self.proj_config.projectConfig
+        self.local              = ProjLocal(self.pid)
+        self.compare            = ProjCompare(self.pid)
+        return True
 
 
 ###############################################################################
@@ -469,28 +460,28 @@ class ProjSetup (object) :
             sName           = os.path.split(source)[1]
             return os.path.join(targetFolder, sName + '.source')
 
+# This is being depricated
+    ########def addCompGroupSourcePath (self, gid, csid, source) :
+        ########'''Add a source path for components used in a group if none
+        ########exsist. If one exists, replace anyway. Last in wins! The 
+        ########assumption is only one path per component group.'''
 
-    def addCompGroupSourcePath (self, gid, csid, source) :
-        '''Add a source path for components used in a group if none
-        exsist. If one exists, replace anyway. Last in wins! The 
-        assumption is only one path per component group.'''
+#########        # Get the csid
+#########        csid = self.projectConfig['Groups'][gid]['csid']
 
-#        # Get the csid
-#        csid = self.projectConfig['Groups'][gid]['csid']
+        ######### Path has been resolved in Rapuma, we assume it should be valid.
+        ######### But it could be a full file name. We need to sort that out.
+        ########try :
+            ########if os.path.isdir(source) :
+                ########self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = source
+            ########else :
+                ########self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = os.path.split(source)[0]
 
-        # Path has been resolved in Rapuma, we assume it should be valid.
-        # But it could be a full file name. We need to sort that out.
-        try :
-            if os.path.isdir(source) :
-                self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = source
-            else :
-                self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = os.path.split(source)[0]
-
-            self.tools.writeConfFile(self.userConfig)
-            self.log.writeToLog(self.errorCodes['0320'], [source])
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0300'], [str(e)])
+            ########self.tools.writeConfFile(self.userConfig)
+            ########self.log.writeToLog(self.errorCodes['0320'], [source])
+        ########except Exception as e :
+            ######### If we don't succeed, we should probably quite here
+            ########self.log.writeToLog(self.errorCodes['0300'], [str(e)])
 
 
 ###############################################################################
@@ -541,23 +532,20 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0600 ########################
 ###############################################################################
 
-    def newProject (self, projHome, pmid, systemVersion, tid = None) :
+    def newProject (self, pmid='book', tid=None, force=None) :
         '''Create a new publishing project.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Sort out some necessary vars
-        self.projHome = projHome
-        self.projectMediaIDCode = pmid
-
         # Test if this project already exists in the user's config file.
-        if self.user.isRegisteredProject(self.pid) :
-            self.tools.terminal('ERR: Halt! ID [' + self.pid + '] already defined for another project.')
-            return
-
-        # Add project to local Rapuma project registry
-#        self.user.registerProject(self.pid, pname, self.projectMediaIDCode, self.projHome)
-        self.user.registerProject(self.pid, self.projectMediaIDCode, self.projHome)
+        projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        if os.path.exists(projHome) :
+            if force :
+                self.tools.terminal('Force project delete for: ' + self.pid)
+                shutil.rmtree(projHome)
+            else :
+                self.tools.terminal('ERR: Halt! Project [' + self.pid + '] already exists.')
+                return
 
         # Load a couple necessary modules
         self.local              = ProjLocal(self.pid)
@@ -598,8 +586,24 @@ class ProjSetup (object) :
         if tid :
             self.data.templateToProject(self.user, self.local.projHome, self.pid, tid)
         else :
+
+
+
+
+
+
+
+
             # If not from a template, just create a new version of the project config file
             Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, systemVersion)
+
+
+
+
+
+
+
+
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -864,9 +868,7 @@ class ProjDelete (object) :
         self.userConfig                     = self.user.userConfig
         self.tools                          = Tools()
         self.pid                            = pid
-        self.projHome                       = None
-        if self.userConfig.has_key('Projects') and self.userConfig['Projects'].has_key(pid) :
-            self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
+        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
 
 # Currently there is only this function in this class
 

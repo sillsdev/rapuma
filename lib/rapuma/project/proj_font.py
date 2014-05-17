@@ -50,7 +50,6 @@ class ProjFont (object) :
         self.local                          = ProjLocal(pid, gid, self.projectConfig)
         self.cType                          = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                          = self.cType.capitalize()
-        self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.macPack                        = None
         self.macPackConfig                  = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :

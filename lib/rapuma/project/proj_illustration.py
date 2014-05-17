@@ -51,7 +51,6 @@ class ProjIllustration (object) :
         self.illustrationConfig         = self.proj_config.illustrationConfig
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.csid                       = self.projectConfig['Groups'][self.gid]['csid']
         self.macPack                    = None
         self.macPackConfig              = None

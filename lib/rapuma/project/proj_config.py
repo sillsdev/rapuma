@@ -40,7 +40,7 @@ class Config (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = self.userConfig['Projects'][pid]['projectPath']
+        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
@@ -70,18 +70,11 @@ class Config (object) :
                 self.getProjectConfig()
             # Reinitialize local
             self.local                      = ProjLocal(pid, gid, self.projectConfig)
-            self.csid                       = self.projectConfig['Groups'][gid]['csid']
             self.cType                      = self.projectConfig['Groups'][gid]['cType']
             self.Ctype                      = self.cType.capitalize()
-            # Just in case source path has not been defined
-            try :
-                self.sourcePath             = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
-            except :
-                self.sourcePath             = ''
         else :
             self.cType                      = None
             self.Ctype                      = None
-            self.csid                       = None
 
 
 ###############################################################################
