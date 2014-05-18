@@ -305,14 +305,13 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'project' :
-                ProjDelete(pid).deleteProject(force)
+                ProjDelete().deleteProject(pid)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'restore' :
             if cmdType == 'archive' :
                 ProjData(pid).restoreArchive(targetPath, sourcePath)
             elif cmdType == 'backup' :
-
                 if pid not in projList :
                     ProjData(pid).restoreLocalBackup(args.bak_num)
                 else :

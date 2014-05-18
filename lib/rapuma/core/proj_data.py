@@ -40,6 +40,7 @@ class ProjData (object) :
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
+        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['Resources']['projects']))
 
         # Log messages for this module

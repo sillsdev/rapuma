@@ -45,7 +45,7 @@ class ProjSetup (object) :
         self.pid                            = pid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.tools                          = Tools()
         self.projectMediaIDCode             = None
         self.systemVersion                  = sysConfig['Rapuma']['systemVersion']
@@ -535,14 +535,22 @@ class ProjSetup (object) :
     def newProject (self, pmid='book', tid=None, force=None) :
         '''Create a new publishing project.'''
 
-#        import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
+
+
+# FIXME: The problem is that theconfig file gets created before the rest of this proceeds 
+
+
+
+        if not pmid :
+            pmid = 'book'
 
         # Test if this project already exists in the user's config file.
         projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         if os.path.exists(projHome) :
             if force :
                 self.tools.terminal('Force project delete for: ' + self.pid)
-                shutil.rmtree(projHome)
+                ProjDelete().deleteProject(self.pid)
             else :
                 self.tools.terminal('ERR: Halt! Project [' + self.pid + '] already exists.')
                 return
@@ -586,24 +594,8 @@ class ProjSetup (object) :
         if tid :
             self.data.templateToProject(self.user, self.local.projHome, self.pid, tid)
         else :
-
-
-
-
-
-
-
-
             # If not from a template, just create a new version of the project config file
-            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, systemVersion)
-
-
-
-
-
-
-
-
+            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.systemVersion, pmid) 
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -861,56 +853,28 @@ class ProjSetup (object) :
 
 class ProjDelete (object) :
 
-    def __init__(self, pid) :
+    def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
         self.tools                          = Tools()
-        self.pid                            = pid
-        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
 
 # Currently there is only this function in this class
 
-    def deleteProject (self, force = False) :
-        '''Delete a project from the Rapuma system registry. If force is used,
-        create a backup in the project's parent folder.'''
+    def deleteProject (self, pid) :
+        '''Delete a project.'''
 
-        # If no pid was given this fails
-        if not self.pid :
-            self.tools.terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
-            return
+        projHome                            = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), pid)
 
-        # Check if project is registered with Rapuma
-        if not self.projHome :
-            self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
+        # Delete project
+        if os.path.exists(projHome) :
+            shutil.rmtree(projHome)
+            self.tools.terminal('Removed project files for [' + pid + '] from hard drive.')
+            return True
         else :
-            # Remove references from user rapuma.conf
-            if self.user.unregisterProject(self.pid) :
-                self.tools.terminal('Removed [' + self.pid + '] from user configuration.')
-            else :
-                self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
+            self.tools.terminal('Warning: [' + pid + '] project could not be found, unable to delete project files.')
 
-        # Do a simple (numbered) backup if force is used.
-        if self.projHome and force :
-            self.tools.makeFolderBackup(self.projHome)
-        else :
-            self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
-
-#        import pdb; pdb.set_trace()
-
-        # Remove any possible residual project data
-        if not self.projHome :
-            self.projHome = os.path.join(self.userConfig['Resources']['projects'], self.pid)
-        if os.path.exists(self.projHome) :
-            shutil.rmtree(self.projHome)
-            self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
-        else :
-            self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
-
-        # Report the process is done
-        self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
-        return True
 
 
 

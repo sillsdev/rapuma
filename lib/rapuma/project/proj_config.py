@@ -40,7 +40,7 @@ class Config (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
@@ -156,7 +156,7 @@ class Config (object) :
 ###############################################################################
 
 
-    def makeNewprojectConf (self, local, pid, pmid, cVersion) :
+    def makeNewprojectConf (self, local, pid, cVersion, pmid='book') : 
         '''Create a new project configuration file for a new project.'''
 
         self.projectConfig = ConfigObj(self.tools.getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
