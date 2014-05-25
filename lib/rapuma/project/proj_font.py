@@ -21,7 +21,6 @@ from configobj                      import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -40,7 +39,6 @@ class ProjFont (object) :
         self.pid                            = pid
         self.gid                            = gid
         self.tools                          = Tools()
-        self.pt_tools                       = Paratext(pid, gid)
         self.user                           = UserConfig()
         self.log                            = ProjLog(pid)
         self.userConfig                     = self.user.userConfig
@@ -57,8 +55,7 @@ class ProjFont (object) :
             self.proj_config.getMacPackConfig(self.macPack)
             self.proj_config.loadMacPackFunctions(self.macPack)
             self.macPackConfig      = self.proj_config.macPackConfig
-        # Get our component sourceEditor
-#        self.sourceEditor                   = self.pt_tools.getSourceEditor()
+
         # The first time this is initialized make sure we have a FontSettings section
         if self.macPackConfig and not self.macPackConfig.has_key('FontSettings') :
             self.tools.buildConfSection(self.macPackConfig, 'FontSettings')

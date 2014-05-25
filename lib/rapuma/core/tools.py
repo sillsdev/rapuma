@@ -356,6 +356,19 @@ class Tools (object) :
                 return confObj['ProjectInfo']['projectIDCode']
 
 
+    def discoverCIDFromFile (self, fileName) :
+        '''Return the component (3 letter) ID as found in the header
+        (first line) of the file. If the CID is not found or cannot
+        be determined, return None (nothing). This does not varify if
+        the ID is valid or not.'''
+
+        if os.path.exists(fileName) :
+            with open(fileName, 'r') as f :
+              thisId = f.readline().split()[1]
+            if len(thisId) == 3 :
+                return thisId.lower()
+
+
     def isInZip (self, fileName, fileZip) :
         '''Look for a specific file in a zip file.'''
 
@@ -453,47 +466,52 @@ class Tools (object) :
                 return cfg
 
 
-    def initConfig (self, confFile, defaultFile) :
-        '''Initialize or load a config file. This will load a config file if an
-        existing one is there and update it with any new system default settings
-        If one does not exist a new one will be created based on system default
-        settings.'''
+    def loadConfig (self, confFile, defaultFile) :
+        '''Load a config file and check against the default settings. If
+        new default settings are present, add them to the exsisting config
+        file. The assumption is that the config file exists.'''
+        
+        # FIXME: It might be good to be able to remove settings if they
+        # no longer exist in the default settings.
+        
+        # Check against the default for possible new settings
+        # If the original config file is corrupt, catch it here
+        try :
+            configObj           = ConfigObj(encoding='utf-8')
+            orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
+            orgFileName         = orgConfigObj.filename
+        except Exception as e :
+            self.terminal(u'\nERROR: Could not open config file: ' + confFile)
+            self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
+            self.dieNow()
 
-
-#        if confFile.find('usfmTex') > 0 :
-#            import pdb; pdb.set_trace()
-
-        if not os.path.isfile(confFile) :
-            configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            configObj.filename  = confFile
-            self.writeConfFile(configObj)
+        # FIXME: There is a deficiency here in that confs like project
+        # are compond objects. This will not deal with any of the conf's
+        # child object so additionl fields in the child sections are not
+        # dealt with, example would be Groups in project.conf
+        defaultObj = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+        defaultObj.merge(orgConfigObj)
+        # For existing configs a key comparison should be enough to tell
+        # if it is the same or not
+        if self.confObjCompare(defaultObj, orgConfigObj) :
+            configObj = orgConfigObj
+            configObj.filename = orgFileName
         else :
-            # But check against the default for possible new settings
-            # If the original config file is corrupt, catch it here
-            try :
-                configObj           = ConfigObj(encoding='utf-8')
-                orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
-                orgFileName         = orgConfigObj.filename
-            except Exception as e :
-                self.terminal(u'\nERROR: Could not open config file: ' + confFile)
-                self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
-                self.dieNow()
+            configObj = defaultObj
+            configObj.filename = orgFileName
+            self.writeConfFile(configObj)
 
-            # FIXME: There is a deficiency here in that confs like project
-            # are compond objects. This will not deal with any of the conf's
-            # child object so additionl fields in the child sections are not
-            # dealt with, example would be Groups in project.conf
-            defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            defaultObj.merge(orgConfigObj)
-            # A key comparison should be enough to tell if it is the same or not
-            if self.confObjCompare(defaultObj, orgConfigObj) :
-                configObj = orgConfigObj
-                configObj.filename = orgFileName
-            else :
-                configObj = defaultObj
-                configObj.filename = orgFileName
-                self.writeConfFile(configObj)
+        return configObj
 
+
+    def initNewConfig (self, confFile, defaultFile) :
+        '''Initialize/create a config file. Return the new config object
+        and write out the new file. This assumes the file does not exist.'''
+
+        configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+        configObj.filename  = confFile
+        self.writeConfFile(configObj)
+            
         return configObj
 
 

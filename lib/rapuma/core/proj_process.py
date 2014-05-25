@@ -23,25 +23,26 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
-from rapuma.core.paratext           import Paratext
 from rapuma.project.proj_config     import Config
 
 
 class ProjProcess (object) :
 
-    def __init__(self, pid, gid = None) :
+    def __init__(self, pid, gid = None, projectConfig = None) :
         '''Intitate the whole class and create the object.'''
 
         self.pid                    = pid
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.proj_config            = Config(self.pid)
-        self.proj_config.getProjectConfig()
-        self.projectConfig          = self.proj_config.projectConfig
+        if projectConfig :
+            self.projectConfig      = projectConfig
+        else :
+            self.proj_config            = Config(self.pid)
+            self.proj_config.getProjectConfig()
+            self.projectConfig          = self.proj_config.projectConfig
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
-        self.paratext               = Paratext(pid, gid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -69,83 +70,84 @@ class ProjProcess (object) :
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
 
+# FIXME: This needs to be rewritten
 
-    def export (self, cType, cName, path = None, script = None, bundle = False, force = False) :
-        '''Facilitate the exporting of project text. It is assumed that the
-        text is clean and ready to go and if any extraneous publishing info
-        has been injected into the text, it will be removed by an appropreate
-        post-process that can be applied by this function. No validation
-        will be initiated by this function.'''
+    #def export (self, cType, cName, path = None, script = None, bundle = False, force = False) :
+        #'''Facilitate the exporting of project text. It is assumed that the
+        #text is clean and ready to go and if any extraneous publishing info
+        #has been injected into the text, it will be removed by an appropreate
+        #post-process that can be applied by this function. No validation
+        #will be initiated by this function.'''
         
-        # FIXME - Todo: add post processing script feature
+        ## FIXME - Todo: add post processing script feature
 
-        # Probably need to create the component object now
-        self.createComponent(cName)
+        ## Probably need to create the component object now
+        #self.createComponent(cName)
 
-        # Figure out target path
-        if path :
-            path = self.tools.resolvePath(path)
-        else :
-            parentFolder = os.path.dirname(self.local.projHome)
-            path = os.path.join(parentFolder, 'Export')
+        ## Figure out target path
+        #if path :
+            #path = self.tools.resolvePath(path)
+        #else :
+            #parentFolder = os.path.dirname(self.local.projHome)
+            #path = os.path.join(parentFolder, 'Export')
 
-        # Make target folder if needed
-        if not os.path.isdir(path) :
-            os.makedirs(path)
+        ## Make target folder if needed
+        #if not os.path.isdir(path) :
+            #os.makedirs(path)
 
-        # Start a list for one or more files we will process
-        fList = []
+        ## Start a list for one or more files we will process
+        #fList = []
 
-        # Will need the stylesheet for copy
-        projSty = self.projectConfig['Managers'][cType + '_Style']['mainStyleFile']
-        projSty = os.path.join(self.local.projStyleFolder, projSty)
-        # Process as list of components
+        ## Will need the stylesheet for copy
+        #projSty = self.projectConfig['Managers'][cType + '_Style']['mainStyleFile']
+        #projSty = os.path.join(self.local.projStyleFolder, projSty)
+        ## Process as list of components
 
-        self.log.writeToLog('XPRT-040')
-        for cid in self.components[cName].getSubcomponentList(cName) :
-            cidCName = self.components[cName].getRapumaCName(cid)
-            ptName = self.paratext.formPTName(cName, cid)
-            # Test, no name = no success
-            if not ptName :
-                self.log.writeToLog('XPRT-010')
-                self.tools.dieNow()
+        #self.log.writeToLog('XPRT-040')
+        #for cid in self.components[cName].getSubcomponentList(cName) :
+            #cidCName = self.components[cName].getRapumaCName(cid)
+            #ptName = self.paratext.formPTName(cName, cid)
+            ## Test, no name = no success
+            #if not ptName :
+                #self.log.writeToLog('XPRT-010')
+                #self.tools.dieNow()
 
-            target = os.path.join(path, ptName)
-            source = os.path.join(self.local.projComponentFolder, cidCName, cid + '.' + cType)
-            # If shutil.copy() spits anything back its bad news
-            if shutil.copy(source, target) :
-                self.log.writeToLog('XPRT-020', [self.tools.fName(target)])
-            else :
-                fList.append(target)
+            #target = os.path.join(path, ptName)
+            #source = os.path.join(self.local.projComponentFolder, cidCName, cid + '.' + cType)
+            ## If shutil.copy() spits anything back its bad news
+            #if shutil.copy(source, target) :
+                #self.log.writeToLog('XPRT-020', [self.tools.fName(target)])
+            #else :
+                #fList.append(target)
 
-        # Start the main process here
-        if bundle :
-            archFile = os.path.join(path, cName + '_' + self.tools.ymd() + '.zip')
-            # Hopefully, this is a one time operation but if force is not True,
-            # we will expand the file name so nothing is lost.
-            if not force :
-                if os.path.isfile(archFile) :
-                    archFile = os.path.join(path, cName + '_' + self.tools.fullFileTimeStamp() + '.zip')
+        ## Start the main process here
+        #if bundle :
+            #archFile = os.path.join(path, cName + '_' + self.tools.ymd() + '.zip')
+            ## Hopefully, this is a one time operation but if force is not True,
+            ## we will expand the file name so nothing is lost.
+            #if not force :
+                #if os.path.isfile(archFile) :
+                    #archFile = os.path.join(path, cName + '_' + self.tools.fullFileTimeStamp() + '.zip')
 
-            myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
-            for f in fList :
-                # Create a string object from the contents of the file
-                strObj = StringIO.StringIO()
-                for l in open(f, "rb") :
-                    strObj.write(l)
-                # Write out string object to zip
-                myzip.writestr(self.tools.fName(f), strObj.getvalue())
-                strObj.close()
-            # Close out the zip and report
-            myzip.close()
-            # Clean out the folder
-            for f in fList :
-                os.remove(f)
-            self.log.writeToLog('XPRT-030', [self.tools.fName(archFile)])
-        else :
-            self.log.writeToLog('XPRT-030', [path])
+            #myzip = zipfile.ZipFile(archFile, 'w', zipfile.ZIP_DEFLATED)
+            #for f in fList :
+                ## Create a string object from the contents of the file
+                #strObj = StringIO.StringIO()
+                #for l in open(f, "rb") :
+                    #strObj.write(l)
+                ## Write out string object to zip
+                #myzip.writestr(self.tools.fName(f), strObj.getvalue())
+                #strObj.close()
+            ## Close out the zip and report
+            #myzip.close()
+            ## Clean out the folder
+            #for f in fList :
+                #os.remove(f)
+            #self.log.writeToLog('XPRT-030', [self.tools.fName(archFile)])
+        #else :
+            #self.log.writeToLog('XPRT-030', [path])
 
-        return True
+        #return True
 
 
 ###############################################################################

@@ -254,7 +254,7 @@ def userArguments (args) :
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
         if args.project_id not in projList :
-            sys.exit('\nERROR: Project ID [' + args.project_id + '] not found in system configuration. Process halting.\n')
+            sys.exit('\nERROR: Project [' + args.project_id + '] not found. Process halting.\n')
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
@@ -353,8 +353,8 @@ def userArguments (args) :
         pid         = args.project_id
         gid         = args.group_id
         force       = args.force
-        source_path = None
-        cid_list    = None
+        source_list = []
+        cid_list    = []
         cType       = None
         override    = None
         ovrdPath    = ''
@@ -385,29 +385,38 @@ def userArguments (args) :
                 cid_list = args.cid_list.split()
             else :
                 cid_list = args.cid_list
-        # Source path is optional but if given, resolve it
-        if args.source_path :
-            source_path = tools.resolvePath(args.source_path)
-            if not os.path.exists(source_path) :
-                sys.exit('\nERROR: Path is not valid. Process halting.\n')
+        # Quickly varify existance of all files in the list
+        if args.source_list :
+            # Make sure we have a bonified list
+            if type(args.source_list) != list :
+                args.source_list = args.source_list.split()
+            # Message the paths in the list, they need to be complete
+            for f in args.source_list :
+                f = os.path.expanduser(f)
+                if not os.path.exists(f) :
+                    sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+                else :
+                    source_list.append(f)
         # Figure out what manage command this is and do it
         if cmd == 'add' :
 #            import pdb; pdb.set_trace()
+
+# FIXME: To add a group the source list must be valid full path file names
+# we need to make the CLI better at providing that. Using the usfmData()
+# module will make that possible.
+
+
             if cmdType == 'group' :
                 # To add a group (other than TOC) we need to do these checks first
                 if gid != 'TOC' :
                     if not cid_list :
-                        sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
+                        sys.exit('\nERROR: Must provide a list (-i) of one or more valid file names (with paths) when adding a group. Process halted!\n')
                     elif not cType :
                         sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                    elif not source_path :
-                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    elif not args.source_id :
-                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
                 # Having sorted through some of the potential problems, try adding the group according to type
                 if cType == 'usfm' :
                     # Force in this context is used to save the file in the Deliverables folder
-                    ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, source_path, force)
+                    ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
             elif cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -679,9 +688,8 @@ if __name__ == '__main__' :
     groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
     groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
     groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-    groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
-    groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
-    groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
+    groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+    groupCommand.add_argument('-s', '--source_list', help='Specify file names and paths for any sources to be imported or updated.')
     groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')

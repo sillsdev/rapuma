@@ -22,12 +22,12 @@ from configobj                          import ConfigObj
 # Load the local classes
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
-from rapuma.core.paratext               import Paratext
 from rapuma.project.proj_config         import Config
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
+from rapuma.group.usfm                  import Usfm
 
 
 ###############################################################################
@@ -62,7 +62,6 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
-        self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
@@ -70,6 +69,7 @@ class Xetex (Manager) :
         # Bring in some manager objects we will need
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
+#        self.usfm                   = Usfm(project, cfg)
         # Get config objs
         self.projectConfig          = self.proj_config.projectConfig
         self.layoutConfig           = self.proj_config.layoutConfig
@@ -319,11 +319,16 @@ class Xetex (Manager) :
             lccodeObject.write(self.tools.makeFileHeader(self.local.lccodeTexFileName, description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
-            for c in self.pt_tools.getNWFChars() :
-                uv = self.tools.rtnUnicodeValue(c)
-                # We handel these chars special in this context
-                if not uv in ['2011', '002D'] :
-                    lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
+
+
+# FIXME: Remove the PT dependency
+
+
+            #for c in self.pt_tools.getNWFChars() :
+                #uv = self.tools.rtnUnicodeValue(c)
+                ## We handel these chars special in this context
+                #if not uv in ['2011', '002D'] :
+                    #lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
 
             # Add special exceptions
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
@@ -476,7 +481,7 @@ class Xetex (Manager) :
             needed to render the group, or a component of a group.'
 
         # Get some cid info we will need below
-        cidInfo = self.pt_tools.usfmCidInfo()
+        cidInfo = self.usfm.usfmCidInfo()
 
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
@@ -626,7 +631,7 @@ class Xetex (Manager) :
                 cidListSubFileName = '-'.join(cidList)
             else :
                 cid = cidList[0]
-                cidInfo = self.pt_tools.usfmCidInfo()
+                cidInfo = self.usfm.usfmCidInfo()
                 # Add a filler character to the ID
                 cnid = "{:0>3}".format(cidInfo[cid][2])
                 cidListSubFileName = cnid + '-' + cid

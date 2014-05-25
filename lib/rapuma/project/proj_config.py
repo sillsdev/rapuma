@@ -89,31 +89,31 @@ class Config (object) :
 
 #        import pdb; pdb.set_trace()
 
-        self.projectConfig = self.tools.initConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
+        self.projectConfig = self.tools.loadConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
 
 
     def getAdjustmentConfig (self) :
         '''Load/return the adjustment configuation object.'''
 
-        self.adjustmentConfig = self.tools.initConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
+        self.adjustmentConfig = self.tools.loadConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
 
 
     def getLayoutConfig (self) :
         '''Load/return the layout configuation object.'''
 
-        self.layoutConfig = self.tools.initConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
+        self.layoutConfig = self.tools.loadConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
 
 
     def getHyphenationConfig (self) :
         '''Load/return the hyphen configuation object.'''
 
-        self.hyphenationConfig = self.tools.initConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
+        self.hyphenationConfig = self.tools.loadConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
 
 
     def getIllustrationConfig (self) :
         '''Load/return the illustration configuation object.'''
-
-        self.illustrationConfig = self.tools.initConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
+        
+        self.illustrationConfig = self.tools.loadConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
 
 
 #    def initMacPack (self, macPack) :
@@ -136,7 +136,7 @@ class Config (object) :
 #        import pdb; pdb.set_trace()
 
         # Load macPackConfig
-        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -365,7 +365,7 @@ class Config (object) :
         # Move the style files and custom TeX files out of the macPack
         self.moveMacStyles(force)
         self.moveMacTex(force)
-        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macPackConfig = self.tools.initNewConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
         self.log.writeToLog(self.errorCodes['3300'], [macPack,self.local.macPackConfFileName])
 
 
