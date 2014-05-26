@@ -338,7 +338,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
             if cmdType == 'group' :
-                ProjSetup(pid).updateAllGroups(force)
+                ProjSetup(sysConfig, pid).updateAllGroups(force)
             elif cmdType == 'helper' :
                 ProjCommander(pid).updateScripts()
             else :
@@ -436,13 +436,13 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'lock' :
             if cmdType == 'group' :
-                ProjSetup(pid).lockUnlock(gid, True)
+                ProjSetup(sysConfig, pid).lockUnlock(gid, True)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    ProjSetup(pid).removeGroup(gid, force)
+                    ProjSetup(sysConfig, pid).removeGroup(gid, force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         ProjCommander(pid).removeScripts()
                 else :
@@ -452,7 +452,7 @@ def userArguments (args) :
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
             elif cmdType == 'preprocess' :
-                ProjSetup(pid).turnOnOffPreprocess(gid, False)
+                ProjSetup(sysConfig, pid).turnOnOffPreprocess(gid, False)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
@@ -461,9 +461,9 @@ def userArguments (args) :
                     # This assumes that if a source path was given in this context
                     # the user only wants to update the source path.
                     if source_path :
-                        ProjSetup(pid).addCompGroupSourcePath(gid, source_path)
+                        ProjSetup(sysConfig, pid).addCompGroupSourcePath(gid, source_path)
                     else :
-                        ProjSetup(pid).updateGroup(gid, cid_list, force)
+                        ProjSetup(sysConfig, pid).updateGroup(gid, cid_list, force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -472,7 +472,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'unlock' :
             if cmdType == 'group' :
-                ProjSetup(pid).lockUnlock(gid, False)
+                ProjSetup(sysConfig, pid).lockUnlock(gid, False)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'watermark' :
@@ -577,7 +577,7 @@ def userArguments (args) :
         value       = args.value
         if args.configuration :
             if (section or key or value) :
-                ProjSetup(pid).changeConfigSetting(config, section, key, value)
+                ProjSetup(sysConfig, pid).changeConfigSetting(config, section, key, value)
             else :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
