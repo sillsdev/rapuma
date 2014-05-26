@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat, errno
 import difflib, tempfile, subprocess
 from datetime                               import *
 from xml.etree                              import cElementTree as ET
@@ -281,6 +281,19 @@ class Tools (object) :
         except :
             return None
 
+
+    def makedirs (self, path, mode=None):
+        '''Like os.makedirs, but doesn't care if the path already exists'''
+        try:
+            if mode is None:
+                os.makedirs(path)
+            else:
+                os.makedirs(path, mode)
+        except os.error as e:
+            if e.errno == errno.EEXIST:
+                pass
+            else:
+                raise
 
     def macroRunner (self, macroFile) :
         '''Run a macro. This assumes the macroFile includes a full path.'''
