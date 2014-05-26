@@ -95,6 +95,7 @@ class ProjSetup (object) :
             '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+            '1999' : ['WRN', 'Collect end notes is not fully implemented yet. The following note was removed from the working text, but not saved: [<<1>>]'],
 
             '2810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
             '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
@@ -123,6 +124,17 @@ class ProjSetup (object) :
 
     def loadUpProjConfig (self, pid) :
         '''Load up the project config.'''
+
+
+
+
+
+
+
+#        import pdb; pdb.set_trace()
+
+
+
 
         self.proj_config        = Config(pid)
         self.proj_config.getProjectConfig()
@@ -623,8 +635,8 @@ class ProjSetup (object) :
                 if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
-            self.takeOutFigMarkers(cType)
-            self.takeOutFeMarkers(cType)
+            self.takeOutFigMarkers(target, cType, gid, cid)
+            self.takeOutFeMarkers(target, cType, gid, cid)
             # If we made it this far, return True
             return True 
         else :
@@ -632,7 +644,7 @@ class ProjSetup (object) :
             return False
 
 
-    def takeOutFigMarkers (self, cType) :
+    def takeOutFigMarkers (self, target, cType, gid, cid) :
         '''Remove \fig markers and log the information in a config file.'''
 
         extractFigMarkers = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
@@ -642,23 +654,7 @@ class ProjSetup (object) :
         if extractFigMarkers :
             tempFile = tempfile.NamedTemporaryFile()
             contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-            
-            
-            
-            
-            
-            
-            
-# FIXME: Go find the PT function for this and put it in here
-            
-            
-            
-            
-            
-            
-            
-            
-            contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(paratext.logFigure, gid, cid), contents)
+            contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logFigure, gid, cid), contents)
             # Write out the remaining data to the working file
             codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
             # Finish by copying the tempFile to the source
@@ -670,56 +666,31 @@ class ProjSetup (object) :
             return True
 
 
-    def takeOutFeMarkers (self, cType) :
+    def takeOutFeMarkers (self, target, cType, gid, cid) :
         '''Remove \fe markers and log the information in a config file.'''
 
         extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
-            ## If this is a USFM component type we need to remove any \fig markers,
-            ## and record them in the illustration.conf file for later use
-            #if cType == 'usfm' :
-                #tempFile = tempfile.NamedTemporaryFile()
-                #contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                ## logUsfmFigure() logs the fig data and strips it from the working text
-                ## Note: Using partial() to allows the passing of the cid param 
-                ## into logUsfmFigure()
-                #if extractFigMarkers :
-                    #contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(paratext.logFigure, gid, cid), contents)
-                ## Now remove end notes from the text
-                #if extractFeMarkers :
-                    #contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(paratext.collectEndNotes, cid), contents)
-                ## Write out the remaining data to the working file
-                #codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
-                ## Finish by copying the tempFile to the source
-                #shutil.copy(tempFile.name, target)
+        # collectEndNotes() removes and collects any end notes found
+        # in the working text. They will be processed later and converted
+        # to another end matter component.
+        # Note: Using partial() to allows the passing of the cid param 
+        # into collectEndNotes()
+        if extractFeMarkers :
+            tempFile = tempfile.NamedTemporaryFile()
+            contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+            
+# FIXME: The collectEndNotes() function doesn't really work yet.
+            
+            contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.collectEndNotes, cid), contents)
+            # Write out the remaining data to the working file
+            codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
+            # Finish by copying the tempFile to the source
+            shutil.copy(tempFile.name, target)
 
-            ## If the text is there, we should return True so do a last check to see
-            #if os.path.isfile(target) :
-                #self.log.writeToLog(self.errorCodes['1140'], [cid])
-                #return True
-        #else :
-            #self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
-            #return False
-
-
-
-# FIXME: Must get rid of all PT dependencies
-
-    #def installUsfmWorkingText (self, gid, cid, force = False) :
-        #'''Find the USFM source text and install it into the working text
-        #folder of the project with the proper name. If a USFM text file
-        #is not located in a PT project folder, the editor cannot be set
-        #to paratext, it must be set to generic. This assumes lock checking
-        #was done previous to the call.'''
-
-##        import pdb; pdb.set_trace()
-
-
-## FIXME: This entire next part should go out into a separate function to better
-## manage the process of removing extra non-Biblical text from the source, if
-## the process requires this. It should not be hard to do
-
-## Of cource this is USFM! Dah!
-
+        # If the text is there, we should return True so do a last check to see
+        if os.path.isfile(target) :
+            self.log.writeToLog(self.errorCodes['1140'], [cid])
+            return True
 
 
     def usfmCopy (self, source, target, gid) :
@@ -804,6 +775,116 @@ class ProjSetup (object) :
             # We may want to rethink this later but for now, it feels right.
             self.log.writeToLog(self.errorCodes['1070'], [source,str(e)], 'proj_setup.usfmTextFileIsValid():1070')
             return False
+
+
+    def collectEndNotes (self, cid, endNoteConts) :
+        '''Collect the end notes from a cid.'''
+
+# FIXME: Output the endnotes to a separate file in the component folder for future processing
+
+        self.log.writeToLog(self.errorCodes['1999'], [endNoteConts.group(1)])
+
+        pass
+
+
+    def logFigure (self, gid, cid, figConts) :
+        '''Log the figure data in the illustration.conf. If nothing is returned, the
+        existing \fig markers with their contents will be removed. That is the default
+        behavior.'''
+
+        # Just in case this section isn't there
+        self.tools.buildConfSection(self.illustrationConfig, gid)
+
+        # Description of figKeys (in order found in \fig)
+            # description = A brief description of what the illustration is about
+            # file = The file name of the illustration (only the file name)
+            # caption = The caption that will be used with the illustration (if turned on)
+            # width = The width or span the illustration will have (span/col)
+            # location = Location information that could be printed in the caption reference
+            # copyright = Copyright information for the illustration
+            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
+
+        # We want the figConts to be a list but it comes in as a re group
+        figList = figConts.group(1).split('|')
+
+        figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
+        figDict = {}
+        # FIXME: If this is for a map and no layout information has been added
+        # to the project yet, the cvSep look up will fail, get around with a try
+        try :
+            cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
+        except :
+            cvSep = ':'
+
+        # Add all the figure info to the dictionary
+        c = 0
+        for value in figList :
+            figDict[figKeys[c]] = value
+            c +=1
+
+        # Add additional information, get rid of stuff we don't need
+        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
+        figDict['useThisIllustration'] = True
+        figDict['useThisCaption'] = True
+        figDict['useThisCaptionRef'] = True
+        figDict['bid'] = cid
+        c = re.search(ur'([0-9]+)[.:][0-9]+', figDict['reference'].upper())
+        if c is None :
+            figDict['chapter'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['chapter'] = c.group(1)
+
+        v = re.search(ur'[0-9]+[.:]([0-9]+)', figDict['reference'].upper())
+        if v is None :
+            figDict['verse'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['verse'] = v.group(1)
+
+        # If this is an update, we need to keep the original settings in case the
+        # default settings have been modified for this project.
+        # Illustration Scale
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['scale'] = self.illustrationConfig[gid][figDict['illustrationID']]['scale']
+        else :
+            figDict['scale'] = '1.0'
+        # Illustration Position
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['position'] = self.illustrationConfig[gid][figDict['illustrationID']]['position']
+        else :
+            if figDict['width'] == 'col' :
+                figDict['position'] = 'tl'
+            else :
+                figDict['position'] = 't'
+        # Illustration Location
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['location'] = self.illustrationConfig[gid][figDict['illustrationID']]['location']
+        else :
+            if not figDict['location'] :
+                figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
+        # Now make (update) the actual illustration section
+        if not self.illustrationConfig.has_key(gid) :
+            self.tools.buildConfSection(self.illustrationConfig, gid)
+        # Put the dictionary info into the illustration conf file
+        if not self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            self.tools.buildConfSection(self.illustrationConfig[gid], figDict['illustrationID'])
+        for k in figDict.keys() :
+            self.illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
+
+        # Write out the conf file to preserve the data found
+        self.tools.writeConfFile(self.illustrationConfig)
+
+        # Just incase we need to keep the fig markers intact this will
+        # allow for that. However, default behavior is to strip them
+        # because usfmTex does not handle \fig markers. By returning
+        # them here, they will not be removed from the working text.
+        # FIXME: One issue here is that is is basicaly hard-wired for
+        # usfm to be the only cType. This breaks if you are working with
+        # something else. To get around it we will use a try statement
+        try :
+            if self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+                return '\\fig ' + figConts.group(1) + '\\fig*'
+        except :
+            return None
 
 
 ###############################################################################

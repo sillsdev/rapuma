@@ -280,7 +280,6 @@ def userArguments (args) :
         mediaType   = None
         if args.media_type :
             mediaType = args.media_type
-
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
