@@ -386,6 +386,7 @@ class Config (object) :
         for f in self.getMacStyExtFiles() :
             source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projStyleFolder, f)
+            self.tools.makedirs(self.local.projStyleFolder)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)
@@ -418,6 +419,7 @@ class Config (object) :
         for f in self.getMacTexExtFiles() :
             source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projTexFolder, f)
+            self.tools.makedirs(self.local.projTexFolder)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)
