@@ -40,7 +40,7 @@ from rapuma.group.usfm_data                 import UsfmData
 class ProjSetup (object) :
 
     def __init__(self, sysConfig, pid) :
-        '''Intitate the whole class and create the object.'''
+        '''Initiate the whole class and create the object.'''
 
         self.pid                            = pid
         self.user                           = UserConfig()
@@ -509,6 +509,24 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0600 ########################
 ###############################################################################
 
+    def isProjectEmpty(self):
+        '''Test if project is "empty" (contains no data files).
+        The reason this might be necessary is that inside newProject(), we
+        want to distinguish the "we're in process of creating the project"
+        case from the "this project already existed before" case. If we're
+        creating a brand-new project, it will have a project.conf file but
+        nothing else.'''
+        projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        result = False
+        if not os.path.exists(projHome) :
+            result = True
+        else:
+            # Project exists, but is it empty? (i.e., contains nothing but Config/project.conf)
+            if os.listdir(projHome) == ['Config'] :
+                if os.listdir(os.path.join(projHome, 'Config')) == ['project.conf'] :
+                    result = True
+        return result
+
     def newProject (self, pmid='book', tid=None, force=None) :
         '''Create a new publishing project.'''
 
@@ -518,8 +536,7 @@ class ProjSetup (object) :
             pmid = 'book'
 
         # Test if this project already exists in the user's config file.
-        projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
-        if os.path.exists(projHome) :
+        if not self.isProjectEmpty() :
             if force :
                 self.tools.terminal('Force project delete for: ' + self.pid)
                 ProjDelete().deleteProject(self.pid)
@@ -550,12 +567,13 @@ class ProjSetup (object) :
                 self.tools.terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(self.local.projHome))
                 return
         else :
-            self.tools.terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
-            return
+            if not self.isProjectEmpty() :
+                self.tools.terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
+                return
 
         # If we made it to this point, we need to make a new project folder
         if not os.path.exists(self.local.projConfFolder) :
-            os.makedirs(self.local.projConfFolder)
+            self.tools.makedirs(self.local.projConfFolder)
             # Create all normal project folders
             for fld in self.local.projFolders :
                 folder = os.path.join(self.local.projHome, fld)
