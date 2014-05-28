@@ -293,7 +293,10 @@ class ProjSetup (object) :
         # project config. If not, the user will need to sort out why
         if self.installGroupComps(gid, cType, sources, force) :
             # Sort the cidList to cannonical order
-            cidList = self.usfmData.cannonListSort(cidList)
+            cidListSorted = self.usfmData.cannonListSort(cidList)
+            if cidList != cidListSorted :
+                self.projectConfig['Groups'][gid]['cidList'] = cidListSorted
+                self.tools.writeConfFile(self.projectConfig)
 
         # Update helper scripts
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :

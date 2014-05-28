@@ -89,7 +89,7 @@ class ProjFont (object) :
             '1260' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - proj_font.installFont()'],
             '1262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - proj_font.installFont()'],
             '1265' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed.'],
-            '1267' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
+            '1267' : ['LOG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
             '1380' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - proj_font.removeFont()'],
             '1382' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - proj_font.removeFont()'],
             '1385' : ['ERR', 'Could not remove! The [<<1>>] font is not listed in the configuration settings.'],

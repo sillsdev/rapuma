@@ -27,7 +27,7 @@ from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
-from rapuma.group.usfm                  import Usfm
+from rapuma.group.usfm_data             import UsfmData
 
 
 ###############################################################################
@@ -69,7 +69,9 @@ class Xetex (Manager) :
         # Bring in some manager objects we will need
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
-#        self.usfm                   = Usfm(project, cfg)
+        self.usfmData               = UsfmData()
+        self.cidChapNumDict         = self.usfmData.cidChapNumDict()
+        self.cidPtIdDict            = self.usfmData.cidPtIdDict()
         # Get config objs
         self.projectConfig          = self.proj_config.projectConfig
         self.layoutConfig           = self.proj_config.layoutConfig
@@ -480,9 +482,6 @@ class Xetex (Manager) :
             read this file to get all of links to other instructions (macros) \
             needed to render the group, or a component of a group.'
 
-        # Get some cid info we will need below
-        cidInfo = self.usfm.usfmCidInfo()
-
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
         # for dependency checking
@@ -551,12 +550,12 @@ class Xetex (Manager) :
                         self.makeCmpExtStyFileOn(cidStyFileOn)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOn + '}\n')
                     # Check for short books add omit statement
-                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                    if self.chapNumOffSingChap and self.cidChapNumDict[cid] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                     # Add the working file here
                     gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
                     # Check again for short books turn off omit statement
-                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                    if self.chapNumOffSingChap and self.cidChapNumDict[cid] == 1 :
                         gidTexObject.write('\\OmitChapterNumberfalse\n') 
                     # Check for for style override and add the "Off" style file here
                     if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
@@ -631,9 +630,8 @@ class Xetex (Manager) :
                 cidListSubFileName = '-'.join(cidList)
             else :
                 cid = cidList[0]
-                cidInfo = self.usfm.usfmCidInfo()
                 # Add a filler character to the ID
-                cnid = "{:0>3}".format(cidInfo[cid][2])
+                cnid = "{:0>3}".format(self.cidPtIdDict[cid])
                 cidListSubFileName = cnid + '-' + cid
 
         # Create, if necessary, the gid.tex file

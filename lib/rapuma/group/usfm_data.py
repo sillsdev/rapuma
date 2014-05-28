@@ -86,6 +86,28 @@ class UsfmData (object) :
         return result
 
 
+    def cidChapNumDict (self) :
+        '''Return a dictionary of total chapters for CIDs based on
+        names found in usfmCidInfo.'''
+
+        result = {}
+        for key in self.usfmCidInfo :
+            result[key] = self.usfmCidInfo[key][3]
+            
+        return result
+
+
+    def cidPtIdDict (self) :
+        '''Return a dictionary of Paratext ID numbers for CIDs based on
+        names found in usfmCidInfo.'''
+
+        result = {}
+        for key in self.usfmCidInfo :
+            result[key] = self.usfmCidInfo[key][2]
+            
+        return result
+
+
     def cannonListSort (self, cidList) :
         '''Return a list of CIDs sorted to cannon order from a list
         of radom ordered CIDs.'''
