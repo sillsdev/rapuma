@@ -60,15 +60,15 @@ class ProjCommander (object) :
     def updateScripts (self) :
         '''Update all the helper command scripts in a project.'''
 
-        if not os.path.isdir(self.local.projHelpScriptFolder) :
-            os.mkdir(self.local.projHelpScriptFolder)
-
         self.makeStaticScripts()
         self.makeGrpScripts()
 
 
     def makeGrpScripts (self) :
         '''Create scripts that process specific group components.'''
+
+        if not os.path.isdir(self.local.projHelpScriptFolder) :
+            os.mkdir(self.local.projHelpScriptFolder)
 
         # Output the scripts (If this is a new project we need to pass)
         if self.projectConfig.has_key('Groups') :
@@ -94,6 +94,9 @@ class ProjCommander (object) :
         Note: This is only for temporary use due to the lack of an interface at
         this time (20130306140636). It assumes the cType is usfm which, at some point
         may not be the case.'''
+
+        if not os.path.isdir(self.local.projHelpScriptFolder) :
+            os.mkdir(self.local.projHelpScriptFolder)
 
         # Output the scripts
         allScripts = self.getStaticScripInfo()

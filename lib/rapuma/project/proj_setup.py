@@ -95,7 +95,7 @@ class ProjSetup (object) :
             '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
-            '1999' : ['WRN', 'Collect end notes is not fully implemented yet. The following note was removed from the working text, but not saved: [<<1>>]'],
+            '1999' : ['WRN', 'Collect end notes is not fully implemented yet. Skipped end notes in: [<<1>>]'],
 
             '2810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
             '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
@@ -242,6 +242,8 @@ class ProjSetup (object) :
         in place for this to work. Force will cause the function to 
         overwrite any exsisting group meta data or source data.'''
 
+#        import pdb; pdb.set_trace()
+
         # Do not want to add this group, non-force, if it already exsists.
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         if self.projectConfig['Groups'].has_key(gid) and not force :
@@ -265,8 +267,6 @@ class ProjSetup (object) :
                 cidList.append(cid)
                 sources[cid] = f
         
-#        import pdb; pdb.set_trace()
-
         # Get persistant values from the config
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         self.tools.buildConfSection(self.projectConfig['Groups'], gid)
@@ -281,12 +281,13 @@ class ProjSetup (object) :
         # If we don't createGroup() will fail badly.
         self.cType = cType
         self.tools.addComponentType(self.projectConfig, self.local, cType)
+
         # Initialize the project now to get settings into the project config
-        # This might help to overcome other module initialization problems.
         aProject = Project(self.pid, gid)
         aProject.createGroup()
-        if self.tools.writeConfFile(self.projectConfig) :
-            self.log.writeToLog(self.errorCodes['0240'], [gid])
+        # This works outside this module so bring the new settings
+        # back into the module here
+        self.projectConfig = aProject.projectConfig
 
         # Install the components now, if successful, we can update the
         # project config. If not, the user will need to sort out why
@@ -294,52 +295,11 @@ class ProjSetup (object) :
             # Sort the cidList to cannonical order
             cidList = self.usfmData.cannonListSort(cidList)
 
-
-
-            # Update helper scripts
-            #if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-                #ProjCommander(self.pid).updateScripts()
-                
-            return True
-
-# FIXME: This all needs to be refactored for importing
-
-        ## The cList can be one or more valid component IDs
-        ## It is expected that the data for this list is in
-        ## this format: "id1 id2 id3 ect", unless it is coming
-        ## internally which means it might alread be a proper
-        ## list. We'll check first.
-        #if type(cidList) != list :
-            #cidList = cidList.split()
-
-
-        ## The assumption is that the conf needs to be
-        ## reset incase there is any residual stuff from 
-        ## a previous attempt to add the same group. But if
-        ## it is new, we can just pass
-
-
-
-
-        ## Lock and save our config settings
-        #self.projectConfig['Groups'][gid]['isLocked']  = True
-
-        ## Update helper scripts
-        #if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            #ProjCommander(self.pid).updateScripts()
-
-        ## Initialize the project now to get settings into the project config
-        ## This might help to overcome other module initialization problems.
-        #aProject = Project(self.pid, gid)
-        #aProject.createGroup()
-
-
-## FIXME: The updateManagerSettings was disabled in text.py
-
-        ##if cType == 'usfm' :
-            ##aProject.managers['usfm_Text'].updateManagerSettings(gid)
-
-
+        # Update helper scripts
+        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+            ProjCommander(self.pid).makeGrpScripts()
+            
+        return True
 
 
     #def removeGroup (self, gid, force = False) :
@@ -375,7 +335,7 @@ class ProjSetup (object) :
         However, a backup will be made of the working text for comparison purposes. 
        This does not return anything. We trust it will work.'''
 
-#       import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         # In the future diglot handling will hopefully be added. Previously,
         # the ability to handle multiple working component files was
@@ -385,10 +345,10 @@ class ProjSetup (object) :
         # a second source identifier will need to be added to the file
         # name and handled in the process. For now, we'll just use the
         # base ID.
-        fileHandle      = cid + '_base'
-        working         = fileHandle + '.' + cType
-        workingComp     = working + '.cv1'
         targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+        fileHandle      = cid + '_base'
+        working         = os.path.join(targetFolder, fileHandle + '.' + cType)
+        workingComp     = working + '.cv1'
 
         # Test to see if it is shared
         if self.isSharedComponent(gid, fileHandle) :
@@ -405,7 +365,8 @@ class ProjSetup (object) :
                         os.remove(f)
                         self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
 
-                return True
+        # If nothing above errored, return true
+        return True
 
 
     def isSharedComponent (self, gid, cid) :
@@ -431,8 +392,6 @@ class ProjSetup (object) :
         # Make sure our group folder is there
         if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
-
-        #print dir(sources)
 
         for cid, fName in sources.iteritems() :
             self.log.writeToLog(self.errorCodes['0250'], [self.cidNameDict[cid]])
@@ -589,7 +548,7 @@ class ProjSetup (object) :
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
+            ProjCommander(self.pid).makeStaticScripts()
 
         # Report what we did
         self.tools.terminal('Created new project [' + self.pid + ']')
@@ -615,6 +574,8 @@ class ProjSetup (object) :
         fileHandle          = cid + '_base'
         target              = os.path.join(targetFolder, fileHandle + '.' + cType)
         targetSource        = target + '.source'
+
+#        import pdb; pdb.set_trace()
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
@@ -678,14 +639,13 @@ class ProjSetup (object) :
             # Finish by copying the tempFile to the source
             shutil.copy(tempFile.name, target)
 
-        # If the text is there, we should return True so do a last check to see
-        if os.path.isfile(target) :
-            self.log.writeToLog(self.errorCodes['1140'], [cid])
-            return True
+        return True
 
 
     def takeOutFeMarkers (self, target, cType, gid, cid) :
         '''Remove \fe markers and log the information in a config file.'''
+
+#        import pdb; pdb.set_trace()
 
         extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
         # collectEndNotes() removes and collects any end notes found
@@ -694,21 +654,20 @@ class ProjSetup (object) :
         # Note: Using partial() to allows the passing of the cid param 
         # into collectEndNotes()
         if extractFeMarkers :
-            tempFile = tempfile.NamedTemporaryFile()
-            contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-            
-# FIXME: The collectEndNotes() function doesn't really work yet.
-            
-            contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.collectEndNotes, cid), contents)
-            # Write out the remaining data to the working file
-            codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
-            # Finish by copying the tempFile to the source
-            shutil.copy(tempFile.name, target)
 
-        # If the text is there, we should return True so do a last check to see
-        if os.path.isfile(target) :
-            self.log.writeToLog(self.errorCodes['1140'], [cid])
-            return True
+# FIXME: The collectEndNotes() function doesn't really work yet.
+
+            contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+            if re.search(r'\\fe\s', contents) :
+                self.log.writeToLog(self.errorCodes['1999'], [cid])
+#                tempFile = tempfile.NamedTemporaryFile()
+#                contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.collectEndNotes, cid), contents)
+                # Write out the remaining data to the working file
+#                codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
+                # Finish by copying the tempFile to the source
+#                shutil.copy(tempFile.name, target)
+
+        return True
 
 
     def usfmCopy (self, source, target, gid) :
@@ -800,9 +759,7 @@ class ProjSetup (object) :
 
 # FIXME: Output the endnotes to a separate file in the component folder for future processing
 
-        self.log.writeToLog(self.errorCodes['1999'], [endNoteConts.group(1)])
-
-        pass
+        return True
 
 
     def logFigure (self, gid, cid, figConts) :

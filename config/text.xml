@@ -40,26 +40,5 @@ Todo:
         <type>string</type>
         <value>NFD</value>
     </setting>
-    <setting>
-        <name>Source File Name PrePart</name>
-        <key>prePart</key>
-        <description>A prefix that is found on the begining of a text source file name.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Source File Name Form ID</name>
-        <key>nameFormID</key>
-        <description>An ID that maps to a description of a predeterminied form that the main part of the file name of the source file will take.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>Source File Name PostPart</name>
-        <key>postPart</key>
-        <description>A sufix that is found on the end of a text source file name. Often just the file extention (with the dot/period character) but could contain other characters before the dot as well.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
 </root>
 

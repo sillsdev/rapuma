@@ -369,16 +369,11 @@ def userArguments (args) :
         # Set optional page range
         if args.pages :
             pages = args.pages
-        # Set optional cType
+        # Set optional cType (default is USFM)
         if args.component_type :
             cType = args.component_type
         else :
-            try :
-                pc = Config(pid)
-                pc.getProjectConfig()
-                cType = pc.projectConfig['Groups'][gid]['cType']
-            except :
-                sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
+            cType = 'usfm'
         if args.cid_list :
             if type(args.cid_list) != list :
                 cid_list = args.cid_list.split()
@@ -406,16 +401,8 @@ def userArguments (args) :
 
 
             if cmdType == 'group' :
-                # To add a group (other than TOC) we need to do these checks first
-                if gid != 'TOC' :
-                    if not cid_list :
-                        sys.exit('\nERROR: Must provide a list (-i) of one or more valid file names (with paths) when adding a group. Process halted!\n')
-                    elif not cType :
-                        sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                # Having sorted through some of the potential problems, try adding the group according to type
-                if cType == 'usfm' :
-                    # Force in this context is used to save the file in the Deliverables folder
-                    ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
+                # Force in this context is used to overwrite any existing group data
+                ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
             elif cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
