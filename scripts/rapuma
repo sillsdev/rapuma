@@ -665,6 +665,7 @@ if __name__ == '__main__' :
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
     parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
+    parser.add_argument('-V', '--version', action='version', version=systemVersion, help = 'Show the program version and exit, doing nothing else')
 
     # Add project subprocess arguments
     sysCommand = subparsers.add_parser('system', help='General system management commands help')
