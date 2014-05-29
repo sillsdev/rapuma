@@ -102,47 +102,18 @@ class Text (Manager) :
 
 # FIXME: Get rid of the PT dependencies
 
-    #def updateManagerSettings (self, gid) :
-        #'''Update the settings for this manager if needed.'''
+    def updateManagerSettings (self, gid) :
+        '''Update the settings for this manager if needed.'''
 
-##        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
-        #sourceEditor = self.pt_tools.getSourceEditor()
+        if not self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
+            not self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] :
+            self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
+            self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
 
-        ## If the source editor is PT, then a lot of information can be
-        ## gleaned from the .ssf file. Otherwise we will go pretty much with
-        ## the defaults and hope for the best.
-        #if sourceEditor.lower() == 'paratext' :
-            ## Do a compare on the settings
-            #ptSet = self.pt_tools.getPTSettings()
-            #oldCompSet = self.compSettings.dict()
-            ## Don't overwrite manager settings (default sets reset to False) if
-            ## there already is a setting present on the nameFormID.
-            #if self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] :
-                #newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
-            #else :
-                #newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet, True)
-
-            #if not newCompSet == oldCompSet :
-                #self.compSettings.merge(newCompSet)
-                #self.tools.writeConfFile(self.project.projectConfig)
-                ## Be sure to update the current session settings
-                #for k, v in self.compSettings.iteritems() :
-                    #setattr(self, k, v)
-        ## A generic editor means we really do not know where the text came
-        ## from. In that case, we just do the best we can.
-        #elif sourceEditor.lower() == 'generic' :
-            #if not self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
-                #not self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] :
-                #self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
-                #self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
-
-                #self.tools.writeConfFile(self.project.projectConfig)
-        #else :
-            #self.project.log.writeToLog('TEXT-010', [sourceEditor])
-            #self.tools.dieNow()
-
-        #return True
+            self.tools.writeConfFile(self.project.projectConfig)
+        return True
 
 
     def testCompTextFile (self, cName, source, projSty = None) :
