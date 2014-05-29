@@ -295,8 +295,8 @@ class Xetex (Manager) :
             self.proj_hyphenation.updateHyphenation(False)
 
         # Create the output file here
-        with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpHyphExcTexFile), description))
+        with codecs.open(self.local.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
+            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.local.grpHyphExcTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
             with codecs.open(self.local.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
@@ -774,7 +774,7 @@ class Xetex (Manager) :
             if os.path.exists(wmFile) :
                 self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
 
-        ##### Veiwing #####
+        ##### Viewing #####
         if wmFile :
             viewFile = wmFile
         elif renderFile :
