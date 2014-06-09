@@ -66,6 +66,12 @@
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/TeX/usfmTex-settings.tex"/>
   <file path="file:///home/dennis/Publishing/BRU/BRU-LATN-BIBA/Config/adjustment.conf"/>
 </session>
+<session name="IKZ-LATN-GEN">
+  <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/usfmTex.conf"/>
+</session>
 <session name="KYU-LATN-NTCAT">
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/adjustment.conf"/>
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/hyphenation.conf"/>
