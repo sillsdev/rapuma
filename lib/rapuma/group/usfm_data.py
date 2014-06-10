@@ -61,6 +61,12 @@ class UsfmData (object) :
         return sorted(result, key=self.canonical_order)
 
 
+    def bibleCidList (self) :
+        '''Return a list of common Bible CIDs in proper canonical order.'''
+
+        return otCIDList + ntCIDList
+
+
     def wholeCannonList (self) :
         '''Return a list of CIDs for the entire cannon of Scripture in
         proper order. This can be used for varification of common

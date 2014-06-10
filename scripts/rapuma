@@ -103,6 +103,7 @@ from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
+from rapuma.group.usfm_data             import UsfmData
 
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
@@ -351,13 +352,24 @@ def userArguments (args) :
         cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
-        force       = args.force
-        source_list = []
-        cid_list    = []
-        cType       = None
-        override    = None
-        ovrdPath    = ''
-        pages       = None
+        force       = args.force    # Switch/force actions
+        source_path = []            # A path to files to use
+        source_list = []            # Gen: A list of files w/paths
+        cid_list    = []            # A list of valid CIDs
+        cType       = None          # A valid component type ID
+        override    = None          # A folder w/path for output
+        ovrdPath    = ''            # Gen: path to override folder
+        pages       = None          # Pages to deliver for output
+        # These are valid USFM file extentions we will process
+        usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
+        # These are recognized CID groups names for generating CID list
+        # if no CIDs are provided
+        cannonGroups = ['OT', 'NT', 'BIBLE']
+        # Check source path if there is one
+        if args.source_path :
+            source_path = os.path.abspath(args.source_path)
+            if not os.path.isdir(source_path) :
+                sys.exit('\nERROR: Path is not valid. [' + source_path + '] Process halting.\n')
         # Set optional override
         if args.override :
             override = args.override
@@ -374,23 +386,45 @@ def userArguments (args) :
             cType = args.component_type
         else :
             cType = 'usfm'
+        # If the user provided any CIDs, we preprocess them here
         if args.cid_list :
+            # Load this now because we'll need it
+            usfmData    = UsfmData()
+            cids        = []
             if type(args.cid_list) != list :
-                cid_list = args.cid_list.split()
+                cids = args.cid_list.split()
             else :
-                cid_list = args.cid_list
-        # Quickly varify existance of all files in the list
-        if args.source_list :
-            # Make sure we have a bonified list
-            if type(args.source_list) != list :
-                args.source_list = args.source_list.split()
-            # Message the paths in the list, they need to be complete
-            for f in args.source_list :
-                f = os.path.expanduser(f)
-                if not os.path.exists(f) :
-                    sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
-                else :
-                    source_list.append(f)
+                cids = args.cid_list
+            cid_list = usfmData.cannonListSort(cids)
+        else :
+            # Otherwise we will see if we are adding using a shortcut
+            if cmd == 'add' and gid in cannonGroups :
+                cid_list = getattr(usfmData, gid.lower + 'CidList')
+
+        # The source_list will be auto-generated and is required at
+        # the engine level for processing. We need both a source_path
+        # and a CID list to make it. This will take them as it finds
+        # them but the completed list needs to be varified
+        if source_path and cid_list :
+            for f in os.listdir(source_path) :
+                # Check only valid file types (by ext)
+                if os.path.splitext(filename)[1][1:].lower() in usfmExt :
+                    if self.tools.discoverCIDFromFile(f).lower() in cid_list : 
+                        source_list.append(os.path.join(source_path, f))
+        # Before we go on, quickly varify existance of all files in the list
+        for f in source_list :
+            if not os.path.exists(f) :
+                sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+
+
+
+        # One last check to see if all the files are there that were in
+        # the cid list
+        for cid in cid_list :
+            ...
+        
+        
+        
         # Figure out what manage command this is and do it
         if cmd == 'add' :
 #            import pdb; pdb.set_trace()
@@ -401,8 +435,13 @@ def userArguments (args) :
 
 
             if cmdType == 'group' :
-                # Force in this context is used to overwrite any existing group data
-                ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
+                # Even though Rapuma could make an empty group, we are not
+                # going to let that happen.
+                if source_list :
+                    # Force in this context is used to overwrite any existing group data
+                    ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
+                else :
+                    sys.exit('\nERROR: Must provide a source path or valid component IDs to add a group. Process halting.\n')
             elif cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -443,17 +482,7 @@ def userArguments (args) :
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
-            if cmdType == 'group' :
-                if cType == 'usfm' :
-                    # This assumes that if a source path was given in this context
-                    # the user only wants to update the source path.
-                    if source_path :
-                        ProjSetup(sysConfig, pid).addCompGroupSourcePath(gid, source_path)
-                    else :
-                        ProjSetup(sysConfig, pid).updateGroup(gid, cid_list, force)
-                else :
-                    cTypeError(cType)
-            elif cmdType == 'hyphenation' :
+            if cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd, force)
             else :
                 cmdError(cmd, cmdType)
@@ -675,8 +704,8 @@ if __name__ == '__main__' :
     groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
     groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
     groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-    groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-    groupCommand.add_argument('-s', '--source_list', help='Specify file names and paths for any sources to be imported or updated.')
+    groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+    groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
     groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
