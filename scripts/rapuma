@@ -348,6 +348,7 @@ def userArguments (args) :
     ##### GROUP
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
+        usfmData    = UsfmData()
         cmdType     = args.command_type
         cmd         = args.command
         pid         = args.project_id
@@ -370,6 +371,10 @@ def userArguments (args) :
             source_path = os.path.abspath(args.source_path)
             if not os.path.isdir(source_path) :
                 sys.exit('\nERROR: Path is not valid. [' + source_path + '] Process halting.\n')
+        else :
+            if cmd == 'add' :
+                sys.exit('\nERROR: Source path needed to complete operation. Process halting.\n')
+            
         # Set optional override
         if args.override :
             override = args.override
@@ -389,7 +394,6 @@ def userArguments (args) :
         # If the user provided any CIDs, we preprocess them here
         if args.cid_list :
             # Load this now because we'll need it
-            usfmData    = UsfmData()
             cids        = []
             if type(args.cid_list) != list :
                 cids = args.cid_list.split()
@@ -399,8 +403,8 @@ def userArguments (args) :
         else :
             # Otherwise we will see if we are adding using a shortcut
             if cmd == 'add' and gid in cannonGroups :
-                cid_list = getattr(usfmData, gid.lower + 'CidList')
-
+                getCidList = getattr(usfmData, gid.lower() + 'CidList')
+                cid_list = getCidList()
         # The source_list will be auto-generated and is required at
         # the engine level for processing. We need both a source_path
         # and a CID list to make it. This will take them as it finds
@@ -408,32 +412,24 @@ def userArguments (args) :
         if source_path and cid_list :
             for f in os.listdir(source_path) :
                 # Check only valid file types (by ext)
-                if os.path.splitext(filename)[1][1:].lower() in usfmExt :
-                    if self.tools.discoverCIDFromFile(f).lower() in cid_list : 
+                if os.path.splitext(f)[1][1:].lower() in usfmExt :
+                    cid = tools.discoverCIDFromFile(os.path.join(source_path, f))
+                    if cid.lower() in cid_list : 
                         source_list.append(os.path.join(source_path, f))
-        # Before we go on, quickly varify existance of all files in the list
+        # Before we go on, quickly varify existance of all files in the
+        # list and cross-check with the CID list
+        checkList = list(cid_list)
         for f in source_list :
             if not os.path.exists(f) :
                 sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
-
-
-
-        # One last check to see if all the files are there that were in
-        # the cid list
-        for cid in cid_list :
-            ...
-        
-        
-        
+            else :
+                cid = tools.discoverCIDFromFile(f).lower()
+                if cid in checkList :
+                    checkList.remove(cid)
+        if len(checkList) != 0 :
+                sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
         # Figure out what manage command this is and do it
         if cmd == 'add' :
-#            import pdb; pdb.set_trace()
-
-# FIXME: To add a group the source list must be valid full path file names
-# we need to make the CLI better at providing that. Using the usfmData()
-# module will make that possible.
-
-
             if cmdType == 'group' :
                 # Even though Rapuma could make an empty group, we are not
                 # going to let that happen.
