@@ -125,17 +125,6 @@ class ProjSetup (object) :
     def loadUpProjConfig (self, pid) :
         '''Load up the project config.'''
 
-
-
-
-
-
-
-#        import pdb; pdb.set_trace()
-
-
-
-
         self.proj_config        = Config(pid)
         self.proj_config.getProjectConfig()
         return self.proj_config.projectConfig
@@ -275,13 +264,15 @@ class ProjSetup (object) :
             self.projectConfig['Groups'][gid] = newSectionSettings
         # Add/Modify the info to the group config info
         self.projectConfig['Groups'][gid]['cType']                 = cType
-        self.projectConfig['Groups'][gid]['cidList']               = cidList
+        self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.cannonListSort(cidList)
         self.projectConfig['Groups'][gid]['bindingOrder']          = 0
         # Here we need to "inject" cType information into the config
-        # If we don't createGroup() will fail badly.
-        self.cType = cType
-        self.tools.addComponentType(self.projectConfig, self.local, cType)
 
+#        import pdb; pdb.set_trace()
+
+        self.cType = cType
+        if not self.tools.addComponentType(self.projectConfig, self.local, cType) :
+            self.tools.writeConfFile(self.projectConfig)
         # Initialize the project now to get settings into the project config
         aProject = Project(self.pid, gid)
         aProject.createGroup()

@@ -364,7 +364,9 @@ def userArguments (args) :
         # These are valid USFM file extentions we will process
         usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
         # These are recognized CID groups names for generating CID list
-        # if no CIDs are provided
+        # if no CIDs are provided. To expand this list there must be
+        # a corresponding function in UsfmData that will retrieve the
+        # correct CIDs in the correct order.
         cannonGroups = ['OT', 'NT', 'BIBLE']
         # Check source path if there is one
         if args.source_path :

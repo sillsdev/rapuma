@@ -464,6 +464,8 @@ class Tools (object) :
         '''Add (register) a component type to the config if it 
         is not there already.'''
 
+#        import pdb; pdb.set_trace()
+
         Ctype = cType.capitalize()
         self.buildConfSection(cfg, 'CompTypes')
         if not cfg['CompTypes'].has_key(Ctype) :

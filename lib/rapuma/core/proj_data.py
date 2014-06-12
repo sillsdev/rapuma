@@ -161,12 +161,6 @@ class ProjData (object) :
         else :
             os.rename(aProject.local.projHome, bakArchProjDir)
 
-        # Remove references from user rapuma.conf
-        if self.user.unregisterProject(pid) :
-            self.tools.terminal('Removed [' + pid + '] from user configuration.\n')
-        else :
-            self.tools.terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
-
         # Finish here
         self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
@@ -258,7 +252,6 @@ class ProjData (object) :
         log         = ProjLog(pid)
         aProject    = Project(pid, self.gid)
     #    import pdb; pdb.set_trace()
-        self.user.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
         self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
@@ -402,9 +395,6 @@ class ProjData (object) :
 
 #        # Permission for executables is lost in the zip, fix them here
 #        self.tools.fixExecutables(projHome)
-
-#        # If this is a new project we will need to register it now
-#        self.registerProject(projHome)
 
 #        # Add helper scripts if needed
 #        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -729,8 +719,6 @@ class ProjData (object) :
             if cr > 0 :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # Register the local copy to the local user
-        self.registerProject(self.local.projHome)
         # Reset the local and log now
         self.local      = ProjLocal(self.pid)
         self.log        = ProjLog(self.pid)
@@ -900,9 +888,6 @@ class Template (object) :
 
         # Get the media type from the newly placed project for registration
         projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
-
-        # Register the new project
-        self.user.registerProject(self.pid, projectMediaIDCode, projHome)
 
         # Reset the local settings
         self.local = ProjLocal(self.pid)
