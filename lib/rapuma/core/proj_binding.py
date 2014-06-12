@@ -69,8 +69,7 @@ class ProjBinding (object) :
 
 #        import pdb; pdb.set_trace()
         try :
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+            self.projHome           = os.path.join(self.userConfig['Resources']['projects'], self.pid)
             self.local              = ProjLocal(self.pid)
             self.log                = ProjLog(self.pid)
         except :

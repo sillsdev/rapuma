@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 
-import os, sys, StringIO, datetime, shutil
+import os, sys, StringIO, datetime, shutil, errno
 
 # Load Rapuma modules
 from rapuma.core.tools                  import Tools

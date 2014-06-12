@@ -124,7 +124,7 @@ class GuiConfig (object) :
         '''Compare cid with the current recored cid in rapuma_gui.conf. 
         If it is different change to the new cid. If not, leave it alone.'''
 
-        if gid != self.currentCid :
+        if cid != self.currentCid :
             self.currentCid = cid
             self.guiConfig['ProjectBookmark']['currentCid'] = cid
             self.tools.writeConfFile(self.guiConfig)

@@ -40,14 +40,13 @@ class Project (object) :
         self.gid                    = gid
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.config                 = Config(self.pid)
         self.config.getProjectConfig()
         self.projectConfig          = self.config.projectConfig
         self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
-        macPack                     = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()

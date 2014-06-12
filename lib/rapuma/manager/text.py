@@ -21,7 +21,6 @@ import os, shutil, codecs, re, subprocess
 # Load the local classes
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
-from rapuma.core.paratext           import Paratext
 
 
 ###############################################################################
@@ -42,13 +41,11 @@ class Text (Manager) :
         self.gid                    = project.gid
         self.pid                    = project.projectIDCode
         self.tools                  = Tools()
-        self.pt_tools               = Paratext(project.projectIDCode, project.gid)
         self.project                = project
         self.projectConfig          = project.projectConfig
         self.cfg                    = cfg
         self.cType                  = cType
         self.Ctype                  = cType.capitalize()
-        self.csid                   = project.projectConfig['Groups'][self.gid]['csid']
         self.log                    = project.log
         self.manager                = self.cType + '_Text'
         self.managers               = project.managers
@@ -103,51 +100,53 @@ class Text (Manager) :
 #            self.tools.writeConfFile(self.project.projectConfig)
 
 
-    def updateManagerSettings (self, gid) :
-        '''Update the settings for this manager if needed.'''
+# FIXME: Get rid of the PT dependencies
 
-#        import pdb; pdb.set_trace()
+    #def updateManagerSettings (self, gid) :
+        #'''Update the settings for this manager if needed.'''
 
-        sourceEditor = self.pt_tools.getSourceEditor()
+##        import pdb; pdb.set_trace()
 
-        # If the source editor is PT, then a lot of information can be
-        # gleaned from the .ssf file. Otherwise we will go pretty much with
-        # the defaults and hope for the best.
-        if sourceEditor.lower() == 'paratext' :
-            # Do a compare on the settings
-            ptSet = self.pt_tools.getPTSettings()
-            oldCompSet = self.compSettings.dict()
-            # Don't overwrite manager settings (default sets reset to False) if
-            # there already is a setting present on the nameFormID.
-            if self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] :
-                newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
-            else :
-                newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet, True)
+        #sourceEditor = self.pt_tools.getSourceEditor()
 
-            if not newCompSet == oldCompSet :
-                self.compSettings.merge(newCompSet)
-                self.tools.writeConfFile(self.project.projectConfig)
-                # Be sure to update the current session settings
-                for k, v in self.compSettings.iteritems() :
-                    setattr(self, k, v)
-        # A generic editor means we really do not know where the text came
-        # from. In that case, we just do the best we can.
-        elif sourceEditor.lower() == 'generic' :
-            if not self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
-                not self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] :
-                self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
-                self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
+        ## If the source editor is PT, then a lot of information can be
+        ## gleaned from the .ssf file. Otherwise we will go pretty much with
+        ## the defaults and hope for the best.
+        #if sourceEditor.lower() == 'paratext' :
+            ## Do a compare on the settings
+            #ptSet = self.pt_tools.getPTSettings()
+            #oldCompSet = self.compSettings.dict()
+            ## Don't overwrite manager settings (default sets reset to False) if
+            ## there already is a setting present on the nameFormID.
+            #if self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] :
+                #newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet)
+            #else :
+                #newCompSet = self.pt_tools.mapPTTextSettings(self.compSettings.dict(), ptSet, True)
 
-                self.tools.writeConfFile(self.project.projectConfig)
-        else :
-            self.project.log.writeToLog('TEXT-010', [sourceEditor])
-            self.tools.dieNow()
+            #if not newCompSet == oldCompSet :
+                #self.compSettings.merge(newCompSet)
+                #self.tools.writeConfFile(self.project.projectConfig)
+                ## Be sure to update the current session settings
+                #for k, v in self.compSettings.iteritems() :
+                    #setattr(self, k, v)
+        ## A generic editor means we really do not know where the text came
+        ## from. In that case, we just do the best we can.
+        #elif sourceEditor.lower() == 'generic' :
+            #if not self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] or \
+                #not self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] :
+                #self.project.projectConfig['Managers'][self.cType + '_Text']['nameFormID'] = 'USFM'
+                #self.project.projectConfig['Managers'][self.cType + '_Text']['postPart'] = 'usfm'
 
-        return True
+                #self.tools.writeConfFile(self.project.projectConfig)
+        #else :
+            #self.project.log.writeToLog('TEXT-010', [sourceEditor])
+            #self.tools.dieNow()
+
+        #return True
 
 
-    def testCompTextFile (self, source, projSty = None) :
-        '''This will direct a request to the proper validater for
+    def testCompTextFile (self, cName, source, projSty = None) :
+        '''This will direct a request to the proper validator for
         testing the source of a component text file.'''
 
         if self.cType == 'usfm' :

@@ -23,6 +23,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
+from rapuma.manager.project         import Project
 from rapuma.project.proj_config     import Config
 from rapuma.project.proj_commander  import ProjCommander
 
@@ -33,11 +34,14 @@ class ProjData (object) :
         '''Intitate the whole class and create the object.'''
 
         self.pid            = pid
+        self.gid            = gid
         self.tools          = Tools()
         self.user           = UserConfig()
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
+        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['Resources']['projects']))
 
         # Log messages for this module
         self.errorCodes     = {
@@ -76,40 +80,6 @@ class ProjData (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-    def registerProject (self, projHome) :
-        '''Do a basic project registration with information available in a
-        project config file found in projHome.'''
-
-        pid                 = os.path.basename(projHome)
-        projectConfig          = self.getConfig(projHome)
-
-        if len(projectConfig) :
-            pTitle          = projectConfig['ProjectInfo']['projectTitle']
-            pid             = projectConfig['ProjectInfo']['projectIDCode']
-            pmid            = projectConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate         = projectConfig['ProjectInfo']['projectCreateDate']
-            if not self.userConfig['Projects'].has_key(pid) :
-                self.tools.buildConfSection(self.userConfig['Projects'], pid)
-                self.userConfig['Projects'][pid]['projectTitle']        = pTitle
-                self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
-                self.userConfig['Projects'][pid]['projectPath']         = projHome
-                self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
-                self.tools.writeConfFile(self.userConfig)
-            else :
-                self.log.writeToLog(self.errorCodes['1220'], [pid])
-            # Change the project path is something different has been given
-            oldPath = self.userConfig['Projects'][pid]['projectPath']
-            if oldPath != projHome :
-                self.userConfig['Projects'][pid]['projectPath'] = projHome
-                self.tools.writeConfFile(self.userConfig)
-                # FIXME: We used to backup the oldPath if it was there
-                # However, if necessary, this should be done by the caller
-#                self.tools.makeFolderBackup(oldPath)
-                # Now remove the orginal
-                if os.path.exists(oldPath) :
-                    shutil.rmtree(oldPath)
-        else :
-            self.log.writeToLog(self.errorCodes['1240'], [pid])
 
 
 ###############################################################################
@@ -145,7 +115,7 @@ class ProjData (object) :
 
         return excludeFiles
 
-
+# FIXME: Should archiveProject() use self.pid instead of explicitly passing in a pid?
     def archiveProject (self, pid, path = None) :
         '''Archive a project. Send the compressed archive file to the user-specified
         archive folder. If none is specified, put the archive in cwd. If a valid
@@ -155,10 +125,10 @@ class ProjData (object) :
         project is archived, all work should cease on the project.'''
 
         # Make a private project object just for archiving
-        aProject = initProject(pid)
+        aProject = Project(pid, self.gid)
         # Set some paths and file names
         archName = aProject.projectIDCode + '.rapuma'
-        userArchives = uc.userConfig['Resources']['archive']
+        userArchives = self.userConfig['Resources']['archive']
         archTarget = ''
         if path :
             path = self.tools.resolvePath(path)
@@ -190,12 +160,6 @@ class ProjData (object) :
             self.tools.dieNow()
         else :
             os.rename(aProject.local.projHome, bakArchProjDir)
-
-        # Remove references from user rapuma.conf
-        if uc.unregisterProject(pid) :
-            self.tools.terminal('Removed [' + pid + '] from user configuration.\n')
-        else :
-            self.tools.terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
 
         # Finish here
         self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
@@ -233,7 +197,7 @@ class ProjData (object) :
             # Add a space before the next message
             print '\n'
 
-
+# FIXME: Should restoreArchive() use self.pid instead of explicitly passing in a pid?
     def restoreArchive (self, pid, targetPath, sourcePath = None) :
         '''Restore a project from the user specified storage area or sourcePath if 
         specified. Use targetPath to specify where the project will be restored.
@@ -255,8 +219,8 @@ class ProjData (object) :
         if sourcePath :
             if os.path.isdir(sourcePath) :
                 archSource = os.path.join(sourcePath, archName)
-        elif os.path.isdir(uc.userConfig['Resources']['archive']) :
-            userArchives = uc.userConfig['Resources']['archive']
+        elif os.path.isdir(self.userConfig['Resources']['archive']) :
+            userArchives = self.userConfig['Resources']['archive']
             archSource = os.path.join(userArchives, archName)
         else :
             self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
@@ -286,9 +250,8 @@ class ProjData (object) :
         local       = ProjLocal(pid)
         pc          = Config(pid)
         log         = ProjLog(pid)
-        aProject    = Project(uc.userConfig, pc.projectConfig, local, log, systemVersion)
+        aProject    = Project(pid, self.gid)
     #    import pdb; pdb.set_trace()
-        uc.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
         self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
@@ -331,7 +294,7 @@ class ProjData (object) :
         backups with the same name exist there, increment with a number.'''
 
         # First see if this is even a valid project
-        if not self.userConfig['Projects'].has_key(self.pid) :
+        if self.pid not in self.projList :
             self.log.writeToLog(self.errorCodes['3610'], [self.pid])
 
         # Set some paths and file names
@@ -432,9 +395,6 @@ class ProjData (object) :
 
 #        # Permission for executables is lost in the zip, fix them here
 #        self.tools.fixExecutables(projHome)
-
-#        # If this is a new project we will need to register it now
-#        self.registerProject(projHome)
 
 #        # Add helper scripts if needed
 #        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -693,7 +653,7 @@ class ProjData (object) :
         if tPath :
             self.local.projHome = self.getProjHome(tPath)
         else :
-            if not self.userConfig['Projects'].has_key(self.pid) :
+            if self.pid not in self.projList :
                 self.tools.terminal('Error: No target path given. Cannot install. Use --target (-t) to indicate path to project.')
                 self.tools.dieNow()
 
@@ -759,8 +719,6 @@ class ProjData (object) :
             if cr > 0 :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # Register the local copy to the local user
-        self.registerProject(self.local.projHome)
         # Reset the local and log now
         self.local      = ProjLocal(self.pid)
         self.log        = ProjLog(self.pid)
@@ -907,7 +865,7 @@ class Template (object) :
 #        self.tools.dieNow()
 
         # Test to see if the project already exists
-        if self.userConfig['Projects'].has_key(self.pid) or os.path.exists(projHome) :
+        if self.pid in self.projList :
             self.tools.terminal('\nError: Project ID [' + self.pid + '] is already exists on this system. Use the remove command to remove it.')
             self.tools.dieNow()
         # Test for source template file
@@ -930,9 +888,6 @@ class Template (object) :
 
         # Get the media type from the newly placed project for registration
         projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
-
-        # Register the new project
-        self.user.registerProject(self.pid, projectMediaIDCode, projHome)
 
         # Reset the local settings
         self.local = ProjLocal(self.pid)

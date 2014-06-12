@@ -47,7 +47,7 @@ class ProjBackground (object) :
         self.log                        = ProjLog(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
+        self.projHome                   = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
 
 

@@ -26,7 +26,7 @@ from rapuma.core.user_config        import UserConfig
 
 class ProjLocal (object) :
 
-    def __init__(self, pid, gid = None, projectConf = None) :
+    def __init__(self, pid, gid = None, cType = 'usfm', mType = 'book', macPack = 'usfmTex') :
         '''Intitate a class object which contains all the project file folder locations.
         The files and folders are processed by state. If the system is in a state where
         certain parent files or folders do not exist, the child file or folder will be
@@ -40,33 +40,19 @@ class ProjLocal (object) :
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.osPlatform         = platform.architecture()[0][:2]
-        self.projectConf        = projectConf
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
+        self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projFolders        = []
-        self.projHome           = None
         self.localDict          = None
-        self.cType              = None
-        self.mType              = None
-        self.macPack            = None
-        self.csid               = None
-        self.sourcePath         = None
+        self.cType              = cType
+        self.mType              = mType
+        self.macPack            = macPack
         debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
             os.makedirs(os.path.join(self.userResouce, 'debug'))
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-        if self.userConfig['Projects'].has_key(pid) :
-            self.projHome       = self.userConfig['Projects'][pid]['projectPath']
-            self.mType          = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        if projectConf :
-            self.cType          = projectConf['Groups'][gid]['cType']
-            self.csid           = projectConf['Groups'][gid]['csid']
-            self.macPack        = projectConf['CompTypes'][self.cType.capitalize()]['macroPackage']
-            if self.userConfig['Projects'][pid].has_key(self.csid + '_sourcePath') :
-                self.sourcePath = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')

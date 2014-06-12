@@ -51,8 +51,6 @@ class ProjIllustration (object) :
         self.illustrationConfig         = self.proj_config.illustrationConfig
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.mType                      = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-        self.csid                       = self.projectConfig['Groups'][self.gid]['csid']
         self.macPack                    = None
         self.macPackConfig              = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
@@ -194,7 +192,7 @@ class ProjIllustration (object) :
         '''Return the full path of the cName working text illustration file. 
         This assumes the cName is valid.'''
 
-        return os.path.join(self.local.projComponentFolder, cid, cid + '_' + self.csid + '.' + self.cType + '.piclist')
+        return os.path.join(self.local.projComponentFolder, cid, cid + '_base.' + self.cType + '.piclist')
 
 
     def createPiclistFile (self, gid, cid) :

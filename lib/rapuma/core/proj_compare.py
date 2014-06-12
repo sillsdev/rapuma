@@ -34,7 +34,6 @@ class ProjCompare (object) :
         self.tools                          = Tools()
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projectMediaIDCode             = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
             self.diffViewCmd                = None
         else :

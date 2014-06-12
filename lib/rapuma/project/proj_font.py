@@ -21,7 +21,6 @@ from configobj                      import ConfigObj, Section
 
 # Load the local classes
 from rapuma.core.tools              import Tools
-from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -40,7 +39,6 @@ class ProjFont (object) :
         self.pid                            = pid
         self.gid                            = gid
         self.tools                          = Tools()
-        self.pt_tools                       = Paratext(pid, gid)
         self.user                           = UserConfig()
         self.log                            = ProjLog(pid)
         self.userConfig                     = self.user.userConfig
@@ -50,7 +48,6 @@ class ProjFont (object) :
         self.local                          = ProjLocal(pid, gid, self.projectConfig)
         self.cType                          = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                          = self.cType.capitalize()
-        self.mType                          = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
         self.macPack                        = None
         self.macPackConfig                  = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
@@ -58,8 +55,7 @@ class ProjFont (object) :
             self.proj_config.getMacPackConfig(self.macPack)
             self.proj_config.loadMacPackFunctions(self.macPack)
             self.macPackConfig      = self.proj_config.macPackConfig
-        # Get our component sourceEditor
-#        self.sourceEditor                   = self.pt_tools.getSourceEditor()
+
         # The first time this is initialized make sure we have a FontSettings section
         if self.macPackConfig and not self.macPackConfig.has_key('FontSettings') :
             self.tools.buildConfSection(self.macPackConfig, 'FontSettings')
@@ -93,7 +89,7 @@ class ProjFont (object) :
             '1260' : ['MSG', 'Force switch was set (-f). The <<1>> font bundle has been force copied into the project font folder. - proj_font.installFont()'],
             '1262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - proj_font.installFont()'],
             '1265' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed.'],
-            '1267' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
+            '1267' : ['LOG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
             '1380' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - proj_font.removeFont()'],
             '1382' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - proj_font.removeFont()'],
             '1385' : ['ERR', 'Could not remove! The [<<1>>] font is not listed in the configuration settings.'],
@@ -386,7 +382,7 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['2437'], [self.macPackConfig['FontSettings']['primaryFont'],self.Ctype])
             return True
         else :
-            self.log.writeToLog(self.errorCodes['2430'], [font,Ctype])
+            self.log.writeToLog(self.errorCodes['2430'], [font,self.Ctype])
             return True
 
         return False

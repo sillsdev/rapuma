@@ -49,7 +49,7 @@ startTime = timeit.default_timer()
 # it will run from there. (~/Projects/rapuma/scripts/rapuma)
 # FIXME: Environment variables are set that may not be needed if this block
 # of code was turned into a module and called from the dependent modules.
-rapumaBase = os.path.dirname(os.path.dirname(sys.argv[0]))
+rapumaBase = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
                         os.path.join(rapumaBase)] if os.path.exists(d)]
 rapumaHome = rapumaHome[0] if len(rapumaHome) else None
@@ -58,8 +58,7 @@ os.environ['RAPUMA_BASE'] = rapumaHome
 if rapumaHome :
     sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
 # Set the user environment path. This is always in the same place.
-userHome = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
-os.environ['RAPUMA_USER'] = userHome
+os.environ['RAPUMA_USER'] = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 
 # Set the (potential) project home by looking for the project config file.
 def find_project_root(tag, path=os.path.curdir):
@@ -102,16 +101,22 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
-from rapuma.project.proj_maps           import ProjMaps
-from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
+from rapuma.group.usfm_data             import UsfmData
 
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
 # Instantiate User config class
 uc                                      = UserConfig()
 tools                                   = Tools()
+
+# Get a list of projects
+projDir = os.path.expanduser(uc.userConfig['Resources']['projects'])
+if os.path.exists(projDir) :
+    projList = tools.getProjIdList(projDir)
+else :
+    sys.exit('\nERROR: The projects folder path is not valid: ' + projDir + '. Process halting.\n')
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
@@ -247,11 +252,10 @@ def userArguments (args) :
     elif sys.argv[1].lower() == 'example' :
         if args.script :
             os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
-
     # Test for valid project ID if this is anything else than a project call
     elif sys.argv[1].lower() != 'project' :
-        if not uc.userConfig.has_key('Projects') or not uc.userConfig['Projects'].has_key(args.project_id) :
-            sys.exit('\nERROR: Project ID [' + args.project_id + '] not found in system configuration. Process halting.\n')
+        if args.project_id not in projList :
+            sys.exit('\nERROR: Project [' + args.project_id + '] not found. Process halting.\n')
         # Update the creator version if necessary
         pid         = args.project_id
         local       = ProjLocal(pid)
@@ -271,8 +275,12 @@ def userArguments (args) :
         cmdType     = args.command_type
         cmd         = args.command
         force       = args.force
+        template    = args.id
         sourcePath  = ''
         targetPath  = ''
+        mediaType   = None
+        if args.media_type :
+            mediaType = args.media_type
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
@@ -286,13 +294,7 @@ def userArguments (args) :
         # Figure out what manage command this is and do it
         if cmd == 'add' :
             if cmdType == 'project' :
-                if not args.media_type in ['book'] :
-                    sys.exit('\nERROR: Media type given: [' + args.media_type + '] is not valid. Process halting.\n')
-# Depricated
-#                if not args.name :
-#                    sys.exit('\nERROR: Must provide a descriptive name (-n) for this new project. Process halting.\n')
-                nProjPath = os.path.join(targetPath, pid)
-                ProjSetup(pid).newProject(nProjPath, args.media_type, systemVersion)
+                ProjSetup(sysConfig, pid).newProject(mediaType, template, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'bind' :
@@ -303,14 +305,14 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'project' :
-                ProjDelete(pid).deleteProject(force)
+                ProjDelete().deleteProject(pid)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'restore' :
             if cmdType == 'archive' :
                 ProjData(pid).restoreArchive(targetPath, sourcePath)
             elif cmdType == 'backup' :
-                if not sourcePath and uc.userConfig['Projects'].has_key(pid) :
+                if pid not in projList :
                     ProjData(pid).restoreLocalBackup(args.bak_num)
                 else :
                     if sourcePath :
@@ -337,7 +339,7 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
             if cmdType == 'group' :
-                ProjSetup(pid).updateAllGroups(force)
+                ProjSetup(sysConfig, pid).updateAllGroups(force)
             elif cmdType == 'helper' :
                 ProjCommander(pid).updateScripts()
             else :
@@ -346,17 +348,35 @@ def userArguments (args) :
     ##### GROUP
     # Group level commands
     elif sys.argv[1].lower() == 'group' :
+        usfmData    = UsfmData()
         cmdType     = args.command_type
         cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
-        force       = args.force
-        source_path = None
-        cid_list    = None
-        cType       = None
-        override    = None
-        ovrdPath    = ''
-        pages       = None
+        force       = args.force    # Switch/force actions
+        source_path = []            # A path to files to use
+        source_list = []            # Gen: A list of files w/paths
+        cid_list    = []            # A list of valid CIDs
+        cType       = None          # A valid component type ID
+        override    = None          # A folder w/path for output
+        ovrdPath    = ''            # Gen: path to override folder
+        pages       = None          # Pages to deliver for output
+        # These are valid USFM file extentions we will process
+        usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
+        # These are recognized CID groups names for generating CID list
+        # if no CIDs are provided. To expand this list there must be
+        # a corresponding function in UsfmData that will retrieve the
+        # correct CIDs in the correct order.
+        cannonGroups = ['OT', 'NT', 'BIBLE']
+        # Check source path if there is one
+        if args.source_path :
+            source_path = os.path.abspath(args.source_path)
+            if not os.path.isdir(source_path) :
+                sys.exit('\nERROR: Path is not valid. [' + source_path + '] Process halting.\n')
+        else :
+            if cmd == 'add' :
+                sys.exit('\nERROR: Source path needed to complete operation. Process halting.\n')
+            
         # Set optional override
         if args.override :
             override = args.override
@@ -368,48 +388,58 @@ def userArguments (args) :
         # Set optional page range
         if args.pages :
             pages = args.pages
-        # Set optional cType
+        # Set optional cType (default is USFM)
         if args.component_type :
             cType = args.component_type
         else :
-            try :
-                pc = Config(pid)
-                pc.getProjectConfig()
-                cType = pc.projectConfig['Groups'][gid]['cType']
-            except :
-                sys.exit('\nERROR: The group [' + gid + '] could not be found in the project. Please check your project setup. Process halted!\n')
+            cType = 'usfm'
+        # If the user provided any CIDs, we preprocess them here
         if args.cid_list :
+            # Load this now because we'll need it
+            cids        = []
             if type(args.cid_list) != list :
-                cid_list = args.cid_list.split()
+                cids = args.cid_list.split()
             else :
-                cid_list = args.cid_list
-        # Source path is optional but if given, resolve it
-        if args.source_path :
-            source_path = tools.resolvePath(args.source_path)
-            if not os.path.exists(source_path) :
-                sys.exit('\nERROR: Path is not valid. Process halting.\n')
+                cids = args.cid_list
+            cid_list = usfmData.cannonListSort(cids)
+        else :
+            # Otherwise we will see if we are adding using a shortcut
+            if cmd == 'add' and gid in cannonGroups :
+                getCidList = getattr(usfmData, gid.lower() + 'CidList')
+                cid_list = getCidList()
+        # The source_list will be auto-generated and is required at
+        # the engine level for processing. We need both a source_path
+        # and a CID list to make it. This will take them as it finds
+        # them but the completed list needs to be varified
+        if source_path and cid_list :
+            for f in os.listdir(source_path) :
+                # Check only valid file types (by ext)
+                if os.path.splitext(f)[1][1:].lower() in usfmExt :
+                    cid = tools.discoverCIDFromFile(os.path.join(source_path, f))
+                    if cid.lower() in cid_list : 
+                        source_list.append(os.path.join(source_path, f))
+        # Before we go on, quickly varify existance of all files in the
+        # list and cross-check with the CID list
+        checkList = list(cid_list)
+        for f in source_list :
+            if not os.path.exists(f) :
+                sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+            else :
+                cid = tools.discoverCIDFromFile(f).lower()
+                if cid in checkList :
+                    checkList.remove(cid)
+        if len(checkList) != 0 :
+                sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
         # Figure out what manage command this is and do it
         if cmd == 'add' :
-#            import pdb; pdb.set_trace()
             if cmdType == 'group' :
-                # To add a group (other than TOC) we need to do these checks first
-                if gid != 'TOC' :
-                    if not cid_list :
-                        sys.exit('\nERROR: Must provide a list (-i) of one or more valid component IDs when adding a group. Process halted!\n')
-                    elif not cType :
-                        sys.exit('\nERROR: Must provide a component type (-c) ID when adding a group. Process halted!\n')
-                    elif not source_path :
-                        sys.exit('\nERROR: Must provide a valid path to the source (-s) ID when adding a group. Process halted!\n')
-                    elif not args.source_id :
-                        sys.exit('\nERROR: Must provide a source ID (-d) ID when adding a text group. Process halted!\n')
-                # Having sorted through some of the potential problems, try adding the group according to type
-                if cType == 'usfm' :
-                    # Force in this context is used to save the file in the Deliverables folder
-                    ProjSetup(pid).addGroup(cType, gid, cid_list, args.source_id, source_path, force)
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).addGroup(cid_list, args.source_id, source_path, force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).addGroup(force)
+                # Even though Rapuma could make an empty group, we are not
+                # going to let that happen.
+                if source_list :
+                    # Force in this context is used to overwrite any existing group data
+                    ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
+                else :
+                    sys.exit('\nERROR: Must provide a source path or valid component IDs to add a group. Process halting.\n')
             elif cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd)
             elif cmdType == 'illustration' :
@@ -424,30 +454,21 @@ def userArguments (args) :
             if cmdType == 'group' :
                 if cType == 'usfm' :
                     Project(pid, gid).renderGroup(cid_list, pages, override, force)
-# FIXME: These next 2 are not done yet!
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).renderMapGroup(cid_list, pages, override)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).renderToc(override)
                 else :
                     cTypeError(cType)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'lock' :
             if cmdType == 'group' :
-                ProjSetup(pid).lockUnlock(gid, True)
+                ProjSetup(sysConfig, pid).lockUnlock(gid, True)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
             if cmdType == 'group' :
                 if cType == 'usfm' :
-                    ProjSetup(pid).removeGroup(gid, force)
+                    ProjSetup(sysConfig, pid).removeGroup(gid, force)
                     if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                         ProjCommander(pid).removeScripts()
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).removeGroup(force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).removeGroup(force)
                 else :
                     cTypeError(cType)
             elif cmdType == 'hyphenation' :
@@ -455,31 +476,17 @@ def userArguments (args) :
             elif cmdType == 'illustration' :
                 sys.exit('\nERROR: Add illustrations off not completed yet')
             elif cmdType == 'preprocess' :
-                ProjSetup(pid).turnOnOffPreprocess(gid, False)
+                ProjSetup(sysConfig, pid).turnOnOffPreprocess(gid, False)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'update' :
-            if cmdType == 'group' :
-                if cType == 'usfm' :
-                    # This assumes that if a source path was given in this context
-                    # the user only wants to update the source path.
-                    if source_path :
-                        ProjSetup(pid).addCompGroupSourcePath(gid, source_path)
-                    else :
-                        ProjSetup(pid).updateGroup(gid, cid_list, force)
-                elif cType == 'map' :
-                    ProjMaps(pid, gid).updateGroup(cid_list, force)
-                elif cType == 'toc' :
-                    ProjToc(pid, gid).updateToc(force)
-                else :
-                    cTypeError(cType)
-            elif cmdType == 'hyphenation' :
+            if cmdType == 'hyphenation' :
                 ProjHyphenation(pid, gid).manageHyphenation(cmd, force)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'unlock' :
             if cmdType == 'group' :
-                ProjSetup(pid).lockUnlock(gid, False)
+                ProjSetup(sysConfig, pid).lockUnlock(gid, False)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'watermark' :
@@ -584,7 +591,7 @@ def userArguments (args) :
         value       = args.value
         if args.configuration :
             if (section or key or value) :
-                ProjSetup(pid).changeConfigSetting(config, section, key, value)
+                ProjSetup(sysConfig, pid).changeConfigSetting(config, section, key, value)
             else :
                 sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
         else :
@@ -663,6 +670,7 @@ if __name__ == '__main__' :
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
     parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
+    parser.add_argument('-V', '--version', action='version', version=systemVersion, help = 'Show the program version and exit, doing nothing else')
 
     # Add project subprocess arguments
     sysCommand = subparsers.add_parser('system', help='General system management commands help')
@@ -694,9 +702,8 @@ if __name__ == '__main__' :
     groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
     groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
     groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
-    groupCommand.add_argument('-s', '--source_path', help='Provide a valid path to where the component source files are found for this group. (Used for adding/updating components, one source path per component group allowed.)')
-    groupCommand.add_argument('-d', '--source_id', help='Specify an ID to associate with the source (required).')
-    groupCommand.add_argument('-i', '--cid_list', help='Specify components used in this group by their recognized ID. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\". If the CID is for a map component, use the file name (please do not use any spaces in the file name).')
+    groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+    groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
     groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')

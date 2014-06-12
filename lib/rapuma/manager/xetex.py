@@ -22,14 +22,12 @@ from configobj                          import ConfigObj
 # Load the local classes
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
-from rapuma.core.paratext               import Paratext
 from rapuma.project.proj_config         import Config
-from rapuma.project.proj_maps           import ProjMaps
-from rapuma.project.proj_toc            import ProjToc
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
+from rapuma.group.usfm_data             import UsfmData
 
 
 ###############################################################################
@@ -64,7 +62,6 @@ class Xetex (Manager) :
         self.renderer               = 'xetex'
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
-        self.pt_tools               = Paratext(self.pid, self.gid)
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
@@ -72,6 +69,9 @@ class Xetex (Manager) :
         # Bring in some manager objects we will need
         self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
+        self.usfmData               = UsfmData()
+        self.cidChapNumDict         = self.usfmData.cidChapNumDict()
+        self.cidPtIdDict            = self.usfmData.cidPtIdDict()
         # Get config objs
         self.projectConfig          = self.proj_config.projectConfig
         self.layoutConfig           = self.proj_config.layoutConfig
@@ -295,8 +295,8 @@ class Xetex (Manager) :
             self.proj_hyphenation.updateHyphenation(False)
 
         # Create the output file here
-        with codecs.open(self.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.grpHyphExcTexFile), description))
+        with codecs.open(self.local.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
+            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.local.grpHyphExcTexFile), description))
             hyphenTexObject.write('\hyphenation{\n')
             with codecs.open(self.local.compHyphFile, "r", encoding='utf_8') as hyphenWords :
                 for word in hyphenWords :
@@ -321,11 +321,16 @@ class Xetex (Manager) :
             lccodeObject.write(self.tools.makeFileHeader(self.local.lccodeTexFileName, description))
             lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
             # Add in all our non-word-forming characters as found in our PT project
-            for c in self.pt_tools.getNWFChars() :
-                uv = self.tools.rtnUnicodeValue(c)
-                # We handel these chars special in this context
-                if not uv in ['2011', '002D'] :
-                    lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
+
+
+# FIXME: Remove the PT dependency
+
+
+            #for c in self.pt_tools.getNWFChars() :
+                #uv = self.tools.rtnUnicodeValue(c)
+                ## We handel these chars special in this context
+                #if not uv in ['2011', '002D'] :
+                    #lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
 
             # Add special exceptions
             lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
@@ -477,9 +482,6 @@ class Xetex (Manager) :
             read this file to get all of links to other instructions (macros) \
             needed to render the group, or a component of a group.'
 
-        # Get some cid info we will need below
-        cidInfo = self.pt_tools.usfmCidInfo()
-
         # Since a render run could contain any number of components
         # in any order, we will remake this file on every run. No need
         # for dependency checking
@@ -548,12 +550,12 @@ class Xetex (Manager) :
                         self.makeCmpExtStyFileOn(cidStyFileOn)
                         gidTexObject.write('\\stylesheet{' + cidStyFileOn + '}\n')
                     # Check for short books add omit statement
-                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                    if self.chapNumOffSingChap and self.cidChapNumDict[cid] == 1 :
                         gidTexObject.write('\\OmitChapterNumbertrue\n') 
                     # Add the working file here
                     gidTexObject.write('\\ptxfile{' + cidSource + '}\n')
                     # Check again for short books turn off omit statement
-                    if self.chapNumOffSingChap and cidInfo[cid][3] == 1 :
+                    if self.chapNumOffSingChap and self.cidChapNumDict[cid] == 1 :
                         gidTexObject.write('\\OmitChapterNumberfalse\n') 
                     # Check for for style override and add the "Off" style file here
                     if self.projectConfig['Groups'][self.gid].has_key('compStyOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compStyOverrideList'] :
@@ -563,12 +565,6 @@ class Xetex (Manager) :
                     if self.projectConfig['Groups'][self.gid].has_key('compTexOverrideList') and cid in self.projectConfig['Groups'][self.gid]['compTexOverrideList'] :
                         self.makeCmpExtTexFileOff(cidTexFileOff)
                         gidTexObject.write('\\input \"' + cidTexFileOff + '\"\n')
-                # Output files and commands for map cType
-                elif self.cType == 'map' :
-                    gidTexObject.write('\\ptxfile{' + ProjMaps(self.pid, self.gid).getGidContainerFile() + '}\n')
-                # Output files and commands for toc cType
-                elif self.cType == 'toc' :
-                    gidTexObject.write('\\ptxfile{' + ProjToc(self.pid, self.gid).getGidContainerFile() + '}\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
             # This can only hapen once in the whole process, this marks the end
@@ -634,9 +630,8 @@ class Xetex (Manager) :
                 cidListSubFileName = '-'.join(cidList)
             else :
                 cid = cidList[0]
-                cidInfo = self.pt_tools.usfmCidInfo()
                 # Add a filler character to the ID
-                cnid = "{:0>3}".format(cidInfo[cid][2])
+                cnid = "{:0>3}".format(self.cidPtIdDict[cid])
                 cidListSubFileName = cnid + '-' + cid
 
         # Create, if necessary, the gid.tex file
@@ -774,7 +769,7 @@ class Xetex (Manager) :
             if os.path.exists(wmFile) :
                 self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
 
-        ##### Veiwing #####
+        ##### Viewing #####
         if wmFile :
             viewFile = wmFile
         elif renderFile :
