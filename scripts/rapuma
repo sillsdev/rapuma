@@ -398,10 +398,10 @@ def userArguments (args) :
             # Load this now because we'll need it
             cids        = []
             if type(args.cid_list) != list :
-                cids = args.cid_list.split()
+                cids    = args.cid_list.split()
             else :
-                cids = args.cid_list
-            cid_list = usfmData.cannonListSort(cids)
+                cids    = args.cid_list
+            cid_list    = usfmData.cannonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
             if cmd == 'add' and gid in cannonGroups :
@@ -420,16 +420,17 @@ def userArguments (args) :
                         source_list.append(os.path.join(source_path, f))
         # Before we go on, quickly varify existance of all files in the
         # list and cross-check with the CID list
-        checkList = list(cid_list)
-        for f in source_list :
-            if not os.path.exists(f) :
-                sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
-            else :
-                cid = tools.discoverCIDFromFile(f).lower()
-                if cid in checkList :
-                    checkList.remove(cid)
-        if len(checkList) != 0 :
-                sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
+        if source_list :
+            checkList = list(cid_list)
+            for f in source_list :
+                if not os.path.exists(f) :
+                    sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+                else :
+                    cid = tools.discoverCIDFromFile(f).lower()
+                    if cid in checkList :
+                        checkList.remove(cid)
+            if len(checkList) != 0 :
+                    sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
         # Figure out what manage command this is and do it
         if cmd == 'add' :
             if cmdType == 'group' :
