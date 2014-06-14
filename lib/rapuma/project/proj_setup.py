@@ -233,6 +233,19 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # Set some vars
+        cidList = []
+        cids = []
+        sources = {}
+
+        # In case the group already exists, pull in the CIDs
+        try :
+            cids = self.projectConfig['Groups'][gid]['cidList']
+            if len(cids) > 0 :
+                cidList = cids
+        except :
+            pass
+
         # Do not want to add this group, non-force, if it already exsists.
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         if self.projectConfig['Groups'].has_key(gid) and not force :
@@ -243,10 +256,6 @@ class ProjSetup (object) :
                 del self.projectConfig['Groups'][gid]
             except :
                 pass
-
-        # Set some vars
-        cidList = []
-        sources = {}
 
         # Do the importing first, then write the changes to the config
         for f in sourceList :
@@ -267,9 +276,6 @@ class ProjSetup (object) :
         self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.cannonListSort(cidList)
         self.projectConfig['Groups'][gid]['bindingOrder']          = 0
         # Here we need to "inject" cType information into the config
-
-#        import pdb; pdb.set_trace()
-
         self.cType = cType
         if not self.tools.addComponentType(self.projectConfig, self.local, cType) :
             self.tools.writeConfFile(self.projectConfig)
@@ -296,32 +302,36 @@ class ProjSetup (object) :
         return True
 
 
-    #def removeGroup (self, gid, force = False) :
-        #'''Handler to remove a group. If it is not found return True anyway.'''
+    def removeGroup (self, gid, force = False) :
+        '''Handler to remove a group. If it is not found return True anyway.'''
 
-        #cidList     = self.projectConfig['Groups'][gid]['cidList']
-        #cType       = self.projectConfig['Groups'][gid]['cType']
-        #groupFolder = os.path.join(self.local.projComponentFolder, gid)
+        # If we can't load these two values the group is not there
+        try :
+            cidList     = self.projectConfig['Groups'][gid]['cidList']
+            cType       = self.projectConfig['Groups'][gid]['cType']
+            groupFolder = os.path.join(self.local.projComponentFolder, gid)
+        except :
+            return True
 
-        ## First test for lock
-        #if self.isLocked(gid) and force == False :
-            #self.log.writeToLog(self.errorCodes['0210'], [gid])
+        # First test for lock
+        if self.isLocked(gid) and force == False :
+            self.log.writeToLog(self.errorCodes['0210'], [gid])
 
-        ## Remove subcomponents from the target if there are any
-        #self.tools.buildConfSection(self.projectConfig, 'Groups')
-        #if self.projectConfig['Groups'].has_key(gid) :
-            #for cid in cidList :
-                #self.uninstallGroupComponent(gid, cid, force)
-            #if os.path.exists(groupFolder) :
-                #shutil.rmtree(groupFolder)
-                #self.log.writeToLog(self.errorCodes['0290'], [gid])
-        #else :
-            #self.log.writeToLog(self.errorCodes['0250'], [gid])
+        # Remove subcomponents from the target if there are any
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+        if self.projectConfig['Groups'].has_key(gid) :
+            for cid in cidList :
+                self.uninstallGroupComponent(cType, gid, cid, force)
+            if os.path.exists(groupFolder) :
+                shutil.rmtree(groupFolder)
+                self.log.writeToLog(self.errorCodes['0290'], [gid])
+        else :
+            self.log.writeToLog(self.errorCodes['0250'], [gid])
             
-        ## Now remove the config entry
-        #del self.projectConfig['Groups'][gid]
-        #if self.tools.writeConfFile(self.projectConfig) :
-            #self.log.writeToLog(self.errorCodes['0220'], [gid])
+        # Now remove the config entry
+        del self.projectConfig['Groups'][gid]
+        if self.tools.writeConfFile(self.projectConfig) :
+            self.log.writeToLog(self.errorCodes['0220'], [gid])
 
 
     def uninstallGroupComponent (self, cType, gid, cid, force = False) :
