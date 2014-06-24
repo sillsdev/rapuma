@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile
+import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile, difflib
 from configobj                              import ConfigObj
 from importlib                              import import_module
 from functools                              import partial
@@ -58,6 +58,14 @@ class ProjSetup (object) :
         self.wholeCannonList                = self.usfmData.wholeCannonList()
         self.cidNameDict                    = self.usfmData.cidNameDict()
 
+        if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
+            self.diffViewCmd                = None
+        else :
+            self.diffViewCmd                = self.userConfig['System']['textDifferentialViewerCommand']
+            # Make sure the diff view command is a list
+            if type(self.diffViewCmd) != list :
+                self.diffViewCmd            = [self.userConfig['System']['textDifferentialViewerCommand']]
+
         self.errorCodes     = {
 
             '0200' : ['ERR', 'No source path exists. Cannot update group. Use -s (source) to indicate where the source files are for this component source ID.'],
@@ -67,12 +75,13 @@ class ProjSetup (object) :
             '0210' : ['ERR', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
             '0212' : ['ERR', 'Component [<<1>>] not found.'],
             '0215' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
-            '0220' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
             '0230' : ['MSG', 'Added the [<<1>>] component to the project.'],
             '0232' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             '0240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             '0250' : ['MSG', 'Importing: [<<1>>]'],
+            '0252' : ['WRN', 'Cannot add/import: [<<1>>] This component already exists in the [<<2>>] group. Operation canceled. Please remove the component before trying to add it, or use update instead.'],
             '0260' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
+            '0262' : ['WRN', 'Component [<<1>>] not found in group [<<2>>]'],
             '0265' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
             '0270' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
             '0272' : ['MSG', 'Update for [<<1>>] component is unnecessary. Source is the same as the group source copy.'],
@@ -80,9 +89,15 @@ class ProjSetup (object) :
             '0274' : ['MSG', 'Force set to true, component [<<1>>] has been overwritten in the [<<2>>] group.'],
             '0280' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
+            '0292' : ['WRN', 'Group [<<1>>] not found in project configuration.'],
+            '0294' : ['LOG', 'Removed [<<1>>] from group [<<2>>]'],
+            '0296' : ['WRN', 'Could not remove [<<1>>] from group [<<2>>]'],
+            '0298' : ['MSG', 'Remove operation for group [<<1>>] is complete.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
-            '0320' : ['MSG', 'Set/reset source path to: [<<1>>]'],
+            '0310' : ['MSG', 'Completed updating components in the [<<1>>] group.'],
+            '0315' : ['MSG', 'Completed updating the [<<1>>] component.'],
+            '0320' : ['MSG', 'Component [<<1>>] not found in the [<<2>>] group. It must be in the group to be updated.'],
 
             '1060' : ['LOG', 'Text validation succeeded on USFM file: [<<1>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
@@ -101,26 +116,26 @@ class ProjSetup (object) :
             '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
             '2860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
 
+            '3100' : ['MSG', 'Component compare for group [<<1>>] is completed'],
+            '3200' : ['MSG', 'Compare component [<<1>>] completed'],
+            '3210' : ['WRN', 'File does not exist: [<<1>>] compare cannot be done.'],
+            '3280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
+            '3285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
+            '3290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
+            '3295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>]'],
+            '3298' : ['MSG', 'Close the viewer to return to the terminal prompt.'],
+            '3220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
+            '3300' : ['WRN', 'Files are different but visual compare is not enabled.'],
+
+            '4100' : ['MSG', 'Restore components for group [<<1>>] is completed'],
+            '4200' : ['MSG', 'Component file [<<1>>] has been restored from its backup.'],
+            '4300' : ['WRN', 'No difference found between working and backup file for [<<1>>]. Restore operation aborted.'],
+            '4400' : ['WRN', 'File not found: [<<1>>]'],
+            '4500' : ['MSG', 'Removed backup file for [<<1>>]'],
+            '4600' : ['WRN', 'No difference found between working and backup file after restore. The restore operation my have failed.']
+
         }
 
-        ## Because this function can be called elsewhere in the module we call it here too
-        #self.finishInit()
-
-    #def finishInit (self) :
-        #'''If this is a new project (or system) we need to handle these settings special.'''
-
-##        import pdb; pdb.set_trace()
-
-        #self.data               = ProjData(self.pid)
-        ## These could be initialized above but because it might be necessary 
-        ## to reinitialize, we put them here
-        #self.log                = ProjLog(self.pid)
-        #self.proj_config        = Config(self.pid)
-        #self.proj_config.getProjectConfig()
-        #self.projectConfig      = self.proj_config.projectConfig
-        #self.local              = ProjLocal(self.pid)
-        #self.compare            = ProjCompare(self.pid)
-        #return True
 
     def loadUpProjConfig (self, pid) :
         '''Load up the project config.'''
@@ -136,6 +151,17 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
 
+    def getCidList (self, gid) :
+        '''Return the project's CID list.'''
+
+        try :
+            cids = self.projectConfig['Groups'][gid]['cidList']
+            if len(cids) > 0 :
+                return cids
+        except :
+            return None
+
+
     def makeCVOne (self, workingBak, workingCVOne) :
         '''Create a .cv1 backup of the current working file (source), if
         one exists. If not, do nothing.'''
@@ -148,114 +174,85 @@ class ProjSetup (object) :
 
         return True
 
-# FIXME: Cannot have this here unless we can feed it all the file path info.
-    #def updateAllGroups (self, force = False) :
-        #'''Run the update on all the groups in a project.'''
 
-        #for gid in self.projectConfig['Groups'].keys() :
-            #self.updateGroup(gid, force)
-
-
-    def updateGroup (self, gid, sourceList, force = False) :
+    def updateGroup (self, gid, sourceList) :
         '''Update a group by providing a list of source files. This
         will check to see if the incoming source coresponds to cids
         listed for the group. If not, it will log a warning. If one or
         more cids are missing, it will throw an error and quite before
-        doing the actual update. All the source needs to be in place
-        for this to work. Otherwise, the user should be just updating
-        a single component.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Just in case there are any problems with the source path
-        # Reset the local mod first
-        self.local = ProjLocal(self.pid, gid, self.projectConfig)
-
-# FIXME: This all needs to be rewriten
-
-        # Sort out the list
-        #if not cidList :
-            #cidList = self.projectConfig['Groups'][gid]['cidList']
-        #else :
-            #if type(cidList) != list :
-                 #cidList = cidList.split()
-            ## Do a quick validity test
-            #for cid in cidList :
-                #if not cid in self.projectConfig['Groups'][gid]['cidList'] :
-                    #self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
-
-        ## Unlock the group so it can be worked on
-        #self.lockUnlock(gid, False)
-
-        ## Process each cid
-        #for cid in cidList :
-            #target              = self.getWorkingFile(gid, cid)
-            #targetSource        = self.getWorkingSourceFile(gid, cid)
-            #source              = self.getSourceFile(gid, cid)
-            #workingBak          = tempfile.NamedTemporaryFile(delete=True).name
-            #workingCVOne        = self.getWorkCompareFile(gid, cid)
-
-            ## Create temp backup of working file
-            #if os.path.exists(target) :
-                #shutil.copy(target, workingBak)
-                
-            ## Don't do this unless it is different or forced
-            #if force or self.compare.isDifferent(source, targetSource) :
-                ## Delete the existing working file
-                #if os.path.exists(target) :
-                    #os.remove(target)
-                ## Create the backup for comparison
-                #if os.path.exists(workingBak) :
-                    #self.makeCVOne(workingBak, workingCVOne)
-                ## Install the new text
-                #self.importWorkingText(gid, cid, force)
-                ## Report if this was forced
-                #if force :
-                    #self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
-                ## Compare the new working file with the previous
-                #if os.path.exists(workingCVOne) :
-                    #self.compare.compare(workingCVOne, target)
-            #else :
-                #self.log.writeToLog(self.errorCodes['0272'], [cid])
-
-        ## Now be sure the group is locked down before we go
-        #if not self.isLocked(gid) :
-            #self.lockUnlock(gid, True)
-
-
-    def addGroup (self, cType, gid, sourceList, force = False) :
-        '''Add a group by providing a component type, group ID and a 
-        list of source files. This will check to see if the incoming 
-        source is valid. If not, it will throw an error and quite 
-        before doing the actual import. All the source needs to be 
-        in place for this to work. Force will cause the function to 
-        overwrite any exsisting group meta data or source data.'''
+        doing the actual update. All the sources needs to be in place
+        for this to work.'''
 
 #        import pdb; pdb.set_trace()
 
         # Set some vars
         cidList = []
+        checkList = []
+        sources = {}
+
+        # Create a check list for being sure the CIDs are in the project
+        checkList = self.getCidList(gid)
+
+        for f in sourceList :
+            cid = self.tools.discoverCIDFromFile(f)
+            if cid in self.wholeCannonList :
+                # Add CID to cidList
+                cidList.append(cid)
+                sources[cid] = f
+
+            # Check now to see of the CID is already in the group
+            if checkList :
+                if cid in checkList :
+                    # Backup component
+                    compFiles           = self.local.getComponentFiles(gid, cid)
+                    cType               = self.projectConfig['Groups'][gid]['cType']
+                    source              = sources[cid]
+                    workingBak          = tempfile.NamedTemporaryFile(delete=True).name
+
+                    # Create temp backup of working file
+                    if os.path.exists(compFiles['working']) :
+                        shutil.copy(compFiles['working'], workingBak)
+                    # Delete the existing working file
+                    if os.path.exists(compFiles['working']) :
+                        os.remove(compFiles['working'])
+                    # Create the backup for comparison
+                    if os.path.exists(workingBak) :
+                        self.makeCVOne(workingBak, compFiles['backup'])
+                    # Install the new text
+                    if self.importWorkingText(source, cType, gid, cid) :
+                        self.log.writeToLog(self.errorCodes['0315'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
+                    return False
+        
+        # Report and return
+        self.log.writeToLog(self.errorCodes['0310'], [gid])
+        return True
+
+    
+    def addGroup (self, cType, gid, sourceList) :
+        '''Add a group by providing a component type, group ID and a 
+        list of source files. This will check to see if the incoming 
+        source is valid. If not, it will throw an error and quite 
+        before doing the actual import. All the source needs to be 
+        in place for this to work. Also, it will not copy over existing
+        project data. That is what updateGroup() is for.'''
+
+#        import pdb; pdb.set_trace()
+
+        # Set some vars
+        cidList = []
+        checkList = []
         cids = []
         sources = {}
 
-        # In case the group already exists, pull in the CIDs
-        try :
-            cids = self.projectConfig['Groups'][gid]['cidList']
-            if len(cids) > 0 :
-                cidList = cids
-        except :
-            pass
 
-        # Do not want to add this group, non-force, if it already exsists.
-        self.tools.buildConfSection(self.projectConfig, 'Groups')
-        if self.projectConfig['Groups'].has_key(gid) and not force :
-            self.log.writeToLog(self.errorCodes['0210'], [gid])
-        else :
-            # Otherwise we may need to remove the group from the config
-            try :
-                del self.projectConfig['Groups'][gid]
-            except :
-                pass
+# FIXME: There seems to be a problem with the existing CID list being lost
+# when a single component is added to a group
+
+
+        # In case the group already exists, pull in the CIDs
+        checkList = self.getCidList(gid)
 
         # Do the importing first, then write the changes to the config
         for f in sourceList :
@@ -264,6 +261,12 @@ class ProjSetup (object) :
                 # Add CID to cidList
                 cidList.append(cid)
                 sources[cid] = f
+
+            # Check now to see of the CID is already in the group
+            if checkList :
+                if cid in checkList :
+                    self.log.writeToLog(self.errorCodes['0252'], [cid,gid])
+                    return False
         
         # Get persistant values from the config
         self.tools.buildConfSection(self.projectConfig, 'Groups')
@@ -288,7 +291,7 @@ class ProjSetup (object) :
 
         # Install the components now, if successful, we can update the
         # project config. If not, the user will need to sort out why
-        if self.installGroupComps(gid, cType, sources, force) :
+        if self.installGroupComps(gid, cType, sources) :
             # Sort the cidList to cannonical order
             cidListSorted = self.usfmData.cannonListSort(cidList)
             if cidList != cidListSorted :
@@ -302,75 +305,93 @@ class ProjSetup (object) :
         return True
 
 
-    def removeGroup (self, gid, force = False) :
+    def removeGroup (self, gid, cidList = None) :
         '''Handler to remove a group. If it is not found return True anyway.'''
-
-        # If we can't load these two values the group is not there
-        try :
-            cidList     = self.projectConfig['Groups'][gid]['cidList']
-            cType       = self.projectConfig['Groups'][gid]['cType']
-            groupFolder = os.path.join(self.local.projComponentFolder, gid)
-        except :
-            return True
-
-        # First test for lock
-        if self.isLocked(gid) and force == False :
-            self.log.writeToLog(self.errorCodes['0210'], [gid])
-
-        # Remove subcomponents from the target if there are any
-        self.tools.buildConfSection(self.projectConfig, 'Groups')
-        if self.projectConfig['Groups'].has_key(gid) :
-            for cid in cidList :
-                self.uninstallGroupComponent(cType, gid, cid, force)
-            if os.path.exists(groupFolder) :
-                shutil.rmtree(groupFolder)
-                self.log.writeToLog(self.errorCodes['0290'], [gid])
-        else :
-            self.log.writeToLog(self.errorCodes['0250'], [gid])
-            
-        # Now remove the config entry
-        del self.projectConfig['Groups'][gid]
-        if self.tools.writeConfFile(self.projectConfig) :
-            self.log.writeToLog(self.errorCodes['0220'], [gid])
-
-
-    def uninstallGroupComponent (self, cType, gid, cid, force = False) :
-        '''This will remove a component (files) from a group in the project.
-        However, a backup will be made of the working text for comparison purposes. 
-       This does not return anything. We trust it will work.'''
 
 #        import pdb; pdb.set_trace()
 
-        # In the future diglot handling will hopefully be added. Previously,
-        # the ability to handle multiple working component files was
-        # done with a csid (Component Source ID), this has been removed.
-        # Now, all initial working components will have "base" tacked on
-        # to the end of the handle. When diglot handling is implemented
-        # a second source identifier will need to be added to the file
-        # name and handled in the process. For now, we'll just use the
-        # base ID.
-        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-        fileHandle      = cid + '_base'
-        working         = os.path.join(targetFolder, fileHandle + '.' + cType)
-        workingComp     = working + '.cv1'
+        # See if the group is there, count as success if it isn't
+        if not self.projectConfig['Groups'].has_key(gid) :
+            self.log.writeToLog(self.errorCodes['0292'], [gid])
+            return False
+
+        # If no CID list was provided, we assume the group is being deleted
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+
+        # Otherwise we are removing just a subset of the group, just
+        # one or more CIDs.
+        groupFolder = os.path.join(self.local.projComponentFolder, gid)
+        # To avoid problems in the for loop, make a copy
+        killList = list(cidList)
+        
+        # Remove components
+        for cid in killList :
+            if self.uninstallGroupComponent(gid, cid) :
+                self.log.writeToLog(self.errorCodes['0294'], [cid,gid])
+            else :
+                self.log.writeToLog(self.errorCodes['0296'], [cid,gid])
+           
+        # Now remove the config entry and folder if it is empty
+        if len(self.projectConfig['Groups'][gid]['cidList']) == 0 :
+            del self.projectConfig['Groups'][gid]
+            if os.path.exists(groupFolder) :
+                shutil.rmtree(groupFolder)
+                self.log.writeToLog(self.errorCodes['0290'], [gid])
+        # Write out the config in case something has been changed
+        self.tools.writeConfFile(self.projectConfig)
+
+
+        # Report successful and return
+        self.log.writeToLog(self.errorCodes['0298'], [gid])
+        return True
+
+
+    def uninstallGroupComponent (self, gid, cid) :
+        '''This will remove a component (files) from a group in the
+        project. A backup will be made of the working text for
+        comparison purposes.'''
+
+#        import pdb; pdb.set_trace()
+
+        # First see if the CID is in the config
+        if not self.isComponent(gid, cid) :
+            self.log.writeToLog(self.errorCodes['0262'], [cid,gid])
+            return False
+
+        # Get file names
+        compFiles = self.local.getComponentFiles(gid, cid)
 
         # Test to see if it is shared
-        if self.isSharedComponent(gid, fileHandle) :
-            self.log.writeToLog(self.errorCodes['0260'], [fileHandle,gid])
+        if self.isSharedComponent(gid, cid + '_base') :
+            self.log.writeToLog(self.errorCodes['0260'], [cid + '_base',gid])
+            return False
 
         # Remove the files
-        if force :
-            if os.path.isfile(working) :
-                self.makeCVOne(working, workingComp)
-                self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(workingComp), cid])
-                for fn in os.listdir(targetFolder) :
-                    f = os.path.join(targetFolder, fn)
-                    if f != workingComp :
-                        os.remove(f)
-                        self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
+        if os.path.isfile(compFiles['working']) :
+            self.makeCVOne(compFiles['working'], compFiles['backup'])
+            self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(compFiles['backup']), cid])
+            for fn in os.listdir(os.path.join(self.local.projComponentFolder, cid)) :
+                f = os.path.join(os.path.join(self.local.projComponentFolder, cid), fn)
+                if f != compFiles['backup'] :
+                    os.remove(f)
+                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
+        # Remove the CID from the config list
+        if cid in self.projectConfig['Groups'][gid]['cidList'] :
+            self.projectConfig['Groups'][gid]['cidList'].remove(cid)
 
         # If nothing above errored, return true
         return True
+
+    
+    def isComponent (self, gid, cid) :
+        '''See if the CID is registered in the group.'''
+
+        try :
+            if cid in self.projectConfig['Groups'][gid]['cidList'] :
+                return True
+        except :
+            return False
 
 
     def isSharedComponent (self, gid, cid) :
@@ -385,10 +406,9 @@ class ProjSetup (object) :
             return False
 
 
-    def installGroupComps (self, gid, cType, sources, force = False) :
-        '''This will install components to the group we created above in createGroup().
-        If a component is already installed in the project it will not proceed unless
-        force is set to True. Then it will remove the component files so a fresh copy
+    def installGroupComps (self, gid, cType, sources) :
+        '''This will install components to the group we created above in 
+        addGroup(). It will remove the component files so a fresh copy
         can be added to the project.'''
 
 #        import pdb; pdb.set_trace()
@@ -400,25 +420,14 @@ class ProjSetup (object) :
         for cid, fName in sources.iteritems() :
             self.log.writeToLog(self.errorCodes['0250'], [self.cidNameDict[cid]])
             # See if the working text is present, quite if it is not
-            if cType == 'usfm' :
-                # Force on add always means we delete the component first
-                # before we do anything else
-                if force :
-                    self.uninstallGroupComponent(cType, gid, cid, force)
 
-                # Install our working text files
-                if self.importWorkingText(fName, cType, gid, cid, force) :
-                    # Report in context to force use or not
-                    if force :
-                        self.log.writeToLog(self.errorCodes['0232'], [cid])
-                    else :
-                        self.log.writeToLog(self.errorCodes['0230'], [cid])
+            # Install our working text files
+            if self.importWorkingText(fName, cType, gid, cid) :
+                self.log.writeToLog(self.errorCodes['0230'], [cid])
 
-                else :
-                    self.log.writeToLog(self.errorCodes['0265'], [cid])
-                    return False
             else :
-                self.log.writeToLog(self.errorCodes['0205'], [cType])
+                self.log.writeToLog(self.errorCodes['0265'], [cid])
+                return False
 
         # If we got this far it must be okay to leave
         return True
@@ -489,6 +498,7 @@ class ProjSetup (object) :
                 if os.listdir(os.path.join(projHome, 'Config')) == ['project.conf'] :
                     result = True
         return result
+
 
     def newProject (self, pmid='book', tid=None, force=None) :
         '''Create a new publishing project.'''
@@ -565,27 +575,26 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def importWorkingText (self, source, cType, gid, cid, force = False) :
-        '''Import USFM working text from source. Using force will cause
-        this function to overwrite an existing version.'''
+    def importWorkingText (self, source, cType, gid, cid) :
+        '''Import USFM working text from source. This will overwrite any
+        existing version.'''
 
         # To prevent loading errors, bring this mod now
         proj_process        = ProjProcess(self.pid, gid, self.projectConfig)
 
         usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
-
+        compFiles           = self.local.getComponentFiles(gid, cid)
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
-        fileHandle          = cid + '_base'
-        target              = os.path.join(targetFolder, fileHandle + '.' + cType)
-        targetSource        = target + '.source'
+        # Set the source path/name here
+        compFiles['source']  = os.path.join(self.local.projComponentFolder, cid, os.path.split(source)[1] + '.source')
 
 #        import pdb; pdb.set_trace()
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
         if not os.path.isfile(source) :
-            if os.path.isfile(targetSource) :
-                source = targetSource
+            if os.path.isfile(compFiles['source']) :
+                source = compFiles['source']
             else :
                 self.log.writeToLog(self.errorCodes['1120'], [source])
 
@@ -595,35 +604,35 @@ class ProjSetup (object) :
 
         # Always save an untouched copy of the source and set to
         # read only. We may need this to restore/reset later.
-        if os.path.isfile(targetSource) :
+        if os.path.isfile(compFiles['source']) :
             # Don't bother if we copied from it in the first place
-            if targetSource != source :
+            if compFiles['source'] != source :
                 # Reset permissions to overwrite
-                self.tools.makeWriteable(targetSource)
-                shutil.copy(source, targetSource)
-                self.tools.makeReadOnly(targetSource)
+                self.tools.makeWriteable(compFiles['source'])
+                shutil.copy(source, compFiles['source'])
+                self.tools.makeReadOnly(compFiles['source'])
         else :
-            shutil.copy(source, targetSource)
-            self.tools.makeReadOnly(targetSource)
+            shutil.copy(source, compFiles['source'])
+            self.tools.makeReadOnly(compFiles['source'])
 
         # To be sure nothing happens, copy from our project source
         # backup file. (Is self.style.defaultStyFile the best thing?)
-        if self.usfmCopy(targetSource, target, gid) :
+        if self.usfmCopy(compFiles['source'], compFiles['working'], gid) :
             # Run any working text preprocesses on the new component text
             # Note that the groupPreprocessFile value is based on the csid,
             # not the gid. This allows for different preprocess scripts
             # to be used for the same type but use can then span groups
             if usePreprocessScript :
                 proj_process.checkForPreprocessScript(gid)                
-                if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :
+                if not proj_process.runProcessScript(compFiles['working'], self.local.groupPreprocessFile) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
-            self.takeOutFigMarkers(target, cType, gid, cid)
-            self.takeOutFeMarkers(target, cType, gid, cid)
+            self.takeOutFigMarkers(compFiles['working'], cType, gid, cid)
+            self.takeOutFeMarkers(compFiles['working'], cType, gid, cid)
             # If we made it this far, return True
             return True 
         else :
-            self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
+            self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(compFiles['working'])])
             return False
 
 
@@ -921,9 +930,136 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['2860'], [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
+###############################################################################
+######################### Component Compare Functions #########################
+###############################################################################
+####################### Error Code Block Series = 3000 ########################
+###############################################################################
+
+
+
+    def compareGroup (self, compareType, gid, cidList = None) :
+        '''Compare cv1 with working file in a component. If
+        no CIDs are given, the entire group will be compared.'''
+        
+        # If no CID list was provided, we assume the whole group will
+        # be compared, not just a subset
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+        
+        for cid in cidList :
+            self.compareComponent(compareType, gid, cid)
+
+        self.log.writeToLog(self.errorCodes['3100'], [gid])
+        return True
+
+
+    def compareComponent (self, compareType, gid, cid) :
+        '''Compare a component's working file with its source or cv1
+        backup.'''
+
+        files = self.local.getComponentFiles(gid, cid)
+        self.compare(files['working'], files[compareType])
+        self.log.writeToLog(self.errorCodes['3200'], [cid])
+        return True
+
+
+    def isDifferent (self, new, old) :
+        '''Return True if the contents of the files are different.'''
+
+        # If one file is missing, return True
+        if not os.path.exists(new) or not os.path.exists(old) :
+            return True
+
+        # Inside of diffl() open both files with universial line endings then
+        # check each line for differences.
+        diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())
+        for d in diff :
+            if d[:1] == '+' or d[:1] == '-' :
+                return True
+        # FIXME: Is returning False better than None?
+        return False
+
+
+    def compare (self, old, new) :
+        '''Run a compare on two files. Do not open in viewer unless it is different.'''
+
+#        import pdb; pdb.set_trace()
+
+        self.log.writeToLog(self.errorCodes['3295'], [self.tools.fName(old),self.tools.fName(new)])
+        # If there are any differences, open the diff viewer
+        if self.isDifferent(old, new) :
+            # If no diffViewCmd is found this may be running headless
+            # in that case just report that the file is different and
+            # and leave the function
+            if not self.diffViewCmd :
+                self.log.writeToLog(self.errorCodes['3300'])
+            else :
+                # To prevent file names being pushed back to the list ref
+                # we need to use extend() rather than append()
+                cmd = []
+                cmd.extend(self.diffViewCmd)
+                cmd.extend([old, new])
+                try :
+                    self.log.writeToLog(self.errorCodes['3298'])
+                    subprocess.call(cmd)
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.log.writeToLog(self.errorCodes['3280'], [str(e)])
+        else :
+            self.log.writeToLog(self.errorCodes['3220'])
+
 
 ###############################################################################
+######################### Component Restore Functions #########################
+###############################################################################
+####################### Error Code Block Series = 4000 ########################
+###############################################################################
+
+
+    def restoreGroup (self, gid, cidList = None) :
+        '''Restore components in a group from their cv1 backup file. If
+        no CIDs are given, the entire group will be restored. Any cv1
+        files that have been restored will be deleted.'''
+        
+        skip = False
+
+        # If no CID list was provided, we assume the whole group will
+        # be compared, not just a subset
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+        
+        for cid in cidList :
+            files = self.local.getComponentFiles(gid, cid)
+            if os.path.isfile(files['backup']) :
+                if self.isDifferent(files['backup'], files['working']) :
+                    self.tools.makeWriteable(files['backup'])
+                    shutil.copy(files['backup'], files['working'])
+                    self.log.writeToLog(self.errorCodes['4200'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['4300'], [cid])
+                    skip = True
+            else :
+                self.log.writeToLog(self.errorCodes['4400'], [self.tools.fName(files['backup'])])
+                return False
+                
+            # Test and delete the backup (cv1)
+            if not skip :
+                if not self.isDifferent(files['backup'], files['working']) :
+                    os.remove(files['backup'])
+                    self.log.writeToLog(self.errorCodes['4500'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['4600'], [cid])
+                    return False
+
+        self.log.writeToLog(self.errorCodes['4100'], [gid])
+        return True
+
+
+###############################################################################
+###############################################################################
 ############################# Project Delete Class ############################
+###############################################################################
 ###############################################################################
 
 # This class was created to prevent conflicts from the main class in this module.

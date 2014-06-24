@@ -68,9 +68,11 @@
 </session>
 <session name="IKZ-LATN-GEN">
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
-  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/project.conf"/>
-  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/layout.conf"/>
-  <file path="file:///home/dennis/Publishing/IKZ/IKZ-LATN-GEN/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/bin/ikz"/>
+  <file path="file:///home/dennis/Publishing/IKZ-LATN-GEN/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ-LATN-GEN/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ-LATN-GEN/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/IKZ-LATN-GEN/Config/usfmTex.conf"/>
 </session>
 <session name="KYU-LATN-NTCAT">
   <file path="file:///home/dennis/Publishing/KYU/KYU-LATN-NTCAT/Config/adjustment.conf"/>

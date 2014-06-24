@@ -64,7 +64,7 @@ class UsfmData (object) :
     def bibleCidList (self) :
         '''Return a list of common Bible CIDs in proper canonical order.'''
 
-        return otCIDList + ntCIDList
+        return self.otCidList() + self.ntCidList()
 
 
     def wholeCannonList (self) :
@@ -115,11 +115,11 @@ class UsfmData (object) :
 
 
     def cannonListSort (self, cidList) :
-        '''Return a list of CIDs sorted to cannon order from a list
-        of radom ordered CIDs.'''
+        '''Return a list of unique CIDs sorted to cannon order from a 
+        list of radom ordered CIDs.'''
 
-        # Sort and return the list
-        return sorted(cidList, key=self.canonical_order)
+        # Sort and return the list without duplicates
+        return sorted(list(set(cidList)), key=self.canonical_order)
 
 
     # Return a dictionary of all valid information about USFMs used in PT. Note

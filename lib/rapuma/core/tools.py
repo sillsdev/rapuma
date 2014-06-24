@@ -242,13 +242,15 @@ class Tools (object) :
     def makeReadOnly (self, fileName) :
         '''Set the permissions on a file to read only.'''
 
-        os.chmod(fileName, stat.S_IREAD)
+        # Using stat.S_IREAD for the mode doesn't work right
+        os.chmod(fileName, 0400)
 
 
     def makeWriteable (self, fileName) :
         '''Set the permissions on a file to writeable.'''
 
-        os.chmod(fileName, stat.S_IWRITE)
+        # Using stat.S_IWRITE for the mode doesn't work right
+        os.chmod(fileName, 0664)
 
 
     def utf8Copy (self, source, target) :

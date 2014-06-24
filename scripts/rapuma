@@ -356,6 +356,7 @@ def userArguments (args) :
         force       = args.force    # Switch/force actions
         source_path = []            # A path to files to use
         source_list = []            # Gen: A list of files w/paths
+        compare_type = ''           # For compare function, the type
         cid_list    = []            # A list of valid CIDs
         cType       = None          # A valid component type ID
         override    = None          # A folder w/path for output
@@ -376,7 +377,6 @@ def userArguments (args) :
         else :
             if cmd == 'add' :
                 sys.exit('\nERROR: Source path needed to complete operation. Process halting.\n')
-            
         # Set optional override
         if args.override :
             override = args.override
@@ -401,12 +401,15 @@ def userArguments (args) :
                 cids    = args.cid_list.split()
             else :
                 cids    = args.cid_list
-            cid_list    = usfmData.cannonListSort(cids)
+            cid_list = usfmData.cannonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' and gid in cannonGroups :
+            if cmd == 'add' or cmd == 'update' and gid in cannonGroups :
                 getCidList = getattr(usfmData, gid.lower() + 'CidList')
                 cid_list = getCidList()
+        # If a compare is being done this provides the type of compare.
+        if args.compare_type :
+            compare_type = args.compare_type
         # The source_list will be auto-generated and is required at
         # the engine level for processing. We need both a source_path
         # and a CID list to make it. This will take them as it finds
@@ -431,93 +434,91 @@ def userArguments (args) :
                         checkList.remove(cid)
             if len(checkList) != 0 :
                     sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
-        # Figure out what manage command this is and do it
+        # Add a group or just a component in a group (source_list required)
         if cmd == 'add' :
-            if cmdType == 'group' :
-                # Even though Rapuma could make an empty group, we are not
-                # going to let that happen.
-                if source_list :
-                    # Force in this context is used to overwrite any existing group data
-                    ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list, force)
-                else :
-                    sys.exit('\nERROR: Must provide a source path or valid component IDs to add a group. Process halting.\n')
-            elif cmdType == 'hyphenation' :
-                ProjHyphenation(pid, gid).manageHyphenation(cmd)
-            elif cmdType == 'illustration' :
-                sys.exit('\nERROR: Add illustrations on not completed yet')
-            elif cmdType == 'preprocess' :
-                prc = ProjProcess(pid)
-                prc.turnOnOffPreprocess(gid, True)
-                prc.checkForPreprocessScript (gid)
+            if source_list :
+                # Optional use of Force in this context is used to
+                # overwrite any existing group data
+                ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list)
             else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'render' :
-            if cmdType == 'group' :
-                if cType == 'usfm' :
-                    Project(pid, gid).renderGroup(cid_list, pages, override, force)
-                else :
-                    cTypeError(cType)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'lock' :
-            if cmdType == 'group' :
-                ProjSetup(sysConfig, pid).lockUnlock(gid, True)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'remove' :
-            if cmdType == 'group' :
-                if cType == 'usfm' :
-                    ProjSetup(sysConfig, pid).removeGroup(gid, force)
-                    if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                        ProjCommander(pid).removeScripts()
-                else :
-                    cTypeError(cType)
-            elif cmdType == 'hyphenation' :
-                ProjHyphenation(pid, gid).manageHyphenation(cmd)
-            elif cmdType == 'illustration' :
-                sys.exit('\nERROR: Add illustrations off not completed yet')
-            elif cmdType == 'preprocess' :
-                ProjSetup(sysConfig, pid).turnOnOffPreprocess(gid, False)
-            else :
-                cmdError(cmd, cmdType)
+                sys.exit('\nERROR: Must provide a source path or valid component IDs to add a group. Process halting.\n')
+        # Add a group or just a component in a group (source_list required)
         elif cmd == 'update' :
-            if cmdType == 'hyphenation' :
-                ProjHyphenation(pid, gid).manageHyphenation(cmd, force)
+            if source_list :
+                ProjSetup(sysConfig, pid).updateGroup(gid, source_list)
             else :
-                cmdError(cmd, cmdType)
+                sys.exit('\nERROR: Must provide a source path or valid component IDs to update a group. Process halting.\n')
+        elif cmd == 'remove' :
+            ProjSetup(sysConfig, pid).removeGroup(gid, cid_list)
+            if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                ProjCommander(pid).removeScripts()
+        elif cmd == 'compare' :
+            if not compare_type :
+                sys.exit('\nERROR: Must provide a compare type (--compare_type/-c). Process halting.\n')
+            ProjSetup(sysConfig, pid).compareGroup(compare_type, gid, cid_list)
+        elif cmd == 'restore' :
+            ProjSetup(sysConfig, pid).restoreGroup(gid, cid_list)
+
+ 
+
+# FIXME: Might need to move it to another place than group
+            #elif cmdType == 'hyphenation' :
+                #ProjHyphenation(pid, gid).manageHyphenation(cmd)
+            #elif cmdType == 'illustration' :
+                #sys.exit('\nERROR: Add illustrations on not completed yet')
+            #elif cmdType == 'preprocess' :
+                #prc = ProjProcess(pid)
+                #prc.turnOnOffPreprocess(gid, True)
+                #prc.checkForPreprocessScript (gid)
+            #else :
+                #cmdError(cmd, cmdType)
+# Remove cmd for these are here 
+            #elif cmdType == 'hyphenation' :
+                #ProjHyphenation(pid, gid).manageHyphenation(cmd)
+            #elif cmdType == 'illustration' :
+                #sys.exit('\nERROR: Add illustrations off not completed yet')
+            #elif cmdType == 'preprocess' :
+                #ProjSetup(sysConfig, pid).turnOnOffPreprocess(gid, False)
+            #else :
+                #cmdError(cmd, cmdType)
+
+
+
+
+
+        elif cmd == 'render' :
+            Project(pid, gid).renderGroup(cid_list, pages, override, force)
+        elif cmd == 'lock' :
+            ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
-            if cmdType == 'group' :
-                ProjSetup(sysConfig, pid).lockUnlock(gid, False)
-            else :
-                cmdError(cmd, cmdType)
+            ProjSetup(sysConfig, pid).lockUnlock(gid, False)
         elif cmd == 'watermark' :
             # This uses the same inputs as render so it can build the
             # file name and find the target. It then creates a new name
             # and saves it to the Deliverables folder.
-            if cmdType == 'group' :
-                ProjBackground(pid).addWatermarkBackground(gid, cid_list, pages, override)
-            else :
-                cmdError(cmd, cmdType)
+            ProjBackground(pid).addWatermarkBackground(gid, cid_list, pages, override)
+        else :
+            cmdError(cmd, cmdType)
 
     ##### COMPONENT
     # Component level commands. Note that rendering is done at the Group level.
     elif sys.argv[1].lower() == 'component' :
-        cmd         = args.command
-        pid         = args.project_id
-        gid         = args.group_id
-        cid         = args.component_id
+        cmd             = args.command
+        pid             = args.project_id
+        gid             = args.group_id
+        cid             = args.component_id
+        compare_type    = ''
         if args.compare_type :
-            compareType = args.compare_type
-        if cmd == 'add' :
-            ProjComponent(pid, gid).addComponent(cid)
-        elif cmd == 'compare' :
-            ProjCompare(pid).compareComponent(gid, cid.lower(), compareType)
+            compare_type = args.compare_type
+        if cmd == 'compare' :
+            if not compare_type :
+                sys.exit('\nERROR: Must provide a compare type (--compare_type/-c). Process halting.\n')
+            ProjSetup(sysConfig, pid).compareComponent(compare_type, gid, cid.lower())
+        elif cmd == 'restore' :
+            # For this we use the group restore function and only send it a list of 1 component
+            ProjSetup(sysConfig, pid).restoreGroup(gid, [cid.lower()])
         elif cmd == 'edit' :
             ProjComponent(pid, gid).editComponent(cid)
-        elif cmd == 'remove' :
-            ProjComponent(pid, gid).removeComponent(cid)
-        elif cmd == 'update' :
-            ProjComponent(pid, gid).updateComponent(cid)
 
     ##### PACKAGES
     # Package management commands
@@ -654,11 +655,11 @@ if __name__ == '__main__' :
     mediaTypes              = ['book']
     # Group
     grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'lock', 'remove', 'render', 'update', 'unlock', 'watermark']
+    grCommands              = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock', 'watermark']
     componentTypes          = ['usfm', 'map', 'toc']
     # Component
-    cpCommands              = ['add', 'compare', 'edit', 'remove', 'update']
-    compareTests            = ['source', 'source-working', 'working']
+    cpCommands              = ['compare', 'edit', 'restore']
+    compareTests            = ['backup', 'source']
     # Packages
     pkCommandType           = ['font', 'macro']
     pkCommands              = ['add', 'primary', 'remove', 'update']
@@ -702,12 +703,13 @@ if __name__ == '__main__' :
     groupCommand.add_argument('group_id', help='A unique ID for this group.')
     groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
     groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
-    groupCommand.add_argument('-c', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
+    groupCommand.add_argument('-t', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
     groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
     groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
+    groupCommand.add_argument('-c', '--compare_type', choices=compareTests, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')
 
     # Add Component subprocess arguments
     compCommand = subparsers.add_parser('component', help='General project component management commands help')
