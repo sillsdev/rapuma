@@ -320,7 +320,7 @@ def userArguments (args) :
                     else :
                         sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
             elif cmdType == 'cloud' :
-                ProjData(pid).pullFromCloud(force, targetPath)
+                ProjData(pid).pullFromCloud()
             elif cmdType == 'template' :
                 Template(pid).templateToProject(targetPath, sourcePath)
             else :
@@ -332,7 +332,7 @@ def userArguments (args) :
             elif cmdType == 'backup' :
                 ProjData(pid).backupProject(targetPath)
             elif cmdType == 'cloud' :
-                ProjData(pid).pushToCloud(force)
+                ProjData(pid).pushToCloud()
             elif cmdType == 'template' :
                 Template(pid).projectToTemplate(args.id)
             else :

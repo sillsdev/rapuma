@@ -18,7 +18,7 @@ long_line_column=72
 
 [files]
 current_page=14
-FILE_NAME_0=23689;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
+FILE_NAME_0=19944;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_1=4833;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
 FILE_NAME_2=6546;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
 FILE_NAME_3=4897;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py;0;4
@@ -30,12 +30,12 @@ FILE_NAME_8=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/pro
 FILE_NAME_9=14381;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_local.py;0;4
 FILE_NAME_10=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_log.py;0;4
 FILE_NAME_11=5366;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_process.py;0;4
-FILE_NAME_12=17418;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/tools.py;0;4
+FILE_NAME_12=10012;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/tools.py;0;4
 FILE_NAME_13=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/user_config.py;0;4
-FILE_NAME_14=10867;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py;0;4
+FILE_NAME_14=14114;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py;0;4
 FILE_NAME_15=1730;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfmTex.py;0;4
 FILE_NAME_16=6950;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex-ext.tex;0;4
-FILE_NAME_17=4091;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
+FILE_NAME_17=10886;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
 FILE_NAME_18=49545;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex.xml;0;4
 FILE_NAME_19=505;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/font.xml;0;4
 FILE_NAME_20=12265;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/ptx-para-style.tex;0;4
@@ -52,9 +52,9 @@ FILE_NAME_30=267;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/usfm.xml;0;4
 FILE_NAME_31=1758;Sh;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/example/example-jas.sh;0;4
 FILE_NAME_32=1129;Conf;0;16;0;1;0;/home/dennis/.config/rapuma/rapuma.conf;0;4
 FILE_NAME_33=1485;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/text.xml;0;4
-FILE_NAME_34=5099;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm_data.py;0;4
+FILE_NAME_34=2470;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm_data.py;0;4
 FILE_NAME_35=833;Conf;0;16;0;1;0;/home/dennis/Projects/rapuma/config/system.ini;0;4
-FILE_NAME_36=263;Sh;0;16;0;1;0;/home/dennis/Publishing/Robin/TestRapuma-KJV.sh;0;4
+FILE_NAME_36=349;Sh;0;16;0;1;0;/home/dennis/Publishing/Robin/TestRapuma-KJV.sh;0;4
 
 [VTE]
 last_dir=/home/dennis/Projects/rapuma

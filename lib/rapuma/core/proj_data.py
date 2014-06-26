@@ -562,27 +562,32 @@ class ProjData (object) :
         self.tools.writeConfFile(projectConfig)
 
 
-    def pushToCloud (self, force = False) :
-        '''Push local project data to the cloud. If a file in the cloud is
-        older than the project file, it will be sent. Otherwise, it will
-        be skipped. Because the local is being pushed, the owner should
-        be changed to the local user. If force is used we will "flush"
-        the project cloud storage area so all the local data will become
-        the new version in the cloud. This could be risky if the cloud
-        contained information that was stored no other place.'''
+    def pushToCloud (self, force = None) :
+        '''Push local project data to the cloud. If a file in the 
+        cloud is older than the project file, it will be overwritten 
+        with the local version. Otherwise, it will be skipped. 
+        Because the local is being pushed, the owner should be 
+        changed to the local user. If force is used we will "flush" 
+        the project cloud storage area so all the local data will 
+        become the new version in the cloud. This could be risky if 
+        the cloud contained information that was stored no other 
+        place.'''
 
-        # Make a path to the cloud
-        cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+        # Check to see if the cloud is good to go
+        cloud = self.checkCloud()
+        # Manually make a path to the cloud project in case it is not
+        # there already.
+        cPid = os.path.join(cloud, self.pid)
 
-        # If force is used, flush the cloud
+        # If force is used, flush the project from the cloud
         if force :
-            if os.path.isdir(cloud) :
-                shutil.rmtree(cloud)
+            if os.path.isdir(cPid) :
+                shutil.rmtree(cPid)
                 self.log.writeToLog(self.errorCodes['4150'], [self.pid])
 
         # Create a cloud folder if needed
-        if not os.path.isdir(cloud) :
-            os.makedirs(cloud)
+        if not os.path.isdir(cPid) :
+            os.makedirs(cPid)
 
         # Check for existence of this project in the cloud and who owns it
         pc = Config(self.pid)
@@ -608,9 +613,9 @@ class ProjData (object) :
                 if fileName[-1] == '~' :
                     continue
                 if os.path.join(folder, fileName) not in excludeFiles :
-                    if not os.path.isdir(folder.replace(self.local.projHome, cloud)) :
-                        os.makedirs(folder.replace(self.local.projHome, cloud))
-                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cloud)
+                    if not os.path.isdir(folder.replace(self.local.projHome, cPid)) :
+                        os.makedirs(folder.replace(self.local.projHome, cPid))
+                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cPid)
                     pFile = os.path.join(folder, fileName)
                     if not os.path.isfile(cFile) :
                         sys.stdout.write('.')
@@ -642,34 +647,14 @@ class ProjData (object) :
         return True
 
 
-    def pullFromCloud (self, force = True, tPath = None) :
-        '''Pull data from cloud storage and merge/replace local data.
-        If force is used, do a full backup first before starting the
-        actual pull operation.'''
+    def pullFromCloud (self) :
+        '''Pull data from cloud storage and replace local data. Cloud
+        data always overwrites local data on pull.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Set the project home reference 
-        if tPath :
-            self.local.projHome = self.getProjHome(tPath)
-        else :
-            if self.pid not in self.projList :
-                self.tools.terminal('Error: No target path given. Cannot install. Use --target (-t) to indicate path to project.')
-                self.tools.dieNow()
-
-        # Make the cloud path (output errors to terminal as log may not be working at this point)
-        if self.userConfig['Resources']['cloud'] != '' :
-            cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
-            if not os.path.exists(cloud) :
-                self.tools.terminal('Error: Path to cloud not valid: [' + cloud + ']')
-                self.tools.dieNow()
-        else :
-            self.tools.terminal('Error: No path to the cloud has been configured.')
-            self.tools.dieNow()
-
-        # Is the project physically present? If force is used, backup the old one
-        if force :
-            self.backupProject()
+        # Check to see if the cloud project is good to go
+        cPid = self.checkCloudProject()
 
         # Empty out all the project contents except the HelperScript folder
         # This is so we don't loose our place in the terminal.
@@ -690,12 +675,12 @@ class ProjData (object) :
         cr = 0
         sys.stdout.write('\nPulling files from the cloud')
         sys.stdout.flush()
-        for folder, subs, files in os.walk(cloud):
+        for folder, subs, files in os.walk(cPid):
             for fileName in files:
-                if not os.path.isdir(folder.replace(cloud, self.local.projHome)) :
-                    os.makedirs(folder.replace(cloud, self.local.projHome))
+                if not os.path.isdir(folder.replace(cPid, self.local.projHome)) :
+                    os.makedirs(folder.replace(cPid, self.local.projHome))
                 cFile = os.path.join(folder, fileName)
-                pFile = os.path.join(folder, fileName).replace(cloud, self.local.projHome)
+                pFile = os.path.join(folder, fileName).replace(cPid, self.local.projHome)
                 if not os.path.isfile(pFile) :
                     shutil.copy(cFile, pFile)
                     cn +=1
@@ -729,6 +714,32 @@ class ProjData (object) :
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             ProjCommander(self.pid).updateScripts()
+
+
+    def checkCloud (self) :
+        '''Check to see if the cloud path and cloud project path is 
+        good. If not the process will be halted.'''
+        
+        if self.userConfig['Resources']['cloud'] != '' :
+            cloud = self.tools.resolvePath(self.userConfig['Resources']['cloud'])
+            if not os.path.exists(cloud) :
+                self.tools.dieNow('Error: Path to cloud not valid: [' + cloud + ']')
+        else :
+            self.tools.dieNow('Error: No path to the cloud has been configured.')
+            
+        return cloud
+
+
+    def checkCloudProject (self) :
+        '''Check to see if the cloud project path is good. If not the 
+        process will be halted.'''
+        
+        cloud = self.checkCloud()
+        cPid = os.path.join(cloud, self.pid)
+        if not os.path.exists(cPid) :
+            self.tools.dieNow('Error: Project [' + self.pid + '] not found in the cloud.')
+            
+        return cPid
 
 
     def getProjHome (self, tPath = None) :

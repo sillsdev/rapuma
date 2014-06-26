@@ -131,7 +131,7 @@ class ProjCommander (object) :
                 'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    group add --source_path $1 '], 
                 'archive'       : ['Archive this project',                          'rapuma project '       + pid + ' archive   save '], 
                 'backup'        : ['Backup this project',                           'rapuma project '       + pid + ' backup    save '], 
-                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + ' cloud     restore $1 '], 
+                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + ' cloud     restore '], 
                 'cloudPush'     : ['Push data from this project to the cloud',      'rapuma project '       + pid + ' cloud     save $1 '], 
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
@@ -166,8 +166,8 @@ class ProjCommander (object) :
         mid                 = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {
-                'compareSource' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare source'], 
-                'compareWork'   : ['Compare working text with previous version.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare working'], 
+                'compareBackup' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 compare -c backup'], 
+                'compareSource' : ['Compare working text with previous version.',   'rapuma component ' + pid + ' ' + gid + ' $1 compare -c source'], 
                 'edit'          : ['Edit specified component file.',                'rapuma component ' + pid + ' ' + gid + ' --edit $1 '], 
                 'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
                 'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
