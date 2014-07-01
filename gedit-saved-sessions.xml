@@ -29,14 +29,15 @@
 </session>
 <session name="BLT-LAOO-NTLS">
   <file path="file:///home/dennis/.config/rapuma/rapuma.conf"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/adjustment.conf"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/layout.conf"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/project.conf"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Config/usfmTex.conf"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Script/base_textPreprocess.py"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/Style/usfmTex-ext.sty"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/TeX/usfmTex-ext.tex"/>
-  <file path="file:///home/dennis/Publishing/BLT/BLT-LAOO-NTLS/TeX/usfmTex-settings.tex"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/project.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/adjustment.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/hyphenation.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/illustration.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/layout.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Config/usfmTex.conf"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Style/usfmTex-ext.sty"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/Script/base_textPreprocess.py"/>
+  <file path="file:///home/dennis/Publishing/BLT-LAOO-NTLS/TeX/usfmTex-ext.tex"/>
 </session>
 <session name="BLT-TAVT-NTTRA">
   <file path="file:///home/dennis/Publishing/BLT/BLT-TAVT-NTTRA/Config/adjustment.conf"/>

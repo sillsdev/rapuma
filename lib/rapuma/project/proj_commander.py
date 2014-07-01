@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, re
 from configobj import ConfigObj
 
 # Load the local classes
@@ -78,7 +78,9 @@ class ProjCommander (object) :
                     fullFile = os.path.join(self.local.projHelpScriptFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
                         writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
-                        writeObject.write(allScripts[key][1] + '\n\n')
+                        # Strip out extra spaces from command
+                        cmd = re.sub(ur'\s+', ur' ', allScripts[key][1])
+                        writeObject.write(cmd + '\n\n')
 
                     # Make the script executable
                     self.tools.makeExecutable(fullFile)
@@ -115,7 +117,16 @@ class ProjCommander (object) :
     def makeScriptHeader (self, desc, cmd) :
         '''Make a helper script header.'''
 
-        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\necho \necho command: ' + cmd + '\n\n'
+        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\necho \necho command: ' + self.echoClean(cmd) + '\n\n'
+
+
+    def echoClean (self, cmdStr) :
+        '''Clean up a string for an echo statement in a shell script.'''
+
+        clean = re.sub(ur'\;', ur'\\;', cmdStr)
+        clean = re.sub(ur'\s+', ur' ', clean)
+
+        return clean
 
 
     def getStaticScripInfo (self) :
@@ -136,7 +147,6 @@ class ProjCommander (object) :
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' helper    update '], 
-                'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind --force '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
@@ -166,9 +176,7 @@ class ProjCommander (object) :
         mid                 = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {
-                'compareBackup' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 compare -c backup'], 
-                'compareSource' : ['Compare working text with previous version.',   'rapuma component ' + pid + ' ' + gid + ' $1 compare -c source'], 
-                'edit'          : ['Edit specified component file.',                'rapuma component ' + pid + ' ' + gid + ' --edit $1 '], 
+                'compare'       : ['Compare component working text with backup.',   'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group compare --compare_type backup $CMD '], 
                 'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
                 'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
                 'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 

@@ -330,9 +330,9 @@ def userArguments (args) :
             if cmdType == 'archive' :
                 ProjData(pid).archiveProject()
             elif cmdType == 'backup' :
-                ProjData(pid).backupProject(targetPath)
+                ProjData(pid).backupProject()
             elif cmdType == 'cloud' :
-                ProjData(pid).pushToCloud()
+                ProjData(pid).pushToCloud(force)
             elif cmdType == 'template' :
                 Template(pid).projectToTemplate(args.id)
             else :
@@ -404,7 +404,7 @@ def userArguments (args) :
             cid_list = usfmData.cannonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' and gid in cannonGroups :
+            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in cannonGroups :
                 getCidList = getattr(usfmData, gid.lower() + 'CidList')
                 cid_list = getCidList()
         # If a compare is being done this provides the type of compare.
@@ -499,26 +499,6 @@ def userArguments (args) :
             ProjBackground(pid).addWatermarkBackground(gid, cid_list, pages, override)
         else :
             cmdError(cmd, cmdType)
-
-    ##### COMPONENT
-    # Component level commands. Note that rendering is done at the Group level.
-    elif sys.argv[1].lower() == 'component' :
-        cmd             = args.command
-        pid             = args.project_id
-        gid             = args.group_id
-        cid             = args.component_id
-        compare_type    = ''
-        if args.compare_type :
-            compare_type = args.compare_type
-        if cmd == 'compare' :
-            if not compare_type :
-                sys.exit('\nERROR: Must provide a compare type (--compare_type/-c). Process halting.\n')
-            ProjSetup(sysConfig, pid).compareComponent(compare_type, gid, cid.lower())
-        elif cmd == 'restore' :
-            # For this we use the group restore function and only send it a list of 1 component
-            ProjSetup(sysConfig, pid).restoreGroup(gid, [cid.lower()])
-        elif cmd == 'edit' :
-            ProjComponent(pid, gid).editComponent(cid)
 
     ##### PACKAGES
     # Package management commands
@@ -657,8 +637,6 @@ if __name__ == '__main__' :
     grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
     grCommands              = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock', 'watermark']
     componentTypes          = ['usfm', 'map', 'toc']
-    # Component
-    cpCommands              = ['compare', 'edit', 'restore']
     compareTests            = ['backup', 'source']
     # Packages
     pkCommandType           = ['font', 'macro']
@@ -710,14 +688,6 @@ if __name__ == '__main__' :
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
     groupCommand.add_argument('-c', '--compare_type', choices=compareTests, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')
-
-    # Add Component subprocess arguments
-    compCommand = subparsers.add_parser('component', help='General project component management commands help')
-    compCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    compCommand.add_argument('group_id', help='The group ID this component is a part of.')
-    compCommand.add_argument('component_id', help='The component ID, required any actions to be done to it.')
-    compCommand.add_argument('command', choices=cpCommands, help='The general commands that can be used for managing components.')
-    compCommand.add_argument('-c', '--compare_type', choices=compareTests, help='Compare a component with another version. This parameter must be followed by the type of test to use. Use either "working" or "source". No other test types will be accepted.')
 
     # Add Package management subprocess arguments
     packCommand = subparsers.add_parser('package', help='General package handling commands help')
