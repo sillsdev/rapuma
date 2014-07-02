@@ -511,7 +511,9 @@ def userArguments (args) :
         force       = args.force
         if cmd == 'add' :
             if cmdType == 'font' :
-                ProjFont(pid, gid).installFont(pkid, force)
+                # At this level it is assumed that if the user is adding
+                # a font, they want it to be the primary font
+                ProjFont(pid, gid).installFont(pkid, True)
             elif cmdType == 'macro' :
                 Config(pid, gid).addMacPack(pkid, force)
             else :

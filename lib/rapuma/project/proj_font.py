@@ -197,7 +197,8 @@ class ProjFont (object) :
         else :
             # If force was set, remove the exsisting font info if it is there
             if force :
-                self.removeFontPack(font, True)
+                #self.removeFontPack(font, True)
+                self.removeFontSettings(font)
 
         # (Re)Inject the font info into the macPack config file.
         fInfo = self.tools.getXMLSettings(metaDataSource)
@@ -265,16 +266,20 @@ class ProjFont (object) :
 
 
     def installFont (self, font, force = False) :
-        '''It is a two step process to install a font. This will both 
-        copy in a font and record a font in one call. Do not try to
-        install a substitute font.'''
+        '''It is a three step process to install a font. This will both
+        copy in a font and record a font in one call. Do not try to 
+        install a substitute font. If force is used, It is assumed 
+        that the font being installed will be the primary font so it 
+        sets it to be so.'''
 
 #        import pdb; pdb.set_trace()
 
-        font = self.checkForSubFont(font)
+#        font = self.checkForSubFont(font)
         cRes = self.copyInFont(font, force)
         rRes = self.recordFont(self.cType, font, force)
-        if cRes and rRes :
+        if force :
+            pRes = self.setPrimaryFont(font, force)
+        if cRes and rRes and pRes :
             self.log.writeToLog(self.errorCodes['1235'], [font])
             return True
 
@@ -314,6 +319,27 @@ class ProjFont (object) :
                     return True
 
 
+    def removeFontSettings (self, font) :
+        '''Remove the font settings from the project.'''
+
+        if self.macPackConfig['Fonts'].has_key(font) :
+            del self.macPackConfig['Fonts'][font]
+            self.log.writeToLog(self.errorCodes['1380'], [font,self.Ctype])
+            # Adjust installed fonts list if needed
+            primFont = self.macPackConfig['FontSettings']['primaryFont']
+            # There has to be a primary font no matter what. If the font being
+            # removed was primary, then try setting the first 
+            if primFont == font :
+                newPrim = ''
+                if len(self.macPackConfig['Fonts'].keys()) > 0 :
+                    newPrim = self.macPackConfig['Fonts'].keys()[0]
+                self.setPrimaryFont(newPrim, True)
+            return True
+        else :
+            self.log.writeToLog(self.errorCodes['1385'], [font], 'proj_font.removeFont():1385')
+            return False
+
+
     def removeFontPack (self, font, force = False) :
         '''Remove a font from a component type which will virtually disconnect 
         it from the calling component type. However, if the force switch is set,
@@ -330,25 +356,11 @@ class ProjFont (object) :
         else :
             self.log.writeToLog(self.errorCodes['1395'], [font])
 
-        if self.macPackConfig['Fonts'].has_key(font) :
-            del self.macPackConfig['Fonts'][font]
-            self.log.writeToLog(self.errorCodes['1380'], [font,self.Ctype])
-            # Adjust installed fonts list if needed
-            primFont = self.macPackConfig['FontSettings']['primaryFont']
-            # There has to be a primary font no matter what. If the font being
-            # removed was primary, then try setting the first 
-            if primFont == font :
-                newPrim = ''
-                if len(self.macPackConfig['Fonts'].keys()) > 0 :
-                    newPrim = self.macPackConfig['Fonts'].keys()[0]
-                self.setPrimaryFont(newPrim, True)
+            self.removeFontSettings(font)
 
             # Write out the new settings files
             self.tools.writeConfFile(self.macPackConfig)
             return True
-        else :
-            self.log.writeToLog(self.errorCodes['1385'], [font], 'proj_font.removeFont():1385')
-            return False
 
 
 ###############################################################################
