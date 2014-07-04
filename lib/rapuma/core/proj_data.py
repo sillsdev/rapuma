@@ -40,6 +40,8 @@ class ProjData (object) :
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
+        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['Resources']['projects']))
 
         # Log messages for this module
         self.errorCodes     = {
@@ -78,40 +80,6 @@ class ProjData (object) :
 ####################### Error Code Block Series = 1000 ########################
 ###############################################################################
 
-    def registerProject (self, projHome) :
-        '''Do a basic project registration with information available in a
-        project config file found in projHome.'''
-
-        pid                 = os.path.basename(projHome)
-        projectConfig          = self.getConfig(projHome)
-
-        if len(projectConfig) :
-            pTitle          = projectConfig['ProjectInfo']['projectTitle']
-            pid             = projectConfig['ProjectInfo']['projectIDCode']
-            pmid            = projectConfig['ProjectInfo']['projectMediaIDCode']
-            pCreate         = projectConfig['ProjectInfo']['projectCreateDate']
-            if not self.userConfig['Projects'].has_key(pid) :
-                self.tools.buildConfSection(self.userConfig['Projects'], pid)
-                self.userConfig['Projects'][pid]['projectTitle']        = pTitle
-                self.userConfig['Projects'][pid]['projectMediaIDCode']  = pmid
-                self.userConfig['Projects'][pid]['projectPath']         = projHome
-                self.userConfig['Projects'][pid]['projectCreateDate']   = pCreate
-                self.tools.writeConfFile(self.userConfig)
-            else :
-                self.log.writeToLog(self.errorCodes['1220'], [pid])
-            # Change the project path is something different has been given
-            oldPath = self.userConfig['Projects'][pid]['projectPath']
-            if oldPath != projHome :
-                self.userConfig['Projects'][pid]['projectPath'] = projHome
-                self.tools.writeConfFile(self.userConfig)
-                # FIXME: We used to backup the oldPath if it was there
-                # However, if necessary, this should be done by the caller
-#                self.tools.makeFolderBackup(oldPath)
-                # Now remove the orginal
-                if os.path.exists(oldPath) :
-                    shutil.rmtree(oldPath)
-        else :
-            self.log.writeToLog(self.errorCodes['1240'], [pid])
 
 
 ###############################################################################
@@ -192,12 +160,6 @@ class ProjData (object) :
             self.tools.dieNow()
         else :
             os.rename(aProject.local.projHome, bakArchProjDir)
-
-        # Remove references from user rapuma.conf
-        if self.user.unregisterProject(pid) :
-            self.tools.terminal('Removed [' + pid + '] from user configuration.\n')
-        else :
-            self.tools.terminal('Error: Failed to remove [' + pid + '] from user configuration.\n')
 
         # Finish here
         self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
@@ -290,7 +252,6 @@ class ProjData (object) :
         log         = ProjLog(pid)
         aProject    = Project(pid, self.gid)
     #    import pdb; pdb.set_trace()
-        self.user.registerProject(aProject.projectIDCode, aProject.projectMediaIDCode, aProject.local.projHome)
 
         # Finish here
         self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
@@ -333,7 +294,7 @@ class ProjData (object) :
         backups with the same name exist there, increment with a number.'''
 
         # First see if this is even a valid project
-        if not self.userConfig['Projects'].has_key(self.pid) :
+        if self.pid not in self.projList :
             self.log.writeToLog(self.errorCodes['3610'], [self.pid])
 
         # Set some paths and file names
@@ -434,9 +395,6 @@ class ProjData (object) :
 
 #        # Permission for executables is lost in the zip, fix them here
 #        self.tools.fixExecutables(projHome)
-
-#        # If this is a new project we will need to register it now
-#        self.registerProject(projHome)
 
 #        # Add helper scripts if needed
 #        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -604,27 +562,32 @@ class ProjData (object) :
         self.tools.writeConfFile(projectConfig)
 
 
-    def pushToCloud (self, force = False) :
-        '''Push local project data to the cloud. If a file in the cloud is
-        older than the project file, it will be sent. Otherwise, it will
-        be skipped. Because the local is being pushed, the owner should
-        be changed to the local user. If force is used we will "flush"
-        the project cloud storage area so all the local data will become
-        the new version in the cloud. This could be risky if the cloud
-        contained information that was stored no other place.'''
+    def pushToCloud (self, force = None) :
+        '''Push local project data to the cloud. If a file in the 
+        cloud is older than the project file, it will be overwritten 
+        with the local version. Otherwise, it will be skipped. 
+        Because the local is being pushed, the owner should be 
+        changed to the local user. If force is used we will "flush" 
+        the project cloud storage area so all the local data will 
+        become the new version in the cloud. This could be risky if 
+        the cloud contained information that was stored no other 
+        place.'''
 
-        # Make a path to the cloud
-        cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
+        # Check to see if the cloud is good to go
+        cloud = self.checkCloud()
+        # Manually make a path to the cloud project in case it is not
+        # there already.
+        cPid = os.path.join(cloud, self.pid)
 
-        # If force is used, flush the cloud
+        # If force is used, flush the project from the cloud
         if force :
-            if os.path.isdir(cloud) :
-                shutil.rmtree(cloud)
+            if os.path.isdir(cPid) :
+                shutil.rmtree(cPid)
                 self.log.writeToLog(self.errorCodes['4150'], [self.pid])
 
         # Create a cloud folder if needed
-        if not os.path.isdir(cloud) :
-            os.makedirs(cloud)
+        if not os.path.isdir(cPid) :
+            os.makedirs(cPid)
 
         # Check for existence of this project in the cloud and who owns it
         pc = Config(self.pid)
@@ -650,9 +613,9 @@ class ProjData (object) :
                 if fileName[-1] == '~' :
                     continue
                 if os.path.join(folder, fileName) not in excludeFiles :
-                    if not os.path.isdir(folder.replace(self.local.projHome, cloud)) :
-                        os.makedirs(folder.replace(self.local.projHome, cloud))
-                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cloud)
+                    if not os.path.isdir(folder.replace(self.local.projHome, cPid)) :
+                        os.makedirs(folder.replace(self.local.projHome, cPid))
+                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cPid)
                     pFile = os.path.join(folder, fileName)
                     if not os.path.isfile(cFile) :
                         sys.stdout.write('.')
@@ -684,34 +647,14 @@ class ProjData (object) :
         return True
 
 
-    def pullFromCloud (self, force = True, tPath = None) :
-        '''Pull data from cloud storage and merge/replace local data.
-        If force is used, do a full backup first before starting the
-        actual pull operation.'''
+    def pullFromCloud (self) :
+        '''Pull data from cloud storage and replace local data. Cloud
+        data always overwrites local data on pull.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Set the project home reference 
-        if tPath :
-            self.local.projHome = self.getProjHome(tPath)
-        else :
-            if not self.userConfig['Projects'].has_key(self.pid) :
-                self.tools.terminal('Error: No target path given. Cannot install. Use --target (-t) to indicate path to project.')
-                self.tools.dieNow()
-
-        # Make the cloud path (output errors to terminal as log may not be working at this point)
-        if self.userConfig['Resources']['cloud'] != '' :
-            cloud = os.path.join(self.tools.resolvePath(self.userConfig['Resources']['cloud']), self.pid)
-            if not os.path.exists(cloud) :
-                self.tools.terminal('Error: Path to cloud not valid: [' + cloud + ']')
-                self.tools.dieNow()
-        else :
-            self.tools.terminal('Error: No path to the cloud has been configured.')
-            self.tools.dieNow()
-
-        # Is the project physically present? If force is used, backup the old one
-        if force :
-            self.backupProject()
+        # Check to see if the cloud project is good to go
+        cPid = self.checkCloudProject()
 
         # Empty out all the project contents except the HelperScript folder
         # This is so we don't loose our place in the terminal.
@@ -732,12 +675,12 @@ class ProjData (object) :
         cr = 0
         sys.stdout.write('\nPulling files from the cloud')
         sys.stdout.flush()
-        for folder, subs, files in os.walk(cloud):
+        for folder, subs, files in os.walk(cPid):
             for fileName in files:
-                if not os.path.isdir(folder.replace(cloud, self.local.projHome)) :
-                    os.makedirs(folder.replace(cloud, self.local.projHome))
+                if not os.path.isdir(folder.replace(cPid, self.local.projHome)) :
+                    os.makedirs(folder.replace(cPid, self.local.projHome))
                 cFile = os.path.join(folder, fileName)
-                pFile = os.path.join(folder, fileName).replace(cloud, self.local.projHome)
+                pFile = os.path.join(folder, fileName).replace(cPid, self.local.projHome)
                 if not os.path.isfile(pFile) :
                     shutil.copy(cFile, pFile)
                     cn +=1
@@ -761,8 +704,6 @@ class ProjData (object) :
             if cr > 0 :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
-        # Register the local copy to the local user
-        self.registerProject(self.local.projHome)
         # Reset the local and log now
         self.local      = ProjLocal(self.pid)
         self.log        = ProjLog(self.pid)
@@ -773,6 +714,32 @@ class ProjData (object) :
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             ProjCommander(self.pid).updateScripts()
+
+
+    def checkCloud (self) :
+        '''Check to see if the cloud path and cloud project path is 
+        good. If not the process will be halted.'''
+        
+        if self.userConfig['Resources']['cloud'] != '' :
+            cloud = self.tools.resolvePath(self.userConfig['Resources']['cloud'])
+            if not os.path.exists(cloud) :
+                self.tools.dieNow('Error: Path to cloud not valid: [' + cloud + ']')
+        else :
+            self.tools.dieNow('Error: No path to the cloud has been configured.')
+            
+        return cloud
+
+
+    def checkCloudProject (self) :
+        '''Check to see if the cloud project path is good. If not the 
+        process will be halted.'''
+        
+        cloud = self.checkCloud()
+        cPid = os.path.join(cloud, self.pid)
+        if not os.path.exists(cPid) :
+            self.tools.dieNow('Error: Project [' + self.pid + '] not found in the cloud.')
+            
+        return cPid
 
 
     def getProjHome (self, tPath = None) :
@@ -909,7 +876,7 @@ class Template (object) :
 #        self.tools.dieNow()
 
         # Test to see if the project already exists
-        if self.userConfig['Projects'].has_key(self.pid) or os.path.exists(projHome) :
+        if self.pid in self.projList :
             self.tools.terminal('\nError: Project ID [' + self.pid + '] is already exists on this system. Use the remove command to remove it.')
             self.tools.dieNow()
         # Test for source template file
@@ -932,9 +899,6 @@ class Template (object) :
 
         # Get the media type from the newly placed project for registration
         projectMediaIDCode = pc['ProjectInfo']['projectMediaIDCode']
-
-        # Register the new project
-        self.user.registerProject(self.pid, projectMediaIDCode, projHome)
 
         # Reset the local settings
         self.local = ProjLocal(self.pid)

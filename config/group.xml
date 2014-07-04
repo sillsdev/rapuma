@@ -35,13 +35,6 @@ Todo:
         <value></value>
     </setting>
     <setting>
-        <name>Group Component Source ID</name>
-        <key>csid</key>
-        <description>The source ID for this group.</description>
-        <type>string</type>
-        <value></value>
-    </setting>
-    <setting>
         <name>Group Lock Setting</name>
         <key>isLocked</key>
         <description>Lock setting for this group. When locked, no modifications can be made to group components.</description>

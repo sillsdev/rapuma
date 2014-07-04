@@ -40,7 +40,7 @@ class Config (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = self.userConfig['Projects'][pid]['projectPath']
+        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.local                          = ProjLocal(pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
@@ -65,23 +65,25 @@ class Config (object) :
         }
 
         # Test for gid before trying to finish the init
+
+
+
+
+#        import pdb; pdb.set_trace()
+
+
+
+
         if gid :
             if not self.projectConfig :
                 self.getProjectConfig()
             # Reinitialize local
             self.local                      = ProjLocal(pid, gid, self.projectConfig)
-            self.csid                       = self.projectConfig['Groups'][gid]['csid']
             self.cType                      = self.projectConfig['Groups'][gid]['cType']
             self.Ctype                      = self.cType.capitalize()
-            # Just in case source path has not been defined
-            try :
-                self.sourcePath             = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
-            except :
-                self.sourcePath             = ''
         else :
             self.cType                      = None
             self.Ctype                      = None
-            self.csid                       = None
 
 
 ###############################################################################
@@ -96,31 +98,31 @@ class Config (object) :
 
 #        import pdb; pdb.set_trace()
 
-        self.projectConfig = self.tools.initConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
+        self.projectConfig = self.tools.loadConfig(self.local.projectConfFile, self.local.projectConfXmlFile)
 
 
     def getAdjustmentConfig (self) :
         '''Load/return the adjustment configuation object.'''
 
-        self.adjustmentConfig = self.tools.initConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
+        self.adjustmentConfig = self.tools.loadConfig(self.local.adjustmentConfFile, self.local.adjustmentConfXmlFile)
 
 
     def getLayoutConfig (self) :
         '''Load/return the layout configuation object.'''
 
-        self.layoutConfig = self.tools.initConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
+        self.layoutConfig = self.tools.loadConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
 
 
     def getHyphenationConfig (self) :
         '''Load/return the hyphen configuation object.'''
 
-        self.hyphenationConfig = self.tools.initConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
+        self.hyphenationConfig = self.tools.loadConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
 
 
     def getIllustrationConfig (self) :
         '''Load/return the illustration configuation object.'''
-
-        self.illustrationConfig = self.tools.initConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
+        
+        self.illustrationConfig = self.tools.loadConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
 
 
 #    def initMacPack (self, macPack) :
@@ -143,7 +145,7 @@ class Config (object) :
 #        import pdb; pdb.set_trace()
 
         # Load macPackConfig
-        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
 
 
     def loadMacPackFunctions (self, macPack) :
@@ -163,7 +165,7 @@ class Config (object) :
 ###############################################################################
 
 
-    def makeNewprojectConf (self, local, pid, pmid, cVersion) :
+    def makeNewprojectConf (self, local, pid, cVersion, pmid='book') : 
         '''Create a new project configuration file for a new project.'''
 
         self.projectConfig = ConfigObj(self.tools.getXMLSettings(os.path.join(local.rapumaConfigFolder, pmid + '.xml')), encoding='utf-8')
@@ -372,7 +374,7 @@ class Config (object) :
         # Move the style files and custom TeX files out of the macPack
         self.moveMacStyles(force)
         self.moveMacTex(force)
-        self.macPackConfig = self.tools.initConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macPackConfig = self.tools.initNewConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
         self.log.writeToLog(self.errorCodes['3300'], [macPack,self.local.macPackConfFileName])
 
 
@@ -384,6 +386,7 @@ class Config (object) :
         for f in self.getMacStyExtFiles() :
             source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projStyleFolder, f)
+            self.tools.makedirs(self.local.projStyleFolder)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)
@@ -416,6 +419,7 @@ class Config (object) :
         for f in self.getMacTexExtFiles() :
             source = os.path.join(self.local.projMacPackFolder, f)
             target = os.path.join(self.local.projTexFolder, f)
+            self.tools.makedirs(self.local.projTexFolder)
             # Do not overwrite existing files unless force is used
             if not os.path.exists(target) or force :
                 shutil.copy(source, target)

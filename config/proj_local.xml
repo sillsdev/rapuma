@@ -409,40 +409,34 @@ Todo:
             <relies>macPack</relies>
         </file>
         <file>
-            <name>ParaTExt Project Source Hyphenation File</name>
-            <description>The source hypenation word list that is produced by ParaTExt.</description>
-            <fileID>ptHyphFile</fileID>
-            <fileName>hyphenatedWords.txt</fileName>
-            <filePath>[self:sourcePath]</filePath>
-            <depends></depends>
-            <relies>sourcePath</relies>
-        </file>
-        <file>
             <name>TeX lccode Definition File</name>
             <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
             <fileID>lccodeTexFile</fileID>
-            <fileName>[self:csid]_lccode.tex</fileName>
+            <fileName>base_lccode.tex</fileName>
             <filePath>[self:projHyphenationFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies></relies>
+            <note>This file name defaults to base_... This may make future diglot implementations difficult.</note>
         </file>
         <file>
             <name>Component Hyphenation Word List File</name>
             <description>The file that contains the hypenation words that have been preprocessed and ready for the last step of being converted to a form useable by TeX.</description>
             <fileID>compHyphFile</fileID>
-            <fileName>[self:csid]_hyphenation.txt</fileName>
+            <fileName>base_hyphenation.txt</fileName>
             <filePath>[self:projHyphenationFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies></relies>
+            <note>This file name defaults to base_... This may make future diglot implementations difficult.</note>
         </file>
         <file>
             <name>TeX Group Hyphenation Exclusions File</name>
             <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
             <fileID>grpHyphExcTexFile</fileID>
-            <fileName>[self:csid]_hyphenation.tex</fileName>
+            <fileName>base_hyphenation.tex</fileName>
             <filePath>[self:projHyphenationFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies></relies>
+            <note>This file name defaults to base_... This may make future diglot implementations difficult.</note>
         </file>
         <file>
             <name>ParaTExt Project Hyphenation Errors File</name>
@@ -457,10 +451,11 @@ Todo:
             <name>Hyphenation Preprocess Script File</name>
             <description>The script used to preprocess the ParaTExt hypenation word list (if necessary).</description>
             <fileID>preProcessFile</fileID>
-            <fileName>[self:csid]_hyphenPreprocess.py</fileName>
+            <fileName>base_hyphenPreprocess.py</fileName>
             <filePath>[self:projHyphenationFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies></relies>
+            <note>This file name defaults to base_... This may make future diglot implementations difficult.</note>
         </file>
         <file>
             <name>Rapuma Defalt Hyphenation Preprocess Script</name>
@@ -494,10 +489,11 @@ Todo:
             <name>Group Preprocess Script File</name>
             <description>The script used to preprocess the group (component) text. This is based on the component source ID which can be shared by multiple groups.</description>
             <fileID>groupPreprocessFile</fileID>
-            <fileName>[self:csid]_textPreprocess.py</fileName>
+            <fileName>base_textPreprocess.py</fileName>
             <filePath>[self:projScriptFolder]</filePath>
             <depends></depends>
-            <relies>csid</relies>
+            <relies></relies>
+            <note>This file name defaults to base_... This may make future diglot implementations difficult.</note>
         </file>
         <file>
             <name>Rapuma Preprocess Script File</name>
@@ -509,9 +505,7 @@ Todo:
             <relies></relies>
         </file>
 
-
     </section>
-
 
 </root>
 

@@ -23,7 +23,6 @@ import os, re, shutil, subprocess, codecs
 from rapuma.core.tools              import Tools
 from rapuma.project.proj_config     import Config
 from rapuma.core.proj_compare       import ProjCompare
-from rapuma.core.paratext           import Paratext
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
@@ -32,6 +31,14 @@ from rapuma.core.proj_log           import ProjLog
 ###############################################################################
 ################################## Begin Class ################################
 ###############################################################################
+
+
+
+##################################################################################################################
+# FIXME: Right now this has dependencies on PT that need to be removed
+##################################################################################################################
+
+
 
 class ProjHyphenation (object) :
 

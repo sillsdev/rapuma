@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile
+import codecs, os, sys, unicodedata, subprocess, shutil, re, tempfile, difflib
 from configobj                              import ConfigObj
 from importlib                              import import_module
 from functools                              import partial
@@ -31,26 +31,40 @@ from rapuma.core.proj_process               import ProjProcess
 from rapuma.core.proj_log                   import ProjLog
 from rapuma.core.proj_compare               import ProjCompare
 from rapuma.core.proj_data                  import ProjData
-from rapuma.core.paratext                   import Paratext
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
 from rapuma.project.proj_config             import Config
+from rapuma.group.usfm_data                 import UsfmData
 
 
 class ProjSetup (object) :
 
-    def __init__(self, pid) :
-        '''Intitate the whole class and create the object.'''
+    def __init__(self, sysConfig, pid) :
+        '''Initiate the whole class and create the object.'''
 
+        self.pid                            = pid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
+        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.tools                          = Tools()
-        self.pid                            = pid
-        self.projHome                       = None
-        self.projectMediaIDCode             = None
-        self.local                          = None
-        self.log                            = None
+        self.log                            = ProjLog(self.pid)
+        self.systemVersion                  = sysConfig['Rapuma']['systemVersion']
+        self.projectConfig                  = self.loadUpProjConfig(self.pid)
+        self.local                          = ProjLocal(self.pid)
         self.groups                         = {}
+        self.usfmData                       = UsfmData()
+        self.ntCidList                      = self.usfmData.ntCidList()
+        self.otCidList                      = self.usfmData.otCidList()
+        self.wholeCannonList                = self.usfmData.wholeCannonList()
+        self.cidNameDict                    = self.usfmData.cidNameDict()
+
+        if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
+            self.diffViewCmd                = None
+        else :
+            self.diffViewCmd                = self.userConfig['System']['textDifferentialViewerCommand']
+            # Make sure the diff view command is a list
+            if type(self.diffViewCmd) != list :
+                self.diffViewCmd            = [self.userConfig['System']['textDifferentialViewerCommand']]
 
         self.errorCodes     = {
 
@@ -61,12 +75,13 @@ class ProjSetup (object) :
             '0210' : ['ERR', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
             '0212' : ['ERR', 'Component [<<1>>] not found.'],
             '0215' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
-            '0220' : ['MSG', 'Removed the [<<1>>] component group from the project configuation.'],
             '0230' : ['MSG', 'Added the [<<1>>] component to the project.'],
             '0232' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             '0240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
-            '0250' : ['ERR', 'Component group [<<1>>] not found. Cannot remove component.'],
+            '0250' : ['MSG', 'Importing: [<<1>>]'],
+            '0252' : ['WRN', 'Cannot add/import: [<<1>>] This component already exists in the [<<2>>] group. Operation canceled. Please remove the component before trying to add it, or use update instead.'],
             '0260' : ['ERR', 'Sorry, cannot delete [<<1>>] from the [<<2>>] group. This component is shared by another group group.'],
+            '0262' : ['WRN', 'Component [<<1>>] not found in group [<<2>>]'],
             '0265' : ['ERR', 'Unable to complete working text installation for [<<1>>]. May require \"force\" (-f).'],
             '0270' : ['LOG', 'The [<<1>>] compare file was created for component [<<2>>]. - project.uninstallGroupComponent()'],
             '0272' : ['MSG', 'Update for [<<1>>] component is unnecessary. Source is the same as the group source copy.'],
@@ -74,9 +89,15 @@ class ProjSetup (object) :
             '0274' : ['MSG', 'Force set to true, component [<<1>>] has been overwritten in the [<<2>>] group.'],
             '0280' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
+            '0292' : ['WRN', 'Group [<<1>>] not found in project configuration.'],
+            '0294' : ['LOG', 'Removed [<<1>>] from group [<<2>>]'],
+            '0296' : ['WRN', 'Could not remove [<<1>>] from group [<<2>>]'],
+            '0298' : ['MSG', 'Remove operation for group [<<1>>] is complete.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
-            '0320' : ['MSG', 'Set/reset source path to: [<<1>>]'],
+            '0310' : ['MSG', 'Completed updating components in the [<<1>>] group.'],
+            '0315' : ['MSG', 'Completed updating the [<<1>>] component.'],
+            '0320' : ['MSG', 'Component [<<1>>] not found in the [<<2>>] group. It must be in the group to be updated.'],
 
             '1060' : ['LOG', 'Text validation succeeded on USFM file: [<<1>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
@@ -89,41 +110,39 @@ class ProjSetup (object) :
             '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+            '1999' : ['WRN', 'Collect end notes is not fully implemented yet. Skipped end notes in: [<<1>>]'],
 
             '2810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
             '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
             '2860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
 
+            '3100' : ['MSG', 'Component compare for group [<<1>>] is completed'],
+            '3200' : ['MSG', 'Compare component [<<1>>] completed'],
+            '3210' : ['WRN', 'File does not exist: [<<1>>] compare cannot be done.'],
+            '3280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
+            '3285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
+            '3290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
+            '3295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>]'],
+            '3298' : ['MSG', 'Close the viewer to return to the terminal prompt.'],
+            '3220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
+            '3300' : ['WRN', 'Files are different but visual compare is not enabled.'],
+
+            '4100' : ['MSG', 'Restore components for group [<<1>>] is completed'],
+            '4200' : ['MSG', 'Component file [<<1>>] has been restored from its backup.'],
+            '4300' : ['WRN', 'No difference found between working and backup file for [<<1>>]. Restore operation aborted.'],
+            '4400' : ['WRN', 'File not found: [<<1>>]'],
+            '4500' : ['MSG', 'Removed backup file for [<<1>>]'],
+            '4600' : ['WRN', 'No difference found between working and backup file after restore. The restore operation my have failed.']
+
         }
 
-        # Because this function can be called elsewhere in the module we call it here too
-        self.finishInit()
 
-    def finishInit (self) :
-        '''If this is a new project (or system) we need to handle these settings special.'''
+    def loadUpProjConfig (self, pid) :
+        '''Load up the project config.'''
 
-#        import pdb; pdb.set_trace()
-
-        # Catch if we have a Projects key sooner than later
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-            self.tools.writeConfFile(self.userConfig)
-
-        if self.userConfig['Projects'].has_key(self.pid) :
-            self.data               = ProjData(self.pid)
-            self.projHome           = self.userConfig['Projects'][self.pid]['projectPath']
-            self.projectMediaIDCode = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
-            # These could be initialized above but because it might be necessary
-            # to reinitialize, we put them here
-            self.log                = ProjLog(self.pid)
-            self.proj_config        = Config(self.pid)
-            self.proj_config.getProjectConfig()
-            self.projectConfig      = self.proj_config.projectConfig
-            self.local              = ProjLocal(self.pid)
-            self.compare            = ProjCompare(self.pid)
-            return True
-        else :
-            return False
+        self.proj_config        = Config(pid)
+        self.proj_config.getProjectConfig()
+        return self.proj_config.projectConfig
 
 
 ###############################################################################
@@ -131,6 +150,17 @@ class ProjSetup (object) :
 ###############################################################################
 ####################### Error Code Block Series = 0200 ########################
 ###############################################################################
+
+    def getCidList (self, gid) :
+        '''Return the project's CID list.'''
+
+        try :
+            cids = self.projectConfig['Groups'][gid]['cidList']
+            if len(cids) > 0 :
+                return cids
+        except :
+            return None
+
 
     def makeCVOne (self, workingBak, workingCVOne) :
         '''Create a .cv1 backup of the current working file (source), if
@@ -145,218 +175,223 @@ class ProjSetup (object) :
         return True
 
 
-    def updateAllGroups (self, force = False) :
-        '''Run the update on all the groups in a project.'''
-
-        for gid in self.projectConfig['Groups'].keys() :
-            self.updateGroup(gid, force)
-
-
-    def updateGroup (self, gid, cidList = None, force = False) :
-        '''Update a group, --source is optional but if given it will
-        overwrite the current setting. Normal behavior is to have it 
-        check if there is any difference between the cid project backup
-        copy and the proposed source. If there is, then it will perform
-        the update. If not, it will require force to do the update.'''
+    def updateGroup (self, gid, sourceList) :
+        '''Update a group by providing a list of source files. This
+        will check to see if the incoming source coresponds to cids
+        listed for the group. If not, it will log a warning. If one or
+        more cids are missing, it will throw an error and quite before
+        doing the actual update. All the sources needs to be in place
+        for this to work.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Just in case there are any problems with the source path
-        # Reset the local mod first
-        self.local = ProjLocal(self.pid, gid, self.projectConfig)
-        # Look for it now
-        if not self.local.sourcePath :
-            self.log.writeToLog(self.errorCodes['0200'])
+        # Set some vars
+        cidList = []
+        checkList = []
+        sources = {}
 
-        # Sort out the list
-        if not cidList :
-            cidList = self.projectConfig['Groups'][gid]['cidList']
-        else :
-            if type(cidList) != list :
-                cidList = cidList.split()
-            # Do a quick validity test
-            for cid in cidList :
-                if not cid in self.projectConfig['Groups'][gid]['cidList'] :
-                    self.log.writeToLog(self.errorCodes['0273'], [cid,gid], 'proj_setup.updateGroup():0273')
+        # Create a check list for being sure the CIDs are in the project
+        checkList = self.getCidList(gid)
 
-        # Unlock the group so it can be worked on
-        self.lockUnlock(gid, False)
+        for f in sourceList :
+            cid = self.tools.discoverCIDFromFile(f)
+            if cid in self.wholeCannonList :
+                # Add CID to cidList
+                cidList.append(cid)
+                sources[cid] = f
 
-        # Process each cid
-        for cid in cidList :
-            target              = self.getWorkingFile(gid, cid)
-            targetSource        = self.getWorkingSourceFile(gid, cid)
-            source              = self.getSourceFile(gid, cid)
-            workingBak          = tempfile.NamedTemporaryFile(delete=True).name
-            workingCVOne        = self.getWorkCompareFile(gid, cid)
+            # Check now to see of the CID is already in the group
+            if checkList :
+                if cid in checkList :
+                    # Backup component
+                    compFiles           = self.local.getComponentFiles(gid, cid)
+                    cType               = self.projectConfig['Groups'][gid]['cType']
+                    source              = sources[cid]
+                    workingBak          = tempfile.NamedTemporaryFile(delete=True).name
 
-            # Create temp backup of working file
-            if os.path.exists(target) :
-                shutil.copy(target, workingBak)
-                
-            # Don't do this unless it is different or forced
-            if force or self.compare.isDifferent(source, targetSource) :
-                # Delete the existing working file
-                if os.path.exists(target) :
-                    os.remove(target)
-                # Create the backup for comparison
-                if os.path.exists(workingBak) :
-                    self.makeCVOne(workingBak, workingCVOne)
-                # Install the new text
-                self.installUsfmWorkingText(gid, cid, force)
-                # Report if this was forced
-                if force :
-                    self.log.writeToLog(self.errorCodes['0274'], [cid,gid])
-                # Compare the new working file with the previous
-                if os.path.exists(workingCVOne) :
-                    self.compare.compare(workingCVOne, target)
-            else :
-                self.log.writeToLog(self.errorCodes['0272'], [cid])
+                    # Create temp backup of working file
+                    if os.path.exists(compFiles['working']) :
+                        shutil.copy(compFiles['working'], workingBak)
+                    # Delete the existing working file
+                    if os.path.exists(compFiles['working']) :
+                        os.remove(compFiles['working'])
+                    # Create the backup for comparison
+                    if os.path.exists(workingBak) :
+                        self.makeCVOne(workingBak, compFiles['backup'])
+                    # Install the new text
+                    if self.importWorkingText(source, cType, gid, cid) :
+                        self.log.writeToLog(self.errorCodes['0315'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
+                    return False
+        
+        # Report and return
+        self.log.writeToLog(self.errorCodes['0310'], [gid])
+        return True
 
-        # Now be sure the group is locked down before we go
-        if not self.isLocked(gid) :
-            self.lockUnlock(gid, True)
-
-
-    def addGroup (self, cType, gid, cidList, csid, sourcePath = None, force = False) :
-        '''This handels adding a group which can contain one or more components. 
-        Most of the prechecking was done in the calling script so we can assume that
-        the vars here are pretty good.'''
-
-        # Do not want to add this group, non-force, if it already exsists.
-        self.tools.buildConfSection(self.projectConfig, 'Groups')
-        if self.projectConfig['Groups'].has_key(gid) and not force :
-            self.log.writeToLog(self.errorCodes['0210'], [gid])
-
-        sourceKey = csid + '_sourcePath'
-
-        # If the new source is valid, we will add that to the config now
-        # so that processes to follow will have that setting available.
-        if sourcePath :
-            self.addCompGroupSourcePath(gid, csid, sourcePath)
-            setattr(self, sourceKey, sourcePath)
-
-        # The cList can be one or more valid component IDs
-        # It is expected that the data for this list is in
-        # this format: "id1 id2 id3 ect", unless it is coming
-        # internally which means it might alread be a proper
-        # list. We'll check first.
-        if type(cidList) != list :
-            cidList = cidList.split()
+    
+    def addGroup (self, cType, gid, sourceList) :
+        '''Add a group by providing a component type, group ID and a 
+        list of source files. This will check to see if the incoming 
+        source is valid. If not, it will throw an error and quite 
+        before doing the actual import. All the source needs to be 
+        in place for this to work. Also, it will not copy over existing
+        project data. That is what updateGroup() is for.'''
 
 #        import pdb; pdb.set_trace()
 
-        # The assumption is that the conf needs to be
-        # reset incase there is any residual stuff from 
-        # a previous attempt to add the same group. But if
-        # it is new, we can just pass
-        try :
-            del self.projectConfig['Groups'][gid]
-        except :
-            pass
+        # Set some vars
+        cidList = []
+        checkList = []
+        cids = []
+        sources = {}
 
+
+# FIXME: There seems to be a problem with the existing CID list being lost
+# when a single component is added to a group
+
+
+        # In case the group already exists, pull in the CIDs
+        checkList = self.getCidList(gid)
+
+        # Do the importing first, then write the changes to the config
+        for f in sourceList :
+            cid = self.tools.discoverCIDFromFile(f)
+            if cid in self.wholeCannonList :
+                # Add CID to cidList
+                cidList.append(cid)
+                sources[cid] = f
+
+            # Check now to see of the CID is already in the group
+            if checkList :
+                if cid in checkList :
+                    self.log.writeToLog(self.errorCodes['0252'], [cid,gid])
+                    return False
+        
         # Get persistant values from the config
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         self.tools.buildConfSection(self.projectConfig['Groups'], gid)
         newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
         if newSectionSettings != self.projectConfig['Groups'][gid] :
             self.projectConfig['Groups'][gid] = newSectionSettings
-
         # Add/Modify the info to the group config info
         self.projectConfig['Groups'][gid]['cType']                 = cType
-        self.projectConfig['Groups'][gid]['csid']                  = csid
-        self.projectConfig['Groups'][gid]['cidList']               = cidList
+        self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.cannonListSort(cidList)
         self.projectConfig['Groups'][gid]['bindingOrder']          = 0
-
         # Here we need to "inject" cType information into the config
-        # If we don't createGroup() will fail badly.
         self.cType = cType
+        if not self.tools.addComponentType(self.projectConfig, self.local, cType) :
+            self.tools.writeConfFile(self.projectConfig)
+        # Initialize the project now to get settings into the project config
+        aProject = Project(self.pid, gid)
+        aProject.createGroup()
+        # This works outside this module so bring the new settings
+        # back into the module here
+        self.projectConfig = aProject.projectConfig
 
-#        import pdb; pdb.set_trace()
-        self.tools.addComponentType(self.projectConfig, self.local, cType)
-
-        # Lock and save our config settings
-        self.projectConfig['Groups'][gid]['isLocked']  = True
-        if self.tools.writeConfFile(self.projectConfig) :
-            self.log.writeToLog(self.errorCodes['0240'], [gid])
+        # Install the components now, if successful, we can update the
+        # project config. If not, the user will need to sort out why
+        if self.installGroupComps(gid, cType, sources) :
+            # Sort the cidList to cannonical order
+            cidListSorted = self.usfmData.cannonListSort(cidList)
+            if cidList != cidListSorted :
+                self.projectConfig['Groups'][gid]['cidList'] = cidListSorted
+                self.tools.writeConfFile(self.projectConfig)
 
         # Update helper scripts
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
-
-        # Initialize the project now to get settings into the project config
-        # This might help to overcome other module initialization problems.
-        aProject = Project(self.pid, gid)
-        aProject.createGroup()
-        if cType == 'usfm' :
-            aProject.managers['usfm_Text'].updateManagerSettings(gid)
-
-        # In case all the vars are not set
-        self.finishInit()
-
-        # Install the components
-        self.installGroupComps(gid, cidList, force)
+            ProjCommander(self.pid).makeGrpScripts()
+            
+        return True
 
 
-    def removeGroup (self, gid, force = False) :
+    def removeGroup (self, gid, cidList = None) :
         '''Handler to remove a group. If it is not found return True anyway.'''
 
-        cidList     = self.projectConfig['Groups'][gid]['cidList']
-        cType       = self.projectConfig['Groups'][gid]['cType']
+#        import pdb; pdb.set_trace()
+
+        # See if the group is there, count as success if it isn't
+        if not self.projectConfig['Groups'].has_key(gid) :
+            self.log.writeToLog(self.errorCodes['0292'], [gid])
+            return False
+
+        # If no CID list was provided, we assume the group is being deleted
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+
+        # Otherwise we are removing just a subset of the group, just
+        # one or more CIDs.
         groupFolder = os.path.join(self.local.projComponentFolder, gid)
-
-        # First test for lock
-        if self.isLocked(gid) and force == False :
-            self.log.writeToLog(self.errorCodes['0210'], [gid])
-
-        # Remove subcomponents from the target if there are any
-        self.tools.buildConfSection(self.projectConfig, 'Groups')
-        if self.projectConfig['Groups'].has_key(gid) :
-            for cid in cidList :
-                self.uninstallGroupComponent(gid, cid, force)
+        # To avoid problems in the for loop, make a copy
+        killList = list(cidList)
+        
+        # Remove components
+        for cid in killList :
+            if self.uninstallGroupComponent(gid, cid) :
+                self.log.writeToLog(self.errorCodes['0294'], [cid,gid])
+            else :
+                self.log.writeToLog(self.errorCodes['0296'], [cid,gid])
+           
+        # Now remove the config entry and folder if it is empty
+        if len(self.projectConfig['Groups'][gid]['cidList']) == 0 :
+            del self.projectConfig['Groups'][gid]
             if os.path.exists(groupFolder) :
                 shutil.rmtree(groupFolder)
                 self.log.writeToLog(self.errorCodes['0290'], [gid])
-        else :
-            self.log.writeToLog(self.errorCodes['0250'], [gid])
-            
-        # Now remove the config entry
-        del self.projectConfig['Groups'][gid]
-        if self.tools.writeConfFile(self.projectConfig) :
-            self.log.writeToLog(self.errorCodes['0220'], [gid])
+        # Write out the config in case something has been changed
+        self.tools.writeConfFile(self.projectConfig)
 
 
-    def uninstallGroupComponent (self, gid, cid, force = False) :
-        '''This will remove a component (files) from a group in the project.
-        However, a backup will be made of the working text for comparison purposes. 
-       This does not return anything. We trust it will work.'''
+        # Report successful and return
+        self.log.writeToLog(self.errorCodes['0298'], [gid])
+        return True
 
-#       import pdb; pdb.set_trace()
 
-        cType       = self.projectConfig['Groups'][gid]['cType']
-        csid        = self.projectConfig['Groups'][gid]['csid']
-        fileHandle  = cid + '_' + csid
+    def uninstallGroupComponent (self, gid, cid) :
+        '''This will remove a component (files) from a group in the
+        project. A backup will be made of the working text for
+        comparison purposes.'''
+
+#        import pdb; pdb.set_trace()
+
+        # First see if the CID is in the config
+        if not self.isComponent(gid, cid) :
+            self.log.writeToLog(self.errorCodes['0262'], [cid,gid])
+            return False
+
+        # Get file names
+        compFiles = self.local.getComponentFiles(gid, cid)
 
         # Test to see if it is shared
-        if self.isSharedComponent(gid, fileHandle) :
-            self.log.writeToLog(self.errorCodes['0260'], [fileHandle,gid])
+        if self.isSharedComponent(gid, cid + '_base') :
+            self.log.writeToLog(self.errorCodes['0260'], [cid + '_base',gid])
+            return False
 
         # Remove the files
-        if force :
-            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-            workingComp     = self.getWorkCompareFile(gid, cid)
-            working         = self.getWorkingFile(gid, cid)
+        if os.path.isfile(compFiles['working']) :
+            self.makeCVOne(compFiles['working'], compFiles['backup'])
+            self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(compFiles['backup']), cid])
+            for fn in os.listdir(os.path.join(self.local.projComponentFolder, cid)) :
+                f = os.path.join(os.path.join(self.local.projComponentFolder, cid), fn)
+                if f != compFiles['backup'] :
+                    os.remove(f)
+                    self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
+        # Remove the CID from the config list
+        if cid in self.projectConfig['Groups'][gid]['cidList'] :
+            self.projectConfig['Groups'][gid]['cidList'].remove(cid)
 
-            if os.path.isfile(working) :
-                self.makeCVOne(working, workingComp)
-                self.log.writeToLog(self.errorCodes['0270'], [self.tools.fName(workingComp), cid])
-                for fn in os.listdir(targetFolder) :
-                    f = os.path.join(targetFolder, fn)
-                    if f != workingComp :
-                        os.remove(f)
-                        self.log.writeToLog(self.errorCodes['0280'], [self.tools.fName(f), cid])
+        # If nothing above errored, return true
+        return True
 
+    
+    def isComponent (self, gid, cid) :
+        '''See if the CID is registered in the group.'''
+
+        try :
+            if cid in self.projectConfig['Groups'][gid]['cidList'] :
                 return True
+        except :
+            return False
 
 
     def isSharedComponent (self, gid, cid) :
@@ -371,10 +406,9 @@ class ProjSetup (object) :
             return False
 
 
-    def installGroupComps (self, gid, cidList, force = False) :
-        '''This will install components to the group we created above in createGroup().
-        If a component is already installed in the project it will not proceed unless
-        force is set to True. Then it will remove the component files so a fresh copy
+    def installGroupComps (self, gid, cType, sources) :
+        '''This will install components to the group we created above in 
+        addGroup(). It will remove the component files so a fresh copy
         can be added to the project.'''
 
 #        import pdb; pdb.set_trace()
@@ -383,114 +417,20 @@ class ProjSetup (object) :
         if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
-        # Get some group settings
-        cType       = self.projectConfig['Groups'][gid]['cType']
-
-        for cid in cidList :
+        for cid, fName in sources.iteritems() :
+            self.log.writeToLog(self.errorCodes['0250'], [self.cidNameDict[cid]])
             # See if the working text is present, quite if it is not
-            if cType == 'usfm' :
-                # Force on add always means we delete the component first
-                # before we do anything else
-                if force :
-                    self.uninstallGroupComponent(gid, cid, force)
 
-                # Install our working text files
-                if self.installUsfmWorkingText(gid, cid, force) :
-                    # Report in context to force use or not
-                    if force :
-                        self.log.writeToLog(self.errorCodes['0232'], [cid])
-                    else :
-                        self.log.writeToLog(self.errorCodes['0230'], [cid])
+            # Install our working text files
+            if self.importWorkingText(fName, cType, gid, cid) :
+                self.log.writeToLog(self.errorCodes['0230'], [cid])
 
-                else :
-                    self.log.writeToLog(self.errorCodes['0265'], [cid])
-                    return False
             else :
-                self.log.writeToLog(self.errorCodes['0205'], [cType])
+                self.log.writeToLog(self.errorCodes['0265'], [cid])
+                return False
 
         # If we got this far it must be okay to leave
         return True
-
-
-###############################################################################
-######################### Component Handling Functions ########################
-###############################################################################
-####################### Error Code Block Series = 0300 ########################
-###############################################################################
-
-    def getSourceFile (self, gid, cid) :
-        '''Get the source file name with path.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Just in case there are any problems with the source path
-        # Reset the local mod first
-        self.local = ProjLocal(self.pid, gid, self.projectConfig)
-        if self.local.sourcePath :
-            paratext            = Paratext(self.pid, gid)
-            sourcePath          = self.local.sourcePath
-            cType               = self.projectConfig['Groups'][gid]['cType']
-            sourceEditor        = paratext.getSourceEditor()
-            # Build the file name
-            if sourceEditor.lower() == 'paratext' :
-                sName = paratext.formPTName(cid)
-            elif sourceEditor.lower() == 'generic' :
-                sName = paratext.formGenericName(cid)
-            else :
-                return None
-
-            return os.path.join(sourcePath, sName)
-
-
-    def getWorkingFile (self, gid, cid) :
-        '''Return the working file name with path.'''
-
-        csid            = self.projectConfig['Groups'][gid]['csid']
-        cType           = self.projectConfig['Groups'][gid]['cType']
-        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-        return os.path.join(targetFolder, cid + '_' + csid + '.' + cType)
-
-
-    def getWorkCompareFile (self, gid, cid) :
-        '''Return the working compare file (saved from last update) name with path.'''
-
-        return self.getWorkingFile(gid, cid) + '.cv1'
-
-
-    def getWorkingSourceFile (self, gid, cid) :
-        '''Get the working source file name with path.'''
-
-        # Just in case there are any problems with the source path
-        # Reset the local mod first
-        self.local = ProjLocal(self.pid, gid, self.projectConfig)
-        if self.local.sourcePath :
-            targetFolder    = os.path.join(self.local.projComponentFolder, cid)
-            source          = self.getSourceFile(gid, cid)
-            sName           = os.path.split(source)[1]
-            return os.path.join(targetFolder, sName + '.source')
-
-
-    def addCompGroupSourcePath (self, gid, csid, source) :
-        '''Add a source path for components used in a group if none
-        exsist. If one exists, replace anyway. Last in wins! The 
-        assumption is only one path per component group.'''
-
-#        # Get the csid
-#        csid = self.projectConfig['Groups'][gid]['csid']
-
-        # Path has been resolved in Rapuma, we assume it should be valid.
-        # But it could be a full file name. We need to sort that out.
-        try :
-            if os.path.isdir(source) :
-                self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = source
-            else :
-                self.userConfig['Projects'][self.pid][csid + '_sourcePath'] = os.path.split(source)[0]
-
-            self.tools.writeConfFile(self.userConfig)
-            self.log.writeToLog(self.errorCodes['0320'], [source])
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0300'], [str(e)])
 
 
 ###############################################################################
@@ -541,23 +481,41 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 0600 ########################
 ###############################################################################
 
-    def newProject (self, projHome, pmid, systemVersion, tid = None) :
+    def isProjectEmpty(self):
+        '''Test if project is "empty" (contains no data files).
+        The reason this might be necessary is that inside newProject(), we
+        want to distinguish the "we're in process of creating the project"
+        case from the "this project already existed before" case. If we're
+        creating a brand-new project, it will have a project.conf file but
+        nothing else.'''
+        projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        result = False
+        if not os.path.exists(projHome) :
+            result = True
+        else:
+            # Project exists, but is it empty? (i.e., contains nothing but Config/project.conf)
+            if os.listdir(projHome) == ['Config'] :
+                if os.listdir(os.path.join(projHome, 'Config')) == ['project.conf'] :
+                    result = True
+        return result
+
+
+    def newProject (self, pmid='book', tid=None, force=None) :
         '''Create a new publishing project.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Sort out some necessary vars
-        self.projHome = projHome
-        self.projectMediaIDCode = pmid
+        if not pmid :
+            pmid = 'book'
 
         # Test if this project already exists in the user's config file.
-        if self.user.isRegisteredProject(self.pid) :
-            self.tools.terminal('ERR: Halt! ID [' + self.pid + '] already defined for another project.')
-            return
-
-        # Add project to local Rapuma project registry
-#        self.user.registerProject(self.pid, pname, self.projectMediaIDCode, self.projHome)
-        self.user.registerProject(self.pid, self.projectMediaIDCode, self.projHome)
+        if not self.isProjectEmpty() :
+            if force :
+                self.tools.terminal('Force project delete for: ' + self.pid)
+                ProjDelete().deleteProject(self.pid)
+            else :
+                self.tools.terminal('ERR: Halt! Project [' + self.pid + '] already exists.')
+                return
 
         # Load a couple necessary modules
         self.local              = ProjLocal(self.pid)
@@ -582,12 +540,13 @@ class ProjSetup (object) :
                 self.tools.terminal('ERR: Halt! Not a valid (parent) path: ' + os.path.dirname(self.local.projHome))
                 return
         else :
-            self.tools.terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
-            return
+            if not self.isProjectEmpty() :
+                self.tools.terminal('ERR: Halt! A project already exsits in this location. Please remove it before continuing.')
+                return
 
         # If we made it to this point, we need to make a new project folder
         if not os.path.exists(self.local.projConfFolder) :
-            os.makedirs(self.local.projConfFolder)
+            self.tools.makedirs(self.local.projConfFolder)
             # Create all normal project folders
             for fld in self.local.projFolders :
                 folder = os.path.join(self.local.projHome, fld)
@@ -599,11 +558,11 @@ class ProjSetup (object) :
             self.data.templateToProject(self.user, self.local.projHome, self.pid, tid)
         else :
             # If not from a template, just create a new version of the project config file
-            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.projectMediaIDCode, systemVersion)
+            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.systemVersion, pmid) 
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
+            ProjCommander(self.pid).makeStaticScripts()
 
         # Report what we did
         self.tools.terminal('Created new project [' + self.pid + ']')
@@ -616,33 +575,26 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def installUsfmWorkingText (self, gid, cid, force = False) :
-        '''Find the USFM source text and install it into the working text
-        folder of the project with the proper name. If a USFM text file
-        is not located in a PT project folder, the editor cannot be set
-        to paratext, it must be set to generic. This assumes lock checking
-        was done previous to the call.'''
+    def importWorkingText (self, source, cType, gid, cid) :
+        '''Import USFM working text from source. This will overwrite any
+        existing version.'''
+
+        # To prevent loading errors, bring this mod now
+        proj_process        = ProjProcess(self.pid, gid, self.projectConfig)
+
+        usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
+        compFiles           = self.local.getComponentFiles(gid, cid)
+        targetFolder        = os.path.join(self.local.projComponentFolder, cid)
+        # Set the source path/name here
+        compFiles['source']  = os.path.join(self.local.projComponentFolder, cid, os.path.split(source)[1] + '.source')
 
 #        import pdb; pdb.set_trace()
-
-        # To prevent loading errors, bring these mods now
-        paratext            = Paratext(self.pid, gid)
-        proj_process        = ProjProcess(self.pid, gid)
-
-        cType               = self.projectConfig['Groups'][gid]['cType']
-        usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
-        targetFolder        = os.path.join(self.local.projComponentFolder, cid)
-        target              = self.getWorkingFile(gid, cid)
-        targetSource        = self.getWorkingSourceFile(gid, cid)
-        source              = self.getSourceFile(gid, cid)
-        extractFigMarkers   = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
-        extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
 
         # Look for the source now, if not found, fallback on the targetSource
         # backup file. But if that isn't there die.
         if not os.path.isfile(source) :
-            if os.path.isfile(targetSource) :
-                source = targetSource
+            if os.path.isfile(compFiles['source']) :
+                source = compFiles['source']
             else :
                 self.log.writeToLog(self.errorCodes['1120'], [source])
 
@@ -652,61 +604,83 @@ class ProjSetup (object) :
 
         # Always save an untouched copy of the source and set to
         # read only. We may need this to restore/reset later.
-        if os.path.isfile(targetSource) :
+        if os.path.isfile(compFiles['source']) :
             # Don't bother if we copied from it in the first place
-            if targetSource != source :
+            if compFiles['source'] != source :
                 # Reset permissions to overwrite
-                self.tools.makeWriteable(targetSource)
-                shutil.copy(source, targetSource)
-                self.tools.makeReadOnly(targetSource)
+                self.tools.makeWriteable(compFiles['source'])
+                shutil.copy(source, compFiles['source'])
+                self.tools.makeReadOnly(compFiles['source'])
         else :
-            shutil.copy(source, targetSource)
-            self.tools.makeReadOnly(targetSource)
+            shutil.copy(source, compFiles['source'])
+            self.tools.makeReadOnly(compFiles['source'])
 
         # To be sure nothing happens, copy from our project source
         # backup file. (Is self.style.defaultStyFile the best thing?)
-        if self.usfmCopy(targetSource, target, gid) :
+        if self.usfmCopy(compFiles['source'], compFiles['working'], gid) :
             # Run any working text preprocesses on the new component text
             # Note that the groupPreprocessFile value is based on the csid,
             # not the gid. This allows for different preprocess scripts
             # to be used for the same type but use can then span groups
             if usePreprocessScript :
                 proj_process.checkForPreprocessScript(gid)                
-                if not proj_process.runProcessScript(target, self.local.groupPreprocessFile) :
+                if not proj_process.runProcessScript(compFiles['working'], self.local.groupPreprocessFile) :
                     self.log.writeToLog(self.errorCodes['1130'], [cid])
 
-
-# FIXME: This entire next part should go out into a separate function to better
-# manage the process of removing extra non-Biblical text from the source, if
-# the process requires this. It should not be hard to do
-
-# Of cource this is USFM! Dah!
-
-            # If this is a USFM component type we need to remove any \fig markers,
-            # and record them in the illustration.conf file for later use
-            if cType == 'usfm' :
-                tempFile = tempfile.NamedTemporaryFile()
-                contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
-                # logUsfmFigure() logs the fig data and strips it from the working text
-                # Note: Using partial() to allows the passing of the cid param 
-                # into logUsfmFigure()
-                if extractFigMarkers :
-                    contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(paratext.logFigure, gid, cid), contents)
-                # Now remove end notes from the text
-                if extractFeMarkers :
-                    contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(paratext.collectEndNotes, cid), contents)
-                # Write out the remaining data to the working file
-                codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
-                # Finish by copying the tempFile to the source
-                shutil.copy(tempFile.name, target)
-
-            # If the text is there, we should return True so do a last check to see
-            if os.path.isfile(target) :
-                self.log.writeToLog(self.errorCodes['1140'], [cid])
-                return True
+            self.takeOutFigMarkers(compFiles['working'], cType, gid, cid)
+            self.takeOutFeMarkers(compFiles['working'], cType, gid, cid)
+            # If we made it this far, return True
+            return True 
         else :
-            self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(target)])
+            self.log.writeToLog(self.errorCodes['1150'], [source,self.tools.fName(compFiles['working'])])
             return False
+
+
+    def takeOutFigMarkers (self, target, cType, gid, cid) :
+        '''Remove \fig markers and log the information in a config file.'''
+
+        extractFigMarkers = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFigMarkers'])
+        # logUsfmFigure() logs the fig data and strips it from the working text
+        # Note: Using partial() to allows the passing of the cid param 
+        # into logUsfmFigure()
+        if extractFigMarkers :
+            tempFile = tempfile.NamedTemporaryFile()
+            contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+            contents = re.sub(r'\\fig\s(.+?)\\fig\*', partial(self.logFigure, gid, cid), contents)
+            # Write out the remaining data to the working file
+            codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
+            # Finish by copying the tempFile to the source
+            shutil.copy(tempFile.name, target)
+
+        return True
+
+
+    def takeOutFeMarkers (self, target, cType, gid, cid) :
+        '''Remove \fe markers and log the information in a config file.'''
+
+#        import pdb; pdb.set_trace()
+
+        extractFeMarkers    = self.tools.str2bool(self.projectConfig['CompTypes'][cType.capitalize()]['extractFeMarkers'])
+        # collectEndNotes() removes and collects any end notes found
+        # in the working text. They will be processed later and converted
+        # to another end matter component.
+        # Note: Using partial() to allows the passing of the cid param 
+        # into collectEndNotes()
+        if extractFeMarkers :
+
+# FIXME: The collectEndNotes() function doesn't really work yet.
+
+            contents = codecs.open(target, "rt", encoding="utf_8_sig").read()
+            if re.search(r'\\fe\s', contents) :
+                self.log.writeToLog(self.errorCodes['1999'], [cid])
+#                tempFile = tempfile.NamedTemporaryFile()
+#                contents = re.sub(r'\\fe\s(.+?)\\fe\*', partial(self.collectEndNotes, cid), contents)
+                # Write out the remaining data to the working file
+#                codecs.open(tempFile.name, "wt", encoding="utf_8_sig").write(contents)
+                # Finish by copying the tempFile to the source
+#                shutil.copy(tempFile.name, target)
+
+        return True
 
 
     def usfmCopy (self, source, target, gid) :
@@ -793,6 +767,114 @@ class ProjSetup (object) :
             return False
 
 
+    def collectEndNotes (self, cid, endNoteConts) :
+        '''Collect the end notes from a cid.'''
+
+# FIXME: Output the endnotes to a separate file in the component folder for future processing
+
+        return True
+
+
+    def logFigure (self, gid, cid, figConts) :
+        '''Log the figure data in the illustration.conf. If nothing is returned, the
+        existing \fig markers with their contents will be removed. That is the default
+        behavior.'''
+
+        # Just in case this section isn't there
+        self.tools.buildConfSection(self.illustrationConfig, gid)
+
+        # Description of figKeys (in order found in \fig)
+            # description = A brief description of what the illustration is about
+            # file = The file name of the illustration (only the file name)
+            # caption = The caption that will be used with the illustration (if turned on)
+            # width = The width or span the illustration will have (span/col)
+            # location = Location information that could be printed in the caption reference
+            # copyright = Copyright information for the illustration
+            # reference = The book ID (upper-case) plus the chapter and verse (eg. MAT 8:23)
+
+        # We want the figConts to be a list but it comes in as a re group
+        figList = figConts.group(1).split('|')
+
+        figKeys = ['description', 'fileName', 'width', 'location', 'copyright', 'caption', 'reference']
+        figDict = {}
+        # FIXME: If this is for a map and no layout information has been added
+        # to the project yet, the cvSep look up will fail, get around with a try
+        try :
+            cvSep = self.layoutConfig['Illustrations']['chapterVerseSeperator']
+        except :
+            cvSep = ':'
+
+        # Add all the figure info to the dictionary
+        c = 0
+        for value in figList :
+            figDict[figKeys[c]] = value
+            c +=1
+
+        # Add additional information, get rid of stuff we don't need
+        figDict['illustrationID'] = figDict['fileName'].split('.')[0]
+        figDict['useThisIllustration'] = True
+        figDict['useThisCaption'] = True
+        figDict['useThisCaptionRef'] = True
+        figDict['bid'] = cid
+        c = re.search(ur'([0-9]+)[.:][0-9]+', figDict['reference'].upper())
+        if c is None :
+            figDict['chapter'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['chapter'] = c.group(1)
+
+        v = re.search(ur'[0-9]+[.:]([0-9]+)', figDict['reference'].upper())
+        if v is None :
+            figDict['verse'] = 0  # Or however you want to handle "pattern not found"
+        else:
+            figDict['verse'] = v.group(1)
+
+        # If this is an update, we need to keep the original settings in case the
+        # default settings have been modified for this project.
+        # Illustration Scale
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['scale'] = self.illustrationConfig[gid][figDict['illustrationID']]['scale']
+        else :
+            figDict['scale'] = '1.0'
+        # Illustration Position
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['position'] = self.illustrationConfig[gid][figDict['illustrationID']]['position']
+        else :
+            if figDict['width'] == 'col' :
+                figDict['position'] = 'tl'
+            else :
+                figDict['position'] = 't'
+        # Illustration Location
+        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['location'] = self.illustrationConfig[gid][figDict['illustrationID']]['location']
+        else :
+            if not figDict['location'] :
+                figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
+        # Now make (update) the actual illustration section
+        if not self.illustrationConfig.has_key(gid) :
+            self.tools.buildConfSection(self.illustrationConfig, gid)
+        # Put the dictionary info into the illustration conf file
+        if not self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            self.tools.buildConfSection(self.illustrationConfig[gid], figDict['illustrationID'])
+        for k in figDict.keys() :
+            self.illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
+
+        # Write out the conf file to preserve the data found
+        self.tools.writeConfFile(self.illustrationConfig)
+
+        # Just incase we need to keep the fig markers intact this will
+        # allow for that. However, default behavior is to strip them
+        # because usfmTex does not handle \fig markers. By returning
+        # them here, they will not be removed from the working text.
+        # FIXME: One issue here is that is is basicaly hard-wired for
+        # usfm to be the only cType. This breaks if you are working with
+        # something else. To get around it we will use a try statement
+        try :
+            if self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Illustration']['preserveUsfmFigData']) :
+                return '\\fig ' + figConts.group(1) + '\\fig*'
+        except :
+            return None
+
+
 ###############################################################################
 ########################## Settings Change Functions ##########################
 ###############################################################################
@@ -848,67 +930,164 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['2860'], [config, section, key, unicode(oldValue), unicode(newValue)])
 
 
+###############################################################################
+######################### Component Compare Functions #########################
+###############################################################################
+####################### Error Code Block Series = 3000 ########################
+###############################################################################
+
+
+
+    def compareGroup (self, compareType, gid, cidList = None) :
+        '''Compare cv1 with working file in a component. If
+        no CIDs are given, the entire group will be compared.'''
+        
+        # If no CID list was provided, we assume the whole group will
+        # be compared, not just a subset
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+        
+        for cid in cidList :
+            self.compareComponent(compareType, gid, cid)
+
+        self.log.writeToLog(self.errorCodes['3100'], [gid])
+        return True
+
+
+    def compareComponent (self, compareType, gid, cid) :
+        '''Compare a component's working file with its source or cv1
+        backup.'''
+
+        files = self.local.getComponentFiles(gid, cid)
+        self.compare(files['working'], files[compareType])
+        self.log.writeToLog(self.errorCodes['3200'], [cid])
+        return True
+
+
+    def isDifferent (self, new, old) :
+        '''Return True if the contents of the files are different.'''
+
+        # If one file is missing, return True
+        if not os.path.exists(new) or not os.path.exists(old) :
+            return True
+
+        # Inside of diffl() open both files with universial line endings then
+        # check each line for differences.
+        diff = difflib.ndiff(open(new, 'rU').readlines(), open(old, 'rU').readlines())
+        for d in diff :
+            if d[:1] == '+' or d[:1] == '-' :
+                return True
+        # FIXME: Is returning False better than None?
+        return False
+
+
+    def compare (self, old, new) :
+        '''Run a compare on two files. Do not open in viewer unless it is different.'''
+
+#        import pdb; pdb.set_trace()
+
+        self.log.writeToLog(self.errorCodes['3295'], [self.tools.fName(old),self.tools.fName(new)])
+        # If there are any differences, open the diff viewer
+        if self.isDifferent(old, new) :
+            # If no diffViewCmd is found this may be running headless
+            # in that case just report that the file is different and
+            # and leave the function
+            if not self.diffViewCmd :
+                self.log.writeToLog(self.errorCodes['3300'])
+            else :
+                # To prevent file names being pushed back to the list ref
+                # we need to use extend() rather than append()
+                cmd = []
+                cmd.extend(self.diffViewCmd)
+                cmd.extend([old, new])
+                try :
+                    self.log.writeToLog(self.errorCodes['3298'])
+                    subprocess.call(cmd)
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.log.writeToLog(self.errorCodes['3280'], [str(e)])
+        else :
+            self.log.writeToLog(self.errorCodes['3220'])
+
 
 ###############################################################################
+######################### Component Restore Functions #########################
+###############################################################################
+####################### Error Code Block Series = 4000 ########################
+###############################################################################
+
+
+    def restoreGroup (self, gid, cidList = None) :
+        '''Restore components in a group from their cv1 backup file. If
+        no CIDs are given, the entire group will be restored. Any cv1
+        files that have been restored will be deleted.'''
+        
+        skip = False
+
+        # If no CID list was provided, we assume the whole group will
+        # be compared, not just a subset
+        if not cidList :
+            cidList = self.projectConfig['Groups'][gid]['cidList']
+        
+        for cid in cidList :
+            files = self.local.getComponentFiles(gid, cid)
+            if os.path.isfile(files['backup']) :
+                if self.isDifferent(files['backup'], files['working']) :
+                    self.tools.makeWriteable(files['backup'])
+                    shutil.copy(files['backup'], files['working'])
+                    self.log.writeToLog(self.errorCodes['4200'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['4300'], [cid])
+                    skip = True
+            else :
+                self.log.writeToLog(self.errorCodes['4400'], [self.tools.fName(files['backup'])])
+                return False
+                
+            # Test and delete the backup (cv1)
+            if not skip :
+                if not self.isDifferent(files['backup'], files['working']) :
+                    os.remove(files['backup'])
+                    self.log.writeToLog(self.errorCodes['4500'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['4600'], [cid])
+                    return False
+
+        self.log.writeToLog(self.errorCodes['4100'], [gid])
+        return True
+
+
+###############################################################################
+###############################################################################
 ############################# Project Delete Class ############################
+###############################################################################
 ###############################################################################
 
 # This class was created to prevent conflicts from the main class in this module.
 
 class ProjDelete (object) :
 
-    def __init__(self, pid) :
+    def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
         self.tools                          = Tools()
-        self.pid                            = pid
-        self.projHome                       = None
-        if self.userConfig.has_key('Projects') and self.userConfig['Projects'].has_key(pid) :
-            self.projHome                   = self.userConfig['Projects'][self.pid]['projectPath']
 
 # Currently there is only this function in this class
 
-    def deleteProject (self, force = False) :
-        '''Delete a project from the Rapuma system registry. If force is used,
-        create a backup in the project's parent folder.'''
+    def deleteProject (self, pid) :
+        '''Delete a project.'''
 
-        # If no pid was given this fails
-        if not self.pid :
-            self.tools.terminal('\nERROR: Project ID code not given or found. delete operation failed.\n')
-            return
+        projHome                            = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), pid)
 
-        # Check if project is registered with Rapuma
-        if not self.projHome :
-            self.tools.terminal('\nWarning: [' + self.pid + '] not a registered project.\n')
+        # Delete project
+        if os.path.exists(projHome) :
+            shutil.rmtree(projHome)
+            self.tools.terminal('Removed project files for [' + pid + '] from hard drive.')
+            return True
         else :
-            # Remove references from user rapuma.conf
-            if self.user.unregisterProject(self.pid) :
-                self.tools.terminal('Removed [' + self.pid + '] from user configuration.')
-            else :
-                self.tools.terminal('Failed to remove [' + self.pid + '] from user configuration.')
+            self.tools.terminal('Warning: [' + pid + '] project could not be found, unable to delete project files.')
 
-        # Do a simple (numbered) backup if force is used.
-        if self.projHome and force :
-            self.tools.makeFolderBackup(self.projHome)
-        else :
-            self.tools.terminal('Warning: Not enough config information to build a path to the project home. Unable to do the requested project backup.')
-
-#        import pdb; pdb.set_trace()
-
-        # Remove any possible residual project data
-        if not self.projHome :
-            self.projHome = os.path.join(self.userConfig['Resources']['projects'], self.pid)
-        if os.path.exists(self.projHome) :
-            shutil.rmtree(self.projHome)
-            self.tools.terminal('Removed project files for [' + self.pid + '] from hard drive.')
-        else :
-            self.tools.terminal('Warning: [' + self.pid + '] project could not be found, unable to delete project files.')
-
-        # Report the process is done
-        self.tools.terminal('Removal process for [' + self.pid + '] is completed.')
-        return True
 
 
 

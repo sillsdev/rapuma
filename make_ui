@@ -21,7 +21,7 @@
 #    internet at http://www.fsf.org/licenses/lgpl.html.
 
 # Import standard modules
-import os, subprocess, sys
+import os, subprocess, sys, time, datetime
 from configobj import ConfigObj
 # Temporay mod the Python path to import auxillary modules
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), 'lib'))
@@ -29,8 +29,10 @@ import sh
 del sys.path[0]
 
 # Update version number
+# Note: This is modified for testing, do not use this date stamp code for stable
+dts             = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d%H%M%S')
 gv              = str(sh.git.describe('master')).strip().split('-')
-systemVersion   = gv[0] + '.' + gv[1].zfill(3) + ' build(' + gv[2] + ')'
+systemVersion   = gv[0] + '.' + gv[1].zfill(3) + ' testing(' + dts + ')'
 
 sysConfig = ConfigObj(os.path.join(os.getcwd(), 'config', 'system.ini'), encoding='utf-8')
 sysConfig['Rapuma']['systemVersion'] = systemVersion

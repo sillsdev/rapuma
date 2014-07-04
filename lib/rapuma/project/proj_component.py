@@ -41,8 +41,7 @@ class ProjComponent (object) :
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = self.userConfig['Projects'][pid]['projectPath']
-        self.pmid                       = self.userConfig['Projects'][pid]['projectMediaIDCode']
+        self.projHome                   = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local                      = ProjLocal(pid)
         self.projectConfig              = Config(self.local).projectConfig
         self.log                        = ProjLog(pid)

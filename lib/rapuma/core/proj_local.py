@@ -26,7 +26,7 @@ from rapuma.core.user_config        import UserConfig
 
 class ProjLocal (object) :
 
-    def __init__(self, pid, gid = None, projectConf = None) :
+    def __init__(self, pid, gid = None, cType = 'usfm', mType = 'book', macPack = 'usfmTex') :
         '''Intitate a class object which contains all the project file folder locations.
         The files and folders are processed by state. If the system is in a state where
         certain parent files or folders do not exist, the child file or folder will be
@@ -40,33 +40,19 @@ class ProjLocal (object) :
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.userHome           = os.environ.get('RAPUMA_USER')
         self.osPlatform         = platform.architecture()[0][:2]
-        self.projectConf        = projectConf
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
+        self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projFolders        = []
-        self.projHome           = None
         self.localDict          = None
-        self.cType              = None
-        self.mType              = None
-        self.macPack            = None
-        self.csid               = None
-        self.sourcePath         = None
+        self.cType              = cType
+        self.mType              = mType
+        self.macPack            = macPack
         debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
             os.makedirs(os.path.join(self.userResouce, 'debug'))
-        if not self.userConfig.has_key('Projects') :
-            self.tools.buildConfSection(self.userConfig, 'Projects')
-        if self.userConfig['Projects'].has_key(pid) :
-            self.projHome       = self.userConfig['Projects'][pid]['projectPath']
-            self.mType          = self.userConfig['Projects'][pid]['projectMediaIDCode']
-        if projectConf :
-            self.cType          = projectConf['Groups'][gid]['cType']
-            self.csid           = projectConf['Groups'][gid]['csid']
-            self.macPack        = projectConf['CompTypes'][self.cType.capitalize()]['macroPackage']
-            if self.userConfig['Projects'][pid].has_key(self.csid + '_sourcePath') :
-                self.sourcePath = self.userConfig['Projects'][pid][self.csid + '_sourcePath']
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
@@ -294,6 +280,35 @@ class ProjLocal (object) :
                     found_idx = remembered_idx
                     remembered_idx = None
                     yield (found_idx, idx)
+
+
+    def getComponentFiles (self, gid, cid) :
+        '''Return a dictionary that contains files and paths for a set
+        of component files. The path/names are only theoretical and
+        need to be tested by the calling function. However, in the case
+        of the source name, it will be a null item if the file does not
+        exist.'''
+
+        files               = {}
+        compFolder          = os.path.join(self.projComponentFolder, cid)
+        # These are predictable
+        fileHandle          = cid + '_base'
+        files['working']    = os.path.join(compFolder, fileHandle + '.' +  self.cType)
+        files['backup']     = files['working'] + '.cv1'
+        # Source file may not exist so we will try to find it
+        try :
+            # Since the source name is not predictable we will look for a
+            # file with a .source extention and assume that is it. If not
+            # found we leave the source item empty
+            fileList = os.listdir(compFolder)
+            for f in fileList :
+                if f.find('.source') > 0 :
+                    files['source'] = os.path.join(compFolder, f)
+        except :
+            files['source'] = None
+                                
+        # Return the dictionary
+        return files
 
 
 

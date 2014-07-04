@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os
+import codecs, os, re
 from configobj import ConfigObj
 
 # Load the local classes
@@ -34,12 +34,12 @@ class ProjCommander (object) :
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = self.userConfig['Projects'][self.pid]['projectPath']
-        self.projectMediaIDCode     = self.userConfig['Projects'][self.pid]['projectMediaIDCode']
+        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local                  = ProjLocal(self.pid)
         self.proj_config            = Config(pid)
         self.proj_config.getProjectConfig()
         self.projectConfig          = self.proj_config.projectConfig
+        self.projectMediaIDCode     = self.projectConfig['ProjectInfo']['projectMediaIDCode']
 
         # Log messages for this module
         self.errorCodes     = {
@@ -60,15 +60,15 @@ class ProjCommander (object) :
     def updateScripts (self) :
         '''Update all the helper command scripts in a project.'''
 
-        if not os.path.isdir(self.local.projHelpScriptFolder) :
-            os.mkdir(self.local.projHelpScriptFolder)
-
         self.makeStaticScripts()
         self.makeGrpScripts()
 
 
     def makeGrpScripts (self) :
         '''Create scripts that process specific group components.'''
+
+        if not os.path.isdir(self.local.projHelpScriptFolder) :
+            os.mkdir(self.local.projHelpScriptFolder)
 
         # Output the scripts (If this is a new project we need to pass)
         if self.projectConfig.has_key('Groups') :
@@ -78,7 +78,9 @@ class ProjCommander (object) :
                     fullFile = os.path.join(self.local.projHelpScriptFolder, key) + gid
                     with codecs.open(fullFile, "w", encoding='utf_8') as writeObject :
                         writeObject.write(self.makeScriptHeader(allScripts[key][0], allScripts[key][1]))
-                        writeObject.write(allScripts[key][1] + '\n\n')
+                        # Strip out extra spaces from command
+                        cmd = re.sub(ur'\s+', ur' ', allScripts[key][1])
+                        writeObject.write(cmd + '\n\n')
 
                     # Make the script executable
                     self.tools.makeExecutable(fullFile)
@@ -94,6 +96,9 @@ class ProjCommander (object) :
         Note: This is only for temporary use due to the lack of an interface at
         this time (20130306140636). It assumes the cType is usfm which, at some point
         may not be the case.'''
+
+        if not os.path.isdir(self.local.projHelpScriptFolder) :
+            os.mkdir(self.local.projHelpScriptFolder)
 
         # Output the scripts
         allScripts = self.getStaticScripInfo()
@@ -112,7 +117,16 @@ class ProjCommander (object) :
     def makeScriptHeader (self, desc, cmd) :
         '''Make a helper script header.'''
 
-        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\necho \necho command: ' + cmd + '\n\n'
+        return '#!/bin/sh\n\n# Description: ' + desc + '\n\necho \necho Rapuma helper script: ' + desc + '\n\necho \necho command: ' + self.echoClean(cmd) + '\n\n'
+
+
+    def echoClean (self, cmdStr) :
+        '''Clean up a string for an echo statement in a shell script.'''
+
+        clean = re.sub(ur'\;', ur'\\;', cmdStr)
+        clean = re.sub(ur'\s+', ur' ', clean)
+
+        return clean
 
 
     def getStaticScripInfo (self) :
@@ -123,17 +137,16 @@ class ProjCommander (object) :
         mid                 = self.projectMediaIDCode
 
         return {
-                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' Bible group add --component_type usfm --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    group add --component_type usfm --source_id base --source_path $1 --cid_list "mat mrk luk jhn act rom 1co 2co gal eph php col 1th 2th 1ti 2ti tit phm heb jas 1pe 2pe 1jn 2jn 3jn jud rev"'], 
-                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    group add --component_type usfm --source_id base --source_path $1 --cid_list "gen exo lev num deu jos jdg rut 1sa 2sa 1ki 2ki 1ch 2ch ezr neh est job psa pro ecc sng isa jer lam ezk dan hos jol amo oba jon mic nam hab zep hag zec mal"'], 
+                'addBible'      : ['Add Scripture components for a Bible group.',   'rapuma group '         + pid + ' BIBLE group add --source_path $1 '], 
+                'addNT'         : ['Add Scripture components for an NT group.',     'rapuma group '         + pid + ' NT    group add --source_path $1 '], 
+                'addOT'         : ['Add Scripture components for an OT group.',     'rapuma group '         + pid + ' OT    group add --source_path $1 '], 
                 'archive'       : ['Archive this project',                          'rapuma project '       + pid + ' archive   save '], 
                 'backup'        : ['Backup this project',                           'rapuma project '       + pid + ' backup    save '], 
-                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + ' cloud     restore $1 '], 
+                'cloudPull'     : ['Pull data for this project from the cloud',     'rapuma project '       + pid + ' cloud     restore '], 
                 'cloudPush'     : ['Push data from this project to the cloud',      'rapuma project '       + pid + ' cloud     save $1 '], 
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' helper    update '], 
-                'updateGroups'  : ['Update all the groups in a project.',           'rapuma project '       + pid + ' groups    update $1 '], 
                 'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind --force '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
@@ -163,15 +176,13 @@ class ProjCommander (object) :
         mid                 = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate
         return {
-                'compareSource' : ['Compare component working text with source.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare source'], 
-                'compareWork'   : ['Compare working text with previous version.',   'rapuma component ' + pid + ' ' + gid + ' $1 --compare working'], 
-                'edit'          : ['Edit specified component file.',                'rapuma component ' + pid + ' ' + gid + ' --edit $1 '], 
+                'compare'       : ['Compare component working text with backup.',   'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group compare --compare_type backup $CMD '], 
                 'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
                 'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
                 'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 
-                'render'        : ['Render ' + gid + ' group PDF file.',            'rapuma group '     + pid + ' ' + gid + ' group         render  --cid_list \"$1\" $2 '], 
-                'save'          : ['Render & save ' + gid + ' group PDF file.',     'rapuma group '     + pid + ' ' + gid + ' group         render  --cid_list \"$1\" --force '], 
-                'update'        : ['Update the ' + gid + ' group from its source.', 'rapuma group '     + pid + ' ' + gid + ' group         update  --cid_list \"$1\" $2 '], 
+                'render'        : ['Render ' + gid + ' group PDF file.',            'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group render $CMD '], 
+                'save'          : ['Render & save ' + gid + ' group PDF file.',     'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group render --force $CMD '], 
+                'update'        : ['Update the ' + gid + ' group from its source.', 'if [ "$2" ]; then CMD="--cid_list $2"; fi; rapuma group ' + pid + ' ' + gid + ' group update --source_path $1 $CMD '], 
                 'watermark'     : ['Create a watermark for ' + gid + ' group.',     'rapuma group '     + pid + ' ' + gid + ' group         watermark  --cid_list \"$1\" $2 '], 
                 'addFont'       : ['Add a font to the ' + gid + ' group.',          'rapuma package '   + pid + ' ' + gid + ' $1 font add -f '],
                 'removeFont'    : ['Remove a font from the ' + gid + ' group.',     'rapuma package '   + pid + ' ' + gid + ' $1 font remove -f '],

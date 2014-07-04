@@ -17,7 +17,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, sys, re, fileinput, zipfile, shutil, stat
+import codecs, os, sys, re, fileinput, zipfile, shutil, stat, errno
 import difflib, tempfile, subprocess
 from datetime                               import *
 from xml.etree                              import cElementTree as ET
@@ -242,13 +242,15 @@ class Tools (object) :
     def makeReadOnly (self, fileName) :
         '''Set the permissions on a file to read only.'''
 
-        os.chmod(fileName, stat.S_IREAD)
+        # Using stat.S_IREAD for the mode doesn't work right
+        os.chmod(fileName, 0400)
 
 
     def makeWriteable (self, fileName) :
         '''Set the permissions on a file to writeable.'''
 
-        os.chmod(fileName, stat.S_IWRITE)
+        # Using stat.S_IWRITE for the mode doesn't work right
+        os.chmod(fileName, 0664)
 
 
     def utf8Copy (self, source, target) :
@@ -281,6 +283,19 @@ class Tools (object) :
         except :
             return None
 
+
+    def makedirs (self, path, mode=None):
+        '''Like os.makedirs, but doesn't care if the path already exists'''
+        try:
+            if mode is None:
+                os.makedirs(path)
+            else:
+                os.makedirs(path, mode)
+        except os.error as e:
+            if e.errno == errno.EEXIST:
+                pass
+            else:
+                raise
 
     def macroRunner (self, macroFile) :
         '''Run a macro. This assumes the macroFile includes a full path.'''
@@ -356,6 +371,19 @@ class Tools (object) :
                 return confObj['ProjectInfo']['projectIDCode']
 
 
+    def discoverCIDFromFile (self, fileName) :
+        '''Return the component (3 letter) ID as found in the header
+        (first line) of the file. If the CID is not found or cannot
+        be determined, return None (nothing). This does not varify if
+        the ID is valid or not.'''
+
+        if os.path.exists(fileName) :
+            with open(fileName, 'r') as f :
+              thisId = f.readline().split()[1]
+            if len(thisId) == 3 :
+                return thisId.lower()
+
+
     def isInZip (self, fileName, fileZip) :
         '''Look for a specific file in a zip file.'''
 
@@ -419,9 +447,26 @@ class Tools (object) :
 ########################## Config/Dictionary routines #########################
 ###############################################################################
 
+    def getProjIdList (self, projDir) :
+        '''Return a list of projects from a specified valid Rapuma project
+        folder. It is assumed the folder exists but still not have any
+        projects. A valid project is assumed if a project.conf file
+        exists in the Config folder. If none are found, return an empty list.'''
+
+        projList = []
+        for d in os.listdir(projDir) :
+            dp = os.path.join(projDir, d, 'Config', 'project.conf')
+            if os.path.exists(dp) :
+                projList.append(d)
+                
+        return projList
+
+
     def addComponentType (self, cfg, local, cType) :
         '''Add (register) a component type to the config if it 
         is not there already.'''
+
+#        import pdb; pdb.set_trace()
 
         Ctype = cType.capitalize()
         self.buildConfSection(cfg, 'CompTypes')
@@ -438,47 +483,52 @@ class Tools (object) :
                 return cfg
 
 
-    def initConfig (self, confFile, defaultFile) :
-        '''Initialize or load a config file. This will load a config file if an
-        existing one is there and update it with any new system default settings
-        If one does not exist a new one will be created based on system default
-        settings.'''
+    def loadConfig (self, confFile, defaultFile) :
+        '''Load a config file and check against the default settings. If
+        new default settings are present, add them to the exsisting config
+        file. The assumption is that the config file exists.'''
+        
+        # FIXME: It might be good to be able to remove settings if they
+        # no longer exist in the default settings.
+        
+        # Check against the default for possible new settings
+        # If the original config file is corrupt, catch it here
+        try :
+            configObj           = ConfigObj(encoding='utf-8')
+            orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
+            orgFileName         = orgConfigObj.filename
+        except Exception as e :
+            self.terminal(u'\nERROR: Could not open config file: ' + confFile)
+            self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
+            self.dieNow()
 
-
-#        if confFile.find('usfmTex') > 0 :
-#            import pdb; pdb.set_trace()
-
-        if not os.path.isfile(confFile) :
-            configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            configObj.filename  = confFile
-            self.writeConfFile(configObj)
+        # FIXME: There is a deficiency here in that confs like project
+        # are compond objects. This will not deal with any of the conf's
+        # child object so additionl fields in the child sections are not
+        # dealt with, example would be Groups in project.conf
+        defaultObj = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+        defaultObj.merge(orgConfigObj)
+        # For existing configs a key comparison should be enough to tell
+        # if it is the same or not
+        if self.confObjCompare(defaultObj, orgConfigObj) :
+            configObj = orgConfigObj
+            configObj.filename = orgFileName
         else :
-            # But check against the default for possible new settings
-            # If the original config file is corrupt, catch it here
-            try :
-                configObj           = ConfigObj(encoding='utf-8')
-                orgConfigObj        = ConfigObj(confFile, encoding='utf-8')
-                orgFileName         = orgConfigObj.filename
-            except Exception as e :
-                self.terminal(u'\nERROR: Could not open config file: ' + confFile)
-                self.terminal(u'\nPython reported this error:\n\n\t[' + unicode(e) + ']\n')
-                self.dieNow()
+            configObj = defaultObj
+            configObj.filename = orgFileName
+            self.writeConfFile(configObj)
 
-            # FIXME: There is a deficiency here in that confs like project
-            # are compond objects. This will not deal with any of the conf's
-            # child object so additionl fields in the child sections are not
-            # dealt with, example would be Groups in project.conf
-            defaultObj          = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
-            defaultObj.merge(orgConfigObj)
-            # A key comparison should be enough to tell if it is the same or not
-            if self.confObjCompare(defaultObj, orgConfigObj) :
-                configObj = orgConfigObj
-                configObj.filename = orgFileName
-            else :
-                configObj = defaultObj
-                configObj.filename = orgFileName
-                self.writeConfFile(configObj)
+        return configObj
 
+
+    def initNewConfig (self, confFile, defaultFile) :
+        '''Initialize/create a config file. Return the new config object
+        and write out the new file. This assumes the file does not exist.'''
+
+        configObj           = ConfigObj(self.getXMLSettings(defaultFile), encoding='utf-8')
+        configObj.filename  = confFile
+        self.writeConfFile(configObj)
+            
         return configObj
 
 
