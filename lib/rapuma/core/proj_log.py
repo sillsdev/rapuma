@@ -84,7 +84,7 @@ class ProjLog (object) :
         # the corresponding position in the args list.
         if args :
             for count, arg in enumerate(args) :
-                msg = msg.replace('<<' + str(count-1) + '>>', arg)
+                msg = msg.replace('<<' + str(count+1) + '>>', arg)
 
         # Write out everything but LOG messages to the terminal
         if code != 'LOG' and code != 'TOD' :
