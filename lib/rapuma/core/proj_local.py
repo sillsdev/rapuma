@@ -42,7 +42,7 @@ class ProjLocal (object) :
         self.osPlatform         = platform.architecture()[0][:2]
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
-        self.userResouce        = os.path.join(site.USER_BASE, 'share', 'rapuma')
+        self.userResource       = os.path.join(site.USER_BASE, 'share', 'rapuma')
         self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projFolders        = []
         self.localDict          = None
@@ -50,9 +50,9 @@ class ProjLocal (object) :
         self.mType              = mType
         self.macPack            = macPack
         debug                   = self.userConfig['System']['debugging']
-        debugOutput             = os.path.join(self.userResouce, 'debug', 'local_path.log')
-        if debug and not os.path.exists(os.path.join(self.userResouce, 'debug')) :
-            os.makedirs(os.path.join(self.userResouce, 'debug'))
+        debugOutput             = os.path.join(self.userResource, 'debug', 'local_path.log')
+        if debug and not os.path.exists(os.path.join(self.userResource, 'debug')) :
+            os.makedirs(os.path.join(self.userResource, 'debug'))
 
         # Bring in all the Rapuma default project location settings
         rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'proj_local.xml')
@@ -62,8 +62,8 @@ class ProjLocal (object) :
             raise IOError, "Can't open " + rapumaXMLDefaults
 
         # Create the user resources dir under .local/share
-        if not os.path.isdir(self.userResouce) :
-            os.makedirs(self.userResouce)
+        if not os.path.isdir(self.userResource) :
+            os.makedirs(self.userResource)
 
         # Troll through the localDict and create the file and folder defs we need
         if debug :
@@ -249,17 +249,16 @@ class ProjLocal (object) :
             return True
 
 
-    def getConfigValue (self, val) :
-        '''Return the value from a config function or just pass the
-        value through, unchanged.'''
+    def getConfigValue (self, val, default=None) :
+        '''Return the value from a config function or return default value if key not found.'''
 
-        val = val.split('|')
-        dct = ['self.' + val[0]]
-        val.remove(val[0])
-        for i in val :
-            dct.append('["' + i + '"]')
-
-        return eval(''.join(dct))
+        keyparts = val.split('|')
+        curval = getattr(self, keyparts[0], None)
+        if curval is None: return default
+        for key in keyparts[1:]:
+            curval = curval.get(key, None)
+            if curval is None: return default
+        return curval
 
 
 

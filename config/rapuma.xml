@@ -124,7 +124,7 @@ Todo:
         </setting>
         <setting>
             <name>Rapuma Resource Path</name>
-            <key>rapumaResouce</key>
+            <key>rapumaResource</key>
             <description>The full path to where Rapuma resources like fonts, backups, etc. are kept. They can go any where but if it is not specified, Rapuma will look under Publishing first.</description>
             <type>string</type>
             <value></value>

@@ -60,7 +60,7 @@ class UserConfig (object) :
         # Load the Rapuma conf file into an object
         self.userConfig = ConfigObj(self.userConfFile, encoding='utf-8')
 
-        # Initialize the user's home folders, like resouces, etc
+        # Initialize the user's home folders, like resources, etc
         self.makeHomeFolders()
 
         # Log messages for this module
@@ -122,11 +122,15 @@ class UserConfig (object) :
 
         # Make the default global rapuma.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
-            self.userConfig = ConfigObj(encoding='utf-8')
+            self.userConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8')
             self.userConfig.filename = self.userConfFile
+<<<<<<< HEAD
             self.userConfig['System'] = {self.defaultSystemSettings()}
             self.userConfig['Resources'] = {self.defaultResourcesSettings()}
 
+=======
+            self.userConfig['System']['initDate'] = self.tools.tStamp()
+>>>>>>> personal/rmunn
             self.userConfig.write()
 
 
@@ -156,28 +160,32 @@ class UserConfig (object) :
             self.tools.buildConfSection(self.userConfig, 'Resources')
 
         # Get the user config project folder location (or set a default)
-        if not self.userConfig['Resources'].has_key('projects') :
-            self.tools.buildConfSection(self.userConfig['Resources'], 'projects')
-        if not self.userConfig['Resources']['projects'] :
+        if not self.userConfig['Resources'].has_key('projects') or not self.userConfig['Resources']['projects'] :
             projects = os.path.join(os.environ.get('HOME'), 'Publishing')
             if not os.path.exists(projects) :
                 os.makedirs(projects)
-                self.userConfig['Resources']['projects'] = projects
-                confWriteFlag = True
+            self.userConfig['Resources']['projects'] = projects
+            confWriteFlag = True
         elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
             sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '\n\nProcess halted.\n')
         else :
             projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
 
-        # Get the user config Rapuma resouce folder location
-        if not self.userConfig['Resources'].has_key('rapumaResouce') :
-            self.tools.buildConfSection(self.userConfig['Resources'], 'rapumaResouce')
-        if len(self.userConfig['Resources']['rapumaResouce']) > 0 :
-            rapumaResouce = self.userConfig['Resources']['rapumaResouce']
+        # Get the user config Rapuma resource folder location
+        if not self.userConfig['Resources'].has_key('rapumaResource') :
+            # Check for pre-typo-fix value ('rapumaResouce') before creating new section
+            if self.userConfig['Resources'].has_key('rapumaResouce') :
+                self.userConfig['Resources'].rename('rapumaResouce', 'rapumaResource')
+                confWriteFlag = True
+            else:
+                self.tools.buildConfSection(self.userConfig['Resources'], 'rapumaResource')
+                confWriteFlag = True
+        if len(self.userConfig['Resources']['rapumaResource']) > 0 :
+            rapumaResource = self.userConfig['Resources']['rapumaResource']
         else :
             # This is the default location
-            rapumaResouce = os.path.join(site.USER_BASE, 'share', 'rapuma')
-            self.userConfig['Resources']['rapumaResouce'] = rapumaResouce
+            rapumaResource = os.path.join(site.USER_BASE, 'share', 'rapuma')
+            self.userConfig['Resources']['rapumaResource'] = rapumaResource
             confWriteFlag = True
 
         # Make a list of sub-folders to make in the Rapuma resourcs folder
@@ -186,11 +194,11 @@ class UserConfig (object) :
 
         for r in resourceFolders :
             # Build the path and check if it can be made
-            thisPath = os.path.join(rapumaResouce, r)
+            thisPath = os.path.join(rapumaResource, r)
             if not os.path.isdir(thisPath) :
                 os.makedirs(thisPath)
-                self.userConfig['Resources'][r] = thisPath
-                confWriteFlag = True
+            self.userConfig['Resources'][r] = thisPath
+            confWriteFlag = True
 
         # Write out if needed
         if confWriteFlag :

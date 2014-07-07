@@ -23,6 +23,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
+from rapuma.core.paratext           import Paratext
 from rapuma.project.proj_config     import Config
 
 
@@ -43,6 +44,7 @@ class ProjProcess (object) :
             self.projectConfig          = self.proj_config.projectConfig
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
+        self.paratext               = Paratext(pid, gid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -106,7 +108,7 @@ class ProjProcess (object) :
         #self.log.writeToLog('XPRT-040')
         #for cid in self.components[cName].getSubcomponentList(cName) :
             #cidCName = self.components[cName].getRapumaCName(cid)
-            #ptName = self.paratext.formPTName(cName, cid)
+            #ptName = PT_Tools(self).formPTName(cName, cid)
             ## Test, no name = no success
             #if not ptName :
                 #self.log.writeToLog('XPRT-010')

@@ -44,11 +44,13 @@ startTime = timeit.default_timer()
 ############################ Location Discovery ###############################
 ###############################################################################
 
-# Set the Rapuma base program paths. It looks in /user/share first for an
+# Set the Rapuma base program paths. It looks in /usr/share first for an
 # installed copy. If you give it a actual path to the development version
 # it will run from there. (~/Projects/rapuma/scripts/rapuma)
 # FIXME: Environment variables are set that may not be needed if this block
 # of code was turned into a module and called from the dependent modules.
+# E.g., if rapuma is called from /usr/bin/rapuma then rapumaBase = /usr
+# If from ~/Projects/rapuma/scripts/rapuma then rapumaBase = ~/Projects/rapuma
 rapumaBase = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
                         os.path.join(rapumaBase)] if os.path.exists(d)]
@@ -190,7 +192,7 @@ def trimLog (local) :
 # All command options must contain a project ID (-i). That is required. If one
 # is not listed then the incoming command is either considered malformed or
 # incomplete. If there is a way to figure out what the user might be needing
-# the help system will be called. Otherwise, Rapuma will quite.
+# the help system will be called. Otherwise, Rapuma will quit.
 
 # The argument handler
 def userArguments (args) :
@@ -372,7 +374,7 @@ def userArguments (args) :
         # if no CIDs are provided. To expand this list there must be
         # a corresponding function in UsfmData that will retrieve the
         # correct CIDs in the correct order.
-        cannonGroups = ['OT', 'NT', 'BIBLE']
+        canonGroups = ['OT', 'NT', 'BIBLE']
         # Check source path if there is one
         if args.source_path :
             source_path = os.path.abspath(args.source_path)
@@ -405,10 +407,10 @@ def userArguments (args) :
                 cids    = args.cid_list.split()
             else :
                 cids    = args.cid_list
-            cid_list = usfmData.cannonListSort(cids)
+            cid_list = usfmData.canonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in cannonGroups :
+            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in canonGroups :
                 getCidList = getattr(usfmData, gid.lower() + 'CidList')
                 cid_list = getCidList()
         # If a compare is being done this provides the type of compare.
@@ -674,7 +676,7 @@ if __name__ == '__main__' :
     projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
     projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
-    projCommand.add_argument('-s', '--source_path', help='An alternate path to a resouce to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+    projCommand.add_argument('-s', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
     projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
     projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
     projCommand.add_argument('-f', '--force', action='store_true', help='Force an action, or, in the case of bind, save the results.')
