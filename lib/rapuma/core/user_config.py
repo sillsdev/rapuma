@@ -116,14 +116,12 @@ class UserConfig (object) :
             self.tools.buildConfSection(self.userConfig, 'Resources')
 
         # Get the user config project folder location (or set a default)
-        if not self.userConfig['Resources'].has_key('projects') :
-            self.tools.buildConfSection(self.userConfig['Resources'], 'projects')
-        if not self.userConfig['Resources']['projects'] :
+        if not self.userConfig['Resources'].has_key('projects') or not self.userConfig['Resources']['projects'] :
             projects = os.path.join(os.environ.get('HOME'), 'Publishing')
             if not os.path.exists(projects) :
                 os.makedirs(projects)
-                self.userConfig['Resources']['projects'] = projects
-                confWriteFlag = True
+            self.userConfig['Resources']['projects'] = projects
+            confWriteFlag = True
         elif not os.path.exists(self.tools.resolvePath(self.userConfig['Resources']['projects'])) :
             sys.exit('\nERROR: Invalid projects folder path: ' + self.userConfig['Resources']['projects'] + '\n\nProcess halted.\n')
         else :
