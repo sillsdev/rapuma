@@ -78,15 +78,15 @@ To obtain Rapuma, you need to check it out from the Mercurial repository it resi
 
 Create the above path if it does not exist with this command in your terminal:
 
-    mkdir ~/Projects
+    mkdir ~/Projects/rapuma
+    
+Then:
 
-Now you can go to the Palaso website and clone the Rapuma project code with:
+    cd ~/Projects
 
-    hg clone http://hg.palaso.org/pub-rpm ~/Projects/rapuma
+The Rapuma project is curently kept in a GIT repository. Be sure you have GIT installed on your system, then run this command:
 
-That should put Rapuma where you need it. From time to time you may want to update it. To do that, from inside the Rapuma project folder (~/Projects/rapuma), this is the command you need:
-
-    hg pull --update
+    git clone https://github.com/sillsdev/rapuma.git
 
 
 -------------------------------------------------------------------------------

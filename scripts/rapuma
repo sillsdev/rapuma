@@ -105,6 +105,10 @@ from rapuma.project.proj_background     import ProjBackground
 from rapuma.manager.project             import Project
 from rapuma.group.usfm_data             import UsfmData
 
+
+import pdb; pdb.set_trace()
+
+
 # Grab some system info
 sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'config', 'system.ini'), encoding='utf-8')
 # Instantiate User config class
