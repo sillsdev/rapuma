@@ -67,10 +67,10 @@ class UsfmData (object) :
         return self.otCidList() + self.ntCidList()
 
 
-    def wholeCannonList (self) :
-        '''Return a list of CIDs for the entire cannon of Scripture in
+    def wholeCanonList (self) :
+        '''Return a list of CIDs for the entire canon of Scripture in
         proper order. This can be used for varification of common
-        components of the cannon but has not been comprehensively tested.'''
+        components of the canon but has not been comprehensively tested.'''
 
         result = []
         for name, booknum in self.bookAbbrevs.iteritems() :
@@ -114,9 +114,9 @@ class UsfmData (object) :
         return result
 
 
-    def cannonListSort (self, cidList) :
-        '''Return a list of unique CIDs sorted to cannon order from a 
-        list of radom ordered CIDs.'''
+    def canonListSort (self, cidList) :
+        '''Return a list of unique CIDs sorted to canon order from a 
+        list of random ordered CIDs.'''
 
         # Sort and return the list without duplicates
         return sorted(list(set(cidList)), key=self.canonical_order)

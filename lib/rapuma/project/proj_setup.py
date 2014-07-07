@@ -55,7 +55,7 @@ class ProjSetup (object) :
         self.usfmData                       = UsfmData()
         self.ntCidList                      = self.usfmData.ntCidList()
         self.otCidList                      = self.usfmData.otCidList()
-        self.wholeCannonList                = self.usfmData.wholeCannonList()
+        self.wholeCanonList                 = self.usfmData.wholeCanonList()
         self.cidNameDict                    = self.usfmData.cidNameDict()
 
         if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
@@ -195,7 +195,7 @@ class ProjSetup (object) :
 
         for f in sourceList :
             cid = self.tools.discoverCIDFromFile(f)
-            if cid in self.wholeCannonList :
+            if cid in self.wholeCanonList :
                 # Add CID to cidList
                 cidList.append(cid)
                 sources[cid] = f
@@ -257,7 +257,7 @@ class ProjSetup (object) :
         # Do the importing first, then write the changes to the config
         for f in sourceList :
             cid = self.tools.discoverCIDFromFile(f)
-            if cid in self.wholeCannonList :
+            if cid in self.wholeCanonList :
                 # Add CID to cidList
                 cidList.append(cid)
                 sources[cid] = f
@@ -267,7 +267,7 @@ class ProjSetup (object) :
                 if cid in checkList :
                     self.log.writeToLog(self.errorCodes['0252'], [cid,gid])
                     return False
-        
+
         # Get persistant values from the config
         self.tools.buildConfSection(self.projectConfig, 'Groups')
         self.tools.buildConfSection(self.projectConfig['Groups'], gid)
@@ -276,7 +276,7 @@ class ProjSetup (object) :
             self.projectConfig['Groups'][gid] = newSectionSettings
         # Add/Modify the info to the group config info
         self.projectConfig['Groups'][gid]['cType']                 = cType
-        self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.cannonListSort(cidList)
+        self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.canonListSort(cidList)
         self.projectConfig['Groups'][gid]['bindingOrder']          = 0
         # Here we need to "inject" cType information into the config
         self.cType = cType
@@ -292,8 +292,8 @@ class ProjSetup (object) :
         # Install the components now, if successful, we can update the
         # project config. If not, the user will need to sort out why
         if self.installGroupComps(gid, cType, sources) :
-            # Sort the cidList to cannonical order
-            cidListSorted = self.usfmData.cannonListSort(cidList)
+            # Sort the cidList to canonical order
+            cidListSorted = self.usfmData.canonListSort(cidList)
             if cidList != cidListSorted :
                 self.projectConfig['Groups'][gid]['cidList'] = cidListSorted
                 self.tools.writeConfFile(self.projectConfig)
@@ -301,7 +301,7 @@ class ProjSetup (object) :
         # Update helper scripts
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
             ProjCommander(self.pid).makeGrpScripts()
-            
+
         return True
 
 
@@ -324,14 +324,14 @@ class ProjSetup (object) :
         groupFolder = os.path.join(self.local.projComponentFolder, gid)
         # To avoid problems in the for loop, make a copy
         killList = list(cidList)
-        
+
         # Remove components
         for cid in killList :
             if self.uninstallGroupComponent(gid, cid) :
                 self.log.writeToLog(self.errorCodes['0294'], [cid,gid])
             else :
                 self.log.writeToLog(self.errorCodes['0296'], [cid,gid])
-           
+
         # Now remove the config entry and folder if it is empty
         if len(self.projectConfig['Groups'][gid]['cidList']) == 0 :
             del self.projectConfig['Groups'][gid]
@@ -383,7 +383,7 @@ class ProjSetup (object) :
         # If nothing above errored, return true
         return True
 
-    
+
     def isComponent (self, gid, cid) :
         '''See if the CID is registered in the group.'''
 

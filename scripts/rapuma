@@ -370,7 +370,7 @@ def userArguments (args) :
         # if no CIDs are provided. To expand this list there must be
         # a corresponding function in UsfmData that will retrieve the
         # correct CIDs in the correct order.
-        cannonGroups = ['OT', 'NT', 'BIBLE']
+        canonGroups = ['OT', 'NT', 'BIBLE']
         # Check source path if there is one
         if args.source_path :
             source_path = os.path.abspath(args.source_path)
@@ -403,10 +403,10 @@ def userArguments (args) :
                 cids    = args.cid_list.split()
             else :
                 cids    = args.cid_list
-            cid_list = usfmData.cannonListSort(cids)
+            cid_list = usfmData.canonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in cannonGroups :
+            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in canonGroups :
                 getCidList = getattr(usfmData, gid.lower() + 'CidList')
                 cid_list = getCidList()
         # If a compare is being done this provides the type of compare.
