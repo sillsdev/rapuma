@@ -328,17 +328,17 @@ class Config (object) :
                     yield (found_idx, idx)
 
 
-    def getConfigValue (self, val) :
+    def getConfigValue (self, val, default=None) :
         '''Return the value from a config function or just pass the
         value through, unchanged.'''
 
-        val = val.split('|')
-        dct = ['self.' + val[0]]
-        val.remove(val[0])
-        for i in val :
-            dct.append('["' + i + '"]')
-
-        return eval(''.join(dct))
+        keyparts = val.split('|')
+        curval = getattr(self, keyparts[0], None)
+        if curval is None: return default
+        for key in keyparts[1:]:
+            curval = curval.get(key, None)
+            if curval is None: return default
+        return curval
 
 
     def getMeasureUnit (self) :

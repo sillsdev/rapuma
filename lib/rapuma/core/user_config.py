@@ -82,10 +82,8 @@ class UserConfig (object) :
 
         # Make the default global rapuma.conf for custom environment settings
         if not os.path.isfile(self.userConfFile) :
-            self.userConfig = ConfigObj(encoding='utf-8')
+            self.userConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8')
             self.userConfig.filename = self.userConfFile
-            self.userConfig['System'] = {}
-            self.userConfig['System']['userName'] = 'Default User'
             self.userConfig['System']['initDate'] = self.tools.tStamp()
             self.userConfig.write()
 
@@ -153,8 +151,8 @@ class UserConfig (object) :
             thisPath = os.path.join(rapumaResource, r)
             if not os.path.isdir(thisPath) :
                 os.makedirs(thisPath)
-                self.userConfig['Resources'][r] = thisPath
-                confWriteFlag = True
+            self.userConfig['Resources'][r] = thisPath
+            confWriteFlag = True
 
         # Write out if needed
         if confWriteFlag :
