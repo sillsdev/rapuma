@@ -72,47 +72,6 @@ class UserConfig (object) :
 ############################ User Config Functions ############################
 ###############################################################################
 
-    def defaultSystemSettings (self) :
-        '''Return the default system settings for the user config file.'''
-
-        sysSet = {}
-        sysSet['userName'] = 'Default User'
-        sysSet['initDate'] = self.tools.tStamp()
-        sysSet['debugging'] = 'False'
-        sysSet['svgPdfConvertCommand'] = 'rsvg-convert, -f, pdf, -o, pdfOutFile, svgInFile'
-        sysSet['projLogLineLimit'] = '1000'
-        sysSet['userID'] = 'default_user'
-        sysSet['langID'] = 'ENG'
-        sysSet['pdfViewerCommand'] = 'evince,'
-        sysSet['pdfUtilityCommand'] = 'pdftk,'
-        sysSet['textDifferentialViewerCommand'] = 'meld,'
-        sysSet['autoHelperScripts'] = 'True'
-        sysSet['recognizedComponentTypes'] = 'usfm,'
-        sysSet['maxStoreBackups'] = '5'
-        
-        return sysSet
-
-
-    def defaultResourcesSettings (self) :
-        '''Return the default resources settings for the user config file.'''
-    
-        resSet = {}
-        resSet['defaultIllustrationLibraryName'] = 'Knowles-600_bw'
-    rapumaResouce = /home/dennis/.local/share/rapuma
-    script = /home/dennis/.local/share/rapuma/script
-    macro = /home/dennis/.local/share/rapuma/macro
-    illustration = /home/dennis/.local/share/rapuma/illustration
-    projects = /home/dennis/Publishing
-#    projects = /home/dennis/Publishing/Robin/Publishing
-    template = /home/dennis/.local/share/rapuma/template
-    font = /home/dennis/.local/share/rapuma/font
-    backup = /home/dennis/.local/share/rapuma/backup
-    archive = /home/dennis/.local/share/rapuma/archive
-    cloud = ~/Dropbox/MSEAG_Publishing/Rapuma
-#    cloud = /home/dennis/Publishing/Robin/Cloud
-
-
-
     def initUserHome (self) :
         '''Initialize a user config file on a new install or system re-init.'''
 
@@ -124,13 +83,7 @@ class UserConfig (object) :
         if not os.path.isfile(self.userConfFile) :
             self.userConfig = ConfigObj(self.tools.sysXmlConfig.dict(), encoding='utf-8')
             self.userConfig.filename = self.userConfFile
-<<<<<<< HEAD
-            self.userConfig['System'] = {self.defaultSystemSettings()}
-            self.userConfig['Resources'] = {self.defaultResourcesSettings()}
-
-=======
             self.userConfig['System']['initDate'] = self.tools.tStamp()
->>>>>>> personal/rmunn
             self.userConfig.write()
 
 

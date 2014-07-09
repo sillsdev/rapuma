@@ -108,7 +108,7 @@ from rapuma.manager.project             import Project
 from rapuma.group.usfm_data             import UsfmData
 
 
-import pdb; pdb.set_trace()
+#import pdb; pdb.set_trace()
 
 
 # Grab some system info

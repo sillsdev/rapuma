@@ -139,34 +139,6 @@ Todo:
         <sectionID>GeneralSettings</sectionID>
         <description>This section contains miscellaneous global settings and operational information for the project.</description>
         <setting>
-            <name>Page Background Watermark</name>
-            <key>watermark</key>
-            <description>Enter text (one word like proof or draft) to be used as a watermark on the page background. If nothing is present, no watermark will be used.</description>
-            <type>string</type>
-            <value></value>
-        </setting>
-        <setting>
-            <name>Cropmarks</name>
-            <description>Set to true if you want cropmarks to show page trim size.</description>
-            <key>cropmarks</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Lines on Page</name>
-            <description>Create and merge a background that has lines which are the same leading as the text.</description>
-            <key>lines</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
-            <name>Page Box</name>
-            <description>Create and merge a background that is a box the size of the page which helps visualize how elements will fit.</description>
-            <key>box</key>
-            <type>boolean</type>
-            <value>False</value>
-        </setting>
-        <setting>
             <name>Last Edit on the Config File</name>
             <key>lastEdit</key>
             <description>A time stamp of when the project config was last edited.</description>

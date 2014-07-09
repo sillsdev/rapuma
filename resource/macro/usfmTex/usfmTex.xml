@@ -776,15 +776,6 @@ Todo:
             <texCode>\PaperWidth=[val][mu]</texCode>
         </setting>
         <setting>
-            <name>Cropmarks</name>
-            <description>If set to true this will place a set of cropmarks to show page trim size. Default = True</description>
-            <key>useCropmarks</key>
-            <type>boolean</type>
-            <value>[config:projectConfig|GeneralSettings|cropmarks]</value>
-            <texCode>\CropMarkstrue</texCode>
-            <boolDepend state='true'>[config:projectConfig|GeneralSettings|cropmarks]</boolDepend>
-        </setting>
-        <setting>
             <name>End Book No Eject</name>
             <description>[NOT IMPLEMENTED] To save space on long publications the next book can start on the same page of the previous one.   Default = False</description>
             <key>useEndBookNoEject</key>

@@ -89,11 +89,8 @@ class Xetex (Manager) :
         self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-# FIXME: This is for a future feature to add cropmarks outside XeTeX
-#        self.cropmarks              = self.tools.str2bool(self.projectConfig['GeneralSettings']['cropmarks'])
-        self.lines                  = self.tools.str2bool(self.projectConfig['GeneralSettings']['lines'])
-        self.box                    = self.tools.str2bool(self.projectConfig['GeneralSettings']['box'])
-        self.watermark              = self.projectConfig['GeneralSettings']['watermark']
+        self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
+        self.useDocInfo             = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
 
         # Get settings for this component
         self.managerSettings = self.projectConfig['Managers'][self.manager]
@@ -147,7 +144,8 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
-            '0725' : ['MSG', 'Added watermark: [<<1>>] to file: [<<2>>]'],
+            '0725' : ['MSG', 'Added background to file: [<<1>>]'],
+            '0726' : ['MSG', 'Added timestamp to file: [<<1>>]'],
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
 
         }
@@ -717,21 +715,6 @@ class Xetex (Manager) :
         if pgRange :
             self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
 
-        ##### Background management #####
-
-# FIXME: This is for a future feature to add cropmarks outside of XeTeX
-#        # Now, add cropmarks background if that setting is activated
-#        if self.cropmarks :
-#            self.pg_back.addCropmarksBackground(self.local.gidPdfFile)
-
-        # Now, add a lines background if that setting is activated
-        if self.lines :
-            self.pg_back.addLinesBackground(self.local.gidPdfFile)
-
-        # Now, add a box background if that setting is activated
-        if self.box :
-            self.pg_back.addBoxBackground(self.local.gidPdfFile)
-
         # If the user wants to save this file, do that now
         if save and not override :
             renderFileName = self.pid + '_' + gid
@@ -763,16 +746,22 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
 
-        # Once we know the file is successfully generated, add a water mark if requested
-        if self.watermark :
-            wmFile = self.pg_back.addWatermarkBackground(renderFile)
-            if os.path.exists(wmFile) :
-                self.log.writeToLog(self.errorCodes['0725'], [self.watermark, self.tools.fName(wmFile)])
+#        import pdb; pdb.set_trace()
+
+        if not renderFile :
+            renderFile = self.local.gidPdfFile
+
+        # Once we know the file is successfully generated, add a background if defined
+        if self.useBackground :
+            if self.pg_back.addBackground(renderFile) :
+                self.log.writeToLog(self.errorCodes['0725'], [renderFile])
+        # Add a timestamp if requested
+        if self.useDocInfo :
+            if self.pg_back.addDocInfo(renderFile) :
+                self.log.writeToLog(self.errorCodes['0726'], [renderFile])
 
         ##### Viewing #####
-        if wmFile :
-            viewFile = wmFile
-        elif renderFile :
+        if renderFile :
             viewFile = renderFile
         else :
             viewFile = self.local.gidPdfFile

@@ -505,6 +505,16 @@ Todo:
             <relies></relies>
         </file>
 
+        <file>
+            <name>Background File</name>
+            <description>The file that provides a background for the rendered output, if desired. This will contain various components like cropmarks, lines and watermark.</description>
+            <fileID>backgroundFile</fileID>
+            <fileName>background.pdf</fileName>
+            <filePath>[self:projIllustrationFolder]</filePath>
+            <depends></depends>
+            <relies></relies>
+        </file>
+
     </section>
 
 </root>

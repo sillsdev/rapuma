@@ -37,6 +37,13 @@ Todo:
         <sectionID>PageLayout</sectionID>
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
+            <name>Printer Page Size ID Code</name>
+            <description>For print output to a common printer a page size ID has to be identified. Two page sizes are supported, A4 and US Letter. Default = A4</description>
+            <key>printerPageSizeCode</key>
+            <type>string</type>
+            <value>A4</value>
+        </setting>
+        <setting>
             <name>Page Size ID Code</name>
             <description>If you are using a common page size please enter the standard code.  If a custom size is being used just enter "custom". Default = A5</description>
             <key>pageSizeCode</key>
@@ -127,6 +134,43 @@ Todo:
         <name>Document Features</name>
         <sectionID>DocumentFeatures</sectionID>
         <description>Various features used in this document/publication.</description>
+
+        <setting>
+            <name>Use Document Information</name>
+            <description>If this is set to true, document information will be added in header and footer lines. This information will be merged with the typeset page. This is independent to the background merge operation. Default = False</description>
+            <key>useDocInfo</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Document Information Text</name>
+            <description>Text that can be added to the footer, used along with other document information. This is optional information.</description>
+            <key>docInfoText</key>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Use Background</name>
+            <description>If this is set to true, a background (or watermark) will be merged with the typeset page. Multiple backgrounds can be defined in the backgroundComponents field. Default = False</description>
+            <key>useBackground</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Background Components</name>
+            <description>Components to be used for a document. Currently the following are supported: watermark, cropmarks, lines, and pagebox. Default = watermark</description>
+            <key>backgroundComponents</key>
+            <type>list</type>
+            <value>watermark</value>
+        </setting>
+        <setting>
+            <name>Watermark Text</name>
+            <description>Text to be used for the watermark background. Default = DRAFT</description>
+            <key>watermarkText</key>
+            <type>string</type>
+            <value>DRAFT</value>
+        </setting>
+
         <setting>
             <name>Use Running Header Rule</name>
             <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>

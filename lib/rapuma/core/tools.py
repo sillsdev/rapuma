@@ -370,6 +370,14 @@ class Tools (object) :
                 confObj = ConfigObj(f, encoding='utf-8')
                 return confObj['ProjectInfo']['projectIDCode']
 
+    
+    def getCidIdLine (self, fileName) :
+        '''Return the entire \id line from an SFM file.'''
+
+        if os.path.exists(fileName) :
+            with open(fileName, 'r') as f :
+              return f.readline()
+
 
     def discoverCIDFromFile (self, fileName) :
         '''Return the component (3 letter) ID as found in the header
@@ -377,11 +385,8 @@ class Tools (object) :
         be determined, return None (nothing). This does not varify if
         the ID is valid or not.'''
 
-        if os.path.exists(fileName) :
-            with open(fileName, 'r') as f :
-              thisId = f.readline().split()[1]
-            if len(thisId) == 3 :
-                return thisId.lower()
+        if len(self.getCidIdLine().split()[1]) == 3 :
+            return thisId.lower()
 
 
     def isInZip (self, fileName, fileZip) :

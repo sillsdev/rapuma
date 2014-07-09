@@ -15,7 +15,8 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, difflib, subprocess, shutil, re, tempfile
+import codecs, os, difflib, subprocess, shutil, re, tempfile, pyPdf
+from pyPdf                              import PdfFileReader
 from configobj                          import ConfigObj
 
 # Load the local classes
@@ -55,8 +56,9 @@ class ProjBackground (object) :
         self.errorCodes     = {
 
             '0000' : ['MSG', 'Placeholder message'],
-            '0280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
-            '0290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
+            '1110' : ['MSG', 'File exsits: [<<1>>]. Use \"force\" to remove it.'],
+            '1280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
+            '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
 
         }
 
@@ -64,83 +66,200 @@ class ProjBackground (object) :
 ###############################################################################
 ############################### Basic Functions ###############################
 ###############################################################################
-######################## Error Code Block Series = 0200 #######################
+######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def addCropmarksBackground (self, target) :
-        '''Add a background that puts cropmarks around the page area.'''
 
-        print 'Calling: addCropmarksBackground()'
+    def addBackground (self, target, force = False) :
+        '''Add a background (watermark) to a rendered PDF file. This will
+        figure out what the background is to be composed of and create
+        a master background page. Using force will cause it to be remade.'''
 
+# FIXME: Need to figure out a way to keep intact the original target so
+# it can be delivered without having to be rerendered. This will prevent
+# possible problems of things not rendering exactly the same. The output
+# the client reviews should be the output that is delivered.
 
-    def addBoxBackground (self, target) :
-        '''Add a background that puts a box around the page area.'''
-
-        # Create box background file name 
-        if self.gid :
-            boxFile = os.path.join(self.local.projIllustrationFolder, self.gid + '-boxBackground.pdf')
+        # Do a quick check if the background needs to be remade
+        if force :
+            self.createBlankBackground()
+            # Add each component to the blank background file
+            for comp in self.layoutConfig['DocumentFeatures']['backgroundComponents'] :
+                getattr(self, 'merge' + comp.capitalize())()
         else :
-            boxFile = os.path.join(self.local.projIllustrationFolder, 'boxBackground.pdf')
-            
-        # Create the lines file
-        if not os.path.isfile(boxFile) :
-            self.createBoxFile(boxFile)
-                
-        # Merge the lines file with the target
-        if os.path.isfile(boxFile) :
-            if self.mergePdfFilesPdftk(target, boxFile) :
-                return True
+            # If there isn't one, make it
+            if not os.path.exists(self.local.backgroundFile) :
+                self.createBlankBackground()
+                # Add each component to the blank background file
+                for comp in self.layoutConfig['DocumentFeatures']['backgroundComponents'] :
+                    getattr(self, 'merge' + comp.capitalize())()
+
+        # Merge target with the background
+        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), target)
+
+        return True
 
 
-    def addLinesBackground (self, target) :
-        '''Add a background that has lines that represent the type
-        leading.'''
+    def addDocInfo (self, target) :
+        '''Add (merge) document information to the rendered target doc.'''
 
-        # Create lines background file name 
-        if self.gid :
-            linesFile = os.path.join(self.local.projIllustrationFolder, self.gid + '-linesBackground.pdf')
-        else :
-            linesFile = os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf')
-            
-        # Create the lines file
-        if not os.path.isfile(linesFile) :
-            self.createLinesFile(linesFile)
-                
-        # Merge the lines file with the target
-        if os.path.isfile(linesFile) :
-            if self.mergePdfFilesPdftk(target, linesFile) :
-                return True
+        # Initialize the process
+        docInfoText         = self.layoutConfig['DocumentFeatures']['docInfoText']
+        timestamp           = self.tools.tStamp()
+        headerLine          = self.pid + ' / ' + self.gid + ' / ' + timestamp
+        svgFile             = tempfile.NamedTemporaryFile().name
+        pdfFile             = tempfile.NamedTemporaryFile().name
 
+        ## RENDERED PAGE DIMENSIONS (body)
+        # This can be determined with the pyPdf element 
+        # "pdf.getPage(0).mediaBox", which returns a 
+        # RectangleObject([0, 0, Width, Height]). The
+        # width and height are in points. Hopefully we will
+        # always be safe by measuring the gidPdfFile size.
+        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
+        var2 = pdf.getPage(0).mediaBox
+        bdWidth = float(var2.getWidth())
+        bdHeight = float(var2.getHeight())
+        # Printer page size
+        pps = self.printerPageSize()
+        pgWidth = pps[0]
+        pgHeight = pps[1]
+        pgCenter = pgWidth/2
 
-    def addWatermarkBackground (self, source) :
-        '''Add a background (watermark) to a specific PDF file.'''
+        #   Write out SVG document text 
+        with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
+            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
+                version="1.1" width = "''' + str(pgWidth) + '''" height = "''' + str(pgHeight) + '''">
+                <g><text x = "''' + str(pgCenter) + '''" y = "''' + str(20) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:8;text-anchor:middle;fill:#000000;fill-opacity:1">''' + headerLine + '''</text></g>
+                <g><text x = "''' + str(pgCenter) + '''" y = "''' + str(pgHeight-30) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:8;text-anchor:middle;fill:#000000;fill-opacity:1">''' + self.tools.fName(target) + '''</text></g>
+                <g><text x = "''' + str(pgCenter) + '''" y = "''' + str(pgHeight-20) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:8;text-anchor:middle;fill:#000000;fill-opacity:1">''' + docInfoText + '''</text></g>
+                </svg>''')
 
-        watermark = self.projectConfig['GeneralSettings']['watermark']
-        # Create watermark background file name 
-        watermarkFile = os.path.join(self.local.projIllustrationFolder, 'watermark-' + watermark + '.pdf')
-        # Create the target file name
-        target = source.split('.')[0] + '-' + watermark + '.pdf'
-        # Create the watermark file
-        if not os.path.isfile(watermarkFile) :
-            self.createWatermarkFile(watermarkFile)
-        # For this operation we need to copy our source to target
-        shutil.copy(source, target)
-        # Merge the watermark file with the target
-        if os.path.isfile(watermarkFile) :
-            if self.mergePdfFilesPdftk(target, watermarkFile) :
-                return target
+        self.convertSvgToPdf(svgFile, pdfFile)
+        # Merge target with the background
+        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), pdfFile), target)
+        
+        return True
 
 
     ##### Background Creation Functions #####
 
-    def createWatermarkFile (self, watermark) :
-        '''Create a watermark file and return the file name.'''
-
-        print 'Calling: createWatermarkFile()'
+    def createBlankBackground (self) :
+        '''Create a blank background page according to the print page
+        size specified. If force is used, the page will be remade.'''
         
+        svgFile   = tempfile.NamedTemporaryFile().name
 
-    def createBoxFile (self, pdfOutFile) :
-        '''Create a border backgound file used for proof reading.'''
+        # Printer page size
+        pps = self.printerPageSize()
+        pgWidth = pps[0]
+        pgHeight = pps[1]
+
+        #   Write out SVG document text 
+        with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
+            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
+                version="1.1" width = "''' + str(pgWidth) + '''" height = "''' + str(pgHeight)+ '''">
+                </svg>''')
+
+        self.convertSvgToPdf(svgFile, self.local.backgroundFile)
+
+
+    def mergeWatermark (self) :
+        '''Create a watermark file and return the file name. Using force
+        will cause any exsiting versions to be recreated.'''
+
+#        import pdb; pdb.set_trace()
+
+        # Initialize the process
+        pubProg             = "Rapuma"
+        watermarkText       = self.layoutConfig['DocumentFeatures']['watermarkText']
+        svgFile             = tempfile.NamedTemporaryFile().name
+        pdfFile             = tempfile.NamedTemporaryFile().name
+
+        ## RENDERED PAGE DIMENSIONS (body)
+        # This can be determined with the pyPdf element 
+        # "pdf.getPage(0).mediaBox", which returns a 
+        # RectangleObject([0, 0, Width, Height]). The
+        # width and height are in points. Hopefully we will
+        # always be safe by measuring the gidPdfFile size.
+        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
+        var2 = pdf.getPage(0).mediaBox
+        bdWidth = float(var2.getWidth())
+        bdHeight = float(var2.getHeight())
+        # Printer page size
+        pps = self.printerPageSize()
+        pgWidth = pps[0]
+        pgHeight = pps[1]
+
+        #   Write out SVG document text 
+        with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
+            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
+                version="1.1" width = "''' + str(pgWidth) + '''" height = "''' + str(pgHeight)+ '''">
+                <g><text x = "''' + str((pgWidth - bdWidth)/2 + 54) + '''" y = "''' + str((pgHeight - bdHeight)/2 + 120) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg)+'''
+                <tspan x = "''' + str((pgWidth)/2) + '''" y = "''' + str((pgHeight - bdHeight)/2 + 194)+ '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str((pgWidth + bdWidth)/2-54)+ '''" y = "''' + str((pgHeight - bdHeight)/2 + 268) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pgWidth/2) + '''" y = "''' + str((pgHeight - bdHeight)/2 + 342)+ '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str((pgWidth - bdWidth)/2 + 54)+ '''" y = "''' + str((pgHeight - bdHeight)/2 + 416) + '''" style="text-anchor:start">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str((pgWidth + bdWidth)/2 - 36)+ '''" y = "''' + str((pgHeight - bdHeight)/2 + 520 + 36)+ '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                </text></g></svg>''')
+
+        self.convertSvgToPdf(svgFile, pdfFile)
+        self.mergePdfFilesPdftk(self.local.backgroundFile, pdfFile)
+        
+        return True
+
+
+    def mergeCropmarks (self) :
+        '''Merge cropmarks on to the background page.'''
+
+        # Initialize the process
+        svgFile             = tempfile.NamedTemporaryFile().name
+        pdfFile             = tempfile.NamedTemporaryFile().name
+
+        ## RENDERED PAGE DIMENSIONS (body)
+        # This can be determined with the pyPdf element 
+        # "pdf.getPage(0).mediaBox", which returns a 
+        # RectangleObject([0, 0, Width, Height]). The
+        # width and height are in points. Hopefully we will
+        # always be safe by measuring the gidPdfFile size.
+        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
+        var2 = pdf.getPage(0).mediaBox
+        bdWidth = float(var2.getWidth())
+        bdHeight = float(var2.getHeight())
+        # Printer page size
+        pps = self.printerPageSize()
+        pgWidth = pps[0]
+        pgHeight = pps[1]
+
+        with codecs.open(svgFile, 'wb') as fbackgr : 
+                    # starting lines of SVG xml
+            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width = "''' + str(pgWidth) + '''" height = "''' + str(pgHeight) + '''">\n''') 
+                    # vertical top left
+            fbackgr.write( '''<path d = "m'''+str ((pgWidth - bdWidth)/2)+''','''+str ((pgHeight - bdHeight)/2 - 32.0)+''',v27," style="stroke:#000000;stroke-width:.2"/>\n''')   
+                    # vertical bottom left
+            fbackgr.write( '''<path d = "m'''+str ((pgWidth - bdWidth)/2)+''','''+str ((pgHeight + bdHeight)/2 + 5.0)+''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
+                    # vertical bottom right
+            fbackgr.write( '''<path d = "m'''+str ((pgWidth + bdWidth)/2)+''','''+str ((pgHeight - bdHeight)/2 - 32.0)+''',v27" style="stroke:#000000;stroke-width:.2"/>\n''')
+                    # vertical top right
+            fbackgr.write( '''<path d = "m'''+str ((pgWidth + bdWidth)/2)+''','''+str ((pgHeight + bdHeight)/2 + 5.0)+''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
+                    # horzontal top left
+            fbackgr.write( '''<path d =" m'''+str ((pgWidth - bdWidth)/2 - 32.0)+''','''+str ((pgHeight - bdHeight)/2)+''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+                    # horzontal top right
+            fbackgr.write( '''<path d =" m'''+str ((pgWidth + bdWidth)/2 + 5.0)+''','''+str ((pgHeight - bdHeight)/2)+''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+                    # horzontal bottom right
+            fbackgr.write( '''<path d =" m'''+str ((pgWidth - bdWidth)/2 - 32.0)+''','''+str ((pgHeight + bdHeight)/2)+''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+                    # horzontal bottom left
+            fbackgr.write( '''<path d =" m'''+str ((pgWidth + bdWidth)/2 +5.0)+''','''+str ((pgHeight + bdHeight)/2)+''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''</svg>''')
+
+        self.convertSvgToPdf(svgFile, pdfFile)
+        self.mergePdfFilesPdftk(self.local.backgroundFile, pdfFile)
+        
+        return True
+
+
+    def mergePagebox (self) :
+        '''Merge a page box with the background page to be used for proof reading.'''
 
         # Set our file names
         borderSource        = os.path.join(self.local.rapumaIllustrationFolder, 'border.svg')
@@ -182,9 +301,8 @@ class ProjBackground (object) :
             return True
 
 
-    def createLinesFile (self, pdfOutFile) :
-        '''Create a lines background file used for composition work. The code
-        in this file came from Flip Wester (flip_wester@sil.org)'''
+    def mergeLines (self) :
+        '''Merge a lines component with the background file.'''
 
         # Set our file names
         gridSource          = os.path.join(self.local.rapumaIllustrationFolder, 'grid.svg')
@@ -204,7 +322,7 @@ class ProjBackground (object) :
         bottomMargin        = float(self.layoutConfig['PageLayout']['bottomMargin'])
         outsideMargin       = float(self.layoutConfig['PageLayout']['outsideMargin'])
         insideMargin        = float(self.layoutConfig['PageLayout']['insideMargin'])
-        textWidth           = pageWidth - (outsideMargin + insideMargin)
+        textWidth           = bdWidth - (outsideMargin + insideMargin)
 
         # The page dimensions are given in [mm] but are converted to pixels [px],
         # the conversion factor for [mm] to [px] is 90/25.4 
@@ -450,17 +568,51 @@ class ProjBackground (object) :
         return cmds
 
 
-    def mergePdfFilesPdftk (self, front, back) :
-        '''Merge two PDF files together using pdftk.'''
-    
-        cmd = ['pdftk', front, 'background', back, 'output', self.tools.tempName(front)]
+    def centerOnPrintPage (self, contents) :
+        '''Center a PDF file on the printerPageSize page. GhostScript
+        is the only way to do this at this point.'''
+
+#        import pdb; pdb.set_trace()
+
+        # This breaks if the printerPageSizeCode is not A4 or US Letter
+        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode']
+        tmpFile = tempfile.NamedTemporaryFile().name
+        # Get the size of our printer page
+        pps = self.printerPageSize()
+        # Get the size of our contents page
+        cPdf = PdfFileReader(open(contents,'rb'))
+        var2 = cPdf.getPage(0).mediaBox
+        bw = float(var2.getWidth())
+        bh = float(var2.getHeight())
+        # Get the offset. We assume that pps is bigger than the contents
+        # Note: Offset is measured in points
+        wo = float((int(pps[0]) - bw)/2)
+        ho = float((int(pps[1]) - bh)/2)
+        pageOffset = str(wo) + ' ' + str(ho)
+        # Assemble the GhostScript command
+        cmd = ['gs',  '-o', tmpFile,  '-sDEVICE=pdfwrite',  '-dQUIET', '-sPAPERSIZE=' + printerPageSizeCode.lower(),  '-dFIXEDMEDIA' , '-c', '<</PageOffset [' + str(pageOffset) + ']>>', 'setpagedevice', '-f', contents]
+        # Run the process
         try:
             subprocess.call(cmd) 
-            shutil.copy(self.tools.tempName(front), front)
-            os.remove(self.tools.tempName(front))
-            return True
+            # Return the name of the temp PDF
+            return tmpFile
         except Exception as e :
-            self.log.writeToLog(self.errorCodes['0280'], [str(cmd), str(e)])
+            self.log.writeToLog(self.errorCodes['1280'], [str(cmd), str(e)])
+        # Return the temp file name for further processing
+
+
+    def mergePdfFilesPdftk (self, front, back) :
+        '''Merge two PDF files together using pdftk.'''
+
+        tmpFile = tempfile.NamedTemporaryFile().name
+        cmd = ['pdftk', front, 'background', back, 'output', tmpFile]
+        try:
+            subprocess.call(cmd) 
+            shutil.copy(tmpFile, front)
+            # Return the name of the primary PDF
+            return front
+        except Exception as e :
+            self.log.writeToLog(self.errorCodes['1280'], [str(cmd), str(e)])
 
 
     def convertSvgToPdf (self, svgInFile, pdfOutFile) :
@@ -471,8 +623,35 @@ class ProjBackground (object) :
             subprocess.call(self.buildCommandList(svgInFile, pdfOutFile)) 
             return True
         except Exception as e :
-            self.log.writeToLog(self.errorCodes['0290'], [self.tools.fName(pdfOutFile),str(e)])
+            self.log.writeToLog(self.errorCodes['1290'], [self.tools.fName(pdfOutFile),str(e)])
 
 
+    def printerPageSize (self) :
+        '''Return the width and height of the printer page size in
+        points. If there is a problem just return the size for A4.
+        Only US Letter and A4 are currently supported.'''
     
+        size = []
+        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode']
+        ## STANDARD PRINTER PAGE SIZES
+        # The output page (printer page) is what the typeset page will be placed on
+        # with a watermark behind it. There are only two page sizes supported.
+        # They are A4 and US Letter. We will determine the size by the ID code
+        # found in the layout.conf file. If that doesn't make sense, then just
+        # default to the A4 size.
+        if printerPageSizeCode.lower() == 'a4' :
+            size.append(float(595))
+            size.append(float(842))
+        elif printerPageSizeCode.lower() == 'letter' :
+            size.append(float(612))
+            size.append(float(792))
+        else :
+            # Just use the default A4 size in pts so it doesn't die from this
+            size.append(float(595))
+            size.append(float(842))
+
+        return [size[0], size[1]]
+
+
+
     
