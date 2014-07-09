@@ -59,6 +59,7 @@ class ProjBackground (object) :
             '1110' : ['MSG', 'File exsits: [<<1>>]. Use \"force\" to remove it.'],
             '1280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
             '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
+            '1300' : ['MSG', 'Background merge operation in process, please wait...'],
 
         }
 
@@ -75,10 +76,16 @@ class ProjBackground (object) :
         figure out what the background is to be composed of and create
         a master background page. Using force will cause it to be remade.'''
 
-# FIXME: Need to figure out a way to keep intact the original target so
+# FIXME(1): Need to figure out a way to keep intact the original target so
 # it can be delivered without having to be rerendered. This will prevent
 # possible problems of things not rendering exactly the same. The output
 # the client reviews should be the output that is delivered.
+
+# FIXME(2): Adding the background slows performance. There needs to be a
+# a way to do this faster. The centerOnPrintPage() seems to be the problem
+# GS tends to take longer than pdftk but when merging, pdftk cannot
+# maintain the individual sizes of two docs. One will always be stretched
+# or shrunk. GS over comes that, but at the cost of speed.
 
         # Do a quick check if the background needs to be remade
         if force :
@@ -95,6 +102,7 @@ class ProjBackground (object) :
                     getattr(self, 'merge' + comp.capitalize())()
 
         # Merge target with the background
+        self.log.writeToLog(self.errorCodes['1300'])
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), target)
 
         return True
@@ -137,6 +145,7 @@ class ProjBackground (object) :
 
         self.convertSvgToPdf(svgFile, pdfFile)
         # Merge target with the background
+        self.log.writeToLog(self.errorCodes['1300'])
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), pdfFile), target)
         
         return True
@@ -148,12 +157,17 @@ class ProjBackground (object) :
         '''Create a blank background page according to the print page
         size specified. If force is used, the page will be remade.'''
         
+        # Set the temp svg file name
         svgFile   = tempfile.NamedTemporaryFile().name
 
         # Printer page size
         pps = self.printerPageSize()
         pgWidth = pps[0]
         pgHeight = pps[1]
+
+        # Be sure there is an illustrations folder in place
+        if not os.path.isdir(self.local.projIllustrationFolder) :
+            os.mkdir(self.local.projIllustrationFolder)
 
         #   Write out SVG document text 
         with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 

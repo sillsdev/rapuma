@@ -44,7 +44,6 @@ class ProjProcess (object) :
             self.projectConfig          = self.proj_config.projectConfig
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
-        self.paratext               = Paratext(pid, gid)
 
         # Log messages for this module
         self.errorCodes     = {

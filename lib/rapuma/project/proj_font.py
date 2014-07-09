@@ -169,13 +169,16 @@ class ProjFont (object) :
         self.tools.writeConfFile(self.macPackConfig)
 
 
+
+
+
     def recordFont (self, cType, font, force = None) :
         '''Check for the exsitance of the specified font in the font folder.
         Then extract the meta data into the appropreate configurations.
         If the force flag has been set then delete the old settings and
         install the new settings (or just reset to default settings).'''
 
-#       import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         # Set vars do initial checks
         metaDataSource = os.path.join(self.local.projFontFolder, font, font + '.xml')
@@ -274,9 +277,10 @@ class ProjFont (object) :
 
 #        import pdb; pdb.set_trace()
 
-#        font = self.checkForSubFont(font)
+        font = self.checkForSubFont(font)
         cRes = self.copyInFont(font, force)
         rRes = self.recordFont(self.cType, font, force)
+        pRes = ''
         if force :
             pRes = self.setPrimaryFont(font, force)
         if cRes and rRes and pRes :

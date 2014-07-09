@@ -47,8 +47,8 @@ echo    rapuma project ENG-LATN-JAS project add
 # for this command will cause it to overwrite any existing data for this
 # group. Otherwise a warning will be given and the process will stop.
 
-echo    rapuma group ENG-LATN-JAS mb group add --source_list ~/Publishing/testArea/MBJAS/sources/mb/jas.usfm
-        rapuma group ENG-LATN-JAS mb group add --source_list "~/Publishing/testArea/MBJAS/sources/mb/jas.usfm ~/Publishing/testArea/MBJAS/sources/mb/41MATBRUvu1.SFM"
+echo    rapuma group ENG-LATN-JAS mb group add --cid_list "jas mat" --source_path ~/Publishing/testArea/MBJAS/sources/mb
+        rapuma group ENG-LATN-JAS mb group add --cid_list "jas mat" --source_path ~/Publishing/testArea/MBJAS/sources/mb
 
 # With simple projects such as this, we can now render the text. The "render" command will set in
 # motion a process that will perform a number of tasks in this project such as import the default

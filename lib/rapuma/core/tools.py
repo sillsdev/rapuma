@@ -385,7 +385,8 @@ class Tools (object) :
         be determined, return None (nothing). This does not varify if
         the ID is valid or not.'''
 
-        if len(self.getCidIdLine().split()[1]) == 3 :
+        thisId = self.getCidIdLine(fileName).split()[1]
+        if len(thisId) == 3 :
             return thisId.lower()
 
 

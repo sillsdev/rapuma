@@ -144,8 +144,8 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
-            '0725' : ['MSG', 'Added background to file: [<<1>>]'],
-            '0726' : ['MSG', 'Added timestamp to file: [<<1>>]'],
+            '0725' : ['MSG', 'Added background to: [<<1>>]'],
+            '0726' : ['MSG', 'Added timestamp to: [<<1>>]'],
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
 
         }
@@ -754,11 +754,11 @@ class Xetex (Manager) :
         # Once we know the file is successfully generated, add a background if defined
         if self.useBackground :
             if self.pg_back.addBackground(renderFile) :
-                self.log.writeToLog(self.errorCodes['0725'], [renderFile])
+                self.log.writeToLog(self.errorCodes['0725'], [self.tools.fName(renderFile)])
         # Add a timestamp if requested
         if self.useDocInfo :
             if self.pg_back.addDocInfo(renderFile) :
-                self.log.writeToLog(self.errorCodes['0726'], [renderFile])
+                self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(renderFile)])
 
         ##### Viewing #####
         if renderFile :
