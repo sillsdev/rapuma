@@ -1100,6 +1100,8 @@ class UsfmData (object) :
             "rv" : 87,
             "rev" : 87,
             "revelation" : 87,
-            "revelations" : 87
+            "revelations" : 87,
+           
+            "bak" : 100
             }
 

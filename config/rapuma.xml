@@ -73,7 +73,7 @@ Todo:
             <key>svgPdfConvertCommand</key>
             <description>The command needed to convert a SVG file to PDF. Mostly used for creating backgound watermark files. Input and output filenames are represented by these key terms: svgInFile and pdfOutFile. Use those along with any other application-specific commands. The default setting is for the rsvg-convert utility.</description>
             <type>list</type>
-            <value>rsvg-convert,-f,pdf,-o,pdfOutFile,svgInFile</value>
+            <value>rsvg-convert,-f,pdf,-o,pdfFile,svgFile</value>
         </setting>
         <setting>
             <name>Text Differential Viewer Command</name>
@@ -190,7 +190,7 @@ Todo:
             <key>defaultIllustrationLibraryName</key>
             <description>The name of the illustrations collection library that is most commonly used. This will go into all new projects but can be easily changed at the project level.</description>
             <type>string</type>
-            <value>Knowles-600</value>
+            <value>Knowles-600_bw</value>
         </setting>
     </section>
 </root>

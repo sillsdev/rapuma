@@ -498,11 +498,9 @@ def userArguments (args) :
             ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, False)
-        elif cmd == 'watermark' :
-            # This uses the same inputs as render so it can build the
-            # file name and find the target. It then creates a new name
-            # and saves it to the Deliverables folder.
-            ProjBackground(pid).addWatermarkBackground(gid, cid_list, pages, override)
+        elif cmd == 'background' :
+            # Create a new or refresh an existing backgrond.
+            ProjBackground(pid).createBackground()
         else :
             cmdError(cmd, cmdType)
 
@@ -643,7 +641,7 @@ if __name__ == '__main__' :
     mediaTypes              = ['book']
     # Group
     grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock', 'watermark']
+    grCommands              = ['add', 'background', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
     componentTypes          = ['usfm', 'map', 'toc']
     compareTests            = ['backup', 'source']
     # Packages
