@@ -58,7 +58,7 @@ class ProjBackground (object) :
             '0000' : ['MSG', 'Placeholder message'],
             '1110' : ['MSG', 'File exsits: [<<1>>]. Use \"force\" to remove it.'],
             '1280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
-            '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
+            '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>] The command was: [<<3>>]'],
             '1300' : ['MSG', 'Background merge operation in process, please wait...'],
             '1310' : ['WRN', 'Failed to add background component: [<<1>>] with error: [<<2>>]']
 
@@ -396,11 +396,11 @@ class ProjBackground (object) :
     
         # Convert the lines background component to PDF
         linesPdf = self.convertSvgToPdf(svgFile)
-        shutil.copy(linesPdf, os.path.join(self.local.projIllustrationFolder, 'linesPdf.pdf'))
+#        shutil.copy(linesPdf, os.path.join(self.local.projIllustrationFolder, 'linesPdf.pdf'))
 
         # Center linesPdf on the print page (this keeps the size right)
         linesBackground = self.centerOnPrintPage(linesPdf)
-        shutil.copy(linesBackground, os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf'))
+#        shutil.copy(linesBackground, os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf'))
 
         # Merge linesPdf with existing background
         results = results = self.mergePdfFilesPdftk(self.local.backgroundFile, linesBackground)
@@ -483,12 +483,13 @@ class ProjBackground (object) :
 
         pdfFile = tempfile.NamedTemporaryFile().name
 
+        cmd = self.buildCommandList(svgFile, pdfFile)
         # Simple try statement seems to work best for this
         try:
-            subprocess.call(self.buildCommandList(svgFile, pdfFile)) 
+            subprocess.call(cmd) 
             return pdfFile
         except Exception as e :
-            self.log.writeToLog(self.errorCodes['1290'], [pdfFile,str(e)])
+            self.log.writeToLog(self.errorCodes['1290'], [pdfFile,str(e),cmd])
 
 
     def printerPageSize (self) :

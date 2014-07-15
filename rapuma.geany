@@ -17,13 +17,13 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=32
-FILE_NAME_0=28252;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
+current_page=5
+FILE_NAME_0=22823;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/scripts/rapuma;0;4
 FILE_NAME_1=4833;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_binding.py;0;4
 FILE_NAME_2=8414;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/project.py;0;4
 FILE_NAME_3=21188;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfm.py;0;4
 FILE_NAME_4=7833;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/manager/xetex.py;0;4
-FILE_NAME_5=22695;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
+FILE_NAME_5=22605;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_background.py;0;4
 FILE_NAME_6=2561;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_compare.py;0;4
 FILE_NAME_7=25180;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_data.py;0;4
 FILE_NAME_8=0;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core/proj_edit.py;0;4
@@ -35,7 +35,7 @@ FILE_NAME_13=3000;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/core
 FILE_NAME_14=16285;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_setup.py;0;4
 FILE_NAME_15=1730;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/group/usfmTex.py;0;4
 FILE_NAME_16=6950;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex-ext.tex;0;4
-FILE_NAME_17=9853;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
+FILE_NAME_17=10187;Python;0;16;0;1;0;/home/dennis/Projects/rapuma/lib/rapuma/project/proj_commander.py;0;4
 FILE_NAME_18=50300;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/usfmTex.xml;0;4
 FILE_NAME_19=505;XML;0;16;0;1;0;/home/dennis/Projects/rapuma/config/font.xml;0;4
 FILE_NAME_20=12265;LaTeX;0;16;0;1;0;/home/dennis/Projects/rapuma/resource/macro/usfmTex/ptx-para-style.tex;0;4
