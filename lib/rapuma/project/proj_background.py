@@ -60,6 +60,7 @@ class ProjBackground (object) :
             '1280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
             '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>]'],
             '1300' : ['MSG', 'Background merge operation in process, please wait...'],
+            '1310' : ['WRN', 'Failed to add background component: [<<1>>] with error: [<<2>>]']
 
         }
 
@@ -119,10 +120,12 @@ class ProjBackground (object) :
         # RectangleObject([0, 0, Width, Height]). The
         # width and height are in points. Hopefully we will
         # always be safe by measuring the gidPdfFile size.
-        pdf         = PdfFileReader(open(self.local.gidPdfFile,'rb'))
-        var2        = pdf.getPage(0).mediaBox
-        bdWidth     = float(var2.getWidth())
-        bdHeight    = float(var2.getHeight())
+        #pdf         = PdfFileReader(open(self.local.gidPdfFile,'rb'))
+        #var2        = pdf.getPage(0).mediaBox
+        #bdWidth     = float(var2.getWidth())
+        #bdHeight    = float(var2.getHeight())
+        bdWidth = float(self.layoutConfig['PageLayout']['pageWidth'])
+        bdHeight = float(self.layoutConfig['PageLayout']['pageHeight'])
         # Printer page size
         pps         = self.printerPageSize()
         ppsWidth    = pps[0]
@@ -149,12 +152,20 @@ class ProjBackground (object) :
 
     def createBackground (self) :
         '''Create a background file. This will overwrite any existing
-        background file.'''
+        background file and will add each recognoized background type
+        found in the bacgroundComponents config setting.'''
 
         self.createBlankBackground()
+
         # Add each component to the blank background file
         for comp in self.layoutConfig['DocumentFeatures']['backgroundComponents'] :
-            getattr(self, 'merge' + comp.capitalize())()
+            try :
+                getattr(self, 'merge' + comp.capitalize())()
+            except Exception as e :
+                self.log.writeToLog(self.errorCodes['1310'],[comp,str(e)])
+                pass
+
+        return True
 
 
     def createBlankBackground (self) :
@@ -194,36 +205,33 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # This can be determined with the pyPdf element 
-        # "pdf.getPage(0).mediaBox", which returns a 
-        # RectangleObject([0, 0, Width, Height]). The
-        # width and height are in points. Hopefully we will
-        # always be safe by measuring the gidPdfFile size.
-        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
-        var2 = pdf.getPage(0).mediaBox
-        bdWidth = float(var2.getWidth())
-        bdHeight = float(var2.getHeight())
-        # Printer page size
+        # Convert formula - mm to px
+        mmToPx = 72 / 25.4
+        # Trim page width [px]
+        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        # Trim page height [px]
+        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
         ppsHeight = pps[1]
 
+        pageX = ppsWidth - bdWidth
+        pageY = ppsHeight - bdHeight
+        
         #   Write out SVG document text 
         with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
-                version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight)+ '''">
-                <g><text x = "''' + str((ppsWidth - bdWidth)/2 + 54) + '''" y = "''' + str((ppsHeight - bdHeight)/2 + 120) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
-                <tspan x = "''' + str((ppsWidth)/2) + '''" y = "''' + str((ppsHeight - bdHeight)/2 + 194)+ '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str((ppsWidth + bdWidth)/2-54)+ '''" y = "''' + str((ppsHeight - bdHeight)/2 + 268) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(ppsWidth/2) + '''" y = "''' + str((ppsHeight - bdHeight)/2 + 342)+ '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str((ppsWidth - bdWidth)/2 + 54)+ '''" y = "''' + str((ppsHeight - bdHeight)/2 + 416) + '''" style="text-anchor:start">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str((ppsWidth + bdWidth)/2 - 36)+ '''" y = "''' + str((ppsHeight - bdHeight)/2 + 520 + 36)+ '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">
+                <g><text x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.40) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(pageY * 1.80) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 2.2) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(pageY * 3) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
                 </text></g></svg>''')
 
-# For testing
-        #shutil.copy(self.convertSvgToPdf(svgFile), os.path.join(self.local.projIllustrationFolder, 'lines.pdf'))
-        #shutil.copy(svgFile, os.path.join(self.local.projIllustrationFolder, 'lines.svg'))
-
+        shutil.copy(self.convertSvgToPdf(svgFile), os.path.join(self.local.projIllustrationFolder, 'watermark.pdf'))
+        shutil.copy(svgFile, os.path.join(self.local.projIllustrationFolder, 'watermark.svg'))
 
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -239,16 +247,13 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # This can be determined with the pyPdf element 
-        # "pdf.getPage(0).mediaBox", which returns a 
-        # RectangleObject([0, 0, Width, Height]). The
-        # width and height are in points. Hopefully we will
-        # always be safe by measuring the gidPdfFile size.
-        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
-        var2 = pdf.getPage(0).mediaBox
-        bdWidth = float(var2.getWidth())
-        bdHeight = float(var2.getHeight())
-        # Printer page size
+        # Convert formula - mm to px
+        mmToPx = 72 / 25.4
+        # Trim page width [px]
+        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        # Trim page height [px]
+        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
         ppsHeight = pps[1]
@@ -287,16 +292,13 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # This can be determined with the pyPdf element 
-        # "pdf.getPage(0).mediaBox", which returns a 
-        # RectangleObject([0, 0, Width, Height]). The
-        # width and height are in points. Hopefully we will
-        # always be safe by measuring the gidPdfFile size.
-        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
-        var2 = pdf.getPage(0).mediaBox
-        bdWidth = float(var2.getWidth())
-        bdHeight = float(var2.getHeight())
-        # Printer page size
+        # Convert formula - mm to px
+        mmToPx = 72 / 25.4
+        # Trim page width [px]
+        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        # Trim page height [px]
+        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
         ppsHeight = pps[1]
@@ -306,7 +308,7 @@ class ProjBackground (object) :
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
                 version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">''')
                     # rectangle
-            fbackgr.write( '''<rect x = "''' + str((ppsWidth - bdWidth)/2) + '''" y= "''' + str((ppsHeight - bdHeight)/2) + '''" height = "''' + str(bdHeight) + '''" width = "''' + str(bdWidth) + '''" style = "fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:.2"/>
+            fbackgr.write( '''<rect x = "''' + str((ppsWidth - bdWidth)/2) + '''" y= "''' + str((ppsHeight - bdHeight)/2) + '''" height = "''' + str(bdHeight) + '''" width = "''' + str(bdWidth) + '''" style = "fill:none;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:.2"/>
                 </svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -321,115 +323,88 @@ class ProjBackground (object) :
         # Initialize the process
         svgFile             = tempfile.NamedTemporaryFile().name
 
-        # CONVERSIONS OF IMPORTS TO [PX]
-        # The variable type of pageWidth and pageHeight can be 'int' or
-        # <class 'decimal.Decimal'>. In order to work properly in the linessvg 
-        # function the variables dimensions have to be [px], the conversion is
-        # done by changing the variables' type to 'float'.
-
+        # PAGE DIMENSIONS
         # The page dimensions extracted from layoutConfig are in [mm] and
         # must be converted to pixels [px], the conversion factor for [mm]
         # to [px] is 72/25.4 
-        mmToPx              = 72 / 25.4
-
-        # The page dimensions are given in [mm] but are converted to pixels [px],
-        # the conversion factor for [mm] to [px] is 90/25.4 
-        def convertMmToPx (mm) :
-            return round(mm * 90 / 25.4, 1)
-        #def convertMmToPx (mm) :
-            #return round(mm * 3.8, 1)
-
-
-        ## RENDERED PAGE DIMENSIONS (body)
-        # This can be determined with the pyPdf element 
-        # "pdf.getPage(0).mediaBox", which returns a 
-        # RectangleObject([0, 0, Width, Height]). The
-        # width and height are in points. Hopefully we will
-        # always be safe by measuring the gidPdfFile size.
-        pdf = PdfFileReader(open(self.local.gidPdfFile,'rb'))
-        var2 = pdf.getPage(0).mediaBox
-        bdWidth = float(var2.getWidth())
-        bdHeight = float(var2.getHeight())
-        # Printer page size
-        pps = self.printerPageSize()
-        ppsWidth = pps[0]
-        ppsHeight = pps[1]
-
-        
-        
-        # Top margin
-        topMargin           = int(self.layoutConfig['PageLayout']['topMargin'])
-        # Outside margin
-        outsideMargin       = int(self.layoutConfig['PageLayout']['outsideMargin'])
-        # Inside margin
-        insideMargin        = int(self.layoutConfig['PageLayout']['insideMargin'])
-        # Bottom margin
-        bottomMargin        = int(self.layoutConfig['PageLayout']['bottomMargin'])
-        # Width of the text area
-#        gridWidth           = bdWidth - ((outsideMargin + insideMargin) / 0.35)
-        gridWidth           = bdWidth - ((outsideMargin + insideMargin) * 3)
-        # Height of the text area
-        gridHeight          = bdHeight - ((topMargin + bottomMargin) * 3)
-
-        # The font and leading are given in TeX point [pt] and are converted 
-        # to pixels [px], the conversion factor for [pt] to [px] is 72/72.27 
+        mmToPx = 72 / 25.4
+        # page width [px]
+        paperPxWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        # page height [px]
+        paperPxHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # bodyFontSize [px]
-        bodyFontSize        = self.layoutConfig['TextElements']['bodyFontSize']
-        bodyFontPxSize      = round(float(bodyFontSize) * 72/72.27,3)
+        bodyFontSize = self.layoutConfig['TextElements']['bodyFontSize']
+        bodyFontPxSize = round(float(bodyFontSize) * 72/72.27,3)
         # bodyTextLeading [px]
-        bodyTextLeading     = self.layoutConfig['TextElements']['bodyTextLeading']
-        bodyTextPxLeading   = round(float(bodyTextLeading) * 72/72.27,3)
+        bodyTextLeading = self.layoutConfig['TextElements']['bodyTextLeading']
+        bodyTextPxLeading = round(float(bodyTextLeading) * 72/72.27,3)
+        # top margin [px]
+        topMargin = self.layoutConfig['PageLayout']['topMargin']
+        topPxMargin = round(mmToPx * float(topMargin),1)
+        # outside margin [px]
+        outsideMargin = self.layoutConfig['PageLayout']['outsideMargin']
+        outsidePxMargin = round(mmToPx * float(outsideMargin),1)
+        #inside margin [px]
+        insideMargin = self.layoutConfig['PageLayout']['insideMargin']
+        insidePxMargin = round(mmToPx * float(outsideMargin),1)
+        # bottom margin [px]
+        bottomMargin = self.layoutConfig['PageLayout']['bottomMargin']
+        bottomPxMargin = round(mmToPx * float(bottomMargin),1)
+        # width of the body text
+        textPxWidth = paperPxWidth - (outsidePxMargin + insidePxMargin)
 
-# Definition of CROP MARK SVG function
-#def linesvg(paperPxWidth,paperPxHeight,topPxMargin,outsidePxMargin,insidePxMargin,bottomPxMargin,textPxWidth,bodyFontPxSize,bodyTextPxLeading) :
-#    "This function writes the SVG code for a linegrid, based on pagedimensions, margins body font and body leading"
-
-        with codecs.open(svgFile, 'wb') as fbackgr : 
+        # Create the svg file
+        with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
                 # starting lines of SVG xml
-            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width = "''' + str(ppsWidth)+ '''" height = "''' + str(ppsHeight) + '''">
+            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width = "''' + str(paperPxWidth)+ '''" height = "'''+str(paperPxHeight) + '''">
                 \n    <!--RECTANGLE OF MARGINS-->\n''')
-            fbackgr.write( '''<rect x = "''' + str((ppsWidth - gridWidth) / 2) + '''" y= "''' + str((ppsHeight - gridHeight) / 2) + '''" height = "''' + str(gridHeight) + '''" width = "''' + str(gridWidth) + '''" style = "fill:#ffffff;fill-opacity:1;stroke:#ffc800;stroke-opacity:1;stroke-width:.2"/>
+            fbackgr.write( '''<rect x = "''' + str(outsidePxMargin) + '''" y= "''' + str(topPxMargin) + '''" height = "''' + str(paperPxHeight - topPxMargin - bottomPxMargin) + '''" width = "''' + str(textPxWidth) + '''" style = "fill:none;fill-opacity:1;stroke:#ffc800;stroke-opacity:1;stroke-width:.2"/>
                 \n    <!--START OF LINEGRID-->\n''')
-            fbackgr.write( '''<path d= "m ''' + str((ppsWidth - bdWidth)/2) + "," + str((ppsHeight - bdHeight)/2) + " " + str(bdWidth) + ''',0''')
+            fbackgr.write( '''<path d= "m ''' + str(outsidePxMargin * 0.75-1) + "," + str(topPxMargin + bodyFontPxSize) + " " + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
                 # filling the space between the top line and bottom margin, starting at distance
                 # counter num = 0 up to the but not including the total of num x leading
                 # equals the distance between top and bottom margin
             num = 0
-            while (num < int(round(bdHeight - bottomMargin - topMargin )/bodyTextPxLeading)):
+            while (num < int(round(paperPxHeight - bottomPxMargin - topPxMargin)/bodyTextPxLeading)):
                     # lines are drawn in zigzag pattern: RTL when num is even and LTR when odd
                 if num%2 == 0: 
-                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " - " + str(bdWidth + outsideMargin * 0.25) + ''',0''')
+                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " -" + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
                 else:
-                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " " + str(bdWidth + outsideMargin * 0.25) + ''',0''')
+                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " " + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
                 num = num +1
                 # draw all lines with following style 
             fbackgr.write( '''" style="stroke-width:0.2px;stroke:#ffc800;stroke-opacity:1"/>
                 \n    <!--LINE NUMBERS-->\n''')
                 # add line number '1' to top line just left of margin
-            fbackgr.write( '''<text x="''' + str(outsideMargin * 0.75-2) + '''" y="''' + str(topMargin + bodyFontPxSize-3) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#760076">1\n''')
+            fbackgr.write( '''<text x="''' + str(outsidePxMargin * 0.75-2) + '''" y="''' + str(topPxMargin + bodyFontPxSize-3) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#760076"> 1''')
                 # add line numbers to all lines down to bottom margin, starting with line number
                 # counter linecount = 2, the distance counter runs from '0' till one short of 
                 # the quotient (distance between top and bottom margin)/bodyTextPxLeading
             num = 0         # line counter
             linenumber = 2   # line number
-            while (num < int(round(bdHeight - bottomMargin - topMargin)/bodyTextPxLeading)):
-                fbackgr.write( '''<tspan x="''' + str(outsideMargin * 0.75-2) + '''" dy="''' + str(bodyTextPxLeading) + '''">''' + str(linenumber) + '''</tspan>\n''') 
+            while (num < int(round(paperPxHeight - bottomPxMargin - topPxMargin)/bodyTextPxLeading)):
+                fbackgr.write( '''<tspan x="''' + str(outsidePxMargin * 0.75-2) + '''" dy="''' + str(bodyTextPxLeading) + '''">''' + str(linenumber) + '''</tspan>''') 
                 linenumber = linenumber +1  
                 num = num +1
-            fbackgr.write('''</text>\n''' 
-                '''<!--LINEGRID CAPTION-->\n'''
-                '''<text  x="36" y="''' + str(bdHeight - bottomMargin+10) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#ffc800">page size: ''' + str(int(bdWidth/72*25.4+.5)) + ''' x ''' + str(int(bdHeight/72*25.4+.5)) + ''' mm ; font size: ''' + str(bodyFontSize) + ''' pt; leading: ''' + str(bodyTextLeading) + ''' pt</text>
+            fbackgr.write('''</text> 
+                \n  <!--LINEGRID CAPTION-->
+                <text  x="36" y="''' + str(paperPxHeight - bottomPxMargin+10) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#ffc800">page size: ''' + str(int(paperPxWidth/72*25.4+.5)) + ''' x ''' + str(int(paperPxHeight/72*25.4+.5)) + ''' mm ; font size: ''' + str(bodyFontSize) + ''' pt; leading: ''' + str(bodyTextLeading) + ''' pt</text>
                 \n    <!--PURPLE LINES TOP AND BOTTOM MARGINS--> 
-                <path d="M ''' + str(outsideMargin) + "," + str(topMargin) + " " + str(bdWidth + outsideMargin) + "," + str(topMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
-                <path d="M ''' + str(outsideMargin) + "," + str(bdHeight - bottomMargin) + " " + str(bdWidth + outsideMargin) + "," + str(bdHeight - bottomMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
+                <path d="M ''' + str(outsidePxMargin) + "," + str(topPxMargin) + " " + str(textPxWidth + outsidePxMargin) + "," + str(topPxMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
+                <path d="M ''' + str(outsidePxMargin) + "," + str(paperPxHeight - bottomPxMargin) + " " + str(textPxWidth + outsidePxMargin) + "," + str(paperPxHeight - bottomPxMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
                 </svg>''')
     
-        shutil.copy(self.convertSvgToPdf(svgFile), os.path.join(self.local.projIllustrationFolder, 'lines.pdf'))
-        shutil.copy(svgFile, os.path.join(self.local.projIllustrationFolder, 'lines.svg'))
-    
-    
-        # Convert the temp svg to pdf and merge into backgroundFile
-        results = self.mergePdfFilesPdftk(self.local.backgroundFile, self.convertSvgToPdf(svgFile))
+        # Convert the lines background component to PDF
+        linesPdf = self.convertSvgToPdf(svgFile)
+        shutil.copy(linesPdf, os.path.join(self.local.projIllustrationFolder, 'linesPdf.pdf'))
+
+        # Center linesPdf on the print page (this keeps the size right)
+        linesBackground = self.centerOnPrintPage(linesPdf)
+        shutil.copy(linesBackground, os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf'))
+
+        # Merge linesPdf with existing background
+        results = results = self.mergePdfFilesPdftk(self.local.backgroundFile, linesBackground)
+        # Test and return if good
         if os.path.isfile(results) :
             return True
 
@@ -541,7 +516,5 @@ class ProjBackground (object) :
             size.append(float(842))
 
         return [size[0], size[1]]
-
-
 
     

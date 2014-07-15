@@ -500,7 +500,7 @@ def userArguments (args) :
             ProjSetup(sysConfig, pid).lockUnlock(gid, False)
         elif cmd == 'background' :
             # Create a new or refresh an existing backgrond.
-            ProjBackground(pid).createBackground()
+            ProjBackground(pid, gid).createBackground()
         else :
             cmdError(cmd, cmdType)
 

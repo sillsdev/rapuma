@@ -183,7 +183,7 @@ class ProjCommander (object) :
                 'render'        : ['Render ' + gid + ' group PDF file.',            'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group render $CMD '], 
                 'save'          : ['Render & save ' + gid + ' group PDF file.',     'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group render --force $CMD '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'if [ "$2" ]; then CMD="--cid_list $2"; fi; rapuma group ' + pid + ' ' + gid + ' group update --source_path $1 $CMD '], 
-                'watermark'     : ['Create a watermark for ' + gid + ' group.',     'rapuma group '     + pid + ' ' + gid + ' group         watermark  --cid_list \"$1\" $2 '], 
+                'background'    : ['Create a background for ' + gid + ' group.',    'rapuma group '     + pid + ' ' + gid + ' group background '], 
                 'addFont'       : ['Add a font to the ' + gid + ' group.',          'rapuma package '   + pid + ' ' + gid + ' $1 font add -f '],
                 'removeFont'    : ['Remove a font from the ' + gid + ' group.',     'rapuma package '   + pid + ' ' + gid + ' $1 font remove -f '],
                 'primaryFont'   : ['Make font primary for the ' + gid + ' group.',  'rapuma package '   + pid + ' ' + gid + ' $1 font primary -f '],
