@@ -224,16 +224,13 @@ class ProjBackground (object) :
         with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
                 version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">
-                <g><text x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.40) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(pageY * 1.80) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 2.2) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(pageY * 3) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                <g><text x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:middle;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.25) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(pageY * 1.50) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.75) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY * 2.00) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(pageY * 2.5) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
                 </text></g></svg>''')
-
-        shutil.copy(self.convertSvgToPdf(svgFile), os.path.join(self.local.projIllustrationFolder, 'watermark.pdf'))
-        shutil.copy(svgFile, os.path.join(self.local.projIllustrationFolder, 'watermark.svg'))
-
 
         # Convert the temp svg to pdf and merge into backgroundFile
         results = self.mergePdfFilesPdftk(self.local.backgroundFile, self.convertSvgToPdf(svgFile))
@@ -497,12 +494,16 @@ class ProjBackground (object) :
         pdfFile = tempfile.NamedTemporaryFile().name
 
         cmd = self.buildCommandList(svgFile, pdfFile)
+
+        if self.debugMode :
+            self.tools.terminal('Debug Mode On: \convertSvgToPdf() command: ' + str(cmd))
+
         # Simple try statement seems to work best for this
         try:
             subprocess.call(cmd) 
             return pdfFile
         except Exception as e :
-            self.log.writeToLog(self.errorCodes['1290'], [pdfFile,str(e),cmd])
+            self.log.writeToLog(self.errorCodes['1290'], [pdfFile,str(e),str(cmd)])
 
 
     def printerPageSize (self) :
