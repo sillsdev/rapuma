@@ -51,7 +51,7 @@ class ProjBackground (object) :
 
         # For debugging purposes a switch can be set here for verbose
         # message output via the terminal
-        self.debugMode                  = self.tools.str2bool(self.userConfig['System']['svgPdfConvertCommand'])
+        self.debugMode                  = self.tools.str2bool(self.userConfig['System']['debugging'])
 
         # Log messages for this module
         self.errorCodes     = {
