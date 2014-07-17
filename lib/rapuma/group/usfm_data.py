@@ -263,7 +263,8 @@ class UsfmData (object) :
     # with their proper canonical order. This data comes from the
     # Libronix project (http://www.libronix.com/) and has been adapted
     # to harmonize with the PT data set (usfmCidInfo)
-    bookAbbrevs = {
+    canonBookAbbrevs = {
+
             "ge" : 1,
             "gn" : 1,
             "gen" : 1,
@@ -1102,6 +1103,28 @@ class UsfmData (object) :
             "revelation" : 87,
             "revelations" : 87,
            
-            "bak" : 100
             }
 
+    extraCompAbbrevs = {
+
+            'frt' : 0, 
+            'int' : 0, 
+            'bak' : 0, 
+            'cnc' : 0, 
+            'glo' : 0, 
+            'tdx' : 0, 
+            'ndx' : 0, 
+            'xxa' : 0, 
+            'xxb' : 0, 
+            'xxc' : 0, 
+            'xxd' : 0,
+            'xxe' : 0, 
+            'xxf' : 0, 
+            'xxg' : 0, 
+            'oth' : 0 
+
+            }
+
+    bookAbbrevs = {}
+    bookAbbrevs.update(canonBookAbbrevs)
+    bookAbbrevs.update(extraCompAbbrevs)

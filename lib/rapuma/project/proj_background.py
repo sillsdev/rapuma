@@ -31,8 +31,6 @@ class ProjBackground (object) :
 
     def __init__(self, pid, gid = None) :
         '''Intitate the whole class and create the object.'''
-        
-# FIXME: Doing a complete rewrite to allow this process to occure at any time in the process
 
 #        import pdb; pdb.set_trace()
 
@@ -51,6 +49,9 @@ class ProjBackground (object) :
         self.projHome                   = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
 
+        # For debugging purposes a switch can be set here for verbose
+        # message output via the terminal
+        self.debugMode                  = self.tools.str2bool(self.userConfig['System']['svgPdfConvertCommand'])
 
         # Log messages for this module
         self.errorCodes     = {
@@ -418,16 +419,19 @@ class ProjBackground (object) :
             svgPdfConverter = inkscape,-f,svgFile,-A,pdfOutFile
         This will insert the right value for svgFile and pdfOutFile.'''
 
-        cmds = list()
+        cmd = list()
         for c in self.svgPdfConverter :
             if c == 'svgFile' :
-                cmds.append(svgFile)
+                cmd.append(svgFile)
             elif c == 'pdfFile' :
-                cmds.append(pdfFile)
+                cmd.append(pdfFile)
             else :
-                cmds.append(c)
+                cmd.append(c)
 
-        return cmds
+        if self.debugMode :
+            self.tools.terminal('Debug Mode On: \nbuildCommandList() command: ' + str(cmd))
+
+        return cmd
 
 
     def centerOnPrintPage (self, contents) :
@@ -453,6 +457,10 @@ class ProjBackground (object) :
         pageOffset = str(wo) + ' ' + str(ho)
         # Assemble the GhostScript command
         cmd = ['gs',  '-o', tmpFile,  '-sDEVICE=pdfwrite',  '-dQUIET', '-sPAPERSIZE=' + printerPageSizeCode.lower(),  '-dFIXEDMEDIA' , '-c', '<</PageOffset [' + str(pageOffset) + ']>>', 'setpagedevice', '-f', contents]
+
+        if self.debugMode :
+            self.tools.terminal('Debug Mode On: \centerOnPrintPage() command: ' + str(cmd))
+
         # Run the process
         try:
             subprocess.call(cmd) 
@@ -468,6 +476,11 @@ class ProjBackground (object) :
 
         tmpFile = tempfile.NamedTemporaryFile().name
         cmd = ['pdftk', front, 'background', back, 'output', tmpFile]
+
+        if self.debugMode :
+            self.tools.terminal('Debug Mode On: \centerOnPrintPage() command: ' + str(cmd))
+
+        # Run the process
         try:
             subprocess.call(cmd) 
             shutil.copy(tmpFile, front)
