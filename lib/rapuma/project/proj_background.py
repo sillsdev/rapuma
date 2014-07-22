@@ -225,11 +225,11 @@ class ProjBackground (object) :
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
                 version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">
                 <g><text x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:middle;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.25) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(pageY * 1.50) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(pageY * 1.75) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY * 2.00) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(pageY * 2.5) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(bdHeight * 0.35) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(bdHeight * 0.50) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(bdHeight * 0.65) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.75) + '''" y = "''' + str(bdHeight * 0.80) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(bdHeight) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
                 </text></g></svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -475,7 +475,7 @@ class ProjBackground (object) :
         cmd = ['pdftk', front, 'background', back, 'output', tmpFile]
 
         if self.debugMode :
-            self.tools.terminal('Debug Mode On: \centerOnPrintPage() command: ' + str(cmd))
+            self.tools.terminal('Debug Mode On: \mergePdfFilesPdftk() command: ' + str(cmd))
 
         # Run the process
         try:
