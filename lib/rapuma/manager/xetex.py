@@ -735,7 +735,7 @@ class Xetex (Manager) :
             if shutil.copy(self.local.gidPdfFile, renderFile) :
                 self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
             else :
-                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
+                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])            
 
         # If given, the override file name becomes the file name 
         if override :
@@ -752,17 +752,27 @@ class Xetex (Manager) :
             renderFile = self.local.gidPdfFile
 
         # Once we know the file is successfully generated, add a background if defined
+        bgFile = ''
         if self.useBackground :
-            if self.pg_back.addBackground(renderFile) :
-                self.log.writeToLog(self.errorCodes['0725'], [self.tools.fName(renderFile)])
-        # Add a timestamp if requested
-        if self.useDocInfo :
-            if self.pg_back.addDocInfo(renderFile) :
-                self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(renderFile)])
+            bgFile = self.pg_back.addBackground(renderFile)
+            if bgFile :
+                self.log.writeToLog(self.errorCodes['0725'], [self.tools.fName(bgFile)])
+            # Add a timestamp if requested in addition to background
+            if self.useDocInfo :
+                if self.pg_back.addDocInfo(bgFile) :
+                    self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(bgFile)])
+        # Add only doc info if requested
+        elif self.useDocInfo :
+            bgFile = self.pg_back.addDocInfo(renderFile)
+            if self.pg_back.addDocInfo(bgFile) :
+                self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(bgFile)])
 
         ##### Viewing #####
         if renderFile :
-            viewFile = renderFile
+            if bgFile :
+                viewFile = bgFile
+            else :
+                viewFile = renderFile
         else :
             viewFile = self.local.gidPdfFile
         if os.path.isfile(viewFile) :

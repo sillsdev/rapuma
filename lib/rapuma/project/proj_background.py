@@ -101,9 +101,11 @@ class ProjBackground (object) :
 
         # Merge target with the project's background file in the Illustraton folder
         self.log.writeToLog(self.errorCodes['1300'])
-        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), target)
-
-        return True
+        bgFile = self.makeBgFileName(target)
+        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
+        
+        if os.path.exists(bgFile) :
+            return bgFile
 
 
     def addDocInfo (self, target) :
@@ -144,9 +146,11 @@ class ProjBackground (object) :
 
         # Merge target with the background
         self.log.writeToLog(self.errorCodes['1300'])
-        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), target)
+        bgFile = self.makeBgFileName(target)
+        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
         
-        return True
+        if os.path.exists(bgFile) :
+            return bgFile
 
 
     ##### Background Creation Functions #####
@@ -405,6 +409,18 @@ class ProjBackground (object) :
         # Test and return if good
         if os.path.isfile(results) :
             return True
+
+
+    def makeBgFileName (self, orgName) :
+        '''Alter the file name to reflect the fact it has a background
+        added to it. This assumes the file only has a single extention.
+        If that's not the case we're hosed.'''
+
+        name    = orgName.split('.')[0]
+        ext     = orgName.split('.')[1]
+        # Just in case this is the second pass
+        name    = name.replace('-bg', '')
+        return name + '-bg.' + ext
 
 
     def buildCommandList (self, svgFile, pdfFile) :

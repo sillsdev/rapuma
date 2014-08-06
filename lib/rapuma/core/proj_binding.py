@@ -94,6 +94,13 @@ class ProjBinding (object) :
 
 #        import pdb; pdb.set_trace()
 
+
+
+# FIXME: Starting here - Need to be able to grab the right finished files
+# but how do we know the file name?
+
+
+
 # FIXME: The problem with bind the way it is is that because the process creates 3
 # separate files and joins them together with pdftk, we loose the index. What is 
 # needed is to make one big control file that runs everything needed in the right order
@@ -167,8 +174,11 @@ class ProjBinding (object) :
             self.tools.writeConfFile(self.projectConfig)
             self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(bindFileName)])
 
-        # Build the viewer command
+        # Build the viewer command (fall back to default if needed)
         pdfViewerCmd = self.projectConfig['Managers'][manager]['pdfViewerCommand']
+        if not pdfViewerCmd :
+            pdfViewerCmd = self.userConfig['System']['pdfViewerCommand']
+
         pdfViewerCmd.append(bindFile)
         # Run the XeTeX and collect the return code for analysis
         try :
