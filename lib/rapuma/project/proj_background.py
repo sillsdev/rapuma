@@ -61,6 +61,7 @@ class ProjBackground (object) :
             '1280' : ['ERR', 'Failed to merge background file with command: [<<1>>]. This is the error: [<<2>>]'],
             '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>] The command was: [<<3>>]'],
             '1300' : ['MSG', 'Background merge operation in process, please wait...'],
+            '1305' : ['MSG', 'Adding document information, please wait...'],
             '1310' : ['WRN', 'Failed to add background component: [<<1>>] with error: [<<2>>]']
 
         }
@@ -114,7 +115,10 @@ class ProjBackground (object) :
         # Initialize the process
         docInfoText         = self.layoutConfig['DocumentFeatures']['docInfoText']
         timestamp           = self.tools.tStamp()
-        headerLine          = self.pid + ' / ' + self.gid + ' / ' + timestamp
+        if self.gid :
+            headerLine          = self.pid + ' / ' + self.gid + ' / ' + timestamp
+        else :
+            headerLine          = self.pid + ' / ' + timestamp
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
@@ -145,7 +149,7 @@ class ProjBackground (object) :
                 </svg>''')
 
         # Merge target with the background
-        self.log.writeToLog(self.errorCodes['1300'])
+        self.log.writeToLog(self.errorCodes['1305'])
         bgFile = self.makeBgFileName(target)
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
         
@@ -423,14 +427,14 @@ class ProjBackground (object) :
         return name + '-bg.' + ext
 
 
-    def buildCommandList (self, svgFile, pdfFile) :
+    def buildSvg2PdfCommand (self, svgFile, pdfFile) :
         '''Convert a command line from the config that has keys in it for
         input and output files. The commands in the config should look like
         this coming in:
-            svgPdfConverter = convert,svgFile,pdfOutFile
-            svgPdfConverter = rsvg-convert,-f,pdf,-o,pdfOutFile,svgFile
-            svgPdfConverter = inkscape,-f,svgFile,-A,pdfOutFile
-        This will insert the right value for svgFile and pdfOutFile.'''
+            svgPdfConverter = convert,svgFile,pdfFile
+            svgPdfConverter = rsvg-convert,-f,pdf,-o,pdfFile,svgFile
+            svgPdfConverter = inkscape,-f,svgFile,-A,pdfFile
+        This will insert the right value for svgFile and pdfFile.'''
 
         cmd = list()
         for c in self.svgPdfConverter :
@@ -442,7 +446,7 @@ class ProjBackground (object) :
                 cmd.append(c)
 
         if self.debugMode :
-            self.tools.terminal('Debug Mode On: \nbuildCommandList() command: ' + str(cmd))
+            self.tools.terminal('Debug Mode On: \nbuildSvg2PdfCommand() command: ' + str(cmd))
 
         return cmd
 
@@ -509,7 +513,7 @@ class ProjBackground (object) :
 
         pdfFile = tempfile.NamedTemporaryFile().name
 
-        cmd = self.buildCommandList(svgFile, pdfFile)
+        cmd = self.buildSvg2PdfCommand(svgFile, pdfFile)
 
         if self.debugMode :
             self.tools.terminal('Debug Mode On: \convertSvgToPdf() command: ' + str(cmd))

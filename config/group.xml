@@ -146,5 +146,19 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
+    <setting>
+        <name>Binding Order</name>
+        <key>bindingOrder</key>
+        <description>The order that this group will be bound. If "0" (zero) is used, the group will be excluded from binding. Default = 0</description>
+        <type>string</type>
+        <value>0</value>
+    </setting>
+    <setting>
+        <name>Binding File</name>
+        <key>bindingFile</key>
+        <description>The path and file name of the last rendering of this group which will be bound (if a binding order is specified). This is created automatically at render time. There is no way for the system to know if the file is correct or not, so if it is not, it will be bound just the same.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 

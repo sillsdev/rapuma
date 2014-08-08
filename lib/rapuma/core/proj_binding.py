@@ -45,11 +45,14 @@ class ProjBinding (object) :
         self.config             = Config(pid)
         self.pg_back            = ProjBackground(self.pid)
         self.config.getProjectConfig()
+        self.config.getLayoutConfig()
         self.projectConfig      = self.config.projectConfig
-        self.projHome           = None
-        self.projectMediaIDCode = None
-        self.local              = None
-        self.finishInit()
+        self.layoutConfig       = self.config.layoutConfig
+        self.useBackground      = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
+        self.useDocInfo         = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
+        self.projHome           = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.local              = ProjLocal(self.pid)
+        self.log                = ProjLog(self.pid)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -60,20 +63,9 @@ class ProjBinding (object) :
             '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding file.'],
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding file.'],
             '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
+            '0280' : ['ERR', 'GS PDF file merge failed with this error: [<<1>>]'],
+            '0300' : ['MSG', 'File binding operation in process, please wait...']
         }
-
-
-    def finishInit (self, projHome = None) :
-        '''Finishing collecting settings that would be needed for most
-        functions in this module.'''
-
-#        import pdb; pdb.set_trace()
-        try :
-            self.projHome           = os.path.join(self.userConfig['Resources']['projects'], self.pid)
-            self.local              = ProjLocal(self.pid)
-            self.log                = ProjLog(self.pid)
-        except :
-            pass
 
 
 ###############################################################################
@@ -94,18 +86,6 @@ class ProjBinding (object) :
 
 #        import pdb; pdb.set_trace()
 
-
-
-# FIXME: Starting here - Need to be able to grab the right finished files
-# but how do we know the file name?
-
-
-
-# FIXME: The problem with bind the way it is is that because the process creates 3
-# separate files and joins them together with pdftk, we loose the index. What is 
-# needed is to make one big control file that runs everything needed in the right order
-# This has been reported in the Rapuma bugtracker.
-
         # Make a name if the file is to be saved
         if save :
             bindFileName = self.pid + '_contents_' + self.tools.ymd()
@@ -122,60 +102,46 @@ class ProjBinding (object) :
         if not self.projectConfig.has_key('Groups') :
             return False
 
-        for grp in self.projectConfig['Groups'].keys() :
-            if not self.projectConfig['Groups'][grp].has_key('bindingOrder') :
-                self.projectConfig['Groups'][grp]['bindingOrder'] = 0
+        # Build the bindOrder dict with ord num as key and file name as value
+        for gid in self.projectConfig['Groups'].keys() :
+            if not self.projectConfig['Groups'][gid].has_key('bindingOrder') :
+                self.projectConfig['Groups'][gid]['bindingOrder'] = 0
                 self.tools.writeConfFile(self.projectConfig)
-            if int(self.projectConfig['Groups'][grp]['bindingOrder']) > 0 :
-                bindOrder[self.projectConfig['Groups'][grp]['bindingOrder']] = grp
+            if int(self.projectConfig['Groups'][gid]['bindingOrder']) > 0 :
+                bindOrder[self.projectConfig['Groups'][gid]['bindingOrder']] = self.projectConfig['Groups'][gid]['bindingFile']
         bindGrpNum = len(bindOrder)
         # Need not keep going if nothing was found
         if bindGrpNum == 0 :
             self.log.writeToLog(self.errorCodes['0210'])
             return False
 
-        # Rerender the groups by bindingOrder value
+        # Make an ordered key list
         keyList = bindOrder.keys()
         keyList.sort()
 
-        # Build the final bind command
-        disposable = []
-        confCommand = ['pdftk']
-        # Append each of the input files
+        # Output the bind files in order according to the list we made
+        fileList = []
         for key in keyList :
-            gidPdf = os.path.join(self.local.projComponentFolder, bindOrder[key], bindOrder[key] + '.pdf')
-            confCommand.append(gidPdf)
-            disposable.append(gidPdf)
-        # Now the rest of the commands and output file
-        confCommand.append('cat')
-        confCommand.append('output')
-        confCommand.append(bindFile)
+            fileList.append(bindOrder[key])
 
-        # Run the binding command
-        rCode = subprocess.call(confCommand)
-        # Analyse the return code
-        if rCode == int(0) :
-            self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(bindFile)])
-        else :
-            self.log.writeToLog(self.errorCodes['0235'], [self.tools.fName(bindFile)])
-
-        # Collect the page count and record in group
-        newPages = self.tools.pdftkTotalPages(bindFile)
-        # FIXME: For now, we need to hard-code the manager name
-        manager = 'usfm_Xetex'
-        if self.projectConfig['Managers'][manager].has_key('totalBoundPages') :
-            oldPages = int(self.projectConfig['Managers'][manager]['totalBoundPages'])
-            if oldPages != newPages or oldPages == 'None' :
-                self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
-                self.tools.writeConfFile(self.projectConfig)
-                self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(bindFileName)])
-        else :
-            self.projectConfig['Managers'][manager]['totalBoundPages'] = newPages
-            self.tools.writeConfFile(self.projectConfig)
-            self.log.writeToLog(self.errorCodes['0240'], [str(newPages),self.tools.fName(bindFileName)])
+        # First merge the master pages together
+        self.mergePdfFilesGs(bindFile, fileList)
+        # Now add background and doc info if requested
+        bgFile = ''
+        if self.useBackground :
+            bgFile = self.pg_back.addBackground(bindFile)
+        if self.useDocInfo :
+            if bgFile :
+                bgFile = self.pg_back.addDocInfo(bgFile)
+            else :
+                bgFile = self.pg_back.addDocInfo(bindFile)
+        # Change the bindFile name so the viewer shows what we want
+        if os.path.exists(bgFile) :
+            bindFile = bgFile
 
         # Build the viewer command (fall back to default if needed)
-        pdfViewerCmd = self.projectConfig['Managers'][manager]['pdfViewerCommand']
+        # FIXME: For now, we need to hard-code the manager name
+        pdfViewerCmd = self.projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand']
         if not pdfViewerCmd :
             pdfViewerCmd = self.userConfig['System']['pdfViewerCommand']
 
@@ -187,3 +153,24 @@ class ProjBinding (object) :
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog(self.errorCodes['0260'], [str(e)])
+
+
+    def mergePdfFilesGs (self, target, sourceList) :
+        '''Using GS, merge multiple PDF files into one. The advantage of
+        using Gs is that the index will be maintained. pdftk strips out
+        the index, which is bad...'''
+    
+        cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + target]
+        cmd = cmd + sourceList
+
+        try :
+            self.log.writeToLog(self.errorCodes['0300'])
+            subprocess.call(cmd)
+            return True
+        except Exception as e :
+            # If we don't succeed, we should probably quite here
+            self.log.writeToLog(self.errorCodes['0280'], [str(e)])
+
+
+
+

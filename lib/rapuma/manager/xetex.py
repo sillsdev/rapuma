@@ -707,9 +707,8 @@ class Xetex (Manager) :
             # we will try to report back something useful
             self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
-        # Collect the page count and record in group
+        # Collect the page count and record in group (Write out at the end of the opp.)
         self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
-        self.tools.writeConfFile(self.projectConfig)
 
         # Pull out pages if requested (use the same file for output)
         if pgRange :
@@ -748,8 +747,16 @@ class Xetex (Manager) :
 
 #        import pdb; pdb.set_trace()
 
+        # If no special renderfile was created, just give it the generic file name.
         if not renderFile :
             renderFile = self.local.gidPdfFile
+            
+        # For potential binding operations, we will now log this file name in the
+        # project.conf
+        self.projectConfig['Groups'][self.gid]['bindingFile'] = renderFile
+
+        # Write out any changes made to the project.conf file that happened during this opp.
+        self.tools.writeConfFile(self.projectConfig)
 
         # Once we know the file is successfully generated, add a background if defined
         bgFile = ''

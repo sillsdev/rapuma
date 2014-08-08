@@ -277,7 +277,10 @@ class ProjSetup (object) :
         # Add/Modify the info to the group config info
         self.projectConfig['Groups'][gid]['cType']                 = cType
         self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.canonListSort(cidList)
-        self.projectConfig['Groups'][gid]['bindingOrder']          = 0
+
+# Moved to the group.xml file
+#        self.projectConfig['Groups'][gid]['bindingOrder']          = 0
+
         # Here we need to "inject" cType information into the config
         self.cType = cType
         if not self.tools.addComponentType(self.projectConfig, self.local, cType) :
