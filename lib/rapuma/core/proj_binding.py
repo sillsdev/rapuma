@@ -108,7 +108,9 @@ class ProjBinding (object) :
                 self.projectConfig['Groups'][gid]['bindingOrder'] = 0
                 self.tools.writeConfFile(self.projectConfig)
             if int(self.projectConfig['Groups'][gid]['bindingOrder']) > 0 :
-                bindOrder[self.projectConfig['Groups'][gid]['bindingOrder']] = self.projectConfig['Groups'][gid]['bindingFile']
+                gidPdfFile = os.path.join(self.local.projComponentFolder, gid, gid + '.pdf')
+#                bindOrder[self.projectConfig['Groups'][gid]['bindingOrder']] = self.projectConfig['Groups'][gid]['bindingFile']
+                bindOrder[self.projectConfig['Groups'][gid]['bindingOrder']] = gidPdfFile
         bindGrpNum = len(bindOrder)
         # Need not keep going if nothing was found
         if bindGrpNum == 0 :

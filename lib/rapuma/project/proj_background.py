@@ -102,9 +102,13 @@ class ProjBackground (object) :
 
         # Merge target with the project's background file in the Illustraton folder
         self.log.writeToLog(self.errorCodes['1300'])
+
+        # Create a special name for the file with the background
+        # Then merge and save it
         bgFile = self.makeBgFileName(target)
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
-        
+
+        # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
             return bgFile
 
@@ -150,9 +154,13 @@ class ProjBackground (object) :
 
         # Merge target with the background
         self.log.writeToLog(self.errorCodes['1305'])
+
+        # Create a special name for the file with the background
+        # Then merge and save it
         bgFile = self.makeBgFileName(target)
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
-        
+
+        # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
             return bgFile
 

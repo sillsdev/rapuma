@@ -14,7 +14,7 @@
 ## SETUP
 # First, setup the test environment. Rapuma publishing systems have
 # a specified project folder. Create a folder there that will contain
-# the source files we will be drawing from. We will call it "sources"
+# the source files we will be drawing from. We will call it "my_source"
 # for the purpose of this exercise. Find the testing/sources/KJV.zip file
 # in the Rapuma program folder and copy it to your newly created sources
 # folder. Extract the contents there. Once this is done you should be
@@ -26,15 +26,15 @@
 # first time. Be careful as this step cannot be undone. This command 
 # permanently removes the project and its contents. Any work done on
 # the project will be lost when this command is run. 
-echo    rapuma project ENG-LATN-KJVTEST project remove
-        rapuma project ENG-LATN-KJVTEST project remove
+
+rapuma project ENG-LATN-KJVTEST project remove
 
 ## ADDING A PROJECT
 # This next command creates a new project in the Rapuma project folder. 
 # After this command is run there will be a new project folder created
 # named "ENG-LATN-KJVTEST" in the main project folder.
-echo    rapuma project ENG-LATN-KJVTEST project add
-        rapuma project ENG-LATN-KJVTEST project add
+
+rapuma project ENG-LATN-KJVTEST project add
 
 ## ADDING COMPONENTS
 # At this point the project is started but there are no components 
@@ -50,7 +50,7 @@ echo    rapuma project ENG-LATN-KJVTEST project add
 # create one of these groups a command formed like the following can 
 # be used:
 # 
-#   rapuma group ENG-LATN-KJV NT group add --source_path ~/my_source
+#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/my_source
 #
 # With this command Rapuma will search the files in "my_source" and
 # look for SFM or USFM extention files and check to see if any have the
@@ -63,32 +63,60 @@ echo    rapuma project ENG-LATN-KJVTEST project add
 #
 # If you want to create a custom group...
 #
-#   rapuma group ENG-LATN-KJV GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/my_source
+#   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/my_source
 #
 # This group (GOSPEL) will contain the component books, Matthew, Mark,
 # Luke and John and nothing else.
+#
 # For this example we'll create the full NT group with this command:
 
-echo    rapuma group ENG-LATN-KJV NT group add --source_path ~/my_source
-        rapuma group ENG-LATN-KJV NT group add --source_path ~/my_source
+rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/my_source
 
 
+## ADDING DOCUMENT FEATURES
+# There are a number of features that can be added to a document to help
+# in the typesetting process. For example, a background can be added to
+# indicate it is in the PROOF stage. To do this, run the following commands:
 
-
-
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
 
 ## RENDERING PROJECT COMPONENTS
-# ...
-# With simple projects such as this, we can now render the text. The "render" command will set in
-# motion a process that will perform a number of tasks in this project such as import the default
-# font and macro package as well as create some default settings files.
-echo    rapuma group ENG-LATN-JAS mb group render
-        rapuma group ENG-LATN-JAS mb group render
+# With more complex projects there would be more setup to do. With this
+# simple one we can move on to rendering. To render the entire NT group
+# we created above, we would use a command like this:
+#
+#   rapuma group ENG-LATN-KJVTEST NT group render
+#
+# However, for this example, we are going to just render one component
+# out of the entire NT group, the Book of James. To do this, we would
+# use this command:
 
-# The above command is for "view only". To save the file add the --force command. This
-# will save the newly produced PDF file in the Deliverables folder.
-echo    rapuma group ENG-LATN-JAS mb group render --force
-        rapuma group ENG-LATN-JAS mb group render --force
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
+
+# You see that it has PROOF watermark background and the page is set on
+# an A4 page. This is to make printing for proofing easier. However,
+# the above command is for "view only". To save the file add the --force
+# command. This will save the newly produced PDF file in the Deliverable
+# folder which will be added when the file is created. The Deliverable
+# is where Rapuma stores rendered files that are to be saved. Rapuma
+# should never do any "clean-up" in that folder. To save the Book of
+# James file you would run this command:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force
+
+# Now you will note that a folder has been created called Deliverable
+# and in it are two files that have just been created called:
+#
+#   ENG-LATN-KJVTEST_NT_060-jas_20140812.pdf
+#   ENG-LATN-KJVTEST_NT_060-jas_20140812-bg.pdf
+#
+
+# ... Hmmmm, this is where we may need to just get rid of the non-bg file in the Deliverable folder
+# it might be too confusing to explain and not even necessary. How to do that...
+
+
+# ...
 
 # Another variation of the above command uses the --override command to save the output
 # to a custom file name and location.

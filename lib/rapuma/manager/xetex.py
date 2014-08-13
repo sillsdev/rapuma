@@ -144,8 +144,6 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
-            '0725' : ['MSG', 'Added background to: [<<1>>]'],
-            '0726' : ['MSG', 'Added timestamp to: [<<1>>]'],
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
 
         }
@@ -614,8 +612,8 @@ class Xetex (Manager) :
         # There must be a cidList. If one was not passed, default to
         # the group list
         cidListSubFileName      = ''
-        renderFile              = ''
-        renderFileName          = ''
+        saveFile                = ''
+        saveFileName            = ''
         wmFile                  = ''
         if not cidList :
             cidList = self.projectConfig['Groups'][gid]['cidList']
@@ -709,79 +707,99 @@ class Xetex (Manager) :
 
         # Collect the page count and record in group (Write out at the end of the opp.)
         self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+        # Write out any changes made to the project.conf file that happened during this opp.
+        self.tools.writeConfFile(self.projectConfig)
 
         # Pull out pages if requested (use the same file for output)
         if pgRange :
             self.tools.pdftkPullPages(self.local.gidPdfFile, self.local.gidPdfFile, pgRange)
 
-        # If the user wants to save this file, do that now
+        # The gidPdfFile is the residue of the last render and if approved, can be
+        # used for the binding process. In regard to saving and file naming, the
+        # gidPdfFile will be copied but never renamed. It must remain intact.
+
+        # If the user wants to save this file or use a custom name, do that now
         if save and not override :
-            renderFileName = self.pid + '_' + gid
+            saveFileName = self.pid + '_' + gid
             if cidListSubFileName :
-                renderFileName = renderFileName + '_' + cidListSubFileName
+                saveFileName = saveFileName + '_' + cidListSubFileName
             if pgRange :
-                renderFileName = renderFileName + '_pg(' + pgRange + ')'
+                saveFileName = saveFileName + '_pg(' + pgRange + ')'
             # Add date stamp
-            renderFileName = renderFileName + '_' + self.tools.ymd()
+            saveFileName = saveFileName + '_' + self.tools.ymd()
             # Add render file extention
-            renderFileName = renderFileName + '.pdf'
+            saveFileName = saveFileName + '.pdf'
             # Save this to the Deliverable folder (Make sure there is one)
             if not os.path.isdir(self.local.projDeliverableFolder) :
                 os.makedirs(self.local.projDeliverableFolder)
             # Final file name and path
-            renderFile = os.path.join(self.local.projDeliverableFolder, renderFileName)
+            saveFile = os.path.join(self.local.projDeliverableFolder, saveFileName)
             # Copy, no news is good news
-            if shutil.copy(self.local.gidPdfFile, renderFile) :
-                self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
+            if shutil.copy(self.local.gidPdfFile, saveFile) :
+                self.log.writeToLog(self.errorCodes['0730'], [saveFileName])
             else :
-                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])            
+                self.log.writeToLog(self.errorCodes['0720'], [saveFileName])            
 
         # If given, the override file name becomes the file name 
         if override :
-            renderFile = override
-            # Copy, no news is good news
-            if shutil.copy(self.local.gidPdfFile, renderFile) :
-                self.log.writeToLog(self.errorCodes['0730'], [renderFileName])
+            saveFile = override
+            # With shutil.copy(), no news is good news
+            if shutil.copy(self.local.gidPdfFile, saveFile) :
+                self.log.writeToLog(self.errorCodes['0730'], [saveFileName])
             else :
-                self.log.writeToLog(self.errorCodes['0720'], [renderFileName])
+                self.log.writeToLog(self.errorCodes['0720'], [saveFileName])
 
 #        import pdb; pdb.set_trace()
-
-        # If no special renderfile was created, just give it the generic file name.
-        if not renderFile :
-            renderFile = self.local.gidPdfFile
-            
-        # For potential binding operations, we will now log this file name in the
-        # project.conf
-        self.projectConfig['Groups'][self.gid]['bindingFile'] = renderFile
-
-        # Write out any changes made to the project.conf file that happened during this opp.
-        self.tools.writeConfFile(self.projectConfig)
 
         # Once we know the file is successfully generated, add a background if defined
         bgFile = ''
         if self.useBackground :
-            bgFile = self.pg_back.addBackground(renderFile)
-            if bgFile :
-                self.log.writeToLog(self.errorCodes['0725'], [self.tools.fName(bgFile)])
-            # Add a timestamp if requested in addition to background
-            if self.useDocInfo :
-                if self.pg_back.addDocInfo(bgFile) :
-                    self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(bgFile)])
-        # Add only doc info if requested
-        elif self.useDocInfo :
-            bgFile = self.pg_back.addDocInfo(renderFile)
-            if self.pg_back.addDocInfo(bgFile) :
-                self.log.writeToLog(self.errorCodes['0726'], [self.tools.fName(bgFile)])
+            if saveFile :
+                bgFile = self.pg_back.addBackground(saveFile)
+            else :
+                bgFile = self.pg_back.addBackground(self.local.gidPdfFile)
+
+        # Add a timestamp and doc info if requested in addition to background
+        if self.useDocInfo :
+            if saveFile :
+                if os.path.isfile(bgFile) :
+                    bgFile = self.pg_back.addDocInfo(bgFile)
+                else :
+                    bgFile = self.pg_back.addDocInfo(saveFile)
+            else :
+                if os.path.isfile(bgFile) :
+                    bgFile = self.pg_back.addDocInfo(bgFile)
+                else :
+                    bgFile = self.pg_back.addDocInfo(self.local.gidPdfFile)
+
+        # To avoid confusion with file names, if this is a saved file,
+        # and it has a background, we need to remove the original, non-
+        # background file (remembering originals are kept in the group
+        # Component folder), then rename the -bg version to whatever
+        # the saved name should be
+        if save or override :
+            if os.path.isfile(saveFile) and os.path.isfile(bgFile) :
+                # First remove
+                os.remove(saveFile)
+                # Next rename
+                os.rename(bgFile, saveFile)
 
         ##### Viewing #####
-        if renderFile :
-            if bgFile :
-                viewFile = bgFile
-            else :
-                viewFile = renderFile
+        # First get the right file name to view
+        if saveFile :
+            # If there was a saveFile, that will be the viewFile
+            viewFile = saveFile
         else :
-            viewFile = self.local.gidPdfFile
+            # Problem here is that there could be a -bg version
+            # of the gidPdfFile if this was a view-only operation
+            # but if the -bg version was created after the original
+            # gidPdfFile, we know that's the one we want to see
+            if os.path.isfile(bgFile) :
+                if self.tools.isOlder(self.local.gidPdfFile, bgFile) :
+                    viewFile = bgFile
+                else :
+                    viewFile = self.local.gidPdfFile
+        # Now view it
         if os.path.isfile(viewFile) :
             if not len(self.pdfViewerCmd) == 0 :
                 # Add the file to the viewer command
