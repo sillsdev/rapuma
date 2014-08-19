@@ -17,14 +17,15 @@
 # the source files we will be drawing from. We will call it "my_source"
 # for the purpose of this exercise and it will be located here:
 #
-#   ~/Publishing/my_source
+#   ~/Publishing/my_source/KJV
 #
 # You may wish to locate it in a different place on your system. Be sure
 # that is reflected in the commands of the rest of the exercises for
 # this example. Now find the testing/sources/KJV.zip file in the Rapuma
 # program folder and copy it to your newly created sources folder.
-# Extract the contents there. Once this is done you should be ready to
-# work through the rest of this example script.
+# Extract the contents which is in the KJV folder into the my_source
+# folder. Once this is done you should be ready to work through the rest
+# of this example script.
 
 ## ADDING A PROJECT
 # This next command creates a new project in the Rapuma project folder. 
@@ -61,7 +62,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # create one of these groups a command formed like the following can 
 # be used:
 # 
-#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source
+#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
 #
 # With this command Rapuma will search the files in "my_source" and
 # look for SFM or USFM extention files and check to see if any have the
@@ -74,14 +75,14 @@ rapuma project ENG-LATN-KJVTEST project add
 #
 # If you want to create a custom group...
 #
-#   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source
+#   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source/KJV
 #
 # This group (GOSPEL) will contain the component books, Matthew, Mark,
 # Luke and John and nothing else.
 #
 # For this example we'll create the full NT group with this command:
 
-rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source
+rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
 
 
 ## ADDING DOCUMENT FEATURES
