@@ -1,16 +1,16 @@
 Installation instructions for Rapuma
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 09 April 2014
+	Last edited: 19 August 2014
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
 STATUS: Currently Rapuma is under heavy development (by one, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
 
-These instructions are for manually installing the Rapuma publishing system package on a typical Ubuntu operating system (currently Precise, 12.04). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
+The instructions below are for manually installing the Rapuma publishing system package on a typical Ubuntu-ish operating system (currently Linux Mint 17 - based on Ubuntu 14.04/Trusty Tahr). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the github repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
 
 -------------------------------------------------------------------------------
-UBUNTU SYSTEM SETUP
+SYSTEM SETUP
 -------------------------------------------------------------------------------
 Go to the SIL Linux packages site and hook your system up with that if it isn't already. Follow the instructions on this page:
 
@@ -63,30 +63,44 @@ Some Rapuma features that require user interaction (via  can be accessed with th
 
 Some suggested additional package(s) to make your Linux DTP system complete:
 
-    sudo apt-get install mercurial tortoisehg libteckit-perl teckit libfont-ttf-scripts-perl
+    sudo apt-get install libfont-ttf-scripts-perl
 
-Finally, log out and log back in again so the system will properly recognize the newly installed packages and the TortoiseHg package should work correctly.
+Some additional SIL packages that may, or may not, be available via that repo:
+
+    sudo apt-get install libteckit-perl teckit
+
+Finally, log out and log back in again so the system will properly recognize the newly installed packages.
 
 With all the above packages installed, we are ready to move on to installing Rapuma publishing package.
 
 
 -------------------------------------------------------------------------------
-3) GETTING RAPUMA
+3) GITTING RAPUMA
 -------------------------------------------------------------------------------
 
-To obtain Rapuma, you need to check it out from the Mercurial repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in a folder called "~/Projects" but you are welcomed to put it wherever you want.
+To obtain Rapuma, you need to check it out from the github repository it resides in. To simplify these instructions we will assume that the Rapuma package will go in a folder called "~/Projects" but you are welcomed to put it wherever you want.
 
-Create the above path if it does not exist with this command in your terminal:
-
-    mkdir ~/Projects/rapuma
-    
-Then:
-
-    cd ~/Projects
-
-The Rapuma project is curently kept in a GIT repository. Be sure you have GIT installed on your system, then run this command:
+Open a terminal in the Projects folder, then run this command:
 
     git clone https://github.com/sillsdev/rapuma.git
+
+This will create a folder named rapuma in the Projects folder. The main branch is the default. That version should always be good for production work. However, to change to the "experimental" branch where active development is going on and things are more on the cutting edge, use this command:
+
+    git checkout personal/dennis
+
+There is no guarantee what will happen with the experimental branch, it could break your project and you could loose data. You have been warned. To change back to the stable branch, use this command: 
+
+    git checkout master
+
+Each time you change to a different branch, be sure to follow the setup instructions below so the current version is properly installed into your system. Otherwise confusion will result.
+
+One way to better know what branch you are in is to have it displayed on the command line. The following does not work in all situations. Look for the .bashrc file in your home folder. If you do not have one, then create one and add this line to it:
+
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\[\033[1;34m\]$(__git_ps1)\[\033[0m\]\$ '
+
+If you do have one, and it is somewhat complecated, then you might want to look at this tutorial before attempting to edit it:
+
+    http://askubuntu.com/questions/249174/prepend-current-git-branch-in-terminal
 
 
 -------------------------------------------------------------------------------
