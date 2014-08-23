@@ -69,7 +69,15 @@ Some additional SIL packages that may, or may not, be available via that repo:
 
     sudo apt-get install libteckit-perl teckit
 
-Finally, log out and log back in again so the system will properly recognize the newly installed packages.
+XeTeX normally comes bundled with Rapuma. However, it may become necessary to use an external version of XeTeX. The best source for this is through the texlive package. To install texlive, use this command in the terminal:
+
+    sudo apt-get install texlive-xetex
+
+This should install just enough to render with an external version of XeTeX. In the process of installing texlive, a dependency conflict may arrise, this is because of the way the texlive package is currently put together. It will block TECKit from being able to install correctly. It may be some time before this is fixed so a work-around can be applied by doing the following:
+
+    sudo dpkg-divert --package teckit --add /usr/bin/teckit_compile
+
+Once the above packages are installed, log out and log back in again so the system will properly recognize the newly installed packages.
 
 With all the above packages installed, we are ready to move on to installing Rapuma publishing package.
 
