@@ -102,7 +102,7 @@ There is no guarantee what will happen with the experimental branch, it could br
 
 Each time you change to a different branch, be sure to follow the setup instructions below so the current version is properly installed into your system. Otherwise confusion will result.
 
-One way to better know what branch you are in is to have it displayed on the command line. The following does not work in all situations. Look for the .bashrc file in your home folder. If you do not have one, then create one and add this line to it:
+One way to better know what branch you are in is to have it displayed on the command line. The following does not work in all situations. Look for the ~/.bashrc file in your home folder. If you do not have one, then create one and add this line to it:
 
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\[\033[1;34m\]$(__git_ps1)\[\033[0m\]\$ '
 

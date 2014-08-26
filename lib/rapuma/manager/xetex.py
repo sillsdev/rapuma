@@ -784,7 +784,13 @@ class Xetex (Manager) :
                 # Next rename
                 os.rename(bgFile, saveFile)
 
+
+
+
+
+
         ##### Viewing #####
+        viewFile = ''
         # First get the right file name to view
         if saveFile :
             # If there was a saveFile, that will be the viewFile
@@ -797,8 +803,14 @@ class Xetex (Manager) :
             if os.path.isfile(bgFile) :
                 if self.tools.isOlder(self.local.gidPdfFile, bgFile) :
                     viewFile = bgFile
-                else :
-                    viewFile = self.local.gidPdfFile
+            else :
+                viewFile = self.local.gidPdfFile
+
+
+
+
+
+
         # Now view it
         if os.path.isfile(viewFile) :
             if not len(self.pdfViewerCmd) == 0 :
