@@ -1,69 +1,166 @@
 #!/bin/sh
 
-# NOTE: This script is desined to work on the Linux operating system 
-# (Ubuntu 12.04).
+##### Rapuma KJV Test/Example Script #####
 
-##### Book of James Basic Project Example #####
-# This example Rapuma project is the most basic set of commands needed
-# to create output with the Rapuma publishing system. Using the 
-# commands in this script, this will create an example project on your
-# system and create a rough draft of the Book of James. A basic 
-# explanation of how it works is explained in the comments that 
-# precede each command.
+# This script will both test the Rapuma publishing system and give a
+# user an example of how the Rapuma CLI works for some basic commands.
+# Before using this script, be sure you have a properly set up system
+# according to the "installme" instructions found in the Rapuma doc
+# folder.
 
-# Fetch and unpack the raw data for this project These are not Rapuma 
-# commands, just basic terminal commands. Be sure that your system is 
-# setup to work with these commands or edit the following lines to 
-# reflect your system's folder configuration. Otherwise, this script 
-# will not work.
-mkdir ~/Publishing/testArea
-cp resource/example/MBJAS.zip ~/Publishing/testArea
-unzip -o ~/Publishing/testArea/MBJAS.zip -d ~/Publishing/testArea
-rm -rf ~/Publishing/testArea/ENG-LATN-JAS
+# NOTE: This script is desined to work with Rapuma version v0.7.011 or
+# higher and on the Linux operating system, Ubuntu 12.04 or higher.
 
-# This first Rapuma command is for deleting any previous copies of 
-# this example project on your system. It does not have to be run the 
-# first time. Be careful as this step cannot be undone. This command 
-# permanently removes the project.
-echo    rapuma project ENG-LATN-JAS project remove
-        rapuma project ENG-LATN-JAS project remove
+## SETUP
+# First, setup the test environment. Rapuma publishing systems have
+# a specified project folder. Create a folder there that will contain
+# the source files we will be drawing from. We will call it "my_source"
+# for the purpose of this exercise and it will be located here:
+#
+#   ~/Publishing/my_source/KJV
+#
+# You may wish to locate it in a different place on your system. Be sure
+# that is reflected in the commands of the rest of the exercises for
+# this example. Now find the testing/sources/KJV.zip file in the Rapuma
+# program folder and copy it to your newly created sources folder.
+# Extract the contents which is in the KJV folder into the my_source
+# folder. Once this is done you should be ready to work through the rest
+# of this example script.
 
-# This command creates a new project in the Rapuma project folder. 
-# Currently Rapuma only supports the "book" media type but the 
-# architecture, in theory, could support a wide variety of outputs 
-# like phone, web, tablet, etc. Rapuma will default to book-type media
-# so it is not necessary to use that designator.
-echo    rapuma project ENG-LATN-JAS project add
-        rapuma project ENG-LATN-JAS project add
+## ADDING A PROJECT
+# This next command creates a new project in the Rapuma project folder. 
+# After this command is run there will be a new project folder created
+# named "ENG-LATN-KJVTEST" in the main project folder.
 
-# This is where actual content is added to the project in the form of a
-# group that contains components. The group designator for this project
-# is "mb" and the component type is assumed to be "usfm" but if not, it
-# can be specified with --component_type. The --source_list option
-# contains a valid path and file name to the book of James, the only
-# component for this group. if more books were desired to be in this
-# group they would be listed in quotes separated by spaces. Note, it is
-# not wise to use spaces in file names. (sorry) The use of --force (-f)
-# for this command will cause it to overwrite any existing data for this
-# group. Otherwise a warning will be given and the process will stop.
+rapuma project ENG-LATN-KJVTEST project add
 
-echo    rapuma group ENG-LATN-JAS mb group add --cid_list "jas mat" --source_path ~/Publishing/testArea/MBJAS/sources/mb
-        rapuma group ENG-LATN-JAS mb group add --cid_list "jas mat" --source_path ~/Publishing/testArea/MBJAS/sources/mb
 
-# With simple projects such as this, we can now render the text. The "render" command will set in
-# motion a process that will perform a number of tasks in this project such as import the default
-# font and macro package as well as create some default settings files.
-echo    rapuma group ENG-LATN-JAS mb group render
-        rapuma group ENG-LATN-JAS mb group render
+## PROJECT REMOVAL
+# This Rapuma command is for deleting any previous copies of this 
+# example project on your system. Be careful when using this command
+# as this action cannot be undone. This command permanently removes the
+# project and its contents. Any work done on it will be lost when a
+# command like this is run:
+#
+#   rapuma project ENG-LATN-KJVTEST project remove
+#
+# Note that this would be the same as selecting the project folder in
+# your file browser and deleting it.
 
-# The above command is for "view only". To save the file add the --force command. This
-# will save the newly produced PDF file in the Deliverables folder.
-echo    rapuma group ENG-LATN-JAS mb group render --force
-        rapuma group ENG-LATN-JAS mb group render --force
 
-# Another variation of the above command uses the --override command to save the output
-# to a custom file name and location.
-echo    rapuma group ENG-LATN-JAS mb group render --override ~/Publishing/testArea/ENG-LATN-JAS/mysillyname.pdf
-        rapuma group ENG-LATN-JAS mb group render --override ~/Publishing/testArea/ENG-LATN-JAS/mysillyname.pdf
+## ADDING COMPONENTS
+# At this point the project is started but there are no components 
+# in it. This next command is where actual content is added to the 
+# project in the form of components. The group components have to 
+# have valid IDs recognized by Paratext. Custom component IDs are 
+# not recognized. The actuall group ID, however, can be anything. 
+# Three IDs have some speical meaning to the system, however. They 
+# are OT, NT, and BIBLE. These IDs enable Rapuma to auto-create 
+# these groups without having to specify the components. OT is for 
+# the Old Testament (GEN-MAL). NT is for New Testament (MAT-REV). 
+# BIBLE is the normal connoical collection of books (GEN-REV). To 
+# create one of these groups a command formed like the following can 
+# be used:
+# 
+#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
+#
+# With this command Rapuma will search the files in "my_source" and
+# look for SFM or USFM extention files and check to see if any have the
+# ID of a component needed for the NT group (MAT-REV). When it finds a
+# file with an ID that is defined for the NT group, Rapuma imports the
+# text into the project. If an ID is not found during the process, that
+# component will be skipped. If two IDs around found for the same
+# component, the first one it finds will be used. (If you have two
+# valid files with the same ID Rapuma can't help you sort that out.)
+#
+# If you want to create a custom group...
+#
+#   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source/KJV
+#
+# This group (GOSPEL) will contain the component books, Matthew, Mark,
+# Luke and John and nothing else.
+#
+# For this example we'll create the full NT group with this command:
 
+rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
+
+
+## ADDING DOCUMENT FEATURES
+# There are a number of features that can be added to a document to help
+# in the typesetting process. These are controled by settings found in
+# the configuration files found in the project Config folder. Project
+# settings can be changed manualy with a text editor. Or, with "settings"
+# a special Rapuma command included for this purpose. The settings command
+# has four parameters, they are configuration, section, key, and value.
+# The command would be constructed like this:
+#
+#   rapuma settings ENG-LATN-KJVTEST <configuration> <section> <key> <value>
+#
+# For example, a background can be added to indicate it is in the PROOF
+# stage. To do this, run the following two settings commands:
+
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
+
+# An additional helpful parameter setting for this project would be this:
+
+rapuma settings ENG-LATN-KJVTEST usfmTex TeXBehavior vFuzz 2.5pt
+
+# Note that any Rapuma setting, project or system, can be changed with
+# the settings command as long as the four parameters are valid. One
+# drawback is you have to know exactly what the parameters are, and what
+# they do. In the CLI interface does not provide a good explanation for
+# configuration paramters at this time. (Though that would be a good
+# thing to add!) Because of this it is often necessary to open a
+# configuration file in an editor to discover what you need to know.
+# If that is the case, you can just make the changes directly.
+
+
+## RENDERING PROJECT COMPONENTS
+# With more complex projects there would be more setup to do. With this
+# simple one we can move on to rendering. To render the entire NT group
+# we created above, we would use a command like this:
+#
+#   rapuma group ENG-LATN-KJVTEST NT group render
+#
+# However, for this example, we are going to just render one component
+# out of the entire NT group, the Book of James. To do this, we would
+# use this command:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
+
+# You see that it has PROOF watermark background and the page is set on
+# an A4 page. This is to make printing for proofing easier. However,
+# the above command is for "view-only". To save the file add the --force
+# command. This will save the newly produced PDF file in the Deliverable
+# folder which will be added when the file is created. The Deliverable
+# is where Rapuma stores specified rendered files and should never do
+# any "clean-up" in that folder. To save the Book of James file you
+# would run this command:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force
+
+# Now you will note that a folder has been created called Deliverable
+# and in is a file named: ENG-LATN-KJVTEST_NT_060-jas_20140812.pdf
+#
+# The name given to the rendered file is created by the Rapuma system
+# and follows a default format. In some situations it maybe necessary
+# to give the newly rendered file a specific name. This can be done by
+# using the --override command during rendering. The --override command
+# would be followed by the path and file name indicating to Rapuma
+# where the file should be delivered and what it should be named.
+# For example, this command, like above, would render James, name the
+# file James.pdf and put it in the root of the project and view it:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf
+
+# [Note that the path needs to reflect your specific system.]
+# One other render feature that is worth noting is Rapuma ability to
+# just produce a document with specific pages. For this we would add the
+# --pages command like this:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf --pages 2-3
+
+# If you run that command you will see pages 2 and 3 from the Book of
+# James found in the root of your example project.
 
