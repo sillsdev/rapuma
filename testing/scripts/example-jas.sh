@@ -115,6 +115,17 @@ rapuma settings ENG-LATN-KJVTEST usfmTex TeXBehavior vFuzz 2.5pt
 # configuration file in an editor to discover what you need to know.
 # If that is the case, you can just make the changes directly.
 
+# Some times you may need to make project-level setting adjustments to
+# enable a particular behavior. One such change would be to use the
+# external version of XeTeX that comes with the standard texlive
+# installation. To make a change like this you would use this command:
+
+#    rapuma settings ENG-LATN-KJVTEST project Managers/usfm_Xetex runExternalXetex True
+
+# This has been included for reference and is normally not needed. However,
+# it is worth noting that with this setting change command there is a "/"
+# to note a sub-section in the config file.
+
 
 ## RENDERING PROJECT COMPONENTS
 # With more complex projects there would be more setup to do. With this
