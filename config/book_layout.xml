@@ -38,7 +38,7 @@ Todo:
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
             <name>Printer Page Size ID Code</name>
-            <description>For print output to a common printer a page size ID has to be identified. Two page sizes are supported, A4 and US Letter. Default = A4</description>
+            <description>For print output to a common printer a page size ID has to be identified. If no size is specified (null/none) the printer page size will be the same as the document. Two page sizes are supported, A4 and US Letter. Default = A4</description>
             <key>printerPageSizeCode</key>
             <type>string</type>
             <value>A4</value>
@@ -317,14 +317,6 @@ Todo:
             <key>useCaptionReferences</key>
             <type>boolean</type>
             <value>True</value>
-        </setting>
-
-        <setting>
-            <name>Page Border</name>
-            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
-            <key>usePageBorder</key>
-            <type>boolean</type>
-            <value>False</value>
         </setting>
 
         <setting>

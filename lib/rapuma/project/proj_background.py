@@ -465,23 +465,25 @@ class ProjBackground (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # This breaks if the printerPageSizeCode is not A4 or US Letter
-        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode']
         tmpFile = tempfile.NamedTemporaryFile().name
         # Get the size of our printer page
-        pps = self.printerPageSize()
-        # Get the size of our contents page
-        cPdf = PdfFileReader(open(contents,'rb'))
-        var2 = cPdf.getPage(0).mediaBox
-        bw = float(var2.getWidth())
-        bh = float(var2.getHeight())
-        # Get the offset. We assume that pps is bigger than the contents
-        # Note: Offset is measured in points
-        wo = float((int(pps[0]) - bw)/2)
-        ho = float((int(pps[1]) - bh)/2)
+        (ppsw, ppsh) = self.printerPageSize()
+        (wo, ho) = self.getPageOffset()
         pageOffset = str(wo) + ' ' + str(ho)
+
         # Assemble the GhostScript command
-        cmd = ['gs',  '-o', tmpFile,  '-sDEVICE=pdfwrite',  '-dQUIET', '-sPAPERSIZE=' + printerPageSizeCode.lower(),  '-dFIXEDMEDIA' , '-c', '<</PageOffset [' + str(pageOffset) + ']>>', 'setpagedevice', '-f', contents]
+        cmd = [ 'gs', 
+                '-o', tmpFile, 
+                '-sDEVICE=pdfwrite', 
+                '-dQUIET', 
+                '-dDEVICEWIDTHPOINTS=' + str(ppsw),
+                '-dDEVICEHEIGHTPOINTS=' + str(ppsh),
+                '-dFIXEDMEDIA', 
+                '-c', 
+                '<</PageOffset [' + str(pageOffset) + ']>>', 
+                'setpagedevice', 
+                '-f', 
+                contents]
 
         if self.debugMode :
             self.tools.terminal('Debug Mode On: \centerOnPrintPage() command: ' + str(cmd))
@@ -536,28 +538,59 @@ class ProjBackground (object) :
 
     def printerPageSize (self) :
         '''Return the width and height of the printer page size in
-        points. If there is a problem just return the size for A4.
-        Only US Letter and A4 are currently supported.'''
+        points. Only US Letter and A4 are supported. If not specified
+        return the page trim size.'''
     
-        size = []
-        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode']
+        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode'].lower()
         ## STANDARD PRINTER PAGE SIZES
         # The output page (printer page) is what the typeset page will be placed on
         # with a watermark behind it. There are only two page sizes supported.
         # They are A4 and US Letter. We will determine the size by the ID code
-        # found in the layout.conf file. If that doesn't make sense, then just
-        # default to the A4 size.
-        if printerPageSizeCode.lower() == 'a4' :
-            size.append(float(595))
-            size.append(float(842))
-        elif printerPageSizeCode.lower() == 'letter' :
-            size.append(float(612))
-            size.append(float(792))
+        # found in the layout.conf file. However, in some cases, for example
+        # during the layout process, the trim size is what is needed. If
+        # one of the two supported pages sizes are not used, this will defult
+        # to the trim size.
+        if printerPageSizeCode == 'a4' :
+            return float(595), float(842)
+        elif printerPageSizeCode == 'letter' :
+            return float(612), float(792)
         else :
-            # Just use the default A4 size in pts so it doesn't die from this
-            size.append(float(595))
-            size.append(float(842))
-
-        return [size[0], size[1]]
+            # Just default to the page trim size (assumed mm coming in)
+            return float(int(self.layoutConfig['PageLayout']['pageWidth']) * 2.845355), float(int(self.layoutConfig['PageLayout']['pageHeight']) * 2.845355)
 
     
+    def getPageOffset (self) :
+        '''Return the amount of horizontal and vertical offset that will
+        enable the page trim size to be centered on the printer page. If
+        something other than A4 or Letter is being used, the offset returned
+        will be zero as this only supports those two sizes. The offset is
+        based on the starting point being the lower-left side corner
+        of the page. '''
+        
+        # Get the printer page size
+        printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode'].lower()
+        # Get the page trim size (assuming mm input)
+        tsw = int(self.layoutConfig['PageLayout']['pageWidth']) * 2.845355
+        tsh = int(self.layoutConfig['PageLayout']['pageHeight']) * 2.845355
+
+        # The trim size of the content page can never be bigger than
+        # the printer page size. If so, the offset is 0
+        if printerPageSizeCode == 'a4' or printerPageSizeCode == 'letter' :
+            (bw, bh) = self.printerPageSize()
+            wo = float((bw/2)-(tsw/2))
+            ho = float((bh/2)-(tsh/2))
+            return wo, ho
+        else :
+            return 0, 0
+
+        # Note:
+        # Another way to get the size of our contents page would be
+        # to use PdfFileReader() to open the contents and read the
+        # trim size dimensions, like this:
+        # cPdf = PdfFileReader(open(contents,'rb'))
+        # var2 = cPdf.getPage(0).mediaBox
+        # tsw = float(var2.getWidth())
+        # tsh = float(var2.getHeight())
+        
+        
+        
