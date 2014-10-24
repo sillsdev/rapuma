@@ -48,19 +48,25 @@ rapuma project ENG-LATN-KJVTEST project add
 # your file browser and deleting it.
 
 
-## ADDING COMPONENTS
-# At this point the project is started but there are no components 
-# in it. This next command is where actual content is added to the 
-# project in the form of components. The group components have to 
-# have valid IDs recognized by Paratext. Custom component IDs are 
-# not recognized. The actuall group ID, however, can be anything. 
-# Three IDs have some speical meaning to the system, however. They 
-# are OT, NT, and BIBLE. These IDs enable Rapuma to auto-create 
-# these groups without having to specify the components. OT is for 
-# the Old Testament (GEN-MAL). NT is for New Testament (MAT-REV). 
-# BIBLE is the normal connoical collection of books (GEN-REV). To 
-# create one of these groups a command formed like the following can 
-# be used:
+## ADDING STANDARD GROUPS
+# A group is the container used to hold components that are rendered
+# into the publication. A standard group is one of three pre-defined
+# component containers. They are, OT, NT and BIBLE. Using one of these
+# three group designators will allow Rapuma to auto-create a group
+# which will contain all the components necessary for that group.
+# 
+# At this point the project is started but there are no groups in it 
+# and no components to render. This next command is where actual
+# content is added to the project in the form of groups which contain
+# components. The group components have to have valid IDs recognized
+# by Paratext. Custom component IDs are not recognized. The actuall
+# group ID, however, can be anything. These three IDs have speical
+# meaning to the system, they are OT, NT, and BIBLE. These IDs enable
+# Rapuma to auto-create these groups without having to specify the
+# components. OT is for the Old Testament (GEN-MAL). NT is for New
+# Testament (MAT-REV). BIBLE is the normal connoical collection of
+# books (GEN-REV). To create one of these groups a command formed like
+# the following can be used:
 # 
 #   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
 #
@@ -73,7 +79,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # component, the first one it finds will be used. (If you have two
 # valid files with the same ID Rapuma can't help you sort that out.)
 #
-# If you want to create a custom group...
+# If you want to create a custom sub-group...
 #
 #   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source/KJV
 #
@@ -84,6 +90,31 @@ rapuma project ENG-LATN-KJVTEST project add
 
 rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
 
+
+## ADDING CUSTOM GROUPS AND COMPONENTS
+# As noted above, you can create a custom group to handle portions of
+# content which are not in a standard order or contain components that
+# are not Scripture, like front and back mater.
+#
+# In the case of front mater, the USFM standard allows the "frt" ID
+# to be used to indicate components that are used in the front of the
+# publication. There are several other official IDs used for these
+# types of peripheral components. Consult the USFM manual for more
+# information.
+#
+# Just like with standard groups, you would use a command such as this
+# to create a custom group which contains all the front mater:
+
+rapuma group MLF-THAI-NTREV FRONT group add -s ~/ParatextProjects/MLF -i "xxa xxb xxc"
+
+# This adds a group to our publication that will contain all the front
+# mater. The xxa, xxb and xxc are valid USFM IDs for components that
+# can contain anything. In this case xxa is our title page, xxb is the
+# verso page and xxc is the table of contents. Note, you could not use
+# an ID like "toc" for the table of contents because "toc" is not a
+# valid USFM component ID.
+
+##### NOTE: Need more explanation added here #####
 
 ## ADDING DOCUMENT FEATURES
 # There are a number of features that can be added to a document to help
@@ -96,11 +127,10 @@ rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/
 #
 #   rapuma settings ENG-LATN-KJVTEST <configuration> <section> <key> <value>
 #
-# For example, a background can be added to indicate it is in the PROOF
-# stage. To do this, run the following two settings commands:
+# For example, the background, by default, is turned on. It could be turned
+# off with this command:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground False
 
 # An additional helpful parameter setting for this project would be this:
 
@@ -163,4 +193,46 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override 
 
 # If you run that command you will see pages 2 and 3 from the Book of
 # James found in the root of your example project.
+
+
+## SETTING UP BACKGROUND OUTPUT
+# There are several backgrounds that can be added to the document output.
+# To turn on the background, use this command:
+
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
+
+# Rapuma supports 4 different types of backgrounds, cropmarks, lines
+# watermark and pagebox. The cropmarks show the trim size of the paper.
+# The lines background will show where the text aligns to help with design
+# and the paging process. The watermark will put a message in gray in the
+# background of the page to prevent premature use of the document for
+# publication. Finally, the pagebox background will place a box around
+# the edge of the page to mark the trim size of the page.
+#
+# One of the four backgrounds listed here can be added to the rendered
+# with this command:
+
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents "watermark"
+
+Watermark text can be changed with:
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
+
+
+# We have a bug in Rapuma that will not allow us to update a setting
+# with a list if items.
+
+
+
+you can add doc info with
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useDocInfo True
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info text"
+
+change by command or edit layout.conf file
+
+delete the background.pdf file in Illustration folder after change is made
+
+
+*** Add feature to facilitate a checkbox to regenerate background on run "regenerateBackground = True" (default is True)
+
+
 

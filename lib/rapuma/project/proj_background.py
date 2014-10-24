@@ -225,27 +225,25 @@ class ProjBackground (object) :
         # Convert formula - mm to px
         mmToPx = 72 / 25.4
         # Trim page width [px]
-        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        tsw = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        tsh = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
-        pps = self.printerPageSize()
-        ppsWidth = pps[0]
-        ppsHeight = pps[1]
+        (ppsw, ppsh) = self.printerPageSize()
 
-        pageX = ppsWidth - bdWidth
-        pageY = ppsHeight - bdHeight
+        pageX = ppsw - tsw
+        pageY = ppsh - tsh
         
         #   Write out SVG document text 
         with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
-                version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">
+                version="1.1" width = "''' + str(ppsw) + '''" height = "''' + str(ppsh) + '''">
                 <g><text x = "''' + str(pageX * 1.75) + '''" y = "''' + str(pageY) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:middle;fill:#e6e6ff;fill-opacity:1">''' + str(pubProg) + '''
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(bdHeight * 0.35) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(bdHeight * 0.50) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(bdHeight * 0.65) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 1.75) + '''" y = "''' + str(bdHeight * 0.80) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(bdHeight) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(tsh * 0.35) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.25)+ '''" y = "''' + str(tsh * 0.50) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.5) + '''" y = "''' + str(tsh * 0.65) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 1.75) + '''" y = "''' + str(tsh * 0.80) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX * 2.5) + '''" y = "''' + str(tsh) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
                 </text></g></svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
