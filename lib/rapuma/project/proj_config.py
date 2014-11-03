@@ -491,8 +491,11 @@ class Config (object) :
             # folder. We will do that now. The name of the file should
             # be the macPack + ".sty", in theory. We will copy over the
             # top of the old one.
-            shutil.copy(os.path.join(macDir, macPack + '.sty'), self.local.projStyleFolder)
-            # The style file should never be edited by the user
+            # Unlock the old one so it can be copied over.
+            self.tools.makeExecutable(self.local.defaultStyFile)
+            # Now copy in the new one.
+            shutil.copy(os.path.join(macDir, macPack + '.sty'), self.local.defaultStyFile)
+            # The style file should never be edited by the user, relock it
             self.tools.makeReadOnly(self.local.defaultStyFile)
             # Remove un-needed sty and tex files from the macDir to
             # avoid confusion. The ext files never are updated because
