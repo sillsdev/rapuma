@@ -471,6 +471,8 @@ class Config (object) :
         '''Update a macro package with the latest version from Rapuma
         but do not touch the config file.'''
 
+#        import pdb; pdb.set_trace()
+
         # Be sure we have file names
         self.getMacPackConfig(macPack)
         # Delete the existing macro package (but not the settings)
@@ -482,7 +484,20 @@ class Config (object) :
             shutil.rmtree(macDir)
         # Reinstall the macPack
         if self.installMacPackOnly(macPack) :
-            # Remove un-needed sty and tex files (to avoid confusion)
+            # The current macro system must have a "master" style file.
+            # This is a version of the ParaText style file. Because
+            # an update might include an update to the style file,
+            # we meed to copy that from the macro folder to the Style
+            # folder. We will do that now. The name of the file should
+            # be the macPack + ".sty", in theory. We will copy over the
+            # top of the old one.
+            shutil.copy(os.path.join(macDir, macPack + '.sty'), self.local.projStyleFolder)
+            # The style file should never be edited by the user
+            self.tools.makeReadOnly(self.local.defaultStyFile)
+            # Remove un-needed sty and tex files from the macDir to
+            # avoid confusion. The ext files never are updated because
+            # they could contain custom project code that we don't want
+            # to loose in an update.
             for f in self.getMacStyExtFiles() :
                 source = os.path.join(self.local.projMacPackFolder, f)
                 if os.path.exists(source) :
@@ -505,7 +520,7 @@ class Config (object) :
 
 
     def installMacPackOnly (self, package) :
-        '''Install macro package.'''
+        '''Install the new macro package but only that.'''
 
         if self.tools.pkgExtract(self.local.rapumaMacPackFile, self.local.projMacroFolder, self.local.macPackConfXmlFile) :
             return True
