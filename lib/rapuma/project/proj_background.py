@@ -93,7 +93,12 @@ class ProjBackground (object) :
 # or shrunk. GS over comes that, but at the cost of speed.
 
         # Do a quick check if the background needs to be remade
+        # The background normally is not remade if one already exists.
+        # If one is there, it can be remade in two ways, with a force
+        # or a regenerate command.
         if force :
+            self.createBackground()
+        elif self.tools.str2bool(self.layoutConfig['DocumentFeatures']['regenerateBackground']) :
             self.createBackground()
         else :
             # If there isn't one, make it

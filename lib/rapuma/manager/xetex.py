@@ -758,6 +758,10 @@ class Xetex (Manager) :
                 bgFile = self.pg_back.addBackground(saveFile)
             else :
                 bgFile = self.pg_back.addBackground(self.local.gidPdfFile)
+        # NOTE: We could add a "force" to addBackground() the background
+        # would be regenerated, but we can't get a force command
+        # resonably at this point. Therefore, the "regenerateBackground"
+        # setting should be set to True.
 
         # Add a timestamp and doc info if requested in addition to background
         if self.useDocInfo :

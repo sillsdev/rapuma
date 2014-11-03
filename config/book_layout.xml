@@ -157,6 +157,13 @@ Todo:
             <value>False</value>
         </setting>
         <setting>
+            <name>Regenerate Background</name>
+            <description>If this is set to true, any exsisting background file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = True</description>
+            <key>regenerateBackground</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
             <name>Background Components</name>
             <description>Components to be used for a document. Currently the following are supported: watermark, cropmarks, lines, and pagebox. Default = watermark</description>
             <key>backgroundComponents</key>
