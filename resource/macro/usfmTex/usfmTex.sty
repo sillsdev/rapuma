@@ -1,11 +1,6 @@
-# Version=2.500
-# ********************************************************************
-# * usfm.sty is the default stylesheet for Paratext 7 projects       *
-# *   using USFM markup.                                             *
-# * Latest documentation and stylesheets are maintained at:          *
-# *   http://paratext.org/usfm                                       *
-# ********************************************************************
-# Last Updated: Oct 21, 2013
+# File: usfmTex.sty
+# This style sheet is a fork of the ParaText standard style sheet,
+# usfm.sty, version 2.500, used for the Rapuma system.
 
 # File Identification
 
@@ -2173,7 +2168,8 @@
 \Marker pb
 \Name pb - Break - Page Break
 \Description Page Break used for new reader portions and children's bibles where content is controlled by the page
-\OccursUnder c
+# Changed from under "c" to under "id" so that a page break can happen anywhere in the document (djd - 20141102)
+\OccursUnder id
 \Rank 4
 \TextType Other
 \TextProperties publishable
