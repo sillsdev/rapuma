@@ -784,7 +784,10 @@ class ProjSetup (object) :
         behavior.'''
 
         # Just in case this section isn't there
-        self.tools.buildConfSection(self.illustrationConfig, gid)
+        # Load illustrationConfig if it is not already (probably isn't)
+        if not self.proj_config.illustrationConfig :
+            self.proj_config.getIllustrationConfig()
+        self.tools.buildConfSection(self.proj_config.illustrationConfig, gid)
 
         # Description of figKeys (in order found in \fig)
             # description = A brief description of what the illustration is about
@@ -834,35 +837,35 @@ class ProjSetup (object) :
         # If this is an update, we need to keep the original settings in case the
         # default settings have been modified for this project.
         # Illustration Scale
-        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['scale'] = self.illustrationConfig[gid][figDict['illustrationID']]['scale']
+        if self.proj_config.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['scale'] = self.proj_config.illustrationConfig[gid][figDict['illustrationID']]['scale']
         else :
             figDict['scale'] = '1.0'
         # Illustration Position
-        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['position'] = self.illustrationConfig[gid][figDict['illustrationID']]['position']
+        if self.proj_config.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['position'] = self.proj_config.illustrationConfig[gid][figDict['illustrationID']]['position']
         else :
             if figDict['width'] == 'col' :
                 figDict['position'] = 'tl'
             else :
                 figDict['position'] = 't'
         # Illustration Location
-        if self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            figDict['location'] = self.illustrationConfig[gid][figDict['illustrationID']]['location']
+        if self.proj_config.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            figDict['location'] = self.proj_config.illustrationConfig[gid][figDict['illustrationID']]['location']
         else :
             if not figDict['location'] :
                 figDict['location'] = figDict['chapter'] + cvSep + figDict['verse']
         # Now make (update) the actual illustration section
-        if not self.illustrationConfig.has_key(gid) :
-            self.tools.buildConfSection(self.illustrationConfig, gid)
+        if not self.proj_config.illustrationConfig.has_key(gid) :
+            self.tools.buildConfSection(self.proj_config.illustrationConfig, gid)
         # Put the dictionary info into the illustration conf file
-        if not self.illustrationConfig[gid].has_key(figDict['illustrationID']) :
-            self.tools.buildConfSection(self.illustrationConfig[gid], figDict['illustrationID'])
+        if not self.proj_config.illustrationConfig[gid].has_key(figDict['illustrationID']) :
+            self.tools.buildConfSection(self.proj_config.illustrationConfig[gid], figDict['illustrationID'])
         for k in figDict.keys() :
-            self.illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
+            self.proj_config.illustrationConfig[gid][figDict['illustrationID']][k] = figDict[k]
 
         # Write out the conf file to preserve the data found
-        self.tools.writeConfFile(self.illustrationConfig)
+        self.tools.writeConfFile(self.proj_config.illustrationConfig)
 
         # Just incase we need to keep the fig markers intact this will
         # allow for that. However, default behavior is to strip them
