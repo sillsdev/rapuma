@@ -410,9 +410,12 @@ def userArguments (args) :
             cid_list = usfmData.canonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in canonGroups :
-                getCidList = getattr(usfmData, gid.lower() + 'CidList')
-                cid_list = getCidList()
+            if cmd == 'add' or cmd == 'update' or cmd == 'compare' :
+                if gid in canonGroups :
+                    getCidList = getattr(usfmData, gid.lower() + 'CidList')
+                    cid_list = getCidList()
+                else :
+                    sys.exit('\nERROR: A group ID is not found or not in the list of recognized canonical books. Please rerun using the --cid_list parameter. Process halting.\n')
         # If a compare is being done this provides the type of compare.
         if args.compare_type :
             compare_type = args.compare_type
