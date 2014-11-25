@@ -78,19 +78,16 @@ class ProjBackground (object) :
         figure out what the background is to be composed of and create
         a master background page. Using force will cause it to be remade.'''
 
-# FIXME(1): Need to figure out a way to keep intact the original target so
-# it can be delivered without having to be rerendered. This will prevent
-# possible problems of things not rendering exactly the same. The output
-# the client reviews should be the output that is delivered.
-#   Answer(1): Using "save", Have XeTeX preserve the original file name
-#               and add extra information to the file(s) that have background
-#               or doc info on them
-
-# FIXME(2): Adding the background slows performance. There needs to be a
+# FIXME: Adding the background slows performance. There needs to be a
 # a way to do this faster. The centerOnPrintPage() seems to be the problem
 # GS tends to take longer than pdftk but when merging, pdftk cannot
 # maintain the individual sizes of two docs. One will always be stretched
 # or shrunk. GS over comes that, but at the cost of speed.
+
+# One way around this, for normal production work, not final rendering,
+# would be to ship the merge out to pdftk. However, the background page
+# would have to be the same size as the trim size. Otherwise, this will
+# not work. 
 
         # Do a quick check if the background needs to be remade
         # The background normally is not remade if one already exists.
@@ -111,7 +108,20 @@ class ProjBackground (object) :
         # Create a special name for the file with the background
         # Then merge and save it
         bgFile = self.makeBgFileName(target)
+        
+        
+##################################################
+        
+# If the bg and trim are the same size we might be able to remove the centerOnPrintPage() call
+
+# Set printerPageSizeCode to "" (nothing) to make this happen
+        
         shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
+
+
+
+##################################################
+
 
         # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
