@@ -15,7 +15,7 @@
 # Firstly, import all the standard Python modules we need for
 # this process
 
-import codecs, os, difflib, subprocess, shutil, re, tempfile, pyPdf
+import codecs, os, difflib, subprocess, shutil, re, tempfile, pyPdf, filecmp
 from pyPdf                              import PdfFileReader
 from configobj                          import ConfigObj
 
@@ -171,9 +171,16 @@ class ProjBackground (object) :
         self.log.writeToLog(self.errorCodes['1305'])
 
         # Create a special name for the file with the background
-        # Then merge and save it
         bgFile = self.makeBgFileName(target)
-        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
+        # Compare the new file name with the target to see if we are
+        # already working with a background file
+        if bgFile == target :
+            # If the target is a BG file all we need to do is merge it
+            self.mergePdfFilesPdftk(bgFile, self.convertSvgToPdf(svgFile))
+        else :
+            # If not a BG file, we need to be sure the target is the same
+            # size as the print page to merge with pdftk
+            shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
 
         # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
@@ -483,7 +490,7 @@ class ProjBackground (object) :
         (ppsw, ppsh) = self.printerPageSize()
         (wo, ho) = self.getPageOffset()
         pageOffset = str(wo) + ' ' + str(ho)
-
+        
         # Assemble the GhostScript command
         cmd = [ 'gs', 
                 '-o', tmpFile, 
