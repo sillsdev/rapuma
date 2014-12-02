@@ -148,10 +148,10 @@ class ProjBackground (object) :
         # always be safe by measuring the gidPdfFile size.
         #pdf         = PdfFileReader(open(self.local.gidPdfFile,'rb'))
         #var2        = pdf.getPage(0).mediaBox
-        #bdWidth     = float(var2.getWidth())
-        #bdHeight    = float(var2.getHeight())
-        bdWidth = float(self.layoutConfig['PageLayout']['pageWidth'])
-        bdHeight = float(self.layoutConfig['PageLayout']['pageHeight'])
+        #trimWidth     = float(var2.getWidth())
+        #trimHeight    = float(var2.getHeight())
+        trimWidth = float(self.layoutConfig['PageLayout']['pageWidth'])
+        trimHeight = float(self.layoutConfig['PageLayout']['pageHeight'])
         # Printer page size
         pps         = self.printerPageSize()
         ppsWidth    = pps[0]
@@ -247,25 +247,25 @@ class ProjBackground (object) :
         # Convert formula - mm to px
         mmToPx = 72 / 25.4
         # Trim page width [px]
-        tsw = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        tsh = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
-        (ppsw, ppsh) = self.printerPageSize()
+        (ppsWidth, ppsHeight) = self.printerPageSize()
 
-        pageX = ppsw/2
-        pageY = ppsh/2
+        pageX = ppsWidth/2
+        pageY = ppsHeight/2
         
         #   Write out SVG document text 
         with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
-                version="1.1" width = "''' + str(ppsw) + '''" height = "''' + str(ppsh) + '''">
-                <g><text x = "''' + str(pageX-tsw*.42) + '''" y = "''' + str(pageY-tsh*0.39) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#d5d5f5;fill-opacity:1">''' + str(pubProg) + '''
-                <tspan x = "''' + str(pageX) + '''" y = "''' + str(pageY - tsh*0.22) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX+tsw*0.42)+ '''" y = "''' + str(pageY-tsh*0.05) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX) + '''" y = "''' + str(pageY+tsh*0.12) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX-tsw*0.42) + '''" y = "''' + str(pageY+tsh*0.29) + '''" style="text-anchor:start">''' + str(pubProg) + '''</tspan>
-                <tspan x = "''' + str(pageX+tsw*0.49) + '''" y = "''' + str(pageY+tsh*0.455) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
+                version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">
+                <g><text x = "''' + str(pageX-trimWidth*.42) + '''" y = "''' + str(pageY-trimHeight*0.39) + '''" style="font-family:DejaVu Sans;font-style:regular;font-size:32;text-anchor:start;fill:#d5d5f5;fill-opacity:1">''' + str(pubProg) + '''
+                <tspan x = "''' + str(pageX) + '''" y = "''' + str(pageY - trimHeight*0.22) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX+trimWidth*0.42)+ '''" y = "''' + str(pageY-trimHeight*0.05) + '''" style="text-anchor:end">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX) + '''" y = "''' + str(pageY+trimHeight*0.12) + '''" style="text-anchor:middle">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX-trimWidth*0.42) + '''" y = "''' + str(pageY+trimHeight*0.29) + '''" style="text-anchor:start">''' + str(pubProg) + '''</tspan>
+                <tspan x = "''' + str(pageX+trimWidth*0.49) + '''" y = "''' + str(pageY+trimHeight*0.455) + '''" style="font-weight:bold;font-size:68;text-anchor:end">''' + watermarkText + ''' </tspan>
                 </text></g></svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -284,9 +284,9 @@ class ProjBackground (object) :
         # Convert formula - mm to px
         mmToPx = 72 / 25.4
         # Trim page width [px]
-        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
@@ -296,21 +296,21 @@ class ProjBackground (object) :
                     # starting lines of SVG xml
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">\n''') 
                     # vertical top left
-            fbackgr.write( '''<path d = "m''' + str((ppsWidth - bdWidth)/2) + ''',''' + str((ppsHeight - bdHeight)/2 - 32.0) + ''',v27," style="stroke:#000000;stroke-width:.2"/>\n''')   
+            fbackgr.write( '''<path d = "m''' + str((ppsWidth - trimWidth)/2) + ''',''' + str((ppsHeight - trimHeight)/2 - 32.0) + ''',v27," style="stroke:#000000;stroke-width:.2"/>\n''')   
                     # vertical bottom left
-            fbackgr.write( '''<path d = "m''' + str((ppsWidth - bdWidth)/2) + ''',''' + str((ppsHeight + bdHeight)/2 + 5.0) + ''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d = "m''' + str((ppsWidth - trimWidth)/2) + ''',''' + str((ppsHeight + trimHeight)/2 + 5.0) + ''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
                     # vertical bottom right
-            fbackgr.write( '''<path d = "m''' + str((ppsWidth + bdWidth)/2) + ''',''' + str((ppsHeight - bdHeight)/2 - 32.0) + ''',v27" style="stroke:#000000;stroke-width:.2"/>\n''')
+            fbackgr.write( '''<path d = "m''' + str((ppsWidth + trimWidth)/2) + ''',''' + str((ppsHeight - trimHeight)/2 - 32.0) + ''',v27" style="stroke:#000000;stroke-width:.2"/>\n''')
                     # vertical top right
-            fbackgr.write( '''<path d = "m''' + str((ppsWidth + bdWidth)/2) + ''',''' + str((ppsHeight + bdHeight)/2 + 5.0) + ''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d = "m''' + str((ppsWidth + trimWidth)/2) + ''',''' + str((ppsHeight + trimHeight)/2 + 5.0) + ''',v27" style="stroke:#000000;stroke-width:.2" />\n''')
                     # horzontal top left
-            fbackgr.write( '''<path d =" m''' + str((ppsWidth - bdWidth)/2 - 32.0) + ''',''' + str((ppsHeight - bdHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d =" m''' + str((ppsWidth - trimWidth)/2 - 32.0) + ''',''' + str((ppsHeight - trimHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
                     # horzontal top right
-            fbackgr.write( '''<path d =" m''' + str((ppsWidth + bdWidth)/2 + 5.0) + ''',''' + str((ppsHeight - bdHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d =" m''' + str((ppsWidth + trimWidth)/2 + 5.0) + ''',''' + str((ppsHeight - trimHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
                     # horzontal bottom right
-            fbackgr.write( '''<path d =" m''' + str((ppsWidth - bdWidth)/2 - 32.0) + ''',''' + str((ppsHeight + bdHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d =" m''' + str((ppsWidth - trimWidth)/2 - 32.0) + ''',''' + str((ppsHeight + trimHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
                     # horzontal bottom left
-            fbackgr.write( '''<path d =" m''' + str((ppsWidth + bdWidth)/2 +5.0) + ''',''' + str((ppsHeight + bdHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
+            fbackgr.write( '''<path d =" m''' + str((ppsWidth + trimWidth)/2 +5.0) + ''',''' + str((ppsHeight + trimHeight)/2) + ''',h27" style="stroke:#000000;stroke-width:.2" />\n''')
             fbackgr.write( '''</svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -329,9 +329,9 @@ class ProjBackground (object) :
         # Convert formula - mm to px
         mmToPx = 72 / 25.4
         # Trim page width [px]
-        bdWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        bdHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
@@ -342,7 +342,7 @@ class ProjBackground (object) :
             fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg"
                 version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight) + '''">''')
                     # rectangle
-            fbackgr.write( '''<rect x = "''' + str((ppsWidth - bdWidth)/2) + '''" y= "''' + str((ppsHeight - bdHeight)/2) + '''" height = "''' + str(bdHeight) + '''" width = "''' + str(bdWidth) + '''" style = "fill:none;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:.2"/>
+            fbackgr.write( '''<rect x = "''' + str((ppsWidth - trimWidth)/2) + '''" y= "''' + str((ppsHeight - trimHeight)/2) + '''" height = "''' + str(trimHeight) + '''" width = "''' + str(trimWidth) + '''" style = "fill:none;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:.2"/>
                 </svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
@@ -431,13 +431,38 @@ class ProjBackground (object) :
         # Convert the lines background component to PDF
         linesPdf = self.convertSvgToPdf(svgFile)
 #        shutil.copy(linesPdf, os.path.join(self.local.projIllustrationFolder, 'linesPdf.pdf'))
+        shutil.copy(linesPdf, self.local.backgroundFile)
 
-        # Center linesPdf on the print page (this keeps the size right)
-        linesBackground = self.centerOnPrintPage(linesPdf)
+#        # Center linesPdf on the print page (this keeps the size right)
+#        linesBackground = self.centerOnPrintPage(linesPdf)
 #        shutil.copy(linesBackground, os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf'))
 
+################# REASON FOR CHANGING LINESBACKGROUND ###############################################
+                # In RapumaThere there are two categories of background:
+                # 1. Watermark, cropmarks, pagebox and docinfo are added to the finished (half) product
+                #    for the benefit of the customer.
+                # 2. Linesbackground (aka lines or linegrid) is used after each rendering of components
+                #    for the benefit of the typesetter.
+                # At present the are added with the centerOnPrintPage function that is centerin the 
+                # PDF file on the printerPageSize page with GhostScript. It is the only way to retain
+                # meta data combining PDF files, which is important for further processing of the 
+                # finished product. The centering is a somewhat time consuming process compared 
+                # with Pdftk. This is no problem for the first category.
+                # For the linesbackground is would be nice to have the almost simultaneous adding to 
+                # the rendered page of Pdftk as it speeds up the process of balancing columns and 
+                # adjusting pages. Unlike the first category the linegrid does not need to be sent 
+                # to the customer. 
+                # Therefore the linesbackground should be taken out of the background merging process 
+                # and made mutual exclusive with the first category backgrounds in that when this 
+                # background is choosen the other cannot be used and vice versa. 
+
+                # FIXME: MORE WORK needs to be done to make the linegrid feature mutual exclusive
+                # with watermark, cropmarks, pagebox and docinfo background. See also comment on
+                # line 80
+
+
         # Merge linesPdf with existing background
-        results = results = self.mergePdfFilesPdftk(self.local.backgroundFile, linesBackground)
+        results = self.mergePdfFilesPdftk(self.local.backgroundFile, linesPdf)
         # Test and return if good
         if os.path.isfile(results) :
             return True
@@ -487,7 +512,7 @@ class ProjBackground (object) :
 
         tmpFile = tempfile.NamedTemporaryFile().name
         # Get the size of our printer page
-        (ppsw, ppsh) = self.printerPageSize()
+        (ppsWidth, ppsHeight) = self.printerPageSize()
         (wo, ho) = self.getPageOffset()
         pageOffset = str(wo) + ' ' + str(ho)
         
@@ -496,8 +521,8 @@ class ProjBackground (object) :
                 '-o', tmpFile, 
                 '-sDEVICE=pdfwrite', 
                 '-dQUIET', 
-                '-dDEVICEWIDTHPOINTS=' + str(ppsw),
-                '-dDEVICEHEIGHTPOINTS=' + str(ppsh),
+                '-dDEVICEWIDTHPOINTS=' + str(ppsWidth),
+                '-dDEVICEHEIGHTPOINTS=' + str(ppsHeight),
                 '-dFIXEDMEDIA', 
                 '-c', 
                 '<</PageOffset [' + str(pageOffset) + ']>>', 
@@ -575,8 +600,9 @@ class ProjBackground (object) :
         elif printerPageSizeCode == 'letter' :
             return float(612), float(792)
         else :
-            # Just default to the page trim size (assumed mm coming in)
-            return float(int(self.layoutConfig['PageLayout']['pageWidth']) * 2.845355), float(int(self.layoutConfig['PageLayout']['pageHeight']) * 2.845355)
+            # Just default to the page trim size (assumed mm coming in) factor mmToPx = 72 / 25.4
+            mmToPx = 72 / 25.4
+            return float(int(self.layoutConfig['PageLayout']['pageWidth']) * mmToPx), float(int(self.layoutConfig['PageLayout']['pageHeight']) * mmToPx)
 
     
     def getPageOffset (self) :
@@ -589,16 +615,17 @@ class ProjBackground (object) :
         
         # Get the printer page size
         printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode'].lower()
-        # Get the page trim size (assuming mm input)
-        tsw = int(self.layoutConfig['PageLayout']['pageWidth']) * 2.845355
-        tsh = int(self.layoutConfig['PageLayout']['pageHeight']) * 2.845355
+        # Get the page trim size (assuming mm input)factor mmToPx = 72 / 25.4
+        mmToPx = 72 / 25.4
+        trimWidth = int(self.layoutConfig['PageLayout']['pageWidth']) * mmToPx
+        trimHeight = int(self.layoutConfig['PageLayout']['pageHeight']) * mmToPx
 
         # The trim size of the content page can never be bigger than
         # the printer page size. If so, the offset is 0
         if printerPageSizeCode == 'a4' or printerPageSizeCode == 'letter' :
             (bw, bh) = self.printerPageSize()
-            wo = float((bw/2)-(tsw/2))
-            ho = float((bh/2)-(tsh/2))
+            wo = float((bw/2)-(trimWidth/2))
+            ho = float((bh/2)-(trimHeight/2))
             return wo, ho
         else :
             return 0, 0
@@ -609,8 +636,8 @@ class ProjBackground (object) :
         # trim size dimensions, like this:
         # cPdf = PdfFileReader(open(contents,'rb'))
         # var2 = cPdf.getPage(0).mediaBox
-        # tsw = float(var2.getWidth())
-        # tsh = float(var2.getHeight())
+        # trimWidth = float(var2.getWidth())
+        # trimHeight = float(var2.getHeight())
         
         
         
