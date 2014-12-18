@@ -47,8 +47,7 @@ class ProjBackground (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.projHome                   = os.path.join(self.userConfig['Resources']['projects'], self.pid)
-        self.svgPdfConverter            = self.userConfig['System']['svgPdfConvertCommand']
-
+        self.mmToPx                     = 72 / 25.4
         # For debugging purposes a switch can be set here for verbose
         # message output via the terminal
         self.debugMode                  = self.tools.str2bool(self.userConfig['System']['debugging'])
@@ -78,17 +77,6 @@ class ProjBackground (object) :
         figure out what the background is to be composed of and create
         a master background page. Using force will cause it to be remade.'''
 
-# FIXME: Adding the background slows performance. There needs to be a
-# a way to do this faster. The centerOnPrintPage() seems to be the problem
-# GS tends to take longer than pdftk but when merging, pdftk cannot
-# maintain the individual sizes of two docs. One will always be stretched
-# or shrunk. GS over comes that, but at the cost of speed.
-
-# One way around this, for normal production work, not final rendering,
-# would be to ship the merge out to pdftk. However, the background page
-# would have to be the same size as the trim size. Otherwise, this will
-# not work. 
-
         # Do a quick check if the background needs to be remade
         # The background normally is not remade if one already exists.
         # If one is there, it can be remade in two ways, with a force
@@ -109,19 +97,7 @@ class ProjBackground (object) :
         # Then merge and save it
         bgFile = self.makeBgFileName(target)
         
-        
-##################################################
-        
-# If the bg and trim are the same size we might be able to remove the centerOnPrintPage() call
-
-# Set printerPageSizeCode to "" (nothing) to make this happen
-        
-        shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
-
-
-
-##################################################
-
+        shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
 
         # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
@@ -176,11 +152,11 @@ class ProjBackground (object) :
         # already working with a background file
         if bgFile == target :
             # If the target is a BG file all we need to do is merge it
-            self.mergePdfFilesPdftk(bgFile, self.convertSvgToPdf(svgFile))
+            self.tools.mergePdfFilesPdftk(bgFile, self.tools.convertSvgToPdfRsvg(svgFile))
         else :
             # If not a BG file, we need to be sure the target is the same
             # size as the print page to merge with pdftk
-            shutil.copy(self.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.convertSvgToPdf(svgFile)), bgFile)
+            shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.tools.convertSvgToPdfRsvg(svgFile)), bgFile)
 
         # Not returning a file name would mean it failed
         if os.path.exists(bgFile) :
@@ -209,7 +185,7 @@ class ProjBackground (object) :
 
     def createBlankBackground (self) :
         '''Create a blank background page according to the print page
-        size specified. If force is used, the page will be remade.'''
+        size specified.'''
         
         # Set the temp svg file name
         svgFile   = tempfile.NamedTemporaryFile().name
@@ -229,7 +205,7 @@ class ProjBackground (object) :
                 version="1.1" width = "''' + str(ppsWidth) + '''" height = "''' + str(ppsHeight)+ '''">
                 </svg>''')
 
-        shutil.copy(self.convertSvgToPdf(svgFile), self.local.backgroundFile)
+        shutil.copy(self.tools.convertSvgToPdfRsvg(svgFile), self.local.backgroundFile)
 
 
     def mergeWatermark (self) :
@@ -244,12 +220,10 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # Convert formula - mm to px
-        mmToPx = 72 / 25.4
         # Trim page width [px]
-        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
         (ppsWidth, ppsHeight) = self.printerPageSize()
 
@@ -269,7 +243,7 @@ class ProjBackground (object) :
                 </text></g></svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
-        results = self.mergePdfFilesPdftk(self.local.backgroundFile, self.convertSvgToPdf(svgFile))
+        results = self.tools.mergePdfFilesPdftk(self.local.backgroundFile, self.tools.convertSvgToPdfRsvg(svgFile))
         if os.path.isfile(results) :
             return True
 
@@ -281,12 +255,10 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # Convert formula - mm to px
-        mmToPx = 72 / 25.4
         # Trim page width [px]
-        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
@@ -314,7 +286,7 @@ class ProjBackground (object) :
             fbackgr.write( '''</svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
-        results = self.mergePdfFilesPdftk(self.local.backgroundFile, self.convertSvgToPdf(svgFile))
+        results = self.tools.mergePdfFilesPdftk(self.local.backgroundFile, self.tools.convertSvgToPdfRsvg(svgFile))
         if os.path.isfile(results) :
             return True
 
@@ -326,12 +298,10 @@ class ProjBackground (object) :
         svgFile             = tempfile.NamedTemporaryFile().name
 
         ## RENDERED PAGE DIMENSIONS (body)
-        # Convert formula - mm to px
-        mmToPx = 72 / 25.4
         # Trim page width [px]
-        trimWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
+        trimWidth = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
         # Trim page height [px]
-        trimHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
+        trimHeight = round(self.mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
         # Printer page size [px]
         pps = self.printerPageSize()
         ppsWidth = pps[0]
@@ -346,124 +316,7 @@ class ProjBackground (object) :
                 </svg>''')
 
         # Convert the temp svg to pdf and merge into backgroundFile
-        results = self.mergePdfFilesPdftk(self.local.backgroundFile, self.convertSvgToPdf(svgFile))
-        if os.path.isfile(results) :
-            return True
-
-
-    def mergeLines (self) :
-        '''Merge a lines component with the background file.'''
-
-        # Initialize the process
-        svgFile             = tempfile.NamedTemporaryFile().name
-
-        # PAGE DIMENSIONS
-        # The page dimensions extracted from layoutConfig are in [mm] and
-        # must be converted to pixels [px], the conversion factor for [mm]
-        # to [px] is 72/25.4 
-        mmToPx = 72 / 25.4
-        # page width [px]
-        paperPxWidth = round(mmToPx * float(self.layoutConfig['PageLayout']['pageWidth']),1)
-        # page height [px]
-        paperPxHeight = round(mmToPx * float(self.layoutConfig['PageLayout']['pageHeight']),1)
-        # bodyFontSize [px]
-        bodyFontSize = self.layoutConfig['TextElements']['bodyFontSize']
-        bodyFontPxSize = round(float(bodyFontSize) * 72/72.27,3)
-        # bodyTextLeading [px]
-        bodyTextLeading = self.layoutConfig['TextElements']['bodyTextLeading']
-        bodyTextPxLeading = round(float(bodyTextLeading) * 72/72.27,3)
-        # top margin [px]
-        topMargin = self.layoutConfig['PageLayout']['topMargin']
-        topPxMargin = round(mmToPx * float(topMargin),1)
-        # outside margin [px]
-        outsideMargin = self.layoutConfig['PageLayout']['outsideMargin']
-        outsidePxMargin = round(mmToPx * float(outsideMargin),1)
-        #inside margin [px]
-        insideMargin = self.layoutConfig['PageLayout']['insideMargin']
-        insidePxMargin = round(mmToPx * float(outsideMargin),1)
-        # bottom margin [px]
-        bottomMargin = self.layoutConfig['PageLayout']['bottomMargin']
-        bottomPxMargin = round(mmToPx * float(bottomMargin),1)
-        # width of the body text
-        textPxWidth = paperPxWidth - (outsidePxMargin + insidePxMargin)
-
-        # Create the svg file
-        with codecs.open(svgFile, 'wb') as fbackgr :            # open file for writing 
-                # starting lines of SVG xml
-            fbackgr.write( '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width = "''' + str(paperPxWidth)+ '''" height = "'''+str(paperPxHeight) + '''">
-                \n    <!--RECTANGLE OF MARGINS-->\n''')
-            fbackgr.write( '''<rect x = "''' + str(outsidePxMargin) + '''" y= "''' + str(topPxMargin) + '''" height = "''' + str(paperPxHeight - topPxMargin - bottomPxMargin) + '''" width = "''' + str(textPxWidth) + '''" style = "fill:none;fill-opacity:1;stroke:#ffc800;stroke-opacity:1;stroke-width:.2"/>
-                \n    <!--START OF LINEGRID-->\n''')
-            fbackgr.write( '''<path d= "m ''' + str(outsidePxMargin * 0.75-1) + "," + str(topPxMargin + bodyFontPxSize) + " " + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
-                # filling the space between the top line and bottom margin, starting at distance
-                # counter num = 0 up to the but not including the total of num x leading
-                # equals the distance between top and bottom margin
-            num = 0
-            while (num < int(round(paperPxHeight - bottomPxMargin - topPxMargin)/bodyTextPxLeading)):
-                    # lines are drawn in zigzag pattern: RTL when num is even and LTR when odd
-                if num%2 == 0: 
-                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " -" + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
-                else:
-                    fbackgr.write( ''' m 0, ''' + str(bodyTextPxLeading) + " " + str(textPxWidth + outsidePxMargin * 0.25)+ ''',0''')
-                num = num +1
-                # draw all lines with following style 
-            fbackgr.write( '''" style="stroke-width:0.2px;stroke:#ffc800;stroke-opacity:1"/>
-                \n    <!--LINE NUMBERS-->\n''')
-                # add line number '1' to top line just left of margin
-            fbackgr.write( '''<text x="''' + str(outsidePxMargin * 0.75-2) + '''" y="''' + str(topPxMargin + bodyFontPxSize-3) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#760076"> 1''')
-                # add line numbers to all lines down to bottom margin, starting with line number
-                # counter linecount = 2, the distance counter runs from '0' till one short of 
-                # the quotient (distance between top and bottom margin)/bodyTextPxLeading
-            num = 0         # line counter
-            linenumber = 2   # line number
-            while (num < int(round(paperPxHeight - bottomPxMargin - topPxMargin)/bodyTextPxLeading)):
-                fbackgr.write( '''<tspan x="''' + str(outsidePxMargin * 0.75-2) + '''" dy="''' + str(bodyTextPxLeading) + '''">''' + str(linenumber) + '''</tspan>''') 
-                linenumber = linenumber +1  
-                num = num +1
-            fbackgr.write('''</text> 
-                \n  <!--LINEGRID CAPTION-->
-                <text  x="36" y="''' + str(paperPxHeight - bottomPxMargin+10) + '''" style="font-family: Charis SIL;font-style:italic;font-size:7;fill:#ffc800">page size: ''' + str(int(paperPxWidth/72*25.4+.5)) + ''' x ''' + str(int(paperPxHeight/72*25.4+.5)) + ''' mm ; font size: ''' + str(bodyFontSize) + ''' pt; leading: ''' + str(bodyTextLeading) + ''' pt</text>
-                \n    <!--PURPLE LINES TOP AND BOTTOM MARGINS--> 
-                <path d="M ''' + str(outsidePxMargin) + "," + str(topPxMargin) + " " + str(textPxWidth + outsidePxMargin) + "," + str(topPxMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
-                <path d="M ''' + str(outsidePxMargin) + "," + str(paperPxHeight - bottomPxMargin) + " " + str(textPxWidth + outsidePxMargin) + "," + str(paperPxHeight - bottomPxMargin) + '''" style="fill:#ffffff;fill-opacity:1;stroke-width:0.4px;stroke:#760076;stroke-opacity:1"/>
-                </svg>''')
-    
-        # Convert the lines background component to PDF
-        linesPdf = self.convertSvgToPdf(svgFile)
-#        shutil.copy(linesPdf, os.path.join(self.local.projIllustrationFolder, 'linesPdf.pdf'))
-        shutil.copy(linesPdf, self.local.backgroundFile)
-
-#        # Center linesPdf on the print page (this keeps the size right)
-#        linesBackground = self.centerOnPrintPage(linesPdf)
-#        shutil.copy(linesBackground, os.path.join(self.local.projIllustrationFolder, 'linesBackground.pdf'))
-
-################# REASON FOR CHANGING LINESBACKGROUND ###############################################
-                # In RapumaThere there are two categories of background:
-                # 1. Watermark, cropmarks, pagebox and docinfo are added to the finished (half) product
-                #    for the benefit of the customer.
-                # 2. Linesbackground (aka lines or linegrid) is used after each rendering of components
-                #    for the benefit of the typesetter.
-                # At present the are added with the centerOnPrintPage function that is centerin the 
-                # PDF file on the printerPageSize page with GhostScript. It is the only way to retain
-                # meta data combining PDF files, which is important for further processing of the 
-                # finished product. The centering is a somewhat time consuming process compared 
-                # with Pdftk. This is no problem for the first category.
-                # For the linesbackground is would be nice to have the almost simultaneous adding to 
-                # the rendered page of Pdftk as it speeds up the process of balancing columns and 
-                # adjusting pages. Unlike the first category the linegrid does not need to be sent 
-                # to the customer. 
-                # Therefore the linesbackground should be taken out of the background merging process 
-                # and made mutual exclusive with the first category backgrounds in that when this 
-                # background is choosen the other cannot be used and vice versa. 
-
-                # FIXME: MORE WORK needs to be done to make the linegrid feature mutual exclusive
-                # with watermark, cropmarks, pagebox and docinfo background. See also comment on
-                # line 80
-
-
-        # Merge linesPdf with existing background
-        results = self.mergePdfFilesPdftk(self.local.backgroundFile, linesPdf)
-        # Test and return if good
+        results = self.tools.mergePdfFilesPdftk(self.local.backgroundFile, self.tools.convertSvgToPdfRsvg(svgFile))
         if os.path.isfile(results) :
             return True
 
@@ -478,30 +331,6 @@ class ProjBackground (object) :
         # Just in case this is the second pass
         name    = name.replace('-bg', '')
         return name + '-bg.' + ext
-
-
-    def buildSvg2PdfCommand (self, svgFile, pdfFile) :
-        '''Convert a command line from the config that has keys in it for
-        input and output files. The commands in the config should look like
-        this coming in:
-            svgPdfConverter = convert,svgFile,pdfFile
-            svgPdfConverter = rsvg-convert,-f,pdf,-o,pdfFile,svgFile
-            svgPdfConverter = inkscape,-f,svgFile,-A,pdfFile
-        This will insert the right value for svgFile and pdfFile.'''
-
-        cmd = list()
-        for c in self.svgPdfConverter :
-            if c == 'svgFile' :
-                cmd.append(svgFile)
-            elif c == 'pdfFile' :
-                cmd.append(pdfFile)
-            else :
-                cmd.append(c)
-
-        if self.debugMode :
-            self.tools.terminal('Debug Mode On: \nbuildSvg2PdfCommand() command: ' + str(cmd))
-
-        return cmd
 
 
     def centerOnPrintPage (self, contents) :
@@ -543,44 +372,6 @@ class ProjBackground (object) :
         # Return the temp file name for further processing
 
 
-    def mergePdfFilesPdftk (self, front, back) :
-        '''Merge two PDF files together using pdftk.'''
-
-        tmpFile = tempfile.NamedTemporaryFile().name
-        cmd = ['pdftk', front, 'background', back, 'output', tmpFile]
-
-        if self.debugMode :
-            self.tools.terminal('Debug Mode On: \mergePdfFilesPdftk() command: ' + str(cmd))
-
-        # Run the process
-        try:
-            subprocess.call(cmd) 
-            shutil.copy(tmpFile, front)
-            # Return the name of the primary PDF
-            return front
-        except Exception as e :
-            self.log.writeToLog(self.errorCodes['1280'], [str(cmd), str(e)])
-
-
-    def convertSvgToPdf (self, svgFile) :
-        '''Convert/render an SVG file to produce a PDF file. Return
-        a temp file name to the caller.'''
-
-        pdfFile = tempfile.NamedTemporaryFile().name
-
-        cmd = self.buildSvg2PdfCommand(svgFile, pdfFile)
-
-        if self.debugMode :
-            self.tools.terminal('Debug Mode On: \convertSvgToPdf() command: ' + str(cmd))
-
-        # Simple try statement seems to work best for this
-        try:
-            subprocess.call(cmd) 
-            return pdfFile
-        except Exception as e :
-            self.log.writeToLog(self.errorCodes['1290'], [pdfFile,str(e),str(cmd)])
-
-
     def printerPageSize (self) :
         '''Return the width and height of the printer page size in
         points. Only US Letter and A4 are supported. If not specified
@@ -601,8 +392,7 @@ class ProjBackground (object) :
             return float(612), float(792)
         else :
             # Just default to the page trim size (assumed mm coming in) factor mmToPx = 72 / 25.4
-            mmToPx = 72 / 25.4
-            return float(int(self.layoutConfig['PageLayout']['pageWidth']) * mmToPx), float(int(self.layoutConfig['PageLayout']['pageHeight']) * mmToPx)
+            return float(int(self.layoutConfig['PageLayout']['pageWidth']) * self.mmToPx), float(int(self.layoutConfig['PageLayout']['pageHeight']) * self.mmToPx)
 
     
     def getPageOffset (self) :
@@ -616,9 +406,8 @@ class ProjBackground (object) :
         # Get the printer page size
         printerPageSizeCode = self.layoutConfig['PageLayout']['printerPageSizeCode'].lower()
         # Get the page trim size (assuming mm input)factor mmToPx = 72 / 25.4
-        mmToPx = 72 / 25.4
-        trimWidth = int(self.layoutConfig['PageLayout']['pageWidth']) * mmToPx
-        trimHeight = int(self.layoutConfig['PageLayout']['pageHeight']) * mmToPx
+        trimWidth = int(self.layoutConfig['PageLayout']['pageWidth']) * self.mmToPx
+        trimHeight = int(self.layoutConfig['PageLayout']['pageHeight']) * self.mmToPx
 
         # The trim size of the content page can never be bigger than
         # the printer page size. If so, the offset is 0

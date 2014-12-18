@@ -18,12 +18,14 @@
 
 import os, shutil, re, codecs, subprocess
 from configobj                          import ConfigObj
+from pyPdf                              import PdfFileReader
 
 # Load the local classes
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.project.proj_config         import Config
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
@@ -63,6 +65,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pg_back                = ProjBackground(self.pid, self.gid)
+        self.fmt_diagnose           = ProjDiagnose(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -90,6 +93,7 @@ class Xetex (Manager) :
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
+        self.useDiagnostic          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic'])
         self.useDocInfo             = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
 
         # Get settings for this component
@@ -705,8 +709,17 @@ class Xetex (Manager) :
             # we will try to report back something useful
             self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
+        # Overlay transparency of format dignostic components, if called for
+        # This will go over the top of the just rendered PDF file.
+        # It is assumed that diagnostics would never be included in an
+        # actual publication so by overlaying them now, the "clean"
+        # file will be distroyed, but that isn't critical at this point.
+        if self.useDiagnostic :
+            self.fmt_diagnose.addTransparency(self.local.gidPdfFile)
+
         # Collect the page count and record in group (Write out at the end of the opp.)
-        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+#        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+        self.projectConfig['Groups'][gid]['totalPages'] = str(PdfFileReader(open(self.local.gidPdfFile)).getNumPages())
         # Write out any changes made to the project.conf file that happened during this opp.
         self.tools.writeConfFile(self.projectConfig)
 

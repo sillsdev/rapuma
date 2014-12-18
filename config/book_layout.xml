@@ -150,6 +150,27 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Use Diagnostic</name>
+            <description>If this is set to true, diagnostic components (as per the Diagnostic components list) will be superimposed over the page contents to enable checking for various problems with the layout of the page contents. This is done with a similar process as adding page a background but is not the same thing. Default = False</description>
+            <key>useDiagnostic</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Regenerate Transparency</name>
+            <description>If this is set to true, any exsisting transparency (diagnostic) file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
+            <key>regenerateTransparency</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Diagnostic Components</name>
+            <description>Diagnostic components to be superimposed on the contents of a page used to diagnose format issues. Currently supported components are, leading. Default = leading</description>
+            <key>diagnosticComponents</key>
+            <type>list</type>
+            <value>leading</value>
+        </setting>
+        <setting>
             <name>Use Background</name>
             <description>If this is set to true, a background (or watermark) will be merged with the typeset page. Multiple backgrounds can be defined in the backgroundComponents field. Default = False</description>
             <key>useBackground</key>
@@ -158,10 +179,10 @@ Todo:
         </setting>
         <setting>
             <name>Regenerate Background</name>
-            <description>If this is set to true, any exsisting background file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = True</description>
+            <description>If this is set to true, any exsisting background file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
             <key>regenerateBackground</key>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
         <setting>
             <name>Background Components</name>

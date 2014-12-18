@@ -501,9 +501,12 @@ def userArguments (args) :
             ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, False)
+        # Create a new or refresh an existing backgrond.
         elif cmd == 'background' :
-            # Create a new or refresh an existing backgrond.
             ProjBackground(pid, gid).createBackground()
+        # Create a new or refresh an existing diagnostic components.
+        elif cmd == 'diagnostic' :
+            ProjDiagnose(pid, gid).createDiagnostic()
         else :
             cmdError(cmd, cmdType)
 
@@ -644,7 +647,7 @@ if __name__ == '__main__' :
     mediaTypes              = ['book']
     # Group
     grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'background', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
+    grCommands              = ['add', 'background', 'diagnostic', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
     componentTypes          = ['usfm', 'map', 'toc']
     compareTests            = ['backup', 'source']
     # Packages
