@@ -709,14 +709,6 @@ class Xetex (Manager) :
             # we will try to report back something useful
             self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
-        # Overlay transparency of format dignostic components, if called for
-        # This will go over the top of the just rendered PDF file.
-        # It is assumed that diagnostics would never be included in an
-        # actual publication so by overlaying them now, the "clean"
-        # file will be distroyed, but that isn't critical at this point.
-        if self.useDiagnostic :
-            self.fmt_diagnose.addTransparency(self.local.gidPdfFile)
-
         # Collect the page count and record in group (Write out at the end of the opp.)
 #        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
         self.projectConfig['Groups'][gid]['totalPages'] = str(PdfFileReader(open(self.local.gidPdfFile)).getNumPages())
@@ -762,71 +754,67 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0720'], [saveFileName])
 
-#        import pdb; pdb.set_trace()
-
         # Once we know the file is successfully generated, add a background if defined
-        bgFile = ''
+        viewFile = ''
         if self.useBackground :
             if saveFile :
-                bgFile = self.pg_back.addBackground(saveFile)
+                viewFile = self.pg_back.addBackground(saveFile)
             else :
-                bgFile = self.pg_back.addBackground(self.local.gidPdfFile)
-        # NOTE: We could add a "force" to addBackground() the background
-        # would be regenerated, but we can't get a force command
-        # resonably at this point. Therefore, the "regenerateBackground"
-        # setting should be set to True.
-
+                viewFile = self.pg_back.addBackground(self.local.gidPdfFile)
+                
         # Add a timestamp and doc info if requested in addition to background
         if self.useDocInfo :
             if saveFile :
-                if os.path.isfile(bgFile) :
-                    bgFile = self.pg_back.addDocInfo(bgFile)
+                if os.path.isfile(viewFile) :
+                    viewFile = self.pg_back.addDocInfo(saveFile)
                 else :
-                    bgFile = self.pg_back.addDocInfo(saveFile)
+                    viewFile = self.pg_back.addDocInfo(saveFile)
             else :
-                if os.path.isfile(bgFile) :
-                    bgFile = self.pg_back.addDocInfo(bgFile)
+                if os.path.isfile(viewFile) :
+                    viewFile = self.pg_back.addDocInfo(viewFile)
                 else :
-                    bgFile = self.pg_back.addDocInfo(self.local.gidPdfFile)
+                    viewFile = self.pg_back.addDocInfo(self.local.gidPdfFile)
+
+        # Add a diagnostic layer to the rendered output. Normally this is
+        # not used with a normal background layer
+        if self.useDiagnostic :
+            if saveFile :
+                viewFile = self.fmt_diagnose.addTransparency(saveFile)
+            else :
+                viewFile = self.fmt_diagnose.addTransparency(self.local.gidPdfFile)
 
         # To avoid confusion with file names, if this is a saved file,
         # and it has a background, we need to remove the original, non-
         # background file (remembering originals are kept in the group
-        # Component folder), then rename the -bg version to whatever
+        # Component folder), then rename the -view version to whatever
         # the saved name should be
         if save or override :
-            if os.path.isfile(saveFile) and os.path.isfile(bgFile) :
+            if os.path.isfile(saveFile) and os.path.isfile(viewFile) :
                 # First remove
                 os.remove(saveFile)
                 # Next rename
-                os.rename(bgFile, saveFile)
+                os.rename(viewFile, saveFile)
 
+            
+        #print ':::', saveFile, ';;;', viewFile
 
-
-
-
+        #import pdb; pdb.set_trace()
 
         ##### Viewing #####
-        viewFile = ''
         # First get the right file name to view
         if saveFile :
             # If there was a saveFile, that will be the viewFile
             viewFile = saveFile
         else :
-            # Problem here is that there could be a -bg version
+            # Problem here is that there could be a -view version
             # of the gidPdfFile if this was a view-only operation
-            # but if the -bg version was created after the original
+            # but if the -view version was created after the original
             # gidPdfFile, we know that's the one we want to see
-            if os.path.isfile(bgFile) :
-                if self.tools.isOlder(self.local.gidPdfFile, bgFile) :
-                    viewFile = bgFile
+            if os.path.isfile(viewFile) :
+                if not self.tools.isOlder(self.local.gidPdfFile, viewFile) :
+                    viewFile = self.local.gidPdfFile
             else :
                 viewFile = self.local.gidPdfFile
-
-
-
-
-
 
         # Now view it
         if os.path.isfile(viewFile) :

@@ -135,6 +135,22 @@ class Tools (object) :
             self.terminal('FYI: Project [' + source + '] not found. Cannot backup.')
 
 
+    def alterFileName (self, orgName, alt) :
+        '''Alter the file name for various purposes.
+        This assumes the file only has a single extention.
+        If that's not the case we're hosed.'''
+
+        # If we send a temp file without an extention, we have a problem
+        if orgName.find('.') > -1 :
+            name    = orgName.split('.')[0]
+            ext     = orgName.split('.')[1]
+            # Just in case this is the second pass
+            name    = name.replace('-' + alt, '')
+            return name + '-' + alt + '.' + ext
+        else :
+            return orgName + '-' + alt
+
+
     def incrementFileName (self, fileName) :
         '''If a file of the same name already exists, increment the
         name by one by adding (1) to the end of the name before the

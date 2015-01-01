@@ -72,6 +72,38 @@ class ProjBackground (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
+    def turnOnBackground (self) :
+        '''Change the layout config settings to turn on the background.'''
+
+        if not self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground']) :
+            self.layoutConfig['DocumentFeatures']['useBackground'] = True
+            self.tools.writeConfFile(self.layoutConfig)
+
+
+    def turnOffBackground (self) :
+        '''Change the layout config settings to turn off the background.'''
+
+        if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground']) :
+            self.layoutConfig['DocumentFeatures']['useBackground'] = False
+            self.tools.writeConfFile(self.layoutConfig)
+
+
+    def turnOnDocInfo (self) :
+        '''Change the layout config settings to turn on the doc info in the background.'''
+
+        if not self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo']) :
+            self.layoutConfig['DocumentFeatures']['useDocInfo'] = True
+            self.tools.writeConfFile(self.layoutConfig)
+
+
+    def turnOffDocInfo (self) :
+        '''Change the layout config settings to turn off the doc info in the background.'''
+
+        if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo']) :
+            self.layoutConfig['DocumentFeatures']['useDocInfo'] = False
+            self.tools.writeConfFile(self.layoutConfig)
+
+
     def addBackground (self, target, force = False) :
         '''Add a background (watermark) to a rendered PDF file. This will
         figure out what the background is to be composed of and create
@@ -95,13 +127,13 @@ class ProjBackground (object) :
 
         # Create a special name for the file with the background
         # Then merge and save it
-        bgFile = self.makeBgFileName(target)
+        viewFile = self.tools.alterFileName(target, 'view')
         
-        shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), bgFile)
+        shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.local.backgroundFile), viewFile)
 
         # Not returning a file name would mean it failed
-        if os.path.exists(bgFile) :
-            return bgFile
+        if os.path.exists(viewFile) :
+            return viewFile
 
 
     def addDocInfo (self, target) :
@@ -147,27 +179,27 @@ class ProjBackground (object) :
         self.log.writeToLog(self.errorCodes['1305'])
 
         # Create a special name for the file with the background
-        bgFile = self.makeBgFileName(target)
+        viewFile = self.tools.alterFileName(target, 'view')
         # Compare the new file name with the target to see if we are
         # already working with a background file
-        if bgFile == target :
+        if viewFile == target :
             # If the target is a BG file all we need to do is merge it
-            self.tools.mergePdfFilesPdftk(bgFile, self.tools.convertSvgToPdfRsvg(svgFile))
+            self.tools.mergePdfFilesPdftk(viewFile, self.tools.convertSvgToPdfRsvg(svgFile))
         else :
             # If not a BG file, we need to be sure the target is the same
             # size as the print page to merge with pdftk
-            shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.tools.convertSvgToPdfRsvg(svgFile)), bgFile)
+            shutil.copy(self.tools.mergePdfFilesPdftk(self.centerOnPrintPage(target), self.tools.convertSvgToPdfRsvg(svgFile)), viewFile)
 
         # Not returning a file name would mean it failed
-        if os.path.exists(bgFile) :
-            return bgFile
+        if os.path.exists(viewFile) :
+            return viewFile
 
 
     ##### Background Creation Functions #####
 
     def createBackground (self) :
         '''Create a background file. This will overwrite any existing
-        background file and will add each recognoized background type
+        background file and will add each recognized background type
         found in the bacgroundComponents config setting.'''
 
         self.createBlankBackground()
@@ -321,16 +353,17 @@ class ProjBackground (object) :
             return True
 
 
-    def makeBgFileName (self, orgName) :
-        '''Alter the file name to reflect the fact it has a background
-        added to it. This assumes the file only has a single extention.
-        If that's not the case we're hosed.'''
+# Depricated
+    #def makeBgFileName (self, orgName) :
+        #'''Alter the file name to reflect the fact it has a background
+        #added to it. This assumes the file only has a single extention.
+        #If that's not the case we're hosed.'''
 
-        name    = orgName.split('.')[0]
-        ext     = orgName.split('.')[1]
-        # Just in case this is the second pass
-        name    = name.replace('-bg', '')
-        return name + '-bg.' + ext
+        #name    = orgName.split('.')[0]
+        #ext     = orgName.split('.')[1]
+        ## Just in case this is the second pass
+        #name    = name.replace('-bg', '')
+        #return name + '-bg.' + ext
 
 
     def centerOnPrintPage (self, contents) :

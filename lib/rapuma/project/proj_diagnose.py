@@ -69,6 +69,22 @@ class ProjDiagnose (object) :
 ###############################################################################
 
 
+    def turnOnDiagnostic (self) :
+        '''Change the layout config settings to turn on the diagnostic layer.'''
+
+        if not self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic']) :
+            self.layoutConfig['DocumentFeatures']['useDiagnostic'] = True
+            self.tools.writeConfFile(self.layoutConfig)
+
+
+    def turnOffDiagnostic (self) :
+        '''Change the layout config settings to turn off the diagnostic layer.'''
+
+        if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic']) :
+            self.layoutConfig['DocumentFeatures']['useDiagnostic'] = False
+            self.tools.writeConfFile(self.layoutConfig)
+
+
     def addTransparency (self, target, force = False) :
         '''Add a transparent layer to a rendered PDF file. This will
         add in diagnosing format issues. Using force will cause any
@@ -93,8 +109,17 @@ class ProjDiagnose (object) :
         shutil.copy(target, tmpTarget)
         # Overlay the transparency diagnostic file over the tmpTarget
         self.tools.mergePdfFilesPdftk(tmpTarget, self.local.diagnosticFile)
+
+        # Create a special name for the file with the background
+        # Then merge and save it
+        viewFile = self.tools.alterFileName(target, 'view')
+
         # Copy the results back to the target (should be done now)
-        shutil.copy(tmpTarget, target)
+        shutil.copy(tmpTarget, viewFile)
+
+        # Not returning a file name would mean it failed
+        if os.path.exists(viewFile) :
+            return viewFile
 
 
     def createDiagnostic (self) :
