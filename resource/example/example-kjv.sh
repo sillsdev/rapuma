@@ -11,6 +11,7 @@
 # NOTE: This script is desined to work with Rapuma version v0.7.011 or
 # higher and on the Linux operating system, Ubuntu 12.04 or higher.
 
+
 ## SETUP
 # First, setup the test environment. Rapuma publishing systems have
 # a specified project folder. Create a folder there that will contain
@@ -26,6 +27,7 @@
 # Extract the contents which is in the KJV folder into the my_source
 # folder. Once this is done you should be ready to work through the rest
 # of this example script.
+
 
 ## ADDING A PROJECT
 # This next command creates a new project in the Rapuma project folder. 
@@ -86,11 +88,12 @@ rapuma project ENG-LATN-KJVTEST project add
 # This group (GOSPEL) will contain the component books, Matthew, Mark,
 # Luke and John and nothing else.
 #
-# For this example we'll create the full NT group with this command:
+# For this example we'll create a full Bible by adding these two groups
+# to the project with these commands:
 
 rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
+rapuma group ENG-LATN-KJVTEST OT group add --source_path ~/Publishing/my_source/KJV
 
-##### NOTE: Need more explanation added here #####
 
 ## ADDING DOCUMENT FEATURES
 # There are a number of features that can be added to a document to help
@@ -133,28 +136,12 @@ rapuma settings ENG-LATN-KJVTEST usfmTex TeXBehavior vFuzz 2.5pt
 rapuma settings ENG-LATN-KJVTEST project Managers/usfm_Xetex runExternalXetex True 
 
 # For this part of example, we are going to just render one component
-# out of the entire NT group, the Book of James. To do this, we would
-# use this command:
+# from the NT group, the Book of James with this command:
 
 rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
 
-# The background, by default, is turned off. It could be turned on with
-# this command:
-
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
-
-# Now we will rerun the same command:
-
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
-
-# You see that it has PROOF watermark background and the page is set on
-# an A4 page. This is to make printing for proofing easier. However,
-# the above command is for "view-only". To save the file add the --force
-# command. This will save the newly produced PDF file in the Deliverable
-# folder which will be added when the file is created. The Deliverable
-# is where Rapuma stores specified rendered files and should never do
-# any "clean-up" in that folder. To save the Book of James file you
-# would run this command:
+# To save the Book of James file you would add the --force switch to
+# the command:
 
 rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force
 
@@ -184,12 +171,7 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override 
 
 
 ## SETTING UP BACKGROUND OUTPUT
-# There are several backgrounds that can be added to the document output.
-# To turn on the background, use this command:
-
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
-
-# Rapuma supports 3 different types of backgrounds, cropmarks, watermark
+# Rapuma supports 3 different types of backgrounds: cropmarks, watermark
 # and pagebox. The cropmarks show the trim size of the paper. The lines
 # background will show where the text aligns to help with design and
 # the paging process. The watermark will put a message in gray in the
@@ -197,35 +179,52 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground True
 # publication. Finally, the pagebox background will place a box around
 # the edge of the page to mark the trim size of the page.
 #
-# One of the four backgrounds listed here can be added to the rendered
+# One of the three backgrounds listed here can be added to the rendered
 # with this command:
 
 rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents "watermark"
-
-# The watermark text can be changed with this command:
-
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
 
 # There is a bug in Rapuma's settings change command that doesn't allow
 # adding more than one element to a list. So, for settings like backgroundComponents
 # this causes a problem if the user wants to have more than one background
 # element. In cases like these, the work-around is to manually edit the
-# configuration file.
+# configuration file with a text editor. In this case, you would open
+# the layout.conf file and find this line:
 
-# However, please note that if a change is made to the background, the
-# existing background file needs to be deleted so that the next time
-# Rapuma is run it will recreate the file. If the existing file is not
-# removed, the new one will not be created and you will not see the
-# results of the changes just made. The background file is named
-# background.pdf and is found in the Illustration folder.
+# backgroundComponents = watermark
+
+# and change it to:
+
+# backgroundComponents = watermark, cropmarks
+
+# This technique can be used with any setting but should be used with
+# caution. In this case, once cropmarks are added, the output will
+# include both types of background types in the same rendering.
+
+# The watermark text itself can be changed with this command:
+
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
+
+# If any changes are made to the background settings, the background file
+# needs to be remade so the next time Rapuma is run the results will be
+# as expected. To recreate the background file use this command:
+
+rapuma project ENG-LATN-KJVTEST project update --update_type background
+
+# To output the background when you render, add --background (or -b) to
+# the render command like this:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list 1ti --background
 
 # When using backgrounds you can add information to the header and footer
-# of the document. To turn this feature on, use this command:
+# of the background. To use this feature add the --doc_info command to
+# your command like this:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useDocInfo True
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list 2ti --background --doc_info
 
 # By default no text is assigned. To add some information text a command
-# like this could be used: 
+# like this could be used:
+
 rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info text"
 
 # Rapuma has some aids to help with formating new publications. They are
@@ -233,17 +232,39 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info t
 # To check the leading of the body text the "leading" diagnostic aid can
 # be added by using this command:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useDiagnostic True
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list heb --diagnostic
 
-# Now we'll turn off the background and document info, then render a
-# different book.
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useBackground False
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures useDocInfo False
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jhn
-
-# change by command or edit layout.conf file
-
-# *** Add feature to facilitate a checkbox to regenerate background on run "regenerateBackground = True" (default is True)
+# Note that you cannot use --diagnostic and --background (or --doc_info)
+# at the same time.
 
 
+## USING THE BIND COMMAND
+# The composition process in Rapuma is a render, adjust repeat cycle.
+# Once every component (book) in all the groups has gone through the
+# composition process, binding is the next process to do. Before the
+# bind command can be used, the groups should be rendered all together
+# with these commands:
 
+rapuma group ENG-LATN-KJVTEST OT group render
+rapuma group ENG-LATN-KJVTEST NT group render
+
+# As we get closer to binding, page numbers become important. After the
+# groups have been rendered the first time, you will need to adjust the
+# starting page number on the NT group (as it will follow OT group).
+# This command (adjust if necessary) will do it:
+
+rapuma settings ENG-LATN-KJVTEST project Groups/NT startPageNumber 1079
+
+# The bind process merges the rendered group PDF files into one. However,
+# Rapuma needs to know what order the files need to be merged together.
+# In this case the setting commands would be:
+
+rapuma settings ENG-LATN-KJVTEST project Groups/OT bindingOrder 1
+rapuma settings ENG-LATN-KJVTEST project Groups/NT bindingOrder 2
+
+# With these settings made Binding should now be possible. Use a command
+# like this:
+
+rapuma project ENG-LATN-KJVTEST project bind
+
+##### Next document variations on the bind command, saving, etc. #####
