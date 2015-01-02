@@ -404,7 +404,7 @@ def userArguments (args) :
         cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
-        force       = args.force    # Switch/force actions
+        save        = args.save    # For saving a rendered group/component
         source_path = []            # A path to files to use
         source_list = []            # Gen: A list of files w/paths
         compare_type = ''           # For compare function, the type
@@ -548,7 +548,7 @@ def userArguments (args) :
                 ProjBackground(pid).turnOnBackground()
                 ProjBackground(pid).turnOnDocInfo()
                 # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, force)
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
                 # Turn off background
                 ProjBackground(pid).turnOffDocInfo()
                 ProjBackground(pid).turnOffBackground()
@@ -558,7 +558,7 @@ def userArguments (args) :
                 ProjBackground(pid).turnOffDocInfo()
                 ProjDiagnose(pid).turnOffDiagnostic()
                 # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, force)
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
                 # Turn off background
                 ProjBackground(pid).turnOffBackground()
             elif args.doc_info :
@@ -567,7 +567,7 @@ def userArguments (args) :
                 ProjDiagnose(pid).turnOffDiagnostic()
                 ProjBackground(pid).turnOffBackground()
                 # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, force)
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
                 # Turn off doc info
                 ProjBackground(pid).turnOffDocInfo()
             elif args.diagnostic :
@@ -576,11 +576,11 @@ def userArguments (args) :
                 ProjBackground(pid).turnOffBackground()
                 ProjBackground(pid).turnOffDocInfo()
                 # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, force)
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
                 # Turn off diagnostic
                 ProjDiagnose(pid).turnOffDiagnostic()
             else :
-                Project(pid, gid).renderGroup(cid_list, pages, override, force)
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
         elif cmd == 'lock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
@@ -782,7 +782,7 @@ if __name__ == '__main__' :
     groupCommand.add_argument('-t', '--component_type', choices=componentType, help='The group component type is needed for creating a new group.')
     groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
-    groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
+    groupCommand.add_argument('-v', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
     groupCommand.add_argument('-c', '--compare_type', choices=compareTest, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')

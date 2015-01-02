@@ -179,27 +179,13 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override 
 # publication. Finally, the pagebox background will place a box around
 # the edge of the page to mark the trim size of the page.
 #
-# One of the three backgrounds listed here can be added to the rendered
+# Two of the three backgrounds listed here can be added to the rendered
 # with this command:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents "watermark"
+rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents watermark,cropmarks
 
-# There is a bug in Rapuma's settings change command that doesn't allow
-# adding more than one element to a list. So, for settings like backgroundComponents
-# this causes a problem if the user wants to have more than one background
-# element. In cases like these, the work-around is to manually edit the
-# configuration file with a text editor. In this case, you would open
-# the layout.conf file and find this line:
-
-# backgroundComponents = watermark
-
-# and change it to:
-
-# backgroundComponents = watermark, cropmarks
-
-# This technique can be used with any setting but should be used with
-# caution. In this case, once cropmarks are added, the output will
-# include both types of background types in the same rendering.
+# Note that the background list has no spaces in it. This is necessary
+# because we are using the CLI for transmitting the command.
 
 # The watermark text itself can be changed with this command:
 
@@ -234,7 +220,7 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info t
 
 rapuma group ENG-LATN-KJVTEST NT group render --cid_list heb --diagnostic
 
-# Note that you cannot use --diagnostic and --background (or --doc_info)
+# Note that you cannot use --diagnostic and --background (and/or --doc_info)
 # at the same time.
 
 
