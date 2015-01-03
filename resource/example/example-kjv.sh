@@ -140,10 +140,10 @@ rapuma settings ENG-LATN-KJVTEST project Managers/usfm_Xetex runExternalXetex Tr
 
 rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
 
-# To save the Book of James file you would add the --force switch to
+# To save the Book of James file you would add the --save switch to
 # the command:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --save
 
 # Now you will note that a folder has been created called Deliverable
 # and in is a file named: ENG-LATN-KJVTEST_NT_060-jas_20140812.pdf
@@ -157,17 +157,17 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force
 # For example, this command, like above, would render James, name the
 # file James.pdf and put it in the root of the project and view it:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --save --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf
 
 # [Note that the path needs to reflect your specific system.]
 # One other render feature that is worth noting is Rapuma ability to
 # just produce a document with specific pages. For this we would add the
 # --pages command like this:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --force --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf --pages 2-3
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jhn --save --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf --pages 15-20
 
-# If you run that command you will see pages 2 and 3 from the Book of
-# James found in the root of your example project.
+# If you run that command you will see pages 15 through 20 from the
+# Gospel of John found in the root of your example project.
 
 
 ## SETTING UP BACKGROUND OUTPUT
@@ -187,7 +187,8 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents wa
 # Note that the background list has no spaces in it. This is necessary
 # because we are using the CLI for transmitting the command.
 
-# The watermark text itself can be changed with this command:
+# The watermark text default is DRAFT. It can be changed with this
+# command:
 
 rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
 
@@ -220,26 +221,33 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info t
 
 rapuma group ENG-LATN-KJVTEST NT group render --cid_list heb --diagnostic
 
-# Note that you cannot use --diagnostic and --background (and/or --doc_info)
-# at the same time.
+# Note that you cannot use --background (and/or --doc_info) with
+# --diagnostic at the same time. That will cause an error
 
 
 ## USING THE BIND COMMAND
 # The composition process in Rapuma is a render, adjust repeat cycle.
 # Once every component (book) in all the groups has gone through the
-# composition process, binding is the next process to do. Before the
-# bind command can be used, the groups should be rendered all together
-# with these commands:
+# composition process, binding is the next process. Before the bind
+# command can be used, the groups should be rendered all together with
+# these commands:
 
 rapuma group ENG-LATN-KJVTEST OT group render
 rapuma group ENG-LATN-KJVTEST NT group render
 
-# As we get closer to binding, page numbers become important. After the
-# groups have been rendered the first time, you will need to adjust the
-# starting page number on the NT group (as it will follow OT group).
-# This command (adjust if necessary) will do it:
+# After that is run, if you look at the page number at the begining of
+# Matthew in the NT group, you will notice that it starts with number 1.
+# As we move into the binding process, page numbers become important.
+# After the groups have been rendered the first time, you will need to
+# adjust the starting page number on the NT group (as it will follow OT
+# group). This command (adjust the pg. no. if necessary) will do it:
 
 rapuma settings ENG-LATN-KJVTEST project Groups/NT startPageNumber 1079
+
+# Now rerun the NT group to adjust the page numbers. There is no need
+# to rerun the OT group.
+
+rapuma group ENG-LATN-KJVTEST NT group render
 
 # The bind process merges the rendered group PDF files into one. However,
 # Rapuma needs to know what order the files need to be merged together.
@@ -249,8 +257,17 @@ rapuma settings ENG-LATN-KJVTEST project Groups/OT bindingOrder 1
 rapuma settings ENG-LATN-KJVTEST project Groups/NT bindingOrder 2
 
 # With these settings made Binding should now be possible. Use a command
-# like this:
+# like this to preform a bind operation:
 
 rapuma project ENG-LATN-KJVTEST project bind
 
-##### Next document variations on the bind command, saving, etc. #####
+# This gives you a temporary view-version of the publication. If you
+# want to save it to the Deliverable folder, like the render command,
+# add the --save (or -s) switch. At that point you will need to rerun
+# the bind command. Note you can also use the --background and 
+# --doc_info switches to add these to the output. But you cannot use
+# the --diagnostic command in the bind mode.
+
+# Please note that because of the underlying process, binding can take
+# a lot of time compared to rendering, 3 to 5 minutes for a whole Bible.
+# Do not interupt the process while it is running.

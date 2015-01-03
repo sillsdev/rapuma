@@ -766,7 +766,7 @@ class Xetex (Manager) :
         if self.useDocInfo :
             if saveFile :
                 if os.path.isfile(viewFile) :
-                    viewFile = self.pg_back.addDocInfo(saveFile)
+                    viewFile = self.pg_back.addDocInfo(viewFile)
                 else :
                     viewFile = self.pg_back.addDocInfo(saveFile)
             else :

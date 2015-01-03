@@ -120,8 +120,6 @@ class ProjBinding (object) :
         # First merge the master pages together
         tempFile = self.mergePdfFilesGs(fileList)
 
-#        import pdb; pdb.set_trace()
-
         # Now add background and doc info if requested
         bgFile = ''
         if self.useBackground :
@@ -176,7 +174,7 @@ class ProjBinding (object) :
         the index, which is bad...'''
 
         # This is our working file for this operation
-        tempFile = tempfile.NamedTemporaryFile().name
+        tempFile = tempfile.NamedTemporaryFile().name + '.pdf'
 
 
         cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]

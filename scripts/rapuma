@@ -282,6 +282,7 @@ def userArguments (args) :
         cmdType     = args.command_type
         cmd         = args.command
         force       = args.force
+        save        = args.save
         template    = args.id
         sourcePath  = ''
         targetPath  = ''
@@ -317,9 +318,9 @@ def userArguments (args) :
                     ProjBackground(pid).turnOnDocInfo()
                     # Make sure diagnostic is off
                     ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, force here is used to save the file
+                    # Bind the groups, save here is used to save the file
                     # in the Deliverables folder
-                    ProjBinding(pid).bind(force)
+                    ProjBinding(pid).bind(save)
                     # Last one out turn off the lights :-)
                     ProjBackground(pid).turnOffBackground()
                     ProjBackground(pid).turnOffDocInfo()
@@ -329,9 +330,9 @@ def userArguments (args) :
                     # Make sure doc info and diagnostic is off
                     ProjBackground(pid).turnOffDocInfo()
                     ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, force here is used to save the file
+                    # Bind the groups, save here is used to save the file
                     # in the Deliverables folder
-                    ProjBinding(pid).bind(force)
+                    ProjBinding(pid).bind(save)
                     # Last one out turn off the lights :-)
                     ProjBackground(pid).turnOffBackground()
                 elif args.doc_info :
@@ -340,15 +341,15 @@ def userArguments (args) :
                     # Make sure background and diagnostic is off
                     ProjBackground(pid).turnOffBackground
                     ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, force here is used to save the file
+                    # Bind the groups, save here is used to save the file
                     # in the Deliverables folder
-                    ProjBinding(pid).bind(force)
+                    ProjBinding(pid).bind(save)
                     # Last one out turn off the lights :-)
                     ProjBackground(pid).turnOffDocInfo()
                 else :
-                    # Bind the groups, force here is used to save the file
+                    # Bind the groups, save here is used to save the file
                     # in the Deliverables folder
-                    ProjBinding(pid).bind(force)
+                    ProjBinding(pid).bind(save)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
@@ -762,10 +763,11 @@ if __name__ == '__main__' :
     projCommand.add_argument('command', choices=prCommand, help='The general commands that can be used for managing a project.')
     projCommand.add_argument('-b', '--background', action='store_true', help='Used only with the bind command, this will add a background to the bound object.')
     projCommand.add_argument('-d', '--doc_info', action='store_true', help='Used only with the bind command, this will add a document information background layer to the bound object.')
-    projCommand.add_argument('-s', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+    projCommand.add_argument('-p', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
     projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
     projCommand.add_argument('-e', '--media_type', choices=mediaType, help='If creating a new project, give a valid project media type code.')
     projCommand.add_argument('-f', '--force', action='store_true', help='Force an action, or, in the case of bind, save the results.')
+    projCommand.add_argument('-s', '--save', action='store_true', help='Use for saving a bind file.')
     projCommand.add_argument('-n', '--bak_num', help='Specify the number (version) of backup you want to restore.')
     projCommand.add_argument('-i', '--id', help='Specify an ID for an opperation.')
     projCommand.add_argument('-u', '--update_type', choices=updateType, help='Update a project element like a background or the groups.')

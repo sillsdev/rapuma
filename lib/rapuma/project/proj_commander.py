@@ -147,7 +147,7 @@ class ProjCommander (object) :
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' project update --update_type helper '], 
-                'bind'          : ['Create the binding PDF file',                   'rapuma project '       + pid + ' project   bind --force '], 
+                'bind'          : ['Create the binding PDF file',                   'if [ "$1" ]; then CMD=" $1"; fi; rapuma project ' + pid + ' project   bind $CMD '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
             }
