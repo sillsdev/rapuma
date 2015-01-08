@@ -1,6 +1,6 @@
 #!/bin/sh
 
-##### Rapuma KJV Test/Example Script #####
+##### Rapuma KYUM Test/Example Script #####
 
 # This script will both test the Rapuma publishing system and give a
 # user an example of how the Rapuma CLI works for some basic commands.
@@ -18,13 +18,13 @@
 # the source files we will be drawing from. We will call it "my_source"
 # for the purpose of this exercise and it will be located here:
 #
-#   ~/Publishing/my_source/KJV
+#   ~/Publishing/my_source/KYUM
 #
 # You may wish to locate it in a different place on your system. Be sure
 # that is reflected in the commands of the rest of the exercises for
-# this example. Now find the resource/example/KJV.zip file in the Rapuma
+# this example. Now find the resource/example/KYUM.zip file in the Rapuma
 # program folder and copy it to your newly created sources folder.
-# Extract the contents which is in the KJV folder into the my_source
+# Extract the contents which is in the KYUM folder into the my_source
 # folder. Once this is done you should be ready to work through the rest
 # of this example script.
 
@@ -32,9 +32,9 @@
 ## ADDING A PROJECT
 # This next command creates a new project in the Rapuma project folder. 
 # After this command is run there will be a new project folder created
-# named "ENG-LATN-KJVTEST" in the main project folder.
+# named "KYU-MYMR-KYUMTEST" in the main project folder.
 
-rapuma project ENG-LATN-KJVTEST project add
+rapuma project KYU-MYMR-KYUMTEST project add
 
 
 ## PROJECT REMOVAL
@@ -44,7 +44,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # project and its contents. Any work done on it will be lost when a
 # command like this is run:
 #
-#   rapuma project ENG-LATN-KJVTEST project remove
+#   rapuma project KYU-MYMR-KYUMTEST project remove
 #
 # Note that this would be the same as selecting the project folder in
 # your file browser and deleting it.
@@ -55,7 +55,9 @@ rapuma project ENG-LATN-KJVTEST project add
 # into the publication. A standard group is one of three pre-defined
 # component containers. They are, OT, NT and BIBLE. Using one of these
 # three group designators will allow Rapuma to auto-create a group
-# which will contain all the components necessary for that group.
+# which will contain all the components necessary for that group
+# Note that for this test project we will only be using the NT group.
+# Sadly, the OT texts do not exist yet for the KYU language.
 # 
 # At this point the project is started but there are no groups in it 
 # and no components to render. This next command is where actual
@@ -70,7 +72,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # books (GEN-REV). To create one of these groups a command formed like
 # the following can be used:
 # 
-#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
+#   rapuma group KYU-MYMR-KYUMTEST NT group add --source_path ~/Publishing/my_source/KYUM
 #
 # With this command Rapuma will search the files in "my_source" and
 # look for SFM or USFM extention files and check to see if any have the
@@ -83,16 +85,15 @@ rapuma project ENG-LATN-KJVTEST project add
 #
 # If you want to create a custom sub-group...
 #
-#   rapuma group ENG-LATN-KJVTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source/KJV
+#   rapuma group KYU-MYMR-KYUMTEST GOSPEL group add --cid_list "mat mrk luk jhn" --source_path ~/Publishing/my_source/KYUM
 #
 # This group (GOSPEL) will contain the component books, Matthew, Mark,
 # Luke and John and nothing else.
 #
-# For this example we'll create a full Bible by adding these two groups
-# to the project with these commands:
+# For this example we'll create a NT by adding this group to the project
+# with this command:
 
-rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
-rapuma group ENG-LATN-KJVTEST OT group add --source_path ~/Publishing/my_source/KJV
+rapuma group KYU-MYMR-KYUMTEST NT group add --source_path ~/Publishing/my_source/KYUM
 
 
 ## ADDING DOCUMENT FEATURES
@@ -104,12 +105,12 @@ rapuma group ENG-LATN-KJVTEST OT group add --source_path ~/Publishing/my_source/
 # has four parameters, they are configuration, section, key, and value.
 # The command would be constructed like this:
 #
-#   rapuma settings ENG-LATN-KJVTEST <configuration> <section> <key> <value>
+#   rapuma settings KYU-MYMR-KYUMTEST <configuration> <section> <key> <value>
 #
 
 # A helpful parameter setting for this project would be this:
 
-rapuma settings ENG-LATN-KJVTEST usfmTex TeXBehavior vFuzz 2.5pt
+rapuma settings KYU-MYMR-KYUMTEST usfmTex TeXBehavior vFuzz 2.5pt
 
 # Note that any Rapuma setting, project or system, can be changed with
 # the settings command as long as the four parameters are valid. One
@@ -126,27 +127,39 @@ rapuma settings ENG-LATN-KJVTEST usfmTex TeXBehavior vFuzz 2.5pt
 # simple one we can move on to rendering. To render the entire NT group
 # we created above, we would use a command like this:
 #
-#   rapuma group ENG-LATN-KJVTEST NT group render
+#   rapuma group KYU-MYMR-KYUMTEST NT group render
 #
 # Rapuma, by default uses an internal version of XeTeX to render. If that
 # isn't working for whatever reason, there is a way to fall back to a
 # system-installed version of XeTeX. To switch to the external version
 # could use this command:
 
-rapuma settings ENG-LATN-KJVTEST project Managers/usfm_Xetex runExternalXetex True 
+rapuma settings KYU-MYMR-KYUMTEST project Managers/usfm_Xetex runExternalXetex True 
 
 # For this part of example, we are going to just render one component
 # from the NT group, the Book of James with this command:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jas
+
+# You will note that the rendering came out very bad as the output is
+# pretty much all little square boxes. This brings us to working with
+# fonts.
+
+
+## SETTING UP FONTS
+# Currently, setting up fonts in Rapuma is a little tedious and unstable.
+# For this example 
+
+
+## ADVANCED RENDERING COMMANDS
 
 # To save the Book of James file you would add the --save switch to
 # the command:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --save
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jas --save
 
 # Now you will note that a folder has been created called Deliverable
-# and in is a file named: ENG-LATN-KJVTEST_NT_060-jas_20140812.pdf
+# and in is a file named: KYU-MYMR-KYUMTEST_NT_060-jas_20140812.pdf
 # Actually, the last number will be different as it is tied to the 
 # current date but it will be something like the above name.
 #
@@ -159,14 +172,14 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --save
 # For example, this command, like above, would render James, name the
 # file James.pdf and put it in the root of the project and view it:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jas --save --override ~/Publishing/ENG-LATN-KJVTEST/James.pdf
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jas --save --override ~/Publishing/KYU-MYMR-KYUMTEST/James.pdf
 
 # [Note that the path needs to reflect your specific system.]
 # One other render feature that is worth noting is Rapuma ability to
 # just produce a document with specific pages. For this we would add the
 # --pages command like this:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list jhn --save --override ~/Publishing/ENG-LATN-KJVTEST/John-test.pdf --pages 15-20
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jhn --save --override ~/Publishing/KYU-MYMR-KYUMTEST/John-test.pdf --pages 15-20
 
 # If you run that command you will see pages 15 through 20 from the
 # Gospel of John found in the root of your example project.
@@ -184,7 +197,7 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list jhn --save --override ~
 # Two of the three backgrounds listed here can be added to the rendered
 # with this command:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents watermark,cropmarks
+rapuma settings KYU-MYMR-KYUMTEST layout DocumentFeatures backgroundComponents watermark,cropmarks
 
 # Note that the background list has no spaces in it. This is necessary
 # because we are using the CLI for transmitting the command.
@@ -192,84 +205,42 @@ rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures backgroundComponents wa
 # The watermark text default is DRAFT. It can be changed with this
 # command:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures watermarkText PROOF
+rapuma settings KYU-MYMR-KYUMTEST layout DocumentFeatures watermarkText PROOF
 
 # If any changes are made to the background settings, the background file
 # needs to be remade so the next time Rapuma is run the results will be
 # as expected. To recreate the background file use this command:
 
-rapuma project ENG-LATN-KJVTEST project update --update_type background
+rapuma project KYU-MYMR-KYUMTEST project update --update_type background
 
 # To output the background when you render, add --background (or -b) to
 # the render command like this:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list 1ti --background
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list 1ti --background
 
 # When using backgrounds you can add information to the header and footer
 # of the background. To use this feature add the --doc_info command to
 # your command like this:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list 2ti --background --doc_info
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list 2ti --background --doc_info
 
 # By default no text is assigned. To add some information text a command
 # like this could be used:
 
-rapuma settings ENG-LATN-KJVTEST layout DocumentFeatures docInfoText "Doc info text"
+rapuma settings KYU-MYMR-KYUMTEST layout DocumentFeatures docInfoText "Doc info text"
 
 # Rapuma has some aids to help with formating new publications. They are
 # called diagnostics. Currently, there is only one but more can be added.
 # To check the leading of the body text the "leading" diagnostic aid can
 # be added by using this command:
 
-rapuma group ENG-LATN-KJVTEST NT group render --cid_list heb --diagnostic
+rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list heb --diagnostic
 
 # Note that you cannot use --background (and/or --doc_info) with
 # --diagnostic at the same time. That will cause an error
 
 
 ## USING THE BIND COMMAND
-# The composition process in Rapuma is a render, adjust repeat cycle.
-# Once every component (book) in all the groups has gone through the
-# composition process, binding is the next process. Before the bind
-# command can be used, the groups should be rendered all together with
-# these commands:
-
-rapuma group ENG-LATN-KJVTEST OT group render
-rapuma group ENG-LATN-KJVTEST NT group render
-
-# After that is run, if you look at the page number at the begining of
-# Matthew in the NT group, you will notice that it starts with number 1.
-# As we move into the binding process, page numbers become important.
-# After the groups have been rendered the first time, you will need to
-# adjust the starting page number on the NT group (as it will follow OT
-# group). This command (adjust the pg. no. if necessary) will do it:
-
-rapuma settings ENG-LATN-KJVTEST project Groups/NT startPageNumber 1079
-
-# Now rerun the NT group to adjust the page numbers. There is no need
-# to rerun the OT group.
-
-rapuma group ENG-LATN-KJVTEST NT group render
-
-# The bind process merges the rendered group PDF files into one. However,
-# Rapuma needs to know what order the files need to be merged together.
-# In this case the setting commands would be:
-
-rapuma settings ENG-LATN-KJVTEST project Groups/OT bindingOrder 1
-rapuma settings ENG-LATN-KJVTEST project Groups/NT bindingOrder 2
-
-# With these settings made Binding should now be possible. Use a command
-# like this to preform a bind operation:
-
-rapuma project ENG-LATN-KJVTEST project bind
-
-# This gives you a temporary view-version of the publication. If you
-# want to save it to the Deliverable folder, like the render command,
-# add the --save (or -s) switch. At that point you will need to rerun
-# the bind command. Note you can also use the --background and 
-# --doc_info switches to add these to the output. But you cannot use
-# the --diagnostic command in the bind mode.
-
-# Please note that because of the underlying process, binding can take
-# a lot of time compared to rendering, 3 to 5 minutes for a whole Bible.
-# Do not interupt the process while it is running.
+# As there is currently only one group in this particular example, this
+# this will not be covered at this time. For more information on binding
+# please refer to the KJV example.
