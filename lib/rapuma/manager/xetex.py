@@ -679,7 +679,7 @@ class Xetex (Manager) :
         # environment vars set elsewhere
         if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
                 not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
-            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
+            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin', 'x86_64-linux')
             envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
         else :

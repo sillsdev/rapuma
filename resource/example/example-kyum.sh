@@ -110,7 +110,7 @@ rapuma group KYU-MYMR-KYUMTEST NT group add --source_path ~/Publishing/my_source
 
 # A helpful parameter setting for this project would be this:
 
-rapuma settings KYU-MYMR-KYUMTEST usfmTex TeXBehavior vFuzz 2.5pt
+rapuma settings KYU-MYMR-KYUMTEST usfmTex TeXBehavior vFuzz 4.8pt
 
 # Note that any Rapuma setting, project or system, can be changed with
 # the settings command as long as the four parameters are valid. One
@@ -148,11 +148,30 @@ rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jas
 
 ## SETTING UP FONTS
 # Currently, setting up fonts in Rapuma is a little tedious and unstable.
-# For this example 
+# For this example, without going into detail, we will use the existing
+# mechanism to import the appropreat font into the project.
+
+# First import the font with this command:
+rapuma package KYU-MYMR-KYUMTEST NT Padauk_2.701 font add
+# Be sure the font is set to be the primary project font
+rapuma package KYU-MYMR-KYUMTEST NT Padauk_2.701 font primary --force
+
+# Now for some magic commands to make things look nicer
+# First, turn on Graphite rendering
+rapuma settings KYU-MYMR-KYUMTEST usfmTex FontSettings useRenderingSystem GR
+# Set the language the font will be using to Kayah
+rapuma settings KYU-MYMR-KYUMTEST usfmTex FontSettings useLanguage kyu
+# Map numbers found in the text to the Burmese form
+rapuma settings KYU-MYMR-KYUMTEST usfmTex FontSettings useMapping kye_renumber
+# Set the font scale size
+rapuma settings KYU-MYMR-KYUMTEST usfmTex FontSettings fontSizeUnit 0.82
+# Increase the line space factor (leading)
+rapuma settings KYU-MYMR-KYUMTEST usfmTex FontSettings lineSpacingFactor 1.3
 
 
-
-
+## ADVANCED FORMAT COMMANDS
+# Here we can add some commands for adding illustrations and other
+# format issue solutions
 
 
 ## ADVANCED RENDERING COMMANDS
