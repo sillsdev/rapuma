@@ -149,7 +149,7 @@ rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list jas
 ## SETTING UP FONTS
 # Currently, setting up fonts in Rapuma is a little tedious and unstable.
 # For this example, without going into detail, we will use the existing
-# mechanism to import the appropreat font into the project.
+# mechanism to import the appropreat font into this project.
 
 # First import the font with this command:
 rapuma package KYU-MYMR-KYUMTEST NT Padauk_2.701 font add
