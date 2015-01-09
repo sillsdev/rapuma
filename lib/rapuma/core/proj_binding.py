@@ -59,6 +59,7 @@ class ProjBinding (object) :
             '0205' : ['MSG', 'Unassigned message.'],
             '0210' : ['MSG', 'No contents are specified for binding.'],
             '0215' : ['ERR', 'Failed to bind contents into the [<<1>>] fille. Got error: [<<2>>]'],
+            '0220' : ['ERR', 'Could not copy [<<1>>] temp file to [<<2>>] saved binding file.'],
             '0230' : ['MSG', 'Completed proccessing on the [<<1>>] binding file.'],
             '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding file.'],
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding file.'],
@@ -85,16 +86,6 @@ class ProjBinding (object) :
         each time a group is rendered from here.'''
 
 #        import pdb; pdb.set_trace()
-
-        # Make a name if the file is to be saved
-        if save :
-            bindFileName = self.pid + '_contents_' + self.tools.ymd()
-            # Save this to the Deliverable folder (Make sure there is one)
-            if not os.path.isdir(self.local.projDeliverableFolder) :
-                os.makedirs(self.local.projDeliverableFolder)
-            bindFile = os.path.join(self.local.projDeliverableFolder, bindFileName + '.pdf')
-        else :
-            bindFile = tempfile.NamedTemporaryFile().name
 
         # Get the order of the groups to be bound.
         bindOrder = {}
@@ -127,27 +118,47 @@ class ProjBinding (object) :
             fileList.append(bindOrder[key])
 
         # First merge the master pages together
-        self.mergePdfFilesGs(bindFile, fileList)
+        tempFile = self.mergePdfFilesGs(fileList)
+
         # Now add background and doc info if requested
         bgFile = ''
         if self.useBackground :
-            bgFile = self.pg_back.addBackground(bindFile)
+            bgFile = self.pg_back.addBackground(tempFile)
         if self.useDocInfo :
             if bgFile :
                 bgFile = self.pg_back.addDocInfo(bgFile)
             else :
-                bgFile = self.pg_back.addDocInfo(bindFile)
-        # Change the bindFile name so the viewer shows what we want
-        if os.path.exists(bgFile) :
-            bindFile = bgFile
+                bgFile = self.pg_back.addDocInfo(tempFile)
+
+        # If we are saving this make a name for it
+        if save :
+            bindFileName = self.pid + '_contents_' + self.tools.ymd()
+            # Save this to the Deliverable folder (Make sure there is one)
+            if not os.path.isdir(self.local.projDeliverableFolder) :
+                os.makedirs(self.local.projDeliverableFolder)
+            bindFile = os.path.join(self.local.projDeliverableFolder, bindFileName + '.pdf')
+            if os.path.exists(bgFile) :
+                if shutil.copy(bgFile, bindFile) :
+                    self.log.writeToLog(self.errorCodes['0220'], [bgFile,bindFile])
+            else :
+                if shutil.copy(tempFile, bindFile) :
+                    self.log.writeToLog(self.errorCodes['0220'], [tempFile,bindFile])
+            # Direct to viewFile
+            viewFile = bindFile
+                
+        else :
+            if os.path.exists(bgFile) :
+                viewFile = bgFile
+            else :
+                viewFile = tempFile
 
         # Build the viewer command (fall back to default if needed)
-        # FIXME: For now, we need to hard-code the manager name
+        # FIXME: For now, we need to hard-code the manager name (usfm_Xetex)
         pdfViewerCmd = self.projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand']
         if not pdfViewerCmd :
             pdfViewerCmd = self.userConfig['System']['pdfViewerCommand']
 
-        pdfViewerCmd.append(bindFile)
+        pdfViewerCmd.append(viewFile)
         # Run the XeTeX and collect the return code for analysis
         try :
             subprocess.Popen(pdfViewerCmd)
@@ -157,18 +168,23 @@ class ProjBinding (object) :
             self.log.writeToLog(self.errorCodes['0260'], [str(e)])
 
 
-    def mergePdfFilesGs (self, target, sourceList) :
+    def mergePdfFilesGs (self, sourceList) :
         '''Using GS, merge multiple PDF files into one. The advantage of
         using Gs is that the index will be maintained. pdftk strips out
         the index, which is bad...'''
-    
-        cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + target]
+
+        # This is our working file for this operation
+        tempFile = tempfile.NamedTemporaryFile().name + '.pdf'
+
+
+        cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]
         cmd = cmd + sourceList
 
         try :
             self.log.writeToLog(self.errorCodes['0300'])
             subprocess.call(cmd)
-            return True
+            # Return our file name for further processing
+            return tempFile
         except Exception as e :
             # If we don't succeed, we should probably quite here
             self.log.writeToLog(self.errorCodes['0280'], [str(e)])

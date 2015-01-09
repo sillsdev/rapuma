@@ -18,12 +18,14 @@
 
 import os, shutil, re, codecs, subprocess
 from configobj                          import ConfigObj
+from pyPdf                              import PdfFileReader
 
 # Load the local classes
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.project.proj_config         import Config
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
@@ -63,6 +65,7 @@ class Xetex (Manager) :
         self.manager                = self.cType + '_' + self.renderer.capitalize()
         self.managers               = project.managers
         self.pg_back                = ProjBackground(self.pid, self.gid)
+        self.fmt_diagnose           = ProjDiagnose(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -90,6 +93,7 @@ class Xetex (Manager) :
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
+        self.useDiagnostic          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic'])
         self.useDocInfo             = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
 
         # Get settings for this component
@@ -675,7 +679,7 @@ class Xetex (Manager) :
         # environment vars set elsewhere
         if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
                 not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
-            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin')
+            envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin', 'x86_64-linux')
             envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
         else :
@@ -706,7 +710,8 @@ class Xetex (Manager) :
             self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
         # Collect the page count and record in group (Write out at the end of the opp.)
-        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+#        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
+        self.projectConfig['Groups'][gid]['totalPages'] = str(PdfFileReader(open(self.local.gidPdfFile)).getNumPages())
         # Write out any changes made to the project.conf file that happened during this opp.
         self.tools.writeConfFile(self.projectConfig)
 
@@ -749,67 +754,67 @@ class Xetex (Manager) :
             else :
                 self.log.writeToLog(self.errorCodes['0720'], [saveFileName])
 
-#        import pdb; pdb.set_trace()
-
         # Once we know the file is successfully generated, add a background if defined
-        bgFile = ''
+        viewFile = ''
         if self.useBackground :
             if saveFile :
-                bgFile = self.pg_back.addBackground(saveFile)
+                viewFile = self.pg_back.addBackground(saveFile)
             else :
-                bgFile = self.pg_back.addBackground(self.local.gidPdfFile)
-
+                viewFile = self.pg_back.addBackground(self.local.gidPdfFile)
+                
         # Add a timestamp and doc info if requested in addition to background
         if self.useDocInfo :
             if saveFile :
-                if os.path.isfile(bgFile) :
-                    bgFile = self.pg_back.addDocInfo(bgFile)
+                if os.path.isfile(viewFile) :
+                    viewFile = self.pg_back.addDocInfo(viewFile)
                 else :
-                    bgFile = self.pg_back.addDocInfo(saveFile)
+                    viewFile = self.pg_back.addDocInfo(saveFile)
             else :
-                if os.path.isfile(bgFile) :
-                    bgFile = self.pg_back.addDocInfo(bgFile)
+                if os.path.isfile(viewFile) :
+                    viewFile = self.pg_back.addDocInfo(viewFile)
                 else :
-                    bgFile = self.pg_back.addDocInfo(self.local.gidPdfFile)
+                    viewFile = self.pg_back.addDocInfo(self.local.gidPdfFile)
+
+        # Add a diagnostic layer to the rendered output. Normally this is
+        # not used with a normal background layer
+        if self.useDiagnostic :
+            if saveFile :
+                viewFile = self.fmt_diagnose.addTransparency(saveFile)
+            else :
+                viewFile = self.fmt_diagnose.addTransparency(self.local.gidPdfFile)
 
         # To avoid confusion with file names, if this is a saved file,
         # and it has a background, we need to remove the original, non-
         # background file (remembering originals are kept in the group
-        # Component folder), then rename the -bg version to whatever
+        # Component folder), then rename the -view version to whatever
         # the saved name should be
         if save or override :
-            if os.path.isfile(saveFile) and os.path.isfile(bgFile) :
+            if os.path.isfile(saveFile) and os.path.isfile(viewFile) :
                 # First remove
                 os.remove(saveFile)
                 # Next rename
-                os.rename(bgFile, saveFile)
+                os.rename(viewFile, saveFile)
 
+            
+        #print ':::', saveFile, ';;;', viewFile
 
-
-
-
+        #import pdb; pdb.set_trace()
 
         ##### Viewing #####
-        viewFile = ''
         # First get the right file name to view
         if saveFile :
             # If there was a saveFile, that will be the viewFile
             viewFile = saveFile
         else :
-            # Problem here is that there could be a -bg version
+            # Problem here is that there could be a -view version
             # of the gidPdfFile if this was a view-only operation
-            # but if the -bg version was created after the original
+            # but if the -view version was created after the original
             # gidPdfFile, we know that's the one we want to see
-            if os.path.isfile(bgFile) :
-                if self.tools.isOlder(self.local.gidPdfFile, bgFile) :
-                    viewFile = bgFile
+            if os.path.isfile(viewFile) :
+                if not self.tools.isOlder(self.local.gidPdfFile, viewFile) :
+                    viewFile = self.local.gidPdfFile
             else :
                 viewFile = self.local.gidPdfFile
-
-
-
-
-
 
         # Now view it
         if os.path.isfile(viewFile) :

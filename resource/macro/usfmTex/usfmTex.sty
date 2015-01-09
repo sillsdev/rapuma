@@ -1,11 +1,6 @@
-# Version=2.500
-# ********************************************************************
-# * usfm.sty is the default stylesheet for Paratext 7 projects       *
-# *   using USFM markup.                                             *
-# * Latest documentation and stylesheets are maintained at:          *
-# *   http://paratext.org/usfm                                       *
-# ********************************************************************
-# Last Updated: Oct 21, 2013
+# File: usfmTex.sty
+# This style sheet is a fork of the ParaText standard style sheet,
+# usfm.sty, version 2.500, used for the Rapuma system.
 
 # File Identification
 
@@ -2059,7 +2054,7 @@
 \Endmarker sls*
 \Name sls...sls* - Special Text - Secondary Language or Text Source
 \Description To represent where the original text is in a secondary language or from an alternate text source
-\OccursUnder li li1 li2 li3 li4 m mi nb p pc ph phi pi pi1 pi2 pi3 pr pmo pm pmc pmr q q1 q2 q3 q4 qc qr qm qm1 qm2 qm3 sp tr th1 th2 th3 th4 thr1 thr2 thr3 thr4 tc1 tc2 tc3 tc4 tcr1 tcr2 tcr3 tcr4 f fe NEST
+\OccursUnder li li1 li2 li3 li4 m mi nb p pc ph phi pi pi1 pi2 pi3 pr pmo pm pmc pmr q q1 q2 q3 q4 qc qr qm qm1 qm2 qm3 sp tr th1 th2 th3 th4 thr1 thr2 thr3 thr4 tc1 tc2 tc3 tc4 tcr1 tcr2 tcr3 tcr4 f fe mt1 mt2 mt3 NEST
 \TextType VerseText
 \TextProperties publishable vernacular
 \StyleType Character
@@ -2173,7 +2168,8 @@
 \Marker pb
 \Name pb - Break - Page Break
 \Description Page Break used for new reader portions and children's bibles where content is controlled by the page
-\OccursUnder c
+# Changed from under "c" to under "id" so that a page break can happen anywhere in the document (djd - 20141102)
+\OccursUnder id
 \Rank 4
 \TextType Other
 \TextProperties publishable
@@ -2251,6 +2247,7 @@
 \Marker periph
 \Name periph - Peripherals - Content Division Marker
 \Description Periheral content division marker which should be followed by an additional division argument/title.
+\OccursUnder id
 \TextType Section
 \TextProperties paragraph publishable vernacular
 \StyleType Paragraph

@@ -36,8 +36,9 @@ class UsfmData (object) :
 
         result = []
         for name, booknum in self.bookAbbrevs.iteritems() :
-            # Filter out everything but NT books
-            if (booknum > 39):
+            # Filter out everything but OT books
+            # Book numbers that are '0' are not part of the cannon
+            if (booknum > 39) or (booknum == 0) :
                 continue  # Skip this one
             # Append the CID to the list
             if name in self.usfmCidInfo :
@@ -52,7 +53,8 @@ class UsfmData (object) :
         result = []
         for name, booknum in self.bookAbbrevs.iteritems() :
             # Filter out everything but NT books
-            if (booknum < 61):
+            # This includes book numbers in the range of 61 to 87
+            if (booknum < 61) or (booknum > 87) :
                 continue  # Skip this one
             # Append the CID to the list
             if name in self.usfmCidInfo :

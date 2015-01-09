@@ -39,6 +39,45 @@ class Tools (object) :
 ############################ Functions Begin Here #############################
 ###############################################################################
 
+##### PDF Tools
+
+    def mergePdfFilesPdftk (self, front, back) :
+        '''Merge two PDF files together using pdftk.'''
+
+#        import pdb; pdb.set_trace()
+
+        tmpFile = tempfile.NamedTemporaryFile().name
+        cmd = ['pdftk', front, 'background', back, 'output', tmpFile]
+
+        # Run the process
+        try:
+            subprocess.call(cmd) 
+            shutil.copy(tmpFile, front)
+            # Return the name of the primary PDF
+            return front
+        except Exception as e :
+            self.terminal('Warning: Merging PDF files failed, pdftk failed with this error: ' + str(e))
+            self.terminal('The command used was: ' + str(cmd))
+
+
+    def convertSvgToPdfRsvg (self, svgFile) :
+        '''Convert/render an SVG file to produce a PDF file using the
+        RSVG conversion utility. Return a temp file name to the caller.'''
+
+#        import pdb; pdb.set_trace()
+
+        pdfFile = tempfile.NamedTemporaryFile().name
+        cmd = ['rsvg-convert', '-f', 'pdf', '-o', pdfFile, svgFile]
+
+        # Simple try statement seems to work best for this
+        try:
+            subprocess.call(cmd) 
+            return pdfFile
+        except Exception as e :
+            self.terminal('Warning: Converting SVG to PDF, RSVG failed with this error: ' + str(e))
+            self.terminal('The command used was: ' + str(cmd))
+
+
     def pdftkPullPages (self, source, target, pgRange) :
         '''Using the concatenate function in the pdftk utility, extract
         a range of pages, 1 to n. It returns it in the target file.'''
@@ -66,6 +105,7 @@ class Tools (object) :
                 if line.split(':')[0] == 'NumberOfPages' :
                     return int(line.split(':')[1].strip())
 
+##### Other Functions
 
     def makeFolderBackup (self, source) :
         '''Make a zipped backup of a folder (and its subfolders).'''
@@ -93,6 +133,22 @@ class Tools (object) :
                 self.terminal('Warning: Source ' + source + ' is not a folder. Cannot backup folder.')
         else :
             self.terminal('FYI: Project [' + source + '] not found. Cannot backup.')
+
+
+    def alterFileName (self, orgName, alt) :
+        '''Alter the file name for various purposes.
+        This assumes the file only has a single extention.
+        If that's not the case we're hosed.'''
+
+        # If we send a temp file without an extention, we have a problem
+        if orgName.find('.') > -1 :
+            name    = orgName.split('.')[0]
+            ext     = orgName.split('.')[1]
+            # Just in case this is the second pass
+            name    = name.replace('-' + alt, '')
+            return name + '-' + alt + '.' + ext
+        else :
+            return orgName + '-' + alt
 
 
     def incrementFileName (self, fileName) :

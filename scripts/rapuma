@@ -104,6 +104,7 @@ from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.manager.project             import Project
 from rapuma.group.usfm_data             import UsfmData
 
@@ -281,12 +282,16 @@ def userArguments (args) :
         cmdType     = args.command_type
         cmd         = args.command
         force       = args.force
+        save        = args.save
         template    = args.id
         sourcePath  = ''
         targetPath  = ''
         mediaType   = None
+        updateType  = None
         if args.media_type :
             mediaType = args.media_type
+        if args.update_type :
+            updateType = args.update_type
         # Source path is optional but if given, resolve it
         if args.source_path :
             sourcePath = tools.resolvePath(args.source_path)
@@ -305,8 +310,46 @@ def userArguments (args) :
                 cmdError(cmd, cmdType)
         elif cmd == 'bind' :
             if cmdType == 'project' :
-                # Force here is used to save the file in the Deliverables folder
-                ProjBinding(pid).bind(force)
+                # A background and doc info can be added in a bind
+                # operation, but not a diagnostic layer
+                if args.background and args.doc_info :
+                    # Turn on background and Doc info
+                    ProjBackground(pid).turnOnBackground()
+                    ProjBackground(pid).turnOnDocInfo()
+                    # Make sure diagnostic is off
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffBackground()
+                    ProjBackground(pid).turnOffDocInfo()
+                elif args.background :
+                    # Turn on background
+                    ProjBackground(pid).turnOnBackground()
+                    # Make sure doc info and diagnostic is off
+                    ProjBackground(pid).turnOffDocInfo()
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffBackground()
+                elif args.doc_info :
+                    # Turn on background
+                    ProjBackground(pid).turnOnDocInfo()
+                    # Make sure background and diagnostic is off
+                    ProjBackground(pid).turnOffBackground
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffDocInfo()
+                else :
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
             else :
                 cmdError(cmd, cmdType)
         elif cmd == 'remove' :
@@ -343,13 +386,16 @@ def userArguments (args) :
                 Template(pid).projectToTemplate(args.id)
             else :
                 cmdError(cmd, cmdType)
+        # Update project elements
         elif cmd == 'update' :
-            if cmdType == 'group' :
-                ProjSetup(sysConfig, pid).updateAllGroups(force)
-            elif cmdType == 'helper' :
+            if updateType == 'helper' :
                 ProjCommander(pid).updateScripts()
+            elif updateType == 'background' :
+                ProjBackground(pid).createBackground()
+            elif updateType == 'diagnostic' :
+                ProjDiagnose(pid).createDiagnostic()
             else :
-                 cmdError(cmd, cmdType)
+                 cmdError(cmd, updateType)
 
     ##### GROUP
     # Group level commands
@@ -359,7 +405,7 @@ def userArguments (args) :
         cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
-        force       = args.force    # Switch/force actions
+        save        = args.save    # For saving a rendered group/component
         source_path = []            # A path to files to use
         source_list = []            # Gen: A list of files w/paths
         compare_type = ''           # For compare function, the type
@@ -410,9 +456,12 @@ def userArguments (args) :
             cid_list = usfmData.canonListSort(cids)
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' or cmd == 'compare' and gid in canonGroups :
-                getCidList = getattr(usfmData, gid.lower() + 'CidList')
-                cid_list = getCidList()
+            if cmd == 'add' or cmd == 'update' or cmd == 'compare' :
+                if gid in canonGroups :
+                    getCidList = getattr(usfmData, gid.lower() + 'CidList')
+                    cid_list = getCidList()
+                else :
+                    sys.exit('\nERROR: A group ID is not found or not in the list of recognized canonical books. Please rerun using the --cid_list parameter. Process halting.\n')
         # If a compare is being done this provides the type of compare.
         if args.compare_type :
             compare_type = args.compare_type
@@ -488,21 +537,58 @@ def userArguments (args) :
             #else :
                 #cmdError(cmd, cmdType)
 
-
-
-
-
         elif cmd == 'render' :
-            Project(pid, gid).renderGroup(cid_list, pages, override, force)
+            # Turn on background, Doc info or a diagnostic layer
+            # Note that Doc info can only be used with a background
+            # and diagnostic layer cannot be used with a background
+            # turned on at the same time
+            if args.background and args.diagnostic :
+                sys.exit('\nERROR: Cannot have background (--background/-b) and diagnostic (--diagnostic/-d) turned on at the same time. Process halting.\n')
+            elif args.background and args.doc_info :
+                # Turn on background and Doc info
+                ProjBackground(pid).turnOnBackground()
+                ProjBackground(pid).turnOnDocInfo()
+                # Render the group
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
+                # Turn off background
+                ProjBackground(pid).turnOffDocInfo()
+                ProjBackground(pid).turnOffBackground()
+            elif args.background :
+                # Turn on background only
+                ProjBackground(pid).turnOnBackground()
+                ProjBackground(pid).turnOffDocInfo()
+                ProjDiagnose(pid).turnOffDiagnostic()
+                # Render the group
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
+                # Turn off background
+                ProjBackground(pid).turnOffBackground()
+            elif args.doc_info :
+                # Turn on doc info on only
+                ProjBackground(pid).turnOnDocInfo()
+                ProjDiagnose(pid).turnOffDiagnostic()
+                ProjBackground(pid).turnOffBackground()
+                # Render the group
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
+                # Turn off doc info
+                ProjBackground(pid).turnOffDocInfo()
+            elif args.diagnostic :
+                # Turn on diagnostic only
+                ProjDiagnose(pid).turnOnDiagnostic()
+                ProjBackground(pid).turnOffBackground()
+                ProjBackground(pid).turnOffDocInfo()
+                # Render the group
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
+                # Turn off diagnostic
+                ProjDiagnose(pid).turnOffDiagnostic()
+            else :
+                Project(pid, gid).renderGroup(cid_list, pages, override, save)
         elif cmd == 'lock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, False)
-        elif cmd == 'background' :
-            # Create a new or refresh an existing backgrond.
-            ProjBackground(pid, gid).createBackground()
         else :
             cmdError(cmd, cmdType)
+
 
     ##### PACKAGES
     # Package management commands
@@ -633,23 +719,24 @@ if __name__ == '__main__' :
 
     # Available choices
     # System
-    syCommandTypes          = ['setup']
-    syCommands              = ['name', 'uid', 'projects', 'cloud', 'folders']
+    syCommandType           = ['setup']
+    syCommand               = ['name', 'uid', 'projects', 'cloud', 'folders']
     # Project
-    prCommandTypes          = ['archive', 'backup', 'cloud', 'group', 'helper', 'project', 'template']
-    prCommands              = ['add', 'bind', 'remove', 'restore', 'save', 'update']
-    mediaTypes              = ['book']
+    prCommandType           = ['archive', 'backup', 'cloud', 'group', 'project', 'template']
+    prCommand               = ['add', 'bind', 'remove', 'restore', 'save', 'update']
+    updateType              = ['background', 'diagnostic', 'helper']
+    mediaType               = ['book']
     # Group
-    grCommandTypes          = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
-    grCommands              = ['add', 'background', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
-    componentTypes          = ['usfm', 'map', 'toc']
-    compareTests            = ['backup', 'source']
+    grCommandType           = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
+    grCommand               = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
+    componentType           = ['usfm', 'map', 'toc']
+    compareTest             = ['backup', 'source']
     # Packages
     pkCommandType           = ['font', 'macro']
-    pkCommands              = ['add', 'primary', 'remove', 'update']
+    pkCommand               = ['add', 'primary', 'remove', 'update']
     # Processes
     pcCommandType           = ['export', 'preprocess', 'postprocess']
-    pcCommands              = ['add', 'remove', 'update']
+    pcCommand               = ['add', 'remove', 'update']
     # Example
     examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
 
@@ -660,8 +747,8 @@ if __name__ == '__main__' :
 
     # Add project subprocess arguments
     sysCommand = subparsers.add_parser('system', help='General system management commands help')
-    sysCommand.add_argument('command_type', choices=syCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    sysCommand.add_argument('command', choices=syCommands, help='The setting command for managing user and system settings.')
+    sysCommand.add_argument('command_type', choices=syCommandType, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+    sysCommand.add_argument('command', choices=syCommand, help='The setting command for managing user and system settings.')
     sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
     sysCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
 
@@ -672,28 +759,35 @@ if __name__ == '__main__' :
     # Add Project subprocess arguments
     projCommand = subparsers.add_parser('project', help='General project management commands help')
     projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    projCommand.add_argument('command_type', choices=prCommandTypes, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    projCommand.add_argument('command', choices=prCommands, help='The general commands that can be used for managing a project.')
-    projCommand.add_argument('-s', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
+    projCommand.add_argument('command_type', choices=prCommandType, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
+    projCommand.add_argument('command', choices=prCommand, help='The general commands that can be used for managing a project.')
+    projCommand.add_argument('-b', '--background', action='store_true', help='Used only with the bind command, this will add a background to the bound object.')
+    projCommand.add_argument('-d', '--doc_info', action='store_true', help='Used only with the bind command, this will add a document information background layer to the bound object.')
+    projCommand.add_argument('-p', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
     projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
-    projCommand.add_argument('-e', '--media_type', choices=mediaTypes, help='If creating a new project, give a valid project media type code.')
+    projCommand.add_argument('-e', '--media_type', choices=mediaType, help='If creating a new project, give a valid project media type code.')
     projCommand.add_argument('-f', '--force', action='store_true', help='Force an action, or, in the case of bind, save the results.')
-    projCommand.add_argument('-b', '--bak_num', help='Specify the number (version) of backup you want to restore.')
+    projCommand.add_argument('-s', '--save', action='store_true', help='Use for saving a bind file.')
+    projCommand.add_argument('-n', '--bak_num', help='Specify the number (version) of backup you want to restore.')
     projCommand.add_argument('-i', '--id', help='Specify an ID for an opperation.')
+    projCommand.add_argument('-u', '--update_type', choices=updateType, help='Update a project element like a background or the groups.')
 
     # Add Group subprocess arguments
     groupCommand = subparsers.add_parser('group', help='General project group management commands help')
     groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     groupCommand.add_argument('group_id', help='A unique ID for this group.')
-    groupCommand.add_argument('command_type', choices=grCommandTypes, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
-    groupCommand.add_argument('command', choices=grCommands, help='The general commands that can be used for managing groups.')
-    groupCommand.add_argument('-t', '--component_type', choices=componentTypes, help='The group component type is needed for creating a new group.')
+    groupCommand.add_argument('command_type', choices=grCommandType, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
+    groupCommand.add_argument('command', choices=grCommand, help='The general commands that can be used for managing groups.')
+    groupCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
+    groupCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
+    groupCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
+    groupCommand.add_argument('-t', '--component_type', choices=componentType, help='The group component type is needed for creating a new group.')
     groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
-    groupCommand.add_argument('-f', '--force', action='store_true', help='Force an action to override a group lock or save a rendered file.')
+    groupCommand.add_argument('-v', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
     groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
     groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
-    groupCommand.add_argument('-c', '--compare_type', choices=compareTests, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')
+    groupCommand.add_argument('-c', '--compare_type', choices=compareTest, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')
 
     # Add Package management subprocess arguments
     packCommand = subparsers.add_parser('package', help='General package handling commands help')
@@ -701,7 +795,7 @@ if __name__ == '__main__' :
     packCommand.add_argument('group_id', help='The group ID this package is a part of.')
     packCommand.add_argument('package_id', help='The package name ID. The ID given has to be a valid system package.')
     packCommand.add_argument('package_type', choices=pkCommandType, help='The package type. The type given has to be a valid system package type.')
-    packCommand.add_argument('command', choices=pkCommands, help='The general commands that can be used for managing groups.')
+    packCommand.add_argument('command', choices=pkCommand, help='The general commands that can be used for managing groups.')
     packCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
 
     # Add Processing subprocess arguments
@@ -709,7 +803,7 @@ if __name__ == '__main__' :
     processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     processCommand.add_argument('group_id', help='A unique ID for this group.')
     processCommand.add_argument('process_type', choices=pcCommandType, help='The type of process being managed. The type given has to be a valid system package type.')
-    processCommand.add_argument('command', choices=pcCommands, help='The general commands that can be used for managing groups.')
+    processCommand.add_argument('command', choices=pcCommand, help='The general commands that can be used for managing groups.')
     processCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
     processCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for postprocesses.')
     processCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')

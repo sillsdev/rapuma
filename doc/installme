@@ -69,6 +69,10 @@ Some additional SIL packages that may, or may not, be available via that repo:
 
     sudo apt-get install libteckit-perl teckit
 
+If you are doing some Rapuma development work you might need these:
+
+    sudo apt-get install pyside-tools
+
 XeTeX normally comes bundled with Rapuma. However, it may become necessary to use an external version of XeTeX. The best source for this is through the texlive package. To install texlive, use this command in the terminal:
 
     sudo apt-get install texlive-xetex

@@ -38,7 +38,7 @@ Todo:
         <description>Page layout information.  This covers general page layout format options.</description>
         <setting>
             <name>Printer Page Size ID Code</name>
-            <description>For print output to a common printer a page size ID has to be identified. Two page sizes are supported, A4 and US Letter. Default = A4</description>
+            <description>For print output to a common printer a page size ID has to be identified. If no size is specified (null/none) the printer page size will be the same as the document. Two page sizes are supported, A4 and US Letter. Default = A4</description>
             <key>printerPageSizeCode</key>
             <type>string</type>
             <value>A4</value>
@@ -150,9 +150,37 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Use Diagnostic</name>
+            <description>If this is set to true, diagnostic components (as per the Diagnostic components list) will be superimposed over the page contents to enable checking for various problems with the layout of the page contents. This is done with a similar process as adding page a background but is not the same thing. Default = False</description>
+            <key>useDiagnostic</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Regenerate Transparency</name>
+            <description>If this is set to true, any exsisting transparency (diagnostic) file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
+            <key>regenerateTransparency</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Diagnostic Components</name>
+            <description>Diagnostic components to be superimposed on the contents of a page used to diagnose format issues. Currently supported components are, leading. Default = leading</description>
+            <key>diagnosticComponents</key>
+            <type>list</type>
+            <value>leading</value>
+        </setting>
+        <setting>
             <name>Use Background</name>
             <description>If this is set to true, a background (or watermark) will be merged with the typeset page. Multiple backgrounds can be defined in the backgroundComponents field. Default = False</description>
             <key>useBackground</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Regenerate Background</name>
+            <description>If this is set to true, any exsisting background file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
+            <key>regenerateBackground</key>
             <type>boolean</type>
             <value>False</value>
         </setting>
@@ -317,14 +345,6 @@ Todo:
             <key>useCaptionReferences</key>
             <type>boolean</type>
             <value>True</value>
-        </setting>
-
-        <setting>
-            <name>Page Border</name>
-            <description>[NOT IMPLEMENTED] Set this to "true" to put a border on every page.  The PDF file containing the border is located in the Illustrations folder in the Source area.  To change the border, you can replace the file and change the file name in the System-Files section.   Default = False</description>
-            <key>usePageBorder</key>
-            <type>boolean</type>
-            <value>False</value>
         </setting>
 
         <setting>

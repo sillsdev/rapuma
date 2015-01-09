@@ -515,6 +515,16 @@ Todo:
             <relies></relies>
         </file>
 
+        <file>
+            <name>Diagnostic Transparency File</name>
+            <description>The file that provides diagnostic components on a transparency layer that will be superimposed over the page contents for diagnostic purposes, if desired.</description>
+            <fileID>diagnosticFile</fileID>
+            <fileName>diagnostic.pdf</fileName>
+            <filePath>[self:projIllustrationFolder]</filePath>
+            <depends></depends>
+            <relies></relies>
+        </file>
+
     </section>
 
 </root>

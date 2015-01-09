@@ -169,10 +169,10 @@
 
 
 %%%%% BLANK PAGE INSERT
-% This will insert a blank page. This should be used at the beginning
-% of a book/component as it does not seem too effective at the end.
+% This will insert a blank page. The page must be blank and cannot have
+% any text or graphics on it.
 \def\blankpage{%
-    \par\nbsp\eject\relax%
+    \pagebreak \par \nbsp\relax%
 }
 
 %%%%% HEADER OUTPUT
