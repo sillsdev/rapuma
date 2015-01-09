@@ -677,11 +677,15 @@ class Xetex (Manager) :
         # False, the following special environment vars will be run. If set to true,
         # an external version of XeTeX, provided it is installed, will run with its own
         # environment vars set elsewhere
-        if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
-                not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
+        runExternal = self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex'].get('runExternalXetex', ''))
+        if not runExternal :
             envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin', 'x86_64-linux')
             envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
+            debugXetex = self.projectConfig['Managers'][self.cType + '_Xetex'].get('Debugkpse', None)
+            if debugXetex :
+                envDict['KPATHSEA_DEBUG'] = debugXetex
+                print envDict
         else :
             envDict.update(os.environ)
 
