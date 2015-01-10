@@ -47,5 +47,12 @@ Todo:
         <type>boolean</type>
         <value>False</value>
     </setting>
+    <setting>
+        <name>Debug KPSE</name>
+        <key>debugKpse</key>
+        <description>This is a developer feature that helps diagnose path and other issues with XeTeX. Refer to the following URL for documentation on what debugging can be done and what integer value to enter: http://www.dcs.ed.ac.uk/home/latex/Informatics/Obsolete/html/kpathsea/kpathsea.html </description>
+        <type>integer</type>
+        <value>0</value>
+    </setting>
 </root>
 

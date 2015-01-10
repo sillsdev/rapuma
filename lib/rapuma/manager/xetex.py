@@ -148,7 +148,10 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
-            '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
+            '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]'],
+
+            '1000' : ['WRN', 'XeTeX debugging is set to [<<1>>]. These are the paths XeTeX is seeing: [<<2>>]'],
+            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32']
 
         }
 
@@ -682,10 +685,18 @@ class Xetex (Manager) :
             envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin', 'x86_64-linux')
             envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
-            debugXetex = self.projectConfig['Managers'][self.cType + '_Xetex'].get('Debugkpse', None)
+            # To help with debugging the following hook has been added. This is not
+            # something the user would ever use. It is only for developer diagnostics.
+            # for infomation on what integers can be used refer to this URL:
+            # http://www.dcs.ed.ac.uk/home/latex/Informatics/Obsolete/html/kpathsea/kpathsea.html
+            debugXetex = self.projectConfig['Managers'][self.cType + '_Xetex'].get('debugKpse', None)
             if debugXetex :
-                envDict['KPATHSEA_DEBUG'] = debugXetex
-                print envDict
+                try :
+                    if int(debugXetex) > 0 :
+                        envDict['KPATHSEA_DEBUG'] = debugXetex
+                        self.log.writeToLog(self.errorCodes['1000'], [str(debugXetex), str(envDict)])
+                except :
+                    self.log.writeToLog(self.errorCodes['1090'], [debugXetex])
         else :
             envDict.update(os.environ)
 
