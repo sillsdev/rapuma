@@ -17,12 +17,12 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=12
+current_page=44
 FILE_NAME_0=21888;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Fscripts%2Frapuma;0;4
 FILE_NAME_1=5942;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_binding.py;0;4
 FILE_NAME_2=8612;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fmanager%2Fproject.py;0;4
 FILE_NAME_3=11802;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fgroup%2Fusfm.py;0;4
-FILE_NAME_4=43010;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fmanager%2Fxetex.py;0;4
+FILE_NAME_4=38515;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fmanager%2Fxetex.py;0;4
 FILE_NAME_5=9990;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fproject%2Fproj_background.py;0;4
 FILE_NAME_6=2561;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_compare.py;0;4
 FILE_NAME_7=25180;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_data.py;0;4
@@ -30,7 +30,7 @@ FILE_NAME_8=0;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2
 FILE_NAME_9=14531;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_local.py;0;4
 FILE_NAME_10=0;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_log.py;0;4
 FILE_NAME_11=1921;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fproj_process.py;0;4
-FILE_NAME_12=15634;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Ftools.py;0;4
+FILE_NAME_12=16129;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Ftools.py;0;4
 FILE_NAME_13=3000;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fcore%2Fuser_config.py;0;4
 FILE_NAME_14=11019;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fproject%2Fproj_setup.py;0;4
 FILE_NAME_15=1730;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fgroup%2FusfmTex.py;0;4
@@ -62,7 +62,7 @@ FILE_NAME_40=5643;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Fl
 FILE_NAME_41=7892;Sh;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Fresource%2Fexample%2Fexample-kjv.sh;0;4
 FILE_NAME_42=371;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fmanager%2Fmanager.py;0;4
 FILE_NAME_43=395;Python;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Flib%2Frapuma%2Fmanager%2Ftext.py;0;4
-FILE_NAME_44=8187;Sh;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Fresource%2Fexample%2Fexample-kyum.sh;0;4
+FILE_NAME_44=2109;Sh;0;EUTF-8;0;1;0;%2Fhome%2Fdennis%2FProjects%2Frapuma%2Fresource%2Fexample%2Fexample-kyum.sh;0;4
 
 [VTE]
 last_dir=/home/dennis/Projects/rapuma

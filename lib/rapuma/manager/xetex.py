@@ -148,7 +148,10 @@ class Xetex (Manager) :
             '0700' : ['ERR', 'Rendered file not found: <<1>>'],
             '0710' : ['WRN', 'PDF viewing is disabled.'],
             '0720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
-            '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]']
+            '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]'],
+
+            '1000' : ['WRN', 'XeTeX debugging is set to [<<1>>]. These are the paths XeTeX is seeing: [<<2>>]'],
+            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32']
 
         }
 
@@ -677,11 +680,23 @@ class Xetex (Manager) :
         # False, the following special environment vars will be run. If set to true,
         # an external version of XeTeX, provided it is installed, will run with its own
         # environment vars set elsewhere
-        if not self.projectConfig['Managers'][self.cType + '_Xetex'].has_key('runExternalXetex') or \
-                not self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex']['runExternalXetex']) :
+        runExternal = self.tools.str2bool(self.projectConfig['Managers'][self.cType + '_Xetex'].get('runExternalXetex', ''))
+        if not runExternal :
             envDict['PATH'] = os.path.join(self.local.rapumaXetexFolder, 'bin', 'x86_64-linux')
             envDict['TEXMFCNF'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c')
             envDict['TEXFORMATS'] = os.path.join(self.local.rapumaXetexFolder, 'texmf-local', 'web2c', 'xetex')
+            # To help with debugging the following hook has been added. This is not
+            # something the user would ever use. It is only for developer diagnostics.
+            # for infomation on what integers can be used refer to this URL:
+            # http://www.dcs.ed.ac.uk/home/latex/Informatics/Obsolete/html/kpathsea/kpathsea.html
+            debugXetex = self.projectConfig['Managers'][self.cType + '_Xetex'].get('debugKpse', None)
+            if debugXetex :
+                try :
+                    if int(debugXetex) > 0 :
+                        envDict['KPATHSEA_DEBUG'] = debugXetex
+                        self.log.writeToLog(self.errorCodes['1000'], [str(debugXetex), str(envDict)])
+                except :
+                    self.log.writeToLog(self.errorCodes['1090'], [debugXetex])
         else :
             envDict.update(os.environ)
 
