@@ -147,7 +147,7 @@ class ProjCommander (object) :
                 'restore'       : ['Restore a backup.',                             'rapuma project '       + pid + ' backup    restore '], 
                 'template'      : ['Create a template of the project.',             'rapuma project '       + pid + ' template  save --id $1 '], 
                 'updateScripts' : ['Update the project scripts.',                   'rapuma project '       + pid + ' project update --update_type helper '], 
-                'bind'          : ['Create the binding PDF file',                   'if [ "$1" ]; then CMD=" $1"; fi; rapuma project ' + pid + ' project   bind $CMD '], 
+                'bind'          : ['Create the binding PDF file',                   'if [ "$1" ]; then CMD=" $1"; fi; if [ "$2" ]; then CMD=" $1 $2"; fi; rapuma project ' + pid + ' project bind $CMD '], 
                 'placeholdOff'  : ['Turn off illustration placeholders.',           'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders False '], 
                 'placeholdOn'   : ['Turn on illustration placeholders.',            'rapuma settings '      + pid + ' ' + mid + '_layout Illustrations useFigurePlaceHolders True '] 
             }
@@ -180,7 +180,7 @@ class ProjCommander (object) :
                 'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
                 'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
                 'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 
-                'render'        : ['Render ' + gid + ' group PDF file.',            'if [ "$1" ]; then CMD="--cid_list $1"; fi; if [ "$2" ]; then CMD="--cid_list $1 $2"; fi; rapuma group ' + pid + ' ' + gid + ' group render $CMD '], 
+                'render'        : ['Render ' + gid + ' group PDF file.',            'if [ "$1" ]; then CMD="--cid_list $1"; fi; if [ "$2" ]; then CMD="--cid_list $1 $2"; fi; if [ "$3" ]; then CMD="--cid_list $1 $2 $3"; fi; rapuma group ' + pid + ' ' + gid + ' group render $CMD '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'if [ "$2" ]; then CMD="--cid_list $2"; fi; rapuma group ' + pid + ' ' + gid + ' group update --source_path $1 $CMD '], 
                 'background'    : ['Re/Create the project background.',             'rapuma project '   + pid + ' project update --update_type background '], 
                 'transparency'  : ['Re/Create the project diagnostic layer.',       'rapuma project '   + pid + ' project update --update_type diagnostic '], 

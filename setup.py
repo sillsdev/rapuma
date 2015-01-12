@@ -39,7 +39,7 @@ datafiles = []
 # This sets the path for usr/local/share/rapuma
 dataprefix = "share/rapuma"
 
-for subdir in ('doc', 'resource', 'config', 'xetex-32', 'xetex-64') :
+for subdir in ('doc', 'resource', 'config', 'xetex-64') :
     for (dp, dn, fn) in os.walk(subdir) :
         datafiles.append((os.path.join(dataprefix, dp), [os.path.join(dp, f) for f in fn]))
 
