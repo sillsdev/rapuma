@@ -94,6 +94,15 @@ rapuma project ENG-LATN-KJVTEST project add
 rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
 rapuma group ENG-LATN-KJVTEST OT group add --source_path ~/Publishing/my_source/KJV
 
+# If changes are made to a component, that component will need to be 
+# re-updated or re-imported into the project. This is an example of a
+# command that will do that:
+
+#   rapuma group ENG-LATN-KJVTEST NT group update --cid_list jhn --source_path ~/Publishing/my_source/KJV
+
+# If the entire group needs to be updated, then just leave out the
+# --cid_list parameter. Then all the group components will be updated.
+
 
 ## ADDING DOCUMENT FEATURES
 # There are a number of features that can be added to a document to help
