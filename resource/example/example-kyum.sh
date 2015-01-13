@@ -23,9 +23,15 @@
 # You may wish to locate it in a different place on your system. Be sure
 # that is reflected in the commands of the rest of the exercises for
 # this example. Now find the resource/example/KYUM.zip file in the Rapuma
-# program folder and copy it to your newly created sources folder.
+# resource folder and copy it to your newly created sources folder.
 # Extract the contents which is in the KYUM folder into the my_source
-# folder. Once this is done you should be ready to work through the rest
+# folder.
+#
+# This example also includes illustrations so it is useful to also find
+# the KYUM_Illustrations.zip file and extract that into the my_source
+# folder too for future access.
+
+# Once this is done you should be ready to work through the rest
 # of this example script.
 
 
@@ -94,6 +100,15 @@ rapuma project KYU-MYMR-KYUMTEST project add
 # with this command:
 
 rapuma group KYU-MYMR-KYUMTEST NT group add --source_path ~/Publishing/my_source/KYUM
+
+# If changes are made to a component, that component will need to be 
+# re-updated or re-imported into the project. This is an example of a
+# command that will do that:
+
+#   rapuma group KYU-MYMR-KYUMTEST NT group update --cid_list jhn --source_path ~/Publishing/my_source/KYUM
+
+# If the entire group needs to be updated, then just leave out the
+# --cid_list parameter. Then all the group components will be updated.
 
 
 ## ADDING DOCUMENT FEATURES
@@ -267,3 +282,49 @@ rapuma group KYU-MYMR-KYUMTEST NT group render --cid_list heb --diagnostic
 # As there is currently only one group in this particular example, this
 # this will not be covered at this time. For more information on binding
 # please refer to the KJV example.
+
+
+## WORKING WITH ILLUSTRATIONS
+# Scripture publications often need illustrations. Rapuma can work with
+# basic illustration placement in the running text. A number of things
+# need to happen for successful illustration useage. First, \fig markers
+# need to be found in the source text. If they are not in the original,
+# there is no foundational information to work with for placing the
+# illustrations. With valid \fig markers in the source text, Rapuma will
+# create/populate the illustration.conf file when the source text is
+# imported into the project. Once the import is completed you will see
+# that the illustration.conf file now contains entries for six
+# illustrations that are used in the Book of John. (For this example we
+# limit illustrations to just that book.)
+#
+# Next we need to bring our illustration files into the project. One way
+# way is to just copy them into the project Illustration folder. They
+# can be found in my_source/KYUM_Illustrations. Copy the six png files
+# there to KYU-MYMR-KYUMTEST/Illustration folder.
+# 
+# With the illustration files in place, at this point we need to
+# "turn on" illustrations with this command:
+#
+#   rapuma settings KYU-MYMR-KYUMTEST project Groups/NT useIllustrations True
+#
+# When you render now, The illustrations will be placed but you will only
+# see a box representing where the image is supposed to go. These boxes
+# are called figure place holders. This is set this way by default to
+# allow for faster rendering during composition. To be able to view
+# illustrations in the rendered output use this command:
+#
+#   rapuma settings KYU-MYMR-KYUMTEST layout DocumentFeatures useFigurePlaceHolders False
+#
+# More than likely the illustrations will not be in the correct place
+# and adjustments will be needed. The placement settings are found in
+# the illustration.conf file. There are a number of settings that can
+# help adjust the placement and size of the illustrations. For example,
+# in the book of John, which was just rendered, on page 5, the illustration
+# which is to go with chapter 2, verse 6 is in the upper left corner
+# and it should be in the lower right. This command will change it:
+#
+#   rapuma settings KYU-MYMR-KYUMTEST illustration NT/lb00135 position br
+#
+# This is just one of the many adjustments that can be made to an
+# illustration.
+
