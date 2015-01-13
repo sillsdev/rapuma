@@ -1,19 +1,45 @@
-RUNNING THE REPOSITORY VERSION FOR DEVELOPMENT
-----------------------------------------------
-If you are doing Rapuma development work and production side-by-side, you will want to keep as much seperation between these two worlds. To do this, open a terminal in the root of the rapuma repository on your local machine. Then run this script:
+TIPS FOR RAPUMA DEVELOPMENT
+	By Dennis Drescher (dennis_drescher@sil.org)
+	Last edited: 13 January 2015
+------------------------------------------------------------------------
 
-    . ./dev_setup.sh
+* WORKING WITH GIT
+When you "GIT" Rapuma, the master branch is the default. That version should always be good for production work. However, to change to the "experimental" branch where active development is going on and things are more on the cutting edge, use this command:
 
-(Note the "." just before "./", that is not a typo.)
+    git checkout personal/dennis
 
-In the same terminal session, create this link to your ~/bin folder (if you have not done this already):
+There is no guarantee what will happen with the experimental branch, it could break your project and you could loose data. You have been warned. To change back to the stable branch, use this command: 
 
-    ln -s ~/Projects/rapuma/scripts/rapuma ~/bin/rpm
+    git checkout master
 
-(By the way, if you are running the Red Hat Package manager on your system you may want to use another name other than "rpm")
+One way to better know what branch you are in is to have it displayed on the command line. The following does not work in all situations. Look for the ~/.bashrc file in your home folder. If you do not have one, then create one and add this line to it:
 
-This will create a link from the source code area that has a slightly different name than the installed production version. For production you will use "rapuma" and for development, in the terminal session where you ran the dev_setup.sh, run the command "rpm" to run off of development source code.
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\[\033[1;34m\]$(__git_ps1)\[\033[0m\]\$ '
 
-Please note that you will need to stay in that terminal session to use Rapuma in developer mode. The modified settings are only for that session and will go away as soon as you close the terminal. If you open a new window, and run rpm, it will actually be running the system-wide version, leaving you very confused, at least it did me. :)
+If you do have one, and it is somewhat complecated, then you might want to look at this tutorial before attempting to edit it:
+
+    http://askubuntu.com/questions/249174/prepend-current-git-branch-in-terminal
+
+
+** WORKING WITH XETEX
+XeTeX normally comes bundled with Rapuma. However, it may become necessary to use an external version of XeTeX. The best source for this is through the texlive package. To install texlive, use this command in the terminal:
+
+    sudo apt-get install texlive-xetex
+
+To access the external version you will need to go into the project.conf file of the project you are working on, go to the Managers/usfm_Xetex section, find the runExternalXetex key and change it to True. This will enable Rapuma to render using a system installed version of XeTeX.
+
+This should install just enough to render with an external version of XeTeX. In the process of installing texlive, a dependency conflict may arrise, this is because of the way the texlive has been packaged (at least before 2015). This conflict will block TECKit from being able to install correctly. It may be some time before this is fixed so a work-around can be applied by doing the following:
+
+    sudo dpkg-divert --package teckit --add /usr/bin/teckit_compile
+
+To help with debugging XeTeX a hook has been added to the xetex.py module. This is something the user would never use. It is only for developer diagnostics.
+To turn it on go to the project.conf of the current project and find the Managers/usfm_Xetex section, then find the debugKpse key. The default setting is 0 to turn on debugging, enter an integer of 1, 2, 4, 8, 16 or 32, depending on what you need to check.
+For infomation on what each integers will yeild, please refer to this URL: http://www.dcs.ed.ac.uk/home/latex/Informatics/Obsolete/html/kpathsea/kpathsea.html
+
+
+*** WORKING WITH PYTHON
+If you are doing Rapuma development work you might need this package:
+
+    sudo apt-get install pyside-tools
 
 

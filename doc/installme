@@ -1,6 +1,7 @@
-Installation instructions for Rapuma
+INSTALLATION INSTRUCTIONS FOR RAPUMA
 	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 19 August 2014
+	Last edited: 13 January 2015
+------------------------------------------------------------------------
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
@@ -69,18 +70,6 @@ Some additional SIL packages that may, or may not, be available via that repo:
 
     sudo apt-get install libteckit-perl teckit
 
-If you are doing some Rapuma development work you might need these:
-
-    sudo apt-get install pyside-tools
-
-XeTeX normally comes bundled with Rapuma. However, it may become necessary to use an external version of XeTeX. The best source for this is through the texlive package. To install texlive, use this command in the terminal:
-
-    sudo apt-get install texlive-xetex
-
-This should install just enough to render with an external version of XeTeX. In the process of installing texlive, a dependency conflict may arrise, this is because of the way the texlive package is currently put together. It will block TECKit from being able to install correctly. It may be some time before this is fixed so a work-around can be applied by doing the following:
-
-    sudo dpkg-divert --package teckit --add /usr/bin/teckit_compile
-
 Once the above packages are installed, log out and log back in again so the system will properly recognize the newly installed packages.
 
 With all the above packages installed, we are ready to move on to installing Rapuma publishing package.
@@ -96,23 +85,7 @@ Open a terminal in the Projects folder, then run this command:
 
     git clone https://github.com/sillsdev/rapuma.git
 
-This will create a folder named rapuma in the Projects folder. The main branch is the default. That version should always be good for production work. However, to change to the "experimental" branch where active development is going on and things are more on the cutting edge, use this command:
-
-    git checkout personal/dennis
-
-There is no guarantee what will happen with the experimental branch, it could break your project and you could loose data. You have been warned. To change back to the stable branch, use this command: 
-
-    git checkout master
-
-Each time you change to a different branch, be sure to follow the setup instructions below so the current version is properly installed into your system. Otherwise confusion will result.
-
-One way to better know what branch you are in is to have it displayed on the command line. The following does not work in all situations. Look for the ~/.bashrc file in your home folder. If you do not have one, then create one and add this line to it:
-
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\[\033[1;34m\]$(__git_ps1)\[\033[0m\]\$ '
-
-If you do have one, and it is somewhat complecated, then you might want to look at this tutorial before attempting to edit it:
-
-    http://askubuntu.com/questions/249174/prepend-current-git-branch-in-terminal
+This will create a folder named rapuma in the Projects folder. The master branch is the default.
 
 
 -------------------------------------------------------------------------------
