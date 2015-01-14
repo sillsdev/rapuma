@@ -253,27 +253,6 @@ def userArguments (args) :
             else :
                 sys.exit('\nERROR: Command not supported. Process halting.\n')
 
-    ###### EXAMPLE
-    # Run example scripts
-    elif sys.argv[1].lower() == 'example' :
-        if args.script :
-            os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
-    # Test for valid project ID if this is anything else than a project call
-    elif sys.argv[1].lower() != 'project' :
-        if args.project_id not in projList :
-            sys.exit('\nERROR: Project [' + args.project_id + '] not found. Process halting.\n')
-        # Update the creator version if necessary
-        pid         = args.project_id
-        local       = ProjLocal(pid)
-        pc          = Config(pid)
-        pc.getProjectConfig()
-        checkCreatorVersion(pid, pc.projectConfig, systemVersion)
-
-    # Command processing
-    # Dummy place holder for 'system' which as actually processed above
-    if sys.argv[1].lower() == 'system' :
-        pass
-
     ##### PROJECT
     # Project level commands
     elif sys.argv[1].lower() == 'project' :
@@ -695,7 +674,7 @@ if __name__ == '__main__' :
     # Group
     grCommandType           = ['export', 'group', 'illustration', 'postprocess', 'preprocess']
     grCommand               = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
-    componentType           = ['usfm', 'map', 'pdf', 'toc']
+    componentType           = ['usfm', 'pdf']
     compareTest             = ['backup', 'source']
     # Packages
     pkCommandType           = ['font', 'macro']
@@ -703,8 +682,6 @@ if __name__ == '__main__' :
     # Processes
     pcCommandType           = ['export', 'preprocess', 'postprocess']
     pcCommand               = ['add', 'remove', 'update']
-    # Example
-    examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
 
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -783,10 +760,6 @@ if __name__ == '__main__' :
     settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
     settingsCommand.add_argument('key', help='The key which has the value to be changed.')
     settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
-
-    # Add example subprocess arguments
-    exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
-    exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
 
     # Send the collected arguments to the handler
     userArguments(parser.parse_args())
