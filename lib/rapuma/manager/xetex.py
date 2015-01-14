@@ -26,7 +26,6 @@ from rapuma.manager.manager             import Manager
 from rapuma.project.proj_config         import Config
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_diagnose       import ProjDiagnose
-from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
 from rapuma.group.usfm_data             import UsfmData
@@ -70,7 +69,6 @@ class Xetex (Manager) :
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
         # Bring in some manager objects we will need
-        self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.usfmData               = UsfmData()
         self.cidChapNumDict         = self.usfmData.cidChapNumDict()
@@ -105,7 +103,7 @@ class Xetex (Manager) :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
-        self.useHyphenation         = self.proj_hyphenation.useHyphenation
+        self.useHyphenation         = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
         self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
         # Make any dependent folders if needed
@@ -127,12 +125,10 @@ class Xetex (Manager) :
             '1040' : ['LOG', 'Created: [<<1>>]'],
 
             '0420' : ['WRN', 'TeX settings file has been frozen for debugging purposes.'],
-            '0430' : ['LOG', 'TeX hyphenation dependent file [<<1>>] has been recreated.'],
             '0440' : ['LOG', 'Created: [<<1>>]'],
             '0460' : ['LOG', 'Settings changed in [<<1>>], [<<2>>] needed to be recreated.'],
             '0465' : ['LOG', 'File: [<<1>>] missing, created a new one.'],
             '0470' : ['ERR', 'Macro package [<<1>>] is not recognized by the system.'],
-            '0480' : ['ERR', 'Cannot create critical hyphenation file: [<<1>>]'],
 
             '0600' : ['MSG', '<<1>> cannot be viewed, PDF viewer turned off.'],
             '0610' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] group.'],
@@ -151,9 +147,23 @@ class Xetex (Manager) :
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]'],
 
             '1000' : ['WRN', 'XeTeX debugging is set to [<<1>>]. These are the paths XeTeX is seeing: [<<2>>]'],
-            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32']
+            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32'],
+
+            '2000' : ['ERR', 'TeX hyphenation file [<<1>>] not found. Either find that file or turn off hyphenation. Process halted.']
 
         }
+
+        # Do a check for dependent files
+        # Note that other checks like this done below could be moved here
+        # In the case of hyphenation, the current model expects that the
+        # hyphen exclusions and lccode files are generated externally
+        # and imported into the project. If hyphenation is turned on and
+        # one of these files are missing, the process is halted.
+        if self.useHyphenation :
+            if not os.path.exists (self.local.grpHyphExcTexFile) :
+                self.log.writeToLog(self.errorCodes['2000'], [self.tools.fName(self.local.grpHyphExcTexFile)])
+            if not os.path.exists (self.local.lccodeTexFile) :
+                self.log.writeToLog(self.errorCodes['2000'], [self.tools.fName(self.local.lccodeTexFile)])
 
 
 ###############################################################################
@@ -282,63 +292,6 @@ class Xetex (Manager) :
         the main default component extentions settings style file.'
 
         return self.makeExtFile(self.local.grpExtStyFile, description)
-
-
-    def makeGrpHyphExcTexFile (self) :
-        '''Create a TeX hyphenation file. There must be a texWordList for this
-        to work properly.'''
-
-        description = 'This is an auto-generated hyphenation exceptions word list for this group. \
-             Please refer to the documentation for details on how to make changes.'
-
-        # Try to get dependent files in place
-        if not os.path.isfile(self.local.compHyphFile) :
-            # Call the Hyphenation manager to create a sorted file of hyphenated words
-            # We will not use force (set to False) for this.
-            self.proj_hyphenation.updateHyphenation(False)
-
-        # Create the output file here
-        with codecs.open(self.local.grpHyphExcTexFile, "w", encoding='utf_8') as hyphenTexObject :
-            hyphenTexObject.write(self.tools.makeFileHeader(self.tools.fName(self.local.grpHyphExcTexFile), description))
-            hyphenTexObject.write('\hyphenation{\n')
-            with codecs.open(self.local.compHyphFile, "r", encoding='utf_8') as hyphenWords :
-                for word in hyphenWords :
-                    # Strip out commented lines/words
-                    if word[:1] != '#' and word != '' :
-                        # Swap the generic hyphen markers out if they are there
-                        hyphenTexObject.write(re.sub(u'<->', u'-', word))
-
-            hyphenTexObject.write('}\n')
-
-        return True
-
-
-    def makeLccodeTexFile (self) :
-        '''Make a simple starter lccode file to be used with TeX hyphenation.'''
-
-        description = 'This is an auto-generated lccode rules file for this project. \
-            Please refer to the documentation for details on how to make changes.'
-
-        # Create the file and put default settings in it
-        with codecs.open(self.local.lccodeTexFile, "w", encoding='utf_8') as lccodeObject :
-            lccodeObject.write(self.tools.makeFileHeader(self.local.lccodeTexFileName, description))
-            lccodeObject.write('\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen\n')
-            # Add in all our non-word-forming characters as found in our PT project
-
-
-# FIXME: Remove the PT dependency
-
-
-            #for c in self.pt_tools.getNWFChars() :
-                #uv = self.tools.rtnUnicodeValue(c)
-                ## We handel these chars special in this context
-                #if not uv in ['2011', '002D'] :
-                    #lccodeObject.write('\lccode "' + uv + ' = "' + uv + '\n')
-
-            # Add special exceptions
-            lccodeObject.write('\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work\n')
-
-        return True
 
 
 ###############################################################################
@@ -576,33 +529,6 @@ class Xetex (Manager) :
         return True
 
 
-    def checkGrpHyphExcTexFile (self) :
-        '''If hyphenation is used, check for the exsistance of the group TeX Hyphenation 
-        exception file. If not found, kindly ask the appropreate function to make it.'''
-
-        if self.useHyphenation :
-            # The TeX group hyphen exceptions file
-            if not os.path.isfile(self.local.grpHyphExcTexFile) or self.tools.isOlder(self.local.grpHyphExcTexFile, self.local.compHyphFile) :
-                if self.makeGrpHyphExcTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [self.local.grpHyphExcTexFileName])
-                else :
-                    # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [self.local.grpHyphExcTexFile])
-                    return False
-            # The TeX lccode file
-            if not os.path.exists(self.local.lccodeTexFile) or self.tools.isOlder(self.local.lccodeTexFile, self.local.grpHyphExcTexFile) :
-                if self.makeLccodeTexFile() :
-                    self.log.writeToLog(self.errorCodes['0430'], [self.local.lccodeTexFileName])
-                else :
-                    # If we can't make it, we return False
-                    self.log.writeToLog(self.errorCodes['0480'], [self.local.lccodeTexFileName])
-                    return False
-            return True
-        else :
-            # If Hyphenation is turned off, we return True and don't need to worry about it.
-            return True
-
-
 ###############################################################################
 ################################# Main Function ###############################
 ###############################################################################
@@ -640,7 +566,6 @@ class Xetex (Manager) :
         # Create, if necessary, the gid.tex file
         # First, go through and make/update any dependency files
         self.makeSettingsTexFile()
-        self.checkGrpHyphExcTexFile()
         # Now make the gid main setting file
         self.makeGidTexFile(cidList)
         # Dynamically create a dependency list for the render process
@@ -810,11 +735,6 @@ class Xetex (Manager) :
                 # Next rename
                 os.rename(viewFile, saveFile)
 
-            
-        #print ':::', saveFile, ';;;', viewFile
-
-        #import pdb; pdb.set_trace()
-
         ##### Viewing #####
         # First get the right file name to view
         if saveFile :
@@ -825,11 +745,10 @@ class Xetex (Manager) :
             # of the gidPdfFile if this was a view-only operation
             # but if the -view version was created after the original
             # gidPdfFile, we know that's the one we want to see
-            if os.path.isfile(viewFile) :
-                if not self.tools.isOlder(self.local.gidPdfFile, viewFile) :
-                    viewFile = self.local.gidPdfFile
-            else :
-                viewFile = self.local.gidPdfFile
+            if not os.path.isfile(viewFile) :
+                viewFile = self.local.gidPdfFile.replace(gid + '.pdf', gid + '-view.pdf')
+                if os.path.exists(viewFile) :
+                    shutil.copy(self.local.gidPdfFile, viewFile)
 
         # Now view it
         if os.path.isfile(viewFile) :

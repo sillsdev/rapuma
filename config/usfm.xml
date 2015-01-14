@@ -44,9 +44,9 @@ Todo:
     <setting>
         <name>Source Editor</name>
         <key>sourceEditor</key>
-        <description>The editor the source text comes from.</description>
+        <description>The editor the source text comes from. Paratext is the assumed default. Changing this might disrupt some functions.</description>
         <type>string</type>
-        <value></value>
+        <value>paratext</value>
     </setting>
     <setting>
         <name>Macro Package</name>

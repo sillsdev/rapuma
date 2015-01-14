@@ -1,0 +1,20 @@
+% This is an example lccode.tex file and it used in the hyphenation
+% process. This needs to have a good explanation written as to what
+% this file is for and how to manage it, but alas we've run out of
+% time. Just know that for hyhpenation to work properly, this file
+% must be present in a group where hyphenation is expected to work.
+
+\lccode "2011 = "2011	% Allow TeX hyphenation to ignore a Non-break hyphen
+\lccode "0029 = "0029
+\lccode "0021 = "0021
+\lccode "002E = "002E
+\lccode "002C = "002C
+\lccode "003A = "003A
+\lccode "003F = "003F
+\lccode "003B = "003B
+\lccode "2019 = "2019
+\lccode "201D = "201D
+\lccode "200C = "200C
+\lccode "200D = "200D
+\lccode "2026 = "2026
+\catcode "2011 = 11	% Changing the catcode here allows the \lccode above to work

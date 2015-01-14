@@ -1,0 +1,24 @@
+% This is a hyphenation test file for the Rapuma KJV example. This contains
+% a simple hyphenation inventory of one word for this publication. The
+% word is "prophet" is found on the first page of the Book of John.
+% normally this word would not be broken with a hyphen as we have done.
+% However, doing it this way causes that word to break about mid-way
+% down on the right column of the first page of the book. By turning
+% hyphenation on and off you can see if it works or not. Note that if
+% you move the hyphen character you can see how TeX responds. Obviously
+% proper hyphenation should follow rules and the hyphen character is not
+% radomly located as it is here.
+%
+% One final not about hyphenation in Rapuma. Hyphenation in TeX is
+% normally done with carefully crafted rules that TeX uses to break words
+% in the proper place. It also allows for exceptions. With most minority
+% langauges, the actual hyphenation rules have not been formed so hyphenation
+% cannot work. However, by using an execeptions list, we can get TeX to
+% break words as described in list like below. That is what this file is
+% for. 
+
+\hyphenation{
+
+pro-phet
+
+}

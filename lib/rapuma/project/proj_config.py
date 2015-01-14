@@ -48,7 +48,6 @@ class Config (object) :
         self.projectConfig                  = None
         self.adjustmentConfig               = None
         self.layoutConfig                   = None
-        self.hyphenationConfig              = None
         self.illustrationConfig             = None
         self.macPackConfig                  = None
 
@@ -111,12 +110,6 @@ class Config (object) :
         '''Load/return the layout configuation object.'''
 
         self.layoutConfig = self.tools.loadConfig(self.local.layoutConfFile, self.local.layoutConfXmlFile)
-
-
-    def getHyphenationConfig (self) :
-        '''Load/return the hyphen configuation object.'''
-
-        self.hyphenationConfig = self.tools.loadConfig(self.local.hyphenationConfFile, self.local.hyphenationConfXmlFile)
 
 
     def getIllustrationConfig (self) :
