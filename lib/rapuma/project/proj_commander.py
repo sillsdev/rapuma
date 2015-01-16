@@ -177,9 +177,6 @@ class ProjCommander (object) :
         # Return a dictionary of all the commands we generate
         return {
                 'compare'       : ['Compare component working text with backup.',   'if [ "$1" ]; then CMD="--cid_list $1"; fi; rapuma group ' + pid + ' ' + gid + ' group compare --compare_type backup $CMD '], 
-                'hyphenOff'     : ['Turn off hyphenation in a group.',              'rapuma group '     + pid + ' ' + gid + ' hyphenation   remove '], 
-                'hyphenOn'      : ['Turn on hyphenation in a group.',               'rapuma group '     + pid + ' ' + gid + ' hyphenation   add '], 
-                'hyphenUpdate'  : ['Update hyphenation in a group.',                'rapuma group '     + pid + ' ' + gid + ' hyphenation   update $1 '], 
                 'render'        : ['Render ' + gid + ' group PDF file.',            'if [ "$1" ]; then CMD="--cid_list $1"; fi; if [ "$2" ]; then CMD="--cid_list $1 $2"; fi; if [ "$3" ]; then CMD="--cid_list $1 $2 $3"; fi; rapuma group ' + pid + ' ' + gid + ' group render $CMD '], 
                 'update'        : ['Update the ' + gid + ' group from its source.', 'if [ "$2" ]; then CMD="--cid_list $2"; fi; rapuma group ' + pid + ' ' + gid + ' group update --source_path $1 $CMD '], 
                 'background'    : ['Re/Create the project background.',             'rapuma project '   + pid + ' project update --update_type background '], 

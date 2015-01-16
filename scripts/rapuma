@@ -102,7 +102,6 @@ from rapuma.project.proj_config         import Config
 from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
-from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.manager.project             import Project
@@ -253,27 +252,6 @@ def userArguments (args) :
                 uc.setSystemSettings('Resources', 'cloud', path)
             else :
                 sys.exit('\nERROR: Command not supported. Process halting.\n')
-
-    ###### EXAMPLE
-    # Run example scripts
-    elif sys.argv[1].lower() == 'example' :
-        if args.script :
-            os.system(os.path.join(rapumaHome, 'resource/example/example-' + args.script.lower() + '.sh'))
-    # Test for valid project ID if this is anything else than a project call
-    elif sys.argv[1].lower() != 'project' :
-        if args.project_id not in projList :
-            sys.exit('\nERROR: Project [' + args.project_id + '] not found. Process halting.\n')
-        # Update the creator version if necessary
-        pid         = args.project_id
-        local       = ProjLocal(pid)
-        pc          = Config(pid)
-        pc.getProjectConfig()
-        checkCreatorVersion(pid, pc.projectConfig, systemVersion)
-
-    # Command processing
-    # Dummy place holder for 'system' which as actually processed above
-    if sys.argv[1].lower() == 'system' :
-        pass
 
     ##### PROJECT
     # Project level commands
@@ -513,75 +491,42 @@ def userArguments (args) :
             ProjSetup(sysConfig, pid).compareGroup(compare_type, gid, cid_list)
         elif cmd == 'restore' :
             ProjSetup(sysConfig, pid).restoreGroup(gid, cid_list)
-
- 
-
-# FIXME: Might need to move it to another place than group
-            #elif cmdType == 'hyphenation' :
-                #ProjHyphenation(pid, gid).manageHyphenation(cmd)
-            #elif cmdType == 'illustration' :
-                #sys.exit('\nERROR: Add illustrations on not completed yet')
-            #elif cmdType == 'preprocess' :
-                #prc = ProjProcess(pid)
-                #prc.turnOnOffPreprocess(gid, True)
-                #prc.checkForPreprocessScript (gid)
-            #else :
-                #cmdError(cmd, cmdType)
-# Remove cmd for these are here 
-            #elif cmdType == 'hyphenation' :
-                #ProjHyphenation(pid, gid).manageHyphenation(cmd)
-            #elif cmdType == 'illustration' :
-                #sys.exit('\nERROR: Add illustrations off not completed yet')
-            #elif cmdType == 'preprocess' :
-                #ProjSetup(sysConfig, pid).turnOnOffPreprocess(gid, False)
-            #else :
-                #cmdError(cmd, cmdType)
-
         elif cmd == 'render' :
-            # Turn on background, Doc info or a diagnostic layer
-            # Note that Doc info can only be used with a background
-            # and diagnostic layer cannot be used with a background
-            # turned on at the same time
+            # First we will set whatever peripheral features to what
+            # they need to be. After we will turn them off.
+            # Hyphenation can be run in any case
+            if args.hyphenation :
+                ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
+            # Now check and set background features
             if args.background and args.diagnostic :
                 sys.exit('\nERROR: Cannot have background (--background/-b) and diagnostic (--diagnostic/-d) turned on at the same time. Process halting.\n')
             elif args.background and args.doc_info :
                 # Turn on background and Doc info
                 ProjBackground(pid).turnOnBackground()
                 ProjBackground(pid).turnOnDocInfo()
-                # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, save)
-                # Turn off background
-                ProjBackground(pid).turnOffDocInfo()
-                ProjBackground(pid).turnOffBackground()
             elif args.background :
                 # Turn on background only
                 ProjBackground(pid).turnOnBackground()
                 ProjBackground(pid).turnOffDocInfo()
                 ProjDiagnose(pid).turnOffDiagnostic()
-                # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, save)
-                # Turn off background
-                ProjBackground(pid).turnOffBackground()
             elif args.doc_info :
                 # Turn on doc info on only
                 ProjBackground(pid).turnOnDocInfo()
                 ProjDiagnose(pid).turnOffDiagnostic()
                 ProjBackground(pid).turnOffBackground()
-                # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, save)
-                # Turn off doc info
-                ProjBackground(pid).turnOffDocInfo()
             elif args.diagnostic :
                 # Turn on diagnostic only
                 ProjDiagnose(pid).turnOnDiagnostic()
                 ProjBackground(pid).turnOffBackground()
                 ProjBackground(pid).turnOffDocInfo()
-                # Render the group
-                Project(pid, gid).renderGroup(cid_list, pages, override, save)
-                # Turn off diagnostic
-                ProjDiagnose(pid).turnOffDiagnostic()
-            else :
-                Project(pid, gid).renderGroup(cid_list, pages, override, save)
+            # Now we will render
+            Project(pid, gid).renderGroup(cid_list, pages, override, save)
+            # Just to be safe we will just turn everything off
+            ProjDiagnose(pid).turnOffDiagnostic()
+            ProjBackground(pid).turnOffDocInfo()
+            ProjBackground(pid).turnOffBackground()
+            if args.hyphenation :
+                ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
         elif cmd == 'lock' :
             ProjSetup(sysConfig, pid).lockUnlock(gid, True)
         elif cmd == 'unlock' :
@@ -727,9 +672,9 @@ if __name__ == '__main__' :
     updateType              = ['background', 'diagnostic', 'helper']
     mediaType               = ['book']
     # Group
-    grCommandType           = ['export', 'group', 'hyphenation', 'illustration', 'postprocess', 'preprocess']
+    grCommandType           = ['export', 'group', 'illustration', 'postprocess', 'preprocess']
     grCommand               = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
-    componentType           = ['usfm', 'map', 'toc']
+    componentType           = ['usfm', 'pdf']
     compareTest             = ['backup', 'source']
     # Packages
     pkCommandType           = ['font', 'macro']
@@ -737,8 +682,6 @@ if __name__ == '__main__' :
     # Processes
     pcCommandType           = ['export', 'preprocess', 'postprocess']
     pcCommand               = ['add', 'remove', 'update']
-    # Example
-    examples                = ['jas', 'jas-b', 'jas-t', 'jas_web']
 
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -781,6 +724,7 @@ if __name__ == '__main__' :
     groupCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
     groupCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
     groupCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
+    groupCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
     groupCommand.add_argument('-t', '--component_type', choices=componentType, help='The group component type is needed for creating a new group.')
     groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
@@ -816,10 +760,6 @@ if __name__ == '__main__' :
     settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
     settingsCommand.add_argument('key', help='The key which has the value to be changed.')
     settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
-
-    # Add example subprocess arguments
-    exampleCommand = subparsers.add_parser('example', help='Commands for running example scripts.')
-    exampleCommand.add_argument('-s', '--script', choices=examples, help='Specify an example script for executing.')
 
     # Send the collected arguments to the handler
     userArguments(parser.parse_args())

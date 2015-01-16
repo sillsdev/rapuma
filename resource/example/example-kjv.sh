@@ -236,6 +236,26 @@ rapuma group ENG-LATN-KJVTEST NT group render --cid_list heb --diagnostic
 # --diagnostic at the same time. That will cause an error
 
 
+## ADDING HYPHENATION TO A PROJECT
+# Because XeTeX has hyphenation capabilities, Rapuma projects have a
+# place for the necessary files to be which will allow hyphenation in
+# XeTeX to work. To be sure hyphenation will work properly, two files
+# must be present (copied into) the component group folder that is
+# being rendered. For this exersize two files have been prepared for
+# use. They can be found in the resources folder. Copy the
+# kjv-hyphenation.tex and kjv-lccode.tex files to the project's NT group
+# folder which is in the Component folder. Rename them to NT-hyphenation.tex
+# and NT-lccode.tex. After this has been done you should be able to run
+# this render command and see some results:
+
+rapuma group ENG-LATN-KJVTEST NT group render --cid_list jhn --hyphenation
+
+# Because the hyphenation example we use is very simple, we only render
+# the Book of John for this example so results can be easily seen. Please
+# refer the notes in the NT-hyphenation.tex file in the project for more
+# information on how it all works and how to see the results.
+
+
 ## USING THE BIND COMMAND
 # The composition process in Rapuma is a render, adjust repeat cycle.
 # Once every component (book) in all the groups has gone through the

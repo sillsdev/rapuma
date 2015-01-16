@@ -803,13 +803,13 @@ class Template (object) :
         tc['ProjectInfo']['projectCreateDate']          = ''
         tc['ProjectInfo']['projectCreateDate']          = ''
         # Remove unnecessary folders
-        needNot = ['Component', 'Deliverable', 'Draft', 'Proof', 'Final', 'Illustration', 'Hyphenation']
+        needNot = ['Component', 'Deliverable', 'Illustration']
         for f in needNot :
             fld = os.path.join(tempDir, f)
             if os.path.exists(fld) :
                 shutil.rmtree(fld)
         # Remove unnecessary config files
-        needNot = ['adjustment', 'hyphenation', 'illustration']
+        needNot = ['adjustment', 'illustration']
         for f in needNot :
             fl = os.path.join(tempDir, 'Config', f + '.conf')
             if os.path.exists(fl) :

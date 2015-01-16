@@ -28,7 +28,7 @@ contents = codecs.open(source, "rt", encoding="utf_8_sig").read()
 # Do stuff here
 
 # Please delete this warning message when you start modifying this script.
-tools.terminal('\nThe group preprocess script has not been modified yet. It is in its defaul form. Nothing has been done to the component data.\n(This anoying little message can be found in a file in your project Script folder.)\n')
+tools.terminal('\nThe group preprocess script has not been modified yet. It is in its default form. Nothing has been done to the component data.\n(This anoying little message can be found in a file in your project Script folder.)\n')
 
 # Examples:
 # Change cross reference into footnotes
