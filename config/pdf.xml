@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: pdf.xml
+Description:
+This is a component type description for PDF type component to be used 
+in most any type of project.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Component Source</name>
+        <key>compSource</key>
+        <description>Helpful information about the origins of a PDF file.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Component Renderer</name>
+        <key>renderer</key>
+        <description>The render for this kind of component. The value must correspond with a Rapuma method written for this specific renderer.</description>
+        <type>string</type>
+        <value>pdftk</value>
+    </setting>
+</root>
+

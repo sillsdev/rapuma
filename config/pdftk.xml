@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: pdftk.xml
+Description:
+This contains persistant values for pdftk component manager.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Init Command</name>
+        <key>initCommand</key>
+        <description>Any values that need to be in the command line for initialising pdftk.</description>
+        <type>string</type>
+        <value>pdftk</value>
+    </setting>
+</root>
+

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: text.xml
+Description:
+This is a settings file for the fixed manager.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <setting>
+        <name>Fixed File Type ID</name>
+        <key>fixedFileTypeId</key>
+        <description>The fixed file type ID indicates what this file/data will be used for. The default is PDF.</description>
+        <type>string</type>
+        <value>PDF</value>
+    </setting>
+</root>
+
