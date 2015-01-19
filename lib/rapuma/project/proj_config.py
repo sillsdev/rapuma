@@ -65,13 +65,7 @@ class Config (object) :
 
         # Test for gid before trying to finish the init
 
-
-
-
 #        import pdb; pdb.set_trace()
-
-
-
 
         if gid :
             if not self.projectConfig :

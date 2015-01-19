@@ -140,21 +140,8 @@ tools.terminal('\n\t\tWelcome to ' + systemName)
 tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
 
 ###############################################################################
-############################# Rapuma Functions ################################
+########################### Rapuma CLI Functions ##############################
 ###############################################################################
-
-def checkCreatorVersion (pid, projectConfig, systemVersion) :
-    '''Keep track of the version of Rapuma used in the current project.'''
-
-    if not projectConfig['ProjectInfo'].has_key('projectCreatorVersion') :
-        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
-        tools.writeConfFile(projectConfig)
-
-    if projectConfig['ProjectInfo']['projectCreatorVersion'] != systemVersion :
-        projectConfig['ProjectInfo']['projectCreatorVersion'] = systemVersion
-        tools.writeConfFile(projectConfig)
-        # Now update the scripts if that is needed
-        ProjCommander(pid).updateScripts()
 
 
 def trimLog (local) :
@@ -218,211 +205,62 @@ def userArguments (args) :
             tools.terminal('About: ' + systemAbout + '\n')
             return
 
-    ##### SYSTEM
-    # Pre-command process: System level commands
-    # FIXME: I think this section can be simplified, not sure how yet
-    if sys.argv[1].lower() == 'system' :
-        cmdType     = args.command_type
-        cmd         = args.command
-        setting     = args.setting
-        if cmdType == 'setup' :
-            # Single call for folders
-            if cmd == 'folders' :
-                if uc.makeHomeFolders() :
-                    tools.terminal('Updated Rapuma user folders.')
-                    return
-                else :
-                    sys.exit('\nERROR: Could not update Rapuma user folders. Use force (-f) to override current settings. Process halting.\n')
-            # Look for settings
-            if not setting :
-                sys.exit('\nERROR: No setting was given. Process halting.\n')
-            # Path checking
-            if cmd in ['cloud', 'project'] :
-                if not os.path.exists(tools.resolvePath(setting)) :
-                    sys.exit('\nERROR: Path given is not valid. Process halting.\n')
-                else :
-                    path = tools.resolvePath(setting)
-            if cmd == 'name' :
-                uc.setSystemSettings('System', 'userName', setting)
-            elif cmd == 'uid' :
-                uc.setSystemSettings('System', 'userID', setting)
-            elif cmd == 'project' :
-                uc.setSystemSettings('Resources', 'projects', path)
-            elif cmd == 'cloud' :
-                uc.setSystemSettings('Resources', 'cloud', path)
-            else :
-                sys.exit('\nERROR: Command not supported. Process halting.\n')
-
     ##### PROJECT
     # Project level commands
-    elif sys.argv[1].lower() == 'project' :
+    elif sys.argv[1].lower() == 'publication' :
         pid         = args.project_id
-        cmdType     = args.command_type
         cmd         = args.command
-        force       = args.force
-        save        = args.save
-        template    = args.id
-        sourcePath  = ''
-        targetPath  = ''
+        sub         = args.sub_command
+        path        = ''
         mediaType   = None
-        updateType  = None
         if args.media_type :
             mediaType = args.media_type
-        if args.update_type :
-            updateType = args.update_type
+        else :
+            # The default is book
+            mediaType = 'book'
         # Source path is optional but if given, resolve it
-        if args.source_path :
-            sourcePath = tools.resolvePath(args.source_path)
-            if not os.path.exists(sourcePath) :
-                sys.exit('\nERROR: Sourct path is not valid [' + sourcePath + ']. Process halting.\n')
-        # Target path is optional also but if given, resolve it
-        if args.target_path :
-            targetPath = tools.resolvePath(args.target_path)
-            if not os.path.exists(targetPath) :
-                sys.exit('\nERROR: Target path is not valid [' + targetPath + ']. Process halting.\n')
-        # Figure out what manage command this is and do it
-        if cmd == 'add' :
-            if cmdType == 'project' :
-                ProjSetup(sysConfig, pid).newProject(mediaType, template, force)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'bind' :
-            if cmdType == 'project' :
-                # A background and doc info can be added in a bind
-                # operation, but not a diagnostic layer
-                if args.background and args.doc_info :
-                    # Turn on background and Doc info
-                    ProjBackground(pid).turnOnBackground()
-                    ProjBackground(pid).turnOnDocInfo()
-                    # Make sure diagnostic is off
-                    ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, save here is used to save the file
-                    # in the Deliverables folder
-                    ProjBinding(pid).bind(save)
-                    # Last one out turn off the lights :-)
-                    ProjBackground(pid).turnOffBackground()
-                    ProjBackground(pid).turnOffDocInfo()
-                elif args.background :
-                    # Turn on background
-                    ProjBackground(pid).turnOnBackground()
-                    # Make sure doc info and diagnostic is off
-                    ProjBackground(pid).turnOffDocInfo()
-                    ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, save here is used to save the file
-                    # in the Deliverables folder
-                    ProjBinding(pid).bind(save)
-                    # Last one out turn off the lights :-)
-                    ProjBackground(pid).turnOffBackground()
-                elif args.doc_info :
-                    # Turn on background
-                    ProjBackground(pid).turnOnDocInfo()
-                    # Make sure background and diagnostic is off
-                    ProjBackground(pid).turnOffBackground
-                    ProjDiagnose(pid).turnOffDiagnostic()
-                    # Bind the groups, save here is used to save the file
-                    # in the Deliverables folder
-                    ProjBinding(pid).bind(save)
-                    # Last one out turn off the lights :-)
-                    ProjBackground(pid).turnOffDocInfo()
-                else :
-                    # Bind the groups, save here is used to save the file
-                    # in the Deliverables folder
-                    ProjBinding(pid).bind(save)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'remove' :
-            if cmdType == 'project' :
+        if args.path :
+            path = tools.resolvePath(args.path)
+            if not os.path.exists(path) :
+                sys.exit('\nERROR: Sourct path is not valid [' + path + ']. Process halting.\n')
+        # Figure out what area this command relates to and do it
+        if cmd == 'archive' :
+            sys.exit('\nERROR: The ' + cmd + ' is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
+        elif cmd == 'backup' :
+            sys.exit('\nERROR: The ' + cmd + ' is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
+        elif cmd == 'project' :
+            if sub == 'create' :
+                ProjSetup(sysConfig, pid).newProject(mediaType)
+            elif sub == 'remove' :
                 ProjDelete().deleteProject(pid)
             else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'restore' :
-            if cmdType == 'archive' :
-                ProjData(pid).restoreArchive(targetPath, sourcePath)
-            elif cmdType == 'backup' :
-                if pid not in projList :
-                    ProjData(pid).restoreLocalBackup(args.bak_num)
-                else :
-                    if sourcePath :
-                        ProjData(pid).restoreExternalBackup(sourcePath, targetPath)
-                    else :
-                        sys.exit('\nERROR: To restore this backup, a path must be provided with -t. Process halting.\n')
-            elif cmdType == 'cloud' :
-                ProjData(pid).pullFromCloud()
-            elif cmdType == 'template' :
-                Template(pid).templateToProject(targetPath, sourcePath)
-            else :
-                cmdError(cmd, cmdType)
-        # Save in this context refers to the data set
-        elif cmd == 'save' :
-            if cmdType == 'archive' :
-                ProjData(pid).archiveProject()
-            elif cmdType == 'backup' :
-                ProjData(pid).backupProject()
-            elif cmdType == 'cloud' :
-                ProjData(pid).pushToCloud(force)
-            elif cmdType == 'template' :
-                Template(pid).projectToTemplate(args.id)
-            else :
-                cmdError(cmd, cmdType)
-        # Update project elements
-        elif cmd == 'update' :
-            if updateType == 'helper' :
-                ProjCommander(pid).updateScripts()
-            elif updateType == 'background' :
-                ProjBackground(pid).createBackground()
-            elif updateType == 'diagnostic' :
-                ProjDiagnose(pid).createDiagnostic()
-            else :
-                 cmdError(cmd, updateType)
+                sys.exit('\nERROR: The ' + sub + ' command is not supported. The developer didn\'t think it was a good idea. If you think otherwise, let him know what your thoughts are and he might just add it in for you.\n')
+        elif cmd == 'share' :
+            sys.exit('\nERROR: The ' + cmd + ' command is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
 
-    ##### GROUP
-    # Group level commands
-    elif sys.argv[1].lower() == 'group' :
+    ##### CONTENT
+    # Project level commands
+    elif sys.argv[1].lower() == 'content' :
         usfmData    = UsfmData()
-        cmdType     = args.command_type
-        cmd         = args.command
         pid         = args.project_id
         gid         = args.group_id
-        save        = args.save    # For saving a rendered group/component
-        source_path = []            # A path to files to use
-        source_list = []            # Gen: A list of files w/paths
-        compare_type = ''           # For compare function, the type
-        cid_list    = []            # A list of valid CIDs
-        cType       = None          # A valid component type ID
-        override    = None          # A folder w/path for output
-        ovrdPath    = ''            # Gen: path to override folder
-        pages       = None          # Pages to deliver for output
-        # These are valid USFM file extentions we will process
+        cmd         = args.command
+        sub         = args.sub_command
+        cType       = args.comp_type
         usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
+        cid_list    = []            # A list of one or more cids
+        source_list = []            # Gen: A list of files w/paths
+        path        = ''
+        # Check source path if there is one
+        if args.path :
+            path = os.path.abspath(args.path)
+            if not os.path.isdir(path) :
+                sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
         # These are recognized CID groups names for generating CID list
         # if no CIDs are provided. To expand this list there must be
         # a corresponding function in UsfmData that will retrieve the
         # correct CIDs in the correct order.
         canonGroups = ['OT', 'NT', 'BIBLE']
-        # Check source path if there is one
-        if args.source_path :
-            source_path = os.path.abspath(args.source_path)
-            if not os.path.isdir(source_path) :
-                sys.exit('\nERROR: Path is not valid. [' + source_path + '] Process halting.\n')
-        else :
-            if cmd == 'add' :
-                sys.exit('\nERROR: Source path needed to complete operation. Process halting.\n')
-        # Set optional override
-        if args.override :
-            override = args.override
-            ovrdPath = os.path.split(os.path.abspath(override))[0]
-            flName = os.path.split(override)[1]
-            override = os.path.join(ovrdPath, flName)
-            if not os.path.isdir(ovrdPath) :
-                sys.exit('\nERROR: The path given [' + ovrdPath + '] given is not valid. Process halted!\n')
-        # Set optional page range
-        if args.pages :
-            pages = args.pages
-        # Set optional cType (default is USFM)
-        if args.component_type :
-            cType = args.component_type
-        else :
-            cType = 'usfm'
         # If the user provided any CIDs, we preprocess them here
         if args.cid_list :
             # Load this now because we'll need it
@@ -431,190 +269,116 @@ def userArguments (args) :
                 cids    = args.cid_list.split()
             else :
                 cids    = args.cid_list
-            cid_list = usfmData.canonListSort(cids)
+            cid_list = cids
         else :
             # Otherwise we will see if we are adding using a shortcut
-            if cmd == 'add' or cmd == 'update' or cmd == 'compare' :
+            if sub == 'add' or sub == 'update' :
                 if gid in canonGroups :
                     getCidList = getattr(usfmData, gid.lower() + 'CidList')
                     cid_list = getCidList()
-                else :
-                    sys.exit('\nERROR: A group ID is not found or not in the list of recognized canonical books. Please rerun using the --cid_list parameter. Process halting.\n')
-        # If a compare is being done this provides the type of compare.
-        if args.compare_type :
-            compare_type = args.compare_type
+        # The cType is required for a number of operations, check for it here
+        if cmd == 'group' or cmd == 'component' :
+            if not cType :
+                sys.exit('\nERROR: A component type (--comp_type/-c) was not given for this opperation. Due to poor programing, this is needed to complete this operation. Rapuma apologizes for this inconvenience. Process halting. Please try again by adding this parameter and it should work fine.\n')                
+            
         # The source_list will be auto-generated and is required at
         # the engine level for processing. We need both a source_path
         # and a CID list to make it. This will take them as it finds
         # them but the completed list needs to be varified
-        if source_path and cid_list :
-            for f in os.listdir(source_path) :
-                # Check only valid file types (by ext)
-                if os.path.splitext(f)[1][1:].lower() in usfmExt :
-                    cid = tools.discoverCIDFromFile(os.path.join(source_path, f))
-                    if cid.lower() in cid_list : 
-                        source_list.append(os.path.join(source_path, f))
+
+
+#        import pdb; pdb.set_trace()
+
+
+        if cid_list :
+            # Check for path
+            if not path :
+                sys.exit('\nERROR: Source path (--path/-p) not given. Process halting. Please add this parameter and retry.\n')
+            # Create the source_list by type
+            if cType == 'usfm' :
+                for f in os.listdir(path) :
+                    # Check only valid file types (by ext)
+                    if os.path.splitext(f)[1][1:].lower() in usfmExt :
+                        cid = tools.discoverCIDFromFile(os.path.join(path, f))
+                        if cid.lower() in cid_list : 
+                            source_list.append(os.path.join(path, f))
+            elif cType == 'pdf' :
+                for f in cid_list :
+                    source_list.append(os.path.join(path, f + '.pdf'))
+            else :
+                sys.exit('\nERROR: Component type not supported. Rapuma apologizes for this inconvenience. Process halting.\n')
+
         # Before we go on, quickly varify existance of all files in the
         # list and cross-check with the CID list
         if source_list :
             checkList = list(cid_list)
             for f in source_list :
-                if not os.path.exists(f) :
-                    sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+                if cType == 'usfm' :
+                    if not os.path.exists(f) :
+                        sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
+                    else :
+                        cid = tools.discoverCIDFromFile(f).lower()
+                        if cid in checkList :
+                            checkList.remove(cid)
                 else :
-                    cid = tools.discoverCIDFromFile(f).lower()
-                    if cid in checkList :
-                        checkList.remove(cid)
+                    # In this "other" case we assume the file name (less
+                    # extention) is the cid
+                    if os.path.isfile(f) :
+                        # This will obviously fail if there is more than one '.' in
+                        # the file name, but why would anyone want to do that? :-)
+                        checkList.remove(ProjSetup(sysConfig, pid).getCidFromPdfFileName(tools.fName(f)))
             if len(checkList) != 0 :
                     sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
-        # Add a group or just a component in a group (source_list required)
-        if cmd == 'add' :
-            if source_list :
-                # Optional use of Force in this context is used to
-                # overwrite any existing group data
-                ProjSetup(sysConfig, pid).addGroup(cType, gid, source_list)
-            else :
-                sys.exit('\nERROR: Must provide a source path or valid component IDs to add a group. Process halting.\n')
-        # Add a group or just a component in a group (source_list required)
-        elif cmd == 'update' :
-            if source_list :
-                ProjSetup(sysConfig, pid).updateGroup(gid, source_list)
-            else :
-                sys.exit('\nERROR: Must provide a source path or valid component IDs to update a group. Process halting.\n')
-        elif cmd == 'remove' :
-            ProjSetup(sysConfig, pid).removeGroup(gid, cid_list)
-            if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
-                ProjCommander(pid).removeScripts()
-        elif cmd == 'compare' :
-            if not compare_type :
-                sys.exit('\nERROR: Must provide a compare type (--compare_type/-c). Process halting.\n')
-            ProjSetup(sysConfig, pid).compareGroup(compare_type, gid, cid_list)
-        elif cmd == 'restore' :
-            ProjSetup(sysConfig, pid).restoreGroup(gid, cid_list)
-        elif cmd == 'render' :
-            # First we will set whatever peripheral features to what
-            # they need to be. After we will turn them off.
-            # Hyphenation can be run in any case
-            if args.hyphenation :
-                ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
-            # Now check and set background features
-            if args.background and args.diagnostic :
-                sys.exit('\nERROR: Cannot have background (--background/-b) and diagnostic (--diagnostic/-d) turned on at the same time. Process halting.\n')
-            elif args.background and args.doc_info :
-                # Turn on background and Doc info
-                ProjBackground(pid).turnOnBackground()
-                ProjBackground(pid).turnOnDocInfo()
-            elif args.background :
-                # Turn on background only
-                ProjBackground(pid).turnOnBackground()
-                ProjBackground(pid).turnOffDocInfo()
-                ProjDiagnose(pid).turnOffDiagnostic()
-            elif args.doc_info :
-                # Turn on doc info on only
-                ProjBackground(pid).turnOnDocInfo()
-                ProjDiagnose(pid).turnOffDiagnostic()
-                ProjBackground(pid).turnOffBackground()
-            elif args.diagnostic :
-                # Turn on diagnostic only
-                ProjDiagnose(pid).turnOnDiagnostic()
-                ProjBackground(pid).turnOffBackground()
-                ProjBackground(pid).turnOffDocInfo()
-            # Now we will render
-            Project(pid, gid).renderGroup(cid_list, pages, override, save)
-            # Just to be safe we will just turn everything off
-            ProjDiagnose(pid).turnOffDiagnostic()
-            ProjBackground(pid).turnOffDocInfo()
-            ProjBackground(pid).turnOffBackground()
-            if args.hyphenation :
-                ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
-        elif cmd == 'lock' :
-            ProjSetup(sysConfig, pid).lockUnlock(gid, True)
-        elif cmd == 'unlock' :
-            ProjSetup(sysConfig, pid).lockUnlock(gid, False)
-        else :
-            cmdError(cmd, cmdType)
+                    
+        # Figure out what area this command relates to and do it
+        if cmd == 'group' :
+            # Add a group (no components)
+            if sub == 'add' :
+                ProjSetup(sysConfig, pid).addGroup(cType, gid)
+            # Remove a group (all of it)
+            elif sub == 'remove' :
+                ProjSetup(sysConfig, pid).removeGroup(gid)
+                # Clean up the helper scripts too
+                if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
+                    ProjCommander(pid).removeScripts()
+        # Work with components
 
 
-    ##### PACKAGES
-    # Package management commands
-    elif sys.argv[1].lower() == 'package' :
-        cmdType     = args.package_type
-        cmd         = args.command
-        pid         = args.project_id
-        gid         = args.group_id
-        pkid        = args.package_id
-        force       = args.force
-        if cmd == 'add' :
-            if cmdType == 'font' :
-                # At this level it is assumed that if the user is adding
-                # a font, they want it to be the primary font
-                ProjFont(pid, gid).installFont(pkid, True)
-            elif cmdType == 'macro' :
-                Config(pid, gid).addMacPack(pkid, force)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'primary' :
-            if cmdType == 'font' :
-                ProjFont(pid, gid).setPrimaryFont(pkid, force)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'remove' :
-            if cmdType == 'font' :
-                ProjFont(pid, gid).removeFontPack(pkid, force)
-            elif cmdType == 'macro' :
-                Config(pid, gid).removeMacPack(pkid, force)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'update' :
-            if cmdType == 'font' :
-                ProjFont(pid, gid).updateFontPack(pkid)
-            elif cmdType == 'macro' :
-                Config(pid, gid).updateMacPack(pkid)
-            else :
-                cmdError(cmd, cmdType)
 
-    ##### PROCESS
-    # Processing commands
-    elif sys.argv[1].lower() == 'process' :
 
-# FIXME:
-        sys.exit('\nERROR: Sorry process handling is quite broken right now. Process halted!\n')
+        elif cmd == 'component' :
+            # Add one or more components in a group (will not overwrite)
+            if sub == 'add' :
+                ProjSetup(sysConfig, pid).addComponent(gid, source_list)
+            # Remove one or more components from a group
 
-        cmdType     = args.package_type
-        cmd         = args.command
-        pid         = args.project_id
-        gid         = args.group_id
-        force       = args.force
-        script      = args.script
-        path        = ''
-        if args.path and tools.resolvePath(args.path) :
-            path = tools.resolvePath(args.path)
-        if cmd == 'add' :
-            if cmdType in ['export', 'preprocess', 'postprocess'] :
-                ProjProcess(pid).addProcess(script, path, force)
-            else :
-                cmdError(cmd, cmdType)
-        elif cmd == 'remove' :
-            pass
-        elif cmd == 'update' :
-            pass
+
+
+
+            elif sub == 'remove' :
+                sys.exit('\nERROR: This is embarassing the ' + cmd + ' ' + sub + ' feature has not been implemented in the CLI yet. Process halting.\n')
+            # Update one or more components in a group
+            elif sub == 'update' :
+                if source_list :
+                    ProjSetup(sysConfig, pid).updateGroup(gid, source_list)
+                else :
+                    sys.exit('\nERROR: Must provide a source path or valid component IDs to update a group. Process halting.\n')
+
+
+
 
     ##### SETTINGS
     # Setting manipulation commands
-    elif sys.argv[1].lower() == 'settings' :
+    elif sys.argv[1].lower() == 'setting' :
         pid         = args.project_id
-#        gid         = args.group_id
         config      = args.configuration
         section     = args.section
         key         = args.key
         value       = args.value
-        if args.configuration :
-            if (section or key or value) :
-                ProjSetup(sysConfig, pid).changeConfigSetting(config, section, key, value)
-            else :
-                sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
+        if (section or key or value) :
+            ProjSetup(sysConfig, pid).changeConfigSetting(config, section, key, value)
         else :
-            sys.exit('\nERROR: Configuration name is missing from command argument. Process halted!\n')
+            sys.exit('\nERROR: Must provide a section, key and value. Process halted!\n')
 
     # Totally lost
     else:
@@ -663,103 +427,78 @@ if __name__ == '__main__' :
     helpCommand = subparsers.add_parser('help', help='General system help')
 
     # Available choices
-    # System
-    syCommandType           = ['setup']
-    syCommand               = ['name', 'uid', 'projects', 'cloud', 'folders']
+
     # Project
-    prCommandType           = ['archive', 'backup', 'cloud', 'group', 'project', 'template']
-    prCommand               = ['add', 'bind', 'remove', 'restore', 'save', 'update']
-    updateType              = ['background', 'diagnostic', 'helper']
-    mediaType               = ['book']
-    # Group
-    grCommandType           = ['export', 'group', 'illustration', 'postprocess', 'preprocess']
-    grCommand               = ['add', 'compare', 'lock', 'remove', 'render', 'restore', 'update', 'unlock']
-    componentType           = ['usfm', 'pdf']
-    compareTest             = ['backup', 'source']
-    # Packages
-    pkCommandType           = ['font', 'macro']
-    pkCommand               = ['add', 'primary', 'remove', 'update']
+    prCmd              = ['archive', 'backup', 'project', 'share']
+    prSubCmd           = ['create', 'remove', 'restore', 'save', 'update']
+    prMediaType        = ['book']
+    # Content
+    ctCmd              = ['component', 'group']
+    ctSubCmd           = ['add', 'remove', 'update']
+    ctCompType         = ['usfm', 'pdf']
+    # Asset
+    asCmd              = ['font', 'illustration', 'macro', 'script']
+    asSubCmd           = ['add', 'primary', 'remove', 'update']
     # Processes
-    pcCommandType           = ['export', 'preprocess', 'postprocess']
-    pcCommand               = ['add', 'remove', 'update']
+    pcCmd              = ['component', 'group', 'project']
+    pcSubCmd           = ['bind', 'export', 'preprocess', 'postprocess', 'render']
+    # Setting
+    stConf             = ['adjustment', 'illustration', 'layout', 'project', 'usfmTex']
 
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
     parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
     parser.add_argument('-V', '--version', action='version', version=systemVersion, help = 'Show the program version and exit, doing nothing else')
 
-    # Add project subprocess arguments
-    sysCommand = subparsers.add_parser('system', help='General system management commands help')
-    sysCommand.add_argument('command_type', choices=syCommandType, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    sysCommand.add_argument('command', choices=syCommand, help='The setting command for managing user and system settings.')
-    sysCommand.add_argument('-s', '--setting', help='Proved a setting that will be applied to the user or system settings.')
-    sysCommand.add_argument('-f', '--force', action='store_true', help='Force an action.')
-
-    # FIXME: Restore from template will not work. The pid is the new project name but we
-    # currently do not have any means to specify the template. The same will be true for
-    # backups, we may need to add a "resource_id" arg to be able to ID them.
-
     # Add Project subprocess arguments
-    projCommand = subparsers.add_parser('project', help='General project management commands help')
+    projCommand = subparsers.add_parser('publication', help='General publication management commands')
     projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    projCommand.add_argument('command_type', choices=prCommandType, help='Specify the command type to be executed on the project. This is required for all project processing functions.')
-    projCommand.add_argument('command', choices=prCommand, help='The general commands that can be used for managing a project.')
-    projCommand.add_argument('-b', '--background', action='store_true', help='Used only with the bind command, this will add a background to the bound object.')
-    projCommand.add_argument('-d', '--doc_info', action='store_true', help='Used only with the bind command, this will add a document information background layer to the bound object.')
-    projCommand.add_argument('-p', '--source_path', help='An alternate path to a resource to be used to start a new project such as an archive, template or backup. This is needed if the resource is not found in the normal specified Rapuma user resources.')
-    projCommand.add_argument('-t', '--target_path', help='Path to the project home folder or where you want a backup, templates or archive placed. Do not provide the name of the item you are working with, just the path to where you want it to be.')
-    projCommand.add_argument('-e', '--media_type', choices=mediaType, help='If creating a new project, give a valid project media type code.')
-    projCommand.add_argument('-f', '--force', action='store_true', help='Force an action, or, in the case of bind, save the results.')
-    projCommand.add_argument('-s', '--save', action='store_true', help='Use for saving a bind file.')
-    projCommand.add_argument('-n', '--bak_num', help='Specify the number (version) of backup you want to restore.')
-    projCommand.add_argument('-i', '--id', help='Specify an ID for an opperation.')
-    projCommand.add_argument('-u', '--update_type', choices=updateType, help='Update a project element like a background or the groups.')
+    projCommand.add_argument('command', choices=prCmd, help='The general commands that can be used for managing a project.')
+    projCommand.add_argument('sub_command', choices=prSubCmd, help='Specify the command action to be executed on the project. This is required for all project processing functions.')
+    projCommand.add_argument('-m', '--media_type', choices=prMediaType, help='If creating a new project, give a valid project media type code. The default is "book".')
+    projCommand.add_argument('-p', '--path', help='A local path needed for certain operations.')
 
-    # Add Group subprocess arguments
-    groupCommand = subparsers.add_parser('group', help='General project group management commands help')
-    groupCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    groupCommand.add_argument('group_id', help='A unique ID for this group.')
-    groupCommand.add_argument('command_type', choices=grCommandType, help='Specify the command type to be executed on the group. This is required for all group processing functions.')
-    groupCommand.add_argument('command', choices=grCommand, help='The general commands that can be used for managing groups.')
-    groupCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
-    groupCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
-    groupCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
-    groupCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
-    groupCommand.add_argument('-t', '--component_type', choices=componentType, help='The group component type is needed for creating a new group.')
-    groupCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
-    groupCommand.add_argument('-s', '--source_path', help='A path to were component files may be found. Rapuma will use this path to find files that are being imported in bulk.')
-    groupCommand.add_argument('-v', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
-    groupCommand.add_argument('-p', '--pages', help='Specify a page number or range of pages to render.')
-    groupCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
-    groupCommand.add_argument('-c', '--compare_type', choices=compareTest, help='If comparing files, the type of file, either backup or source, must be declaired with this paramater.')
+    # Add Content subprocess arguments
+    contentCommand = subparsers.add_parser('content', help='General project content management commands')
+    contentCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+    contentCommand.add_argument('group_id', help='A unique ID for this group.')
+    contentCommand.add_argument('command', choices=ctCmd, help='Specify either group or component which will be acted on.')
+    contentCommand.add_argument('sub_command', choices=ctSubCmd, help='Commands that can be used for managing groups and components.')
+    contentCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+    contentCommand.add_argument('-c', '--comp_type', choices=ctCompType, help='The group component type is needed for creating a new group.')
+    contentCommand.add_argument('-p', '--path', help='A path to were component files may be found.')
 
-    # Add Package management subprocess arguments
-    packCommand = subparsers.add_parser('package', help='General package handling commands help')
-    packCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    packCommand.add_argument('group_id', help='The group ID this package is a part of.')
-    packCommand.add_argument('package_id', help='The package name ID. The ID given has to be a valid system package.')
-    packCommand.add_argument('package_type', choices=pkCommandType, help='The package type. The type given has to be a valid system package type.')
-    packCommand.add_argument('command', choices=pkCommand, help='The general commands that can be used for managing groups.')
-    packCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
+    # Add project Asset management subprocess arguments
+    assetCommand = subparsers.add_parser('asset', help='General project asset handling commands')
+    assetCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+    assetCommand.add_argument('command', choices=asCmd, help='The general commands that can be used for managing assets.')
+    assetCommand.add_argument('sub_command', choices=asSubCmd, help='Sub commands that can be used for managing project assets.')
+    assetCommand.add_argument('-f', '--file', help='An asset file name.')
+    assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
 
     # Add Processing subprocess arguments
-    processCommand = subparsers.add_parser('process', help='General settings for managing processes. Actual execution of the processes is done through the group commands')
+    processCommand = subparsers.add_parser('process', help='General project process commands')
     processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+    processCommand.add_argument('command', choices=pcCmd, help='The general commands that can be used for managing project processes.')
+    processCommand.add_argument('sub_command', choices=pcSubCmd, help='Sub commands that can be used for managing project processes.')
     processCommand.add_argument('group_id', help='A unique ID for this group.')
-    processCommand.add_argument('process_type', choices=pcCommandType, help='The type of process being managed. The type given has to be a valid system package type.')
-    processCommand.add_argument('command', choices=pcCommand, help='The general commands that can be used for managing groups.')
-    processCommand.add_argument('-p', '--path', help='A valid path and file name of a specific post process script to be installed.')
-    processCommand.add_argument('-s', '--script', help='Specify a script for executing. This is required for postprocesses.')
-    processCommand.add_argument('-f', '--force', action='store_true', help='Force the addition, update or removal of a package from the system even if it is used by other components.')
+    processCommand.add_argument('-p', '--path', help='A path to be used in a process.')
+    processCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
+    processCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
+    processCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
+    processCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
+    processCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
+    processCommand.add_argument('-s', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
+    processCommand.add_argument('-g', '--pages', help='Specify a page number or range of pages to render.')
+    processCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
 
     # Add Settings subprocess arguments
-    settingsCommand = subparsers.add_parser('settings', help='General settings handling commands help')
+    settingsCommand = subparsers.add_parser('setting', help='General settings handling commands')
     settingsCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    #settingsCommand.add_argument('group_id', help='A unique ID for this group.')
-    settingsCommand.add_argument('configuration', help='The configuration set that the target setting is from.')
-    settingsCommand.add_argument('section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
-    settingsCommand.add_argument('key', help='The key which has the value to be changed.')
-    settingsCommand.add_argument('value', type=fsunicode, help='A new value to add or change to the specified key.')
+    settingsCommand.add_argument('configuration', choices=stConf, help='The configuration set that the target setting is from.')
+    settingsCommand.add_argument('-s', '--section', help='The section path to the key/value pare to be changed. Multiple sections are separated by \'/\'.')
+    settingsCommand.add_argument('-k', '--key', help='The key which has the value to be changed.')
+    settingsCommand.add_argument('-v', '--value', type=fsunicode, help='A new value to add or change to the specified key.')
 
     # Send the collected arguments to the handler
     userArguments(parser.parse_args())

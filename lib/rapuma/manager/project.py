@@ -46,7 +46,9 @@ class Project (object) :
         self.projectConfig          = self.config.projectConfig
         self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
-        self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPack                = ''
+        if self.cType == 'usfm' :
+            self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()
@@ -189,9 +191,11 @@ class Project (object) :
         will contain one or more compoenents. The information for
         each one will be contained in the group object.'''
 
-        # If the object already exists just return it
-        if self.gid in self.groups: return self.groups[self.gid]
+#        import pdb; pdb.set_trace()
 
+        # If the object already exists just return it
+        if self.gid in self.groups: 
+            return self.groups[self.gid]
 
         cType = self.projectConfig['Groups'][self.gid]['cType']
         # Create a special component object if called

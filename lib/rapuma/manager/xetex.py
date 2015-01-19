@@ -45,7 +45,6 @@ class Xetex (Manager) :
 
         super(Xetex, self).__init__(project, cfg)
 
-
 #        import pdb; pdb.set_trace()
 
         # Create all the values we can right now for this manager.
@@ -547,7 +546,6 @@ class Xetex (Manager) :
         cidListSubFileName      = ''
         saveFile                = ''
         saveFileName            = ''
-        wmFile                  = ''
         if not cidList :
             cidList = self.projectConfig['Groups'][gid]['cidList']
         else :

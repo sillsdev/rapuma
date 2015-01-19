@@ -95,9 +95,18 @@ class ProjSetup (object) :
             '0298' : ['MSG', 'Remove operation for group [<<1>>] is complete.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
+            '0305' : ['ERR', 'File not found: [<<1>>] Process halted!'],
             '0310' : ['MSG', 'Completed updating components in the [<<1>>] group.'],
             '0315' : ['MSG', 'Completed updating the [<<1>>] component.'],
-            '0320' : ['MSG', 'Component [<<1>>] not found in the [<<2>>] group. It must be in the group to be updated.'],
+            '0320' : ['ERR', 'Component [<<1>>] not found in the [<<2>>] group. It must be in the group to be updated. Process halted!'],
+            '0325' : ['ERR', 'Component list not found for the [<<1>>] group. Perhaps the group needs to be reinstalled. Process halted!'],
+            '0330' : ['ERR', 'Component not a valid USFM component ID [<<1>>]. Process halted!'],
+            '0340' : ['ERR', 'Invalid or unrecognized component type given: [<<1>>]. I really do not know what you mean so I have to stop now. I really apologize for any inconvenience this might cause.'],
+            '0350' : ['MSG', 'Added the [<<1>>] group to the project.'],
+            '0360' : ['ERR', 'Sorry, but the [<<1>>] component is already in this group. Use Remove/Add to move it, or Update to reimport it.'],
+            '0370' : ['ERR', 'Sorry, but the [<<1>>] group is already in this project. If you are experienceing problems with this group, you may remove it, then add it back again. Process halted!'],
+            '0380' : ['ERR', 'Failed to add the [<<1>>] component. Process halted!'],
+            '0390' : ['MSG', 'Successfully added component(s) to the [<<1>>] group.'],
 
             '1060' : ['LOG', 'Text validation succeeded on USFM file: [<<1>>]'],
             '1070' : ['ERR', 'Text validation failed on USFM file: [<<1>>] It reported this error: [<<2>>]'],
@@ -175,111 +184,97 @@ class ProjSetup (object) :
         return True
 
 
-    def updateGroup (self, gid, sourceList) :
-        '''Update a group by providing a list of source files. This
-        will check to see if the incoming source coresponds to cids
-        listed for the group. If not, it will log a warning. If one or
-        more cids are missing, it will throw an error and quite before
-        doing the actual update. All the sources needs to be in place
-        for this to work.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Set some vars
-        cidList = []
-        checkList = []
-        sources = {}
+    def updateComponent (self, gid, source) :
+        '''Update a single component in a group.'''
 
         # Create a check list for being sure the CIDs are in the project
-        checkList = self.getCidList(gid)
+        cidList = self.getCidList(gid)
 
-        for f in sourceList :
-            cid = self.tools.discoverCIDFromFile(f)
-            if cid in self.wholeCanonList :
-                # Add CID to cidList
-                cidList.append(cid)
-                sources[cid] = f
+        # Define some local functions
+        def handleOtherUpdate () :
+            '''A simple generic component handler.'''
 
-            # Check now to see of the CID is already in the group
-            if checkList :
-                if cid in checkList :
-                    # Backup component
-                    compFiles           = self.local.getComponentFiles(gid, cid)
-                    cType               = self.projectConfig['Groups'][gid]['cType']
-                    source              = sources[cid]
-                    workingBak          = tempfile.NamedTemporaryFile(delete=True).name
+            cid = source.split('.')[0]
+            if cid in cidList :
+                targetFolder = os.path.join(self.local.projComponentFolder, cid)
+                targetFile = os.path.join(targetFolder, source)
+                targetFileBak   = targetFile + '.bak'
+                # Maybe folder was manually deleted, check, fix if needed.
+                if not os.path.isdir(targetFolder) :
+                    os.makedirs(targetFolder)
+                # Backup if there is an existing target
+                if os.path.isfile(targetFile) :
+                    shutil.copy(targetFile, targetFileBak)
+                # Copy in our source (over target if needed)
+                shutil.copy(source, targetFile)
+            else :
+                self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
+                return False
+            
+        def handleUsfmUpdate () :
+            '''USFM specific handler function.'''
+            # For USFM the id must be in the first line of the file
+            cid = self.tools.discoverCIDFromFile(source)
+            # It has to be part of the Canon
+            if not cid in self.wholeCanonList :
+                self.log.writeToLog(self.errorCodes['0330'], [cid])
+            # It has to be in the cid list too
+            if cid in cidList :
+                # Backup component
+                compFiles           = self.local.getComponentFiles(gid, cid)
+                workingBak          = tempfile.NamedTemporaryFile(delete=True).name
 
-                    # Create temp backup of working file
-                    if os.path.exists(compFiles['working']) :
-                        shutil.copy(compFiles['working'], workingBak)
-                    # Delete the existing working file
-                    if os.path.exists(compFiles['working']) :
-                        os.remove(compFiles['working'])
-                    # Create the backup for comparison
-                    if os.path.exists(workingBak) :
-                        self.makeCVOne(workingBak, compFiles['backup'])
-                    # Install the new text
-                    if self.importWorkingText(source, cType, gid, cid) :
-                        self.log.writeToLog(self.errorCodes['0315'], [cid])
-                else :
-                    self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
-                    return False
+                # Create temp backup of working file
+                if os.path.exists(compFiles['working']) :
+                    shutil.copy(compFiles['working'], workingBak)
+                # Delete the existing working file
+                if os.path.exists(compFiles['working']) :
+                    os.remove(compFiles['working'])
+                # Create the backup for comparison
+                if os.path.exists(workingBak) :
+                    self.makeCVOne(workingBak, compFiles['backup'])
+                # Install the new text
+                if self.importUsfmWorkingText(source, cType, gid, cid) :
+                    self.log.writeToLog(self.errorCodes['0315'], [cid])
+                
+            else :
+                self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
+                return False
+
+        # Direct to the right function
+        if cidList :
+            cType = self.projectConfig['Groups'][gid]['cType']
+            if cType == 'usfm' :
+                return handleUsfmUpdate()
+            else :
+                return handleOtherUpdate()
         
-        # Report and return
-        self.log.writeToLog(self.errorCodes['0310'], [gid])
-        return True
+        else :
+            self.log.writeToLog(self.errorCodes['0325'], [gid])
+            return False
 
-    
-    def addGroup (self, cType, gid, sourceList) :
-        '''Add a group by providing a component type, group ID and a 
-        list of source files. This will check to see if the incoming 
-        source is valid. If not, it will throw an error and quite 
-        before doing the actual import. All the source needs to be 
-        in place for this to work. Also, it will not copy over existing
-        project data. That is what updateGroup() is for.'''
+
+    def addGroup (self, cType, gid) :
+        '''Add a group to a project by providing a component type, group
+        ID. This wil lonly add a group. Group components are added in a 
+        separate operation.'''
 
 #        import pdb; pdb.set_trace()
 
-        # Set some vars
-        cidList = []
-        checkList = []
-        cids = []
-        sources = {}
-
-
-# FIXME: There seems to be a problem with the existing CID list being lost
-# when a single component is added to a group
-
-
-        # In case the group already exists, pull in the CIDs
-        checkList = self.getCidList(gid)
-
-        # Do the importing first, then write the changes to the config
-        for f in sourceList :
-            cid = self.tools.discoverCIDFromFile(f)
-            if cid in self.wholeCanonList :
-                # Add CID to cidList
-                cidList.append(cid)
-                sources[cid] = f
-
-            # Check now to see of the CID is already in the group
-            if checkList :
-                if cid in checkList :
-                    self.log.writeToLog(self.errorCodes['0252'], [cid,gid])
-                    return False
+        # Make sure we have a Groups section
+        self.tools.buildConfSection(self.projectConfig, 'Groups')
+            
+        # Test first to see if the group is already there 
+        if gid in self.projectConfig['Groups'] :
+            self.log.writeToLog(self.errorCodes['0370'], [gid])
 
         # Get persistant values from the config
-        self.tools.buildConfSection(self.projectConfig, 'Groups')
         self.tools.buildConfSection(self.projectConfig['Groups'], gid)
         newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['Groups'][gid], os.path.join(self.local.rapumaConfigFolder, 'group.xml'))
         if newSectionSettings != self.projectConfig['Groups'][gid] :
             self.projectConfig['Groups'][gid] = newSectionSettings
         # Add/Modify the info to the group config info
-        self.projectConfig['Groups'][gid]['cType']                 = cType
-        self.projectConfig['Groups'][gid]['cidList']               = self.usfmData.canonListSort(cidList)
-
-# Moved to the group.xml file
-#        self.projectConfig['Groups'][gid]['bindingOrder']          = 0
+        self.projectConfig['Groups'][gid]['cType'] = cType
 
         # Here we need to "inject" cType information into the config
         self.cType = cType
@@ -292,23 +287,94 @@ class ProjSetup (object) :
         # back into the module here
         self.projectConfig = aProject.projectConfig
 
-        # Install the components now, if successful, we can update the
-        # project config. If not, the user will need to sort out why
-        if self.installGroupComps(gid, cType, sources) :
-            # Sort the cidList to canonical order
-            cidListSorted = self.usfmData.canonListSort(cidList)
-            if cidList != cidListSorted :
-                self.projectConfig['Groups'][gid]['cidList'] = cidListSorted
-                self.tools.writeConfFile(self.projectConfig)
-
-        # Update helper scripts
-        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).makeGrpScripts()
-
+        # Report and return
+        self.log.writeToLog(self.errorCodes['0350'], [gid])
         return True
 
 
-    def removeGroup (self, gid, cidList = None) :
+    def addComponent (self, gid, sourceList) :
+        '''Add one or more components to a group. In the case of the USFM
+        type, be sure it is valid. In the case of other types, be sure
+        they exist.'''
+
+        # Define some params
+        addedList = []
+        allCids = []
+        # Set params
+        cType = self.projectConfig['Groups'][gid]['cType']
+        # Just in case the cidList is empty we will type it to list
+        cidList = list(self.projectConfig['Groups'][gid]['cidList'])
+
+        # Define handler functions
+        def handleUsfmAdd () :
+            # Install the components now, if successful, we can update the
+            # project config. If not, the user will need to sort out why
+            if self.installGroupComps(gid, sourceList) :
+                # Process each cid found in the source list
+                for fName in sourceList :
+                    cid = self.tools.discoverCIDFromFile(fName)
+                    if cid in cidList :
+                        self.log.writeToLog(self.errorCodes['0360'], [cid])
+                    addedList.append(cid)
+                # Add to existing cids
+                allCids = cidList + addedList
+                # Sort the cidList to canonical order
+                cidListSorted = self.usfmData.canonListSort(allCids)
+                if cidList != cidListSorted :
+                    self.projectConfig['Groups'][gid]['cidList'] = cidListSorted
+                    self.tools.writeConfFile(self.projectConfig)
+
+            # Update helper scripts
+            if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
+                ProjCommander(self.pid).makeGrpScripts()
+
+            return True
+           
+        def handlePdfAdd () :
+            # Process each cid found in the source list
+            
+#            import pdb; pdb.set_trace()
+            
+            for fileName in sourceList :
+                cid = self.getCidFromPdfFileName(self.tools.fName(fileName))
+                if cid in cidList :
+                    self.log.writeToLog(self.errorCodes['0360'], [cid])
+                    return False
+                else :
+                    addedList.append(cid)
+                    if not self.importPdfFileToProject(fileName) :
+                        self.log.writeToLog(self.errorCodes['0380'], [cid])
+                        
+            self.log.writeToLog(self.errorCodes['0390'], [gid])
+            # Add to existing cids and update the config
+            allCids = cidList + addedList
+            self.projectConfig['Groups'][gid]['cidList'] = allCids
+            self.tools.writeConfFile(self.projectConfig)
+            return True
+
+        # Send to the right handling function
+        if cType == 'usfm' :
+            return handleUsfmAdd()
+        elif cType == 'pdf' :
+            return handlePdfAdd()
+        else :
+            self.log.writeToLog(self.errorCodes['0340'], [cType])
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def removeGroup (self, gid) :
         '''Handler to remove a group. If it is not found return True anyway.'''
 
 #        import pdb; pdb.set_trace()
@@ -318,9 +384,7 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['0292'], [gid])
             return False
 
-        # If no CID list was provided, we assume the group is being deleted
-        if not cidList :
-            cidList = self.projectConfig['Groups'][gid]['cidList']
+        cidList = self.projectConfig['Groups'][gid]['cidList']
 
         # Otherwise we are removing just a subset of the group, just
         # one or more CIDs.
@@ -409,23 +473,24 @@ class ProjSetup (object) :
             return False
 
 
-    def installGroupComps (self, gid, cType, sources) :
-        '''This will install components to the group we created above in 
-        addGroup(). It will remove the component files so a fresh copy
-        can be added to the project.'''
+    def installGroupComps (self, gid, sources) :
+        '''This will install components to a group.'''
 
 #        import pdb; pdb.set_trace()
+
+        cType = self.projectConfig['Groups'][gid]['cType']
 
         # Make sure our group folder is there
         if not os.path.exists(os.path.join(self.local.projComponentFolder, gid)) :
             os.makedirs(os.path.join(self.local.projComponentFolder, gid))
 
-        for cid, fName in sources.iteritems() :
+        for fName in sources :
+            cid = self.tools.discoverCIDFromFile(fName)
             self.log.writeToLog(self.errorCodes['0250'], [self.cidNameDict[cid]])
             # See if the working text is present, quite if it is not
 
             # Install our working text files
-            if self.importWorkingText(fName, cType, gid, cid) :
+            if self.importUsfmWorkingText(fName, cType, gid, cid) :
                 self.log.writeToLog(self.errorCodes['0230'], [cid])
 
             else :
@@ -503,22 +568,15 @@ class ProjSetup (object) :
         return result
 
 
-    def newProject (self, pmid='book', tid=None, force=None) :
+    def newProject (self, pmid) :
         '''Create a new publishing project.'''
 
 #        import pdb; pdb.set_trace()
 
-        if not pmid :
-            pmid = 'book'
-
         # Test if this project already exists in the user's config file.
         if not self.isProjectEmpty() :
-            if force :
-                self.tools.terminal('Force project delete for: ' + self.pid)
-                ProjDelete().deleteProject(self.pid)
-            else :
-                self.tools.terminal('ERR: Halt! Project [' + self.pid + '] already exists.')
-                return
+            self.tools.terminal('ERR: Halt! Project [' + self.pid + '] already exists.')
+            return
 
         # Load a couple necessary modules
         self.local              = ProjLocal(self.pid)
@@ -556,12 +614,8 @@ class ProjSetup (object) :
                 if not os.path.exists(folder) :
                     os.makedirs(folder)
 
-        # Create the project depeding on if it is from a template or not
-        if tid :
-            self.data.templateToProject(self.user, self.local.projHome, self.pid, tid)
-        else :
-            # If not from a template, just create a new version of the project config file
-            Config(self.pid).makeNewprojectConf(self.local, self.pid, self.systemVersion, pmid) 
+        # Create the project config
+        Config(self.pid).makeNewprojectConf(self.local, self.pid, self.systemVersion, pmid) 
 
         # Add helper scripts if needed
         if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
@@ -578,7 +632,7 @@ class ProjSetup (object) :
 ######################## Error Code Block Series = 1000 #######################
 ###############################################################################
 
-    def importWorkingText (self, source, cType, gid, cid) :
+    def importUsfmWorkingText (self, source, cType, gid, cid) :
         '''Import USFM working text from source. This will overwrite any
         existing version.'''
 
@@ -1061,6 +1115,41 @@ class ProjSetup (object) :
         self.log.writeToLog(self.errorCodes['4100'], [gid])
         return True
 
+
+###############################################################################
+############################ PDF Handling Functions ###########################
+###############################################################################
+####################### Error Code Block Series = 5000 ########################
+###############################################################################
+
+
+    def importPdfFileToProject (self, source) :
+        '''This will import (copy) a PDF file to the current project. This
+        currently is a really simple operation but it would be anticipated
+        that over time more checking capability could be added to ensure
+        imported data is valid.'''
+        
+        # Get the target location
+        cid             = self.getCidFromPdfFileName(self.tools.fName(source))
+        fileName        = self.tools.fName(source)
+        targetFolder    = os.path.join(self.local.projComponentFolder, cid)
+        if not os.path.exists(targetFolder) :
+            os.makedirs(targetFolder)
+        target          = os.path.join(targetFolder, fileName)
+        if not shutil.copy(source, target) :
+            return True
+
+
+    def getCidFromPdfFileName (self, fileName) :
+        '''This simply returns a CID (component ID) from a PDF file name.
+        This is a simple operation but because file names can be diverse,
+        a specific function should be used for consistancy.'''
+        
+        # Warnings: Right now this assumes that only the file name is being
+        # given and that it only contains one '.'. It will need to be made
+        # more robust as more use cases arrise.
+        
+        return fileName.split('.')[0]
 
 ###############################################################################
 ###############################################################################

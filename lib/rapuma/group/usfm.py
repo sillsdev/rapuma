@@ -46,6 +46,8 @@ class Usfm (Group) :
     def __init__(self, project, cfg) :
         super(Usfm, self).__init__(project, cfg)
 
+#        import pdb; pdb.set_trace()
+
         # Set values for this manager
         self.pid                    = project.projectIDCode
         self.gid                    = project.gid
@@ -76,8 +78,8 @@ class Usfm (Group) :
         self.usfmManagers = ('text', self.renderer)
 
         # Init the general managers
-        for mType in self.usfmManagers :
-            self.project.createManager(mType)
+        for self.mType in self.usfmManagers :
+            self.project.createManager(self.mType)
 
         # Create the internal ref names we use in this module
         self.text                   = self.project.managers[self.cType + '_Text']
@@ -89,6 +91,8 @@ class Usfm (Group) :
         self.gidFolder              = os.path.join(self.projComponentFolder, self.gid)
         # File names with folder paths
         self.rapumaXmlCompConfig    = os.path.join(self.project.local.rapumaConfigFolder, self.xmlConfFile)
+
+
 
         # Get persistant values from the config if there are any
         newSectionSettings = self.tools.getPersistantSettings(self.projectConfig['CompTypes'][self.Ctype], self.rapumaXmlCompConfig)
