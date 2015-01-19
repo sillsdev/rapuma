@@ -8,8 +8,8 @@
 # according to the "installme" instructions found in the Rapuma doc
 # folder.
 
-# NOTE: This script is desined to work with Rapuma version v0.7.011 or
-# higher and on the Linux operating system, Ubuntu 12.04 or higher.
+# NOTE: This script is desined to work with Rapuma version v0.7.202 or
+# higher and on the Linux operating system, Ubuntu 14.04 or higher.
 
 
 ## SETUP
@@ -22,11 +22,10 @@
 #
 # You may wish to locate it in a different place on your system. Be sure
 # that is reflected in the commands of the rest of the exercises for
-# this example. Now find the resource/example/KJV.zip file in the Rapuma
-# program folder and copy it to your newly created sources folder.
-# Extract the contents which is in the KJV folder into the my_source
-# folder. Once this is done you should be ready to work through the rest
-# of this example script.
+# this example. Now find the resource/example/KJV folder in the Rapuma
+# project folder and copy all the contents to your newly created sources
+# folder, then extract the compressed files so they are ready to be
+# accessed.
 
 
 ## ADDING A PROJECT
@@ -34,7 +33,7 @@
 # After this command is run there will be a new project folder created
 # named "ENG-LATN-KJVTEST" in the main project folder.
 
-rapuma project ENG-LATN-KJVTEST project add
+rapuma publication ENG-LATN-KJVTEST project create
 
 
 ## PROJECT REMOVAL
@@ -44,7 +43,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # project and its contents. Any work done on it will be lost when a
 # command like this is run:
 #
-#   rapuma project ENG-LATN-KJVTEST project remove
+#   rapuma publication ENG-LATN-KJVTEST project remove
 #
 # Note that this would be the same as selecting the project folder in
 # your file browser and deleting it.
@@ -70,7 +69,7 @@ rapuma project ENG-LATN-KJVTEST project add
 # books (GEN-REV). To create one of these groups a command formed like
 # the following can be used:
 # 
-#   rapuma group ENG-LATN-KJVTEST NT group add --source_path ~/Publishing/my_source/KJV
+#   rapuma contents ENG-LATN-KJVTEST NT group add --comp_type usfm
 #
 # With this command Rapuma will search the files in "my_source" and
 # look for SFM or USFM extention files and check to see if any have the

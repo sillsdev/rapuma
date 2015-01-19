@@ -22,15 +22,11 @@
 #
 # You may wish to locate it in a different place on your system. Be sure
 # that is reflected in the commands of the rest of the exercises for
-# this example. Now find the resource/example/KYUM.zip file in the Rapuma
-# resource folder and copy it to your newly created sources folder.
-# Extract the contents which is in the KYUM folder into the my_source
-# folder.
+# this example. Now find the resource/example/KYUM folder in the Rapuma
+# project folder and copy all the contents to your newly created sources
+# folder, then extract the compressed files so they are ready to be
+# accessed.
 #
-# This example also includes illustrations so it is useful to also find
-# the KYUM_Illustrations.zip file and extract that into the my_source
-# folder too for future access.
-
 # Once this is done you should be ready to work through the rest
 # of this example script.
 
@@ -40,7 +36,7 @@
 # After this command is run there will be a new project folder created
 # named "KYU-MYMR-KYUMTEST" in the main project folder.
 
-rapuma project KYU-MYMR-KYUMTEST project add
+rapuma publication KYU-MYMR-KYUMTEST project create
 
 
 ## PROJECT REMOVAL
@@ -50,7 +46,7 @@ rapuma project KYU-MYMR-KYUMTEST project add
 # project and its contents. Any work done on it will be lost when a
 # command like this is run:
 #
-#   rapuma project KYU-MYMR-KYUMTEST project remove
+#   rapuma publication KYU-MYMR-KYUMTEST project remove
 #
 # Note that this would be the same as selecting the project folder in
 # your file browser and deleting it.
@@ -68,6 +64,12 @@ rapuma project KYU-MYMR-KYUMTEST project add
 # At this point the project is started but there are no groups in it 
 # and no components to render. This next command is where actual
 # content is added to the project in the form of groups which contain
+
+
+# This needs to be rewritten. Components are not added when groups are made!
+
+
+
 # components. The group components have to have valid IDs recognized
 # by Paratext. Custom component IDs are not recognized. The actuall
 # group ID, however, can be anything. These three IDs have speical
@@ -78,7 +80,7 @@ rapuma project KYU-MYMR-KYUMTEST project add
 # books (GEN-REV). To create one of these groups a command formed like
 # the following can be used:
 # 
-#   rapuma group KYU-MYMR-KYUMTEST NT group add --source_path ~/Publishing/my_source/KYUM
+#   rapuma content KYU-MYMR-KYUMTEST NT group add --comp_type
 #
 # With this command Rapuma will search the files in "my_source" and
 # look for SFM or USFM extention files and check to see if any have the
