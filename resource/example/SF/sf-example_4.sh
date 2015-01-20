@@ -37,7 +37,8 @@ rapuma settings SFTEST usfmTex Columns columnGutterFactor 20
 rapuma settings SFTEST usfmTex Columns columnGutterRuleSkip 4
 # Verse number display
 rapuma settings SFTEST usfmTex ChapterVerse useMarginalVerses True
-# Bind order
+# Binding
+rapuma settings SFTEST project Groups/FOURTEES startPageNumber 274
 rapuma settings SFTEST project Groups/GOSPEL bindingOrder 1
 rapuma settings SFTEST project Groups/FOURTEES bindingOrder 2
 
