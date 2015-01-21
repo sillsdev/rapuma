@@ -172,6 +172,93 @@ def trimLog (local) :
             writeObject.close()
 
 
+def crossCheckSourceList (cType, cidList, sourceList) :
+    '''Double check that all the files in a source list are valid.'''
+
+#    import pdb; pdb.set_trace()
+    checkList = list(cidList)
+    for f in sourceList :
+        if cType == 'usfm' :
+            if not os.path.exists(f) :
+                tools.terminal('\nERROR: Path/file is not valid. [' + f + ']\n')
+            else :
+                cid = tools.discoverCIDFromFile(f).lower()
+                if cid in checkList :
+                    checkList.remove(cid)
+        else :
+            # In this "other" case we assume the file name (less
+            # extention) is the cid
+            if not os.path.exists(f) :
+                tools.terminal('\nERROR: Path/file is not valid. [' + f + ']\n')
+            else :
+                if cid in checkList :
+                    checkList.remove(ProjSetup(sysConfig, pid).getCidFromPdfFileName(tools.fName(f)))
+    # If anything is left in the check list, we failed
+    if len(checkList) == 0 :
+        return True
+    else :
+        tools.terminal('\nERROR: Unable to find the source for component ID(s): [' + str(checkList) + ']\n')
+
+
+def makeSourceList (cType, cidList, path) :
+    '''Create a source list for a given set of CIDs.'''
+
+    usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
+    sourceList  = []
+
+    # Create the source_list by type
+    if cType == 'usfm' :
+        for filename in os.listdir(path) :
+            # Check only valid file types (by ext)
+            if os.path.splitext(filename)[1][1:].lower() in usfmExt :
+                cid = tools.discoverCIDFromFile(os.path.join(path, filename))
+                if cid.lower() in cidList : 
+                    sourceList.append(os.path.join(path, filename))
+    elif cType == 'pdf' :
+        for filename in cidList :
+            sourceList.append(os.path.join(path, filename + '.pdf'))
+
+    if not len(sourceList) > 0 :
+        sys.exit('\nERROR: Failed to create the much needed source list for this process. Process halting.\n')
+    else :
+        return sourceList
+
+
+def setupOutputBackgroundFeatures (pid, background, diagnostic, docInfo) :
+    '''Set all the features the user wants for the background.'''
+
+    if background and diagnostic :
+        sys.exit('\nERROR: Cannot have background (--background/-b) and diagnostic (--diagnostic/-d) turned on at the same time. Process halting.\n')
+    elif background and docInfo :
+        # Turn on background and Doc info
+        ProjBackground(pid).turnOnBackground()
+        ProjBackground(pid).turnOnDocInfo()
+    elif background :
+        # Turn on background only
+        ProjBackground(pid).turnOnBackground()
+        ProjBackground(pid).turnOffDocInfo()
+        ProjDiagnose(pid).turnOffDiagnostic()
+    elif docInfo :
+        # Turn on doc info on only
+        ProjBackground(pid).turnOnDocInfo()
+        ProjDiagnose(pid).turnOffDiagnostic()
+        ProjBackground(pid).turnOffBackground()
+    elif diagnostic :
+        # Turn on diagnostic only
+        ProjDiagnose(pid).turnOnDiagnostic()
+        ProjBackground(pid).turnOffBackground()
+        ProjBackground(pid).turnOffDocInfo()
+
+
+def resetOutputBackgroundFeatures (pid) :
+    '''Turn all the background features off (reset).'''
+
+    ProjDiagnose(pid).turnOffDiagnostic()
+    ProjBackground(pid).turnOffDocInfo()
+    ProjBackground(pid).turnOffBackground()
+
+
+
 ###############################################################################
 ########################### Rapuma Command Center #############################
 ###############################################################################
@@ -225,18 +312,21 @@ def userArguments (args) :
                 sys.exit('\nERROR: Sourct path is not valid [' + path + ']. Process halting.\n')
         # Figure out what area this command relates to and do it
         if cmd == 'archive' :
-            sys.exit('\nERROR: The ' + cmd + ' is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
+            tools.terminal('\nCreat an archive of the current project. This will overwrite any previous achive made.\n')
+            sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
         elif cmd == 'backup' :
-            sys.exit('\nERROR: The ' + cmd + ' is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
+            tools.terminal('\nCreate a backup of the project. (Multiple backups can be stored.) \n')
+            sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
         elif cmd == 'project' :
             if sub == 'create' :
                 ProjSetup(sysConfig, pid).newProject(mediaType)
             elif sub == 'remove' :
                 ProjDelete().deleteProject(pid)
             else :
-                sys.exit('\nERROR: The ' + sub + ' command is not supported. The developer didn\'t think it was a good idea. If you think otherwise, let him know what your thoughts are and he might just add it in for you.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
         elif cmd == 'share' :
-            sys.exit('\nERROR: The ' + cmd + ' command is not working at this time. I really feel bad about this and I hope it does not cause you any distress.\n')
+            tools.terminal('\nSave the project to a virtural drive (cloud) to share with another user. Note only one user can work on the project at a time. \n')
+            sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
 
     ##### CONTENT
     # Project level commands
@@ -247,10 +337,12 @@ def userArguments (args) :
         cmd         = args.command
         sub         = args.sub_command
         cType       = args.comp_type
-        usfmExt     = ['USFM', 'usfm', 'SFM', 'sfm']
         cid_list    = []            # A list of one or more cids
         source_list = []            # Gen: A list of files w/paths
         path        = ''
+        # For some processes we need to have the cType
+        if not cType :
+            cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
         # Check source path if there is one
         if args.path :
             path = os.path.abspath(args.path)
@@ -285,89 +377,172 @@ def userArguments (args) :
         # the engine level for processing. We need both a source_path
         # and a CID list to make it. This will take them as it finds
         # them but the completed list needs to be varified
-
-
-#        import pdb; pdb.set_trace()
-
-
-        if cid_list :
-            # Check for path
-            if not path :
-                sys.exit('\nERROR: Source path (--path/-p) not given. Process halting. Please add this parameter and retry.\n')
-            # Create the source_list by type
-            if cType == 'usfm' :
-                for f in os.listdir(path) :
-                    # Check only valid file types (by ext)
-                    if os.path.splitext(f)[1][1:].lower() in usfmExt :
-                        cid = tools.discoverCIDFromFile(os.path.join(path, f))
-                        if cid.lower() in cid_list : 
-                            source_list.append(os.path.join(path, f))
-            elif cType == 'pdf' :
-                for f in cid_list :
-                    source_list.append(os.path.join(path, f + '.pdf'))
-            else :
-                sys.exit('\nERROR: Component type not supported. Rapuma apologizes for this inconvenience. Process halting.\n')
+        if cmd == 'component' and (sub == 'add' or sub == 'update') :
+            if not path or not cid_list :
+                sys.exit('\nERROR: Missing a parameter (CIDs or path) for this process. Process halting.\n')
+            source_list = makeSourceList(cType, cid_list, path)
+        elif cmd == 'component' and sub == 'remove' :
+            source_list = cid_list
 
         # Before we go on, quickly varify existance of all files in the
         # list and cross-check with the CID list
-        if source_list :
-            checkList = list(cid_list)
-            for f in source_list :
-                if cType == 'usfm' :
-                    if not os.path.exists(f) :
-                        sys.exit('\nERROR: Path is not valid. [' + f + '] Process halting.\n')
-                    else :
-                        cid = tools.discoverCIDFromFile(f).lower()
-                        if cid in checkList :
-                            checkList.remove(cid)
-                else :
-                    # In this "other" case we assume the file name (less
-                    # extention) is the cid
-                    if os.path.isfile(f) :
-                        # This will obviously fail if there is more than one '.' in
-                        # the file name, but why would anyone want to do that? :-)
-                        checkList.remove(ProjSetup(sysConfig, pid).getCidFromPdfFileName(tools.fName(f)))
-            if len(checkList) != 0 :
-                    sys.exit('\nERROR: Components not found: [' + ''.join(checkList) + '] Process halting.\n')
-                    
+        if source_list and (sub == 'add' or sub == 'update') :
+            if not crossCheckSourceList(cType, cid_list, source_list) :
+                sys.exit('\nERROR: Source list cross-check failed. Process halting.\n')
+
         # Figure out what area this command relates to and do it
         if cmd == 'group' :
-            # Add a group (no components)
             if sub == 'add' :
+                # Add a group (no components)
                 ProjSetup(sysConfig, pid).addGroup(cType, gid)
-            # Remove a group (all of it)
             elif sub == 'remove' :
+                # Remove a group (all of it)
                 ProjSetup(sysConfig, pid).removeGroup(gid)
                 # Clean up the helper scripts too
                 if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                     ProjCommander(pid).removeScripts()
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
         # Work with components
-
-
-
-
         elif cmd == 'component' :
-            # Add one or more components in a group (will not overwrite)
             if sub == 'add' :
+                # Add one or more components in a group (will not overwrite)
                 ProjSetup(sysConfig, pid).addComponent(gid, source_list)
-            # Remove one or more components from a group
-
-
-
-
+            elif sub == 'compare' :
+                tools.terminal('\nCompare the current component working text with the previous version. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
             elif sub == 'remove' :
-                sys.exit('\nERROR: This is embarassing the ' + cmd + ' ' + sub + ' feature has not been implemented in the CLI yet. Process halting.\n')
-            # Update one or more components in a group
+                # Remove one or more components from a group
+                ProjSetup(sysConfig, pid).removeComponents(gid, source_list)
             elif sub == 'update' :
-                if source_list :
-                    ProjSetup(sysConfig, pid).updateGroup(gid, source_list)
+                # Update one or more components in a group
+                ProjSetup(sysConfig, pid).updateComponents(gid, source_list)
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+
+    ##### ASSET
+    # Commands for managing assets
+    elif sys.argv[1].lower() == 'asset' :
+
+        sys.exit('\nERROR: Sorry, the Asset command group has not been implemented yet. Process halting.\n')
+
+
+    ##### PROCESS
+    # Commands for processes performed on the project
+    elif sys.argv[1].lower() == 'process' :
+        pid         = args.project_id
+        gid         = args.group_id
+        cmd         = args.command
+        sub         = args.sub_command
+        cidList     = args.cid_list
+        path        = args.path
+        background  = args.background
+        diagnostic  = args.diagnostic
+        docInfo     = args.doc_info
+        hyphenation = args.hyphenation
+        save        = args.save
+        pages       = args.pages
+        override    = args.override
+        canonGroups = ['OT', 'NT', 'BIBLE']
+        cType       = ''
+        # For some processes we need to have the cType
+        cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
+        # Clean up the CID list
+        if cidList :
+            if type(cidList) != list :
+                cidList = cidList.split()
+        # Test the GID
+        if cmd == 'component' :
+            if not ProjSetup(sysConfig, pid).isGroup(gid) :
+                sys.exit('\nERROR: Group ID [' + path + '] is not valid. Process halting.\n')
+        # Check source path if there is one
+        if args.path :
+            path = os.path.abspath(args.path)
+            if not os.path.isdir(path) :
+                sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
+        # Check/Set optional override
+        if args.override :
+            override = args.override
+            ovrdPath = os.path.split(os.path.abspath(override))[0]
+            flName = os.path.split(override)[1]
+            override = os.path.join(ovrdPath, flName)
+            if not os.path.isdir(ovrdPath) :
+                sys.exit('\nERROR: The path given [' + ovrdPath + '] given is not valid. Process halted!\n')
+
+        # Begin processing commands here
+        if cmd == 'component' :
+            if sub == 'export' :
+                tools.terminal('\nExport component(s) from the project in their current state. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'preprocess' :
+                tools.terminal('\nApplies a preprocess script to a component(s) for export. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'postprocess' :
+                tools.terminal('\nApplies a postprocess script to a component(s) for export. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'render' :
+                # Render one or more components in a group
+                if cType == 'usfm' :
+                    # First we will set whatever peripheral features to what
+                    # they need to be. After we will turn them off.
+                    # Hyphenation can be run in any case
+                    if hyphenation :
+                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
+                    # Set the background features
+                    setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
+                    # Now we will render
+                    Project(pid, gid).renderGroup(cidList, pages, override, save)
+                    # Just to be safe we will just turn everything off
+                    resetOutputBackgroundFeatures(pid)
+                    if hyphenation :
+                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
+                elif cType == 'pdf' :
+                    sys.exit('\nERROR: Sorry, the ' + cType + ' render command is not implemented yet. Process halting.\n')
                 else :
-                    sys.exit('\nERROR: Must provide a source path or valid component IDs to update a group. Process halting.\n')
+                    sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+        elif cmd == 'group' :
+            if sub == 'export' :
+                tools.terminal('\nExport an entire group of components from the project in its current state. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'preprocess' :
+                tools.terminal('\nApplies a preprocess script to an entire group of components for export. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'postprocess' :
+                tools.terminal('\nApplies a postprocess script to an entire group of components for export. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'render' :
+                # Render the entire group
+                if cType == 'usfm' :
+                    # First we will set whatever peripheral features to what
+                    # they need to be. After we will turn them off.
+                    # Hyphenation can be run in any case
+                    if hyphenation :
+                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
+                    # Set the background features
+                    setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
+                    # Now we will render
+                    Project(pid, gid).renderGroup(None, pages, override, save)
+                    # Just to be safe we will just turn everything off
+                    resetOutputBackgroundFeatures(pid)
+                    if hyphenation :
+                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
+                elif cType == 'pdf' :
+                    sys.exit('\nERROR: Sorry, the ' + cType + ' render command is not implemented yet. Process halting.\n')
+                else :
+                    sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+        elif cmd == 'project' :
+            if sub == 'bind' :
+                # Bind the rendered output of all the groups together
+                pass
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
 
 
-
-
-    ##### SETTINGS
+    ##### SETTING
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'setting' :
         pid         = args.project_id
@@ -429,12 +604,12 @@ if __name__ == '__main__' :
     # Available choices
 
     # Project
-    prCmd              = ['archive', 'backup', 'project', 'share']
-    prSubCmd           = ['create', 'remove', 'restore', 'save', 'update']
-    prMediaType        = ['book']
+    puCmd              = ['archive', 'backup', 'project', 'share']
+    puSubCmd           = ['create', 'remove', 'restore', 'save', 'update']
+    puMediaType        = ['book']
     # Content
     ctCmd              = ['component', 'group']
-    ctSubCmd           = ['add', 'remove', 'update']
+    ctSubCmd           = ['add', 'compare', 'remove', 'update']
     ctCompType         = ['usfm', 'pdf']
     # Asset
     asCmd              = ['font', 'illustration', 'macro', 'script']
@@ -453,9 +628,9 @@ if __name__ == '__main__' :
     # Add Project subprocess arguments
     projCommand = subparsers.add_parser('publication', help='General publication management commands')
     projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    projCommand.add_argument('command', choices=prCmd, help='The general commands that can be used for managing a project.')
-    projCommand.add_argument('sub_command', choices=prSubCmd, help='Specify the command action to be executed on the project. This is required for all project processing functions.')
-    projCommand.add_argument('-m', '--media_type', choices=prMediaType, help='If creating a new project, give a valid project media type code. The default is "book".')
+    projCommand.add_argument('command', choices=puCmd, help='The general commands that can be used for managing a project.')
+    projCommand.add_argument('sub_command', choices=puSubCmd, help='Specify the command action to be executed on the project. This is required for all project processing functions.')
+    projCommand.add_argument('-m', '--media_type', choices=puMediaType, help='If creating a new project, give a valid project media type code. The default is "book".')
     projCommand.add_argument('-p', '--path', help='A local path needed for certain operations.')
 
     # Add Content subprocess arguments

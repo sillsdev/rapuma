@@ -75,7 +75,7 @@ class ProjSetup (object) :
             '0210' : ['ERR', 'The [<<1>>] group is locked. It must be unlocked before any modifications can be made or use (-f) force to override the lock.'],
             '0212' : ['ERR', 'Component [<<1>>] not found.'],
             '0215' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
-            '0230' : ['MSG', 'Added the [<<1>>] component to the project.'],
+            '0230' : ['MSG', 'Added the [<<1>>] component to the [<<2>>] group.'],
             '0232' : ['LOG', 'Force switch was set (-f). Added the [<<1>>] component to the project.'],
             '0240' : ['MSG', 'Added the [<<1>>] component group to the project.'],
             '0250' : ['MSG', 'Importing: [<<1>>]'],
@@ -89,10 +89,12 @@ class ProjSetup (object) :
             '0274' : ['MSG', 'Force set to true, component [<<1>>] has been overwritten in the [<<2>>] group.'],
             '0280' : ['LOG', 'The [<<1>>] file was removed from component [<<2>>]. - project.uninstallGroupComponent()'],
             '0290' : ['LOG', 'Removed the [<<1>>] component group folder and all its contents.'],
+            '0291' : ['MSG', 'Removed the [<<1>>] component from the [<<2>>] group.'],
             '0292' : ['WRN', 'Group [<<1>>] not found in project configuration.'],
             '0294' : ['LOG', 'Removed [<<1>>] from group [<<2>>]'],
             '0296' : ['WRN', 'Could not remove [<<1>>] from group [<<2>>]'],
             '0298' : ['MSG', 'Remove operation for group [<<1>>] is complete.'],
+            '0299' : ['MSG', 'Update operation for group [<<1>>] is complete.'],
 
             '0300' : ['ERR', 'Failed to set source path. Error given was: [<<1>>]'],
             '0305' : ['ERR', 'File not found: [<<1>>] Process halted!'],
@@ -122,8 +124,9 @@ class ProjSetup (object) :
             '1999' : ['WRN', 'Collect end notes is not fully implemented yet. Skipped end notes in: [<<1>>]'],
 
             '2810' : ['ERR', 'Configuration file [<<1>>] not found. Setting change could not be made.'],
-            '2840' : ['ERR', 'Problem making setting change. Section [<<1>>] missing from configuration file.'],
+            '2840' : ['ERR', 'Big problem here. Section [<<1>>] seems to be missing from configuration file.'],
             '2860' : ['MSG', 'Changed  [<<1>>][<<2>>][<<3>>] setting from \"<<4>>\" to \"<<5>>\".'],
+            '2880' : ['MSG', 'No changes made to settings [<<1>>][<<2>>][<<3>>][<<4>>] new value given matches existing value.".'],
 
             '3100' : ['MSG', 'Component compare for group [<<1>>] is completed'],
             '3200' : ['MSG', 'Compare component [<<1>>] completed'],
@@ -184,7 +187,7 @@ class ProjSetup (object) :
         return True
 
 
-    def updateComponent (self, gid, source) :
+    def updateGroupComponent (self, gid, source) :
         '''Update a single component in a group.'''
 
         # Create a check list for being sure the CIDs are in the project
@@ -359,19 +362,6 @@ class ProjSetup (object) :
             return handlePdfAdd()
         else :
             self.log.writeToLog(self.errorCodes['0340'], [cType])
-            
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def removeGroup (self, gid) :
@@ -408,10 +398,30 @@ class ProjSetup (object) :
         # Write out the config in case something has been changed
         self.tools.writeConfFile(self.projectConfig)
 
-
         # Report successful and return
         self.log.writeToLog(self.errorCodes['0298'], [gid])
         return True
+
+
+    def updateComponents (self, gid, cidList) :
+        '''Update in a group one or more components.'''
+        
+        for cid in cidList :
+            self.updateGroupComponent(gid, cid)
+            
+        self.log.writeToLog(self.errorCodes['0299'], [gid])
+        return True
+
+
+    def removeComponents (self, gid, cidList) :
+        '''Remove from a group one or more components.'''
+        
+        for cid in cidList :
+            self.uninstallGroupComponent(gid, cid)
+            
+        if self.tools.writeConfFile(self.projectConfig) :
+            self.log.writeToLog(self.errorCodes['0298'], [gid])
+            return True
 
 
     def uninstallGroupComponent (self, gid, cid) :
@@ -448,6 +458,7 @@ class ProjSetup (object) :
             self.projectConfig['Groups'][gid]['cidList'].remove(cid)
 
         # If nothing above errored, return true
+        self.log.writeToLog(self.errorCodes['0291'], [cid, gid])
         return True
 
 
@@ -491,7 +502,7 @@ class ProjSetup (object) :
 
             # Install our working text files
             if self.importUsfmWorkingText(fName, cType, gid, cid) :
-                self.log.writeToLog(self.errorCodes['0230'], [cid])
+                self.log.writeToLog(self.errorCodes['0230'], [cid, gid])
 
             else :
                 self.log.writeToLog(self.errorCodes['0265'], [cid])
@@ -941,14 +952,20 @@ class ProjSetup (object) :
 ####################### Error Code Block Series = 2000 ########################
 ###############################################################################
 
-    def changeConfigSetting (self, config, section, key, newValue) :
-        '''Change a value in a specified config/section/key.  This will 
-        write out changes immediately. If this is called internally, the
-        calling function will need to reload to the config for the
-        changes to take place in the current session. This is currently
-        designed to work more as a single call to Rapuma.'''
+    def isGroup (self, gid) :
+        '''Return true if the group is present in the project.conf file.'''
+        
+        obj = self.getConfigObj(project)
+        try :
+            if gid in obj['Groups'] :
+                return True
+        except :
+            return False
 
-        oldValue = ''
+
+    def getConfigObj (self, config) :
+        '''Return a config file object for processing.'''
+
         if config.lower() == 'rapuma' :
             confFile = os.path.join(self.local.userHome, 'rapuma.conf')
         else :
@@ -959,9 +976,43 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['2810'], [self.tools.fName(confFile)])
             return
 
-        # Load the file and make the change
-        confObj = ConfigObj(confFile, encoding='utf-8')
+        # Load the file and return it
+        #obj = ConfigObj(confFile, encoding='utf-8')
+        #obj.filename = confFile
+        #print obj.filename
+        #return obj
+        return ConfigObj(confFile, encoding='utf-8')
+
+
+    def returnConfigValue (self, config, section, key) :
+        '''This will return the current value of a specified key.'''
+                
+        # Get the config object
+        confObj = self.getConfigObj(config)
+        try :
+            # Drill down to the section we need
+            for sec in section.split('/') :
+                confObj = confObj[sec]
+        except :
+            self.log.writeToLog(self.errorCodes['2840'], [section])
+            return
+
+        return confObj[key]
+
+
+    def changeConfigSetting (self, config, section, key, newValue) :
+        '''Change a value in a specified config/section/key.  This will 
+        write out changes immediately. If this is called internally, the
+        calling function will need to reload to the config for the
+        changes to take place in the current session. This is currently
+        designed to work more as a single call to Rapuma.'''
+
+        # Load the whole config object
+        confObj = self.getConfigObj(config)
         outConfObj = confObj
+        # Get the old value, if there is one, for reporting
+        oldValue = self.returnConfigValue(config, section, key)
+
         try :
             # Walk our confObj to get to the section we want
             for s in section.split('/') :
@@ -970,24 +1021,19 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['2840'], [section])
             return
 
-        # Get the old value, if there is one, for reporting
-        try :
-            oldValue = confObj[key]
-        except :
-            pass
-
-        # Insert the new value in its proper form
+        # Convert new value to proper form if needed
         if type(oldValue) == list :
             newValue = newValue.split(',')
-            confObj[key] = newValue
-        else :
-            confObj[key] = newValue
+        # Insert the new value
+        confObj[key] = newValue
 
         # Write out the original copy of the confObj which now 
         # has the change in it, then report what we did
-        outConfObj.filename = confFile
-        if self.tools.writeConfFile(outConfObj) :
+        if oldValue != newValue :
+            self.tools.writeConfFile(outConfObj)
             self.log.writeToLog(self.errorCodes['2860'], [config, section, key, unicode(oldValue), unicode(newValue)])
+        else :
+            self.log.writeToLog(self.errorCodes['2880'], [config, section, key, unicode(oldValue)])
 
 
 ###############################################################################
