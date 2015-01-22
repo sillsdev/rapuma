@@ -428,13 +428,16 @@ def userArguments (args) :
     # Commands for managing assets
     elif sys.argv[1].lower() == 'asset' :
         pid         = args.project_id
+        gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
         fileName    = args.file_name
         path        = ''
         source      = ''
         primary     = args.primary
-
+        # Check CID
+        if not ProjSetup(sysConfig, pid).isGroup(gid) :
+            sys.exit('\nERROR: Group ID is not valid. [' + gid + '] Process halting.\n')
         # Path set and test
         if sub == 'add' or sub == 'update' :
             if args.path :
@@ -448,15 +451,15 @@ def userArguments (args) :
         if cmd == 'font' :
             if sub == 'add' :
                 # Add a font package to the project
-                ProjFont(pid).installFont(fileName)
+                ProjFont(pid, gid).installFont(fileName, path)
                 if primary :
-                    ProjFont(pid).setPrimaryFont(fileName)
+                    ProjFont(pid, gid).setPrimaryFont(fileName)
             elif sub == 'remove' :
                 # Remove a font from the project
-                ProjFont(pid).removeFontPack(pkid)
+                ProjFont(pid, gid).removeFontPack(fileName)
             elif sub == 'update' :
                 # Update a font in the project
-                ProjFont(pid).updateFontPack(pkid)
+                ProjFont(pid, gid).updateFontPack(fileName, path)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 tools.terminal('\nAdd an illustration file (asset) to the project. \n')
@@ -487,6 +490,13 @@ def userArguments (args) :
             elif sub == 'update' :
                 tools.terminal('\nUpdate a script file in the project \n')
                 sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+
+
+
+
+
+
+
 
 
     ##### PROCESS
@@ -708,6 +718,7 @@ if __name__ == '__main__' :
     # Add project Asset management subprocess arguments
     assetCommand = subparsers.add_parser('asset', help='General project asset handling commands')
     assetCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
+    assetCommand.add_argument('group_id', help='A unique ID for this group used to assign certain assets.')
     assetCommand.add_argument('command', choices=asCmd, help='The general commands that can be used for managing assets.')
     assetCommand.add_argument('sub_command', choices=asSubCmd, help='Sub commands that can be used for managing project assets.')
     assetCommand.add_argument('-f', '--file_name', help='An asset file name.')

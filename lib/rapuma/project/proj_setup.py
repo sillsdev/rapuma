@@ -955,7 +955,7 @@ class ProjSetup (object) :
     def isGroup (self, gid) :
         '''Return true if the group is present in the project.conf file.'''
         
-        obj = self.getConfigObj(project)
+        obj = self.getConfigObj('project')
         try :
             if gid in obj['Groups'] :
                 return True

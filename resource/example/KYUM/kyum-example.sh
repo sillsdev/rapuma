@@ -32,6 +32,14 @@
 # project folder and copy all the contents to your newly created sources
 # folder, then extract the compressed files so they are ready to be
 # accessed.
+
+
+
+# Set up assets folder instructions
+
+
+
+
 #
 # Once this is done you should be ready to work through the rest
 # of this example script.
@@ -94,7 +102,8 @@ rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
 # For this example, we will work with Font and Illustration assets. First
 # we will bring in the font we need for this project with these commands:
 
-rapuma asset KYU-MYMR-KYUMTEST font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/KYUM
+rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets --primary
+rapuma asset KYU-MYMR-KYUMTEST GOSPEL font remove --file_name "Charis SIL_4.106.zip"
 
 # 
 # During import, if it is present in the source text, Rapuma has gathered
@@ -112,6 +121,8 @@ cp ~/Publishing/my_source/KYUM/kyum-illustrations/* ~/Publishing/KYU-MYMR-KYUMTE
 
 # REM: rapuma setting KYU-MYMR-KYUMTEST usfmTex --section TeXBehavior --key vFuzz --value 4.6pt
 
+
+#REM: rapuma process KYU-MYMR-KYUMTEST component render GOSPEL --cid_list mat
 
 
 
