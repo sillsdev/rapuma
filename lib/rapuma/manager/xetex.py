@@ -741,14 +741,10 @@ class Xetex (Manager) :
             # If there was a saveFile, that will be the viewFile
             viewFile = saveFile
         else :
-            # Problem here is that there could be a -view version
-            # of the gidPdfFile if this was a view-only operation
-            # but if the -view version was created after the original
-            # gidPdfFile, we know that's the one we want to see
+            # The view file in this case is just temporary
             if not os.path.isfile(viewFile) :
                 viewFile = self.local.gidPdfFile.replace(gid + '.pdf', gid + '-view.pdf')
-                if os.path.exists(viewFile) :
-                    shutil.copy(self.local.gidPdfFile, viewFile)
+                shutil.copy(self.local.gidPdfFile, viewFile)
 
         # Now view it
         if os.path.isfile(viewFile) :
