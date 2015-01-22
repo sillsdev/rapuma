@@ -33,11 +33,10 @@ from rapuma.project.proj_config     import Config
 
 class ProjFont (object) :
 
-    def __init__(self, pid, gid) :
+    def __init__(self, pid) :
         '''Do the primary initialization for this class.'''
 
         self.pid                            = pid
-        self.gid                            = gid
         self.tools                          = Tools()
         self.user                           = UserConfig()
         self.log                            = ProjLog(pid)
@@ -279,10 +278,8 @@ class ProjFont (object) :
 
         font = self.checkForSubFont(font)
         cRes = self.copyInFont(font, primary)
-        rRes = self.recordFont(self.cType, font, force)
-        pRes = ''
-        if force :
-            pRes = self.setPrimaryFont(font, force)
+        rRes = self.recordFont(self.cType, font)
+        pRes = self.setPrimaryFont(font)
         if cRes and rRes and pRes :
             self.log.writeToLog(self.errorCodes['1235'], [font])
             return True

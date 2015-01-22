@@ -421,8 +421,6 @@ def userArguments (args) :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
 
 
-    asCmd              = ['font', 'illustration', 'macro', 'script']
-    asSubCmd           = ['add', 'remove', 'update']
 
 
 
@@ -433,22 +431,32 @@ def userArguments (args) :
         cmd         = args.command
         sub         = args.sub_command
         fileName    = args.file_name
-        path        = args.path
+        path        = ''
+        source      = ''
         primary     = args.primary
+
+        # Path set and test
+        if sub == 'add' or sub == 'update' :
+            if args.path :
+                path = os.path.abspath(args.path)
+                if not os.path.isdir(path) :
+                    sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
+            else :
+                sys.exit('\nERROR: Path required for this operation. Process halting.\n')
 
         # Begin processing commands here
         if cmd == 'font' :
             if sub == 'add' :
-                # Add a font to the project
-                ProjFont(pid, gid).installFont(pkid, True)
+                # Add a font package to the project
+                ProjFont(pid).installFont(fileName)
                 if primary :
-                    ProjFont(pid, gid).setPrimaryFont(pkid, force)
+                    ProjFont(pid).setPrimaryFont(fileName)
             elif sub == 'remove' :
                 # Remove a font from the project
-                ProjFont(pid, gid).removeFontPack(pkid, force)
+                ProjFont(pid).removeFontPack(pkid)
             elif sub == 'update' :
                 # Update a font in the project
-                ProjFont(pid, gid).updateFontPack(pkid)
+                ProjFont(pid).updateFontPack(pkid)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 tools.terminal('\nAdd an illustration file (asset) to the project. \n')

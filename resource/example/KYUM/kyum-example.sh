@@ -91,7 +91,11 @@ rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
 
 ## ASSET MANAGEMENT
 # Assets are parts of a project but are not treated like the source.
-# For this example, we will work with Font and Illustration assets.
+# For this example, we will work with Font and Illustration assets. First
+# we will bring in the font we need for this project with these commands:
+
+rapuma asset KYU-MYMR-KYUMTEST font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/KYUM
+
 # 
 # During import, if it is present in the source text, Rapuma has gathered
 # metadata for illustrations used in the publication. For this example,
