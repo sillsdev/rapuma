@@ -118,9 +118,9 @@ Todo:
         <setting>
             <name>Default Projects Path</name>
             <key>projects</key>
-            <description>The full path to where projects might be kept. They can go any where but if it is not specified, Rapuma will look here first.</description>
+            <description>The full path to where projects are kept. The default is set for deployment on a Debian server. Adjust for other environments.</description>
             <type>string</type>
-            <value>~/Publishing</value>
+            <value>/var/lib/rapuma/Publishing</value>
         </setting>
         <setting>
             <name>Rapuma Resource Path</name>
