@@ -268,7 +268,7 @@ class ProjFont (object) :
                     return False
 
 
-    def installFont (self, font, force = False) :
+    def installFont (self, font, primary = False) :
         '''It is a three step process to install a font. This will both
         copy in a font and record a font in one call. Do not try to 
         install a substitute font. If force is used, It is assumed 
@@ -278,7 +278,7 @@ class ProjFont (object) :
 #        import pdb; pdb.set_trace()
 
         font = self.checkForSubFont(font)
-        cRes = self.copyInFont(font, force)
+        cRes = self.copyInFont(font, primary)
         rRes = self.recordFont(self.cType, font, force)
         pRes = ''
         if force :

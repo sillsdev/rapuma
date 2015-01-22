@@ -420,11 +420,65 @@ def userArguments (args) :
             else :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
 
+
+    asCmd              = ['font', 'illustration', 'macro', 'script']
+    asSubCmd           = ['add', 'remove', 'update']
+
+
+
     ##### ASSET
     # Commands for managing assets
     elif sys.argv[1].lower() == 'asset' :
+        pid         = args.project_id
+        cmd         = args.command
+        sub         = args.sub_command
+        fileName    = args.file_name
+        path        = args.path
+        primary     = args.primary
 
-        sys.exit('\nERROR: Sorry, the Asset command group has not been implemented yet. Process halting.\n')
+        # Begin processing commands here
+        if cmd == 'font' :
+            if sub == 'add' :
+                # Add a font to the project
+                ProjFont(pid, gid).installFont(pkid, True)
+                if primary :
+                    ProjFont(pid, gid).setPrimaryFont(pkid, force)
+            elif sub == 'remove' :
+                # Remove a font from the project
+                ProjFont(pid, gid).removeFontPack(pkid, force)
+            elif sub == 'update' :
+                # Update a font in the project
+                ProjFont(pid, gid).updateFontPack(pkid)
+        elif cmd == 'illustration' :
+            if sub == 'add' :
+                tools.terminal('\nAdd an illustration file (asset) to the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'remove' :
+                tools.terminal('\nRemove an illustration file (asset) from the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'update' :
+                tools.terminal('\nUpdate an illustration file (asset) in the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+        elif cmd == 'macro' :
+            if sub == 'add' :
+                # Add a macro file asset to the project.
+                Config(pid, gid).addMacPack(pkid, force)
+            elif sub == 'remove' :
+                # Remove a macro file asset from the project.
+                Config(pid, gid).removeMacPack(pkid, force)
+            elif sub == 'update' :
+                # Update a macro file asset in the project.
+                Config(pid, gid).updateMacPack(pkid)
+        elif cmd == 'script' :
+            if sub == 'add' :
+                tools.terminal('\nAdd a script file asset to the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'remove' :
+                tools.terminal('\nRemove a script file asset from the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+            elif sub == 'update' :
+                tools.terminal('\nUpdate a script file in the project \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
 
 
     ##### PROCESS
@@ -613,7 +667,7 @@ if __name__ == '__main__' :
     ctCompType         = ['usfm', 'pdf']
     # Asset
     asCmd              = ['font', 'illustration', 'macro', 'script']
-    asSubCmd           = ['add', 'primary', 'remove', 'update']
+    asSubCmd           = ['add', 'remove', 'update']
     # Processes
     pcCmd              = ['component', 'group', 'project']
     pcSubCmd           = ['bind', 'export', 'preprocess', 'postprocess', 'render']
@@ -648,8 +702,9 @@ if __name__ == '__main__' :
     assetCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     assetCommand.add_argument('command', choices=asCmd, help='The general commands that can be used for managing assets.')
     assetCommand.add_argument('sub_command', choices=asSubCmd, help='Sub commands that can be used for managing project assets.')
-    assetCommand.add_argument('-f', '--file', help='An asset file name.')
+    assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
+    assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
 
     # Add Processing subprocess arguments
     processCommand = subparsers.add_parser('process', help='General project process commands')

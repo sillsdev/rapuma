@@ -37,7 +37,7 @@
 # of this example script.
 
 
-## ADDING A PROJECT
+## CREATING A PROJECT
 # This next command creates a new project in the Rapuma project folder. 
 # After this command is run there will be a new project folder created
 # named "KYU-MYMR-KYUMTEST" in the main project folder.
@@ -88,6 +88,11 @@ rapuma content KYU-MYMR-KYUMTEST GOSPEL component update --cid_list jhn --path ~
 rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "act mrk" --path ~/Publishing/my_source/KYUM
 rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
 
+
+## ASSET MANAGEMENT
+# Assets are parts of a project but are not treated like the source.
+# For this example, we will work with Font and Illustration assets.
+# 
 # During import, if it is present in the source text, Rapuma has gathered
 # metadata for illustrations used in the publication. For this example,
 # we will just use some Bash to copy them to the right location in the
