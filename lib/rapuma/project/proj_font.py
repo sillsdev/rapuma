@@ -89,6 +89,7 @@ class ProjFont (object) :
             '1262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - proj_font.installFont()'],
             '1265' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed.'],
             '1267' : ['LOG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
+            '1280' : ['ERR', 'The [<<1>>] font bundle failed to be installed.'],
             '1380' : ['MSG', 'Removed the [<<1>>] font from the [<<2>>] component type settings. - proj_font.removeFont()'],
             '1382' : ['MSG', 'Force switch was set (-f). This process has completely removed the [<<1>>] font and settings from the project. - proj_font.removeFont()'],
             '1385' : ['WRN', 'Could not remove! The [<<1>>] font is not listed in the configuration settings.'],
@@ -239,44 +240,47 @@ class ProjFont (object) :
 
         fontId = self.getFontId(fileName)
         # Initial source file with path
-        source = os.path.join(path, fontId + '.zip')
+        source = os.path.join(path, fileName)
         # See if we are working with a substitute
         subId = self.checkForSubFont(source)
         if subId != fontId :
             source = os.path.join(path, subId + '.zip')
             fontId = subId
-        else :
-            source = os.path.join(path, fileName)
-        cRes = self.copyInFont(source)
-        rRes = self.recordFont(fontId)
-        if cRes and rRes :
+        # Now install and record
+        if self.copyInFont(source) and self.recordFont(fontId) :
             self.log.writeToLog(self.errorCodes['1235'], [fontId])
             return True
-
-
-    def updateFontPack (self, font) :
-        '''Update a font package but do not change any of the existing settings.'''
-
-        fontId = self.getFontId(fileName)
-
-        # Delete the existing font package (but not the settings)
-        # but make a backup of it in case there is a problem
-        fontDir     = os.path.join(self.local.projFontFolder, font)
-        fontDirBak  = fontDir + '.bak'
-        if os.path.exists(fontDir) :
-            shutil.copytree(fontDir, fontDirBak)
-            shutil.rmtree(fontDir)
-        # Bring in a fresh copy
-        cRes = self.copyInFont(font)
-        if cRes :
-            shutil.rmtree(fontDirBak)
-            self.log.writeToLog(self.errorCodes['1237'], [font])
-            return True
         else :
-            shutil.copytree(fontDirBak, fontDir)
+            self.log.writeToLog(self.errorCodes['1280'], [fontId])
+            return False
 
 
-    def varifyFont (self) :
+    def updateFontPack (self, fileName, path) :
+        '''Update a font package but do not change any of the existing
+        settings. If there are setting issues (changes) it would be
+        best to remove, then reinstall.'''
+
+        # Set the vars
+        fontId      = self.getFontId(fileName)
+        source      = os.path.join(path, fileName)
+        fontDir     = os.path.join(self.local.projFontFolder, fontId)
+        # Be sure the font is in the project
+        if self.varifyFont(fontId) :
+            # Bring in a fresh copy
+            if self.copyInFont(source) :
+                self.log.writeToLog(self.errorCodes['1237'], [fontId])
+                return True
+
+
+    def varifyFont (self, fontId) :
+        '''Varify that a font has been installed into the project.'''
+
+        if os.path.isdir(os.path.join(self.local.projFontFolder, fontId)) \
+            and self.macPackConfig['Fonts'][fontId].has_key('FontInformation') :
+            return True
+
+
+    def verifyPrimaryFont (self) :
         '''Return True if a primary font is installed in the project. This will
         go as far as looking for the font package folder and if there is any
         information about the font in the macPackConfig.'''
@@ -286,8 +290,7 @@ class ProjFont (object) :
         if self.macPackConfig['FontSettings'].has_key('primaryFont') :
             if self.macPackConfig['FontSettings']['primaryFont'] :
                 fontId = self.macPackConfig['FontSettings']['primaryFont']
-                if os.path.isdir(os.path.join(self.local.projFontFolder, fontId)) \
-                    and self.macPackConfig['Fonts'][fontId].has_key('FontInformation') :
+                if self.varifyFont :
                     return True
 
 

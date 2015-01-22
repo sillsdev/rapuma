@@ -102,8 +102,10 @@ class Usfm (Group) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
+# FIXME: This needs to go away. Font installation should only happen through
+# the project asset management path
         # Check if there is a primary font installed
-        if not self.proj_font.varifyFont() :
+        if not self.proj_font.verifyPrimaryFont() :
             self.proj_font.installFont('DefaultFont')
 
         # Module Error Codes
