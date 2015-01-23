@@ -26,6 +26,7 @@ from rapuma.group.group                 import Group
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_config         import Config
+from rapuma.project.proj_macro          import Macro
 from rapuma.project.proj_background     import ProjBackground
 
 
@@ -59,6 +60,7 @@ class Usfm (Group) :
         self.proj_font              = ProjFont(self.pid, self.gid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
+        self.proj_macro             = Macro(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getAdjustmentConfig()
         self.projectConfig          = self.proj_config.projectConfig
@@ -72,8 +74,8 @@ class Usfm (Group) :
         # Get the comp settings
         self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
         # Get macro package settings
-        self.proj_config.getMacPackConfig(self.macPack)
-        self.macPackConfig          = self.proj_config.macPackConfig
+        self.proj_macro.getMacPackConfig(self.macPack)
+        self.macPackConfig          = self.proj_macro.macPackConfig
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', self.renderer)
 
@@ -105,8 +107,8 @@ class Usfm (Group) :
 # FIXME: This needs to go away. Font installation should only happen through
 # the project asset management path
         # Check if there is a primary font installed
-        if not self.proj_font.verifyPrimaryFont() :
-            self.proj_font.installFont('DefaultFont')
+        #if not self.proj_font.verifyPrimaryFont() :
+            #self.proj_font.installFont('DefaultFont')
 
         # Module Error Codes
         self.errorCodes     = {

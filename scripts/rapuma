@@ -99,6 +99,7 @@ from rapuma.core.proj_compare           import ProjCompare
 from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
 from rapuma.project.proj_config         import Config
+from rapuma.project.proj_macro          import Macro
 from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
@@ -277,6 +278,13 @@ def userArguments (args) :
     # Set some vars
     local = None
     pid = ''
+    
+    # Validate the PID, halt if it isn't good, return if it is
+    def validatePid (pid) :
+        if pid in projList :
+            return pid
+        else :
+            sys.exit('\nERROR: The project ID given [' + pid + '] is not valid. Process halting.\n')
 
     # Common error handlers
     def cmdError (cmd, cmdType) :
@@ -295,9 +303,13 @@ def userArguments (args) :
     ##### PROJECT
     # Project level commands
     elif sys.argv[1].lower() == 'publication' :
-        pid         = args.project_id
         cmd         = args.command
         sub         = args.sub_command
+        # Only when creating a project can a non-valid PID be used
+        if cmd != 'project' and sub != 'create' :
+            pid     = validatePid(args.project_id)
+        else :
+            pid     = args.project_id
         path        = ''
         mediaType   = None
         if args.media_type :
@@ -332,7 +344,7 @@ def userArguments (args) :
     # Project level commands
     elif sys.argv[1].lower() == 'content' :
         usfmData    = UsfmData()
-        pid         = args.project_id
+        pid         = validatePid(args.project_id)
         gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
@@ -427,25 +439,26 @@ def userArguments (args) :
     ##### ASSET
     # Commands for managing assets
     elif sys.argv[1].lower() == 'asset' :
-        pid         = args.project_id
+        pid         = validatePid(args.project_id)
         gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
         fileName    = args.file_name
+        macroId     = args.macro_id
         path        = ''
         source      = ''
         primary     = args.primary
-        # Check CID
+        # Check GID
         if not ProjSetup(sysConfig, pid).isGroup(gid) :
             sys.exit('\nERROR: Group ID is not valid. [' + gid + '] Process halting.\n')
         # Path set and test
-        if sub == 'add' or sub == 'update' :
-            if args.path :
-                path = os.path.abspath(args.path)
-                if not os.path.isdir(path) :
-                    sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
-            else :
-                sys.exit('\nERROR: Path required for this operation. Process halting.\n')
+#        if sub == 'add' or sub == 'update' and not macroId :
+        if args.path :
+            path = os.path.abspath(args.path)
+            if not os.path.isdir(path) :
+                sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
+#        else :
+#            sys.exit('\nERROR: Path required for this operation. Process halting.\n')
 
         # Begin processing commands here
         if cmd == 'font' :
@@ -471,15 +484,18 @@ def userArguments (args) :
                 tools.terminal('\nUpdate an illustration file (asset) in the project. \n')
                 sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
         elif cmd == 'macro' :
+            # Check here for macro ID
+            if  macroId != 'usfmTex' :
+                sys.exit('\n ERROR: Macro ID missing or invalid. (Hint, --macro_id usfmTex) Only the usfmTex macro package is supported at this time. Process halting.\n')
             if sub == 'add' :
                 # Add a macro file asset to the project.
-                Config(pid, gid).addMacPack(pkid, force)
+                Macro(pid, gid).addMacPack(macroId)
             elif sub == 'remove' :
                 # Remove a macro file asset from the project.
-                Config(pid, gid).removeMacPack(pkid, force)
+                Macro(pid, gid).removeMacPack(macroId)
             elif sub == 'update' :
                 # Update a macro file asset in the project.
-                Config(pid, gid).updateMacPack(pkid)
+                Macro(pid, gid).updateMacPack(macroId)
         elif cmd == 'script' :
             if sub == 'add' :
                 tools.terminal('\nAdd a script file asset to the project. \n')
@@ -502,7 +518,7 @@ def userArguments (args) :
     ##### PROCESS
     # Commands for processes performed on the project
     elif sys.argv[1].lower() == 'process' :
-        pid         = args.project_id
+        pid         = validatePid(args.project_id)
         gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
@@ -617,7 +633,7 @@ def userArguments (args) :
     ##### SETTING
     # Setting manipulation commands
     elif sys.argv[1].lower() == 'setting' :
-        pid         = args.project_id
+        pid         = validatePid(args.project_id)
         config      = args.configuration
         section     = args.section
         key         = args.key
@@ -724,6 +740,7 @@ if __name__ == '__main__' :
     assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
     assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
+    assetCommand.add_argument('-m', '--macro_id', help='A macro package ID is required for managing macros')
 
     # Add Processing subprocess arguments
     processCommand = subparsers.add_parser('process', help='General project process commands')

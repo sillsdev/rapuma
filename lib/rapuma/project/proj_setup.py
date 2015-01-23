@@ -954,7 +954,7 @@ class ProjSetup (object) :
 
     def isGroup (self, gid) :
         '''Return true if the group is present in the project.conf file.'''
-        
+
         obj = self.getConfigObj('project')
         try :
             if gid in obj['Groups'] :
@@ -966,6 +966,8 @@ class ProjSetup (object) :
     def getConfigObj (self, config) :
         '''Return a config file object for processing.'''
 
+#        import pdb; pdb.set_trace()
+
         if config.lower() == 'rapuma' :
             confFile = os.path.join(self.local.userHome, 'rapuma.conf')
         else :
@@ -976,11 +978,6 @@ class ProjSetup (object) :
             self.log.writeToLog(self.errorCodes['2810'], [self.tools.fName(confFile)])
             return
 
-        # Load the file and return it
-        #obj = ConfigObj(confFile, encoding='utf-8')
-        #obj.filename = confFile
-        #print obj.filename
-        #return obj
         return ConfigObj(confFile, encoding='utf-8')
 
 

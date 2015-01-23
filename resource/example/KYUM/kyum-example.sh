@@ -50,7 +50,7 @@
 # After this command is run there will be a new project folder created
 # named "KYU-MYMR-KYUMTEST" in the main project folder.
 
-rapuma publication KYU-MYMR-KYUMTEST project create
+~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST project create
 
 
 ## PROJECT REMOVAL
@@ -59,7 +59,7 @@ rapuma publication KYU-MYMR-KYUMTEST project create
 # as this action cannot be undone. This command permanently removes the
 # project and its contents. Any work done will be lost when it is run.
 #
-#   rapuma publication KYU-MYMR-KYUMTEST project remove
+#   ~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST project remove
 #
 # Note that this would be the same as selecting the project folder in
 # your file browser and deleting it.
@@ -71,12 +71,12 @@ rapuma publication KYU-MYMR-KYUMTEST project create
 # in a group must be of the same type. Component types cannot be mixed
 # in a group. To create our first group, use this command:
 
-rapuma content KYU-MYMR-KYUMTEST GOSPEL group add --comp_type usfm
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL group add --comp_type usfm
 
 # That command created an empty group called GOSPEL which will contain
 # USFM file components after we run this command:
 
-rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "mat luk jhn" --path ~/Publishing/my_source/KYUM
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "mat luk jhn" --path ~/Publishing/my_source/KYUM
 
 # The first four books of the NT have now been imported into the project
 # and you can find them in the Component folder. Often it becomes necessary
@@ -84,7 +84,7 @@ rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "mat luk jhn" -
 # example, if an illustration had to be added to the source of the Book
 # of John, it would be necessary to update it with this command:
 
-rapuma content KYU-MYMR-KYUMTEST GOSPEL component update --cid_list jhn --path ~/Publishing/my_source/KYUM
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component update --cid_list jhn --path ~/Publishing/my_source/KYUM
 
 # Components can be added to a group after the initial import process.
 # You would use the same "add" command as above, only adjust the
@@ -93,37 +93,42 @@ rapuma content KYU-MYMR-KYUMTEST GOSPEL component update --cid_list jhn --path ~
 # we will add the Book of Acts and Mark to the GOSPEL group, then remove
 # Acts as it was a pretend mistake.
 
-rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "act mrk" --path ~/Publishing/my_source/KYUM
-rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "act mrk" --path ~/Publishing/my_source/KYUM
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
 
 
 ## ASSET MANAGEMENT
 # Assets are parts of a project but are not treated like the source.
 # For this example, we will work with Font and Illustration assets. First
-# we will bring in the font we need for this project. Then remove an
-# existing default project, Finally, update the project font.
+# we will bring in the Charis font. However, that's a mistake because we
+# actually need the Padauk font, so we'll add that one too. Then we will
+# remove Charis. Finally, for good measure, we will update Padauk.
 
-rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets --primary
-rapuma asset KYU-MYMR-KYUMTEST GOSPEL font remove --file_name "Charis SIL_4.106.zip"
-rapuma asset KYU-MYMR-KYUMTEST GOSPEL font update --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name "Charis SIL_4.106.zip" --path ~/Publishing/my_source/assets --primary
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets --primary
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font remove --file_name "Charis SIL_4.106.zip"
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font update --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets
 # 
 # During import, if it is present in the source text, Rapuma has gathered
 # metadata for illustrations used in the publication. For this example,
 # we will just use some Bash to copy them to the right location in the
 # project.
 
-mkdir -p ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
-cp ~/Publishing/my_source/KYUM/kyum-illustrations/* ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
+#mkdir -p ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
+#cp ~/Publishing/my_source/KYUM/kyum-illustrations/* ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
 
 
 ###########################################################################
 
 # Stopping here for now
 
-# REM: rapuma setting KYU-MYMR-KYUMTEST usfmTex --section TeXBehavior --key vFuzz --value 4.6pt
+# REM: ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro add --macro_id usfmTex 
 
 
-#REM: rapuma process KYU-MYMR-KYUMTEST component render GOSPEL --cid_list mat
+# REM: ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section TeXBehavior --key vFuzz --value 4.6pt
+
+
+# REM: ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render GOSPEL --cid_list mat
 
 
 

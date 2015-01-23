@@ -26,6 +26,7 @@ from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
 from rapuma.group.usfmTex               import UsfmTex
 
+#from rapuma.project.proj_macro          import Macro
 
 ###############################################################################
 ################################## Begin Class ################################
@@ -49,7 +50,6 @@ class Config (object) :
         self.adjustmentConfig               = None
         self.layoutConfig                   = None
         self.illustrationConfig             = None
-        self.macPackConfig                  = None
 
         # Log messages for this module
         self.errorCodes     = {
@@ -112,37 +112,30 @@ class Config (object) :
         self.illustrationConfig = self.tools.loadConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
 
 
-#    def initMacPack (self, macPack) :
-#        '''Initialize the components of a macro package.'''
+    #def getMacPackConfig (self, macPack) :
+        #'''Load/return the macPack configuration object. This is handled different from
+        #other configs.'''
 
-#        self.getMacPackConfig(macPack)
-#        self.getMacPackDict(macPack)
-#        self.loadMacPackFunctions(macPack)
-
-
-    def getMacPackConfig (self, macPack) :
-        '''Load/return the macPack configuration object. This is handled different from
-        other configs.'''
-
-        # Re/Load the macro package config
-        self.local = ProjLocal(self.pid, self.gid, self.projectConfig)
-        if not os.path.exists(self.local.macPackConfXmlFile) :
-            self.addMacPack(macPack)
-
-#        import pdb; pdb.set_trace()
-
-        # Load macPackConfig
-        self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        ## Re/Load the macro package config
+        #self.local = ProjLocal(self.pid, self.gid, self.projectConfig)
 
 
-    def loadMacPackFunctions (self, macPack) :
-        '''Load the macro package functions that may be used in this module.'''
+        #if not os.path.exists(self.local.macPackConfXmlFile) :
+            #self.addMacPack(macPack)
 
-        # Create an object that contains the macPack functions
-# FIXME: This needs to be macPack specific
-        self.getLayoutConfig()
-        self.macPackFunctions = UsfmTex(self.layoutConfig)
+##        import pdb; pdb.set_trace()
 
+        ## Load macPackConfig
+        #self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+
+
+    #def loadMacPackFunctions (self, macPack) :
+        #'''Load the macro package functions that may be used in this module.'''
+
+        ## Create an object that contains the macPack functions
+## FIXME: This needs to be macPack specific
+##        self.getLayoutConfig()
+        #self.macPackFunctions = UsfmTex(self.layoutConfig)
 
 
 ###############################################################################
@@ -202,8 +195,13 @@ class Config (object) :
         elif holderKey and holderType == 'path' :
             result = getattr(self.local, holderKey)
         # A value that is from a configObj
+# FIXME: To work around a circular init problem between Config() and Macro()
+# the macro package name (UsfmTex) has been hard coded. Not sure how to call
+# another function in another class that relies on this class to work.
         elif holderKey and holderType == 'function' :
-            fnc = getattr(self.macPackFunctions, holderKey)
+#            import pdb; pdb.set_trace()
+#            fnc = getattr(self.macPackFunctions, holderKey)
+            fnc = getattr(UsfmTex(self.layoutConfig), holderKey)
             result = fnc()
         # A value that is a special character (escaped character)
         elif holderKey and holderType == 'esc' :
@@ -233,25 +231,31 @@ class Config (object) :
         '''Get a special font setting if there is one. Otherwise
         return null.'''
 
+# FIXME: This is not ideal (perhaps really bad) but we have to call this
+# config file in for just this instance. This is because the function
+# we would normall use conflicts with this Class (proj_macro.Macro().getMacPackConfig())
+# Once font and macro handling are reworked, this problem will go away.
+        macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+
         # FIXME: This may need to be moved to Fonts, plus it might be a
         # little brittle. Using primaryFont for a default might be asking
         # for trouble
         result = ''
         if value == 'mapping' :
-            useMapping      = self.macPackConfig['FontSettings']['useMapping']
-            primaryFont     = self.macPackConfig['FontSettings']['primaryFont']
+            useMapping      = macPackConfig['FontSettings']['useMapping']
+            primaryFont     = macPackConfig['FontSettings']['primaryFont']
             if useMapping :
                 result = ':mapping=' + os.path.join(self.local.projFontFolder, primaryFont, useMapping)
         elif value == 'renderer' :
-            useRenderingSystem = self.macPackConfig['FontSettings']['useRenderingSystem']
+            useRenderingSystem = macPackConfig['FontSettings']['useRenderingSystem']
             if useRenderingSystem :
                 result = '/' + useRenderingSystem
         elif value == 'language' :
-            useLanguage = self.macPackConfig['FontSettings']['useLanguage']
+            useLanguage = macPackConfig['FontSettings']['useLanguage']
             if useLanguage :
                 result = ':language=' + useLanguage
         elif value == 'feature' :
-            useFeature = self.macPackConfig['FontSettings']['useFeature']
+            useFeature = macPackConfig['FontSettings']['useFeature']
             if useFeature :
                 result = ':' + useFeature
 
@@ -332,191 +336,5 @@ class Config (object) :
         '''Return the value with the specified measurement unit attached.'''
         
         return self.layoutConfig['GeneralSettings']['measurementUnit']
-
-
-###############################################################################
-###################### Macro Package Handling Functions #######################
-###############################################################################
-######################## Error Code Block Series = 3000 #######################
-###############################################################################
-
-
-    def addMacPack (self, macPack, force = False) :
-        '''Add a macro package to the project. If force is set to True
-        user style and TeX files will be overwritten.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Set the projectConf to the new/same package
-        self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
-        self.tools.writeConfFile(self.projectConfig)
-
-# FIXME: I think this can be deprecated
-        # Update existing macPack (but not conf file)
-#        if os.path.exists(self.local.projMacPackFolder) :
-#            self.updateMacPack(macPack, force)
-
-        # If we got this far, install the a fresh copy of the macPack
-        self.installMacPackOnly(macPack)
-        # Move the style files and custom TeX files out of the macPack
-        self.moveMacStyles(force)
-        self.moveMacTex(force)
-        self.macPackConfig = self.tools.initNewConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-        self.log.writeToLog(self.errorCodes['3300'], [macPack,self.local.macPackConfFileName])
-
-
-    def moveMacStyles (self, force) :
-        '''Move the default macro package styles out of the freshly installed
-        project macro package folder to the project Style folder.'''
-
-        # Collect the style files to copy
-        for f in self.getMacStyExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
-            target = os.path.join(self.local.projStyleFolder, f)
-            self.tools.makedirs(self.local.projStyleFolder)
-            # Do not overwrite existing files unless force is used
-            if not os.path.exists(target) or force :
-                shutil.copy(source, target)
-                # Look for default and set to read-only
-                if target == self.local.defaultStyFile :
-                    self.tools.makeReadOnly(self.local.defaultStyFile)
-            # Remove the source to avoid confusion
-            if os.path.exists(target) :
-                os.remove(source)
-            else :
-                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
-
-
-    def getMacStyExtFiles (self) :
-        '''Return a list of macro package style extention files.'''
-
-        sFiles = []
-        macPackFiles = os.listdir(self.local.projMacPackFolder)
-        for f in macPackFiles :
-            if f.split('.')[1].lower() == 'sty' :
-                sFiles.append(f)
-        return sFiles
-
-
-    def moveMacTex (self, force) :
-        '''Move the custom macro package TeX out of the freshly installed
-        project macro package folder to the project TeX folder.'''
-
-        # Collect the TeX extention files to copy
-        for f in self.getMacTexExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
-            target = os.path.join(self.local.projTexFolder, f)
-            self.tools.makedirs(self.local.projTexFolder)
-            # Do not overwrite existing files unless force is used
-            if not os.path.exists(target) or force :
-                shutil.copy(source, target)
-            # Remove the source to avoid confusion
-            if os.path.exists(target) :
-                os.remove(source)
-            else :
-                self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
-
-
-    def getMacTexExtFiles (self) :
-        '''Return a list of macro package TeX extention files.'''
-
-        tFiles = []
-        macPackFiles = os.listdir(self.local.projMacPackFolder)
-        for f in macPackFiles :
-            if f.find('-ext.tex') > 0 :
-                tFiles.append(f)
-        return tFiles
-
-
-    def removeMacPack (self, package, force = False) :
-        '''Remove a macro package from a project. Using this will break a project
-        as installed font information will be lost from the macro config file
-        when it is deleted if force is used. However, there may be times this
-        is necessary. If force is not used it will retain the macro config file.
-        This is useful when you want to freshen the macro package but bad in
-        that custom style and TeX code.'''
-
-        # Remove the macPack config file if required
-        if os.path.exists(self.local.macPackConfFile) and force :
-            os.remove(self.local.macPackConfFile)
-            self.log.writeToLog(self.errorCodes['3400'], [self.local.macPackConfFileName])
-
-        # Now remove the macro folder (with all its contents)
-        if os.path.exists(self.local.projMacPackFolder) :
-            shutil.rmtree(self.local.projMacPackFolder)
-            self.log.writeToLog(self.errorCodes['3500'], [package])
-
-        # Remove the reference for this macro package from any component type
-        # that uses it. Normally that would probably be just be one of them.
-        for comp in self.projectConfig['CompTypes'].keys() :
-            if self.projectConfig['CompTypes'][comp]['macroPackage'] == package :
-                self.projectConfig['CompTypes'][comp]['macroPackage'] = ''
-                self.tools.writeConfFile(self.projectConfig)
-
-
-    def updateMacPack (self, macPack) :
-        '''Update a macro package with the latest version from Rapuma
-        but do not touch the config file.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Be sure we have file names
-        self.getMacPackConfig(macPack)
-        # Delete the existing macro package (but not the settings)
-        # but make a backup first
-        macDir          = os.path.join(self.local.projMacroFolder, macPack)
-        macDirBak       = macDir + '.bak'
-        if os.path.exists(macDir) :
-            shutil.copytree(macDir, macDirBak)
-            shutil.rmtree(macDir)
-        # Reinstall the macPack
-        if self.installMacPackOnly(macPack) :
-            # The current macro system must have a "master" style file.
-            # This is a version of the ParaText style file. Because
-            # an update might include an update to the style file,
-            # we meed to copy that from the macro folder to the Style
-            # folder. We will do that now. The name of the file should
-            # be the macPack + ".sty", in theory. We will copy over the
-            # top of the old one.
-            # Unlock the old one so it can be copied over.
-            self.tools.makeExecutable(self.local.defaultStyFile)
-            # Now copy in the new one.
-            shutil.copy(os.path.join(macDir, macPack + '.sty'), self.local.defaultStyFile)
-            # The style file should never be edited by the user, relock it
-            self.tools.makeReadOnly(self.local.defaultStyFile)
-            # Remove un-needed sty and tex files from the macDir to
-            # avoid confusion. The ext files never are updated because
-            # they could contain custom project code that we don't want
-            # to loose in an update.
-            for f in self.getMacStyExtFiles() :
-                source = os.path.join(self.local.projMacPackFolder, f)
-                if os.path.exists(source) :
-                    os.remove(source)
-            for f in self.getMacTexExtFiles() :
-                source = os.path.join(self.local.projMacPackFolder, f)
-                if os.path.exists(source) :
-                    os.remove(source)
-            # Remove backup folder
-            shutil.rmtree(macDirBak)
-            self.log.writeToLog(self.errorCodes['3600'], [macPack])
-            return True
-        # But if the install fails we need to put things back as they were
-        else :
-            if os.path.exists(macDirBak) :
-                shutil.copytree(macDirBak, macDir)
-            # Report the failure
-            self.log.writeToLog(self.errorCodes['3650'], [macPack])
-            return False
-
-
-    def installMacPackOnly (self, package) :
-        '''Install the new macro package but only that.'''
-
-        if self.tools.pkgExtract(self.local.rapumaMacPackFile, self.local.projMacroFolder, self.local.macPackConfXmlFile) :
-            return True
-        else :
-            self.log.writeToLog(self.errorCodes['3200'], [package])
-            return False
-
 
 

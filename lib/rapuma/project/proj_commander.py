@@ -23,6 +23,7 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.project.proj_config         import Config
+from rapuma.project.proj_macro          import Macro
 
 
 class ProjCommander (object) :
@@ -166,9 +167,9 @@ class ProjCommander (object) :
         Ctype               = cType.capitalize()
         renderer            = self.projectConfig['CompTypes'][Ctype]['renderer']
         macPack             = self.projectConfig['CompTypes'][Ctype]['macroPackage']
-        self.proj_config    = Config(self.pid, gid)
-        self.proj_config.getMacPackConfig(macPack)
-        macPackConfig       = self.proj_config.macPackConfig
+        self.proj_macro     = Macro(self.pid, gid)
+        self.proj_macro.getMacPackConfig(macPack)
+        macPackConfig       = self.proj_macro.macPackConfig
         font                = ''
         if macPackConfig and macPackConfig['FontSettings'].has_key('primaryFont') :
             font            = macPackConfig['FontSettings']['primaryFont']

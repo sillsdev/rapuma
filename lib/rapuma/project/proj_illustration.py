@@ -23,6 +23,7 @@ from configobj                      import ConfigObj
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import Config
+from rapuma.project.proj_macro      import Macro
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
@@ -43,6 +44,7 @@ class ProjIllustration (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(pid, gid)
+        self.proj_macro                 = Macro(pid, gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
         self.proj_config.getIllustrationConfig()
@@ -55,8 +57,8 @@ class ProjIllustration (object) :
         self.macPackConfig              = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_config.getMacPackConfig(self.macPack)
-            self.macPackConfig          = self.proj_config.macPackConfig
+            self.proj_macro.getMacPackConfig(self.macPack)
+            self.macPackConfig          = self.proj_macro.macPackConfig
         self.log                        = ProjLog(pid)
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings

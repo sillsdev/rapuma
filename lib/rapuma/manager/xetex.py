@@ -24,6 +24,7 @@ from pyPdf                              import PdfFileReader
 from rapuma.core.tools                  import Tools
 from rapuma.manager.manager             import Manager
 from rapuma.project.proj_config         import Config
+from rapuma.project.proj_macro          import Macro
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.project.proj_illustration   import ProjIllustration
@@ -64,6 +65,7 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.fmt_diagnose           = ProjDiagnose(self.pid, self.gid)
+        self.proj_macro             = Macro(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
@@ -80,10 +82,10 @@ class Xetex (Manager) :
         self.macPackConfig          = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_config.getMacPackConfig(self.macPack)
-            self.proj_config.loadMacPackFunctions(self.macPack)
-            self.macPackConfig      = self.proj_config.macPackConfig
-            self.macPackFunctions   = self.proj_config.macPackFunctions
+            self.proj_macro.getMacPackConfig(self.macPack)
+            self.proj_macro.loadMacPackFunctions(self.macPack)
+            self.macPackConfig      = self.proj_macro.macPackConfig
+            self.macPackFunctions   = self.proj_macro.macPackFunctions
         # Some config settings
         self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
         self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']

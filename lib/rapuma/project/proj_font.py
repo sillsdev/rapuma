@@ -25,6 +25,7 @@ from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.project.proj_config     import Config
+from rapuma.project.proj_macro      import Macro
 
 
 ###############################################################################
@@ -41,6 +42,7 @@ class ProjFont (object) :
         self.user                           = UserConfig()
         self.log                            = ProjLog(pid)
         self.userConfig                     = self.user.userConfig
+        self.proj_macro                     = Macro(pid, gid)
         self.proj_config                    = Config(pid, gid)
         self.proj_config.getProjectConfig()
         self.projectConfig                  = self.proj_config.projectConfig
@@ -51,9 +53,9 @@ class ProjFont (object) :
         self.macPackConfig                  = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
             self.macPack                    = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_config.getMacPackConfig(self.macPack)
-            self.proj_config.loadMacPackFunctions(self.macPack)
-            self.macPackConfig      = self.proj_config.macPackConfig
+            self.proj_macro.getMacPackConfig(self.macPack)
+            self.proj_macro.loadMacPackFunctions(self.macPack)
+            self.macPackConfig              = self.proj_macro.macPackConfig
 
         # The first time this is initialized make sure we have a FontSettings section
         if self.macPackConfig and not self.macPackConfig.has_key('FontSettings') :
