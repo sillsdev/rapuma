@@ -444,7 +444,7 @@ def userArguments (args) :
         cmd         = args.command
         sub         = args.sub_command
         fileName    = args.file_name
-        macroId     = args.macro_id
+        packageId   = args.package_id
         path        = ''
         source      = ''
         primary     = args.primary
@@ -469,7 +469,10 @@ def userArguments (args) :
                     ProjFont(pid, gid).setPrimaryFont(fileName)
             elif sub == 'remove' :
                 # Remove a font from the project
-                ProjFont(pid, gid).removeFontPack(fileName)
+                if ProjFont(pid, gid).varifyFont(packageId) :
+                    ProjFont(pid, gid).removeFontPack(packageId)
+                else :
+                    sys.exit('\n Sorry to say, but the font package ID you provided ' + packageId + ' does not match any fonts in the project. I have to stop now but please come back and try again.\n')
             elif sub == 'update' :
                 # Update a font in the project
                 ProjFont(pid, gid).updateFontPack(fileName, path)
@@ -485,17 +488,17 @@ def userArguments (args) :
                 sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
         elif cmd == 'macro' :
             # Check here for macro ID
-            if  macroId != 'usfmTex' :
-                sys.exit('\n ERROR: Macro ID missing or invalid. (Hint, --macro_id usfmTex) Only the usfmTex macro package is supported at this time. Process halting.\n')
+            if  packageId != 'usfmTex' :
+                sys.exit('\n ERROR: Macro package ID missing or invalid. (Hint, --package_id usfmTex) Only the usfmTex macro package is supported at this time. Though I could write a couple simple lines of code to help make this easier for you, I am choosing to make you type it in to remain consistant with the rest of the CLI. Sorry for any inconvenience this might cause. Process halting.\n')
             if sub == 'add' :
                 # Add a macro file asset to the project.
-                Macro(pid, gid).addMacPack(macroId)
+                Macro(pid, gid).addMacPack(packageId)
             elif sub == 'remove' :
                 # Remove a macro file asset from the project.
-                Macro(pid, gid).removeMacPack(macroId)
+                Macro(pid, gid).removeMacPack(packageId)
             elif sub == 'update' :
                 # Update a macro file asset in the project.
-                Macro(pid, gid).updateMacPack(macroId)
+                Macro(pid, gid).updateMacPack(packageId)
         elif cmd == 'script' :
             if sub == 'add' :
                 tools.terminal('\nAdd a script file asset to the project. \n')
@@ -740,7 +743,7 @@ if __name__ == '__main__' :
     assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
     assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
-    assetCommand.add_argument('-m', '--macro_id', help='A macro package ID is required for managing macros')
+    assetCommand.add_argument('-k', '--package_id', help='A package ID is required for managing some assets like fonts and macros')
 
     # Add Processing subprocess arguments
     processCommand = subparsers.add_parser('process', help='General project process commands')

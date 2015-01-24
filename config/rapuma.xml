@@ -64,9 +64,9 @@ Todo:
         <setting>
             <name>Auto-Create Helper Scripts</name>
             <key>autoHelperScripts</key>
-            <description>Automatically create auto-helper scripts on project creation.</description>
+            <description>Automatically create auto-helper scripts on project creation. (This is being deprecated and may not work correctly.)</description>
             <type>boolean</type>
-            <value>True</value>
+            <value>False</value>
         </setting>
         <setting>
             <name>SVG to PDF Converter Command</name>

@@ -319,14 +319,13 @@ class ProjFont (object) :
             return False
 
 
-    def removeFontPack (self, fileName) :
+    def removeFontPack (self, fontId) :
         '''Remove a font from a component type which will virtually disconnect 
         it from the calling component type. However, if the force switch is set,
         then remove the font, regardless as to if it is used by another component
         or not. This is useful for purging a font from a project but should be
         used with care.'''
 
-        fontId = self.getFontId(fileName)
         # Purge the font files and folder
         fontDir = os.path.join(self.local.projFontFolder, fontId)
         if os.path.exists(fontDir) :

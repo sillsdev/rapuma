@@ -99,36 +99,71 @@
 
 ## ASSET MANAGEMENT
 # Assets are parts of a project but are not treated like the source.
-# For this example, we will work with Font and Illustration assets. First
+# Currently (0.7.202-ish) because fonts and macros are bound together
+# there is a specific order which has to occur when managing macros
+# and fonts. Macros must be installed before fonts and if a macro package
+# is removed font information will be lost. (Be careful!) With that in
+# mind we will show some asset commands for manageing macros. In practice
+# the only command needed is to update the macro package because of the 
+# same issue mentioned above. At this point, the macros have already 
+# installed and only one macro package is currently supported. The command
+# to update is:
+
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro update --package_id usfmTex
+
+# If you do need to remove or add the macro package, these commands will
+# do that, respectivly:
+
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro remove --package_id usfmTex
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro add --package_id usfmTex
+
+
+# With the macro package in place, we can now work with Fonts. First
 # we will bring in the Charis font. However, that's a mistake because we
 # actually need the Padauk font, so we'll add that one too. Then we will
 # remove Charis. Finally, for good measure, we will update Padauk.
 
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name "Charis SIL_4.106.zip" --path ~/Publishing/my_source/assets --primary
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font add --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets --primary
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font remove --file_name "Charis SIL_4.106.zip"
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font remove --package_id "Charis SIL_4.106"
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL font update --file_name Padauk_2.701.zip --path ~/Publishing/my_source/assets
-# 
-# During import, if it is present in the source text, Rapuma has gathered
-# metadata for illustrations used in the publication. For this example,
-# we will just use some Bash to copy them to the right location in the
-# project.
 
-#mkdir -p ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
-#cp ~/Publishing/my_source/KYUM/kyum-illustrations/* ~/Publishing/KYU-MYMR-KYUMTEST/Illustration
+# Now let's continuing on with illustration asset management. During
+# USFM text import, if \fig markers were present in the source text, 
+# Rapuma gathered metadata from them for the illustrations used in the
+# publication. This information is stored in the illustration.conf file.
+# Rapuma will use it to pull in the correct illustration files from the
+# folder specified.
+
 
 
 ###########################################################################
 
 # Stopping here for now
 
-# REM: ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro add --macro_id usfmTex 
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro add --package_id usfmTex 
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL macro remove --package_id usfmTex 
 
 
-# REM: ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section TeXBehavior --key vFuzz --value 4.6pt
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section TeXBehavior --key vFuzz --value 4.6pt
 
 
-# REM: ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render GOSPEL --cid_list mat
+~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render GOSPEL --cid_list mat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

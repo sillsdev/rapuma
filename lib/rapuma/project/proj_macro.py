@@ -54,11 +54,11 @@ class Macro (object) :
 
         # Log messages for this module
         self.errorCodes     = {
-            '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. Use force (-f) to reinstall.'],
+            '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. I am not allowed to copy over an existing package.'],
             '3200' : ['ERR', 'Failed to install macro package: [<<1>>]'],
             '3300' : ['MSG', 'Install macro package: [<<1>>], Reinitialized [<<2>>]'],
             '3310' : ['ERR', 'Failed to copy [<<1>>] to folder [<<2>>].'],
-            '3400' : ['MSG', 'Force set to True. Removed macro package configuration file: [<<1>>]'],
+            '3400' : ['MSG', 'Removed macro package configuration file: [<<1>>]. Font information may have been lost in the operation too. This was collateral damage. Sorry about that.'],
             '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
             '3600' : ['MSG', 'Updated macro package [<<1>>]'],
             '3650' : ['ERR', 'Failed to updated macro package [<<1>>]']
@@ -123,11 +123,10 @@ class Macro (object) :
 
 #        import pdb; pdb.set_trace()
 
-
-# Do checks here to see if the macPack exists, if so, stop here.
-
-
-
+        # Do not add/install if there seems to be a macro package there already
+        if self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] and os.path.exists(self.local.macPackConfFile) :
+            self.log.writeToLog(self.errorCodes['3100'], [macPack])
+            return False
 
         # Set the projectConf to the new/same package
         self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
@@ -140,6 +139,8 @@ class Macro (object) :
         self.moveMacTex()
         self.macPackConfig = self.tools.initNewConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
         self.log.writeToLog(self.errorCodes['3300'], [macPack, self.local.macPackConfFileName])
+        
+        return True
 
 
     def moveMacStyles (self) :
@@ -205,49 +206,47 @@ class Macro (object) :
         return tFiles
 
 
-    def removeMacPack (self, package, force = False) :
+    def removeMacPack (self, packageId) :
         '''Remove a macro package from a project. Using this will break a project
         as installed font information will be lost from the macro config file
-        when it is deleted if force is used. However, there may be times this
-        is necessary. If force is not used it will retain the macro config file.
-        This is useful when you want to freshen the macro package but bad in
-        that custom style and TeX code.'''
+        when it is deleted. Font(s) will need to be reinstalled. However, there
+        may be times this may be necessary. Be careful!'''
 
         # Remove the macPack config file if required
-        if os.path.exists(self.local.macPackConfFile) and force :
+        if os.path.exists(self.local.macPackConfFile) :
             os.remove(self.local.macPackConfFile)
             self.log.writeToLog(self.errorCodes['3400'], [self.local.macPackConfFileName])
 
         # Now remove the macro folder (with all its contents)
         if os.path.exists(self.local.projMacPackFolder) :
             shutil.rmtree(self.local.projMacPackFolder)
-            self.log.writeToLog(self.errorCodes['3500'], [package])
+            self.log.writeToLog(self.errorCodes['3500'], [packageId])
 
         # Remove the reference for this macro package from any component type
         # that uses it. Normally that would probably be just be one of them.
         for comp in self.projectConfig['CompTypes'].keys() :
-            if self.projectConfig['CompTypes'][comp]['macroPackage'] == package :
+            if self.projectConfig['CompTypes'][comp]['macroPackage'] == packageId :
                 self.projectConfig['CompTypes'][comp]['macroPackage'] = ''
                 self.tools.writeConfFile(self.projectConfig)
 
 
-    def updateMacPack (self, macPack) :
+    def updateMacPack (self, packageId) :
         '''Update a macro package with the latest version from Rapuma
         but do not touch the config file.'''
 
 #        import pdb; pdb.set_trace()
 
         # Be sure we have file names
-        self.proj_config.getMacPackConfig(macPack)
+        self.getMacPackConfig(packageId)
         # Delete the existing macro package (but not the settings)
         # but make a backup first
-        macDir          = os.path.join(self.local.projMacroFolder, macPack)
+        macDir          = os.path.join(self.local.projMacroFolder, packageId)
         macDirBak       = macDir + '.bak'
         if os.path.exists(macDir) :
             shutil.copytree(macDir, macDirBak)
             shutil.rmtree(macDir)
         # Reinstall the macPack
-        if self.installMacPackOnly(macPack) :
+        if self.installMacPackOnly(packageId) :
             # The current macro system must have a "master" style file.
             # This is a version of the ParaText style file. Because
             # an update might include an update to the style file,
@@ -258,7 +257,7 @@ class Macro (object) :
             # Unlock the old one so it can be copied over.
             self.tools.makeExecutable(self.local.defaultStyFile)
             # Now copy in the new one.
-            shutil.copy(os.path.join(macDir, macPack + '.sty'), self.local.defaultStyFile)
+            shutil.copy(os.path.join(macDir, packageId + '.sty'), self.local.defaultStyFile)
             # The style file should never be edited by the user, relock it
             self.tools.makeReadOnly(self.local.defaultStyFile)
             # Remove un-needed sty and tex files from the macDir to
@@ -275,14 +274,14 @@ class Macro (object) :
                     os.remove(source)
             # Remove backup folder
             shutil.rmtree(macDirBak)
-            self.log.writeToLog(self.errorCodes['3600'], [macPack])
+            self.log.writeToLog(self.errorCodes['3600'], [packageId])
             return True
         # But if the install fails we need to put things back as they were
         else :
             if os.path.exists(macDirBak) :
                 shutil.copytree(macDirBak, macDir)
             # Report the failure
-            self.log.writeToLog(self.errorCodes['3650'], [macPack])
+            self.log.writeToLog(self.errorCodes['3650'], [packageId])
             return False
 
 
