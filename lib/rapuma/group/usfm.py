@@ -136,6 +136,7 @@ class Usfm (Group) :
             '0255' : ['LOG', 'Illustrations not being used. The piclist file has been removed from the [<<1>>] illustrations folder.'],
             '0260' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
             '0265' : ['ERR', 'Failed to create piclist file for [<<1>>]!'],
+            '0300' : ['ERR', 'One or more illustration files are missing from the project. Please import these files before continuing.']
         }
 
 
@@ -214,10 +215,6 @@ class Usfm (Group) :
         useIllustrations        = self.tools.str2bool(self.projectConfig['Groups'][gid]['useIllustrations'])
         useManualAdjustments    = self.tools.str2bool(self.projectConfig['Groups'][gid]['useManualAdjustments'])
 
-        # Adjust the page number if necessary
-# FIXME: I moved this to xetex module, was this a good idea?
-#        self.checkStartPageNumber()
-
         # See if the working text is present for each subcomponent in the
         # component and try to install it if it is not
         for cid in cidList :
@@ -239,14 +236,22 @@ class Usfm (Group) :
                 # Component piclist file
                 cidPiclistFile = self.proj_illustration.getCidPiclistFile(cid)
                 if useIllustrations :
-                    if self.proj_illustration.hasIllustrations(gid, cid) :
-                        # Create if not there or if the config has changed
+                    if self.proj_illustration.hasIllustrations(cid) :
+                        # Check for missing illustrations (die here if not found)
+
+#                        import pdb; pdb.set_trace()
+
+
+                        if self.proj_illustration.missingIllustrations(cid) :
+                            self.log.writeToLog(self.errorCodes['0300'])
+
+
+
+
+                        # Create piclist file if not there or if the config has changed
                         if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
-                            # First check if we have the illustrations we think we need
-                            # and get them if we do not.
-                            self.proj_illustration.getPics(gid, cid)
                             # Now make a fresh version of the piclist file
-                            if self.proj_illustration.createPiclistFile(gid, cid) :
+                            if self.proj_illustration.createPiclistFile(cid) :
                                 self.log.writeToLog(self.errorCodes['0260'], [cid])
                             else :
                                 self.log.writeToLog(self.errorCodes['0265'], [cid])
@@ -254,13 +259,10 @@ class Usfm (Group) :
                             for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
                                 if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
                                     # Remake the piclist file
-                                    if self.proj_illustration.createPiclistFile(gid, cid) :
+                                    if self.proj_illustration.createPiclistFile(cid) :
                                         self.log.writeToLog(self.errorCodes['0260'], [cid])
                                     else :
                                         self.log.writeToLog(self.errorCodes['0265'], [cid])
-                        # Do a quick check to see if the illustration files for this book
-                        # are in the project. If it isn't, the run will be killed
-                        self.proj_illustration.getPics(gid, cid)
                     else :
                         # Does not seem to be any illustrations for this cid
                         # clean out any piclist file that might be there

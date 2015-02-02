@@ -104,6 +104,8 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_illustration   import ProjIllustration
+from rapuma.project.proj_script         import ProjScript
 from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.manager.project             import Project
 from rapuma.group.usfm_data             import UsfmData
@@ -433,9 +435,6 @@ def userArguments (args) :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
 
 
-
-
-
     ##### ASSET
     # Commands for managing assets
     elif sys.argv[1].lower() == 'asset' :
@@ -452,16 +451,17 @@ def userArguments (args) :
         if not ProjSetup(sysConfig, pid).isGroup(gid) :
             sys.exit('\nERROR: Group ID is not valid. [' + gid + '] Process halting.\n')
         # Path set and test
-#        if sub == 'add' or sub == 'update' and not macroId :
         if args.path :
             path = os.path.abspath(args.path)
             if not os.path.isdir(path) :
                 sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
-#        else :
-#            sys.exit('\nERROR: Path required for this operation. Process halting.\n')
 
         # Begin processing commands here
-        if cmd == 'font' :
+        if cmd == 'background' :
+            if sub == 'update' :
+                tools.terminal('\nUpdate an illustration file (asset) in the project. \n')
+                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+        elif cmd == 'font' :
             if sub == 'add' :
                 # Add a font package to the project
                 ProjFont(pid, gid).installFont(fileName, path)
@@ -478,14 +478,11 @@ def userArguments (args) :
                 ProjFont(pid, gid).updateFontPack(fileName, path)
         elif cmd == 'illustration' :
             if sub == 'add' :
-                tools.terminal('\nAdd an illustration file (asset) to the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjIllustration(pid, gid).addIllustrationFiles(path)
             elif sub == 'remove' :
-                tools.terminal('\nRemove an illustration file (asset) from the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjIllustration(pid, gid).removeIllustrationFiles()
             elif sub == 'update' :
-                tools.terminal('\nUpdate an illustration file (asset) in the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjIllustration(pid, gid).updateIllustrationFiles(path)
         elif cmd == 'macro' :
             # Check here for macro ID
             if  packageId != 'usfmTex' :
@@ -501,14 +498,11 @@ def userArguments (args) :
                 Macro(pid, gid).updateMacPack(packageId)
         elif cmd == 'script' :
             if sub == 'add' :
-                tools.terminal('\nAdd a script file asset to the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjScript(pid, gid).addScriptFiles(path)
             elif sub == 'remove' :
-                tools.terminal('\nRemove a script file asset from the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjScript(pid, gid).removeScriptFiles()
             elif sub == 'update' :
-                tools.terminal('\nUpdate a script file in the project \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjScript(pid, gid).updateScriptFiles(path)
 
 
 
@@ -703,7 +697,7 @@ if __name__ == '__main__' :
     ctSubCmd           = ['add', 'compare', 'remove', 'update']
     ctCompType         = ['usfm', 'pdf']
     # Asset
-    asCmd              = ['font', 'illustration', 'macro', 'script']
+    asCmd              = ['background', 'font', 'illustration', 'macro', 'script']
     asSubCmd           = ['add', 'remove', 'update']
     # Processes
     pcCmd              = ['component', 'group', 'project']

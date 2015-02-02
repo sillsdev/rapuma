@@ -17,7 +17,6 @@
 # this process
 
 import os, shutil, codecs
-from configobj                      import ConfigObj
 
 # Load the local classes
 from rapuma.core.tools              import Tools
@@ -83,22 +82,25 @@ class ProjIllustration (object) :
 
         # Log messages for this module
         self.errorCodes     = {
+
             '0000' : ['MSG', 'Placeholder message'],
             '0010' : ['ERR', 'Component type [<<1>>] not recognized!'],
-            '0240' : ['ERR', 'Failed to copy [<<1>>] into the project illustration folder.'],
-            '0220' : ['LOG', 'Copied [<<1>>] into the project illustration folder. Force was set to [<<2>>].'],
-            '0230' : ['LOG', 'Did not copy [<<1>>] into the project illustration folder. File already exsits.'],
+            '0210' : ['WRN', 'Cannot copy [<<1>>] into the project Illustration folder. File already exists. Please use remove or update commands if the file needs to be replaced.'],
+            '0220' : ['MSG', 'Copied [<<1>>] into the project Illustration folder.'],
+            '0230' : ['ERR', 'Failed to Copy [<<1>>] into the project Illustration folder.'],
+            '0240' : ['MSG', 'Illustration add operation complete!'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
+            '0270' : ['WRN', 'Illustration file [<<1>>] not found in Illustration folder.'],
 
-            'ILUS-000' : ['MSG', 'Illustration module messages'],
-            'ILUS-010' : ['LOG', 'Wrote out new illustration configuration file. (illustration.__init__())'],
-            'ILUS-050' : ['LOG', 'Removed [<<1>>] from the project illustration folder.'],
-            'ILUS-055' : ['LOG', 'Illustration not being used. The piclist file has been removed from the [<<1>>] component folder.'],
-            'ILUS-060' : ['LOG', 'Piclist file for [<<1>>] already exsits. File not created.'],
-            'ILUS-070' : ['WRN', 'Watermark file [<<1>>] not found in illustration folder. Will try to revert to default watermark.'],
-            'ILUS-080' : ['LOG', 'Installed watermark file [<<1>>] into the project.'],
-            'ILUS-090' : ['LOG', 'Changed watermark config file name to [<<1>>].'],
-            'ILUS-100' : ['ERR', 'Unknown background file type: [<<1>>]'],
+            '1010' : ['MSG', 'Removed illustration file [<<1>>] from project Illustration folder.'],
+            '1020' : ['LOG', 'Request to removed illustration file [<<1>>] from project Illustration folder. File not found. Operation not complete'],
+            '1030' : ['MSG', 'Illustration remove operation complete!'],
+
+            '2010' : ['MSG', 'Updated illustration file [<<1>>] in project Illustration folder.'],
+            '2020' : ['ERR', 'Update failed, file [<<1>>] not found in project Illustration folder. Use add illustration command to install the illustration.'],
+            '2030' : ['ERR', 'Update failed on file [<<1>>]. Copy proceedure failed.'],
+            '2040' : ['MSG', 'Illustration update operation complete!']
+
         }
 
 ###############################################################################
@@ -108,73 +110,59 @@ class ProjIllustration (object) :
 ###############################################################################
 
 
-    def installIllustrationFile (self, fileName, path = None, force = False) :
-        '''Install into the project the specified illustration file. If
-        force is not set to True and no path has been specified, this 
-        function will look into the project Illustration folder first.
-        Failing that, it will look in the user resources illustration
-        folder, and if found, copy it into the project. If a path is
-        specified it will look there first and use that file.'''
+    def addIllustrationFiles (self, path) :
+        '''Import all the illustrations for a group that are found in
+        the given path. This assumes illustrations are being used in
+        one or more components in this group. Assumes valid path. Will
+        fail if a copy doesn't succeed. If the file is already there,
+        give a warning and do not copy.'''
 
-#        import pdb; pdb.set_trace()
-
-        # Set some file names/paths
-        places = []
-        if path :
-            places.append(os.path.join(path, fileName))
-        places.append(os.path.join(self.tools.resolvePath(self.userIllustrationLib), fileName))
-        target = os.path.join(self.projIllustrationFolder, fileName)
-        # See if the file is there or not
-        for p in places :
-            if os.path.isfile(p) :
-                if force :
-                    if not shutil.copy(p, target) :
-                        self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(p),'True'])
-                        return True
-                else :
+        for i in self.illustrationConfig[self.gid].keys() :
+            cid = self.illustrationConfig[self.gid][i]['bid']
+            fileName = self.illustrationConfig[self.gid][i]['fileName']
+            target = os.path.join(self.projIllustrationFolder, fileName)
+            # Check to see if the target exists
+            if not os.path.isfile(target) :
+                source = os.path.join(path, fileName)
+                if os.path.isfile(source) :
+                    # Make sure we have a target dir
+                    if not os.path.isdir(self.projIllustrationFolder) :
+                        os.makedirs(self.projIllustrationFolder)
+                    # Copy in the source to the project
+                    if not shutil.copy(source, target) :
+                        self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(source)])
+                    # Double check that it happened
                     if not os.path.isfile(target) :
-                        if not shutil.copy(p, target) :
-                            self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(p),'False'])
-                            return True
-                    else :
-                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(p)])
-                        return True
+                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(source)])
+            else :
+                self.log.writeToLog(self.errorCodes['0210'], [self.tools.fName(target)])
 
-        # No joy, we're hosed
-        self.log.writeToLog(self.errorCodes['0240'], [self.tools.fName(p)])
+        # If nothing above failed, we can return True now
+        self.log.writeToLog(self.errorCodes['0240'])
+        return True
 
 
-    def getPics (self, gid, cid) :
-        '''Figure out what pics/illustration we need for a given
-        component and install them. It is assumed that this was 
-        called because the user wants illustration. Therefore, 
-        this will kill the current session if it fails.'''
+    def missingIllustrations (self, bid) :
+        '''Check for any missing illustration files for this component and
+        report them. The assumption is that this component is supposed to
+        have one or more illustrations in it so it should be used under
+        hasIllustrations().'''
+        
+        missing = 0
+        for i in self.illustrationConfig[self.gid].keys() :
+            if self.illustrationConfig[self.gid][i]['bid'] == bid :
+                fileName = self.illustrationConfig[self.gid][i]['fileName']
+                target = os.path.join(self.local.projIllustrationFolder, fileName)
+                if not os.path.exists(target) :
+                    self.log.writeToLog(self.errorCodes['0270'], [fileName])
+                    missing +=1
 
-        for i in self.illustrationConfig[gid].keys() :
-            if self.illustrationConfig[gid][i]['bid'] == cid :
-                fileName = self.illustrationConfig[gid][i]['fileName']
-                if not os.path.isfile(os.path.join(self.projIllustrationFolder, fileName)) :
-                    self.installIllustrationFile (fileName, '', False)
-
-
-    def removeIllustrationFile (self, fileName) :
-        '''Remove an Illustration file from the project and conf file.'''
-
-        # Remove the file
-        projIll = os.path.join(self.projIllustrationFolder, fileName)
-        if os.path.isfile(projIll) :
-            os.remove(projIll)
-            self.log.writeToLog('ILUS-050', [fileName])
-
-        # Check to see if this is a watermark file, if it is, remove config setting
-        if self.projectConfig['CompTypes'][self.Ctype].has_key('pageWatermarkFile') :
-            org = self.projectConfig['CompTypes'][self.Ctype]['pageWatermarkFile']
-            if org == fileName :
-                self.projectConfig['CompTypes'][self.Ctype]['pageWatermarkFile'] = ''
-                self.tools.writeConfFile(self.projectConfig)
+        # Returning True if something was missing
+        if missing > 0 :
+            return True
 
 
-    def hasIllustrations (self, gid, bid) :
+    def hasIllustrations (self, bid) :
         '''Return True if this component as any illustration associated with it.'''
 
         # Adjustment for Map cType
@@ -183,8 +171,8 @@ class ProjIllustration (object) :
 
         # If we are missing the bid we fail (gracefully)
         try :
-            for i in self.illustrationConfig[gid].keys() :
-                if self.illustrationConfig[gid][i]['bid'] == bid :
+            for i in self.illustrationConfig[self.gid].keys() :
+                if self.illustrationConfig[self.gid][i]['bid'] == bid :
                     return True
         except :
             return False
@@ -197,18 +185,18 @@ class ProjIllustration (object) :
         return os.path.join(self.local.projComponentFolder, cid, cid + '_base.' + self.cType + '.piclist')
 
 
-    def createPiclistFile (self, gid, cid) :
+    def createPiclistFile (self, cid) :
         '''Look in the cid for \fig data. Extract it from the cid and
         use it to create a piclist file for this specific cid. If
         there is no \fig data no piclist file will be made.'''
 
 #        import pdb; pdb.set_trace()
 
-        cType = self.projectConfig['Groups'][gid]['cType']
+        cType = self.projectConfig['Groups'][self.gid]['cType']
         if cType == 'usfm' :
             piclistFile = self.getCidPiclistFile(cid)
         elif cType == 'map' :
-            piclistFile = self.getCidPiclistFile(gid)
+            piclistFile = self.getCidPiclistFile(self.gid)
         else :
             self.log.writeToLog(self.errorCodes['0010'], [cType])
         
@@ -228,23 +216,23 @@ class ProjIllustration (object) :
             writeObject.write('% This is an auto-generated usfmTex piclist file for this project.\n')
             writeObject.write('% Do not bother editing this file.\n\n')
 
-            for i in self.illustrationConfig[gid].keys() :
-                obj = self.illustrationConfig[gid][i]
+            for i in self.illustrationConfig[self.gid].keys() :
+                obj = self.illustrationConfig[self.gid][i]
                 thisRef = ''
                 # Filter out if needed with this
                 if not self.tools.str2bool(obj['useThisIllustration']) :
                     continue
                 # Is a caption going to be used on this illustration?
                 caption = ''
-                if self.illustrationConfig[gid][i]['bid'] == cid :
+                if self.illustrationConfig[self.gid][i]['bid'] == cid :
                     if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useCaptions']) \
-                        and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaption']) :
+                        and self.tools.str2bool(self.illustrationConfig[self.gid][i]['useThisCaption']) :
                         if obj['caption'] :
                             caption = obj['caption']
                 # Work out if we want a caption reference or not for this illustration
-                if self.illustrationConfig[gid][i]['bid'] == cid :
+                if self.illustrationConfig[self.gid][i]['bid'] == cid :
                     if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useCaptionReferences']) \
-                        and self.tools.str2bool(self.illustrationConfig[gid][i]['useThisCaptionRef']) :
+                        and self.tools.str2bool(self.illustrationConfig[self.gid][i]['useThisCaptionRef']) :
                         if obj['location'] :
                             thisRef = obj['location']
                         else :
@@ -256,6 +244,63 @@ class ProjIllustration (object) :
                             '|' + obj['scale'] + '|' + obj['copyright'] + '|' + caption + '|' + thisRef + ' \n')
         # Report to log
         self.log.writeToLog(self.errorCodes['0265'], [trueCid])
+        return True
+
+
+###############################################################################
+######################## Illustration Remove Functions ########################
+###############################################################################
+######################## Error Code Block Series = 1000 #######################
+###############################################################################
+
+    def removeIllustrationFiles (self) :
+        '''Remove all the illustration files from the illustration folder for
+        a group. This does not affect the illustration.conf file.'''
+
+        for i in self.illustrationConfig[self.gid].keys() :
+            cid = self.illustrationConfig[self.gid][i]['bid']
+            fileName = self.illustrationConfig[self.gid][i]['fileName']
+            target = os.path.join(self.projIllustrationFolder, fileName)
+            # Check to see if the target exists, then delete, skip if not there
+            if os.path.exists(target) :
+                os.remove(target)
+                self.log.writeToLog(self.errorCodes['1010'], [self.tools.fName(target)])
+            else :
+                self.log.writeToLog(self.errorCodes['1020'], [self.tools.fName(target)])
+
+        # Report and return
+        self.log.writeToLog(self.errorCodes['1030'])
+        return True
+
+
+###############################################################################
+######################## Illustration Update Functions ########################
+###############################################################################
+######################## Error Code Block Series = 2000 #######################
+###############################################################################
+
+    def updateIllustrationFiles (self, path) :
+        '''Update all the illustrations in a group from path as referenced in
+        the illustration.conf file. Skip any referenced but not in path.'''
+
+        for i in self.illustrationConfig[self.gid].keys() :
+            cid = self.illustrationConfig[self.gid][i]['bid']
+            fileName = self.illustrationConfig[self.gid][i]['fileName']
+            target = os.path.join(self.projIllustrationFolder, fileName)
+            source = os.path.join(path, fileName)
+            # Check to see if the source exists, proceed if it does
+            if os.path.isfile(source) :
+                if os.path.isfile(target) :
+                    # Copy the source to the project
+                    if not shutil.copy(source, target) :
+                        self.log.writeToLog(self.errorCodes['2010'], [self.tools.fName(source)])
+                    else :
+                        self.log.writeToLog(self.errorCodes['2030'], [self.tools.fName(source)])
+                else :
+                    self.log.writeToLog(self.errorCodes['2020'], [self.tools.fName(source)])
+
+        # Report and return
+        self.log.writeToLog(self.errorCodes['2040'])
         return True
 
 
