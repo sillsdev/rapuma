@@ -281,31 +281,40 @@ class ProjLocal (object) :
                     yield (found_idx, idx)
 
 
-    def getComponentFiles (self, gid, cid) :
+    def getComponentFiles (self, gid, cid, cType=None) :
         '''Return a dictionary that contains files and paths for a set
         of component files. The path/names are only theoretical and
         need to be tested by the calling function. However, in the case
         of the source name, it will be a null item if the file does not
         exist.'''
 
+#        import pdb; pdb.set_trace()
+
+        if cType :
+            self.cType = cType
         files               = {}
         compFolder          = os.path.join(self.projComponentFolder, cid)
-        # These are predictable
-        fileHandle          = cid + '_base'
-        files['working']    = os.path.join(compFolder, fileHandle + '.' +  self.cType)
-        files['backup']     = files['working'] + '.cv1'
-        # Source file may not exist so we will try to find it
-        try :
-            # Since the source name is not predictable we will look for a
-            # file with a .source extention and assume that is it. If not
-            # found we leave the source item empty
-            fileList = os.listdir(compFolder)
-            for f in fileList :
-                if f.find('.source') > 0 :
-                    files['source'] = os.path.join(compFolder, f)
-        except :
-            files['source'] = None
-                                
+        # Handle USFM text special
+        if self.cType == 'usfm' :
+            # These are predictable
+            fileHandle          = cid + '_base'
+            files['working']    = os.path.join(compFolder, fileHandle + '.' +  self.cType)
+            files['backup']     = files['working'] + '.cv1'
+            # Source file may not exist so we will try to find it
+            try :
+                # Since the source name is not predictable we will look for a
+                # file with a .source extention and assume that is it. If not
+                # found we leave the source item empty
+                fileList = os.listdir(compFolder)
+                for f in fileList :
+                    if f.find('.source') > 0 :
+                        files['source'] = os.path.join(compFolder, f)
+            except :
+                files['source'] = None
+        else :
+            files['working']    = os.path.join(compFolder, cid + '.' +  self.cType)
+            files['backup']     = files['working'] + '.bak'
+        
         # Return the dictionary
         return files
 

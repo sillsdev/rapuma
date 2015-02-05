@@ -61,7 +61,8 @@ class ProjBackground (object) :
             '1290' : ['ERR', 'Failed to convert background file [<<1>>]. Error: [<<2>>] The command was: [<<3>>]'],
             '1300' : ['MSG', 'Background merge operation in process, please wait...'],
             '1305' : ['MSG', 'Adding document information, please wait...'],
-            '1310' : ['WRN', 'Failed to add background component: [<<1>>] with error: [<<2>>]']
+            '1310' : ['WRN', 'Failed to add background component: [<<1>>] with error: [<<2>>]'],
+            '1320' : ['MSG', 'New background created.']
 
         }
 
@@ -104,18 +105,16 @@ class ProjBackground (object) :
             self.tools.writeConfFile(self.layoutConfig)
 
 
-    def addBackground (self, target, force = False) :
+    def addBackground (self, target) :
         '''Add a background (watermark) to a rendered PDF file. This will
         figure out what the background is to be composed of and create
         a master background page. Using force will cause it to be remade.'''
 
         # Do a quick check if the background needs to be remade
         # The background normally is not remade if one already exists.
-        # If one is there, it can be remade in two ways, with a force
-        # or a regenerate command.
-        if force :
-            self.createBackground()
-        elif self.tools.str2bool(self.layoutConfig['DocumentFeatures']['regenerateBackground']) :
+        # If one is there, it can be remade if regenerate is set to
+        # to True. Obviously, if one is not there, it will be made.
+        if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['regenerateBackground']) :
             self.createBackground()
         else :
             # If there isn't one, make it
@@ -212,6 +211,7 @@ class ProjBackground (object) :
                 self.log.writeToLog(self.errorCodes['1310'],[comp,str(e)])
                 pass
 
+        self.log.writeToLog(self.errorCodes['1320'])
         return True
 
 

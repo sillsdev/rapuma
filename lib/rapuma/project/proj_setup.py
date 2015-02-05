@@ -27,13 +27,13 @@ from palaso.sfm                             import usfm, style, element, text
 from rapuma.core.tools                      import Tools
 from rapuma.core.user_config                import UserConfig
 from rapuma.core.proj_local                 import ProjLocal
-from rapuma.core.proj_process               import ProjProcess
 from rapuma.core.proj_log                   import ProjLog
 from rapuma.core.proj_compare               import ProjCompare
 from rapuma.core.proj_data                  import ProjData
 from rapuma.manager.project                 import Project
 from rapuma.project.proj_commander          import ProjCommander
 from rapuma.project.proj_config             import Config
+from rapuma.project.proj_script             import ProjScript
 from rapuma.group.usfm_data                 import UsfmData
 
 
@@ -117,8 +117,9 @@ class ProjSetup (object) :
             '1095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
             '1100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
             '1110' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
-            '1120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
+            '1120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project.'],
+            '1130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>].'],
+            '1135' : ['ERR', 'Failed to process component [<<1>>]. Process script not found.'],
             '1140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
             '1150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
             '1999' : ['WRN', 'Collect end notes is not fully implemented yet. Skipped end notes in: [<<1>>]'],
@@ -190,17 +191,24 @@ class ProjSetup (object) :
     def updateGroupComponent (self, gid, source) :
         '''Update a single component in a group.'''
 
+#        import pdb; pdb.set_trace()
+        
         # Create a check list for being sure the CIDs are in the project
         cidList = self.getCidList(gid)
 
         # Define some local functions
-        def handleOtherUpdate () :
+        def handleOtherUpdate (cType) :
             '''A simple generic component handler.'''
 
-            cid = source.split('.')[0]
+            # Get the cid, right now we only work with PDF cType
+            if cType == 'pdf' :
+                fileName = self.tools.fName(source)
+                cid = self.getCidFromPdfFileName(fileName)
+            else :
+                self.log.writeToLog(self.errorCodes['0205'], [cType])
             if cid in cidList :
                 targetFolder = os.path.join(self.local.projComponentFolder, cid)
-                targetFile = os.path.join(targetFolder, source)
+                targetFile = os.path.join(targetFolder, fileName)
                 targetFileBak   = targetFile + '.bak'
                 # Maybe folder was manually deleted, check, fix if needed.
                 if not os.path.isdir(targetFolder) :
@@ -214,8 +222,9 @@ class ProjSetup (object) :
                 self.log.writeToLog(self.errorCodes['0320'], [cid,gid])
                 return False
             
-        def handleUsfmUpdate () :
+        def handleUsfmUpdate (cType) :
             '''USFM specific handler function.'''
+
             # For USFM the id must be in the first line of the file
             cid = self.tools.discoverCIDFromFile(source)
             # It has to be part of the Canon
@@ -224,7 +233,7 @@ class ProjSetup (object) :
             # It has to be in the cid list too
             if cid in cidList :
                 # Backup component
-                compFiles           = self.local.getComponentFiles(gid, cid)
+                compFiles           = self.local.getComponentFiles(gid, cid, cType)
                 workingBak          = tempfile.NamedTemporaryFile(delete=True).name
 
                 # Create temp backup of working file
@@ -248,9 +257,9 @@ class ProjSetup (object) :
         if cidList :
             cType = self.projectConfig['Groups'][gid]['cType']
             if cType == 'usfm' :
-                return handleUsfmUpdate()
+                return handleUsfmUpdate(cType)
             else :
-                return handleOtherUpdate()
+                return handleOtherUpdate(cType)
         
         else :
             self.log.writeToLog(self.errorCodes['0325'], [gid])
@@ -403,11 +412,11 @@ class ProjSetup (object) :
         return True
 
 
-    def updateComponents (self, gid, cidList) :
+    def updateComponents (self, gid, sourceList) :
         '''Update in a group one or more components.'''
         
-        for cid in cidList :
-            self.updateGroupComponent(gid, cid)
+        for source in sourceList :
+            self.updateGroupComponent(gid, source)
             
         self.log.writeToLog(self.errorCodes['0299'], [gid])
         return True
@@ -431,13 +440,15 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
+        cType = self.projectConfig['Groups'][gid]['cType']
+
         # First see if the CID is in the config
         if not self.isComponent(gid, cid) :
             self.log.writeToLog(self.errorCodes['0262'], [cid,gid])
             return False
 
         # Get file names
-        compFiles = self.local.getComponentFiles(gid, cid)
+        compFiles = self.local.getComponentFiles(gid, cid, cType)
 
         # Test to see if it is shared
         if self.isSharedComponent(gid, cid + '_base') :
@@ -648,10 +659,10 @@ class ProjSetup (object) :
         existing version.'''
 
         # To prevent loading errors, bring this mod now
-        proj_process        = ProjProcess(self.pid, gid, self.projectConfig)
+        proj_script         = ProjScript(self.pid, gid)
 
         usePreprocessScript = self.tools.str2bool(self.projectConfig['Groups'][gid]['usePreprocessScript'])
-        compFiles           = self.local.getComponentFiles(gid, cid)
+        compFiles           = self.local.getComponentFiles(gid, cid, cType)
         targetFolder        = os.path.join(self.local.projComponentFolder, cid)
         # Set the source path/name here
         compFiles['source']  = os.path.join(self.local.projComponentFolder, cid, os.path.split(source)[1] + '.source')
@@ -687,15 +698,19 @@ class ProjSetup (object) :
         # backup file. (Is self.style.defaultStyFile the best thing?)
         if self.usfmCopy(compFiles['source'], compFiles['working'], gid) :
             # Run any working text preprocesses on the new component text
-            # Note that the groupPreprocessFile value is based on the csid,
-            # not the gid. This allows for different preprocess scripts
-            # to be used for the same type but use can then span groups
             if usePreprocessScript :
-                proj_process.checkForPreprocessScript(gid)                
-                if not proj_process.runProcessScript(compFiles['working'], self.local.groupPreprocessFile) :
-                    self.log.writeToLog(self.errorCodes['1130'], [cid])
+                preprocessScriptFile = os.path.join(self.local.projScriptFolder, self.projectConfig['Groups'][gid]['preprocessScript'])
+#                import pdb; pdb.set_trace()
 
+
+                if os.path.isfile(preprocessScriptFile) :
+                    if not proj_script.runProcessScript(compFiles['working'], preprocessScriptFile) :
+                        self.log.writeToLog(self.errorCodes['1130'], [cid])
+                else :
+                    self.log.writeToLog(self.errorCodes['1135'], [cid])
+            # Remove \fig (illustration) markers
             self.takeOutFigMarkers(compFiles['working'], cType, gid, cid)
+            # Remove \fe (end note) markers
             self.takeOutFeMarkers(compFiles['working'], cType, gid, cid)
             # If we made it this far, return True
             return True 
@@ -1061,7 +1076,8 @@ class ProjSetup (object) :
         '''Compare a component's working file with its source or cv1
         backup.'''
 
-        files = self.local.getComponentFiles(gid, cid)
+        cType = self.projectConfig['Groups'][gid]['cType']
+        files = self.local.getComponentFiles(gid, cid, cType)
         self.compare(files['working'], files[compareType])
         self.log.writeToLog(self.errorCodes['3200'], [cid])
         return True
@@ -1126,6 +1142,7 @@ class ProjSetup (object) :
         files that have been restored will be deleted.'''
         
         skip = False
+        cType = self.projectConfig['Groups'][gid]['cType']
 
         # If no CID list was provided, we assume the whole group will
         # be compared, not just a subset
@@ -1133,7 +1150,7 @@ class ProjSetup (object) :
             cidList = self.projectConfig['Groups'][gid]['cidList']
         
         for cid in cidList :
-            files = self.local.getComponentFiles(gid, cid)
+            files = self.local.getComponentFiles(gid, cid, cType)
             if os.path.isfile(files['backup']) :
                 if self.isDifferent(files['backup'], files['working']) :
                     self.tools.makeWriteable(files['backup'])

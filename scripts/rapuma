@@ -96,7 +96,6 @@ from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_data              import ProjData, Template
 from rapuma.core.proj_binding           import ProjBinding
 from rapuma.core.proj_compare           import ProjCompare
-from rapuma.core.proj_process           import ProjProcess
 from rapuma.core.tools                  import Tools
 from rapuma.project.proj_config         import Config
 from rapuma.project.proj_macro          import Macro
@@ -175,10 +174,11 @@ def trimLog (local) :
             writeObject.close()
 
 
-def crossCheckSourceList (cType, cidList, sourceList) :
+def crossCheckSourceList (pid, cType, cidList, sourceList) :
     '''Double check that all the files in a source list are valid.'''
 
 #    import pdb; pdb.set_trace()
+
     checkList = list(cidList)
     for f in sourceList :
         if cType == 'usfm' :
@@ -191,6 +191,8 @@ def crossCheckSourceList (cType, cidList, sourceList) :
         else :
             # In this "other" case we assume the file name (less
             # extention) is the cid
+            fileName = tools.fName(f)
+            cid = fileName.split('.')[0]
             if not os.path.exists(f) :
                 tools.terminal('\nERROR: Path/file is not valid. [' + f + ']\n')
             else :
@@ -401,7 +403,7 @@ def userArguments (args) :
         # Before we go on, quickly varify existance of all files in the
         # list and cross-check with the CID list
         if source_list and (sub == 'add' or sub == 'update') :
-            if not crossCheckSourceList(cType, cid_list, source_list) :
+            if not crossCheckSourceList(pid, cType, cid_list, source_list) :
                 sys.exit('\nERROR: Source list cross-check failed. Process halting.\n')
 
         # Figure out what area this command relates to and do it
@@ -442,40 +444,44 @@ def userArguments (args) :
         gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
-        fileName    = args.file_name
         packageId   = args.package_id
+        preprocess  = args.preprocess
+        postprocess = args.postprocess
         path        = ''
         source      = ''
         primary     = args.primary
         # Check GID
         if not ProjSetup(sysConfig, pid).isGroup(gid) :
             sys.exit('\nERROR: Group ID is not valid. [' + gid + '] Process halting.\n')
-        # Path set and test
+        # Path set and test for existance of file or folder
         if args.path :
-            path = os.path.abspath(args.path)
-            if not os.path.isdir(path) :
+            path = args.path
+            if not os.path.exists(path) :
                 sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
 
         # Begin processing commands here
         if cmd == 'background' :
+            # Update (remake) a background file
             if sub == 'update' :
-                tools.terminal('\nUpdate an illustration file (asset) in the project. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                ProjBackground(pid, gid).createBackground()
         elif cmd == 'font' :
+            # Test path/file if there is one
+            if not os.path.isfile(path) :
+                sys.exit('\nERROR: File name [' + tools.fName(path) + '] does not appear to be valid. Process halting.\n')
+            # Add a font package to the project
             if sub == 'add' :
-                # Add a font package to the project
-                ProjFont(pid, gid).installFont(fileName, path)
+                ProjFont(pid, gid).installFont(path)
                 if primary :
-                    ProjFont(pid, gid).setPrimaryFont(fileName)
+                    ProjFont(pid, gid).setPrimaryFont(tools.fName(path))
+            # Remove a font from the project (font ID is the file name less .zip extension)
             elif sub == 'remove' :
-                # Remove a font from the project
                 if ProjFont(pid, gid).varifyFont(packageId) :
                     ProjFont(pid, gid).removeFontPack(packageId)
                 else :
                     sys.exit('\n Sorry to say, but the font package ID you provided ' + packageId + ' does not match any fonts in the project. I have to stop now but please come back and try again.\n')
+            # Update a font in the project
             elif sub == 'update' :
-                # Update a font in the project
-                ProjFont(pid, gid).updateFontPack(fileName, path)
+                ProjFont(pid, gid).updateFontPack(path)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 ProjIllustration(pid, gid).addIllustrationFiles(path)
@@ -487,29 +493,40 @@ def userArguments (args) :
             # Check here for macro ID
             if  packageId != 'usfmTex' :
                 sys.exit('\n ERROR: Macro package ID missing or invalid. (Hint, --package_id usfmTex) Only the usfmTex macro package is supported at this time. Though I could write a couple simple lines of code to help make this easier for you, I am choosing to make you type it in to remain consistant with the rest of the CLI. Sorry for any inconvenience this might cause. Process halting.\n')
+            # Add a macro file asset to the project.
             if sub == 'add' :
-                # Add a macro file asset to the project.
                 Macro(pid, gid).addMacPack(packageId)
+            # Remove a macro file asset from the project.
             elif sub == 'remove' :
-                # Remove a macro file asset from the project.
                 Macro(pid, gid).removeMacPack(packageId)
+            # Update a macro file asset in the project.
             elif sub == 'update' :
-                # Update a macro file asset in the project.
                 Macro(pid, gid).updateMacPack(packageId)
+        # Work with processing scripts
         elif cmd == 'script' :
+            # Set designator or die
+            if not preprocess or postprocess :
+                sys.exit('\n ERROR: Must provide script type designator (--preprocess or --postprocess). Process halting.\n')
+            elif preprocess :
+                scriptType = 'preprocess'
+            elif postprocess :
+                scriptType = 'postprocess'
+            # Test path/file if there is one
+            if path :
+                if not os.path.isfile(path) :
+                    sys.exit('\nERROR: File name [' + tools.fName(path) + '] does not appear to be valid. Process halting.\n')
+            # Add a script to the project
             if sub == 'add' :
-                ProjScript(pid, gid).addScriptFiles(path)
+                ProjScript(pid, gid).addScriptFiles(path, scriptType)
+            # Remove a script from the project
             elif sub == 'remove' :
-                ProjScript(pid, gid).removeScriptFiles()
+                ProjScript(pid, gid).removeScriptFiles(scriptType)
+            # Update a script in the project
             elif sub == 'update' :
-                ProjScript(pid, gid).updateScriptFiles(path)
-
-
-
-
-
-
-
+                # Because we can only have one pre/post-process script in place
+                # at a time, an update is actually just a remove -> add sequence
+                ProjScript(pid, gid).removeScriptFiles(scriptType)
+                ProjScript(pid, gid).addScriptFiles(path, scriptType)
 
 
     ##### PROCESS
@@ -582,7 +599,10 @@ def userArguments (args) :
                     if hyphenation :
                         ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
-                    sys.exit('\nERROR: Sorry, the ' + cType + ' render command is not implemented yet. Process halting.\n')
+                    # Set the background features
+                    setupOutputBackgroundFeatures(pid, background, None, docInfo)
+                    # PDFs are already rendered so this really amounts to "glueing" them together
+                    Project(pid, gid).renderGroup(cidList, pages, override, save)
                 else :
                     sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
             else :
@@ -614,7 +634,10 @@ def userArguments (args) :
                     if hyphenation :
                         ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
-                    sys.exit('\nERROR: Sorry, the ' + cType + ' render command is not implemented yet. Process halting.\n')
+                    # Set the background features
+                    setupOutputBackgroundFeatures(pid, background, None, docInfo)
+                    # Now we will render
+                    Project(pid, gid).renderGroup(None, pages, override, save)
                 else :
                     sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
             else :
@@ -737,6 +760,8 @@ if __name__ == '__main__' :
     assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
     assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
+    assetCommand.add_argument('-r', '--preprocess', action='store_true', help='Type designator for a preprocessing script. Required parameter for handling preprocess scripts.')
+    assetCommand.add_argument('-o', '--postprocess', action='store_true', help='Type designator for a postprocessing script. Required parameter for handling preprocess scripts.')
     assetCommand.add_argument('-k', '--package_id', help='A package ID is required for managing some assets like fonts and macros')
 
     # Add Processing subprocess arguments

@@ -42,16 +42,30 @@ Todo:
         <value>True</value>
     </setting>
     <setting>
-        <name>Group Post Process Scripts</name>
-        <key>postprocessScripts</key>
-        <description>A list of a scripts that can be used for a varity of postprocessing on this type of component.</description>
-        <type>list</type>
+        <name>Group Post-Process Script</name>
+        <key>postprocessScript</key>
+        <description>A script that can be used for a varity of postprocessing on group components for exporting.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Group Pre-Process Script</name>
+        <key>preprocessScript</key>
+        <description>A script for preprocessing incoming component text for a group.</description>
+        <type>string</type>
         <value></value>
     </setting>
     <setting>
         <name>Use Group Preprocess Script</name>
         <key>usePreprocessScript</key>
-        <description>Use preprocessing script on incoming component text for this group.</description>
+        <description>Use (turn on) preprocessing script on incoming component text for this group. Script must be present to work.</description>
+        <type>boolean</type>
+        <value>False</value>
+    </setting>
+    <setting>
+        <name>Use Group Postprocess Script</name>
+        <key>usePostprocessScript</key>
+        <description>Use (turn on) postprocessing script for exporting component text from this group. Script must be present to work.</description>
         <type>boolean</type>
         <value>False</value>
     </setting>

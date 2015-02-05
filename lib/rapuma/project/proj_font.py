@@ -233,16 +233,20 @@ class ProjFont (object) :
             return False
 
 
-    def installFont (self, fileName, path, primary = False) :
+    def installFont (self, source) :
         '''It is a three step process to install a font. This will both
         copy in a font and record it in one call. Do not try to 
-        install a substitute font.'''
+        install a substitute font. Path is assumed to exsist and contains
+        the file name too.'''
 
 #        import pdb; pdb.set_trace()
 
+        # Get the file name from the path
+        fileName = self.tools.fName(source)
+        # Get path only from path/file
+        path = os.path.dirname(source)
+        # Get the font ID
         fontId = self.getFontId(fileName)
-        # Initial source file with path
-        source = os.path.join(path, fileName)
         # See if we are working with a substitute
         subId = self.checkForSubFont(source)
         if subId != fontId :
@@ -257,15 +261,17 @@ class ProjFont (object) :
             return False
 
 
-    def updateFontPack (self, fileName, path) :
+    def updateFontPack (self, source) :
         '''Update a font package but do not change any of the existing
         settings. If there are setting issues (changes) it would be
         best to remove, then reinstall.'''
 
-        # Set the vars
+        # Get the file name from the path
+        fileName = self.tools.fName(source)
+        # Get path only from path/file
+        path = os.path.dirname(source)
+        # Get the font ID
         fontId      = self.getFontId(fileName)
-        source      = os.path.join(path, fileName)
-        fontDir     = os.path.join(self.local.projFontFolder, fontId)
         # Be sure the font is in the project
         if self.varifyFont(fontId) :
             # Bring in a fresh copy

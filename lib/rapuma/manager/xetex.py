@@ -650,7 +650,6 @@ class Xetex (Manager) :
             self.log.writeToLog(self.errorCodes['0615'], [str(e)])
 
         # Collect the page count and record in group (Write out at the end of the opp.)
-#        self.projectConfig['Groups'][gid]['totalPages'] = self.tools.pdftkTotalPages(self.local.gidPdfFile)
         self.projectConfig['Groups'][gid]['totalPages'] = str(PdfFileReader(open(self.local.gidPdfFile)).getNumPages())
         # Write out any changes made to the project.conf file that happened during this opp.
         self.tools.writeConfFile(self.projectConfig)
