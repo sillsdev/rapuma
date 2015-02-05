@@ -13,6 +13,7 @@
 # This allows the command to be echoed
 set -v
 
+
 ## PROJECT REMOVAL (For a clean start)
 ~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST project remove
 
@@ -30,19 +31,19 @@ set -v
 
 
 ## ASSET MANAGEMENT: Preprocess script
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL script add --path ~/Publishing/my_source/KYUM/kyum_textPreprocess.py --preprocess
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL script add --path ~/Publishing/my_source/KYUM/process/kyum_textPreprocess.py --preprocess
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST GOSPEL script update --path ~/Publishing/my_source/KYUM/updates/kyum_textPreprocess-v2.py --preprocess
 # Turn on preprocessing
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key usePreprocessScript --value True
 
 
 ## ADDING/REMOVING/UPDATING COMPONENTS IN GROUPS
-~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "mat luk jhn" --path ~/Publishing/my_source/KYUM/kyum-source
-~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "act mrk" --path ~/Publishing/my_source/KYUM/kyum-source
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "mat luk jhn" --path ~/Publishing/my_source/KYUM/PT-source
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component add --cid_list "act mrk" --path ~/Publishing/my_source/KYUM/PT-source
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component remove --cid_list act
-~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FOURTEES component add --cid_list "1th 2th 1ti 2ti" --path ~/Publishing/my_source/KYUM/kyum-source
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FOURTEES component add --cid_list "1th 2th 1ti 2ti" --path ~/Publishing/my_source/KYUM/PT-source
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST GOSPEL component update --cid_list jhn --path ~/Publishing/my_source/KYUM/updates
-~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FRONT component add --cid_list "cover title copyright toc introduction" --path ~/Publishing/my_source/KYUM/kyum-source
+~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FRONT component add --cid_list "cover title copyright toc introduction" --path ~/Publishing/my_source/KYUM/FRONT-source
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FRONT component remove --cid_list "cover"
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST FRONT component update --cid_list "title" --path ~/Publishing/my_source/KYUM/updates
 

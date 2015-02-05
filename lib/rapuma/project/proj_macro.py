@@ -212,6 +212,8 @@ class Macro (object) :
         when it is deleted. Font(s) will need to be reinstalled. However, there
         may be times this may be necessary. Be careful!'''
 
+#        import pdb; pdb.set_trace()
+
         # Remove the macPack config file if required
         if os.path.exists(self.local.macPackConfFile) :
             os.remove(self.local.macPackConfFile)
@@ -225,9 +227,11 @@ class Macro (object) :
         # Remove the reference for this macro package from any component type
         # that uses it. Normally that would probably be just be one of them.
         for comp in self.projectConfig['CompTypes'].keys() :
-            if self.projectConfig['CompTypes'][comp]['macroPackage'] == packageId :
-                self.projectConfig['CompTypes'][comp]['macroPackage'] = ''
-                self.tools.writeConfFile(self.projectConfig)
+            # USFM is the only cType that supports macros at this time
+            if comp == 'USFM' :
+                if self.projectConfig['CompTypes'][comp]['macroPackage'] == packageId :
+                    self.projectConfig['CompTypes'][comp]['macroPackage'] = ''
+                    self.tools.writeConfFile(self.projectConfig)
 
 
     def updateMacPack (self, packageId) :
