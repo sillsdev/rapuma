@@ -28,6 +28,11 @@ set -v
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group FOURTEES --comp_type usfm
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group GOSPEL --comp_type usfm
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group FRONT --comp_type pdf
+# Bind order
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FRONT --key bindingOrder --value 1
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key bindingOrder --value 2
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key bindingOrder --value 3
+
 
 
 ## ASSET MANAGEMENT: Preprocess script
@@ -76,13 +81,13 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section FontSettings --key useRenderingSystem --value GR
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section FontSettings --key useLanguage --value kyu
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section FontSettings --key useMapping --value kye_renumber
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section FontSettings --key fontSizeUnit --value 0.82
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section FontSettings --key lineSpacingFactor --value 1.3
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section TextElements --key bodyFontSize --value 9
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section TextElements --key bodyTextLeading --value 13
 # Print output
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key backgroundComponents --value watermark,cropmarks
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key watermarkText --value "SF Test"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key watermarkText --value "TESTING"
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST background update --group GOSPEL
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key docInfoText --value "ScriptureForge Test Render"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key docInfoText --value "Rapuma Test Render"
 # Columns
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key columnGutterRule --value True
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section Columns --key columnGutterFactor --value 20
@@ -91,27 +96,22 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section ChapterVerse --key useMarginalVerses --value True
 # Binding
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key startPageNumber --value 274
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key bindingOrder --value 1
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key bindingOrder --value 2
-# Turn off PDF viewing
+
+## RENDERING
+# Turn off PDF viewing to avoid screen clutter
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST rapuma --section System --key pdfViewerCommand --value ""
 
+# Component Level
+~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render --group GOSPEL --cid_list jhn --background --doc_info --save
+
+# Group Level
 ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST group render --group GOSPEL
 ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST group render --group FOURTEES
 ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST group render --group FRONT
 
-# Turn on PDF viewing
+# Turn on PDF viewing so we can see the final results
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST rapuma --section System --key pdfViewerCommand --value evince
 
-~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST project bind --save
-
-
- #Stopping here for now
-
-
-#~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render --group GOSPEL --cid_list jhn --background
-#~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST component render --group FRONT --cid_list "title copyright" --background
-
-
-
+# Bind the results
+~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST project bind --save --background --doc_info
 
